@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>آکادمی سبحان صمدی | پلتفرم آموزشی</title>
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<!-- ========== NAVBAR ========== -->
+<nav class="navbar" id="navbar">
+  <div class="nav-container">
+    <a href="index.html" class="nav-logo">
+      <img src="assets/logo.png" alt="آکادمی سبحان صمدی" />
+    </a>
+    <ul class="nav-links">
+      <li><a href="index.html" class="active">خانه</a></li>
+      <li><a href="#podcasts">پادکست‌ها</a></li>
+      <li><a href="#books">کتاب‌ها</a></li>
+      <li><a href="#mentoring">منتورینگ</a></li>
+      <li><a href="admin.html" class="nav-admin-btn">پنل مدیریت</a></li>
+    </ul>
+    <button class="hamburger" id="hamburger" aria-label="منو">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<!-- Mobile Menu -->
+<div class="mobile-menu" id="mobileMenu">
+  <ul>
+    <li><a href="index.html">خانه</a></li>
+    <li><a href="#podcasts">پادکست‌ها</a></li>
+    <li><a href="#books">کتاب‌ها</a></li>
+    <li><a href="#mentoring">منتورینگ</a></li>
+    <li><a href="admin.html">پنل مدیریت</a></li>
+  </ul>
+</div>
+
+<!-- ========== HERO ========== -->
+<section class="hero">
+  <div class="hero-bg-grid"></div>
+  <div class="hero-orb orb-1"></div>
+  <div class="hero-orb orb-2"></div>
+  <div class="hero-content">
+    <div class="hero-text">
+      <span class="hero-eyebrow">🎯 آکادمی تخصصی ترید</span>
+      <h1 class="hero-title">
+        دانش <span class="gold-text">معامله‌گری</span><br/>
+        در دسترس شماست
+      </h1>
+      <p class="hero-desc">پادکست‌ها، کتاب‌های صوتی و منتورینگ اختصاصی با سبحان صمدی — مسیر موفقیت شما در بازارهای مالی</p>
+      <div class="hero-btns">
+        <a href="#podcasts" class="btn-primary">شروع گوش دادن</a>
+        <a href="#mentoring" class="btn-outline">منتورینگ اختصاصی</a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat"><span class="stat-num">+۵۰۰</span><span class="stat-label">دانشجوی فعال</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">+۸۰</span><span class="stat-label">ساعت محتوا</span></div>
+        <div class="stat-divider"></div>
+        <div class="stat"><span class="stat-num">۴.۹</span><span class="stat-label">امتیاز کاربران</span></div>
+      </div>
+    </div>
+    <div class="hero-image-wrap">
+      <div class="hero-glow-ring"></div>
+      <img src="assets/sobhan.webp" alt="سبحان صمدی" class="hero-img" />
+      <div class="hero-badge">
+        <span class="badge-icon">🎙️</span>
+        <div>
+          <div class="badge-title">در حال پخش</div>
+          <div class="badge-sub">آخرین پادکست</div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-wave">
+    <svg viewBox="0 0 1440 80" preserveAspectRatio="none"><path d="M0,40 C360,80 1080,0 1440,40 L1440,80 L0,80 Z" fill="#0a0a0f"/></svg>
+  </div>
+</section>
+
+<!-- ========== FEATURED PLAYER ========== -->
+<section class="featured-player-section" id="featured">
+  <div class="container">
+    <div class="featured-player" id="featuredPlayer">
+      <div class="fp-artwork">
+        <img src="assets/sobhan.webp" alt="featured" id="fpArtwork"/>
+        <div class="fp-artwork-overlay">
+          <button class="fp-play-big" id="fpPlayBtn" onclick="toggleMainPlay()">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="fp-info">
+        <span class="fp-tag">🎙️ پادکست ویژه</span>
+        <h2 class="fp-title" id="fpTitle">روانشناسی معامله‌گری موفق</h2>
+        <p class="fp-author" id="fpAuthor">سبحان صمدی</p>
+        <div class="fp-waveform">
+          <canvas id="waveCanvas" width="500" height="60"></canvas>
+        </div>
+        <div class="fp-controls">
+          <button class="ctrl-btn" onclick="skipBackward()" title="۱۵ ثانیه قبل">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/><text x="9" y="14" font-size="5" fill="currentColor">۱۵</text></svg>
+          </button>
+          <button class="ctrl-btn ctrl-prev" onclick="prevTrack()" title="قبلی">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+          </button>
+          <button class="ctrl-play" id="mainPlayBtn" onclick="toggleMainPlay()">
+            <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="pause-icon hidden" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+          </button>
+          <button class="ctrl-btn ctrl-next" onclick="nextTrack()" title="بعدی">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+          </button>
+          <button class="ctrl-btn" onclick="skipForward()" title="۱۵ ثانیه بعد">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 5V1l5 5-5 5V7c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z"/></svg>
+          </button>
+        </div>
+        <div class="fp-progress-wrap">
+          <span class="fp-time" id="fpCurrent">۰:۰۰</span>
+          <div class="fp-progress-bar" id="fpProgressBar" onclick="seekAudio(event)">
+            <div class="fp-progress-fill" id="fpProgressFill"></div>
+            <div class="fp-progress-thumb" id="fpProgressThumb"></div>
+          </div>
+          <span class="fp-time" id="fpDuration">۰:۰۰</span>
+        </div>
+        <div class="fp-extras">
+          <div class="fp-speed-wrap">
+            <button class="fp-extra-btn" onclick="cycleSpeed()" id="speedBtn">سرعت: ۱×</button>
+          </div>
+          <div class="fp-vol-wrap">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
+            <input type="range" class="fp-vol-slider" id="volSlider" min="0" max="1" step="0.01" value="1" oninput="setVolume(this.value)" />
+          </div>
+          <button class="fp-extra-btn" onclick="toggleLoop()" id="loopBtn">🔁 تکرار</button>
+        </div>
+      </div>
+    </div>
+    <audio id="mainAudio" preload="metadata"></audio>
+  </div>
+</section>
+
+<!-- ========== PODCASTS ========== -->
+<section class="section" id="podcasts">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-eyebrow">🎙️ محتوای صوتی</span>
+      <h2 class="section-title">پادکست‌های آکادمی</h2>
+      <p class="section-desc">آخرین اپیزودها و محتوای تخصصی معامله‌گری</p>
+    </div>
+    <div class="filter-tabs" id="podcastFilters">
+      <button class="filter-tab active" data-filter="all">همه</button>
+      <button class="filter-tab" data-filter="trading">ترید</button>
+      <button class="filter-tab" data-filter="psychology">روانشناسی</button>
+      <button class="filter-tab" data-filter="analysis">تحلیل</button>
+    </div>
+    <div class="cards-grid" id="podcastGrid">
+      <!-- Filled by JS from data.js -->
+    </div>
+  </div>
+</section>
+
+<!-- ========== BOOKS ========== -->
+<section class="section section-alt" id="books">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-eyebrow">📚 کتابخانه</span>
+      <h2 class="section-title">کتاب‌های صوتی</h2>
+      <p class="section-desc">مجموعه‌ای از بهترین کتاب‌های معامله‌گری به زبان فارسی</p>
+    </div>
+    <div class="books-grid" id="booksGrid">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+</section>
+
+<!-- ========== MENTORING ========== -->
+<section class="section mentoring-section" id="mentoring">
+  <div class="container">
+    <div class="mentoring-content">
+      <div class="mentoring-text">
+        <span class="section-eyebrow">🏆 منتورینگ اختصاصی</span>
+        <h2 class="section-title">مسیر موفقیت<br/><span class="gold-text">با راهنمایی مستقیم</span></h2>
+        <p class="section-desc">با منتورینگ یک‌به‌یک سبحان صمدی، معامله‌گری را به سطح حرفه‌ای برسانید. مسیر شخصی‌سازی شده، بازخورد مستقیم و پشتیبانی مستمر.</p>
+        <div class="mentoring-features">
+          <div class="m-feature"><span class="m-icon">✓</span><span>جلسات آنلاین اختصاصی</span></div>
+          <div class="m-feature"><span class="m-icon">✓</span><span>بررسی معاملات و پورتفولیو</span></div>
+          <div class="m-feature"><span class="m-icon">✓</span><span>دسترسی به محتوای ویژه VIP</span></div>
+          <div class="m-feature"><span class="m-icon">✓</span><span>پشتیبانی در گروه اختصاصی</span></div>
+          <div class="m-feature"><span class="m-icon">✓</span><span>برنامه آموزشی شخصی‌سازی شده</span></div>
+        </div>
+        <a href="#contact" class="btn-primary mentor-cta">ثبت‌نام در منتورینگ</a>
+      </div>
+      <div class="mentoring-card-wrap">
+        <div class="mentoring-card">
+          <div class="mc-glow"></div>
+          <img src="assets/sobhan.webp" alt="سبحان صمدی" class="mc-img" />
+          <div class="mc-info">
+            <div class="mc-name">سبحان صمدی</div>
+            <div class="mc-role">منتور و تحلیل‌گر ارشد</div>
+            <div class="mc-stats">
+              <div class="mc-stat"><div class="mc-s-num">+۱۰</div><div class="mc-s-lbl">سال تجربه</div></div>
+              <div class="mc-stat"><div class="mc-s-num">+۵۰۰</div><div class="mc-s-lbl">دانشجو</div></div>
+              <div class="mc-stat"><div class="mc-s-num">۴.۹⭐</div><div class="mc-s-lbl">امتیاز</div></div>
+            </div>
+          </div>
+          <div class="mc-badge-live">🟢 پذیرش دانشجو فعال است</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== TESTIMONIALS ========== -->
+<section class="section" id="testimonials">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-eyebrow">💬 نظرات</span>
+      <h2 class="section-title">دانشجویان ما می‌گویند</h2>
+    </div>
+    <div class="testimonials-track" id="testimonialsTrack">
+      <div class="testimonials-inner" id="testimonialsInner">
+        <!-- Generated by JS -->
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== CONTACT ========== -->
+<section class="section section-alt" id="contact">
+  <div class="container">
+    <div class="contact-wrap">
+      <div class="section-header">
+        <span class="section-eyebrow">📬 تماس</span>
+        <h2 class="section-title">با ما در تماس باشید</h2>
+      </div>
+      <div class="contact-form-card">
+        <div class="cf-group">
+          <label>نام و نام خانوادگی</label>
+          <input type="text" class="cf-input" placeholder="نام خود را وارد کنید" />
+        </div>
+        <div class="cf-group">
+          <label>شماره تماس</label>
+          <input type="tel" class="cf-input" placeholder="۰۹۱۲..." />
+        </div>
+        <div class="cf-group">
+          <label>پیام</label>
+          <textarea class="cf-input cf-textarea" placeholder="پیام شما..."></textarea>
+        </div>
+        <button class="btn-primary cf-submit" onclick="submitContact()">ارسال پیام</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ========== FOOTER ========== -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img src="assets/logo.png" alt="logo" class="footer-logo" />
+        <p>آکادمی تخصصی آموزش معامله‌گری حرفه‌ای در بازارهای مالی بین‌المللی</p>
+      </div>
+      <div class="footer-links-col">
+        <h4>محتوا</h4>
+        <a href="#podcasts">پادکست‌ها</a>
+        <a href="#books">کتاب‌های صوتی</a>
+        <a href="#mentoring">منتورینگ</a>
+      </div>
+      <div class="footer-links-col">
+        <h4>آکادمی</h4>
+        <a href="#">درباره ما</a>
+        <a href="#contact">تماس</a>
+        <a href="admin.html">پنل مدیریت</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© ۱۴۰۴ آکادمی سبحان صمدی — تمامی حقوق محفوظ است</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Sticky Mini Player -->
+<div class="mini-player" id="miniPlayer">
+  <div class="mp-artwork">
+    <img src="assets/sobhan.webp" id="mpArtwork" alt=""/>
+  </div>
+  <div class="mp-info">
+    <div class="mp-title" id="mpTitle">انتخاب نشده</div>
+    <div class="mp-author" id="mpAuthor">—</div>
+  </div>
+  <div class="mp-controls">
+    <div class="mp-progress">
+      <div class="mp-progress-fill" id="mpProgressFill"></div>
+    </div>
+    <div class="mp-btns">
+      <button onclick="prevTrack()">⏮</button>
+      <button class="mp-play" id="mpPlayBtn" onclick="toggleMainPlay()">▶</button>
+      <button onclick="nextTrack()">⏭</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast" id="toast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/player.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

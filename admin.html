@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>پنل مدیریت | آکادمی سبحان صمدی</title>
+  <link rel="icon" href="assets/logo.png" type="image/png" />
+  <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/admin.css" />
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <img src="assets/logo.png" alt="logo" class="login-logo" />
+    <h2>پنل مدیریت</h2>
+    <p>آکادمی سبحان صمدی</p>
+    <div class="lf-group">
+      <label>نام کاربری</label>
+      <input type="text" id="adminUser" class="lf-input" placeholder="admin" />
+    </div>
+    <div class="lf-group">
+      <label>رمز عبور</label>
+      <input type="password" id="adminPass" class="lf-input" placeholder="••••••••" onkeydown="if(event.key==='Enter')adminLogin()" />
+    </div>
+    <button class="login-btn" onclick="adminLogin()">ورود به پنل</button>
+    <div class="login-error hidden" id="loginError">نام کاربری یا رمز اشتباه است</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="admin-panel hidden">
+
+  <!-- Sidebar -->
+  <aside class="admin-sidebar">
+    <div class="sidebar-logo">
+      <img src="assets/logo.png" alt="logo" />
+    </div>
+    <nav class="sidebar-nav">
+      <button class="snav-btn active" data-tab="dashboard" onclick="switchTab('dashboard', this)">
+        <span class="snav-icon">📊</span> داشبورد
+      </button>
+      <button class="snav-btn" data-tab="podcasts" onclick="switchTab('podcasts', this)">
+        <span class="snav-icon">🎙️</span> پادکست‌ها
+      </button>
+      <button class="snav-btn" data-tab="books" onclick="switchTab('books', this)">
+        <span class="snav-icon">📚</span> کتاب‌های صوتی
+      </button>
+      <button class="snav-btn" data-tab="upload" onclick="switchTab('upload', this)">
+        <span class="snav-icon">⬆️</span> آپلود فایل
+      </button>
+      <button class="snav-btn" data-tab="settings" onclick="switchTab('settings', this)">
+        <span class="snav-icon">⚙️</span> تنظیمات
+      </button>
+    </nav>
+    <button class="sidebar-logout" onclick="adminLogout()">خروج</button>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="admin-main">
+
+    <!-- DASHBOARD -->
+    <section class="admin-tab active" id="tab-dashboard">
+      <div class="admin-header">
+        <h1>داشبورد</h1>
+        <span class="admin-welcome">خوش آمدید، مدیر عزیز 👋</span>
+      </div>
+      <div class="stat-cards">
+        <div class="stat-card">
+          <div class="sc-icon">🎙️</div>
+          <div class="sc-info">
+            <div class="sc-num" id="dashPodCount">0</div>
+            <div class="sc-lbl">پادکست</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-icon">📚</div>
+          <div class="sc-info">
+            <div class="sc-num" id="dashBookCount">0</div>
+            <div class="sc-lbl">کتاب صوتی</div>
+          </div>
+        </div>
+        <div class="stat-card gold">
+          <div class="sc-icon">🏆</div>
+          <div class="sc-info">
+            <div class="sc-num">فعال</div>
+            <div class="sc-lbl">وضعیت سایت</div>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="sc-icon">🔗</div>
+          <div class="sc-info">
+            <div class="sc-num"><a href="index.html" target="_blank" class="dash-link">بازدید از سایت</a></div>
+            <div class="sc-lbl">صفحه اصلی</div>
+          </div>
+        </div>
+      </div>
+      <div class="dash-recent">
+        <h3>راهنمای سریع</h3>
+        <div class="guide-steps">
+          <div class="guide-step">
+            <span class="gs-num">۱</span>
+            <div>
+              <strong>پادکست اضافه کنید:</strong>
+              به تب «پادکست‌ها» بروید، فرم را پر کنید و لینک فایل صوتی را وارد کنید.
+            </div>
+          </div>
+          <div class="guide-step">
+            <span class="gs-num">۲</span>
+            <div>
+              <strong>فایل آپلود کنید:</strong>
+              از تب «آپلود فایل» می‌توانید فایل‌های صوتی خود را آپلود کنید.
+            </div>
+          </div>
+          <div class="guide-step">
+            <span class="gs-num">۳</span>
+            <div>
+              <strong>تغییرات را ذخیره کنید:</strong>
+              بعد از هر تغییر دکمه «ذخیره» را بزنید تا در سایت نمایش داده شود.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PODCASTS TAB -->
+    <section class="admin-tab hidden" id="tab-podcasts">
+      <div class="admin-header">
+        <h1>مدیریت پادکست‌ها</h1>
+        <button class="btn-add" onclick="openPodcastModal()">+ افزودن پادکست</button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="podcastTable">
+          <thead>
+            <tr>
+              <th>عنوان</th>
+              <th>دسته‌بندی</th>
+              <th>مدت</th>
+              <th>فایل صوتی</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="podcastTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- BOOKS TAB -->
+    <section class="admin-tab hidden" id="tab-books">
+      <div class="admin-header">
+        <h1>مدیریت کتاب‌های صوتی</h1>
+        <button class="btn-add" onclick="openBookModal()">+ افزودن کتاب</button>
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table" id="booksTable">
+          <thead>
+            <tr>
+              <th>عنوان</th>
+              <th>نویسنده</th>
+              <th>مدت</th>
+              <th>فایل صوتی</th>
+              <th>عملیات</th>
+            </tr>
+          </thead>
+          <tbody id="booksTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- UPLOAD TAB -->
+    <section class="admin-tab hidden" id="tab-upload">
+      <div class="admin-header"><h1>آپلود فایل صوتی</h1></div>
+      <div class="upload-area" id="uploadArea" ondragover="event.preventDefault()" ondrop="handleDrop(event)">
+        <div class="upload-icon">🎵</div>
+        <p class="upload-title">فایل صوتی را اینجا بکشید یا کلیک کنید</p>
+        <p class="upload-sub">پشتیبانی از MP3، M4A، WAV، OGG</p>
+        <input type="file" id="audioFileInput" accept="audio/*" multiple style="display:none" onchange="handleFileUpload(this.files)" />
+        <button class="btn-upload" onclick="document.getElementById('audioFileInput').click()">انتخاب فایل</button>
+      </div>
+      <div class="upload-list" id="uploadList"></div>
+      <div class="upload-note">
+        <strong>توجه:</strong> برای استفاده در سایت، فایل‌های صوتی را در پوشه <code>assets/audio/</code> قرار دهید و مسیر را در پادکست یا کتاب وارد کنید. مثال: <code>assets/audio/podcast1.mp3</code>
+      </div>
+    </section>
+
+    <!-- SETTINGS TAB -->
+    <section class="admin-tab hidden" id="tab-settings">
+      <div class="admin-header"><h1>تنظیمات</h1></div>
+      <div class="settings-card">
+        <h3>تغییر رمز عبور</h3>
+        <div class="lf-group">
+          <label>رمز عبور فعلی</label>
+          <input type="password" class="lf-input" id="oldPass" />
+        </div>
+        <div class="lf-group">
+          <label>رمز عبور جدید</label>
+          <input type="password" class="lf-input" id="newPass" />
+        </div>
+        <div class="lf-group">
+          <label>تکرار رمز جدید</label>
+          <input type="password" class="lf-input" id="newPass2" />
+        </div>
+        <button class="btn-save" onclick="changePassword()">ذخیره رمز جدید</button>
+      </div>
+      <div class="settings-card danger-zone">
+        <h3>⚠️ بازنشانی داده‌ها</h3>
+        <p>این عمل تمام تغییرات شما را پاک می‌کند و داده‌ها به حالت اولیه بازمی‌گردند.</p>
+        <button class="btn-danger" onclick="resetData()">بازنشانی داده‌ها</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- PODCAST MODAL -->
+<div class="modal-overlay hidden" id="podcastModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="podModalTitle">افزودن پادکست</h3>
+      <button class="modal-close" onclick="closePodcastModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="podId" />
+      <div class="mf-group"><label>عنوان *</label><input type="text" class="lf-input" id="podTitle" placeholder="عنوان پادکست" /></div>
+      <div class="mf-group"><label>توضیحات</label><textarea class="lf-input lf-ta" id="podDesc" placeholder="توضیح کوتاه"></textarea></div>
+      <div class="mf-row">
+        <div class="mf-group">
+          <label>دسته‌بندی</label>
+          <select class="lf-input" id="podCategory">
+            <option value="trading">📈 ترید</option>
+            <option value="psychology">🧠 روانشناسی</option>
+            <option value="analysis">📊 تحلیل</option>
+          </select>
+        </div>
+        <div class="mf-group"><label>مدت (مثال: ۴۵:۳۰)</label><input type="text" class="lf-input" id="podDuration" placeholder="۴۵:۳۰" /></div>
+      </div>
+      <div class="mf-group"><label>بازدید (مثال: ۱۲.۳K)</label><input type="text" class="lf-input" id="podViews" placeholder="۱۲.۳K" /></div>
+      <div class="mf-group"><label>ایموجی</label><input type="text" class="lf-input" id="podEmoji" placeholder="🎙️" value="🎙️" /></div>
+      <div class="mf-group">
+        <label>مسیر فایل صوتی *</label>
+        <input type="text" class="lf-input" id="podSrc" placeholder="assets/audio/podcast1.mp3 یا https://..." />
+        <span class="mf-hint">یا فایل را انتخاب کنید:</span>
+        <input type="file" accept="audio/*" onchange="setAudioPathFromFile(this,'podSrc')" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closePodcastModal()">انصراف</button>
+      <button class="btn-save" onclick="savePodcast()">ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<!-- BOOK MODAL -->
+<div class="modal-overlay hidden" id="bookModal">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="bookModalTitle">افزودن کتاب صوتی</h3>
+      <button class="modal-close" onclick="closeBookModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="bookId" />
+      <div class="mf-group"><label>عنوان *</label><input type="text" class="lf-input" id="bookTitle" placeholder="نام کتاب" /></div>
+      <div class="mf-row">
+        <div class="mf-group"><label>نویسنده</label><input type="text" class="lf-input" id="bookAuthor" placeholder="نام نویسنده" /></div>
+        <div class="mf-group"><label>مدت</label><input type="text" class="lf-input" id="bookDuration" placeholder="۶ ساعت" /></div>
+      </div>
+      <div class="mf-group"><label>ایموجی</label><input type="text" class="lf-input" id="bookEmoji" placeholder="📚" value="📚" /></div>
+      <div class="mf-group">
+        <label>مسیر فایل صوتی *</label>
+        <input type="text" class="lf-input" id="bookSrc" placeholder="assets/audio/book1.mp3 یا https://..." />
+        <span class="mf-hint">یا فایل را انتخاب کنید:</span>
+        <input type="file" accept="audio/*" onchange="setAudioPathFromFile(this,'bookSrc')" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeBookModal()">انصراف</button>
+      <button class="btn-save" onclick="saveBook()">ذخیره</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="aToast"></div>
+
+<script src="js/data.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
