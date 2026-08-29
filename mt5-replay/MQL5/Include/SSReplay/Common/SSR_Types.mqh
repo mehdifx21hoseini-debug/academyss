@@ -27,7 +27,7 @@
 //--- fixed two rounds ago, the only useful question is which copy of
 //--- the source the terminal actually has. This answers it in one line
 //--- instead of a conversation.
-#define SSR_BUILD           "v10 2026-08-29  first-test-run"
+#define SSR_BUILD           "v11 2026-08-29  host-chart-guard"
 
 //+------------------------------------------------------------------+
 //| Replay state machine                                             |

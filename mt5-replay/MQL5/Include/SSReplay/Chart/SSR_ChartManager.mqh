@@ -48,6 +48,7 @@ private:
    //--- charts we opened ourselves, and may therefore close again
    long               m_owned[];
    int                m_owned_count;
+   long               m_host_left_open;   // the chart we stood on and spared
 
    int                Find(const long id)
      {
@@ -126,7 +127,7 @@ public:
                      CSSRChartManager(void)
      : m_symbol(""), m_count(0), m_observer(NULL),
        m_untracked(0), m_last_redraw_us(0), m_redraws(0), m_redraws_skipped(0), m_syncs(0),
-       m_owned_count(0)
+       m_owned_count(0), m_host_left_open(0)
      {
       ArrayResize(m_charts, 0);
       ArrayResize(m_owned, 0);
@@ -216,22 +217,55 @@ public:
    //| be the tool deciding it knows better, and it is the sort of      |
    //| thing that is remembered.                                        |
    //+------------------------------------------------------------------+
+   //+------------------------------------------------------------------+
+   //| NEVER CLOSE THE CHART WE ARE STANDING ON.                        |
+   //|                                                                  |
+   //| A script or EA dies the instant its own chart closes - silently, |
+   //| mid-statement. If teardown closes the host chart, everything     |
+   //| after that line never runs: the custom symbol is not deleted,    |
+   //| the leftover stays in Market Watch, and the NEXT session fails   |
+   //| to start with error 5304. One line of tidying costs the user     |
+   //| their next run.                                                  |
+   //|                                                                  |
+   //| A test run showed exactly this shape: Phase 4 stopped without    |
+   //| printing its summary, at the section that closes charts, and     |
+   //| every later test ran on a different chart than it started on.    |
+   //|                                                                  |
+   //| So the host chart is left open and REPORTED, not closed. The     |
+   //| caller can close it last, after it has nothing left to do.       |
+   //+------------------------------------------------------------------+
    int                CloseOwned(void)
      {
-      int closed = 0;
+      long here = ChartID();
+      int  closed = 0;
+      m_host_left_open = 0;
       for(int i = 0; i < m_owned_count; i++)
         {
-         if(ChartSymbol(m_owned[i]) == m_symbol)
+         if(ChartSymbol(m_owned[i]) != m_symbol)
+            continue;
+         if(m_owned[i] == here)
            {
-            ChartClose(m_owned[i]);
-            closed++;
+            m_host_left_open = here;      // ours, but we are standing on it
+            continue;
            }
+         ChartClose(m_owned[i]);
+         closed++;
         }
       ArrayResize(m_owned, 0);
       m_owned_count = 0;
+      //--- an unclosed host is still ours; keep owning it so a later
+      //--- caller that CAN close it still knows to
+      if(m_host_left_open != 0 && ArrayResize(m_owned, 1) == 1)
+        {
+         m_owned[0]    = m_host_left_open;
+         m_owned_count = 1;
+        }
       Sync();
       return closed;
      }
+
+   //--- the chart CloseOwned refused to close because we were on it
+   long               HostLeftOpen(void) { return m_host_left_open; }
 
    //--- chart settings we impose; deliberately few
    void               ApplyPolicy(const long id)

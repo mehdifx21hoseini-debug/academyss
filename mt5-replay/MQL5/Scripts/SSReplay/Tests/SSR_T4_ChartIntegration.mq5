@@ -349,6 +349,15 @@ void OnStart()
       Check("the other chart survived", charts.Count() >= 1,
             IntegerToString(charts.Count()));
 
+      //--- AND WE ARE STILL HERE. A script dies the instant its own
+      //--- chart closes, silently and mid-statement - so a teardown
+      //--- that closes the host takes everything after it with it,
+      //--- including deleting the custom symbol. The next session then
+      //--- fails to start over the leftover. Cheap to assert, and the
+      //--- only assertion that can catch it before a user does.
+      Check("the chart we are standing on survived",
+            ChartSymbol(ChartID()) != "", "our own chart is gone");
+
       //--- tidy up the one we opened by hand, outside the manager
       if(user_chart != 0)
          ChartClose(user_chart);
