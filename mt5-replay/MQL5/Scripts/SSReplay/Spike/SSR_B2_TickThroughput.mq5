@@ -81,6 +81,17 @@ void OnStart()
    double best_rate  = 0;
    int    best_batch = 0;
 
+   //--- ONE FORWARD TIME BASE FOR THE WHOLE RUN.
+   //--- CustomTicksAdd only appends: a tick at a stamp the symbol
+   //--- already holds is refused outright. Each case used to restart
+   //--- the clock at InpStart, so case 1 wrote the range and cases 2..6
+   //--- re-sent stamps that were already there. All of them were
+   //--- rejected in full, returned in microseconds, and were divided
+   //--- into the SENT count - which is how this spike came to report
+   //--- 10.5 billion ticks/second and recommend a batch size that
+   //--- MetaTrader accepts none of.
+   long t_msc = (long)InpStart * 1000;
+
    for(int bi = 0; bi < 6; bi++)
      {
       int bsize = g_batch[bi];
@@ -92,7 +103,6 @@ void OnStart()
       SSR_Rng rng;
       rng.Seed(90210 + bi);
       double p = InpBase;
-      long   t_msc = (long)InpStart * 1000;
 
       long mem0 = SSR_MemTerminal();
       long mql0 = SSR_MemMql();
@@ -126,15 +136,16 @@ void OnStart()
         }
 
       double secs = total_us / 1000000.0;
-      double rate = (secs > 0 ? (double)sent / secs : 0);
+      double rate = SSR_Rate(sent, accepted, secs);
 
       string c = StringFormat("%s_batch%d", InpLabel, bsize);
       SSR_Metric(c, "batch_size",     (double)bsize,     "ticks");
       SSR_Metric(c, "ticks_sent",     (double)sent,      "count");
       SSR_Metric(c, "ticks_accepted", (double)accepted,  "count");
       SSR_Metric(c, "inject_time",    secs,              "s");
-      SSR_Metric(c, "ticks_per_sec",  rate,              "ticks/s");
-      SSR_Metric(c, "us_per_tick",    total_us / MathMax(sent, 1), "us");
+      SSR_RateMetric(c, "ticks_per_sec", sent, accepted, secs);
+      if(rate > 0.0)
+         SSR_Metric(c, "us_per_tick", total_us / MathMax(accepted, 1), "us");
       SSR_Metric(c, "mem_terminal_delta", (double)(SSR_MemTerminal() - mem0), "MB");
       SSR_Metric(c, "mem_mql_delta",      (double)(SSR_MemMql() - mql0),      "MB");
 
@@ -153,9 +164,14 @@ void OnStart()
       Sleep(500);
      }
 
-   SSR_Metric(InpLabel, "best_ticks_per_sec", best_rate,          "ticks/s");
+   //--- A recommendation is only worth publishing if a case was
+   //--- actually measured. "lock this into Feeder" next to a batch size
+   //--- that MetaTrader rejected in full is worse than no advice.
+   SSR_Metric(InpLabel, "best_ticks_per_sec", MathMax(best_rate, 0.0), "ticks/s",
+              (best_batch > 0 ? "" : "NOT MEASURED - every batch size was rejected"));
    SSR_Metric(InpLabel, "optimal_batch_size", (double)best_batch, "ticks",
-              "lock this into Feeder");
+              (best_batch > 0 ? "lock this into Feeder"
+                              : "NOT MEASURED - do not lock anything into Feeder"));
 
    //--- PASS gate from the spike plan
    SSR_Verdict("throughput_target", best_rate >= 2000.0, ">=2000 ticks/s",

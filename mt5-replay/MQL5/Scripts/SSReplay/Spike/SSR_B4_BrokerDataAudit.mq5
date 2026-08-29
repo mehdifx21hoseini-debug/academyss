@@ -47,22 +47,40 @@ void AuditSymbol(const string sym)
               ((datetime)first_server < (datetime)first_local ? 1 : 0), "bool",
               "Load More History would gain data");
 
-   //--- how deep does tick history go? walk back in doubling steps
+   //--- How deep does tick history go? Walk back in doubling steps.
+   //---
+   //--- THIS PROBE USED TO SAMPLE ONE HOUR AND STOP AT THE FIRST EMPTY
+   //--- ONE. Run it on a Saturday and the first sample lands in a
+   //--- closed market, the walk breaks at day one, and the audit
+   //--- announces "NO tick history - F1 impossible" - directly beside
+   //--- its own next line reporting a million ticks in the last week.
+   //--- An empty hour is a closed market, not an absent history.
+   //---
+   //--- So: sample a whole DAY, and let a few empty ones pass before
+   //--- concluding the history has run out. Weekends are two.
    datetime now = TimeCurrent();
    int deepest_days = 0;
+   int misses = 0;
    for(int d = 1; d <= 2048; d *= 2)
      {
       MqlTick tk[];
       datetime from = now - d * 86400;
       int got = CopyTicksRange(sym, tk, COPY_TICKS_INFO,
-                               (long)from * 1000, (long)(from + 3600) * 1000);
+                               (long)from * 1000, (long)(from + 86400) * 1000);
       if(got > 0)
+        {
          deepest_days = d;
-      else
+         misses = 0;
+         continue;
+        }
+      misses++;
+      if(misses >= 3)
          break;
      }
    SSR_Metric(sym, "tick_history_depth", (double)deepest_days, "days",
-              (deepest_days == 0 ? "NO tick history - F1 impossible" : ""));
+              (deepest_days == 0
+               ? "no ticks in any sampled day - check copyticksrange_week_return before concluding"
+               : ""));
 
    //--- practical ceiling of one CopyTicksRange call
    int cap = 0;
@@ -76,12 +94,18 @@ void AuditSymbol(const string sym)
    SSR_Metric(sym, "copyticksrange_week_return", (double)cap, "ticks",
               "sets the page size for TickSource");
 
-   //--- how long does one day of M1 take to fetch once synced?
+   //--- How long does a day of M1 take to fetch once synced?
+   //--- Measured over a week, because "the last 24 hours" is empty on
+   //--- a weekend and a timing taken over zero bars measures nothing.
    ulong t0 = SSR_Now();
-   MqlRates day[];
-   int nday = CopyRates(sym, PERIOD_M1, now - 86400, now, day);
-   SSR_Metric(sym, "copyrates_1day", SSR_ElapsedMs(t0), "ms",
-              StringFormat("bars=%d", nday));
+   MqlRates week[];
+   int nweek = CopyRates(sym, PERIOD_M1, now - 7 * 86400, now, week);
+   double ms = SSR_ElapsedMs(t0);
+   SSR_Metric(sym, "copyrates_week", ms, "ms",
+              StringFormat("bars=%d%s", nweek,
+                           (nweek <= 0 ? " - NOT MEASURED, no bars in the window" : "")));
+   if(nweek > 0)
+      SSR_Metric(sym, "copyrates_us_per_bar", 1000.0 * ms / nweek, "us/bar");
   }
 
 //+------------------------------------------------------------------+

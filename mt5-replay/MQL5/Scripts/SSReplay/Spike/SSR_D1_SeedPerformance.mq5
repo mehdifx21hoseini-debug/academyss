@@ -30,6 +30,14 @@ int g_chunks[5] = {1000, 5000, 10000, 50000, 0};   // 0 = single call
 //+------------------------------------------------------------------+
 void SeedCase(const int total, const int chunk, const int digits, const double point)
   {
+   //--- Was this name already in use? The first run showed 28ms of
+   //--- series wait on the first case and ~9,300ms on every case after
+   //--- it, at every seed size - a constant, so not the data volume.
+   //--- The one thing that changed is that later cases delete and
+   //--- recreate a name the terminal has already seen. Record it, so
+   //--- the pattern is in the data instead of in my reading of it.
+   bool reused = (bool)SymbolInfoInteger(InpTest, SYMBOL_EXIST);
+
    if(!SSR_MakeSymbol(InpTest, g_origin))
       return;
 
@@ -64,8 +72,24 @@ void SeedCase(const int total, const int chunk, const int digits, const double p
    SSR_Metric(c, "generate_time", t_gen,           "ms");
    SSR_Metric(c, "write_time",    t_write,         "ms");
    SSR_Metric(c, "sync_wait",     t_sync,          "ms");
-   SSR_Metric(c, "total_time",    (t_write + MathMax(t_sync, 0)) / 1000.0, "s");
-   SSR_Metric(c, "bars_per_sec",  (t_write > 0 ? total / (t_write / 1000.0) : 0), "bars/s");
+   SSR_Metric(c, "symbol_recreated", (reused ? 1 : 0), "bool",
+              "the name already existed and was deleted first");
+   double t_total = (t_write + MathMax(t_sync, 0)) / 1000.0;
+   SSR_Metric(c, "total_time", t_total, "s");
+
+   //--- TIME THE SEED UNTIL IT IS READABLE, NOT UNTIL THE CALL RETURNS.
+   //--- CustomRatesUpdate hands control back long before the terminal
+   //--- has built the series, so dividing by write_time alone reported
+   //--- 5.5 MILLION bars/second on a seed that took 9.2 seconds to
+   //--- become usable - a number 500x too flattering, and the exact
+   //--- mistake already corrected once in the Preflight script.
+   //--- The write-call rate is still worth having; it is just not the
+   //--- number a user waits for, so it is labelled as what it is.
+   SSR_Metric(c, "bars_per_sec", (t_total > 0 ? total / t_total : 0), "bars/s",
+              "until readable - this is the number the user waits for");
+   SSR_Metric(c, "write_call_bars_per_sec",
+              (t_write > 0 ? total / (t_write / 1000.0) : 0), "bars/s",
+              "WRITE CEILING ONLY - excludes the series build");
    SSR_Metric(c, "mem_terminal_delta", (double)(SSR_MemTerminal() - mem0), "MB");
 
    //--- how many higher-timeframe candles did this depth actually buy?

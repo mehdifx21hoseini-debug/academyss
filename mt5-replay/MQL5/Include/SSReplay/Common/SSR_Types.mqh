@@ -27,7 +27,7 @@
 //--- fixed two rounds ago, the only useful question is which copy of
 //--- the source the terminal actually has. This answers it in one line
 //--- instead of a conversation.
-#define SSR_BUILD           "v14 2026-08-29  one-package-for-the-spike-run"
+#define SSR_BUILD           "v15 2026-08-30  spike-measurements-repaired"
 
 //+------------------------------------------------------------------+
 //| Replay state machine                                             |

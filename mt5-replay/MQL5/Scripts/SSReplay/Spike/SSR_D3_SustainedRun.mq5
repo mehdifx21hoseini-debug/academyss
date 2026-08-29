@@ -82,6 +82,7 @@ void OnStart()
    ulong  t_window  = t_run;
    long   total     = 0;
    long   window    = 0;
+   long   rejected  = 0;
 
    long   mem_first = -1, mem_last = 0;
    double rate_first = -1, rate_last = 0;
@@ -102,9 +103,15 @@ void OnStart()
          buf[i].volume_real = 1.0;
          buf[i].flags       = TICK_FLAG_BID | TICK_FLAG_ASK;
         }
-      CustomTicksAdd(InpTest, buf);
-      total  += InpBatch;
-      window += InpBatch;
+      //--- Count what was ACCEPTED, not what was offered. A rejected
+      //--- call returns instantly, so counting sends would turn a
+      //--- refusal into a speed record - which is exactly how B2 came
+      //--- to publish 10.5 billion ticks/second.
+      int acc = CustomTicksAdd(InpTest, buf);
+      if(acc < InpBatch)
+         rejected += (InpBatch - MathMax(acc, 0));
+      total  += MathMax(acc, 0);
+      window += MathMax(acc, 0);
 
       if(SSR_ElapsedSec(t_sample) >= (double)InpSampleSec)
         {
@@ -148,6 +155,10 @@ void OnStart()
 
    SSR_Metric("sustained", "duration",        SSR_ElapsedSec(t_run) / 60.0, "min");
    SSR_Metric("sustained", "ticks_total",     (double)total,  "count");
+   SSR_Metric("sustained", "ticks_rejected",  (double)rejected, "count",
+              (rejected > 0
+               ? "the throughput figures cover accepted ticks only"
+               : "every tick was accepted"));
    SSR_Metric("sustained", "mem_at_min10",    (double)mem_first, "MB");
    SSR_Metric("sustained", "mem_at_end",      (double)mem_last,  "MB");
    SSR_Metric("sustained", "mem_growth",      mem_growth,     "%");

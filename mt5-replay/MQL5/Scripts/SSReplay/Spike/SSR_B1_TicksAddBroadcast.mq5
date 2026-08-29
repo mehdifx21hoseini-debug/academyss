@@ -22,6 +22,7 @@ input double   InpBase    = 38000.0;              // Base price
 input int      InpBatches = 20;                   // Batches to inject
 input int      InpPerBar  = 20;                   // Ticks per M1 bar
 input bool     InpOpenChart = true;               // Open a chart for the test symbol
+input int      InpReflectMs = 250;                // Max wait for the chart series to catch up (ms)
 
 string g_origin = "";   //--- resolved from InpOrigin at the top of OnStart
 
@@ -67,6 +68,7 @@ void OnStart()
    double lat_sum = 0;
    int    reflected_tick  = 0;
    int    reflected_close = 0;
+   double close_lat_sum   = 0;
    int    hl_expanded     = 0;
 
    for(int b = 0; b < nbars; b++)
@@ -99,9 +101,30 @@ void OnStart()
         }
 
       //--- 2. has the FORMING bar taken the injected close?
-      double c0 = iClose(InpTest, PERIOD_M1, 0);
-      if(MathAbs(c0 - expect) < point * 0.5)
+      //---
+      //--- THE TICK IS INSTANT; THE SERIES IS NOT. SymbolInfoTick sees
+      //--- every injected tick immediately, but the M1 series the chart
+      //--- draws from is rebuilt by the terminal on its own schedule.
+      //--- Reading iClose with no wait measured that schedule, not the
+      //--- broadcast: 1 hit in 20, which read as "the candle does not
+      //--- form from injected ticks" when the truth is "it forms a few
+      //--- milliseconds later". So wait for it, with a ceiling, and
+      //--- record HOW LONG - a latency is a result; a bare miss is not.
+      ulong  t2 = SSR_Now();
+      double c0 = 0;
+      bool   took = false;
+      while(SSR_ElapsedMs(t2) < InpReflectMs)
+        {
+         c0 = iClose(InpTest, PERIOD_M1, 0);
+         if(MathAbs(c0 - expect) < point * 0.5)
+           { took = true; break; }
+         SSR_Pause(1);
+        }
+      if(took)
+        {
          reflected_close++;
+         close_lat_sum += SSR_ElapsedMs(t2);
+        }
 
       //--- 3. did the wick actually stretch to the injected extremes?
       double h0 = iHigh(InpTest, PERIOD_M1, 0);
@@ -124,6 +147,9 @@ void OnStart()
               "out of " + IntegerToString(nbars));
    SSR_Metric("broadcast", "symbolinfotick_latency",
               lat_sum / MathMax(nbars, 1), "us");
+   SSR_Metric("broadcast", "series_reflect_latency",
+              close_lat_sum / MathMax(reflected_close, 1), "ms",
+              "how long after the tick the chart's own series shows it");
 
    SSR_Verdict("ticks_all_accepted", total_accepted == total_ticks,
                IntegerToString(total_ticks), IntegerToString(total_accepted),

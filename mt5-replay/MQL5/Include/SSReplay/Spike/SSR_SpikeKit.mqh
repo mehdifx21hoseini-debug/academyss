@@ -339,6 +339,45 @@ double SSR_WaitSeries(const string sym, const ENUM_TIMEFRAMES tf, const int time
   }
 
 //+------------------------------------------------------------------+
+//| A RATE IS ONLY A RATE IF THE WORK ACTUALLY HAPPENED.             |
+//|                                                                  |
+//| Three spikes in this suite computed throughput by dividing what  |
+//| they SENT by how long the call took, without checking what was   |
+//| ACCEPTED. A call that MetaTrader rejects outright returns in     |
+//| microseconds, so a total rejection reports as infinite speed -   |
+//| B2 published 10.5 BILLION ticks/second that way, and then        |
+//| recommended the batch size that produced it.                     |
+//|                                                                  |
+//| Route every throughput number through here. A shortfall returns  |
+//| a negative rate, which the caller must record as "not measured"  |
+//| rather than as a fast result.                                    |
+//+------------------------------------------------------------------+
+double SSR_Rate(const long sent, const long accepted, const double seconds)
+  {
+   if(sent <= 0 || accepted < sent)
+      return -1.0;
+   if(seconds <= 0.0)
+      return -1.0;
+   return (double)accepted / seconds;
+  }
+
+//--- record a throughput, or record that there wasn't one
+void SSR_RateMetric(const string testcase, const string metric,
+                    const long sent, const long accepted, const double seconds,
+                    const string notes = "")
+  {
+   double r = SSR_Rate(sent, accepted, seconds);
+   if(r < 0.0)
+     {
+      SSR_Metric(testcase, metric, 0.0, "ticks/s",
+                 StringFormat("NOT MEASURED - sent=%I64d accepted=%I64d in %.6fs. %s",
+                              sent, accepted, seconds, notes));
+      return;
+     }
+   SSR_Metric(testcase, metric, r, "ticks/s", notes);
+  }
+
+//+------------------------------------------------------------------+
 //| Golden dataset - deterministic synthetic M1 bars.                |
 //| Broker-independent, so every machine measures the same thing.    |
 //+------------------------------------------------------------------+
