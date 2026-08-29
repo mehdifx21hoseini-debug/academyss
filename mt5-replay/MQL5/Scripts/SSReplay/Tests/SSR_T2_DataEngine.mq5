@@ -377,16 +377,26 @@ void OnStart()
          CheckEq("stream is ordered",           0, sink.OrderViolations());
          CheckEq("no duplicate stamps",         0, sink.DuplicateStamps());
          CheckEq("nothing beyond replay time",  0, sink.CountAfter(ctrl.Now()));
+         //--- Measure the advance from the window the engine ACTUALLY
+         //--- opened, not the one we asked for. SetWindow snaps the start
+         //--- down to an M1 boundary deliberately: a replay window has to
+         //--- begin on a bar open, because truncation can only land on
+         //--- one, and a mid-minute start would make the first rewind cut
+         //--- into the warmup. `win_start` is derived from the last bar of
+         //--- the data and is a bar-CLOSE instant, so request and window
+         //--- legitimately differ by up to a minute. Comparing against the
+         //--- request measured the snap, not the clock.
          //--- WHEN THIS FAILS, SAY ENOUGH TO DIAGNOSE IT. A clock that
          //--- stopped short can mean the engine errored, completed, or
          //--- was paused by an observer - and a bare pair of numbers
          //--- cannot tell those apart. It cost a whole round trip once.
-         Check("clock advanced 120s", ctrl.Now() == win_start + 120000,
+         long clock_from = ctrl.StartMsc();
+         Check("clock advanced 120s", ctrl.Now() == clock_from + 120000,
                StringFormat("expected=%I64d actual=%I64d (%+I64d ms)  state=%s  "
-                            "window=%I64d..%I64d  err=%s",
-                            win_start + 120000, ctrl.Now(),
-                            ctrl.Now() - (win_start + 120000),
-                            SSRStateName(ctrl.Status()),
+                            "asked=%I64d  window=%I64d..%I64d  err=%s",
+                            clock_from + 120000, ctrl.Now(),
+                            ctrl.Now() - (clock_from + 120000),
+                            SSRStateName(ctrl.Status()), win_start,
                             ctrl.StartMsc(), ctrl.EndMsc(),
                             ctrl.LastErrorText()));
          CheckEq("no guard violations in normal play", 0, ctrl.Violations());
