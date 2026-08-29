@@ -282,13 +282,22 @@ public:
       ArrayResize(m_ticks, 8192);
      }
 
-                    ~CSSRReplayController(void) {}
+                    ~CSSRReplayController(void)
+     {
+      //--- the guard dies with this object, so nothing may still point
+      //--- at it. Closes the dangling-pointer TODO from Phase 1.
+      if(m_source != NULL)
+         m_source.DetachGuard();
+     }
 
    //--- wiring ------------------------------------------------------
    void              SetLog(CSSRLog *l) { m_log = l; }
 
    void              Attach(CSSRDataSource *source, CSSRReplaySink *sink)
      {
+      //--- a source being swapped out must not keep pointing at our guard
+      if(m_source != NULL && m_source != source)
+         m_source.DetachGuard();
       m_source = source;
       m_sink   = sink;
       if(m_source != NULL)
@@ -690,7 +699,10 @@ public:
       if(m_sink != NULL)
          m_sink.Release();
       if(m_source != NULL)
+        {
          m_source.Close();
+         m_source.DetachGuard();
+        }
       m_guard.Disarm();
       m_state.Init();
       m_clock.Init();

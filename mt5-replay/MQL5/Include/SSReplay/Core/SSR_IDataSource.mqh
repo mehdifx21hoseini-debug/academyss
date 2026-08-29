@@ -180,6 +180,25 @@ public:
    ENUM_SSR_DATA_MODE Mode(void)   { return m_mode; }
    bool               IsOpen(void) { return m_open; }
 
+   //+------------------------------------------------------------------+
+   //| Drop the guard everywhere this source holds it.                  |
+   //|                                                                  |
+   //| The guard is a MEMBER of the controller, so a data source that   |
+   //| outlives its controller would keep a dangling pointer and the    |
+   //| next read would touch freed memory. Every teardown path calls    |
+   //| this first. Overridden by sources that own extra providers.      |
+   //+------------------------------------------------------------------+
+   virtual void       DetachGuard(void)
+     {
+      m_guard = NULL;
+      CSSRHistoryProvider *h = History();
+      if(h != NULL) h.SetGuard(NULL);
+      CSSRBarProvider *b = Bars();
+      if(b != NULL) b.SetGuard(NULL);
+      CSSRTickProvider *t = Ticks();
+      if(t != NULL) t.SetGuard(NULL);
+     }
+
    //--- push the guard down into every provider this source owns
    virtual void       SetGuard(CSSRFutureGuard *g)
      {
