@@ -19,6 +19,12 @@ string g_syms[] = {"SSRA1", "SSRA2", "SSRA2N", "SSRA3", "SSRB1", "SSRB1H",
 //+------------------------------------------------------------------+
 void OnStart()
   {
+   //--- Cleanup is the first thing run before every spike round, which
+   //--- makes it the cheapest possible place to answer "is the code in
+   //--- this terminal the code that was sent?" - before six scripts run
+   //--- and produce a result file about the wrong build.
+   Print("=== SSR_Z_Cleanup  ssr=", SSR_BUILD, " ===");
+
    int closed = 0;
 
    //--- close any chart on a spike symbol

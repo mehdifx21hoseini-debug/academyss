@@ -11,6 +11,11 @@
 #property copyright "SS Replay - Phase 0"
 #property version   "1.00"
 
+//--- The one thing the spikes share with the product: which build
+//--- they are. Without it, "the fix did not work" and "the fix was
+//--- never compiled" produce identical result files.
+#include "../Common/SSR_Build.mqh"
+
 //--- output files (relative to <Terminal Data Folder>\MQL5\Files)
 #define SSR_DIR        "SSR_Spike"
 #define SSR_F_ENV      "SSR_Spike\\env.csv"
@@ -117,7 +122,7 @@ void SSR_Begin(const string spike)
    FolderCreate(SSR_DIR);
 
    //--- environment row: everything needed to interpret the numbers later
-   string env = StringFormat("%s,%s,%s,%s,%d,%s,%s,%d,%d,%d,%d,%d",
+   string env = StringFormat("%s,%s,%s,%s,%d,%s,%s,%d,%d,%d,%d,%d,%s",
                              g_ssr_run,
                              SSR_Utc(),
                              SSR_Csv(spike),
@@ -129,13 +134,18 @@ void SSR_Begin(const string spike)
                              TerminalInfoInteger(TERMINAL_MEMORY_PHYSICAL),
                              TerminalInfoInteger(TERMINAL_MEMORY_TOTAL),
                              TerminalInfoInteger(TERMINAL_MEMORY_USED),
-                             TerminalInfoInteger(TERMINAL_MAXBARS));
+                             TerminalInfoInteger(TERMINAL_MAXBARS),
+                             SSR_Csv(SSR_BUILD));
+   //--- ssr_build is the LAST column on purpose: an env.csv written by
+   //--- an older run still parses, it just has one field fewer.
    SSR_Append(SSR_F_ENV,
-              "run_id,utc,spike,terminal,build,company,server,cpu_cores,mem_physical_mb,mem_total_mb,mem_used_mb,max_bars",
+              "run_id,utc,spike,terminal,build,company,server,cpu_cores,mem_physical_mb,mem_total_mb,mem_used_mb,max_bars,ssr_build",
               env);
 
-   PrintFormat("=== [%s] BEGIN  run=%s  build=%d  cores=%d  maxbars=%d ===",
-               spike, g_ssr_run, TerminalInfoInteger(TERMINAL_BUILD),
+   //--- First line of every spike, so "which code ran" is never again
+   //--- something that has to be worked out after the fact.
+   PrintFormat("=== [%s] BEGIN  ssr=%s  run=%s  mt5=%d  cores=%d  maxbars=%d ===",
+               spike, SSR_BUILD, g_ssr_run, TerminalInfoInteger(TERMINAL_BUILD),
                TerminalInfoInteger(TERMINAL_CPU_CORES), TerminalInfoInteger(TERMINAL_MAXBARS));
   }
 
