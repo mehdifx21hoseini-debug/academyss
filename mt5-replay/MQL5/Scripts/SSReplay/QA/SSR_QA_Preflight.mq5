@@ -218,6 +218,13 @@ void OnStart()
                   StringFormat("%d of the %d asked for - shorter sessions "
                                "only, or scroll an M1 chart back to load more",
                                got, InpWantBars));
+         else if(local_bars > got)
+            //--- got == what we ASKED for. Saying "20000 bars (14 days)"
+            //--- next to a terminal holding 100,137 reads as a shortage
+            //--- that is not there. Quote the holding, not the request.
+            Ok("M1 history", StringFormat("read %d on request; the terminal "
+                                          "holds %I64d (%.0f days)",
+                                          got, local_bars, local_bars / 1440.0));
          else
             Ok("M1 history", StringFormat("%d bars (%.0f days)", got, days));
 
@@ -495,9 +502,9 @@ void OnStart()
                   b[i].real_volume = 0;
                  }
 
-               ulong  t0 = GetMicrosecondCount();
-               int    n  = CustomRatesUpdate(bs, b);
-               double ms = (GetMicrosecondCount() - t0) / 1000.0;
+               ulong  t0      = GetMicrosecondCount();
+               int    n       = CustomRatesUpdate(bs, b);
+               double call_ms = (GetMicrosecondCount() - t0) / 1000.0;
 
                if(n != InpBenchBars)
                  {
@@ -508,9 +515,46 @@ void OnStart()
                   break;
                  }
 
-               double rate = (ms > 0.0 ? n / (ms / 1000.0) : 0.0);
-               PrintFormat("      pass %d: %d bars in %.0f ms = %.0f bars/sec",
-                           pass + 1, n, ms, rate);
+               //+------------------------------------------------------------+
+               //| CustomRatesUpdate RETURNING IS NOT THE WORK BEING DONE.    |
+               //|                                                            |
+               //| The first honest-looking version of this timed the call    |
+               //| and reported 3.6 MILLION bars/sec - 50,000 bars in 14 ms.  |
+               //| The rate had gone UP twentyfold when the sample grew a     |
+               //| hundredfold, which is the signature of a call that queues  |
+               //| rather than writes, not of a fast disk.                    |
+               //|                                                            |
+               //| What a user waits for is the data being READABLE. So poll  |
+               //| for the last bar written - one bar, so the probe costs     |
+               //| nothing - and stop the clock when the terminal hands it    |
+               //| back. That number is the one worth quoting.                |
+               //+------------------------------------------------------------+
+               MqlRates probe[];
+               bool     visible  = false;
+               ulong    deadline = GetMicrosecondCount() + 15000000;   // 15 s
+               while(GetMicrosecondCount() < deadline)
+                 {
+                  int got1 = CopyRates(bs, PERIOD_M1, b[n-1].time, 1, probe);
+                  if(got1 == 1 && probe[0].time == b[n-1].time)
+                    { visible = true; break; }
+                  Sleep(1);
+                 }
+               double ready_ms = (GetMicrosecondCount() - t0) / 1000.0;
+
+               if(!visible)
+                 {
+                  Limit("write rate",
+                        StringFormat("pass %d: %d bars were accepted but the "
+                                     "last one was still not readable after "
+                                     "15 s", pass + 1, n));
+                  failed = true;
+                  break;
+                 }
+
+               double rate = (ready_ms > 0.0 ? n / (ready_ms / 1000.0) : 0.0);
+               PrintFormat("      pass %d: %d bars - call returned in %.0f ms, "
+                           "readable after %.0f ms = %.0f bars/sec",
+                           pass + 1, n, call_ms, ready_ms, rate);
                if(worst_rate == 0.0 || rate < worst_rate) worst_rate = rate;
                if(rate > best_rate)                       best_rate  = rate;
 
@@ -528,16 +572,22 @@ void OnStart()
                //--- Say plainly how far this is being stretched. A 200-day
                //--- D1 warmup is 288,000 M1 bars; anything short of that
                //--- measured here is extrapolation, and is labelled so.
-               double secs = 288000.0 / worst_rate;
+               double secs  = 288000.0 / worst_rate;
                double reach = 288000.0 / (double)InpBenchBars;
+               //--- "%.0f seconds" printed a 0.08-second answer as "0
+               //--- seconds", which reads like a failure rather than a
+               //--- fast machine. Say it in whatever unit is legible.
+               string cost = (secs < 1.0
+                              ? StringFormat("%.0f ms", secs * 1000.0)
+                              : StringFormat("%.1f seconds", secs));
                if(reach <= 1.0)
                   PrintFormat("      a 200-day D1 warmup (288,000 bars) is "
-                              "MEASURED at %.0f seconds", secs);
+                              "MEASURED at %s", cost);
                else
                   PrintFormat("      a 200-day D1 warmup (288,000 bars) "
-                              "extrapolates to %.0f seconds - %.1fx beyond "
-                              "what was measured, so treat it as an estimate",
-                              secs, reach);
+                              "extrapolates to %s - %.1fx beyond what was "
+                              "measured, so treat it as an estimate",
+                              cost, reach);
 
                if(secs > 120.0)
                   Limit("warmup cost",
@@ -575,10 +625,31 @@ void OnStart()
                   Ok("single-bar append",
                      StringFormat("%.0f us per bar = %.0f bars/sec streaming",
                                   per_bar_us, 1000000.0 / per_bar_us));
-                  //--- 1x speed on M1 is one bar per 60 seconds. The number
-                  //--- that matters is the ceiling, not the comfort.
-                  PrintFormat("      at that cost the M1 stream saturates "
-                              "around %.0fx real time", 60000000.0 / per_bar_us);
+
+                  //--- THE RATIO IS THE FINDING. Writing one bar at a time
+                  //--- costs far more per bar than writing them in bulk,
+                  //--- and knowing by how much is what tells the engine
+                  //--- where batching is worth the complexity. The product
+                  //--- already seeds through WriteBars() in slices and
+                  //--- streams through ticks rather than bars; this is the
+                  //--- number that says whether that was worth doing.
+                  double bulk_us = 1000000.0 / worst_rate;
+                  if(bulk_us > 0.0)
+                     PrintFormat("      one at a time costs %.0fx more per bar "
+                                 "than writing in bulk (%.2f us) - which is "
+                                 "why seeding batches and the stream uses ticks",
+                                 per_bar_us / bulk_us, bulk_us);
+
+                  //--- AND A CEILING THIS DOES NOT MEASURE. One M1 bar per
+                  //--- 60 s of market time makes the arithmetic enormous,
+                  //--- but nobody is bound by it: the chart redraw, the
+                  //--- indicators on it and the UI bind first. Quoting the
+                  //--- write ceiling as the replay ceiling would be a claim
+                  //--- about a thing this section never touched.
+                  PrintFormat("      that is the WRITE ceiling only (%.0fx real "
+                              "time on paper); redraw and indicators bind long "
+                              "before it - Phase 17 measures those",
+                              60000000.0 / per_bar_us);
                  }
               }
 

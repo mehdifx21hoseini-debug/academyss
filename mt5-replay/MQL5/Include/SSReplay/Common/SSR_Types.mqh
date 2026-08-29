@@ -27,7 +27,7 @@
 //--- fixed two rounds ago, the only useful question is which copy of
 //--- the source the terminal actually has. This answers it in one line
 //--- instead of a conversation.
-#define SSR_BUILD           "v8  2026-08-29  leftover-adopt"
+#define SSR_BUILD           "v9  2026-08-29  time-to-readable"
 
 //+------------------------------------------------------------------+
 //| Replay state machine                                             |
