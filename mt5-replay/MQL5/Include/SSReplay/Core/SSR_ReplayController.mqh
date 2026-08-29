@@ -18,6 +18,8 @@
 #include "../Common/SSR_Types.mqh"
 #include "../Common/SSR_Time.mqh"
 #include "../Common/SSR_Log.mqh"
+#include "../Common/SSR_SessionFile.mqh"
+#include "../Common/SSR_Fingerprint.mqh"
 #include "SSR_ReplayState.mqh"
 #include "SSR_ReplayClock.mqh"
 #include "SSR_ReplayTimeline.mqh"
@@ -1374,6 +1376,218 @@ public:
       //--- a restored engine is never left running
       if(m_state.status == SSR_STATE_PLAYING)
          m_state.status = SSR_STATE_PAUSED;
+      return true;
+     }
+
+   //+------------------------------------------------------------------+
+   //| Tell every observer that the state they were tracking has been   |
+   //| replaced.                                                        |
+   //|                                                                  |
+   //| A session restore swaps the account out from under observers     |
+   //| that were watching it. That is the same class of event as a      |
+   //| rewind - "what you were told is no longer true, resync" - so it  |
+   //| travels the same path rather than growing a second one. Without  |
+   //| it the auto-pause watcher would see every restored position as   |
+   //| brand new and stop the replay announcing an entry that happened  |
+   //| an hour ago.                                                     |
+   //+------------------------------------------------------------------+
+   void              NotifyRestored(void)
+     { PublishRewind(m_clock.now_msc); }
+
+   //+------------------------------------------------------------------+
+   //| Fingerprint the stretch that has actually been replayed.         |
+   //|                                                                  |
+   //| From the replay start to `to_msc` - never further. Reading past  |
+   //| the clock to fingerprint a wider range would be the tool doing   |
+   //| exactly what it exists to prevent, for the sake of a checksum.   |
+   //+------------------------------------------------------------------+
+   bool              FingerprintUpTo(const long to_msc, SSRFingerprint &out)
+     {
+      out.Init();
+      if(m_source == NULL || !m_timeline.IsValid())
+         return false;
+      CSSRBarProvider *bp = m_source.Bars();
+      if(bp == NULL)
+         return false;
+      long hi = (to_msc > m_clock.now_msc ? m_clock.now_msc : to_msc);
+      if(hi <= m_timeline.start_msc)
+         return false;
+
+      MqlRates bars[];
+      int n = bp.ReadBars(m_state.symbol, m_timeline.start_msc, hi, bars);
+      if(n <= 0)
+         return false;
+      SSRFingerprintBars(bars, n, m_digits, out);
+      return true;
+     }
+
+   //================================================================
+   //  SESSION PERSISTENCE
+   //
+   //  What is written is the WINDOW and the INSTANT REACHED - never
+   //  the data. The bars are re-read from the broker on resume, which
+   //  is the only way a session file can be a few kilobytes instead
+   //  of tens of megabytes, and the reason a fingerprint travels with
+   //  it: history that changed since the save has to be noticed.
+   //
+   //  The cursor goes too. Without it a resumed session would re-emit
+   //  bars the sink already holds, or skip ones it does not.
+   //================================================================
+   void              SaveInto(CSSRSessionFile &f)
+     {
+      f.Section("stream");
+      f.Set("origin",       m_state.symbol);
+      f.SetInt("digits",    m_digits);
+      f.SetDouble("point",  m_point, 10);
+      f.SetLong("start",    m_timeline.start_msc);
+      f.SetLong("end",      m_timeline.end_msc);
+      f.SetLong("warmup_first", m_timeline.warmup_first_msc);
+      f.SetLong("data_first",   m_timeline.data_first_msc);
+      f.SetLong("data_last",    m_timeline.data_last_msc);
+      f.SetLong("warmup_bars",  m_warmup_bars);
+      f.SetLong("now",      m_clock.now_msc);
+      f.SetLong("speed",    m_clock.speed_x100);
+      f.SetLong("emitted",  m_cursor.emitted_msc);
+      f.SetLong("ticks",    m_cursor.tick_count);
+      f.SetLong("bars",     m_cursor.bar_count);
+      f.SetInt("fidelity",  (int)m_state.fidelity);
+      f.SetInt("data_mode", (int)m_state.data_mode);
+      f.SetInt("status",    (int)m_state.status);
+      f.SetBool("auto_pause", m_auto_pause);
+
+      //--- what the replayed bars looked like WHEN THEY WERE REPLAYED.
+      //--- The file holds no price data, so on resume the bars come
+      //--- back from the broker - and the broker's history changes.
+      SSRFingerprint fp;
+      if(FingerprintUpTo(m_clock.now_msc, fp))
+         f.Set("fingerprint", SSRFingerprintPack(fp));
+
+      //--- BOOKMARKS ARE THE USER'S. Checkpoints are the engine's and
+      //--- are rebuilt by replaying; bookmarks are places a person
+      //--- chose to remember, and losing them on save/resume would be
+      //--- losing their work.
+      f.Section("bookmarks");
+      int n = m_snaps.Bookmarks();
+      for(int i = 0; i < n; i++)
+        {
+         SSRSnapshot mk;
+         if(!m_snaps.GetMark(i, mk))
+            continue;
+         string r = "";
+         r = SSRPackAdd(r, IntegerToString(mk.taken_at_msc));
+         r = SSRPackAdd(r, mk.label);
+         f.Set("mark", r);
+        }
+     }
+
+   //+------------------------------------------------------------------+
+   //| Read a stream back.                                              |
+   //|                                                                  |
+   //| The caller must already have Load()ed this symbol over the same  |
+   //| window: this restores the POSITION within it, not the session.   |
+   //| Returns false when the file describes a window this stream is    |
+   //| not on, because seeking into it would land the clock outside its |
+   //| own timeline and every read after that would be nonsense.        |
+   //+------------------------------------------------------------------+
+   bool              RestoreFrom(CSSRSessionFile &f, const int nth,
+                                 string &warning)
+     {
+      warning = "";
+      if(!f.Select("stream", nth))
+        {
+         SetError(SSR_ERR_INVALID_ARG, "session file has no stream " +
+                  IntegerToString(nth));
+         return false;
+        }
+
+      string origin = f.Get("origin", "");
+      if(origin != m_state.symbol)
+        {
+         SetError(SSR_ERR_INVALID_ARG,
+                  StringFormat("session stream %d is %s, this stream is %s",
+                               nth, origin, m_state.symbol));
+         return false;
+        }
+
+      long want_now = f.GetLong("now", SSR_INVALID_TIME);
+      if(want_now < m_timeline.start_msc || want_now > m_timeline.end_msc)
+        {
+         SetError(SSR_ERR_INVALID_ARG,
+                  StringFormat("saved position %s is outside this stream's "
+                               "window %s..%s", SSRFormatMsc(want_now),
+                               SSRFormatMsc(m_timeline.start_msc),
+                               SSRFormatMsc(m_timeline.end_msc)));
+         return false;
+        }
+
+      long speed = f.GetLong("speed", SSR_SPEED_1);
+      SetSpeedX100(speed);
+      SetFidelity((ENUM_SSR_FIDELITY)f.GetInt("fidelity", (int)m_state.fidelity));
+      m_auto_pause = f.GetBool("auto_pause", true);
+
+      //--- bookmarks, restored as instants. A bookmark is a PLACE, so
+      //--- it survives even though the engine state it was taken with
+      //--- does not - going to one seeks there like any other jump.
+      f.Select("bookmarks", nth);
+      int marks = f.Count("mark");
+      for(int i = 0; i < marks; i++)
+        {
+         string c[];
+         if(SSRUnpack(f.GetNth("mark", i), c) < 1)
+            continue;
+         long at = SSRFieldLong(c, 0, SSR_INVALID_TIME);
+         if(at < m_timeline.start_msc || at > m_timeline.end_msc)
+            continue;
+         SSRSnapshot mk;
+         TakeSnapshot(mk, SSRField(c, 1, "mark"));
+         mk.taken_at_msc  = at;
+         mk.clock.now_msc = at;
+         m_snaps.Mark(mk, SSRField(c, 1, "mark"));
+        }
+
+      //--- AND THE REPLAY IS WOUND FORWARD TO WHERE IT WAS. Through
+      //--- JumpTo, not by setting the clock: the chart has to be
+      //--- rebuilt bar by bar to that instant, which is the same path
+      //--- a normal jump takes and so cannot drift away from it.
+      if(want_now > m_clock.now_msc && !JumpTo(want_now))
+        {
+         warning = "could not wind forward to " + SSRFormatMsc(want_now) +
+                   ": " + m_state.last_error_text;
+         return false;
+        }
+
+      //--- AND NOW THE CHECK THIS FILE FORMAT EXISTS FOR.
+      //---
+      //--- The bars were just re-read from the broker. If they are not
+      //--- the bars the session was saved against, the trader is about
+      //--- to review their decisions on a chart those decisions were
+      //--- never made on. That is reported, not blocked - they may
+      //--- well want to continue - but it is never silent.
+      f.Select("stream", nth);
+      string packed = f.Get("fingerprint", "");
+      if(packed != "")
+        {
+         SSRFingerprint was, now_fp;
+         if(SSRFingerprintUnpack(packed, was))
+           {
+            if(!FingerprintUpTo(m_clock.now_msc, now_fp))
+               warning = "could not re-read this range to check it against "
+                         "the saved session";
+            else if(!was.Equals(now_fp))
+               warning = was.DiffText(now_fp);
+           }
+        }
+      else
+        {
+         //--- an older file with no fingerprint: the bar count is the
+         //--- weaker check that was available before
+         long bars = f.GetLong("bars", 0);
+         if(bars > 0 && m_cursor.bar_count != bars)
+            warning = StringFormat("replayed %I64d bars to get here; the "
+                                   "saved session had %I64d - the broker's "
+                                   "history for this range is not what it was",
+                                   m_cursor.bar_count, bars);
+        }
       return true;
      }
 

@@ -48,6 +48,7 @@
 #include <SSReplay/Data/SSR_SessionWatcher.mqh>
 #include <SSReplay/Data/SSR_RandomPicker.mqh>
 #include <SSReplay/Chart/SSR_BlindMode.mqh>
+#include <SSReplay/Session/SSR_SessionManager.mqh>
 
 input string          InpSymbol     = "";                   // Symbol (empty = this chart)
 input datetime        InpStart      = 0;                    // Replay start (0 = auto)
@@ -82,6 +83,10 @@ input bool            InpPauseSL     = true;                 // Pause when a sto
 input bool            InpPauseTP     = true;                 // Pause when a target is hit
 input ENUM_SSR_SESSION_MODE InpPauseSession = SSR_SESSION_OFF; // Pause on a new session
 
+//--- Phase 12 -------------------------------------------------------
+input string          InpSession     = "";                   // Session name (blank = do not save or resume)
+input bool            InpResume      = true;                 // Resume it if the file exists
+
 CSSRMt5DataSource    g_src;
 CSSRCustomSymbolSink g_sink;
 CSSRReplayController g_ctrl;
@@ -98,6 +103,8 @@ CSSRBlindMode        g_blind;
 CSSRRandomPicker     g_picker;
 CSSRSessionWatcher   g_session;
 CSSRTradeAutoPause   g_autopause;
+CSSRSessionManager   g_session_mgr;
+bool                 g_resumed = false;
 
 //--- extra streams. Index 0 is g_src/g_sink/g_ctrl above; these are
 //--- the rest, and they exist whether or not they are used because
@@ -148,6 +155,26 @@ int ParseTimeframes(const string csv, ENUM_TIMEFRAMES &out[])
       out[k] = tf;
      }
    return ArraySize(out);
+  }
+
+//+------------------------------------------------------------------+
+//| The settings a session file carries, gathered in ONE place.      |
+//|                                                                  |
+//| Built by a function rather than inline at the save site, because |
+//| a field added to the struct and forgotten here would be a        |
+//| setting that silently resets every time a session is resumed.    |
+//+------------------------------------------------------------------+
+void CollectSettings(SSRSessionSettings &out)
+  {
+   out.Init();
+   out.seed          = g_picker.Seed();
+   out.blind         = (int)InpBlind;
+   out.pause_flags   = g_autopause.Flags();
+   out.session_mode  = (int)InpPauseSession;
+   out.slot          = InpSlot;
+   out.ticks_per_bar = InpTicksPerBar;
+   out.spread_points = InpSpreadPoints;
+   out.chart_tf      = InpChartTf;
   }
 
 //+------------------------------------------------------------------+
@@ -418,14 +445,31 @@ int OnInit()
    //--- respond to nothing. The replay chart is opened separately.
    g_panel.Create(ChartID(), GetPointer(g_gport));
 
-   //--- a position saved by a previous run lands the user where they
-   //--- stopped rather than at the start of the window.
+   //--- A SAVED SESSION, if one was named and exists. This restores
+   //--- the account and every trade in it, not just the position -
+   //--- and it reports anything it could not put back exactly.
+   g_session_mgr.Attach(GetPointer(g_group), GetPointer(g_acct),
+                        GetPointer(g_stats));
+   if(InpSession != "" && InpResume && g_session_mgr.Exists(InpSession))
+     {
+      if(g_session_mgr.Restore(InpSession))
+        {
+         g_resumed = true;
+         Print("[host] ", g_session_mgr.ResumeReport());
+        }
+      else
+         Print("[host] could not resume: ", g_session_mgr.LastError());
+     }
+
+   //--- otherwise a position saved by a previous run lands the user
+   //--- where they stopped rather than at the start of the window.
    //---
    //--- NOT after a random pick. A random session that resumes where
    //--- the last one stopped is not a random session, and the whole
    //--- point was to arrive somewhere the trader does not recognise.
    SSRSnapshot saved;
-   if(random_start <= 0 && g_ctrl.PeekPosition(origin, saved) &&
+   if(!g_resumed && random_start <= 0 &&
+      g_ctrl.PeekPosition(origin, saved) &&
       saved.taken_at_msc > win_start && saved.taken_at_msc < win_end)
      {
       //--- through the GROUP, so every chart resumes together
@@ -458,6 +502,20 @@ void OnDeinit(const int reason)
    //--- start of the window, which is the limitation this host carries.
    if(g_ready)
      {
+      //--- THE WHOLE SESSION, on every deinit reason. A chart change
+      //--- that rebuilds this EA must not cost the user their trades,
+      //--- and by the time we know why we are closing it is too late
+      //--- to go back for them.
+      if(InpSession != "")
+        {
+         SSRSessionSettings set;
+         CollectSettings(set);
+         if(g_session_mgr.Save(InpSession, set))
+            Print("[host] session saved -> ", g_session_mgr.LastPath());
+         else
+            Print("[host] session NOT saved: ", g_session_mgr.LastError());
+        }
+
       g_ctrl.SavePosition();
       for(int i = 0; i < g_extra; i++)
          g_ctrl2[i].SavePosition();

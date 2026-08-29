@@ -33,6 +33,7 @@
 #include "../Core/SSR_ITickObserver.mqh"
 #include "SSR_TradeTypes.mqh"
 #include "SSR_RiskEngine.mqh"
+#include "../Common/SSR_SessionFile.mqh"
 
 #define SSR_MAX_POSITIONS   512
 
@@ -812,6 +813,227 @@ public:
 
    double            Bid(void) { return m_bid; }
    double            Ask(void) { return m_ask; }
+
+   //================================================================
+   //  SESSION PERSISTENCE
+   //
+   //  The account IS the log of positions, so that is what is written:
+   //  every position, every leg, and the assumptions they were priced
+   //  under. Nothing derived is stored - balance, equity, statistics
+   //  and R all fall out of the log, and a stored copy that disagreed
+   //  with it would be believed over the log that is actually true.
+   //
+   //  The one exception is m_balance, written for a CHECK rather than
+   //  to be restored: if replaying the log does not reproduce it, the
+   //  file and this build disagree and the user is told so.
+   //================================================================
+   void              SaveInto(CSSRSessionFile &f)
+     {
+      f.Section("account");
+      f.SetDouble("balance_initial", m_balance_initial, 2);
+      f.SetDouble("balance_check",   m_balance, 2);
+      f.SetInt("digits",             m_digits);
+      f.SetDouble("point",           m_point, 10);
+      f.SetLong("next_ticket",       m_next_ticket);
+      f.SetDouble("margin_per_lot",  m_margin_per_lot, 4);
+      f.SetDouble("stopout_level",   m_stopout_level, 2);
+      f.SetLong("stopouts",          m_stopouts);
+      f.SetLong("ambiguous",         m_ambiguous_count);
+
+      f.Section("execution");
+      f.SetDouble("commission_per_lot", m_exec.commission_per_lot, 6);
+      f.SetDouble("slippage_points",    m_exec.slippage_points, 6);
+      f.SetDouble("swap_long",          m_exec.swap_long_per_lot, 6);
+      f.SetDouble("swap_short",         m_exec.swap_short_per_lot, 6);
+      f.SetBool("use_real_spread",      m_exec.use_real_spread);
+      f.SetDouble("fixed_spread",       m_exec.fixed_spread_points, 6);
+
+      f.Section("positions");
+      f.Comment("pos=ticket|type|state|volume|volume_initial|request_price|"
+                "request_msc|request_type|open_price|open_msc|sl|tp|"
+                "trail_points|trail_peak|close_price|close_msc|reason|"
+                "commission|swap|profit|mae|mfe|ambiguous|risk_at_entry|"
+                "swap_locked|swap_from_msc|tag|note");
+      for(int i = 0; i < m_count; i++)
+        {
+         string r = "";
+         r = SSRPackAdd(r, IntegerToString(m_pos[i].ticket));
+         r = SSRPackAdd(r, IntegerToString((int)m_pos[i].type));
+         r = SSRPackAdd(r, IntegerToString((int)m_pos[i].state));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].volume, 4));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].volume_initial, 4));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].request_price, 8));
+         r = SSRPackAdd(r, IntegerToString(m_pos[i].request_msc));
+         r = SSRPackAdd(r, IntegerToString((int)m_pos[i].request_type));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].open_price, 8));
+         r = SSRPackAdd(r, IntegerToString(m_pos[i].open_msc));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].sl, 8));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].tp, 8));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].trail_points, 4));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].trail_peak, 8));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].close_price, 8));
+         r = SSRPackAdd(r, IntegerToString(m_pos[i].close_msc));
+         r = SSRPackAdd(r, IntegerToString((int)m_pos[i].reason));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].commission, 6));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].swap, 6));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].profit, 6));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].mae, 8));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].mfe, 8));
+         r = SSRPackAdd(r, (m_pos[i].ambiguous ? "1" : "0"));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].risk_at_entry, 6));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].swap_locked, 6));
+         r = SSRPackAdd(r, IntegerToString(m_pos[i].swap_from_msc));
+         r = SSRPackAdd(r, m_pos[i].tag);
+         r = SSRPackAdd(r, m_pos[i].note);
+         f.Set("pos", r);
+
+         //--- and its legs, which are what a rewind needs to undo the
+         //--- exits. A restored session that cannot step back over its
+         //--- own trades is not the session that was saved.
+         for(int e = 0; e < m_pos[i].leg_count; e++)
+           {
+            string g = "";
+            g = SSRPackAdd(g, IntegerToString(m_pos[i].ticket));
+            g = SSRPackAdd(g, DoubleToString(m_pos[i].legs[e].volume, 4));
+            g = SSRPackAdd(g, DoubleToString(m_pos[i].legs[e].price, 8));
+            g = SSRPackAdd(g, IntegerToString(m_pos[i].legs[e].msc));
+            g = SSRPackAdd(g, DoubleToString(m_pos[i].legs[e].realised, 6));
+            g = SSRPackAdd(g, DoubleToString(m_pos[i].legs[e].fee, 6));
+            g = SSRPackAdd(g, (m_pos[i].legs[e].closing ? "1" : "0"));
+            g = SSRPackAdd(g, DoubleToString(m_pos[i].legs[e].prev_swap_locked, 6));
+            g = SSRPackAdd(g, IntegerToString(m_pos[i].legs[e].prev_swap_from_msc));
+            g = SSRPackAdd(g, (m_pos[i].legs[e].prev_ambiguous ? "1" : "0"));
+            f.Set("leg", g);
+           }
+        }
+     }
+
+   //+------------------------------------------------------------------+
+   //| Read the account back.                                           |
+   //|                                                                  |
+   //| Returns false only when the file is unusable. A balance that      |
+   //| does not reproduce is reported through `warning` and does NOT     |
+   //| fail the load: the trades are still the trades, and refusing to   |
+   //| open the session would help nobody.                              |
+   //+------------------------------------------------------------------+
+   bool              RestoreFrom(CSSRSessionFile &f, string &warning)
+     {
+      warning = "";
+      if(!f.Select("account"))
+        { m_last_error = "session file has no account section"; return false; }
+
+      m_balance_initial = f.GetDouble("balance_initial", 10000.0);
+      m_digits          = f.GetInt("digits", 5);
+      m_point           = f.GetDouble("point", MathPow(10, -m_digits));
+      m_next_ticket     = f.GetLong("next_ticket", 1);
+      m_margin_per_lot  = f.GetDouble("margin_per_lot", 0.0);
+      m_stopout_level   = f.GetDouble("stopout_level", 0.0);
+      m_stopouts        = f.GetLong("stopouts", 0);
+      double want_balance = f.GetDouble("balance_check", 0.0);
+
+      if(f.Select("execution"))
+        {
+         m_exec.commission_per_lot = f.GetDouble("commission_per_lot", 0.0);
+         m_exec.slippage_points    = f.GetDouble("slippage_points", 0.0);
+         m_exec.swap_long_per_lot  = f.GetDouble("swap_long", 0.0);
+         m_exec.swap_short_per_lot = f.GetDouble("swap_short", 0.0);
+         m_exec.use_real_spread    = f.GetBool("use_real_spread", true);
+         m_exec.fixed_spread_points= f.GetDouble("fixed_spread", 0.0);
+        }
+
+      m_count           = 0;
+      m_ambiguous_count = 0;
+      m_balance         = m_balance_initial;
+
+      if(!f.Select("positions"))
+         return true;                    // a session with no trades yet
+
+      int n = f.Count("pos");
+      for(int i = 0; i < n && m_count < SSR_MAX_POSITIONS; i++)
+        {
+         string c[];
+         if(SSRUnpack(f.GetNth("pos", i), c) < 26)
+            continue;                    // a row this build cannot read
+
+         int k = m_count++;
+         m_pos[k].Init();
+         m_pos[k].ticket         = SSRFieldLong(c, 0);
+         m_pos[k].type           = (ENUM_SSR_ORDER)SSRFieldLong(c, 1);
+         m_pos[k].state          = (ENUM_SSR_POS_STATE)SSRFieldLong(c, 2);
+         m_pos[k].volume         = SSRFieldDouble(c, 3);
+         m_pos[k].volume_initial = SSRFieldDouble(c, 4);
+         m_pos[k].request_price  = SSRFieldDouble(c, 5);
+         m_pos[k].request_msc    = SSRFieldLong(c, 6, SSR_INVALID_TIME);
+         m_pos[k].request_type   = (ENUM_SSR_ORDER)SSRFieldLong(c, 7);
+         m_pos[k].open_price     = SSRFieldDouble(c, 8);
+         m_pos[k].open_msc       = SSRFieldLong(c, 9, SSR_INVALID_TIME);
+         m_pos[k].sl             = SSRFieldDouble(c, 10);
+         m_pos[k].tp             = SSRFieldDouble(c, 11);
+         m_pos[k].trail_points   = SSRFieldDouble(c, 12);
+         m_pos[k].trail_peak     = SSRFieldDouble(c, 13);
+         m_pos[k].close_price    = SSRFieldDouble(c, 14);
+         m_pos[k].close_msc      = SSRFieldLong(c, 15, SSR_INVALID_TIME);
+         m_pos[k].reason         = (ENUM_SSR_CLOSE_REASON)SSRFieldLong(c, 16);
+         m_pos[k].commission     = SSRFieldDouble(c, 17);
+         m_pos[k].swap           = SSRFieldDouble(c, 18);
+         m_pos[k].profit         = SSRFieldDouble(c, 19);
+         m_pos[k].mae            = SSRFieldDouble(c, 20);
+         m_pos[k].mfe            = SSRFieldDouble(c, 21);
+         m_pos[k].ambiguous      = (SSRFieldLong(c, 22) != 0);
+         m_pos[k].risk_at_entry  = SSRFieldDouble(c, 23);
+         m_pos[k].swap_locked    = SSRFieldDouble(c, 24);
+         m_pos[k].swap_from_msc  = SSRFieldLong(c, 25, SSR_INVALID_TIME);
+         m_pos[k].tag            = SSRField(c, 26);
+         m_pos[k].note           = SSRField(c, 27);
+
+         if(m_pos[k].ambiguous)
+            m_ambiguous_count++;
+
+         //--- the balance is REPLAYED from the log rather than read,
+         //--- so the log stays the single source of truth
+         m_balance += m_pos[k].profit + m_pos[k].swap - m_pos[k].commission;
+        }
+
+      //--- legs, matched back to their positions by ticket
+      int legs = f.Count("leg");
+      int orphans = 0;
+      for(int i = 0; i < legs; i++)
+        {
+         string c[];
+         if(SSRUnpack(f.GetNth("leg", i), c) < 10)
+            continue;
+         int idx = Find(SSRFieldLong(c, 0));
+         if(idx < 0 || m_pos[idx].leg_count >= SSR_MAX_TRADE_LEGS)
+           { orphans++; continue; }
+
+         int e = m_pos[idx].leg_count++;
+         m_pos[idx].legs[e].volume             = SSRFieldDouble(c, 1);
+         m_pos[idx].legs[e].price              = SSRFieldDouble(c, 2);
+         m_pos[idx].legs[e].msc                = SSRFieldLong(c, 3);
+         m_pos[idx].legs[e].realised           = SSRFieldDouble(c, 4);
+         m_pos[idx].legs[e].fee                = SSRFieldDouble(c, 5);
+         m_pos[idx].legs[e].closing            = (SSRFieldLong(c, 6) != 0);
+         m_pos[idx].legs[e].prev_swap_locked   = SSRFieldDouble(c, 7);
+         m_pos[idx].legs[e].prev_swap_from_msc = SSRFieldLong(c, 8, SSR_INVALID_TIME);
+         m_pos[idx].legs[e].prev_ambiguous     = (SSRFieldLong(c, 9) != 0);
+        }
+
+      m_risk.ConfigureFromSymbol(m_symbol);
+
+      //--- and now the check. Silence here would mean a session that
+      //--- opens with a balance nobody can account for.
+      if(want_balance != 0.0 && MathAbs(want_balance - m_balance) > 0.01)
+         warning = StringFormat("balance replayed from the trades is %.2f, "
+                                "but the file recorded %.2f - a difference "
+                                "of %.2f", m_balance, want_balance,
+                                m_balance - want_balance);
+      if(orphans > 0)
+         warning += StringFormat("%s%d partial-exit records could not be "
+                                 "matched to a trade; stepping back over "
+                                 "those exits will not undo them",
+                                 (warning == "" ? "" : "  "), orphans);
+      return true;
+     }
 
    string            ToString(void)
      {

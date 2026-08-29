@@ -26,6 +26,7 @@
 #include "../Common/SSR_Time.mqh"
 #include "../Core/SSR_ITickObserver.mqh"
 #include "SSR_TradingEngine.mqh"
+#include "../Common/SSR_SessionFile.mqh"
 
 //--- equity samples kept for the drawdown curve. One per replay minute
 //--- for about three days, which outlasts any single sitting.
@@ -338,6 +339,62 @@ public:
 
       EquityDrawdown(out.max_drawdown, out.max_drawdown_pct);
       out.max_drawdown_closed = ClosedDrawdown();
+     }
+
+   //================================================================
+   //  SESSION PERSISTENCE
+   //
+   //  ONLY THE EQUITY CURVE IS WRITTEN, and that is a deliberate line.
+   //
+   //  Every other statistic - win rate, profit factor, R, MAE, the
+   //  ambiguous percentage - is DERIVED from the trades, and the
+   //  trades are already in the file. Storing them too would create a
+   //  second source of truth, and the day the two disagree the stored
+   //  one wins silently, because nothing recomputes it to check.
+   //
+   //  The equity curve is the exception because it cannot be derived.
+   //  It records what the account was worth minute by minute, floating
+   //  losses included - the 130 the trader sat through on a trade that
+   //  closed for 100. Recompute it from closed trades and that 130
+   //  vanishes, so the restored session would report a smaller
+   //  drawdown than the one the trader actually lived.
+   //================================================================
+   void              SaveInto(CSSRSessionFile &f)
+     {
+      f.Section("equity");
+      f.Comment("the one statistic that cannot be recomputed from the "
+                "trades: what the account was worth minute by minute, "
+                "floating losses included");
+      f.SetInt("samples", m_eq_count);
+      f.SetLong("last_msc", m_eq_last_msc);
+      for(int i = 0; i < m_eq_count; i++)
+         f.Set("e", StringFormat("%I64d%s%.2f", m_eq_msc[i],
+                                 SSR_SF_SEP, m_eq_val[i]));
+     }
+
+   bool              RestoreFrom(CSSRSessionFile &f)
+     {
+      m_eq_count    = 0;
+      m_eq_last_msc = SSR_INVALID_TIME;
+      if(!f.Select("equity"))
+         return true;                    // a session saved before any run
+
+      int n = f.Count("e");
+      for(int i = 0; i < n && m_eq_count < SSR_EQUITY_SAMPLES; i++)
+        {
+         string c[];
+         if(SSRUnpack(f.GetNth("e", i), c) < 2)
+            continue;
+         m_eq_msc[m_eq_count] = SSRFieldLong(c, 0);
+         m_eq_val[m_eq_count] = SSRFieldDouble(c, 1);
+         m_eq_count++;
+        }
+      //--- from the curve itself, not from the file: if the samples
+      //--- were truncated on the way in, the stored value would let
+      //--- the next sample be rejected as too soon
+      m_eq_last_msc = (m_eq_count > 0 ? m_eq_msc[m_eq_count - 1]
+                                      : SSR_INVALID_TIME);
+      return true;
      }
 
    //--- drawdown of the realised balance alone, for comparison with the
