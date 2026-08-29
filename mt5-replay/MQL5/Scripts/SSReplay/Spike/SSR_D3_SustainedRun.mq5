@@ -155,10 +155,29 @@ void OnStart()
    SSR_Metric("sustained", "rate_at_end",     rate_last,      "ticks/s");
    SSR_Metric("sustained", "rate_degradation", rate_drop,     "%");
 
-   SSR_Verdict("memory_stable", mem_growth <= 10.0, "<=10% growth",
-               StringFormat("%.1f%%", mem_growth), "baseline taken at minute 10");
-   SSR_Verdict("throughput_stable", rate_drop <= 10.0, "<=10% drop",
-               StringFormat("%.1f%%", rate_drop), "");
+   //--- A RUN TOO SHORT TO HAVE A BASELINE MUST NOT REPORT PASS.
+   //--- mem_first is only taken at minute 10. Below that it stays -1,
+   //--- both percentages compute as 0.0, and both verdicts came back
+   //--- green having measured nothing at all. A five-minute run would
+   //--- have certified "no leak" on the strength of an empty baseline -
+   //--- the same lenient-assertion trap that hid the one-bar jump for
+   //--- eleven phases. Say "not measured" instead, out loud.
+   bool have_baseline = (mem_first > 0);
+
+   if(!have_baseline)
+     {
+      string why = StringFormat("ran %.1f min - the baseline is taken at minute 10",
+                                SSR_ElapsedSec(t_run) / 60.0);
+      SSR_Verdict("memory_stable",     false, "a run of 10+ minutes", "not measured", why);
+      SSR_Verdict("throughput_stable", false, "a run of 10+ minutes", "not measured", why);
+     }
+   else
+     {
+      SSR_Verdict("memory_stable", mem_growth <= 10.0, "<=10% growth",
+                  StringFormat("%.1f%%", mem_growth), "baseline taken at minute 10");
+      SSR_Verdict("throughput_stable", rate_drop <= 10.0, "<=10% drop",
+                  StringFormat("%.1f%%", rate_drop), "");
+     }
 
    for(int i = 0; i < ArraySize(cids); i++)
       ChartClose(cids[i]);
