@@ -41,10 +41,38 @@
 class CSSRTradingEngine : public CSSRTickObserver
   {
 private:
-   //--- the log IS the account; everything else is derived from it
-   SSRVirtualPosition m_pos[SSR_MAX_POSITIONS];
+   //+------------------------------------------------------------------+
+   //| The log IS the account; everything else is derived from it.      |
+   //|                                                                  |
+   //| ON THE HEAP, not inline. One position is about 660 bytes once it |
+   //| carries its leg ledger, so a fixed array of 512 makes this object|
+   //| 330 KB - and MQL5 caps a function's local variables at 2 MB, so  |
+   //| six of them in one function will not compile. That is exactly    |
+   //| what the Phase 10 ledger did to the test suites.                 |
+   //|                                                                  |
+   //| Dynamic also means an account that opens four trades costs four  |
+   //| trades, not five hundred and twelve.                             |
+   //+------------------------------------------------------------------+
+   SSRVirtualPosition m_pos[];
    int                m_count;
+   int                m_capacity;
    long               m_next_ticket;
+
+   //--- grow in blocks; the ceiling is still SSR_MAX_POSITIONS
+   bool               Reserve(const int need)
+     {
+      if(need <= m_capacity)
+         return true;
+      if(need > SSR_MAX_POSITIONS)
+         return false;
+      int want = (m_capacity == 0 ? 64 : m_capacity * 2);
+      if(want < need)              want = need;
+      if(want > SSR_MAX_POSITIONS) want = SSR_MAX_POSITIONS;
+      if(ArrayResize(m_pos, want) != want)
+         return false;
+      m_capacity = want;
+      return true;
+     }
 
    CSSRRiskEngine     m_risk;
    SSRExecutionModel  m_exec;
@@ -425,7 +453,8 @@ private:
 
 public:
                      CSSRTradingEngine(void)
-     : m_count(0), m_next_ticket(1), m_symbol(""), m_digits(5), m_point(0.00001),
+     : m_count(0), m_capacity(0), m_next_ticket(1), m_symbol(""),
+       m_digits(5), m_point(0.00001),
        m_balance_initial(10000.0), m_balance(10000.0),
        m_margin_per_lot(0.0), m_stopout_level(0.0), m_stopouts(0),
        m_bid(0.0), m_ask(0.0), m_now_msc(SSR_INVALID_TIME),
@@ -576,6 +605,8 @@ public:
       m_last_error = "";
       if(m_count >= SSR_MAX_POSITIONS)
         { m_last_error = "too many positions"; return 0; }
+      if(!Reserve(m_count + 1))
+        { m_last_error = "out of memory for another position"; return 0; }
       if(volume <= 0.0)
         { m_last_error = "volume must be positive"; return 0; }
       if(m_bid <= 0.0)
@@ -962,6 +993,8 @@ public:
          string c[];
          if(SSRUnpack(f.GetNth("pos", i), c) < 26)
             continue;                    // a row this build cannot read
+         if(!Reserve(m_count + 1))
+            break;
 
          int k = m_count++;
          m_pos[k].Init();

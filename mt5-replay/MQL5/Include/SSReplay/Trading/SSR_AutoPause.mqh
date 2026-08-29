@@ -49,7 +49,7 @@ private:
 
    //--- the last state seen for each position slot, so a change is a
    //--- comparison rather than a notification
-   uchar              m_seen[SSR_MAX_POSITIONS];
+   uchar              m_seen[];      // heap, like the log it mirrors
    int                m_seen_count;
 
    //--- the pending request. Consumed by PauseRequested, exactly once.
@@ -79,6 +79,8 @@ private:
       int total = m_acct.Total();
       if(total > SSR_MAX_POSITIONS)
          total = SSR_MAX_POSITIONS;
+      if(ArraySize(m_seen) < total && ArrayResize(m_seen, total) != total)
+         return;
 
       for(int i = 0; i < total; i++)
         {
@@ -207,6 +209,8 @@ public:
       int total = m_acct.Total();
       if(total > SSR_MAX_POSITIONS)
          total = SSR_MAX_POSITIONS;
+      if(ArraySize(m_seen) < total && ArrayResize(m_seen, total) != total)
+         return;
       for(int i = 0; i < total; i++)
         {
          SSRVirtualPosition p;

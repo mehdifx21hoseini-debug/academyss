@@ -279,12 +279,21 @@ void OnStart()
       CSSRPanel panel59;
       panel59.Create(cid, GetPointer(p59), "SSRT59_");
 
+      //--- OnEvent takes lparam BY REFERENCE, as MetaTrader hands it
+      //--- over, so a literal cannot be passed. The sections above
+      //--- already knew that; this one was written without looking.
+      long   k59 = 0;
+      double d59 = 0.0;
+      string s59 = "";
+
       p59.state.status = SSR_STATE_PAUSED;
-      panel59.OnEvent(CHARTEVENT_KEYDOWN, SSR_VK_LEFT, 0.0, "");
+      k59 = SSR_VK_LEFT;
+      panel59.OnEvent(CHARTEVENT_KEYDOWN, k59, d59, s59);
       CheckEq("LEFT stepped back", 1, p59.back);
       CheckEq("by one bar",        1, p59.last_back_bars);
 
-      panel59.OnEvent(CHARTEVENT_KEYDOWN, SSR_VK_PGUP, 0.0, "");
+      k59 = SSR_VK_PGUP;
+      panel59.OnEvent(CHARTEVENT_KEYDOWN, k59, d59, s59);
       CheckEq("PgUp stepped back again", 2, p59.back);
       CheckEq("by ten bars",            10, p59.last_back_bars);
 

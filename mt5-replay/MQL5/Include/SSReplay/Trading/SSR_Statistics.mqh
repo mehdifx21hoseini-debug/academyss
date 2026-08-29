@@ -148,14 +148,25 @@ class CSSRStatsEngine : public CSSRTickObserver
 private:
    CSSRTradingEngine *m_acct;      // not owned
 
-   long              m_eq_msc[SSR_EQUITY_SAMPLES];
-   double            m_eq_val[SSR_EQUITY_SAMPLES];
+   //--- on the heap for the same reason the position log is: 4096
+   //--- samples is 64 KB, and several of these in one function add up
+   //--- against MQL5's 2 MB local-variable ceiling
+   long              m_eq_msc[];
+   double            m_eq_val[];
    int               m_eq_count;
    long              m_eq_last_msc;
 
+   bool              EnsureRing(void)
+     {
+      if(ArraySize(m_eq_msc) == SSR_EQUITY_SAMPLES)
+         return true;
+      return (ArrayResize(m_eq_msc, SSR_EQUITY_SAMPLES) == SSR_EQUITY_SAMPLES &&
+              ArrayResize(m_eq_val, SSR_EQUITY_SAMPLES) == SSR_EQUITY_SAMPLES);
+     }
+
    void              Sample(const long msc)
      {
-      if(m_acct == NULL)
+      if(m_acct == NULL || !EnsureRing())
          return;
       if(m_eq_last_msc != SSR_INVALID_TIME &&
          msc - m_eq_last_msc < SSR_EQUITY_INTERVAL_MSC)
@@ -395,6 +406,8 @@ public:
       if(!f.Select("equity"))
          return true;                    // a session saved before any run
 
+      if(!EnsureRing())
+         return false;
       int n = f.Count("e");
       for(int i = 0; i < n && m_eq_count < SSR_EQUITY_SAMPLES; i++)
         {
