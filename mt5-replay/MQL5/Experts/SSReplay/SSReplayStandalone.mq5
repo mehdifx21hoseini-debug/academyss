@@ -52,6 +52,7 @@
 #include <SSReplay/Strategy/SSR_MarketView.mqh>
 #include <SSReplay/Strategy/SSR_StrategyHost.mqh>
 #include <SSReplay/Strategy/SSR_RefStrategy.mqh>
+#include <SSReplay/Integration/SSR_Publisher.mqh>
 
 input string          InpSymbol     = "";                   // Symbol (empty = this chart)
 input datetime        InpStart      = 0;                    // Replay start (0 = auto)
@@ -96,6 +97,14 @@ input ENUM_TIMEFRAMES InpStratTf     = PERIOD_M15;           // Its decision tim
 input int             InpStratLookback = 20;                 // Its breakout lookback, in bars
 input double          InpStratRisk   = 0.5;                  // Its risk per trade, percent
 
+//--- Phase 14 -------------------------------------------------------
+//--- Read access is always published. The other two are OFF unless
+//--- asked for: "another program may trade in my account" is not
+//--- something to arrive at by leaving a box unticked.
+input bool            InpPublish     = true;                 // Publish session state to other products
+input bool            InpAllowControl = false;               // Let them drive the replay
+input bool            InpAllowTrade  = false;                // Let them place VIRTUAL trades
+
 CSSRMt5DataSource    g_src;
 CSSRCustomSymbolSink g_sink;
 CSSRReplayController g_ctrl;
@@ -120,6 +129,10 @@ bool                 g_resumed = false;
 CSSRMarketView       g_view;
 CSSRStrategyHost     g_strategies;
 CSSRRefBreakout      g_ref_strategy;
+
+//--- Phase 14. One-directional: this product publishes a contract
+//--- and depends on nobody. There is no SSProX header here.
+CSSRPublisher        g_publisher;
 
 //--- extra streams. Index 0 is g_src/g_sink/g_ctrl above; these are
 //--- the rest, and they exist whether or not they are used because
@@ -474,6 +487,19 @@ int OnInit()
    //--- moment the user touched it.
    g_gport.Attach(GetPointer(g_group), GetPointer(g_sink), GetPointer(g_charts));
 
+   //--- other products may now see this session. The symbol they are
+   //--- told about is the REPLAY symbol, because that is the one a
+   //--- client is looking at on its chart.
+   if(InpPublish)
+     {
+      g_publisher.Attach(GetPointer(g_group), GetPointer(g_acct));
+      g_publisher.SetSlot(InpSlot);
+      g_publisher.SetSymbol(rsym);
+      g_publisher.SetPermissions(InpAllowControl, InpAllowTrade);
+      if(g_publisher.Begin())
+         Print("[host] ", g_publisher.ToString());
+     }
+
    //--- and blind mode goes on every chart we own, remembering what
    //--- each looked like so the user can leave the mode again
    if(g_blind.IsOn())
@@ -551,6 +577,12 @@ int OnInit()
 void OnDeinit(const int reason)
   {
    EventKillTimer();
+
+   //--- WITHDRAWN FIRST, and on every deinit reason. Terminal globals
+   //--- outlive the program that set them, so leaving them behind
+   //--- would tell every other product that a replay is still running.
+   g_publisher.Withdraw();
+
    g_panel.Destroy();
 
    //--- REASON_CHARTCHANGE and friends destroy this EA and rebuild it.
@@ -651,10 +683,18 @@ void OnTimer()
       g_ctrl.Now() > g_ctrl.StartMsc())
       PrimeView();
 
+   //--- one command per pump at most, so a client cannot drive the
+   //--- replay faster than the person watching it can react
+   g_publisher.Poll();
+
    //--- chart housekeeping is cheap but not free; keep it off the hot path
    g_slow_tick++;
    if(g_slow_tick % 5 == 0)
      {
+      //--- the heartbeat rides with the chart housekeeping: often
+      //--- enough that a client never sees a live session as stale,
+      //--- rarely enough that it is not on the hot path
+      g_publisher.Publish();
       g_charts.Sync();
       for(int i = 0; i < g_extra; i++)
          g_charts2[i].Sync();
