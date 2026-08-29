@@ -102,11 +102,25 @@ public:
          return false;
         }
 
-      out.available        = true;
-      out.first_msc        = SSRToMsc((datetime)first);
-      //--- the last instant COVERED, i.e. the close of the final bar.
+      out.available = true;
+      out.first_msc = SSRToMsc((datetime)first);
+
+      //--- The last instant COVERED, i.e. the close of the final bar -
       //--- using its open time instead silently shortens every window.
-      out.last_msc         = SSRToMsc((datetime)lastbar) + SSR_MSC_PER_MIN - 1;
+      //---
+      //--- But SERIES_LASTBAR_DATE may be the bar STILL FORMING, whose
+      //--- close has not happened yet. Reporting that as available data
+      //--- puts the end of the timeline in the future. Compare against
+      //--- the symbol's own last quote: if it falls inside that bar, the
+      //--- bar is live, and the previous one is the last complete data.
+      long lastbar_open  = SSRToMsc((datetime)lastbar);
+      long lastbar_close = lastbar_open + SSR_MSC_PER_MIN - 1;
+      long last_quote    = SymbolInfoInteger(symbol, SYMBOL_TIME_MSC);
+
+      if(last_quote > 0 && last_quote <= lastbar_close)
+         out.last_msc = lastbar_open - 1;      // the forming bar is not data yet
+      else
+         out.last_msc = lastbar_close;
       out.server_first_msc = (server_first > 0 ? SSRToMsc((datetime)server_first)
                                                : out.first_msc);
       out.bar_count        = bars;

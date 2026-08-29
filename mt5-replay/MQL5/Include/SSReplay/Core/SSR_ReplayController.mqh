@@ -429,6 +429,15 @@ public:
         }
       m_clock.SetSpeedX100(m_state.speed_x100);
 
+      //--- The sink may be able to reuse a warmup it seeded previously,
+      //--- but only if it knows which range this session needs BEFORE it
+      //--- prepares - preparing is what would destroy those very bars.
+      //--- Announced through the generic lifecycle hook so Core stays
+      //--- unaware that any particular sink caches anything.
+      m_sink.OnWarmupPlanned(m_timeline.warmup_first_msc > 0
+                             ? m_timeline.warmup_first_msc : m_timeline.start_msc,
+                             m_timeline.start_msc - 1);
+
       if(!m_sink.Prepare(symbol, m_digits, m_point))
         {
          SetError(SSR_ERR_SINK_FAILED, "sink preparation failed: " + m_sink.LastErrorText());
@@ -463,6 +472,18 @@ public:
      {
       if(m_warmup_bars <= 0 || m_timeline.warmup_first_msc <= 0)
          return true;
+
+      long lo_plan = m_timeline.warmup_first_msc;
+      long hi_plan = m_timeline.start_msc - 1;
+
+      //--- ask before reading. The read is the expensive part, so a sink
+      //--- that already holds this range must be able to stop it.
+      if(!m_sink.NeedsWarmup(lo_plan, hi_plan))
+        {
+         if(m_log != NULL && m_log.IsInfo())
+            m_log.Info("warmup already present in the sink; skipping the read");
+         return true;
+        }
 
       CSSRBarProvider *bp = m_source.Bars();
       if(bp == NULL)

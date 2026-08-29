@@ -28,13 +28,18 @@
 #include "../Common/SSR_Platform.mqh"
 #include "../Core/SSR_IReplaySink.mqh"
 #include "SSR_CustomSymbolManager.mqh"
+#include "SSR_SeedCache.mqh"
 
 //+------------------------------------------------------------------+
 class CSSRCustomSymbolSink : public CSSRReplaySink
   {
 private:
    CSSRCustomSymbolManager m_mgr;
+   CSSRSeedCache           m_cache;
    int                     m_slot;
+   long                    m_warmup_from_msc;   // range the cache is asked about
+   long                    m_warmup_to_msc;
+   bool                    m_reused_seed;
    bool                    m_prepared;
    bool                    m_own_symbol;   // did we create it, or adopt one?
 
@@ -48,7 +53,9 @@ private:
 
 public:
                      CSSRCustomSymbolSink(void)
-     : m_slot(1), m_prepared(false), m_own_symbol(true),
+     : m_slot(1), m_warmup_from_msc(SSR_INVALID_TIME),
+       m_warmup_to_msc(SSR_INVALID_TIME), m_reused_seed(false),
+       m_prepared(false), m_own_symbol(true),
        m_emit_calls(0), m_emit_ticks(0), m_seed_bars(0), m_truncates(0),
        m_emit_time_ms(0), m_last_emit_msc(SSR_INVALID_TIME) {}
 
@@ -65,6 +72,16 @@ public:
    void              SetSlot(const int slot) { m_slot = slot; }
    int               Slot(void)              { return m_slot; }
 
+   //--- the controller tells the sink which warmup it is about to seed,
+   //--- so the cache can be consulted before the symbol is touched
+   void              SetWarmupRange(const long from_msc, const long to_msc)
+     { m_warmup_from_msc = from_msc; m_warmup_to_msc = to_msc; }
+
+   void              SetCacheEnabled(const bool on) { m_cache.SetEnabled(on); }
+   bool              ReusedSeed(void)               { return m_reused_seed; }
+   string            CacheReason(void)              { return m_cache.LastReason(); }
+   CSSRSeedCache    *Cache(void)                    { return GetPointer(m_cache); }
+
    //--- the replay symbol, which is NOT the symbol the engine was given
    string            ReplaySymbol(void) { return m_mgr.Symbol(); }
    CSSRCustomSymbolManager *Manager(void) { return GetPointer(m_mgr); }
@@ -78,15 +95,43 @@ public:
      {
       m_prepared = false;
 
-      if(!m_mgr.Create(symbol, m_slot))
+      //--- Ask the cache BEFORE creating, because creating destroys the
+      //--- symbol and with it the very bars we might have reused.
+      m_reused_seed = false;
+      string replay_name = SSRReplaySymbolName(symbol, m_slot);
+      if(m_warmup_from_msc > 0 && m_warmup_to_msc > m_warmup_from_msc)
+         m_reused_seed = m_cache.CanReuse(symbol, replay_name,
+                                          m_warmup_from_msc, m_warmup_to_msc);
+
+      if(m_reused_seed)
         {
-         Fail(m_mgr.LastError(), m_mgr.LastErrorText());
-         return false;
+         //--- adopt the existing symbol instead of rebuilding it
+         if(!m_mgr.Adopt(replay_name, symbol))
+           {
+            m_reused_seed = false;
+            m_cache.Invalidate(replay_name);
+           }
         }
 
-      //--- start from an empty history: a previous session's data would
-      //--- otherwise appear as the future of this one
-      m_mgr.ClearAll();
+      if(!m_reused_seed)
+        {
+         if(!m_mgr.Create(symbol, m_slot))
+           {
+            Fail(m_mgr.LastError(), m_mgr.LastErrorText());
+            return false;
+           }
+         //--- start from an empty history: a previous session's data
+         //--- would otherwise appear as the future of this one
+         m_mgr.ClearAll();
+        }
+      else
+        {
+         //--- reuse is only safe once everything at or after the replay
+         //--- start is gone. A cached warmup that still carries the last
+         //--- session's replay would BE the future of this one.
+         if(m_warmup_to_msc > 0)
+            m_mgr.Truncate(m_warmup_to_msc + 1);
+        }
 
       m_emit_calls    = 0;
       m_emit_ticks    = 0;
@@ -111,12 +156,33 @@ public:
       if(count <= 0)
          return true;
 
+      //--- the whole point of the cache: the expensive write is skipped
+      if(m_reused_seed)
+        {
+         m_seed_bars += count;
+         return true;
+        }
+
       if(!m_mgr.WriteBars(bars, count))
         {
          Fail(m_mgr.LastError(), m_mgr.LastErrorText());
          return false;
         }
       m_seed_bars += count;
+
+      //--- record what is now in the symbol, so the next session can
+      //--- skip it. Written after the bars, never before.
+      if(m_warmup_from_msc > 0 && m_warmup_to_msc > m_warmup_from_msc)
+        {
+         SSRSeedManifest man;
+         man.Init();
+         man.origin          = m_mgr.Origin();
+         man.replay_symbol   = m_mgr.Symbol();
+         man.warmup_from_msc = m_warmup_from_msc;
+         man.warmup_to_msc   = m_warmup_to_msc;
+         man.bar_count       = m_seed_bars;
+         m_cache.Save(man);
+        }
       return true;
      }
 
@@ -179,11 +245,23 @@ public:
         }
       m_truncates++;
 
+      //--- a cut that reaches into the warmup makes the manifest a lie
+      if(m_warmup_to_msc > 0 && actual <= m_warmup_to_msc)
+         m_cache.Invalidate(m_mgr.Symbol());
+
       //--- the emit watermark must fall back with the data, or the very
       //--- next emit would be rejected as out of order
       m_last_emit_msc = (actual > 0 ? actual - 1 : SSR_INVALID_TIME);
       return actual;
      }
+
+   virtual void      OnWarmupPlanned(const long from_msc, const long to_msc) override
+     { SetWarmupRange(from_msc, to_msc); }
+
+   //--- the whole payoff of the cache: when the bars are already in the
+   //--- custom symbol, the data layer is never asked for them
+   virtual bool      NeedsWarmup(const long from_msc, const long to_msc) override
+     { return !m_reused_seed; }
 
    virtual void      OnReset(void) override
      {
@@ -196,7 +274,12 @@ public:
    virtual void      Release(void) override
      {
       if(m_own_symbol && m_mgr.IsCreated())
+        {
+         //--- destroying the symbol destroys the bars the manifest
+         //--- describes; leaving it would promise a cache that is gone
+         m_cache.Invalidate(m_mgr.Symbol());
          m_mgr.Destroy();
+        }
       m_prepared      = false;
       m_last_emit_msc = SSR_INVALID_TIME;
      }

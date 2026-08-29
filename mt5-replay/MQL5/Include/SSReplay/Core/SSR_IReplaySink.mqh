@@ -59,6 +59,24 @@ public:
    //+------------------------------------------------------------------+
    virtual long      TruncateFrom(const long from_msc) = 0;
 
+   //+------------------------------------------------------------------+
+   //| The warmup range this session is about to need, announced before |
+   //| Prepare. A sink that stores history may already hold it and skip |
+   //| the write; one that does not simply ignores the call. Core never |
+   //| learns which kind it is talking to.                              |
+   //+------------------------------------------------------------------+
+   virtual void      OnWarmupPlanned(const long from_msc, const long to_msc) {}
+
+   //+------------------------------------------------------------------+
+   //| Does this sink actually need the warmup handed to it?            |
+   //|                                                                  |
+   //| Reading a hundred thousand bars out of the data layer is most of |
+   //| the cost of starting a session. A sink that already holds them   |
+   //| says so here and the read never happens. Core is not told why -  |
+   //| only whether.                                                    |
+   //+------------------------------------------------------------------+
+   virtual bool      NeedsWarmup(const long from_msc, const long to_msc) { return true; }
+
    //--- lifecycle notifications; a sink may ignore any of them
    virtual void      OnStateChanged(const ENUM_SSR_STATE from, const ENUM_SSR_STATE to) {}
    virtual void      OnSeek(const long msc) {}

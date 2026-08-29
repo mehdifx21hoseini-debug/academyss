@@ -201,6 +201,55 @@ public:
      }
 
    //+------------------------------------------------------------------+
+   //| Take over an EXISTING replay symbol without destroying it.       |
+   //|                                                                  |
+   //| Create() always tears down first, which is right when starting   |
+   //| fresh and exactly wrong when the point is to keep the bars that  |
+   //| are already there. The seed cache needs this second door.        |
+   //+------------------------------------------------------------------+
+   bool              Adopt(const string replay_symbol, const string origin)
+     {
+      ResetLastError();
+      long digits = SymbolInfoInteger(replay_symbol, SYMBOL_DIGITS);
+      if(digits <= 0 || GetLastError() != 0)
+        {
+         Fail(SSR_ERR_NO_DATA, "no symbol to adopt: " + replay_symbol);
+         return false;
+        }
+      if(!SSRIsReplaySymbol(replay_symbol))
+        {
+         Fail(SSR_ERR_INVALID_ARG, "refusing to adopt a symbol that is not ours");
+         return false;
+        }
+
+      m_origin  = origin;
+      m_symbol  = replay_symbol;
+      m_created = true;
+      m_stats.Init();
+
+      //--- re-apply the overrides: a symbol from an older run may have
+      //--- been created before one of them existed
+      CustomSymbolSetInteger(m_symbol, SYMBOL_SPREAD_FLOAT, true);
+      CustomSymbolSetInteger(m_symbol, SYMBOL_TRADE_MODE, SYMBOL_TRADE_MODE_DISABLED);
+      Apply247Sessions();
+
+      if(!SymbolSelect(m_symbol, true))
+        {
+         Fail(SSR_ERR_INTERNAL, "SymbolSelect failed on the adopted symbol");
+         return false;
+        }
+      m_selected = true;
+
+      m_digits = (int)SymbolInfoInteger(m_symbol, SYMBOL_DIGITS);
+      m_point  = SymbolInfoDouble(m_symbol, SYMBOL_POINT);
+      if(m_point <= 0.0)
+         m_point = MathPow(10, -m_digits);
+
+      Succeed();
+      return true;
+     }
+
+   //+------------------------------------------------------------------+
    //| Close every chart showing the replay symbol.                     |
    //|                                                                  |
    //| Chart INTEGRATION is Phase 4; this is not that. Deletion simply  |

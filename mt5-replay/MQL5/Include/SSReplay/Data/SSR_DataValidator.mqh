@@ -67,6 +67,66 @@ struct SSRDataReport
   };
 
 //+------------------------------------------------------------------+
+//| The longest stretch in a week during which this symbol quotes    |
+//| nothing, read from the symbol itself.                            |
+//|                                                                  |
+//| A flat one-hour threshold calls a Friday-evening close "missing   |
+//| data" on a symbol that trades 24/5, and calls a genuine two-hour  |
+//| feed outage "a session break" on one that trades 24/7. The symbol |
+//| already knows the answer; asking it is no more code than          |
+//| guessing.                                                        |
+//+------------------------------------------------------------------+
+long SSRSymbolSessionGap(const string symbol)
+  {
+   long DAY  = 86400L * 1000;
+   long WEEK = 7 * DAY;
+
+   //--- collect every quote session of the week on one timeline, so a
+   //--- gap can be measured from one session's CLOSE to the next one's
+   //--- OPEN rather than from midnight
+   long opens[64], closes[64];
+   int  n = 0;
+
+   for(int d = 0; d < 7 && n < 64; d++)
+     {
+      ENUM_DAY_OF_WEEK day = (ENUM_DAY_OF_WEEK)d;
+      for(uint idx = 0; idx < 8 && n < 64; idx++)
+        {
+         datetime from = 0, to = 0;
+         if(!SymbolInfoSessionQuote(symbol, day, idx, from, to))
+            break;
+         opens[n]  = (long)d * DAY + (long)from * 1000;
+         closes[n] = (long)d * DAY + (long)to   * 1000;
+         n++;
+        }
+     }
+
+   //--- a symbol that declares no sessions tells us nothing; fall back
+   //--- rather than declaring the whole week a closure
+   if(n == 0)
+      return SSR_SESSION_GAP_MSC;
+
+   long widest = 0;
+   for(int i = 1; i < n; i++)
+     {
+      long gap = opens[i] - closes[i - 1];
+      if(gap > widest)
+         widest = gap;
+     }
+
+   //--- and the wrap: the weekend usually lives here, between Friday's
+   //--- close and Monday's open
+   long wrap = (opens[0] + WEEK) - closes[n - 1];
+   if(wrap > widest)
+      widest = wrap;
+
+   //--- never below an hour, or every lunch break reads as damage
+   if(widest < SSR_SESSION_GAP_MSC)
+      widest = SSR_SESSION_GAP_MSC;
+   return widest;
+  }
+
+//+------------------------------------------------------------------+
 class CSSRDataValidator
   {
 private:
@@ -76,6 +136,10 @@ public:
                      CSSRDataValidator(void) : m_session_gap_msc(SSR_SESSION_GAP_MSC) {}
 
    void              SetSessionGap(const long msc) { m_session_gap_msc = msc; }
+
+   //--- derive the threshold from the symbol rather than assuming it
+   void              LearnFrom(const string symbol)
+     { m_session_gap_msc = SSRSymbolSessionGap(symbol); }
    long              SessionGap(void)              { return m_session_gap_msc; }
 
    //+------------------------------------------------------------------+

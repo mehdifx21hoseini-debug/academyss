@@ -169,6 +169,10 @@ public:
       if(hi < to_msc)
          hi = SSRBarOpenMsc(to_msc, PERIOD_M1) + SSR_MSC_PER_MIN;
 
+      //--- a new symbol brings its own idea of what a gap means
+      if(symbol != m_symbol)
+         m_validator.LearnFrom(symbol);
+
       MqlRates tmp[];
       int got = LoadRange(symbol, lo, hi, tmp);
       m_loads++;
