@@ -27,7 +27,7 @@
 //|  is the next structural step rather than a nicety.                 |
 //+------------------------------------------------------------------+
 #property description "SS Replay - standalone replay host"
-#property version   "0.1"
+#property version   "1.00"
 
 #include <SSReplay/Common/SSR_Types.mqh>
 #include <SSReplay/Common/SSR_Time.mqh>
@@ -134,6 +134,12 @@ CSSRMarketView       g_view;
 CSSRStrategyHost     g_strategies;
 CSSRRefBreakout      g_ref_strategy;
 
+//--- How many streams beyond the primary one. Declared HERE, above
+//--- every array that uses it: a #define takes effect from the line
+//--- it appears on, so one placed further down is not a smaller
+//--- mistake than a missing one.
+#define SSR_EXTRA_STREAMS  (SSR_MAX_STREAMS - 1)
+
 //--- Phase 14. One-directional: this product publishes a contract
 //--- and depends on nobody. There is no SSProX header here.
 CSSRPublisher        g_publisher;
@@ -145,7 +151,6 @@ CSSRSessionDialog    g_session_dlg;
 //--- extra streams. Index 0 is g_src/g_sink/g_ctrl above; these are
 //--- the rest, and they exist whether or not they are used because
 //--- MQL5 has no place to put a heap of them.
-#define SSR_EXTRA_STREAMS  (SSR_MAX_STREAMS - 1)
 CSSRMt5DataSource    g_src2[SSR_EXTRA_STREAMS];
 CSSRCustomSymbolSink g_sink2[SSR_EXTRA_STREAMS];
 CSSRReplayController g_ctrl2[SSR_EXTRA_STREAMS];

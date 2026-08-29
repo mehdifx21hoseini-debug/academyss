@@ -32,6 +32,19 @@ private:
    string            m_prefix;
 
    int               m_x, m_y;
+
+   //--- What the chart looked like before the panel touched it.
+   //---
+   //--- These were USED from Phase 5 onward - in the constructor, in
+   //--- Create and in Destroy - and never declared. Eleven phases and
+   //--- every structural check I wrote passed over it; the compiler
+   //--- found it in one second. Declared here in the order the
+   //--- constructor initialises them, so that list stays in step with
+   //--- this one.
+   long              m_saved_mouse_move;
+   long              m_saved_mouse_scroll;
+   bool              m_saved;
+
    bool              m_collapsed;
    bool              m_dragging;
    int               m_drag_dx, m_drag_dy;
