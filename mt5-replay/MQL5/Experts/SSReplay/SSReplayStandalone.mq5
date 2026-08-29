@@ -49,6 +49,9 @@
 #include <SSReplay/Data/SSR_RandomPicker.mqh>
 #include <SSReplay/Chart/SSR_BlindMode.mqh>
 #include <SSReplay/Session/SSR_SessionManager.mqh>
+#include <SSReplay/Strategy/SSR_MarketView.mqh>
+#include <SSReplay/Strategy/SSR_StrategyHost.mqh>
+#include <SSReplay/Strategy/SSR_RefStrategy.mqh>
 
 input string          InpSymbol     = "";                   // Symbol (empty = this chart)
 input datetime        InpStart      = 0;                    // Replay start (0 = auto)
@@ -87,6 +90,12 @@ input ENUM_SSR_SESSION_MODE InpPauseSession = SSR_SESSION_OFF; // Pause on a new
 input string          InpSession     = "";                   // Session name (blank = do not save or resume)
 input bool            InpResume      = true;                 // Resume it if the file exists
 
+//--- Phase 13 -------------------------------------------------------
+input bool            InpRefStrategy = false;                // Run the reference strategy (a template, not advice)
+input ENUM_TIMEFRAMES InpStratTf     = PERIOD_M15;           // Its decision timeframe
+input int             InpStratLookback = 20;                 // Its breakout lookback, in bars
+input double          InpStratRisk   = 0.5;                  // Its risk per trade, percent
+
 CSSRMt5DataSource    g_src;
 CSSRCustomSymbolSink g_sink;
 CSSRReplayController g_ctrl;
@@ -105,6 +114,12 @@ CSSRSessionWatcher   g_session;
 CSSRTradeAutoPause   g_autopause;
 CSSRSessionManager   g_session_mgr;
 bool                 g_resumed = false;
+
+//--- Phase 13. The view holds only what the engine published, so a
+//--- strategy has no bar to read ahead by accident.
+CSSRMarketView       g_view;
+CSSRStrategyHost     g_strategies;
+CSSRRefBreakout      g_ref_strategy;
 
 //--- extra streams. Index 0 is g_src/g_sink/g_ctrl above; these are
 //--- the rest, and they exist whether or not they are used because
@@ -155,6 +170,34 @@ int ParseTimeframes(const string csv, ENUM_TIMEFRAMES &out[])
       out[k] = tf;
      }
    return ArraySize(out);
+  }
+
+//+------------------------------------------------------------------+
+//| Fill the market view with the history a jump skipped over.       |
+//|                                                                  |
+//| Bounded on purpose: the view holds a fixed number of M1 bars, so |
+//| reading more would be work thrown away. And the upper bound is   |
+//| the CLOCK, never the window - Prime trims to it as well, but     |
+//| asking for the future and relying on the trim would be the host  |
+//| leaning on somebody else's guard.                                |
+//+------------------------------------------------------------------+
+void PrimeView(void)
+  {
+   CSSRBarProvider *bp = g_src.Bars();
+   if(bp == NULL)
+      return;
+   long now  = g_ctrl.Now();
+   long from = now - (long)g_view.Capacity() * SSR_MSC_PER_MIN;
+   if(from < g_ctrl.StartMsc())
+      from = g_ctrl.StartMsc();
+
+   MqlRates bars[];
+   int n = bp.ReadBars(g_origin, from, now, bars);
+   if(n <= 0)
+      return;
+   int taken = g_view.Prime(bars, n, now);
+   PrintFormat("[host] view primed with %d bars to %s",
+               taken, SSRFormatMsc(now));
   }
 
 //+------------------------------------------------------------------+
@@ -374,6 +417,23 @@ int OnInit()
    g_session.SetMode(InpPauseSession);
    g_session.LearnFrom(origin);
    g_ctrl.AddObserver(GetPointer(g_session));
+
+   //--- THE VIEW BEFORE THE STRATEGIES. By the time a strategy is
+   //--- asked what it thinks about a bar, the view must already hold
+   //--- it - and it must hold nothing beyond it.
+   g_ctrl.AddObserver(GetPointer(g_view));
+   g_strategies.Attach(GetPointer(g_view), GetPointer(g_acct));
+   g_strategies.SetSeed(InpRandom ? g_picker.Seed() : 1);
+   if(InpRefStrategy)
+     {
+      g_ref_strategy.Configure(InpStratTf, InpStratLookback, InpStratRisk);
+      if(g_strategies.Add(GetPointer(g_ref_strategy), InpStratTf))
+         Print("[host] strategy: ", g_ref_strategy.Name(),
+               " on ", EnumToString(InpStratTf));
+      else
+         Print("[host] strategy refused: ", g_strategies.LastError());
+     }
+   g_ctrl.AddObserver(GetPointer(g_strategies));
    g_stats.Attach(GetPointer(g_acct));
    g_journal.Attach(GetPointer(g_acct), GetPointer(g_stats));
 
@@ -533,6 +593,11 @@ void OnDeinit(const int reason)
       if(g_journal.Count() > 0)
         {
          Print("[host] ", g_journal.Summary());
+         if(g_strategies.Count() > 0)
+           {
+            g_strategies.StopAll();
+            Print("[host] ", g_strategies.Report(GetPointer(g_stats)));
+           }
          string stamp = TimeToString(TimeLocal(), TIME_DATE);
          StringReplace(stamp, ".", "");
          if(g_journal.ExportCsv(g_origin + "_" + stamp))
@@ -578,6 +643,13 @@ void OnTimer()
    //--- hands every stream an instant, so there is nothing to drift.
    if(g_group.AnyPlaying())
       g_group.Pump(delta);
+
+   //--- A JUMP WRITES ITS BARS IN BULK and publishes none of them, so
+   //--- the view is empty on the far side of one. Priming is the
+   //--- host's job because the host is what owns a data source.
+   if(g_strategies.Count() > 0 && g_view.M1Count() == 0 &&
+      g_ctrl.Now() > g_ctrl.StartMsc())
+      PrimeView();
 
    //--- chart housekeeping is cheap but not free; keep it off the hot path
    g_slow_tick++;

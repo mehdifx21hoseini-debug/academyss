@@ -244,7 +244,21 @@ public:
      }
 
    //+------------------------------------------------------------------+
-   void              Compute(SSRStatistics &out)
+   //| Everything, or one strategy's share of it.                       |
+   //|                                                                  |
+   //| An empty tag means every trade. A tag means only the trades that |
+   //| carry it - which is how a strategy gets its own profit factor    |
+   //| without a second set of books to disagree with the first.        |
+   //|                                                                  |
+   //| The DRAWDOWN is the exception and says so: the equity curve is   |
+   //| the whole account's, so a filtered report carries the account's  |
+   //| drawdown, not the strategy's. Reporting a strategy-only drawdown |
+   //| from closed trades alone would drop every floating loss it sat   |
+   //| through, and that is the figure that matters most.               |
+   //+------------------------------------------------------------------+
+   void              Compute(SSRStatistics &out) { ComputeFor("", out); }
+
+   void              ComputeFor(const string tag, SSRStatistics &out)
      {
       out.Init();
       if(m_acct == NULL)
@@ -252,7 +266,7 @@ public:
 
       out.margin_modelled = m_acct.MarginModelled();
       out.stopouts        = (int)m_acct.Stopouts();
-      out.open_now        = m_acct.OpenCount();
+      out.open_now        = (tag == "" ? m_acct.OpenCount() : OpenCountFor(tag));
 
       int  streak_w = 0, streak_l = 0;
       double mae_sum = 0.0, mfe_sum = 0.0;
@@ -263,6 +277,8 @@ public:
         {
          SSRVirtualPosition p;
          if(!m_acct.At(i, p) || !p.IsClosed())
+            continue;
+         if(tag != "" && p.tag != tag)
             continue;
 
          out.trades++;
@@ -338,7 +354,7 @@ public:
       out.ambiguous_pct = 100.0 * (double)out.ambiguous_trades / (double)out.trades;
 
       EquityDrawdown(out.max_drawdown, out.max_drawdown_pct);
-      out.max_drawdown_closed = ClosedDrawdown();
+      out.max_drawdown_closed = ClosedDrawdownFor(tag);
      }
 
    //================================================================
@@ -400,7 +416,23 @@ public:
    //--- drawdown of the realised balance alone, for comparison with the
    //--- equity figure. A large gap between them means the trader was
    //--- riding losses rather than taking them.
-   double            ClosedDrawdown(void)
+   int               OpenCountFor(const string tag)
+     {
+      if(m_acct == NULL)
+         return 0;
+      int n = 0, total = m_acct.Total();
+      for(int i = 0; i < total; i++)
+        {
+         SSRVirtualPosition p;
+         if(m_acct.At(i, p) && p.IsOpen() && p.tag == tag)
+            n++;
+        }
+      return n;
+     }
+
+   double            ClosedDrawdown(void) { return ClosedDrawdownFor(""); }
+
+   double            ClosedDrawdownFor(const string tag)
      {
       if(m_acct == NULL)
          return 0.0;
@@ -411,6 +443,8 @@ public:
         {
          SSRVirtualPosition p;
          if(!m_acct.At(i, p) || !p.IsClosed())
+            continue;
+         if(tag != "" && p.tag != tag)
             continue;
          bal += p.profit + p.swap - p.commission;
          if(bal > peak) peak = bal;
