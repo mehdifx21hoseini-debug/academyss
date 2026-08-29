@@ -105,6 +105,18 @@ struct SSRTradeLeg
    double            prev_swap_locked;
    long              prev_swap_from_msc;
    bool              prev_ambiguous;
+
+   //--- Every field is written when a leg is booked, so nothing reads
+   //--- an uninitialised one today. This exists so that stays true:
+   //--- the guard is leg_count, and a guard is one edit away from
+   //--- being forgotten.
+   void              Init(void)
+     {
+      volume = 0.0; price = 0.0; msc = SSR_INVALID_TIME;
+      realised = 0.0; fee = 0.0; closing = false;
+      prev_swap_locked = 0.0; prev_swap_from_msc = SSR_INVALID_TIME;
+      prev_ambiguous = false;
+     }
   };
 
 //--- legs per position. One is always reserved for the final close,

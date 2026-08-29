@@ -175,6 +175,45 @@ void OnStart()
       //--- W1 does not align with the epoch and was never claimed
       Check("W1 is refused", !v.Bar(PERIOD_W1, 0, r));
       CheckEq("and reported as unavailable", 0, v.Available(PERIOD_W1));
+
+      //--- THE SINGLE-PASS RANGE MUST AGREE WITH THE BAR-BY-BAR ONE.
+      //--- Extremes() was rewritten in Phase 16 to stop rescanning the
+      //--- whole buffer once per requested bar; this compares the fast
+      //--- answer against the slow one it replaced, so a future edit
+      //--- to either cannot drift from the other unnoticed.
+      int agreed = 0, checked = 0;
+      for(int sh = 0; sh <= 4; sh++)
+         for(int cn = 1; cn <= 4; cn++)
+           {
+            double fhi = 0.0, flo = 0.0;
+            bool fast = v.Extremes(PERIOD_M5, sh, cn, fhi, flo);
+
+            //--- the definition, computed the obvious way
+            double shi = 0.0, slo = 0.0;
+            bool slow = true;
+            for(int k = 0; k < cn && slow; k++)
+              {
+               MqlRates b;
+               if(!v.Bar(PERIOD_M5, sh + k, b))
+                 { slow = false; break; }
+               if(k == 0) { shi = b.high; slo = b.low; }
+               else
+                 {
+                  if(b.high > shi) shi = b.high;
+                  if(b.low  < slo) slo = b.low;
+                 }
+              }
+            checked++;
+            if(fast == slow &&
+               (!fast || (MathAbs(fhi - shi) < 1e-9 && MathAbs(flo - slo) < 1e-9)))
+               agreed++;
+            else
+               PrintFormat("      MISMATCH shift=%d count=%d  fast=%d %.2f/%.2f  "
+                           "slow=%d %.2f/%.2f", sh, cn, fast, fhi, flo,
+                           slow, shi, slo);
+           }
+      CheckEq("the fast range agrees with the slow one everywhere",
+              checked, agreed);
    }
 
    //================================================================

@@ -152,6 +152,7 @@ private:
       double fee      = m_exec.commission_per_lot * volume;
 
       int e = m_pos[i].leg_count++;
+      m_pos[i].legs[e].Init();
       m_pos[i].legs[e].volume             = volume;
       m_pos[i].legs[e].price              = Norm(price);
       m_pos[i].legs[e].msc                = m_now_msc;
@@ -1014,6 +1015,7 @@ public:
            { orphans++; continue; }
 
          int e = m_pos[idx].leg_count++;
+         m_pos[idx].legs[e].Init();
          m_pos[idx].legs[e].volume             = SSRFieldDouble(c, 1);
          m_pos[idx].legs[e].price              = SSRFieldDouble(c, 2);
          m_pos[idx].legs[e].msc                = SSRFieldLong(c, 3);

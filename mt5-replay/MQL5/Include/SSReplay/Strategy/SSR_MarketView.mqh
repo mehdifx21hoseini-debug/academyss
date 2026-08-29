@@ -264,46 +264,84 @@ public:
       out = r.time;  return true;
      }
 
-   //--- the highest high over `count` CLOSED bars, ending at `shift`.
-   //--- Refuses outright if any bar in the span is missing, rather
-   //--- than returning the extreme of the part that happened to be
-   //--- there - a range computed from four bars when five were asked
-   //--- for is a different number wearing the same name.
+   //+------------------------------------------------------------------+
+   //| The extremes over `count` bars ending at `shift`.                |
+   //|                                                                  |
+   //| ONE BACKWARD WALK, not `count` of them. The obvious version      |
+   //| calls Bar() in a loop, and each Bar() walks the whole M1 buffer  |
+   //| to find its group - so asking for twenty bars scans four         |
+   //| thousand twenty times, on every tick, for every strategy. That   |
+   //| is an order of complexity, not a micro-optimisation, and it is   |
+   //| the kind that only shows up once a real session is running.      |
+   //|                                                                  |
+   //| REFUSES OUTRIGHT if the span runs off the buffer, rather than    |
+   //| returning the extreme of the part that happened to be there: a   |
+   //| range computed from four bars when twenty were asked for is a    |
+   //| different number wearing the same name.                          |
+   //+------------------------------------------------------------------+
+   bool              Extremes(const ENUM_TIMEFRAMES tf, const int shift,
+                              const int count, double &hi, double &lo)
+     {
+      hi = 0.0; lo = 0.0;
+      if(count <= 0 || shift < 0 || m_count <= 0 ||
+         !SSRIsSupportedTimeframe(tf))
+        { m_refusals++; return false; }
+
+      int  seen  = -1;               // groups crossed, newest first
+      long group = -1;
+      int  taken = 0;                // groups folded into the answer
+      bool any   = false;
+
+      for(int i = m_count - 1; i >= 0; i--)
+        {
+         long g = SSRBarOpenMsc(SSRToMsc(m_m1[i].time), tf);
+         if(g != group)
+           {
+            //--- a group just ended. If it was the last one we needed,
+            //--- the answer is complete and provably so.
+            if(taken >= count)
+              { return true; }
+            group = g;
+            seen++;
+            if(seen >= shift)
+               taken++;
+           }
+         if(seen < shift)
+            continue;
+
+         if(!any)
+           { hi = m_m1[i].high; lo = m_m1[i].low; any = true; }
+         else
+           {
+            if(m_m1[i].high > hi) hi = m_m1[i].high;
+            if(m_m1[i].low  < lo) lo = m_m1[i].low;
+           }
+        }
+
+      //--- ran off the oldest bar. The last group may have begun before
+      //--- the buffer did, so the span cannot be served honestly.
+      hi = 0.0; lo = 0.0;
+      m_refusals++;
+      return false;
+     }
+
    bool              HighestHigh(const ENUM_TIMEFRAMES tf, const int shift,
                                  const int count, double &out)
      {
-      out = 0.0;
-      if(count <= 0)
-         return false;
-      double best = 0.0;
-      for(int i = 0; i < count; i++)
-        {
-         MqlRates r;
-         if(!Bar(tf, shift + i, r))
-            return false;
-         if(i == 0 || r.high > best)
-            best = r.high;
-        }
-      out = best;
+      double hi = 0.0, lo = 0.0;
+      if(!Extremes(tf, shift, count, hi, lo))
+        { out = 0.0; return false; }
+      out = hi;
       return true;
      }
 
    bool              LowestLow(const ENUM_TIMEFRAMES tf, const int shift,
                                const int count, double &out)
      {
-      out = 0.0;
-      if(count <= 0)
-         return false;
-      double best = 0.0;
-      for(int i = 0; i < count; i++)
-        {
-         MqlRates r;
-         if(!Bar(tf, shift + i, r))
-            return false;
-         if(i == 0 || r.low < best)
-            best = r.low;
-        }
-      out = best;
+      double hi = 0.0, lo = 0.0;
+      if(!Extremes(tf, shift, count, hi, lo))
+        { out = 0.0; return false; }
+      out = lo;
       return true;
      }
 
