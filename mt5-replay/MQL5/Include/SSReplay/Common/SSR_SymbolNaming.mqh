@@ -1,11 +1,15 @@
 //+------------------------------------------------------------------+
 //|                                             SSR_SymbolNaming.mqh |
-//|                     SS Replay - Replay Symbol Naming (L0/MT5)    |
+//|                        SS Replay - Replay Symbol Naming (L0)     |
 //|                                                                  |
 //|  MetaTrader caps symbol names, and a truncated name that happens |
 //|  to collide with another replay symbol would have two sessions   |
 //|  writing into the same history. The suffix is therefore never    |
 //|  the part that gets cut - the origin name is.                    |
+//|                                                                  |
+//|  Pure string logic - no MetaTrader API - so it lives in Common   |
+//|  rather than the MT5 layer. That keeps the Chart layer from       |
+//|  depending sideways on the adapter just to recognise a name.      |
 //|                                                                  |
 //|  Phase 0 spike A1 measures the real cap on the target build.     |
 //|  Until that number exists, 31 is used and every name is verified |

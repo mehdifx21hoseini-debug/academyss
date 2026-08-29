@@ -26,7 +26,7 @@
 #include "../Common/SSR_Types.mqh"
 #include "../Common/SSR_Time.mqh"
 #include "../Common/SSR_Platform.mqh"
-#include "SSR_SymbolNaming.mqh"
+#include "../Common/SSR_SymbolNaming.mqh"
 
 //--- CustomRatesUpdate in slices: one enormous call blocks the terminal
 #define SSR_RATES_CHUNK       10000

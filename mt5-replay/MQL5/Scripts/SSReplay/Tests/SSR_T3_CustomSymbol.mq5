@@ -13,7 +13,7 @@
 
 #include <SSReplay/Common/SSR_Types.mqh>
 #include <SSReplay/Common/SSR_Time.mqh>
-#include <SSReplay/Mt5/SSR_SymbolNaming.mqh>
+#include <SSReplay/Common/SSR_SymbolNaming.mqh>
 #include <SSReplay/Mt5/SSR_CustomSymbolSink.mqh>
 #include <SSReplay/Data/SSR_Mt5DataSource.mqh>
 #include <SSReplay/Core/SSR_ReplayController.mqh>
