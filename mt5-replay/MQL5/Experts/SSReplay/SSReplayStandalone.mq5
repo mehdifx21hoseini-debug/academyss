@@ -335,6 +335,7 @@ int OnInit()
   {
    string origin = (InpSymbol == "" ? _Symbol : InpSymbol);
    g_origin = origin;
+   Print("[host] SS Replay build ", SSR_BUILD);
    g_ssr_log.SetTag("host");
    g_ssr_log.SetLevel(SSR_LOG_INFO);
 

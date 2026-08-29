@@ -43,6 +43,7 @@ void OnStart()
    string sym = (InpSymbol == "" ? _Symbol : InpSymbol);
    Print("==================================================");
    Print("  SS REPLAY - PREFLIGHT");
+   Print("  build: ", SSR_BUILD);
    Print("  symbol under test: ", sym);
    Print("==================================================");
 

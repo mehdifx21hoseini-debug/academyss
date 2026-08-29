@@ -22,6 +22,13 @@
 #define SSR_INVALID_TIME    (-1)
 #define SSR_VERSION         "0.1.0"
 
+//--- THE BUILD STAMP. Printed by the preflight and by the host on
+//--- startup, for one reason: when a compile reports errors that were
+//--- fixed two rounds ago, the only useful question is which copy of
+//--- the source the terminal actually has. This answers it in one line
+//--- instead of a conversation.
+#define SSR_BUILD           "v6  2026-08-29  heap-log"
+
 //+------------------------------------------------------------------+
 //| Replay state machine                                             |
 //+------------------------------------------------------------------+
