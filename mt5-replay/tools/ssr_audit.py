@@ -1,0 +1,295 @@
+#!/usr/bin/env python3
+"""
+SSR static audits — the mechanical checks that caught real MetaEditor errors.
+
+Every audit here exists because the compiler found something that eleven
+phases of reading had missed.  Each one is written to be *verified*: break
+the code on purpose, the audit must name it; put the code back, the audit
+must go silent.  An audit that has never been seen to fire is not evidence.
+
+Usage:  python3 tools/ssr_audit.py [MQL5_root]
+Exit code 0 when every audit is silent, 1 otherwise.
+"""
+import os, re, sys, collections
+
+ROOT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), "..", "MQL5")
+ROOT = os.path.abspath(ROOT)
+
+def sources():
+    for base, _dirs, files in os.walk(ROOT):
+        for f in sorted(files):
+            if f.endswith((".mq5", ".mqh")):
+                yield os.path.join(base, f)
+
+def rel(p):
+    return os.path.relpath(p, ROOT)
+
+def strip_comments(text):
+    """Blank out comments and string literals, keeping line count intact."""
+    out, i, n = [], 0, len(text)
+    while i < n:
+        c = text[i]
+        if c == '/' and i + 1 < n and text[i+1] == '/':
+            j = text.find('\n', i)
+            j = n if j < 0 else j
+            out.append(' ' * (j - i)); i = j
+        elif c == '/' and i + 1 < n and text[i+1] == '*':
+            j = text.find('*/', i + 2)
+            j = n if j < 0 else j + 2
+            out.append(''.join(ch if ch == '\n' else ' ' for ch in text[i:j])); i = j
+        elif c in '"\'':
+            j, q = i + 1, c
+            while j < n and text[j] != q:
+                j += 2 if text[j] == '\\' else 1
+            j = min(j + 1, n)
+            out.append(''.join(ch if ch == '\n' else ' ' for ch in text[i:j])); i = j
+        else:
+            out.append(c); i += 1
+    return ''.join(out)
+
+FILES = {p: open(p, encoding="utf-8", errors="replace").read() for p in sources()}
+CLEAN = {p: strip_comments(t) for p, t in FILES.items()}
+
+findings = []
+def report(audit, path, line, msg):
+    findings.append("%-4s %s:%s  %s" % (audit, rel(path), line, msg))
+
+# ---------------------------------------------------------------- A1
+# A member used inside a class body but never declared in it.
+# Caught: CSSRPanel used m_saved / m_saved_mouse_move / m_saved_mouse_scroll
+# from Phase 5 onward and declared none of them.
+CLASS_RE = re.compile(r'^\s*class\s+(\w+)\s*(?::\s*(?:public|private|protected)?\s*(\w+))?', re.M)
+
+def class_bodies(text):
+    for m in CLASS_RE.finditer(text):
+        start = text.find('{', m.end())
+        if start < 0:
+            continue
+        depth, i, n = 0, start, len(text)
+        while i < n:
+            if text[i] == '{': depth += 1
+            elif text[i] == '}':
+                depth -= 1
+                if depth == 0:
+                    yield m.group(1), m.group(2), start, text[start:i + 1]
+                    break
+            i += 1
+
+# A declaration is a whole line: a type token, one or more names, a
+# semicolon, and no call or assignment.  Matching "m_x =" as a declaration
+# is what let the missing CSSRPanel members hide -- the assignment inside
+# Create() looked like the declaration that was never written.
+DECL_LINE = re.compile(r'^\s*(?:static\s+)?(?:const\s+)?([A-Za-z_]\w*)\s+([^;=(){}]*);\s*$', re.M)
+NOT_A_TYPE = {'return', 'delete', 'break', 'continue', 'case', 'goto', 'new'}
+
+def declared_in(body):
+    d = set()
+    for m in DECL_LINE.finditer(body):
+        if m.group(1) in NOT_A_TYPE:
+            continue
+        d |= set(re.findall(r'\b(m_\w+)\b', m.group(2)))
+    return d
+
+def audit_a1():
+    # A member can come from a base class, so resolve the chain first.
+    # Without this the audit fires on every provider that uses the
+    # m_guard CSSRProviderBase gives it.
+    own, base_of, where = {}, {}, {}
+    for path, text in CLEAN.items():
+        for name, base, start, body in class_bodies(text):
+            own[name] = declared_in(body)
+            base_of[name] = base
+            where[name] = (path, text, start, body)
+
+    def inherited(name, seen=None):
+        seen = seen or set()
+        d = set()
+        b = base_of.get(name)
+        while b and b not in seen:
+            seen.add(b)
+            d |= own.get(b, set())
+            b = base_of.get(b)
+        return d
+
+    for name, (path, text, start, body) in where.items():
+        declared = own[name] | inherited(name)
+        used = set(re.findall(r'\b(m_\w+)\b', body))
+        for miss in sorted(used - declared):
+            off = start + body.find(miss)
+            report("A1", path, text.count('\n', 0, off) + 1,
+                   "class %s uses %s but neither it nor its bases declare it" % (name, miss))
+
+# ---------------------------------------------------------------- A2
+# A macro used above the line that defines it.  MQL5's preprocessor is
+# strictly top-down, so this compiles as an undeclared identifier.
+# Caught: SSR_EXTRA_STREAMS used at line 142, #define'd at 148.
+def audit_a2():
+    for path, text in CLEAN.items():
+        lines = text.split('\n')
+        defined = {}
+        for i, ln in enumerate(lines, 1):
+            m = re.match(r'\s*#define\s+(\w+)', ln)
+            if m and m.group(1) not in defined:
+                defined[m.group(1)] = i
+        for name, dline in defined.items():
+            pat = re.compile(r'\b%s\b' % re.escape(name))
+            for i, ln in enumerate(lines[:dline - 1], 1):
+                if ln.lstrip().startswith('#'):
+                    continue
+                if pat.search(ln):
+                    report("A2", path, i,
+                           "%s used here but #define is at line %d" % (name, dline))
+                    break
+
+# ---------------------------------------------------------------- A3
+# MetaEditor rejects any #property version that is not x.yy.
+# Caught: "0.1" -> "version '0.1' is incompatible with the current format".
+def audit_a3():
+    for path, text in FILES.items():
+        for i, ln in enumerate(text.split('\n'), 1):
+            m = re.match(r'\s*#property\s+version\s+"([^"]*)"', ln)
+            if m and not re.fullmatch(r'\d+\.\d\d', m.group(1)):
+                report("A3", path, i,
+                       'version "%s" is not the x.yy form MetaEditor accepts' % m.group(1))
+
+# ---------------------------------------------------------------- A4
+# A literal passed where the parameter is a reference.  MQL5 has no
+# temporaries to bind, so this is a hard error.
+# Caught: my own T5.9 called Panel::OnEvent(..., 0, 0.0, "") while older
+# sections of the same file correctly used variables.
+# Restricted to method names that have exactly one signature codebase-wide;
+# the looser version produced 66 false positives on overloads.
+def audit_a4():
+    sigs = collections.defaultdict(set)
+    for path, text in CLEAN.items():
+        for m in re.finditer(r'\b(\w+)\s*\(([^;{)]*)\)\s*(?:const\s*)?\{', text):
+            name, params = m.group(1), m.group(2)
+            if name in ('if', 'for', 'while', 'switch', 'return', 'sizeof'):
+                continue
+            sigs[name].add(params.strip())
+    unique = {n: next(iter(s)) for n, s in sigs.items() if len(s) == 1}
+
+    def split_args(s):
+        out, depth, cur = [], 0, ''
+        for ch in s:
+            if ch in '([': depth += 1
+            elif ch in ')]': depth -= 1
+            if ch == ',' and depth == 0:
+                out.append(cur); cur = ''
+            else:
+                cur += ch
+        if cur.strip(): out.append(cur)
+        return [a.strip() for a in out]
+
+    LIT = re.compile(r'^(?:-?\d+(?:\.\d+)?|0[xX][0-9a-fA-F]+|true|false|NULL)$')
+    for path, text in CLEAN.items():
+        for m in re.finditer(r'\b(\w+)\s*\(([^;{)]*)\)\s*;', text):
+            name, call = m.group(1), m.group(2)
+            if name not in unique:
+                continue
+            params = split_args(unique[name])
+            args = split_args(call)
+            if len(params) != len(args):
+                continue
+            for p, a in zip(params, args):
+                if '&' in p and LIT.match(a):
+                    report("A4", path, text.count('\n', 0, m.start()) + 1,
+                           "%s() takes %s by reference; a literal (%s) cannot bind"
+                           % (name, p.split()[-1].lstrip('&'), a))
+
+# ---------------------------------------------------------------- A5
+# MQL5 caps a function's local variable section at 2 MB.  A class holding a
+# large inline array blows that cap the moment a test declares one on the
+# stack -- and the error points at the *test*, not at the class.
+# Caught: CSSRTradingEngine held SSRVirtualPosition m_pos[512]; the Phase 10
+# leg ledger took each position from 213 to 661 bytes, so one engine was
+# 338 KB and a test building several per section went over 2 MB.
+PRIM = {"char":1,"uchar":1,"bool":1,"short":2,"ushort":2,"int":4,"uint":4,
+        "color":4,"float":4,"long":8,"ulong":8,"double":8,"datetime":8,
+        "string":12}
+
+INT_DEFINE = {}
+for _p, _t in CLEAN.items():
+    for _m in re.finditer(r'^\s*#define\s+(\w+)\s+(\d+)\s*$', _t, re.M):
+        INT_DEFINE.setdefault(_m.group(1), int(_m.group(2)))
+
+def array_count(expr):
+    """Resolve an array length that may be written as a macro."""
+    e = expr.strip()
+    if re.fullmatch(r'\d+', e):
+        return int(e)
+    return INT_DEFINE.get(e)
+
+def type_sizes():
+    """Size every struct/class we can, smallest first, resolving nesting."""
+    decls = {}
+    for path, text in CLEAN.items():
+        for m in re.finditer(r'\b(?:struct|class)\s+(\w+)[^;{]*\{', text):
+            start = m.end() - 1
+            depth, i, n = 0, start, len(text)
+            while i < n:
+                if text[i] == '{': depth += 1
+                elif text[i] == '}':
+                    depth -= 1
+                    if depth == 0:
+                        decls[m.group(1)] = (path, text[start:i], text.count('\n',0,m.start())+1)
+                        break
+                i += 1
+    sizes, changed = dict(PRIM), True
+    for name in decls:
+        sizes.setdefault(name, None)
+    while changed:
+        changed = False
+        for name, (path, body, line) in decls.items():
+            if sizes.get(name) is not None:
+                continue
+            total, ok = 0, True
+            for fm in re.finditer(r'^\s*(?:static\s+)?(\w+)\s+(\w+)\s*(?:\[([^\]]*)\])?\s*;',
+                                  body, re.M):
+                ftype, _fname, count = fm.groups()
+                if ftype in ('return','const','virtual','void','public','private',
+                             'protected','else','if','enum','struct','class'):
+                    continue
+                base = sizes.get(ftype)
+                if ftype.startswith('ENUM_'):
+                    base = 4
+                if base is None:
+                    if ftype in sizes:
+                        ok = False
+                    continue
+                if count is None:                      # a plain field
+                    total += base
+                elif count.strip() == '':              # dynamic: a handle, not storage
+                    total += 16
+                else:
+                    n = array_count(count)
+                    if n is None:
+                        # An array whose length we cannot resolve. Guessing low
+                        # here is how the leg array hid: [SSR_MAX_TRADE_LEGS]
+                        # read as dynamic and 8 legs per position vanished.
+                        ok = False
+                        break
+                    total += base * n
+            if ok:
+                sizes[name] = total
+                changed = True
+    return sizes, decls
+
+def audit_a5():
+    sizes, decls = type_sizes()
+    CAP = 2 * 1024 * 1024
+    for name, (path, body, line) in decls.items():
+        size = sizes.get(name)
+        if size and size > 64 * 1024:
+            report("A5", path, line,
+                   "%s is %s bytes inline; one on the stack eats %.1f%% of the 2 MB cap"
+                   % (name, format(size, ','), 100.0 * size / CAP))
+
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5):
+    fn()
+
+if findings:
+    print("\n".join(findings))
+    print("\n%d finding(s)." % len(findings))
+    sys.exit(1)
+print("all audits silent across %d source files under %s" % (len(FILES), rel(ROOT) or "MQL5"))
