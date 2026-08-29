@@ -638,30 +638,35 @@ public:
 
       if(backward)
         {
-         if(!m_sink.TruncateFrom(clamped))
+         long actual = m_sink.TruncateFrom(clamped);
+         if(actual < 0)
            {
             SetError(SSR_ERR_SINK_FAILED, "truncate failed: " + m_sink.LastErrorText());
             return false;
            }
-         m_cursor.RewindTo(clamped);
+         //--- follow the SINK, not the request. It may only have been
+         //--- able to cut at a coarser boundary, and the cursor must
+         //--- agree with what actually survives out there.
+         m_cursor.RewindTo(actual);
         }
 
       m_clock.SeekTo(clamped);
       m_guard.SetHorizon(clamped);
       m_sink.OnSeek(clamped);
 
-      //--- a forward seek still owes the sink the data it skipped over
-      if(!backward)
-        {
-         long lo, hi;
-         if(m_cursor.PendingRange(clamped, lo, hi))
-            if(EmitWindow(lo, hi) < 0)
-              {
-               Transition(SSR_STATE_ERROR);
-               Publish();
-               return false;
-              }
-        }
+      //--- Both directions may owe the sink data now. Forward obviously
+      //--- skipped over some; backward may have cut further than asked,
+      //--- leaving a hole between the cut and the clock. Emitting here
+      //--- keeps a seek atomic instead of leaving a visible gap until
+      //--- the next pump happens to fill it.
+      long lo, hi;
+      if(m_cursor.PendingRange(clamped, lo, hi))
+         if(EmitWindow(lo, hi) < 0)
+           {
+            Transition(SSR_STATE_ERROR);
+            Publish();
+            return false;
+           }
 
       Publish();
       if(m_state.status == SSR_STATE_COMPLETED && clamped < m_timeline.end_msc)
@@ -676,15 +681,18 @@ public:
       if(!Transition(SSR_STATE_RESETTING))
          return false;
 
+      long cut = m_timeline.start_msc;
       if(m_sink != NULL)
         {
-         m_sink.TruncateFrom(m_timeline.start_msc);
+         long actual = m_sink.TruncateFrom(m_timeline.start_msc);
+         if(actual >= 0)
+            cut = actual;
          m_sink.OnReset();
         }
 
       m_clock.Rewind();
       m_cursor.Init();
-      m_cursor.RewindTo(m_timeline.start_msc);
+      m_cursor.RewindTo(cut);
       m_guard.ResetCounters();
       m_guard.Arm(m_timeline.start_msc);
 
@@ -740,7 +748,8 @@ public:
          SetError(SSR_ERR_NO_SINK, "no sink");
          return false;
         }
-      if(!m_sink.TruncateFrom(snap.taken_at_msc))
+      long actual = m_sink.TruncateFrom(snap.taken_at_msc);
+      if(actual < 0)
         {
          SetError(SSR_ERR_SINK_FAILED, "truncate failed: " + m_sink.LastErrorText());
          return false;
@@ -750,6 +759,11 @@ public:
       m_clock    = snap.clock;
       m_cursor   = snap.cursor;
       m_timeline = snap.timeline;
+
+      //--- if the sink cut further back than the snapshot, the restored
+      //--- cursor would claim data that no longer exists out there
+      if(actual < m_cursor.emitted_msc)
+         m_cursor.RewindTo(actual);
 
       m_guard.Arm(m_clock.now_msc);
       m_sink.OnSeek(m_clock.now_msc);

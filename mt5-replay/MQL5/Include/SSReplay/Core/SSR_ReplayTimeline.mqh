@@ -56,9 +56,15 @@ struct SSRReplayTimeline
       if(a_start_msc <= 0)
          return false;
 
-      start_msc = SSRClampMsc(a_start_msc, data_first_msc, data_last_msc);
-      long e    = (a_end_msc > 0 ? a_end_msc : data_last_msc);
-      end_msc   = SSRClampMsc(e, start_msc, data_last_msc);
+      //--- Snap the start DOWN to an M1 boundary.
+      //--- Truncation can only land on a bar open, so a start chosen
+      //--- mid-minute would make the first rewind cut into the warmup
+      //--- and delete history the replay never owned.
+      long snapped = SSRBarOpenMsc(a_start_msc, PERIOD_M1);
+      start_msc = SSRClampMsc(snapped, data_first_msc, data_last_msc);
+
+      long e  = (a_end_msc > 0 ? a_end_msc : data_last_msc);
+      end_msc = SSRClampMsc(e, start_msc, data_last_msc);
 
       return (end_msc > start_msc);
      }

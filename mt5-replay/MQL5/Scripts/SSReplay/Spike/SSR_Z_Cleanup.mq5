@@ -27,7 +27,9 @@ void OnStart()
      {
       long next = ChartNext(id);
       string s = ChartSymbol(id);
-      if(StringFind(s, "SSR") == 0)
+      //--- spike symbols start with SSR; product replay symbols carry
+      //--- the .SSR suffix. Both are ours and both must go.
+      if(StringFind(s, "SSR") == 0 || StringFind(s, ".SSR") >= 0)
         {
          ChartClose(id);
          closed++;
@@ -36,7 +38,19 @@ void OnStart()
      }
    Sleep(500);
 
+   //--- product replay symbols: <origin>.SSR<slot>, any origin, slots 0-9
    int dropped = 0;
+   for(int i = SymbolsTotal(false) - 1; i >= 0; i--)
+     {
+      string name = SymbolName(i, false);
+      if(StringFind(name, ".SSR") >= 0)
+        {
+         SymbolSelect(name, false);
+         if(CustomSymbolDelete(name))
+            dropped++;
+        }
+     }
+
    for(int i = 0; i < ArraySize(g_syms); i++)
      {
       ResetLastError();

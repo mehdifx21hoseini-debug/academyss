@@ -43,9 +43,21 @@ public:
    //--- the replay stream. `count` may be 0, which is not an error.
    virtual bool      EmitTicks(const MqlTick &ticks[], const int count) = 0;
 
-   //--- everything at or after `from_msc` must cease to exist.
-   //--- this is what makes rewind and reset structural rather than cosmetic.
-   virtual bool      TruncateFrom(const long from_msc) = 0;
+   //+------------------------------------------------------------------+
+   //| Everything at or after `from_msc` must cease to exist. This is   |
+   //| what makes rewind and reset structural rather than cosmetic.     |
+   //|                                                                  |
+   //| Returns the instant actually truncated from, or -1 on failure.   |
+   //|                                                                  |
+   //| A sink may only be able to cut at a coarser boundary than asked. |
+   //| The MT5 sink is exactly that case: bars and ticks live in        |
+   //| separate stores and deleting a tick does not un-build the bar it |
+   //| already contributed to, so the cut has to land on a bar open or  |
+   //| the surviving bar keeps a high and low from the deleted future.  |
+   //| The caller must trust the RETURNED instant, not the requested    |
+   //| one, when repositioning.                                         |
+   //+------------------------------------------------------------------+
+   virtual long      TruncateFrom(const long from_msc) = 0;
 
    //--- lifecycle notifications; a sink may ignore any of them
    virtual void      OnStateChanged(const ENUM_SSR_STATE from, const ENUM_SSR_STATE to) {}

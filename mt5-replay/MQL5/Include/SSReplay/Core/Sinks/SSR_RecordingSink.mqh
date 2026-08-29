@@ -100,7 +100,7 @@ public:
       return true;
      }
 
-   virtual bool      TruncateFrom(const long from_msc) override
+   virtual long      TruncateFrom(const long from_msc) override
      {
       m_truncations++;
       m_last_truncate_msc = from_msc;
@@ -115,7 +115,8 @@ public:
            }
       m_tick_count = keep;
       m_last_msc   = (keep > 0 ? m_ticks[keep - 1].time_msc : SSR_INVALID_TIME);
-      return true;
+      //--- an in-memory recorder can cut at the exact instant asked for
+      return from_msc;
      }
 
    virtual void      OnStateChanged(const ENUM_SSR_STATE from, const ENUM_SSR_STATE to) override
