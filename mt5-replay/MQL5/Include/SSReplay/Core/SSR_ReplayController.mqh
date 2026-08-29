@@ -70,6 +70,11 @@ private:
 
    int                 m_digits;
    double              m_point;
+   //--- auto pause, driven entirely by observers asking for it
+   bool                m_auto_pause;
+   string              m_pause_reason;
+   long                m_auto_pauses;
+
    //--- per-pump accumulators, read and cleared by Pump()
    double              m_pump_emit_us;
    bool                m_pump_deferred;
@@ -112,6 +117,47 @@ private:
      }
 
    //--- keep the published state in step with the internal parts
+   //+------------------------------------------------------------------+
+   //| Ask every observer whether the replay should stop here.          |
+   //|                                                                  |
+   //| Core never learns why. It gets a sentence and shows it. The      |
+   //| first request wins, and every observer is still asked, because   |
+   //| an observer that raised a flag must be allowed to clear it -     |
+   //| skipping the rest would leave a stale request to fire later at   |
+   //| an unrelated moment.                                             |
+   //+------------------------------------------------------------------+
+   bool                CheckObserverPause(void)
+     {
+      if(!m_auto_pause)
+         return false;
+
+      bool   want = false;
+      string first = "";
+      for(int i = 0; i < m_obs_count; i++)
+        {
+         if(m_obs[i] == NULL)
+            continue;
+         string why = "";
+         if(!m_obs[i].PauseRequested(why))
+            continue;
+         if(!want)
+           {
+            want  = true;
+            first = (why == "" ? m_obs[i].Name() : why);
+           }
+        }
+      if(!want)
+         return false;
+
+      m_pause_reason = first;
+      m_auto_pauses++;
+      if(m_state.status == SSR_STATE_PLAYING)
+         Transition(SSR_STATE_PAUSED);
+      if(m_log != NULL && m_log.IsInfo())
+         m_log.Info("auto pause: " + first);
+      return true;
+     }
+
    void                Publish(void)
      {
       m_state.current_msc    = m_clock.now_msc;
@@ -342,7 +388,8 @@ public:
                      CSSRReplayController(void)
      : m_source(NULL), m_sink(NULL), m_log(NULL),
        m_digits(5), m_point(0.00001), m_pump_emit_us(0.0),
-       m_pump_deferred(false), m_warmup_bars(0)
+       m_pump_deferred(false), m_warmup_bars(0),
+       m_auto_pause(true), m_pause_reason(""), m_auto_pauses(0)
      {
       m_state.Init();
       m_clock.Init();
@@ -473,6 +520,41 @@ public:
    string            BudgetText(void)               { return m_budget.ToString(); }
 
    void              SetDataMode(const ENUM_SSR_DATA_MODE m) { m_state.data_mode = m; }
+
+   //+------------------------------------------------------------------+
+   //| Narrow the replay window's END, never widen it.                  |
+   //|                                                                  |
+   //| For the master clock. Several instruments share the window they  |
+   //| ALL have data for, and a stream whose own history runs past that |
+   //| window would otherwise never report itself finished - the board  |
+   //| would sit at its last common instant waiting for a stream that   |
+   //| believes it has days left.                                       |
+   //|                                                                  |
+   //| Narrowing only. Widening would hand back a period the caller     |
+   //| already established nobody can serve.                            |
+   //+------------------------------------------------------------------+
+   bool              NarrowEndTo(const long end_msc)
+     {
+      if(!m_timeline.IsValid() || end_msc >= m_timeline.end_msc)
+         return false;
+      if(end_msc <= m_timeline.start_msc)
+         return false;
+
+      m_timeline.end_msc = end_msc;
+      m_clock.end_msc    = end_msc;
+      if(m_clock.now_msc > end_msc)
+         m_clock.now_msc = end_msc;
+      Publish();
+      return true;
+     }
+
+   //--- auto pause. The POLICY lives in whichever observer asked for
+   //--- it; this is only the master switch and the sentence it left.
+   void              SetAutoPause(const bool on) { m_auto_pause = on; }
+   bool              AutoPauseEnabled(void)      { return m_auto_pause; }
+   string            PauseReason(void)           { return m_pause_reason; }
+   long              AutoPauses(void)            { return m_auto_pauses; }
+   void              ClearPauseReason(void)      { m_pause_reason = ""; }
 
    //+------------------------------------------------------------------+
    //| Configure and load. IDLE -> LOADING -> READY.                    |
@@ -729,6 +811,81 @@ public:
          TakeSnapshot(cp, "auto");
          m_snaps.Checkpoint(cp);
         }
+
+      //--- asked AFTER the observers have seen this pump's ticks, so a
+      //--- stop hit inside it stops the replay on the bar it happened
+      CheckObserverPause();
+
+      if(m_clock.IsCompleted())
+        {
+         Transition(SSR_STATE_COMPLETED);
+         if(m_log != NULL && m_log.IsInfo())
+            m_log.Info("replay completed at " + SSRFormatMsc(m_clock.now_msc));
+        }
+      return emitted;
+     }
+
+   //+------------------------------------------------------------------+
+   //| Advance to an EXACT replay instant, as a pump rather than a seek.|
+   //|                                                                  |
+   //| Everything Pump() does, except that the target comes from a       |
+   //| caller instead of from this stream's own clock arithmetic. That  |
+   //| is what lets several symbols share one Master Replay Clock       |
+   //| without any of them being able to drift.                         |
+   //|                                                                  |
+   //| A stream whose timeline ends before the target simply completes. |
+   //| It is not an error for EURUSD to have data on a day XAUUSD does  |
+   //| not; it is a fact about the two instruments, and the honest       |
+   //| response is to finish that stream and let the rest carry on.     |
+   //+------------------------------------------------------------------+
+   int               PumpTo(const long target_msc)
+     {
+      if(m_state.status != SSR_STATE_PLAYING)
+         return 0;
+
+      ulong t_pump    = GetMicrosecondCount();
+      m_pump_emit_us  = 0.0;
+      m_pump_deferred = false;
+
+      long before = m_clock.now_msc;
+      long now    = m_clock.AdvanceTo(target_msc);
+
+      m_guard.SetHorizon(now);
+
+      int emitted = 0;
+      if(now > before)
+        {
+         long lo, hi;
+         if(m_cursor.PendingRange(now, lo, hi))
+           {
+            emitted = EmitWindow(lo, hi);
+            if(emitted < 0)
+              {
+               Transition(SSR_STATE_ERROR);
+               Publish();
+               return -1;
+              }
+           }
+        }
+
+      for(int i = 0; i < m_obs_count; i++)
+         if(m_obs[i] != NULL)
+            m_obs[i].OnClock(m_clock.now_msc);
+
+      Publish();
+
+      m_metrics.RecordPump((double)(GetMicrosecondCount() - t_pump),
+                           m_pump_emit_us, emitted,
+                           (int)m_cursor.bar_count, m_pump_deferred);
+
+      if(m_snaps.IsDue(m_clock.now_msc))
+        {
+         SSRSnapshot cp;
+         TakeSnapshot(cp, "auto");
+         m_snaps.Checkpoint(cp);
+        }
+
+      CheckObserverPause();
 
       if(m_clock.IsCompleted())
         {

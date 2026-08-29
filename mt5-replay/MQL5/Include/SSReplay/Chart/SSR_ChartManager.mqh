@@ -173,6 +173,43 @@ public:
      }
 
    //+------------------------------------------------------------------+
+   //| Open several charts of the same replay symbol at once.           |
+   //|                                                                  |
+   //| Multi-timeframe costs nothing here and that is the point of the  |
+   //| architecture: the engine writes M1 into a custom symbol and      |
+   //| MetaTrader derives every higher timeframe itself. An H1 chart of |
+   //| a replay is not a feature this layer implements - it is a chart. |
+   //|                                                                  |
+   //| Returns how many opened. A partial result is reported, not       |
+   //| rolled back: three charts out of four is still a usable desk,    |
+   //| and closing them again would be the tool overruling the user.    |
+   //+------------------------------------------------------------------+
+   int                OpenLayout(const ENUM_TIMEFRAMES &tfs[], const int count)
+     {
+      int opened = 0;
+      for(int i = 0; i < count; i++)
+        {
+         if(m_count + opened >= SSR_MAX_CHARTS)
+            break;                        // the ceiling, honoured quietly
+         if(!SSRIsSupportedTimeframe(tfs[i]))
+            continue;                     // W1/MN1 are not ours to reason about
+         if(OpenChart(tfs[i]) != 0)
+            opened++;
+        }
+      return opened;
+     }
+
+   //--- the ids of the charts we own, for a caller that needs to touch
+   //--- them directly - applying Blind Mode, for instance
+   int                OwnedIds(long &out[])
+     {
+      ArrayResize(out, m_owned_count);
+      for(int i = 0; i < m_owned_count; i++)
+         out[i] = m_owned[i];
+      return m_owned_count;
+     }
+
+   //+------------------------------------------------------------------+
    //| Close only charts WE opened.                                     |
    //|                                                                  |
    //| A chart the user opened is theirs. Closing it on teardown would  |

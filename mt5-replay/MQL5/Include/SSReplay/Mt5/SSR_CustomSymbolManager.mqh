@@ -74,6 +74,8 @@ private:
    string            m_origin;
    string            m_symbol;
    int               m_slot;
+   //--- Blind Mode: the replay symbol carries no instrument name
+   bool              m_anonymous;
    bool              m_created;
    bool              m_selected;
    int               m_digits;
@@ -109,13 +111,18 @@ private:
 
 public:
                      CSSRCustomSymbolManager(void)
-     : m_origin(""), m_symbol(""), m_slot(1), m_created(false), m_selected(false),
+     : m_origin(""), m_symbol(""), m_slot(1), m_anonymous(false),
+       m_created(false), m_selected(false),
        m_digits(5), m_point(0.00001), m_last_error(SSR_OK), m_last_error_text("")
      { m_stats.Init(); }
 
                     ~CSSRCustomSymbolManager(void) {}
 
    //--- identity ----------------------------------------------------
+   //--- must be set BEFORE Create: the name is fixed at creation
+   void              SetAnonymous(const bool on) { m_anonymous = on; }
+   bool              IsAnonymous(void)           { return m_anonymous; }
+
    string            Symbol(void)   { return m_symbol; }
    string            Origin(void)   { return m_origin; }
    int               Slot(void)     { return m_slot; }
@@ -135,7 +142,7 @@ public:
      {
       m_origin = origin;
       m_slot   = slot;
-      m_symbol = SSRReplaySymbolName(origin, slot);
+      m_symbol = SSRReplaySymbolNameFor(origin, slot, m_anonymous);
       m_stats.Init();
 
       if(!SSRIsNameUsable(m_symbol))

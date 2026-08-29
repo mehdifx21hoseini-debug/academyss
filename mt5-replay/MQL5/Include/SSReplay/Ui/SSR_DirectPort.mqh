@@ -72,6 +72,9 @@ public:
       out.checkpoints        = m_ctrl.Snapshots().Count();
       out.last_error       = m_ctrl.LastError();
       out.last_error_text  = m_ctrl.LastErrorText();
+      out.pause_reason     = m_ctrl.PauseReason();
+      out.streams          = 1;
+      out.skew_msc         = 0;
 
       //--- show the REPLAY symbol, not the origin. The user is looking
       //--- at a chart of the replay symbol; naming the origin here

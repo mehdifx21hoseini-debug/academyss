@@ -37,6 +37,7 @@ private:
    CSSRCustomSymbolManager m_mgr;
    CSSRSeedCache           m_cache;
    int                     m_slot;
+   bool                    m_anonymous;
    long                    m_warmup_from_msc;   // range the cache is asked about
    long                    m_warmup_to_msc;
    bool                    m_reused_seed;
@@ -53,7 +54,7 @@ private:
 
 public:
                      CSSRCustomSymbolSink(void)
-     : m_slot(1), m_warmup_from_msc(SSR_INVALID_TIME),
+     : m_slot(1), m_anonymous(false), m_warmup_from_msc(SSR_INVALID_TIME),
        m_warmup_to_msc(SSR_INVALID_TIME), m_reused_seed(false),
        m_prepared(false), m_own_symbol(true),
        m_emit_calls(0), m_emit_ticks(0), m_seed_bars(0), m_truncates(0),
@@ -70,6 +71,10 @@ public:
    virtual string    Name(void) override { return "mt5-custom-symbol"; }
 
    void              SetSlot(const int slot) { m_slot = slot; }
+   //--- Blind Mode. Set before the session opens; the symbol name
+   //--- is decided once, when the symbol is created.
+   void              SetAnonymous(const bool on)
+     { m_anonymous = on; m_mgr.SetAnonymous(on); }
    int               Slot(void)              { return m_slot; }
 
    //--- the controller tells the sink which warmup it is about to seed,
@@ -98,7 +103,7 @@ public:
       //--- Ask the cache BEFORE creating, because creating destroys the
       //--- symbol and with it the very bars we might have reused.
       m_reused_seed = false;
-      string replay_name = SSRReplaySymbolName(symbol, m_slot);
+      string replay_name = SSRReplaySymbolNameFor(symbol, m_slot, m_anonymous);
       if(m_warmup_from_msc > 0 && m_warmup_to_msc > m_warmup_from_msc)
          m_reused_seed = m_cache.CanReuse(symbol, replay_name,
                                           m_warmup_from_msc, m_warmup_to_msc);

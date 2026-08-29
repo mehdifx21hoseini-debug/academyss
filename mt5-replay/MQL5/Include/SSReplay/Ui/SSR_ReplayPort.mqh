@@ -55,6 +55,13 @@ struct SSRUiState
    ENUM_SSR_ERR       last_error;
    string             last_error_text;
 
+   //--- Phase 11. The panel shows WHY the replay stopped, because a
+   //--- tool that pauses itself and says nothing is indistinguishable
+   //--- from one that froze.
+   string             pause_reason;
+   int                streams;         // 1 for a single instrument
+   long               skew_msc;        // between streams; must be 0
+
    void               Init(void)
      {
       connected = false; symbol = ""; status = SSR_STATE_IDLE;
@@ -73,6 +80,7 @@ struct SSRUiState
       bookmarks = 0; has_saved_position = false; checkpoints = 0;
       leak_clean = true; leak_advice = "";
       last_error = SSR_OK; last_error_text = "";
+      pause_reason = ""; streams = 1; skew_msc = 0;
      }
 
    bool               IsRunning(void)  { return (status == SSR_STATE_PLAYING); }

@@ -127,6 +127,64 @@ long SSRSymbolSessionGap(const string symbol)
   }
 
 //+------------------------------------------------------------------+
+//| The SHORTEST break between two quote sessions of the week.       |
+//|                                                                  |
+//| The companion of the function above, and needed for the opposite |
+//| reason. `SSRSymbolSessionGap` returns the WIDEST gap, because it |
+//| answers "how long may the data be silent before something is     |
+//| actually wrong". This one answers "how long a silence means the  |
+//| market closed and reopened" - and for that the widest gap is     |
+//| useless, since it would only ever notice the weekend.            |
+//|                                                                  |
+//| Floored at an hour for the same reason the other one is: below   |
+//| that, a symbol declaring two adjacent sub-sessions would make    |
+//| every lunch break look like a new trading day.                   |
+//+------------------------------------------------------------------+
+long SSRSymbolSessionBreak(const string symbol)
+  {
+   long DAY  = 86400L * 1000;
+   long WEEK = 7 * DAY;
+
+   long opens[64], closes[64];
+   int  n = 0;
+
+   for(int d = 0; d < 7 && n < 64; d++)
+     {
+      ENUM_DAY_OF_WEEK day = (ENUM_DAY_OF_WEEK)d;
+      for(uint idx = 0; idx < 8 && n < 64; idx++)
+        {
+         datetime from = 0, to = 0;
+         if(!SymbolInfoSessionQuote(symbol, day, idx, from, to))
+            break;
+         opens[n]  = (long)d * DAY + (long)from * 1000;
+         closes[n] = (long)d * DAY + (long)to   * 1000;
+         n++;
+        }
+     }
+
+   if(n < 2)
+      return SSR_SESSION_GAP_MSC;
+
+   long narrowest = -1;
+   for(int i = 1; i < n; i++)
+     {
+      long gap = opens[i] - closes[i - 1];
+      if(gap <= 0)
+         continue;                       // touching sessions are one session
+      if(narrowest < 0 || gap < narrowest)
+         narrowest = gap;
+     }
+
+   long wrap = (opens[0] + WEEK) - closes[n - 1];
+   if(wrap > 0 && (narrowest < 0 || wrap < narrowest))
+      narrowest = wrap;
+
+   if(narrowest < SSR_SESSION_GAP_MSC)
+      narrowest = SSR_SESSION_GAP_MSC;
+   return narrowest;
+  }
+
+//+------------------------------------------------------------------+
 class CSSRDataValidator
   {
 private:

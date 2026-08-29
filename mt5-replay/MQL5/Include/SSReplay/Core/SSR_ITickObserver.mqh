@@ -58,6 +58,20 @@ public:
    //--- a new session; drop everything
    virtual void      OnSessionStart(const string symbol, const int digits,
                                     const double point, const long start_msc) {}
+
+   //+------------------------------------------------------------------+
+   //| Does this observer want the replay to stop here?                 |
+   //|                                                                  |
+   //| Asked after every pump. Core does not learn WHY - it receives a  |
+   //| sentence to show the user and nothing else. That is what lets    |
+   //| "pause when my stop is hit" exist without the replay engine      |
+   //| knowing that stops, or trades, or accounts exist at all.         |
+   //|                                                                  |
+   //| The observer must CONSUME its own request: this is asked once    |
+   //| per pump, and an observer that keeps answering true would pin    |
+   //| the replay in a pause the user cannot leave.                     |
+   //+------------------------------------------------------------------+
+   virtual bool      PauseRequested(string &reason) { return false; }
   };
 
 #endif // SSR_ITICK_OBSERVER_MQH

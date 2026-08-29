@@ -110,6 +110,34 @@ struct SSRReplayClock
       return now_msc;
      }
 
+   //+------------------------------------------------------------------+
+   //| Advance to an EXACT instant, forward only.                       |
+   //|                                                                  |
+   //| This is how several streams stay on one clock. Advance() scales  |
+   //| a wall delta and so accumulates its own residue per stream; two  |
+   //| streams fed the same deltas would stay together only as long as  |
+   //| nothing ever changed speed mid-pump. Told a target instead, they |
+   //| cannot drift apart at all - there is nothing to drift.           |
+   //|                                                                  |
+   //| Forward only, because going backward is a SEEK: it deletes a      |
+   //| future that observers were told about, and that has to travel     |
+   //| the rewind path rather than look like ordinary progress.          |
+   //+------------------------------------------------------------------+
+   long              AdvanceTo(const long target_msc)
+     {
+      if(!IsConfigured())
+         return now_msc;
+      long t = target_msc;
+      if(t > end_msc)
+         t = end_msc;
+      if(t <= now_msc)
+         return now_msc;               // never backward, never a no-op step
+      now_msc = t;
+      residue = 0;                     // an exact target owes no fraction
+      steps++;
+      return now_msc;
+     }
+
    //--- jump straight to a time, clamped into the timeline
    bool              SeekTo(const long target_msc)
      {

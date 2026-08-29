@@ -235,6 +235,17 @@ public:
       color  wcol = SSR_C_STOP;
       if(m_state.last_error != SSR_OK)
          warn = SSRErrName(m_state.last_error);
+      //--- WHY IT STOPPED, ahead of everything except an outright
+      //--- error. A tool that pauses itself and says nothing is
+      //--- indistinguishable from one that froze.
+      else if(m_state.pause_reason != "")
+        {
+         warn = m_state.pause_reason;
+         wcol = SSR_C_HOLD;
+        }
+      //--- and a board that has drifted must never look aligned
+      else if(m_state.skew_msc != 0)
+         warn = StringFormat("streams %I64dms apart", m_state.skew_msc);
       else if(!m_state.leak_clean)
          warn = m_state.leak_advice;
       else if(m_state.ticks_rejected > 0)

@@ -45,6 +45,31 @@ string SSRReplaySymbolName(const string origin, const int slot)
    return head + suffix;
   }
 
+//+------------------------------------------------------------------+
+//| The same thing, with the instrument's identity removed.          |
+//|                                                                  |
+//| For Blind Mode. MetaTrader prints the symbol name in the chart   |
+//| caption and there is no property that hides it, so the only way  |
+//| the name stops giving the game away is for it not to be there in |
+//| the first place.                                                 |
+//|                                                                  |
+//| It still ends in the replay suffix, so cleanup and the leak      |
+//| guard recognise it exactly as before. Anonymous to the trader,   |
+//| not to the tool.                                                 |
+//+------------------------------------------------------------------+
+string SSRAnonSymbolName(const int slot)
+  {
+   return "Chart" + SSR_SYMBOL_SUFFIX + IntegerToString(slot);
+  }
+
+//--- either naming, chosen by the caller rather than by a global
+string SSRReplaySymbolNameFor(const string origin, const int slot,
+                              const bool anonymous)
+  {
+   return (anonymous ? SSRAnonSymbolName(slot)
+                     : SSRReplaySymbolName(origin, slot));
+  }
+
 //--- is this name one of ours? used by cleanup and by the leak guard
 bool SSRIsReplaySymbol(const string name)
   {

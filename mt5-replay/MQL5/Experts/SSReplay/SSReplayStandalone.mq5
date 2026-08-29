@@ -36,13 +36,18 @@
 #include <SSReplay/Data/SSR_Mt5DataSource.mqh>
 #include <SSReplay/Mt5/SSR_CustomSymbolSink.mqh>
 #include <SSReplay/Chart/SSR_ChartManager.mqh>
-#include <SSReplay/Ui/SSR_DirectPort.mqh>
 #include <SSReplay/Ui/SSR_Panel.mqh>
 #include <SSReplay/Ui/SSR_RangeDialog.mqh>
 #include <SSReplay/Data/SSR_HistoryCatalog.mqh>
 #include <SSReplay/Trading/SSR_TradingEngine.mqh>
 #include <SSReplay/Trading/SSR_Statistics.mqh>
 #include <SSReplay/Trading/SSR_Journal.mqh>
+#include <SSReplay/Trading/SSR_AutoPause.mqh>
+#include <SSReplay/Core/SSR_MasterClock.mqh>
+#include <SSReplay/Ui/SSR_GroupPort.mqh>
+#include <SSReplay/Data/SSR_SessionWatcher.mqh>
+#include <SSReplay/Data/SSR_RandomPicker.mqh>
+#include <SSReplay/Chart/SSR_BlindMode.mqh>
 
 input string          InpSymbol     = "";                   // Symbol (empty = this chart)
 input datetime        InpStart      = 0;                    // Replay start (0 = auto)
@@ -66,14 +71,43 @@ input double          InpSwapShort  = 0.0;                  // Swap per lot per 
 input double          InpMarginLot  = 0.0;                  // Margin per lot (fallback; 0 = not modelled)
 input double          InpStopout    = 0.0;                  // Stop out level, percent (0 = off)
 
+//--- Phase 11 -------------------------------------------------------
+input string          InpAlsoSymbols = "";                   // Extra symbols, comma separated (max 3)
+input string          InpExtraTfs    = "";                   // Extra chart timeframes, e.g. "M15,H1"
+input bool            InpRandom      = false;                // Random start (and symbol, if a list is given)
+input string          InpSeed        = "";                   // Seed to repeat a random session (blank = new)
+input ENUM_SSR_BLIND  InpBlind       = SSR_BLIND_OFF;        // Blind mode
+input bool            InpPauseEntry  = false;                // Pause when an order fills
+input bool            InpPauseSL     = true;                 // Pause when a stop is hit
+input bool            InpPauseTP     = true;                 // Pause when a target is hit
+input ENUM_SSR_SESSION_MODE InpPauseSession = SSR_SESSION_OFF; // Pause on a new session
+
 CSSRMt5DataSource    g_src;
 CSSRCustomSymbolSink g_sink;
 CSSRReplayController g_ctrl;
 CSSRChartManager     g_charts;
-CSSRDirectPort       g_port;
 CSSRPanel            g_panel;
 CSSRHistoryCatalog   g_catalog;
 CSSRRangeDialog      g_dialog;
+
+//--- Phase 11. One clock over every stream; the panel talks to the
+//--- GROUP, so a transport command can never move one chart alone.
+CSSRReplayGroup      g_group;
+CSSRGroupPort        g_gport;
+CSSRBlindMode        g_blind;
+CSSRRandomPicker     g_picker;
+CSSRSessionWatcher   g_session;
+CSSRTradeAutoPause   g_autopause;
+
+//--- extra streams. Index 0 is g_src/g_sink/g_ctrl above; these are
+//--- the rest, and they exist whether or not they are used because
+//--- MQL5 has no place to put a heap of them.
+#define SSR_EXTRA_STREAMS  (SSR_MAX_STREAMS - 1)
+CSSRMt5DataSource    g_src2[SSR_EXTRA_STREAMS];
+CSSRCustomSymbolSink g_sink2[SSR_EXTRA_STREAMS];
+CSSRReplayController g_ctrl2[SSR_EXTRA_STREAMS];
+CSSRChartManager     g_charts2[SSR_EXTRA_STREAMS];
+int                  g_extra = 0;
 
 //--- The virtual account. It observes the replay stream and NOTHING
 //--- ELSE: there is no OrderSend anywhere below it, so no path exists
@@ -89,12 +123,116 @@ int   g_slow_tick    = 0;
 bool  g_ready        = false;
 
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| Parse "M15,H1" into timeframes, ignoring anything unusable.      |
+//+------------------------------------------------------------------+
+int ParseTimeframes(const string csv, ENUM_TIMEFRAMES &out[])
+  {
+   ArrayResize(out, 0);
+   if(csv == "")
+      return 0;
+   string parts[];
+   int n = StringSplit(csv, StringGetCharacter(",", 0), parts);
+   for(int i = 0; i < n; i++)
+     {
+      string t = parts[i];
+      StringTrimLeft(t); StringTrimRight(t); StringToUpper(t);
+      ENUM_TIMEFRAMES tf = PERIOD_CURRENT;
+      if(t == "M1")  tf = PERIOD_M1;   else if(t == "M5")  tf = PERIOD_M5;
+      else if(t == "M15") tf = PERIOD_M15; else if(t == "M30") tf = PERIOD_M30;
+      else if(t == "H1")  tf = PERIOD_H1;  else if(t == "H4")  tf = PERIOD_H4;
+      else if(t == "D1")  tf = PERIOD_D1;
+      else continue;
+      int k = ArraySize(out);
+      ArrayResize(out, k + 1);
+      out[k] = tf;
+     }
+   return ArraySize(out);
+  }
+
+//+------------------------------------------------------------------+
+//| Build a stream per extra symbol, over the SAME window.           |
+//|                                                                  |
+//| A stream that cannot be built is reported and skipped, not made  |
+//| fatal: three instruments out of four is still a usable desk, and |
+//| refusing to start at all because gold has a shorter history than |
+//| the euro would be the tool overruling the user.                  |
+//+------------------------------------------------------------------+
+int OpenExtraStreams(const long win_start, const long win_end,
+                     const ENUM_TIMEFRAMES &extra_tfs[], const int n_tfs)
+  {
+   if(InpAlsoSymbols == "")
+      return 0;
+
+   string want[];
+   int n = StringSplit(InpAlsoSymbols, StringGetCharacter(",", 0), want);
+   int built = 0;
+
+   for(int i = 0; i < n && built < SSR_EXTRA_STREAMS; i++)
+     {
+      string sym = want[i];
+      StringTrimLeft(sym); StringTrimRight(sym);
+      if(sym == "" || sym == g_origin)
+         continue;
+
+      if(!g_src2[built].Open(sym))
+        { PrintFormat("[host] %s skipped: no M1 history", sym); continue; }
+
+      int    digits = (int)SymbolInfoInteger(sym, SYMBOL_DIGITS);
+      double point  = SymbolInfoDouble(sym, SYMBOL_POINT);
+      if(point <= 0.0) point = MathPow(10, -digits);
+
+      //--- a slot of its own, or two streams would write into one
+      //--- custom symbol and each would see the other's prices
+      g_sink2[built].SetSlot(InpSlot + 1 + built);
+      g_sink2[built].SetAnonymous(g_blind.Anonymous());
+
+      g_ctrl2[built].SetLog(GetPointer(g_ssr_log));
+      g_ctrl2[built].SetSymbolSpec(digits, point);
+      g_ctrl2[built].SetSpreadPoints(InpSpreadPoints);
+      g_ctrl2[built].SetTicksPerBar(InpTicksPerBar);
+      g_ctrl2[built].SetWarmupBars(InpWarmupBars);
+      g_ctrl2[built].SetDataMode(SSR_DATA_BROKER);
+      g_ctrl2[built].Attach(GetPointer(g_src2[built]), GetPointer(g_sink2[built]));
+
+      if(!g_ctrl2[built].Load(sym, win_start, win_end))
+        {
+         PrintFormat("[host] %s skipped: %s", sym,
+                     g_ctrl2[built].LastErrorText());
+         g_ctrl2[built].Release();
+         continue;
+        }
+
+      g_charts2[built].Configure(g_sink2[built].ReplaySymbol(), sym);
+      g_charts2[built].OpenChart(InpChartTf);
+      if(n_tfs > 0)
+         g_charts2[built].OpenLayout(extra_tfs, n_tfs);
+
+      if(!g_group.Add(GetPointer(g_ctrl2[built])))
+        { Print("[host] group refused a stream: ", g_group.LastError()); break; }
+
+      PrintFormat("[host] stream %d: %s -> %s", built + 1, sym,
+                  g_sink2[built].ReplaySymbol());
+      built++;
+     }
+   return built;
+  }
+
+//+------------------------------------------------------------------+
 int OnInit()
   {
    string origin = (InpSymbol == "" ? _Symbol : InpSymbol);
    g_origin = origin;
    g_ssr_log.SetTag("host");
    g_ssr_log.SetLevel(SSR_LOG_INFO);
+
+   //--- BLIND MODE IS DECIDED FIRST. The replay symbol's name is fixed
+   //--- when the symbol is created, so anonymising it later is not an
+   //--- option - and the name is the one leak no chart property closes.
+   SSRBlindPolicy blind;
+   blind.Apply(InpBlind);
+   g_blind.SetPolicy(blind);
+   g_sink.SetAnonymous(blind.anonymous_symbol);
 
    if(!g_src.Open(origin))
      {
@@ -106,11 +244,48 @@ int OnInit()
    range.Init();
    g_src.RangeInto(range);
 
+   //--- RANDOM REPLAY. Decided here because it decides the window, and
+   //--- the seed is printed because a session you cannot return to is
+   //--- one you cannot learn from.
+   long random_start = SSR_INVALID_TIME;
+   if(InpRandom)
+     {
+      g_catalog.Attach(g_src.History());
+      g_picker.Attach(GetPointer(g_catalog));
+      g_picker.SetSeed(SSRSeedFromText(InpSeed));
+      g_picker.AddSymbolList(InpAlsoSymbols);
+      g_picker.AddSymbol(origin);
+
+      if(g_picker.Pick(InpWarmupBars, InpReplayBars, origin))
+        {
+         random_start = g_picker.PickedStart();
+         //--- the picker may have chosen a DIFFERENT instrument, and
+         //--- the whole session has to follow it
+         if(g_picker.PickedSymbol() != origin)
+           {
+            origin   = g_picker.PickedSymbol();
+            g_origin = origin;
+            if(!g_src.Open(origin))
+              {
+               Print("[host] random pick has no history: ", origin);
+               return INIT_FAILED;
+              }
+            range.Init();
+            g_src.RangeInto(range);
+           }
+         PrintFormat("[host] random session - %s", g_picker.Ticket());
+        }
+      else
+         Print("[host] random pick failed, using the normal window: ",
+               g_picker.LastError());
+     }
+
    //--- pick a window. Auto lands near the end of what the broker has,
    //--- leaving room for the warmup the higher timeframes need.
    long win_end   = range.last_msc;
-   long win_start = (InpStart > 0 ? SSRToMsc(InpStart)
-                                  : win_end - (long)InpReplayBars * SSR_MSC_PER_MIN);
+   long win_start = (random_start > 0 ? random_start
+                     : (InpStart > 0 ? SSRToMsc(InpStart)
+                                     : win_end - (long)InpReplayBars * SSR_MSC_PER_MIN));
    long floor_msc = range.first_msc + (long)InpWarmupBars * SSR_MSC_PER_MIN;
    if(win_start < floor_msc)
       win_start = floor_msc;
@@ -152,10 +327,26 @@ int OnInit()
    g_acct.SetMarginPerLot(InpMarginLot);
    g_acct.SetStopoutLevel(InpStopout);
 
-   //--- order matters: the account must see a tick before the
-   //--- statistics sample the equity it produces
+   //--- ORDER MATTERS, twice over. The account must see a tick before
+   //--- the statistics sample the equity it produces, and the auto
+   //--- pause must look at the account only after the account has
+   //--- acted on that same tick.
    g_ctrl.AddObserver(GetPointer(g_acct));
    g_ctrl.AddObserver(GetPointer(g_stats));
+
+   g_autopause.Attach(GetPointer(g_acct));
+   g_autopause.SetFlags(SSR_PAUSE_ON_NONE);
+   g_autopause.Enable(SSR_PAUSE_ON_ENTRY,   InpPauseEntry);
+   g_autopause.Enable(SSR_PAUSE_ON_SL,      InpPauseSL);
+   g_autopause.Enable(SSR_PAUSE_ON_TP,      InpPauseTP);
+   g_autopause.Enable(SSR_PAUSE_ON_STOPOUT, InpPauseSL);
+   g_ctrl.AddObserver(GetPointer(g_autopause));
+
+   //--- what counts as a new session is READ from the instrument, not
+   //--- assumed from the clock
+   g_session.SetMode(InpPauseSession);
+   g_session.LearnFrom(origin);
+   g_ctrl.AddObserver(GetPointer(g_session));
    g_stats.Attach(GetPointer(g_acct));
    g_journal.Attach(GetPointer(g_acct), GetPointer(g_stats));
 
@@ -168,9 +359,52 @@ int OnInit()
    string rsym = g_sink.ReplaySymbol();
    g_charts.Configure(rsym, origin);
    g_replay_chart = g_charts.OpenChart(InpChartTf);
+
+   //--- MULTI TIMEFRAME COSTS NOTHING. The engine writes M1 into a
+   //--- custom symbol and MetaTrader derives H1 from it; an extra
+   //--- chart is an extra chart, not an extra code path.
+   ENUM_TIMEFRAMES extra_tfs[];
+   int n_tfs = ParseTimeframes(InpExtraTfs, extra_tfs);
+   if(n_tfs > 0)
+      PrintFormat("[host] opened %d extra chart(s)",
+                  g_charts.OpenLayout(extra_tfs, n_tfs));
    g_charts.ScanLeaks();
 
-   g_port.Attach(GetPointer(g_ctrl), GetPointer(g_sink), GetPointer(g_charts));
+   //--- MULTI SYMBOL. Every extra instrument is a full stream of its
+   //--- own; the group is what keeps them on one clock.
+   g_group.Add(GetPointer(g_ctrl));
+   g_extra = OpenExtraStreams(win_start, win_end, extra_tfs, n_tfs);
+
+   if(!g_group.Align())
+     {
+      Print("[host] streams will not align: ", g_group.LastError());
+      return INIT_FAILED;
+     }
+
+   //--- THE PANEL TALKS TO THE GROUP, never to one stream. A transport
+   //--- command that reached only the primary chart would leave the
+   //--- rest of the board behind - synchronised right up until the
+   //--- moment the user touched it.
+   g_gport.Attach(GetPointer(g_group), GetPointer(g_sink), GetPointer(g_charts));
+
+   //--- and blind mode goes on every chart we own, remembering what
+   //--- each looked like so the user can leave the mode again
+   if(g_blind.IsOn())
+     {
+      long ids[];
+      int  n = g_charts.OwnedIds(ids);
+      for(int i = 0; i < n; i++)
+         g_blind.Apply(ids[i]);
+      for(int st = 0; st < g_extra; st++)
+        {
+         long ids2[];
+         int  n2 = g_charts2[st].OwnedIds(ids2);
+         for(int i = 0; i < n2; i++)
+            g_blind.Apply(ids2[i]);
+        }
+      Print("[host] ", g_blind.ToString());
+      Print("[host] ", g_blind.Leaks());
+     }
 
    //--- the catalogue quotes the NEXT session from what this one just
    //--- measured, so the estimate stops being a constant after one run
@@ -182,15 +416,20 @@ int OnInit()
    //--- OnChartEvent only for the chart a program is attached to, so a
    //--- panel drawn on the replay chart would render perfectly and
    //--- respond to nothing. The replay chart is opened separately.
-   g_panel.Create(ChartID(), GetPointer(g_port));
+   g_panel.Create(ChartID(), GetPointer(g_gport));
 
    //--- a position saved by a previous run lands the user where they
-   //--- stopped rather than at the start of the window
+   //--- stopped rather than at the start of the window.
+   //---
+   //--- NOT after a random pick. A random session that resumes where
+   //--- the last one stopped is not a random session, and the whole
+   //--- point was to arrive somewhere the trader does not recognise.
    SSRSnapshot saved;
-   if(g_ctrl.PeekPosition(origin, saved) &&
+   if(random_start <= 0 && g_ctrl.PeekPosition(origin, saved) &&
       saved.taken_at_msc > win_start && saved.taken_at_msc < win_end)
      {
-      if(g_ctrl.JumpTo(saved.taken_at_msc))
+      //--- through the GROUP, so every chart resumes together
+      if(g_group.JumpTo(saved.taken_at_msc))
          PrintFormat("[host] resumed at %s", SSRFormatMsc(saved.taken_at_msc));
      }
 
@@ -218,7 +457,11 @@ void OnDeinit(const int reason)
    //--- that rebuilds this EA would otherwise drop them back at the
    //--- start of the window, which is the limitation this host carries.
    if(g_ready)
+     {
       g_ctrl.SavePosition();
+      for(int i = 0; i < g_extra; i++)
+         g_ctrl2[i].SavePosition();
+     }
 
    g_dialog.Destroy();
 
@@ -239,8 +482,19 @@ void OnDeinit(const int reason)
          else
             Print("[host] journal export failed: ", g_journal.LastError());
         }
+      //--- a mode the user cannot leave is a trap: every chart goes
+      //--- back to the settings it had before we touched it
+      g_blind.RestoreAll();
+
       g_charts.CloseOwned();
       g_ctrl.Release();
+      for(int i = 0; i < g_extra; i++)
+        {
+         g_charts2[i].CloseOwned();
+         g_ctrl2[i].Release();
+        }
+      g_group.Clear();
+      g_extra = 0;
      }
    g_ready = false;
   }
@@ -262,13 +516,19 @@ void OnTimer()
    if(delta > 1000)
       delta = 1000;
 
-   if(g_ctrl.Status() == SSR_STATE_PLAYING)
-      g_ctrl.Pump(delta);
+   //--- ONE PUMP FOR THE BOARD. The group takes the wall delta and
+   //--- hands every stream an instant, so there is nothing to drift.
+   if(g_group.AnyPlaying())
+      g_group.Pump(delta);
 
    //--- chart housekeeping is cheap but not free; keep it off the hot path
    g_slow_tick++;
    if(g_slow_tick % 5 == 0)
+     {
       g_charts.Sync();
+      for(int i = 0; i < g_extra; i++)
+         g_charts2[i].Sync();
+     }
    if(g_slow_tick % 50 == 0)
      {
       g_charts.ScanLeaks();
@@ -300,8 +560,8 @@ void OnChartEvent(const int id, const long &lparam,
             //--- a confirmed range is a JUMP within the loaded session
             //--- when it fits, and otherwise needs a reload the host
             //--- cannot do without tearing the symbol down
-            if(r.start_msc >= g_ctrl.StartMsc() && r.start_msc < g_ctrl.EndMsc())
-               g_ctrl.JumpTo(r.start_msc);
+            if(r.start_msc >= g_group.StartMsc() && r.start_msc < g_group.EndMsc())
+               g_group.JumpTo(r.start_msc);
             else
                Print("[host] that range needs a fresh session - reattach with new inputs");
            }
@@ -320,8 +580,8 @@ void OnChartEvent(const int id, const long &lparam,
       SSRSessionRange r;
       r.Init();
       r.origin    = (InpSymbol == "" ? _Symbol : InpSymbol);
-      r.start_msc = g_ctrl.Now();
-      r.end_msc   = g_ctrl.EndMsc();
+      r.start_msc = g_group.Now();
+      r.end_msc   = g_group.EndMsc();
       g_dialog.Open(r);
       return;
      }
