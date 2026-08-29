@@ -24,6 +24,13 @@
 //--- engine measures its own seed and feeds the real figure back through
 //--- SetMeasuredSeedRate, so every quote after the first session is
 //--- taken from this machine rather than from this line.
+//---
+//--- FIRST REAL MEASUREMENT, terminal build 6090, 2026-08-29:
+//---   35,159 bars/sec, so 288,000 M1 bars in about 8 seconds.
+//--- The figure below is left conservative on purpose. A user told
+//--- "48 seconds" who waits 8 is pleased; one told "8" who waits 48 is
+//--- not, and this number is only ever seen before the first seed has
+//--- had a chance to replace it.
 #define SSR_SEED_BARS_PER_SEC_DEFAULT   6000.0
 //--- rough on-disk cost of one M1 bar in the custom symbol store
 #define SSR_SEED_BYTES_PER_BAR          60

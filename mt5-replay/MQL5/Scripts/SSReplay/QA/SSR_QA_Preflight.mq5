@@ -126,6 +126,43 @@ void OnStart()
    //================================================================
    Head("3. history depth - the number that decides everything");
    {
+      //+------------------------------------------------------------------+
+      //| WHAT THE TERMINAL HOLDS, AND WHAT THE SERVER WILL GIVE.          |
+      //|                                                                  |
+      //| Asking CopyRates for N bars and getting N back says nothing:     |
+      //| the ceiling was mine, not the broker's. The first version of     |
+      //| this check made exactly that mistake and reported 20,000 as a    |
+      //| finding when 20,000 was the number it had asked for.             |
+      //|                                                                  |
+      //| SeriesInfoInteger answers the real question, and SERVER_FIRSTDATE|
+      //| answers the one that matters more: whether MORE can be had.      |
+      //+------------------------------------------------------------------+
+      long local_bars = 0, local_first = 0, server_first = 0;
+      SeriesInfoInteger(sym, PERIOD_M1, SERIES_BARS_COUNT,       local_bars);
+      SeriesInfoInteger(sym, PERIOD_M1, SERIES_FIRSTDATE,        local_first);
+      SeriesInfoInteger(sym, PERIOD_M1, SERIES_SERVER_FIRSTDATE, server_first);
+
+      if(local_bars > 0)
+         PrintFormat("      terminal holds  %I64d M1 bars from %s",
+                     local_bars, TimeToString((datetime)local_first));
+      if(server_first > 0)
+        {
+         double server_days = (double)(TimeCurrent() - (datetime)server_first) / 86400.0;
+         PrintFormat("      server offers   back to %s  (%.0f calendar days)",
+                     TimeToString((datetime)server_first), server_days);
+         //--- calendar days, not trading days: an UPPER bound on what a
+         //--- 200-day D1 warmup could draw on, and said as such
+         if(server_days >= 200.0)
+            Ok("server history", StringFormat("%.0f calendar days available - "
+                                              "a 200-day D1 warmup is reachable "
+                                              "once downloaded", server_days));
+         else
+            Limit("server history",
+                  StringFormat("only %.0f calendar days on the server - "
+                               "a 200-day D1 warmup is not reachable from "
+                               "this broker", server_days));
+        }
+
       //--- ASK TWICE. The first CopyRates on a cold symbol starts a
       //--- download and returns -1; treating that as "no history" is
       //--- the mistake Phase 2 was built to stop making.
@@ -162,14 +199,19 @@ void OnStart()
          else
             Ok("M1 history", StringFormat("%d bars (%.0f days)", got, days));
 
-         //--- WHAT A WARMUP COSTS, in this broker's own bars
+         //--- WHAT A WARMUP COSTS, against what is LOADED right now.
+         //--- Not a verdict on the broker: the tool asks for more when
+         //--- it needs it, and the server line above says whether more
+         //--- exists. This one only says what is here at this moment.
          long need_d1 = 200L * 1440;
-         if(got < need_d1)
-            Limit("D1 context",
-                  StringFormat("200 daily candles need %I64d M1 bars; this "
-                               "symbol has %d", need_d1, got));
+         if(local_bars < need_d1)
+            Limit("D1 context, right now",
+                  StringFormat("200 daily candles need %I64d M1 bars; %I64d "
+                               "are loaded. The tool will pull more when it "
+                               "seeds - see the server line above",
+                               need_d1, local_bars));
          else
-            Ok("D1 context", "200 daily candles are reachable");
+            Ok("D1 context, right now", "200 daily candles are already loaded");
         }
 
       //--- tick history decides FIDELITY, and the tool degrades rather
@@ -324,8 +366,17 @@ void OnStart()
               }
            }
 
-         //--- CLEAN UP. A preflight that leaves a symbol behind is a
-         //--- preflight that fails the second time it is run.
+         //--- CLEAN UP.
+         //---
+         //--- A SELECTED SYMBOL CANNOT BE DELETED - error 5306 - and the
+         //--- first version of this script hit exactly that, because it
+         //--- selected the symbol and never let go. The product's own
+         //--- teardown had this right all along; the QA script did not.
+         //--- Same order as CSSRCustomSymbolManager::Destroy().
+         SymbolSelect(test, false);
+         Sleep(100);                    // the terminal needs a beat
+
+         ResetLastError();
          if(!CustomSymbolDelete(test))
             Limit("cleanup",
                   StringFormat("could not delete %s (error %d) - remove it "
