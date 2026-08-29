@@ -38,6 +38,8 @@
 #include <SSReplay/Chart/SSR_ChartManager.mqh>
 #include <SSReplay/Ui/SSR_DirectPort.mqh>
 #include <SSReplay/Ui/SSR_Panel.mqh>
+#include <SSReplay/Ui/SSR_RangeDialog.mqh>
+#include <SSReplay/Data/SSR_HistoryCatalog.mqh>
 
 input string          InpSymbol     = "";                   // Symbol (empty = this chart)
 input datetime        InpStart      = 0;                    // Replay start (0 = auto)
@@ -55,6 +57,8 @@ CSSRReplayController g_ctrl;
 CSSRChartManager     g_charts;
 CSSRDirectPort       g_port;
 CSSRPanel            g_panel;
+CSSRHistoryCatalog   g_catalog;
+CSSRRangeDialog      g_dialog;
 
 long  g_replay_chart = 0;
 ulong g_last_pump_us = 0;
@@ -123,11 +127,27 @@ int OnInit()
 
    g_port.Attach(GetPointer(g_ctrl), GetPointer(g_sink), GetPointer(g_charts));
 
+   //--- the catalogue quotes the NEXT session from what this one just
+   //--- measured, so the estimate stops being a constant after one run
+   g_catalog.Attach(g_src.History());
+   g_catalog.Scan(origin);
+   g_dialog.Create(ChartID(), GetPointer(g_catalog));
+
    //--- The panel MUST live on this EA's own chart. MetaTrader delivers
    //--- OnChartEvent only for the chart a program is attached to, so a
    //--- panel drawn on the replay chart would render perfectly and
    //--- respond to nothing. The replay chart is opened separately.
    g_panel.Create(ChartID(), GetPointer(g_port));
+
+   //--- a position saved by a previous run lands the user where they
+   //--- stopped rather than at the start of the window
+   SSRSnapshot saved;
+   if(g_ctrl.PeekPosition(origin, saved) &&
+      saved.taken_at_msc > win_start && saved.taken_at_msc < win_end)
+     {
+      if(g_ctrl.JumpTo(saved.taken_at_msc))
+         PrintFormat("[host] resumed at %s", SSRFormatMsc(saved.taken_at_msc));
+     }
 
    EventSetMillisecondTimer(InpPumpMs);
    g_last_pump_us = GetMicrosecondCount();
@@ -149,6 +169,14 @@ void OnDeinit(const int reason)
    //--- Tearing the replay symbol down on every one of those would
    //--- discard the whole session, so the symbol only goes when the
    //--- user actually removed the tool.
+   //--- save where the user got to, whatever the reason. A chart change
+   //--- that rebuilds this EA would otherwise drop them back at the
+   //--- start of the window, which is the limitation this host carries.
+   if(g_ready)
+      g_ctrl.SavePosition();
+
+   g_dialog.Destroy();
+
    bool user_removed = (reason == REASON_REMOVE || reason == REASON_PROGRAM ||
                         reason == REASON_CLOSE);
    if(user_removed)
@@ -184,7 +212,13 @@ void OnTimer()
    if(g_slow_tick % 5 == 0)
       g_charts.Sync();
    if(g_slow_tick % 50 == 0)
+     {
       g_charts.ScanLeaks();
+      //--- feed the measured seed rate back so the next session's cost
+      //--- quote comes from this machine rather than from a constant
+      if(g_ctrl.SeedBarsPerSec() > 0.0)
+         g_catalog.SetMeasuredSeedRate(g_ctrl.SeedBarsPerSec());
+     }
 
    g_panel.Render();
   }
@@ -196,13 +230,47 @@ void OnChartEvent(const int id, const long &lparam,
    if(!g_ready)
       return;
 
+   //--- the dialog is modal over the panel, so it looks first
+   if(g_dialog.IsOpen())
+     {
+      if(g_dialog.OnEvent(id, lparam, dparam, sparam))
+        {
+         if(g_dialog.IsConfirmed())
+           {
+            SSRSessionRange r;
+            g_dialog.RequestInto(r);
+            //--- a confirmed range is a JUMP within the loaded session
+            //--- when it fits, and otherwise needs a reload the host
+            //--- cannot do without tearing the symbol down
+            if(r.start_msc >= g_ctrl.StartMsc() && r.start_msc < g_ctrl.EndMsc())
+               g_ctrl.JumpTo(r.start_msc);
+            else
+               Print("[host] that range needs a fresh session - reattach with new inputs");
+           }
+         g_panel.Render();
+         return;
+        }
+     }
+
    if(g_panel.OnEvent(id, lparam, dparam, sparam))
       return;
 
-   //--- "Replay From Here" is deliberately absent from the standalone
-   //--- host. It means clicking a candle on the REPLAY chart, and this
-   //--- EA cannot receive that chart's events. It arrives with the
-   //--- indicator panel, which lives on the replay chart itself.
+   //--- J opens the range dialog; the panel maps the key, the host owns
+   //--- the dialog because the dialog needs the catalogue
+   if(id == CHARTEVENT_KEYDOWN && SSRKeyToCommand(lparam) == SSR_CMD_JUMP)
+     {
+      SSRSessionRange r;
+      r.Init();
+      r.origin    = (InpSymbol == "" ? _Symbol : InpSymbol);
+      r.start_msc = g_ctrl.Now();
+      r.end_msc   = g_ctrl.EndMsc();
+      g_dialog.Open(r);
+      return;
+     }
+
+   //--- "Replay From Here" still needs events from the REPLAY chart,
+   //--- which this EA cannot receive. It arrives with the indicator
+   //--- panel, which lives on that chart itself.
   }
 
 //+------------------------------------------------------------------+

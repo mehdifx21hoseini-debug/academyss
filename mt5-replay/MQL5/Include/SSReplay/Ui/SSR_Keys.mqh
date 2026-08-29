@@ -21,6 +21,11 @@ enum ENUM_SSR_CMD
    SSR_CMD_RESET,
    SSR_CMD_STEP_FWD,
    SSR_CMD_STEP_FWD_10,
+   SSR_CMD_STEP_BACK,
+   SSR_CMD_STEP_BACK_10,
+   SSR_CMD_JUMP,
+   SSR_CMD_BOOKMARK,
+   SSR_CMD_RESTART,
    SSR_CMD_SPEED_UP,
    SSR_CMD_SPEED_DOWN,
    SSR_CMD_FOLLOW,
@@ -42,6 +47,8 @@ enum ENUM_SSR_CMD
 #define SSR_VK_NUMMIN  109
 #define SSR_VK_PGUP    33
 #define SSR_VK_PGDN    34
+#define SSR_VK_J       74
+#define SSR_VK_B       66
 
 //+------------------------------------------------------------------+
 ENUM_SSR_CMD SSRKeyToCommand(const long key)
@@ -51,6 +58,12 @@ ENUM_SSR_CMD SSRKeyToCommand(const long key)
       case SSR_VK_SPACE:   return SSR_CMD_TOGGLE;
       case SSR_VK_RIGHT:   return SSR_CMD_STEP_FWD;
       case SSR_VK_PGDN:    return SSR_CMD_STEP_FWD_10;
+      //--- bound at last: Phase 5 left these dead rather than have keys
+      //--- that pretend to work, and Phase 8 is what earned them
+      case SSR_VK_LEFT:    return SSR_CMD_STEP_BACK;
+      case SSR_VK_PGUP:    return SSR_CMD_STEP_BACK_10;
+      case SSR_VK_J:       return SSR_CMD_JUMP;
+      case SSR_VK_B:       return SSR_CMD_BOOKMARK;
       case SSR_VK_R:       return SSR_CMD_RESET;
       case SSR_VK_F:       return SSR_CMD_FOLLOW;
       case SSR_VK_D:       return SSR_CMD_FIDELITY_CYCLE;
@@ -59,15 +72,13 @@ ENUM_SSR_CMD SSRKeyToCommand(const long key)
       case SSR_VK_MINUS:
       case SSR_VK_NUMMIN:  return SSR_CMD_SPEED_DOWN;
      }
-   //--- LEFT is deliberately unmapped until Phase 8 delivers a real
-   //--- rewind. Binding it to nothing is better than binding it to
-   //--- something that silently does not work.
    return SSR_CMD_NONE;
   }
 
 string SSRKeyHint(void)
   {
-   return "SPACE play  → step  PgDn x10  +/- speed  F follow  D fidelity  R reset";
+   return "SPACE play  <- -> step  PgUp/PgDn x10  J jump  B mark  "
+          "+/- speed  F follow  D fidelity  R reset";
   }
 
 #endif // SSR_KEYS_MQH

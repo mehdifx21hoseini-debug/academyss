@@ -30,6 +30,8 @@
 #include "SSR_Metrics.mqh"
 #include "SSR_PumpBudget.mqh"
 #include "SSR_FidelityPolicy.mqh"
+#include "SSR_SnapshotStore.mqh"
+#include "SSR_PositionFile.mqh"
 
 //--- The per-pump ceiling is no longer a constant. CSSRPumpBudget
 //--- derives it from measured cost per tick; this only bounds the
@@ -49,6 +51,8 @@ private:
    CSSRMetrics         m_metrics;
    CSSRPumpBudget      m_budget;
    CSSRFidelityPolicy  m_fidelity;
+   CSSRSnapshotStore   m_snaps;
+   CSSRPositionFile    m_posfile;
 
    CSSRDataSource     *m_source;      // not owned
    CSSRReplaySink     *m_sink;        // not owned
@@ -504,6 +508,7 @@ public:
       m_cursor.RewindTo(m_timeline.start_msc);
       m_guard.ResetCounters();
       m_guard.Arm(m_timeline.start_msc);
+      m_snaps.Clear();
 
       Publish();
       if(!Transition(SSR_STATE_READY))
@@ -638,6 +643,15 @@ public:
       m_metrics.RecordPump((double)(GetMicrosecondCount() - t_pump),
                            m_pump_emit_us, emitted,
                            (int)m_cursor.bar_count, m_pump_deferred);
+
+      //--- checkpoint on a replay-time interval, so a later step back
+      //--- restores state instead of reconstructing it
+      if(m_snaps.IsDue(m_clock.now_msc))
+        {
+         SSRSnapshot cp;
+         TakeSnapshot(cp, "auto");
+         m_snaps.Checkpoint(cp);
+        }
 
       if(m_clock.IsCompleted())
         {
@@ -780,6 +794,10 @@ public:
       m_cursor.RewindTo(cut);
       m_guard.ResetCounters();
       m_guard.Arm(m_timeline.start_msc);
+      //--- checkpoints describe a playback that no longer happened;
+      //--- bookmarks are the user's and belong to the session, not to
+      //--- the position within it
+      m_snaps.ClearCheckpoints();
 
       //--- warmup is history, not replay: it survives a reset
       Publish();
@@ -802,6 +820,260 @@ public:
       m_timeline.Init();
       m_cursor.Init();
      }
+
+   //+------------------------------------------------------------------+
+   //|                        NAVIGATION                                |
+   //+------------------------------------------------------------------+
+
+   //+------------------------------------------------------------------+
+   //| Jump forward in bulk.                                            |
+   //|                                                                  |
+   //| Phase 7's arithmetic showed why this is the real fast-forward:    |
+   //| even 50x replays a trading day in 29 minutes, so covering ground  |
+   //| by injecting ticks is not covering ground. Bars are written       |
+   //| straight into the sink instead - no live formation, no chart      |
+   //| broadcast per tick.                                               |
+   //|                                                                  |
+   //| The bar CONTAINING the target is excluded from the bulk write and |
+   //| emitted as ticks trimmed to the target, because writing it whole  |
+   //| would put the rest of that minute - the future - into the chart.  |
+   //+------------------------------------------------------------------+
+   int               JumpForward(const long target_msc)
+     {
+      ClearError();
+      if(m_source == NULL || m_sink == NULL)
+        {
+         SetError(SSR_ERR_NO_SOURCE, "not attached");
+         return -1;
+        }
+      //--- clamping against an unconfigured timeline would land the
+      //--- clock on nonsense rather than reporting the real problem
+      if(!m_clock.IsConfigured() || !m_timeline.IsValid())
+        {
+         SetError(SSR_ERR_INVALID_STATE, "jump before load");
+         return -1;
+        }
+
+      long target = SSRClampMsc(target_msc, m_timeline.start_msc, m_timeline.end_msc);
+      if(target <= m_clock.now_msc)
+         return 0;
+
+      CSSRBarProvider *bp = m_source.Bars();
+      if(bp == NULL)
+        {
+         SetError(SSR_ERR_NO_DATA, "source has no bar provider");
+         return -1;
+        }
+
+      //--- the guard must move BEFORE anything is read
+      m_guard.SetHorizon(target);
+
+      long lo      = m_cursor.emitted_msc + 1;
+      long bar_lo  = SSRBarOpenMsc(lo, PERIOD_M1);
+      long last_bar = SSRBarOpenMsc(target, PERIOD_M1);
+
+      int written = 0;
+
+      //--- everything strictly before the target's own bar goes in bulk
+      if(last_bar > bar_lo)
+        {
+         MqlRates bulk[];
+         int n = bp.ReadBars(m_state.symbol, bar_lo, last_bar - 1, bulk);
+         if(n < 0)
+           {
+            SetError(bp.LastError(), "bulk read failed: " + bp.LastErrorText());
+            return -1;
+           }
+         n = m_guard.FilterRates(bulk, n);
+         if(n > 0)
+           {
+            ulong t0 = GetMicrosecondCount();
+            if(!m_sink.SeedBars(bulk, n))
+              {
+               SetError(SSR_ERR_SINK_FAILED, "bulk write failed: " + m_sink.LastErrorText());
+               return -1;
+              }
+            m_metrics.RecordSeed(n, (double)(GetMicrosecondCount() - t0) / 1000.0);
+            written += n;
+            m_cursor.Advance(last_bar - 1, 0, n);
+           }
+        }
+
+      //--- and the partial bar arrives as ticks, so it forms correctly
+      m_clock.SeekTo(target);
+      long tlo, thi;
+      if(m_cursor.PendingRange(target, tlo, thi))
+         if(EmitWindow(tlo, thi) < 0)
+           {
+            Transition(SSR_STATE_ERROR);
+            Publish();
+            return -1;
+           }
+
+      m_sink.OnSeek(target);
+      Publish();
+
+      if(m_clock.IsCompleted())
+         Transition(SSR_STATE_COMPLETED);
+
+      if(m_log != NULL && m_log.IsInfo())
+         m_log.Info(StringFormat("jumped to %s (%d bars in bulk)",
+                                 SSRFormatMsc(target), written));
+      return written;
+     }
+
+   //+------------------------------------------------------------------+
+   //| Move backwards by whole M1 bars.                                 |
+   //|                                                                  |
+   //| Restores the nearest checkpoint at or before the target and then |
+   //| replays forward to it. Seeking alone would also move the chart,  |
+   //| but it RECONSTRUCTS the engine's counters from nothing rather    |
+   //| than restoring them - so a step back would zero the session's    |
+   //| statistics, and once trades exist, would leave them stranded in  |
+   //| a future that no longer happened.                                |
+   //+------------------------------------------------------------------+
+   bool              StepBackward(const int bars)
+     {
+      ClearError();
+      if(bars <= 0)
+         return true;
+      if(!m_clock.IsConfigured())
+        {
+         SetError(SSR_ERR_INVALID_STATE, "step back before load");
+         return false;
+        }
+
+      long here   = SSRBarOpenMsc(m_clock.now_msc, PERIOD_M1);
+      long target = here - (long)bars * SSR_MSC_PER_MIN;
+      if(target < m_timeline.start_msc)
+         target = m_timeline.start_msc;
+      if(target >= m_clock.now_msc)
+         return true;
+
+      SSRSnapshot cp;
+      if(m_snaps.NearestAtOrBefore(target, cp))
+        {
+         if(!RestoreSnapshot(cp))
+            return false;
+         m_snaps.NoteRestore();
+         //--- and forward from the checkpoint to exactly where asked
+         if(target > m_clock.now_msc)
+            if(JumpForward(target) < 0)
+               return false;
+        }
+      else
+        {
+         //--- no checkpoint reaches back that far: fall back to a plain
+         //--- seek. Correct on the chart, but the counters restart -
+         //--- which is precisely what checkpoints exist to prevent, so
+         //--- it is reported rather than passed off as equivalent.
+         if(m_log != NULL && m_log.IsWarn())
+            m_log.Warn("no checkpoint before " + SSRFormatMsc(target) +
+                       "; counters will restart");
+         if(!SeekTo(target))
+            return false;
+        }
+
+      //--- checkpoints describing the discarded future must go with it
+      m_snaps.DropFrom(m_clock.now_msc + 1);
+
+      if(m_state.status == SSR_STATE_COMPLETED || m_state.status == SSR_STATE_READY)
+         Transition(SSR_STATE_PAUSED);
+      Publish();
+      return true;
+     }
+
+   //--- unified entry point: the panel and the dialog both call this
+   bool              JumpTo(const long target_msc)
+     {
+      ClearError();
+      if(!m_clock.IsConfigured())
+        {
+         SetError(SSR_ERR_INVALID_STATE, "jump before load");
+         return false;
+        }
+      long target = SSRClampMsc(target_msc, m_timeline.start_msc, m_timeline.end_msc);
+
+      if(target < m_clock.now_msc)
+        {
+         long bars = (m_clock.now_msc - target) / SSR_MSC_PER_MIN + 1;
+         return StepBackward((int)MathMin(bars, 2147483000));
+        }
+      if(target == m_clock.now_msc)
+         return true;
+      return (JumpForward(target) >= 0);
+     }
+
+   //--- back to the start and ready to run again
+   bool              Restart(void)
+     {
+      //--- Reset already drops the checkpoints; the user's bookmarks
+      //--- survive, because restarting is still the same session
+      return Reset();
+     }
+
+   //--- bookmarks and saved positions ---------------------------------
+   bool              Bookmark(const string label)
+     {
+      SSRSnapshot s;
+      TakeSnapshot(s, label);
+      return m_snaps.Mark(s, label);
+     }
+
+   bool              GotoBookmark(const int index)
+     {
+      SSRSnapshot s;
+      if(!m_snaps.GetMark(index, s))
+        {
+         SetError(SSR_ERR_INVALID_ARG, "no such bookmark");
+         return false;
+        }
+      return JumpTo(s.taken_at_msc);
+     }
+
+   string            BookmarkLabel(const int i) { return m_snaps.MarkLabel(i); }
+   int               BookmarkCount(void)        { return m_snaps.Bookmarks(); }
+
+   bool              SavePosition(const string key = "")
+     {
+      SSRSnapshot s;
+      TakeSnapshot(s, "saved");
+      string k = (key == "" ? m_state.symbol : key);
+      if(!m_posfile.Save(k, s))
+        {
+         SetError(SSR_ERR_INTERNAL, m_posfile.LastError());
+         return false;
+        }
+      return true;
+     }
+
+   //--- the position on disk describes WHERE, not what is loaded; the
+   //--- caller loads the session first and then lands on it
+   bool              PeekPosition(const string key, SSRSnapshot &out)
+     { return m_posfile.Load(key, out); }
+
+   bool              ResumePosition(const string key = "")
+     {
+      SSRSnapshot s;
+      string k = (key == "" ? m_state.symbol : key);
+      if(!m_posfile.Load(k, s))
+        {
+         SetError(SSR_ERR_NO_DATA, m_posfile.LastError());
+         return false;
+        }
+      if(!m_clock.IsConfigured())
+        {
+         SetError(SSR_ERR_INVALID_STATE, "load the session before resuming into it");
+         return false;
+        }
+      return JumpTo(s.taken_at_msc);
+     }
+
+   bool              HasSavedPosition(const string key = "")
+     { return m_posfile.Exists(key == "" ? m_state.symbol : key); }
+
+   CSSRSnapshotStore *Snapshots(void) { return GetPointer(m_snaps); }
+   string            SnapshotText(void) { return m_snaps.ToString(); }
 
    //--- snapshots ---------------------------------------------------
    void              TakeSnapshot(SSRSnapshot &out, const string label = "")

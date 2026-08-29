@@ -66,7 +66,10 @@ public:
       out.pump_p95_ms     = perf.pump_p95_ms;
       out.ticks_emitted    = m_ctrl.TicksEmitted();
       out.bars_consumed    = m_ctrl.BarsConsumed();
-      out.guard_violations = m_ctrl.Violations();
+      out.guard_violations   = m_ctrl.Violations();
+      out.bookmarks          = m_ctrl.BookmarkCount();
+      out.has_saved_position = m_ctrl.HasSavedPosition();
+      out.checkpoints        = m_ctrl.Snapshots().Count();
       out.last_error       = m_ctrl.LastError();
       out.last_error_text  = m_ctrl.LastErrorText();
 
@@ -105,6 +108,24 @@ public:
 
    virtual bool      StepBars(const int bars) override
      { return (m_ctrl != NULL && m_ctrl.StepBars(bars) >= 0); }
+
+   virtual bool      StepBack(const int bars) override
+     { return (m_ctrl != NULL && m_ctrl.StepBackward(bars)); }
+
+   virtual bool      JumpTo(const long msc) override
+     { return (m_ctrl != NULL && m_ctrl.JumpTo(msc)); }
+
+   virtual bool      Restart(void) override
+     { return (m_ctrl != NULL && m_ctrl.Restart()); }
+
+   virtual bool      Bookmark(const string label) override
+     { return (m_ctrl != NULL && m_ctrl.Bookmark(label)); }
+
+   virtual bool      SavePosition(void) override
+     { return (m_ctrl != NULL && m_ctrl.SavePosition()); }
+
+   virtual bool      ResumePosition(void) override
+     { return (m_ctrl != NULL && m_ctrl.ResumePosition()); }
 
    virtual bool      SeekTo(const long msc) override
      { return (m_ctrl != NULL && m_ctrl.SeekTo(msc)); }

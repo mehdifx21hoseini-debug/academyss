@@ -47,6 +47,9 @@ struct SSRUiState
    long               bars_consumed;
    long               ticks_rejected;  // closes Phase 3 TODO T14
    long               guard_violations;
+   int                bookmarks;
+   bool               has_saved_position;
+   int                checkpoints;
    bool               leak_clean;
    string             leak_advice;
    ENUM_SSR_ERR       last_error;
@@ -67,6 +70,7 @@ struct SSRUiState
       data_mode = SSR_DATA_MEMORY;
       ticks_emitted = 0; bars_consumed = 0; ticks_rejected = 0;
       guard_violations = 0;
+      bookmarks = 0; has_saved_position = false; checkpoints = 0;
       leak_clean = true; leak_advice = "";
       last_error = SSR_OK; last_error_text = "";
      }
@@ -101,6 +105,12 @@ public:
    virtual bool      Pause(void) = 0;
    virtual bool      Reset(void) = 0;
    virtual bool      StepBars(const int bars) = 0;
+   virtual bool      StepBack(const int bars) = 0;
+   virtual bool      JumpTo(const long msc) = 0;
+   virtual bool      Restart(void) = 0;
+   virtual bool      Bookmark(const string label) { return false; }
+   virtual bool      SavePosition(void)           { return false; }
+   virtual bool      ResumePosition(void)         { return false; }
    virtual bool      SeekTo(const long msc) = 0;
    virtual bool      SetSpeedX100(const long speed) = 0;
    virtual bool      SetFidelity(const ENUM_SSR_FIDELITY f) = 0;

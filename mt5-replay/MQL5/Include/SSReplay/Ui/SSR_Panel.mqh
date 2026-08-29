@@ -180,14 +180,14 @@ public:
       //--- transport ---------------------------------------------------
       int bw = (W - 2 * SSR_PAD - 4 * 3) / 5;
       int bx = x + SSR_PAD;
+      m_w.Button("back",  bx, cy, bw, SSR_BTN_H, "|<", false, m_state.CanStep());
+      bx += bw + 3;
       m_w.Button("play",  bx, cy, bw, SSR_BTN_H, "PLAY",
                  m_state.IsRunning(), m_state.CanPlay() || m_state.IsRunning());
       bx += bw + 3;
       m_w.Button("pause", bx, cy, bw, SSR_BTN_H, "II", false, m_state.IsRunning());
       bx += bw + 3;
       m_w.Button("step",  bx, cy, bw, SSR_BTN_H, ">|", false, m_state.CanStep());
-      bx += bw + 3;
-      m_w.Button("follow", bx, cy, bw, SSR_BTN_H, "FOL");
       bx += bw + 3;
       m_w.Button("reset", bx, cy, bw, SSR_BTN_H, "RST");
       cy += SSR_BTN_H + SSR_GAP;
@@ -198,6 +198,7 @@ public:
       Text(6, "speedval", x + W - SSR_PAD - 62, cy + 4,
            SSRSpeedName(m_state.speed_x100), SSR_C_TEXT, SSR_FS_BODY, SSR_FONT_MONO);
       m_w.Button("spup", x + W - SSR_PAD - 22, cy, 22, SSR_ROW_H, "+");
+      m_w.Button("follow", x + SSR_PAD + 46, cy, 40, SSR_ROW_H, "FOL");
       cy += SSR_ROW_H + 4;
 
       //--- fidelity. Colour-coded because the user must be able to see
@@ -254,7 +255,7 @@ public:
       Text(13, "warn", x + SSR_PAD, cy, warn, wcol, SSR_FS_SMALL);
       cy += SSR_ROW_H - 4;
 
-      Text(14, "keys", x + SSR_PAD, cy, "SPACE  RIGHT  +/-  F  R",
+      Text(14, "keys", x + SSR_PAD, cy, "SPACE  <->  PgUp/Dn  J  B  +/-",
            SSR_C_TEXT_FAINT, SSR_FS_SMALL, SSR_FONT_MONO);
      }
 
@@ -284,8 +285,13 @@ public:
          case SSR_CMD_PLAY:      return m_port.Play();
          case SSR_CMD_PAUSE:     return m_port.Pause();
          case SSR_CMD_RESET:     return m_port.Reset();
-         case SSR_CMD_STEP_FWD:  return m_port.StepBars(1);
+         case SSR_CMD_STEP_FWD:    return m_port.StepBars(1);
          case SSR_CMD_STEP_FWD_10: return m_port.StepBars(10);
+         case SSR_CMD_STEP_BACK:   return m_port.StepBack(1);
+         case SSR_CMD_STEP_BACK_10: return m_port.StepBack(10);
+         case SSR_CMD_RESTART:     return m_port.Restart();
+         case SSR_CMD_BOOKMARK:
+            return m_port.Bookmark(SSRFormatMsc(m_state.now_msc));
          case SSR_CMD_FOLLOW:    return m_port.FollowCharts();
 
          case SSR_CMD_SPEED_UP:
@@ -339,6 +345,7 @@ public:
          if(what == "play")          c = SSR_CMD_PLAY;
          else if(what == "pause")    c = SSR_CMD_PAUSE;
          else if(what == "step")     c = SSR_CMD_STEP_FWD;
+         else if(what == "back")     c = SSR_CMD_STEP_BACK;
          else if(what == "reset")    c = SSR_CMD_RESET;
          else if(what == "follow")   c = SSR_CMD_FOLLOW;
          else if(what == "spup")     c = SSR_CMD_SPEED_UP;
