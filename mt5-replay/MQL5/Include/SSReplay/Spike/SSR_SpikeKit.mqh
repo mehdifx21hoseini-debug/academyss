@@ -183,6 +183,17 @@ void SSR_End(void)
 //+------------------------------------------------------------------+
 //| Custom symbol helpers                                            |
 //+------------------------------------------------------------------+
+//| Sleep is not permitted in indicators, and this header is shared  |
+//| with two indicator probes - route every wait through here.       |
+//+------------------------------------------------------------------+
+void SSR_Pause(const int ms)
+  {
+   if(MQLInfoInteger(MQL_PROGRAM_TYPE) == PROGRAM_INDICATOR)
+      return;
+   Sleep(ms);
+  }
+
+//+------------------------------------------------------------------+
 
 //--- fully remove a symbol, tolerating "not there"
 void SSR_DropSymbol(const string sym)
@@ -201,8 +212,28 @@ void SSR_DropSymbol(const string sym)
         }
       cid = ChartNext(cid);
      }
+   //--- THE ORDER AND THE PAUSE ARE BOTH LOAD-BEARING.
+   //--- MetaTrader refuses to delete a symbol that is still selected in
+   //--- Market Watch (5306) and needs a moment after being told to
+   //--- deselect one. Without the beat the delete fails, the next
+   //--- CustomSymbolCreate fails with 5304, and the spike dies on its
+   //--- first line for a reason that has nothing to do with what it
+   //--- measures. That exact chain already cost a round trip once, in
+   //--- the Preflight script.
    SymbolSelect(sym, false);
-   CustomSymbolDelete(sym);
+   SSR_Pause(200);
+
+   ResetLastError();
+   if(!CustomSymbolDelete(sym))
+     {
+      //--- one more try, with a longer beat, then say so by name
+      SSR_Pause(800);
+      ResetLastError();
+      if(!CustomSymbolDelete(sym) && SymbolInfoInteger(sym, SYMBOL_EXIST))
+         PrintFormat("[SSR] %s could not be removed (err=%d) - "
+                     "run SSR_Z_Cleanup, or remove it from Market Watch by hand",
+                     sym, GetLastError());
+     }
    ResetLastError();
   }
 
@@ -234,7 +265,12 @@ void SSR_Set247Sessions(const string sym)
 //+------------------------------------------------------------------+
 string SSR_Origin(const string requested)
   {
+   //--- A service has no chart, so Symbol() is empty there. Falling back
+   //--- to Market Watch keeps one rule for every program type instead of
+   //--- one rule with an exception nobody remembers.
    string here = Symbol();
+   if(StringLen(here) == 0 && SymbolsTotal(true) > 0)
+      here = SymbolName(0, true);
 
    if(StringLen(requested) == 0)
      {
@@ -286,17 +322,6 @@ bool SSR_MakeSymbol(const string sym, const string origin, const bool sessions_2
       return false;
      }
    return true;
-  }
-
-//+------------------------------------------------------------------+
-//| Sleep is not permitted in indicators, and this header is shared  |
-//| with two indicator probes - route every wait through here.       |
-//+------------------------------------------------------------------+
-void SSR_Pause(const int ms)
-  {
-   if(MQLInfoInteger(MQL_PROGRAM_TYPE) == PROGRAM_INDICATOR)
-      return;
-   Sleep(ms);
   }
 
 //--- wait until the terminal reports the series is built; returns ms waited, -1 on timeout

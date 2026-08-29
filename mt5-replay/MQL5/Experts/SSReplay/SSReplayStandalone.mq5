@@ -287,6 +287,18 @@ int OpenExtraStreams(const long win_start, const long win_end,
       if(sym == "" || sym == g_origin)
          continue;
 
+      //--- Two different failures used to print the same sentence. A
+      //--- name that is not at this broker at all (a typo, or a symbol
+      //--- whose real name carries a suffix) is not the same as one
+      //--- that exists but has no M1 - and "no M1 history" sent the
+      //--- reader looking in the wrong place.
+      if(!SymbolSelect(sym, true))
+        {
+         PrintFormat("[host] %s skipped: this broker has no symbol by that name "
+                     "- check Market Watch for its exact spelling", sym);
+         continue;
+        }
+
       if(!g_src2[built].Open(sym))
         { PrintFormat("[host] %s skipped: no M1 history", sym); continue; }
 

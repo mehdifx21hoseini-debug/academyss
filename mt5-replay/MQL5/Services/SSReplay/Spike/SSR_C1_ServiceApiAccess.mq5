@@ -16,10 +16,12 @@
 
 #include <SSReplay/Spike/SSR_SpikeKit.mqh>
 
-input string   InpOrigin = "US30Cash";           // Origin symbol
+input string   InpOrigin = "";                 // Origin symbol (blank = Market Watch)
 input string   InpTest   = "SSRC1";              // Test symbol
 input datetime InpStart  = D'2024.01.08 00:00';  // Start time
 input double   InpBase   = 38000.0;              // Base price
+
+string g_origin = "";   //--- resolved from InpOrigin at the top of OnStart
 
 //+------------------------------------------------------------------+
 bool Op(const string name, const bool ok, const int err, const double elapsed_us)
@@ -34,6 +36,8 @@ bool Op(const string name, const bool ok, const int err, const double elapsed_us
 void OnStart()
   {
    SSR_Begin("C1_ServiceApiAccess");
+
+   g_origin = SSR_Origin(InpOrigin);
    Print("[C1] running inside a SERVICE - no chart context expected");
    SSR_Metric("context", "chart_id", (double)ChartID(), "id",
               "a Service is expected to report 0");
@@ -46,7 +50,7 @@ void OnStart()
    SSR_DropSymbol(InpTest);
    t0 = SSR_Now();
    ResetLastError();
-   bool r = CustomSymbolCreate(InpTest, "SSReplay\\Spike", InpOrigin);
+   bool r = CustomSymbolCreate(InpTest, "SSReplay\\Spike", g_origin);
    Op("CustomSymbolCreate", r, GetLastError(), SSR_ElapsedUs(t0));
    if(!r) { SSR_End(); return; }
 
