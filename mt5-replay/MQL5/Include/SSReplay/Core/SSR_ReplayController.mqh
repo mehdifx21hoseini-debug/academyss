@@ -32,6 +32,7 @@
 #include "SSR_FidelityPolicy.mqh"
 #include "SSR_SnapshotStore.mqh"
 #include "SSR_PositionFile.mqh"
+#include "SSR_ITickObserver.mqh"
 
 //--- The per-pump ceiling is no longer a constant. CSSRPumpBudget
 //--- derives it from measured cost per tick; this only bounds the
@@ -53,6 +54,11 @@ private:
    CSSRFidelityPolicy  m_fidelity;
    CSSRSnapshotStore   m_snaps;
    CSSRPositionFile    m_posfile;
+
+   //--- whoever is watching the stream. Core knows only that they are
+   //--- observers - not that one of them keeps a trading account.
+   CSSRTickObserver   *m_obs[8];
+   int                 m_obs_count;
 
    CSSRDataSource     *m_source;      // not owned
    CSSRReplaySink     *m_sink;        // not owned
@@ -118,6 +124,29 @@ private:
       m_state.bars_consumed  = m_cursor.bar_count;
      }
 
+
+   //--- publishing. Deliberately trivial: an observer that is slow
+   //--- slows the replay, and that is the observer's problem to solve.
+   void                PublishBar(const MqlRates &bar, const bool synthetic)
+     {
+      for(int i = 0; i < m_obs_count; i++)
+         if(m_obs[i] != NULL)
+            m_obs[i].OnBarContext(bar, synthetic);
+     }
+
+   void                PublishTicks(const MqlTick &ticks[], const int count)
+     {
+      for(int i = 0; i < m_obs_count; i++)
+         if(m_obs[i] != NULL)
+            m_obs[i].OnTicks(ticks, count);
+     }
+
+   void                PublishRewind(const long msc)
+     {
+      for(int i = 0; i < m_obs_count; i++)
+         if(m_obs[i] != NULL)
+            m_obs[i].OnRewind(msc);
+     }
 
    //+------------------------------------------------------------------+
    //| Keep only ticks inside [lo, hi].                                 |
@@ -197,6 +226,8 @@ private:
                return -1;
               }
             m_pump_emit_us += (double)(GetMicrosecondCount() - t_emit_ft);
+            if(n > 0)
+               PublishTicks(m_ticks, n);
             emitted = n;
             m_cursor.Advance(hi, emitted, 0);
             return emitted;
@@ -258,6 +289,12 @@ private:
       int bars_used = 0;
       for(int i = first; i < nb; i++)
         {
+         //--- the bar reaches observers BEFORE the ticks made from it.
+         //--- With synthesised ticks the order of prices inside the bar
+         //--- is our assumption, so an observer must be able to see the
+         //--- whole range before acting on any single tick.
+         PublishBar(m_bars[i], fid != SSR_FIDELITY_FULL_TICK);
+
          int w = (fid == SSR_FIDELITY_BAR)
                  ? m_synth.SynthesizeClose(m_bars[i], m_ticks, written)
                  : m_synth.Synthesize(m_bars[i], m_ticks, written);
@@ -280,6 +317,8 @@ private:
          return -1;
         }
       m_pump_emit_us += (double)(GetMicrosecondCount() - t_emit);
+      if(written > 0)
+         PublishTicks(m_ticks, written);
 
       emitted = written;
 
@@ -312,6 +351,9 @@ public:
       ArrayResize(m_bars, 1024);
       ArrayResize(m_ticks, 8192);
       m_budget.Attach(GetPointer(m_metrics));
+      m_obs_count = 0;
+      for(int i = 0; i < 8; i++)
+         m_obs[i] = NULL;
      }
 
                     ~CSSRReplayController(void)
@@ -335,6 +377,33 @@ public:
       if(m_source != NULL)
          m_source.SetGuard(GetPointer(m_guard));
      }
+
+   //+------------------------------------------------------------------+
+   //| Register something that watches the stream.                      |
+   //|                                                                  |
+   //| Core never learns what an observer does with what it sees. That  |
+   //| is what keeps the trading engine, and later the statistics and   |
+   //| strategy layers, out of the replay core entirely.                |
+   //+------------------------------------------------------------------+
+   bool              AddObserver(CSSRTickObserver *o)
+     {
+      if(o == NULL || m_obs_count >= 8)
+         return false;
+      for(int i = 0; i < m_obs_count; i++)
+         if(m_obs[i] == o)
+            return true;
+      m_obs[m_obs_count++] = o;
+      return true;
+     }
+
+   void              ClearObservers(void)
+     {
+      for(int i = 0; i < 8; i++)
+         m_obs[i] = NULL;
+      m_obs_count = 0;
+     }
+
+   int               ObserverCount(void) { return m_obs_count; }
 
    CSSRDataSource   *Source(void) { return m_source; }
    CSSRReplaySink   *Sink(void)   { return m_sink; }
@@ -510,6 +579,10 @@ public:
       m_guard.Arm(m_timeline.start_msc);
       m_snaps.Clear();
 
+      for(int i = 0; i < m_obs_count; i++)
+         if(m_obs[i] != NULL)
+            m_obs[i].OnSessionStart(symbol, m_digits, m_point, m_timeline.start_msc);
+
       Publish();
       if(!Transition(SSR_STATE_READY))
          return false;
@@ -638,6 +711,10 @@ public:
            }
         }
 
+      for(int i = 0; i < m_obs_count; i++)
+         if(m_obs[i] != NULL)
+            m_obs[i].OnClock(m_clock.now_msc);
+
       Publish();
 
       m_metrics.RecordPump((double)(GetMicrosecondCount() - t_pump),
@@ -747,6 +824,10 @@ public:
          //--- able to cut at a coarser boundary, and the cursor must
          //--- agree with what actually survives out there.
          m_cursor.RewindTo(actual);
+
+         //--- anything holding state must drop what happened after this
+         //--- instant, or a rewind leaves trades in a deleted future
+         PublishRewind(actual);
         }
 
       m_clock.SeekTo(clamped);
@@ -792,6 +873,7 @@ public:
       m_clock.Rewind();
       m_cursor.Init();
       m_cursor.RewindTo(cut);
+      PublishRewind(cut);
       m_guard.ResetCounters();
       m_guard.Arm(m_timeline.start_msc);
       //--- checkpoints describe a playback that no longer happened;
@@ -1121,6 +1203,12 @@ public:
       //--- cursor would claim data that no longer exists out there
       if(actual < m_cursor.emitted_msc)
          m_cursor.RewindTo(actual);
+
+      //--- and anything holding its own state must be told too. Without
+      //--- this a rewind through a checkpoint - the normal path - left
+      //--- the trading account holding positions opened in a future the
+      //--- chart had just deleted.
+      PublishRewind(actual);
 
       m_guard.Arm(m_clock.now_msc);
       m_sink.OnSeek(m_clock.now_msc);
