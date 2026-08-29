@@ -75,6 +75,11 @@ public:
       out.pause_reason     = m_ctrl.PauseReason();
       out.streams          = 1;
       out.skew_msc         = 0;
+      //--- this port has no account and no blind mode, and says so
+      //--- rather than leaving the panel to guess from zeros
+      out.clock_text       = (m_ctrl.Now() > 0 ? SSRFormatMsc(m_ctrl.Now()) : "--");
+      out.blind            = false;
+      out.can_trade        = false;
 
       //--- show the REPLAY symbol, not the origin. The user is looking
       //--- at a chart of the replay symbol; naming the origin here

@@ -99,6 +99,13 @@
 #define SSR_CMD_BUY            7    // a1 = volume, a2 = sl, a3 = tp
 #define SSR_CMD_SELL           8    // a1 = volume, a2 = sl, a3 = tp
 #define SSR_CMD_CLOSE_ALL      9
+//--- a1 = RISK PERCENT, not a volume. a2 = stop. a3 = target.
+//--- Sized by the replay's own risk engine, so a product integrating
+//--- here cannot arrive at a different lot size than the panel would
+//--- for the same risk - which is the kind of disagreement nobody
+//--- notices until the results are compared.
+#define SSR_CMD_BUY_RISK      10
+#define SSR_CMD_SELL_RISK     11
 
 //--- Result codes. FROZEN NUMBERS.
 #define SSR_RC_OK              0

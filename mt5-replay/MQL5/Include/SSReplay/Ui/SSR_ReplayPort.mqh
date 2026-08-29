@@ -62,6 +62,26 @@ struct SSRUiState
    int                streams;         // 1 for a single instrument
    long               skew_msc;        // between streams; must be 0
 
+   //--- Phase 15. THE PANEL NEVER FORMATS THE CLOCK ITSELF any more.
+   //--- Blind Mode has to reach the text, and a panel deciding what
+   //--- may be shown would be a second place that has to know about
+   //--- blind mode - and the one that gets forgotten.
+   string             clock_text;      // masked already, if blind
+   bool               blind;           // so the user can see they are
+
+   //--- the virtual account, for the trade row
+   double             balance;
+   double             equity;
+   double             floating;
+   int                open_positions;
+   double             risk_percent;    // what the trade buttons will risk
+   double             stop_points;     // and the stop they size against
+   string             trade_symbol;    // which instrument they act on
+   bool               can_trade;
+
+   //--- one line per strategy, already formatted. Empty when none.
+   string             strategy_text;
+
    void               Init(void)
      {
       connected = false; symbol = ""; status = SSR_STATE_IDLE;
@@ -81,6 +101,11 @@ struct SSRUiState
       leak_clean = true; leak_advice = "";
       last_error = SSR_OK; last_error_text = "";
       pause_reason = ""; streams = 1; skew_msc = 0;
+      clock_text = "--"; blind = false;
+      balance = 0.0; equity = 0.0; floating = 0.0;
+      open_positions = 0; risk_percent = 0.0; stop_points = 0.0;
+      trade_symbol = ""; can_trade = false;
+      strategy_text = "";
      }
 
    bool               IsRunning(void)  { return (status == SSR_STATE_PLAYING); }
@@ -126,6 +151,38 @@ public:
    //--- chart-side verbs the panel offers but does not implement
    virtual bool      FollowCharts(void)  { return false; }
    virtual bool      HideOriginSymbol(void) { return false; }
+
+   //+------------------------------------------------------------------+
+   //| TRADING, added in Phase 15.                                      |
+   //|                                                                  |
+   //| Every one defaults to refusing. A port that cannot trade says so |
+   //| by inheriting these, and the panel greys the buttons out from    |
+   //| can_trade rather than from knowing which port it is talking to.  |
+   //|                                                                  |
+   //| Nothing here reaches a broker. It cannot: the only implementation|
+   //| routes into the virtual account, and there is no OrderSend below |
+   //| any of it.                                                       |
+   //+------------------------------------------------------------------+
+   virtual bool      Buy(void)                          { return false; }
+   virtual bool      Sell(void)                         { return false; }
+   virtual bool      CloseAll(void)                     { return false; }
+   virtual bool      BreakEvenAll(void)                 { return false; }
+   virtual bool      SetRiskPercent(const double pct)   { return false; }
+   virtual bool      SetStopPoints(const double pts)    { return false; }
+   virtual string    TradeError(void)                   { return ""; }
+
+   //+------------------------------------------------------------------+
+   //| SESSIONS, added in Phase 15.                                     |
+   //|                                                                  |
+   //| Listing is separate from loading on purpose: the user picks from |
+   //| what exists rather than typing a name and finding out.           |
+   //+------------------------------------------------------------------+
+   virtual int       SessionCount(void)                 { return 0; }
+   virtual string    SessionName(const int i)           { return ""; }
+   virtual string    SessionSummary(const int i)        { return ""; }
+   virtual bool      SaveSession(const string name)     { return false; }
+   virtual bool      LoadSession(const string name)     { return false; }
+   virtual string    SessionError(void)                 { return ""; }
   };
 
 #endif // SSR_REPLAY_PORT_MQH

@@ -352,7 +352,7 @@ void OnStart()
       //--- there is no verb that names a time to READ. Every command
       //--- either moves the replay or trades; none returns data.
       int read_verbs = 0;
-      for(int cmd = 0; cmd <= 9; cmd++)
+      for(int cmd = 0; cmd <= 11; cmd++)
         {
          //--- the full set, enumerated: play, pause, step, step back,
          //--- speed, jump, buy, sell, close all - and none of them
@@ -361,11 +361,12 @@ void OnStart()
             cmd == SSR_CMD_STEP || cmd == SSR_CMD_STEP_BACK ||
             cmd == SSR_CMD_SPEED || cmd == SSR_CMD_JUMP ||
             cmd == SSR_CMD_BUY || cmd == SSR_CMD_SELL ||
-            cmd == SSR_CMD_CLOSE_ALL || cmd == SSR_CMD_NONE)
+            cmd == SSR_CMD_CLOSE_ALL || cmd == SSR_CMD_NONE ||
+            cmd == SSR_CMD_BUY_RISK || cmd == SSR_CMD_SELL_RISK)
             continue;
          read_verbs++;
         }
-      CheckEq("the command set is exactly the ten documented ones",
+      CheckEq("the command set is exactly the documented ones",
               0, read_verbs);
 
       //--- the published state carries the clock and NOTHING beyond it

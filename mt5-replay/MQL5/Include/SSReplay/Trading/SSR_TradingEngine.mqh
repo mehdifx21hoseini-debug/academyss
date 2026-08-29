@@ -811,6 +811,13 @@ public:
       return true;
      }
 
+   //--- which instrument this account is priced against. The panel
+   //--- shows it, because on a multi-symbol board the account follows
+   //--- the primary stream only and that had better be visible.
+   string            Symbol(void) { return m_symbol; }
+   int               Digits(void) { return m_digits; }
+   double            Point(void)  { return m_point; }
+
    double            Bid(void) { return m_bid; }
    double            Ask(void) { return m_ask; }
 

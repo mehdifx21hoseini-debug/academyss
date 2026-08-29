@@ -176,7 +176,9 @@ public:
       //--- one is a courtesy that gives a clear message; that one is
       //--- the rule, because a client is not trusted to enforce it.
       int need = SSR_PERM_CONTROL;
-      if(cmd == SSR_CMD_BUY || cmd == SSR_CMD_SELL || cmd == SSR_CMD_CLOSE_ALL)
+      if(cmd == SSR_CMD_BUY || cmd == SSR_CMD_SELL ||
+         cmd == SSR_CMD_CLOSE_ALL ||
+         cmd == SSR_CMD_BUY_RISK || cmd == SSR_CMD_SELL_RISK)
          need = SSR_PERM_TRADE;
       if(!m_state.Can(need))
         {
@@ -233,6 +235,15 @@ public:
                           const double tp = 0.0)
      { return Send(SSR_CMD_SELL, volume, sl, tp); }
    bool              CloseAll(void)          { return Send(SSR_CMD_CLOSE_ALL); }
+
+   //--- sized from RISK by the replay's own engine. The stop is
+   //--- required, because without one there is no risk to size from.
+   bool              BuyRisk(const double risk_percent, const double sl,
+                             const double tp = 0.0)
+     { return Send(SSR_CMD_BUY_RISK, risk_percent, sl, tp); }
+   bool              SellRisk(const double risk_percent, const double sl,
+                              const double tp = 0.0)
+     { return Send(SSR_CMD_SELL_RISK, risk_percent, sl, tp); }
 
    string            ToString(void)
      {

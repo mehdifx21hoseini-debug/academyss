@@ -23,6 +23,11 @@
 #include "../Core/SSR_MasterClock.mqh"
 #include "../Mt5/SSR_CustomSymbolSink.mqh"
 #include "../Chart/SSR_ChartManager.mqh"
+#include "../Chart/SSR_BlindMode.mqh"
+#include "../Trading/SSR_TradingEngine.mqh"
+#include "../Strategy/SSR_StrategyHost.mqh"
+#include "../Trading/SSR_Statistics.mqh"
+#include "../Session/SSR_SessionManager.mqh"
 
 //+------------------------------------------------------------------+
 class CSSRGroupPort : public CSSRReplayPort
@@ -32,12 +37,30 @@ private:
    CSSRCustomSymbolSink *m_sink;     // the PRIMARY stream's sink; may be NULL
    CSSRChartManager     *m_charts;   // the primary stream's charts; may be NULL
 
+   //--- Phase 15. All optional: a port with none of these is exactly
+   //--- the read-only port it was before, and says so through the
+   //--- state rather than by being a different class.
+   CSSRBlindMode        *m_blind;
+   CSSRTradingEngine    *m_acct;
+   CSSRStatsEngine      *m_stats;
+   CSSRStrategyHost     *m_strategies;
+   CSSRSessionManager   *m_sessions;
+
+   double                m_risk_percent;
+   double                m_stop_points;   // no default: there is no safe one
+   string                m_trade_error;
+   string                m_session_error;
+   string                m_names[];     // the session list, as last read
+
    CSSRReplayController *Primary(void)
      { return (m_group != NULL ? m_group.At(0) : NULL); }
 
 public:
                      CSSRGroupPort(void)
-     : m_group(NULL), m_sink(NULL), m_charts(NULL) {}
+     : m_group(NULL), m_sink(NULL), m_charts(NULL), m_blind(NULL),
+       m_acct(NULL), m_stats(NULL), m_strategies(NULL), m_sessions(NULL),
+       m_risk_percent(0.5), m_stop_points(0.0),
+       m_trade_error(""), m_session_error("") {}
 
    void              Attach(CSSRReplayGroup *g,
                             CSSRCustomSymbolSink *sink = NULL,
@@ -47,6 +70,14 @@ public:
       m_sink   = sink;
       m_charts = charts;
      }
+
+   //--- everything the panel may show or drive, handed over one by
+   //--- one so a host can wire only what it actually has
+   void              AttachBlind(CSSRBlindMode *b)      { m_blind = b; }
+   void              AttachAccount(CSSRTradingEngine *a){ m_acct = a; }
+   void              AttachStats(CSSRStatsEngine *s)    { m_stats = s; }
+   void              AttachStrategies(CSSRStrategyHost *h) { m_strategies = h; }
+   void              AttachSessions(CSSRSessionManager *m) { m_sessions = m; }
 
    virtual string    Name(void) override { return "group"; }
    virtual bool      IsConnected(void) override
@@ -122,7 +153,66 @@ public:
          out.leak_clean  = m_charts.LeaksClean();
          out.leak_advice = m_charts.LeakAdvice();
         }
+
+      //+------------------------------------------------------------------+
+      //| BLIND MODE REACHES THE TEXT HERE, not in the panel.              |
+      //|                                                                  |
+      //| A panel that formatted the clock itself would be a second place  |
+      //| that has to know about blind mode - and the one that gets        |
+      //| forgotten, leaving the date the mode exists to hide printed in   |
+      //| the corner of the screen.                                        |
+      //+------------------------------------------------------------------+
+      if(m_blind != NULL && m_blind.IsOn())
+        {
+         out.blind      = true;
+         out.clock_text = m_blind.MaskTime(out.now_msc, out.start_msc);
+         out.symbol     = m_blind.MaskSymbol(out.symbol);
+        }
+      else
+        {
+         out.blind      = false;
+         out.clock_text = (out.now_msc > 0 ? SSRFormatMsc(out.now_msc) : "--");
+        }
+
+      //--- the account, for the trade row
+      if(m_acct != NULL)
+        {
+         out.balance        = m_acct.Balance();
+         out.equity         = m_acct.Equity();
+         out.floating       = m_acct.FloatingPL();
+         out.open_positions = m_acct.OpenCount();
+         out.risk_percent   = m_risk_percent;
+         out.stop_points    = m_stop_points;
+         out.can_trade      = (m_acct.Bid() > 0.0);
+         //--- WHICH INSTRUMENT the buttons act on. On a multi-symbol
+         //--- board the account follows the primary stream only, and
+         //--- saying so is the difference between a limitation and a
+         //--- trap.
+         out.trade_symbol   = (c != NULL ? c.Symbol() : "");
+        }
+
+      if(m_strategies != NULL && m_strategies.Count() > 0)
+         out.strategy_text = StrategyLine();
       return true;
+     }
+
+   //+------------------------------------------------------------------+
+   //| One line the panel has room for: the busiest strategy's state,   |
+   //| or a count when there are several.                               |
+   //+------------------------------------------------------------------+
+   string            StrategyLine(void)
+     {
+      if(m_strategies == NULL)
+         return "";
+      int n = m_strategies.Count();
+      if(n == 0)
+         return "";
+      if(n == 1)
+        {
+         CSSRStrategy *s = m_strategies.At(0);
+         return (s == NULL ? "" : s.Name() + ": " + s.Status());
+        }
+      return StringFormat("%d strategies running", n);
      }
 
    //--- verbs, every one of them fanned out ---------------------------
@@ -219,6 +309,171 @@ public:
 
    virtual bool      HideOriginSymbol(void) override
      { return (m_charts != NULL && m_charts.Leak().HideOrigin()); }
+
+   //================================================================
+   //  TRADING
+   //
+   //  Sized from risk, never from a lot count typed into a panel. A
+   //  trader practising position sizing is practising the thing that
+   //  decides whether the rest of it matters, and a panel offering
+   //  "1.00 lots" teaches the opposite lesson.
+   //
+   //  THE STOP IS THE USER'S. These buttons place a market order with
+   //  no stop, because a panel that invented one would be inventing
+   //  the risk figure too. Risk sizing needs a stop, so without one
+   //  the order is refused and says why.
+   //================================================================
+   virtual bool      SetRiskPercent(const double pct) override
+     {
+      if(pct <= 0.0 || pct > 100.0)
+        { m_trade_error = "risk must be between 0 and 100 percent"; return false; }
+      m_risk_percent = pct;
+      return true;
+     }
+
+   //--- the stop distance the size is computed from. Zero means the
+   //--- buttons refuse, which is the correct behaviour and not a bug.
+   virtual bool      SetStopPoints(const double pts) override
+     {
+      if(pts < 0.0)
+        { m_trade_error = "a stop distance cannot be negative"; return false; }
+      m_stop_points = pts;
+      return true;
+     }
+
+   virtual bool      Buy(void) override  { return Market(SSR_ORDER_BUY); }
+   virtual bool      Sell(void) override { return Market(SSR_ORDER_SELL); }
+
+   virtual bool      CloseAll(void) override
+     {
+      m_trade_error = "";
+      if(m_acct == NULL)
+        { m_trade_error = "no account"; return false; }
+      return (m_acct.CloseAll() > 0);
+     }
+
+   //--- move every open stop to its entry. One press, because the
+   //--- moment a trader wants this they want it now.
+   virtual bool      BreakEvenAll(void) override
+     {
+      m_trade_error = "";
+      if(m_acct == NULL)
+        { m_trade_error = "no account"; return false; }
+      int moved = 0, total = m_acct.Total();
+      for(int i = 0; i < total; i++)
+        {
+         SSRVirtualPosition p;
+         if(m_acct.At(i, p) && p.IsOpen() && m_acct.BreakEven(p.ticket))
+            moved++;
+        }
+      if(moved == 0)
+         m_trade_error = "nothing open to move";
+      return (moved > 0);
+     }
+
+   virtual string    TradeError(void) override { return m_trade_error; }
+
+   //================================================================
+   //  SESSIONS
+   //================================================================
+   virtual int       SessionCount(void) override
+     {
+      if(m_sessions == NULL)
+         return 0;
+      return m_sessions.List(m_names);
+     }
+
+   virtual string    SessionName(const int i) override
+     { return (i >= 0 && i < ArraySize(m_names) ? m_names[i] : ""); }
+
+   virtual string    SessionSummary(const int i) override
+     {
+      if(m_sessions == NULL || i < 0 || i >= ArraySize(m_names))
+         return "";
+      string summary = "";
+      if(!m_sessions.Peek(m_names[i], summary))
+         return m_names[i] + "  (unreadable: " + m_sessions.LastError() + ")";
+      return summary;
+     }
+
+   virtual bool      SaveSession(const string name) override
+     {
+      m_session_error = "";
+      if(m_sessions == NULL)
+        { m_session_error = "sessions are not available"; return false; }
+      if(name == "")
+        { m_session_error = "a session needs a name"; return false; }
+      SSRSessionSettings set;
+      set.Init();
+      //--- the panel knows none of the settings; the host owns them,
+      //--- so what is written here is the transport-level state only.
+      //--- A host that wants the full set calls the manager directly.
+      set.slot = (m_sink != NULL ? m_sink.Slot() : 1);
+      if(!m_sessions.Save(name, set))
+        { m_session_error = m_sessions.LastError(); return false; }
+      return true;
+     }
+
+   virtual bool      LoadSession(const string name) override
+     {
+      m_session_error = "";
+      if(m_sessions == NULL)
+        { m_session_error = "sessions are not available"; return false; }
+      if(!m_sessions.Restore(name))
+        { m_session_error = m_sessions.LastError(); return false; }
+      //--- warnings are NOT swallowed by a successful load: the point
+      //--- of Phase 12 was that a resume against changed history says so
+      if(m_sessions.HadWarnings())
+         m_session_error = m_sessions.Warnings();
+      return true;
+     }
+
+   virtual string    SessionError(void) override { return m_session_error; }
+
+private:
+   //+------------------------------------------------------------------+
+   //| A market order, SIZED FROM RISK - and refused without a stop.    |
+   //|                                                                  |
+   //| This is a product decision, not a limitation. Without a stop     |
+   //| there is no risk figure, so there is no lot size either, and     |
+   //| every alternative is worse:                                      |
+   //|                                                                  |
+   //|   - a default lot size teaches position sizing does not matter   |
+   //|   - a default stop makes up the number the trade is judged on    |
+   //|   - trading anyway and calling it "1% risk" is simply false      |
+   //|                                                                  |
+   //| A tool for learning to trade should not let its own panel be     |
+   //| the one place where a trade is taken without knowing the risk.   |
+   //+------------------------------------------------------------------+
+   bool              Market(const ENUM_SSR_ORDER type)
+     {
+      m_trade_error = "";
+      if(m_acct == NULL)
+        { m_trade_error = "no account"; return false; }
+      if(m_acct.Bid() <= 0.0)
+        { m_trade_error = "no price yet - let the replay run first"; return false; }
+      if(m_stop_points <= 0.0)
+        {
+         m_trade_error = "set a stop distance first - the size comes from "
+                         "the risk, and the risk needs a stop";
+         return false;
+        }
+
+      //--- the ENGINE's point, not a fresh symbol lookup. Asking
+      //--- MetaTrader again could answer for a symbol the account is
+      //--- not actually priced against, and the stop would be off by
+      //--- a factor of ten with nothing to show for it.
+      bool   is_long = (type == SSR_ORDER_BUY);
+      double dist    = m_stop_points * m_acct.Point();
+      double sl   = (is_long ? m_acct.Bid() - dist : m_acct.Ask() + dist);
+      if(sl <= 0.0)
+        { m_trade_error = "that stop falls below zero"; return false; }
+
+      long t = m_acct.OpenWithRisk(type, m_risk_percent, sl, 0.0, "");
+      if(t <= 0)
+        { m_trade_error = m_acct.LastError(); return false; }
+      return true;
+     }
   };
 
 #endif // SSR_GROUP_PORT_MQH

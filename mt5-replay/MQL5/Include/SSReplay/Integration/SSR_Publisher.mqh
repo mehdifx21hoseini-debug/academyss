@@ -260,7 +260,8 @@ private:
       //--- client that can be trusted to check its own permissions
       //--- does not need them.
       bool trading = (cmd == SSR_CMD_BUY || cmd == SSR_CMD_SELL ||
-                      cmd == SSR_CMD_CLOSE_ALL);
+                      cmd == SSR_CMD_CLOSE_ALL ||
+                      cmd == SSR_CMD_BUY_RISK || cmd == SSR_CMD_SELL_RISK);
       int  need    = (trading ? SSR_PERM_TRADE : SSR_PERM_CONTROL);
       if((m_permissions & need) == 0)
          return SSR_RC_NOT_PERMITTED;
@@ -315,6 +316,26 @@ private:
                return SSR_RC_REFUSED;
             m_acct.CloseAll();
             return SSR_RC_OK;
+           }
+
+         //--- SIZED BY THE REPLAY'S OWN RISK ENGINE. A product that
+         //--- computed its own lot size would eventually disagree with
+         //--- the panel for the same risk, and the disagreement would
+         //--- only show up when two sets of results were compared.
+         case SSR_CMD_BUY_RISK:
+           {
+            if(m_acct == NULL || a2 <= 0.0)
+               return SSR_RC_REFUSED;   // no stop, no risk, no size
+            return (m_acct.OpenWithRisk(SSR_ORDER_BUY, a1, a2, a3, "external") > 0
+                    ? SSR_RC_OK : SSR_RC_REFUSED);
+           }
+
+         case SSR_CMD_SELL_RISK:
+           {
+            if(m_acct == NULL || a2 <= 0.0)
+               return SSR_RC_REFUSED;
+            return (m_acct.OpenWithRisk(SSR_ORDER_SELL, a1, a2, a3, "external") > 0
+                    ? SSR_RC_OK : SSR_RC_REFUSED);
            }
         }
       return SSR_RC_UNKNOWN_CMD;

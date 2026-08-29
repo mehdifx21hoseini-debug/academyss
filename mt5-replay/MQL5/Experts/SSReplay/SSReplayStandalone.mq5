@@ -53,6 +53,7 @@
 #include <SSReplay/Strategy/SSR_StrategyHost.mqh>
 #include <SSReplay/Strategy/SSR_RefStrategy.mqh>
 #include <SSReplay/Integration/SSR_Publisher.mqh>
+#include <SSReplay/Ui/SSR_SessionDialog.mqh>
 
 input string          InpSymbol     = "";                   // Symbol (empty = this chart)
 input datetime        InpStart      = 0;                    // Replay start (0 = auto)
@@ -105,6 +106,9 @@ input bool            InpPublish     = true;                 // Publish session 
 input bool            InpAllowControl = false;               // Let them drive the replay
 input bool            InpAllowTrade  = false;                // Let them place VIRTUAL trades
 
+//--- Phase 15 -------------------------------------------------------
+input double          InpRiskPercent = 0.5;                  // Risk per trade from the panel, percent
+
 CSSRMt5DataSource    g_src;
 CSSRCustomSymbolSink g_sink;
 CSSRReplayController g_ctrl;
@@ -133,6 +137,10 @@ CSSRRefBreakout      g_ref_strategy;
 //--- Phase 14. One-directional: this product publishes a contract
 //--- and depends on nobody. There is no SSProX header here.
 CSSRPublisher        g_publisher;
+//--- one publisher per stream, so a client watching the second
+//--- instrument is not told about the first (closes T60)
+CSSRPublisher        g_publisher2[SSR_EXTRA_STREAMS];
+CSSRSessionDialog    g_session_dlg;
 
 //--- extra streams. Index 0 is g_src/g_sink/g_ctrl above; these are
 //--- the rest, and they exist whether or not they are used because
@@ -242,13 +250,29 @@ void CollectSettings(SSRSessionSettings &out)
 //| the euro would be the tool overruling the user.                  |
 //+------------------------------------------------------------------+
 int OpenExtraStreams(const long win_start, const long win_end,
-                     const ENUM_TIMEFRAMES &extra_tfs[], const int n_tfs)
+                     const ENUM_TIMEFRAMES &extra_tfs[], const int n_tfs,
+                     const string &from_session[], const int n_session)
   {
-   if(InpAlsoSymbols == "")
-      return 0;
-
    string want[];
-   int n = StringSplit(InpAlsoSymbols, StringGetCharacter(",", 0), want);
+   int    n = 0;
+
+   //--- a session being resumed names its own instruments. Its first
+   //--- entry is the primary stream, which is already open, so it is
+   //--- skipped by the same test that skips a duplicate in the inputs.
+   if(n_session > 0)
+     {
+      ArrayResize(want, n_session);
+      for(int i = 0; i < n_session; i++)
+         want[i] = from_session[i];
+      n = n_session;
+     }
+   else
+     {
+      if(InpAlsoSymbols == "")
+         return 0;
+      n = StringSplit(InpAlsoSymbols, StringGetCharacter(",", 0), want);
+     }
+
    int built = 0;
 
    for(int i = 0; i < n && built < SSR_EXTRA_STREAMS; i++)
@@ -363,6 +387,20 @@ int OnInit()
                g_picker.LastError());
      }
 
+   //--- A RESUMED SESSION USES THE WINDOW IT WAS SAVED WITH. Loading
+   //--- the account into a different window would put every trade
+   //--- outside it, and the engine would refuse the restore for a
+   //--- reason that looks like a bug in the file.
+   bool resuming = (InpSession != "" && InpResume &&
+                    g_session_mgr.Exists(InpSession));
+   long saved_start = SSR_INVALID_TIME, saved_end = SSR_INVALID_TIME;
+   if(resuming && !g_session_mgr.ReadWindow(InpSession, 0, saved_start, saved_end))
+     {
+      Print("[host] session file unreadable, starting fresh: ",
+            g_session_mgr.LastError());
+      resuming = false;
+     }
+
    //--- pick a window. Auto lands near the end of what the broker has,
    //--- leaving room for the warmup the higher timeframes need.
    long win_end   = range.last_msc;
@@ -372,6 +410,14 @@ int OnInit()
    long floor_msc = range.first_msc + (long)InpWarmupBars * SSR_MSC_PER_MIN;
    if(win_start < floor_msc)
       win_start = floor_msc;
+
+   if(resuming)
+     {
+      win_start = saved_start;
+      win_end   = saved_end;
+      PrintFormat("[host] resuming \"%s\": %s .. %s", InpSession,
+                  SSRFormatMsc(win_start), SSRFormatMsc(win_end));
+     }
    if(win_start >= win_end)
      {
       PrintFormat("[host] not enough history: %s .. %s",
@@ -472,8 +518,20 @@ int OnInit()
 
    //--- MULTI SYMBOL. Every extra instrument is a full stream of its
    //--- own; the group is what keeps them on one clock.
+   //---
+   //--- WHEN A SESSION IS BEING RESUMED, THE FILE DECIDES which
+   //--- symbols those are - not the inputs. A saved three-instrument
+   //--- board that came back with whatever InpAlsoSymbols happened to
+   //--- say would be a different board wearing the same name, and the
+   //--- account restored into it would hold trades on charts that are
+   //--- no longer there.
    g_group.Add(GetPointer(g_ctrl));
-   g_extra = OpenExtraStreams(win_start, win_end, extra_tfs, n_tfs);
+   string want_syms[];
+   int    n_want = 0;
+   if(resuming)
+      n_want = g_session_mgr.ReadSymbols(InpSession, want_syms);
+   g_extra = OpenExtraStreams(win_start, win_end, extra_tfs, n_tfs,
+                              want_syms, n_want);
 
    if(!g_group.Align())
      {
@@ -486,6 +544,14 @@ int OnInit()
    //--- rest of the board behind - synchronised right up until the
    //--- moment the user touched it.
    g_gport.Attach(GetPointer(g_group), GetPointer(g_sink), GetPointer(g_charts));
+   //--- and everything the panel may SHOW or DRIVE, handed over one by
+   //--- one so the port offers only what this host actually has
+   g_gport.AttachBlind(GetPointer(g_blind));
+   g_gport.AttachAccount(GetPointer(g_acct));
+   g_gport.AttachStats(GetPointer(g_stats));
+   g_gport.AttachStrategies(GetPointer(g_strategies));
+   g_gport.AttachSessions(GetPointer(g_session_mgr));
+   g_gport.SetRiskPercent(InpRiskPercent);
 
    //--- other products may now see this session. The symbol they are
    //--- told about is the REPLAY symbol, because that is the one a
@@ -498,6 +564,20 @@ int OnInit()
       g_publisher.SetPermissions(InpAllowControl, InpAllowTrade);
       if(g_publisher.Begin())
          Print("[host] ", g_publisher.ToString());
+
+      //--- ONE PUBLISHER PER STREAM. A product watching the second
+      //--- instrument would otherwise be told about the first, and
+      //--- would show a clock that belongs to a chart it is not on.
+      //--- The account travels with the primary only, because that is
+      //--- where it actually is.
+      for(int i = 0; i < g_extra; i++)
+        {
+         g_publisher2[i].Attach(GetPointer(g_group), NULL);
+         g_publisher2[i].SetSlot(InpSlot + 1 + i);
+         g_publisher2[i].SetSymbol(g_sink2[i].ReplaySymbol());
+         g_publisher2[i].SetPermissions(InpAllowControl, false);
+         g_publisher2[i].Begin();
+        }
      }
 
    //--- and blind mode goes on every chart we own, remembering what
@@ -524,6 +604,7 @@ int OnInit()
    g_catalog.Attach(g_src.History());
    g_catalog.Scan(origin);
    g_dialog.Create(ChartID(), GetPointer(g_catalog));
+   g_session_dlg.Create(ChartID(), GetPointer(g_gport));
 
    //--- The panel MUST live on this EA's own chart. MetaTrader delivers
    //--- OnChartEvent only for the chart a program is attached to, so a
@@ -536,7 +617,7 @@ int OnInit()
    //--- and it reports anything it could not put back exactly.
    g_session_mgr.Attach(GetPointer(g_group), GetPointer(g_acct),
                         GetPointer(g_stats));
-   if(InpSession != "" && InpResume && g_session_mgr.Exists(InpSession))
+   if(resuming)
      {
       if(g_session_mgr.Restore(InpSession))
         {
@@ -582,7 +663,10 @@ void OnDeinit(const int reason)
    //--- outlive the program that set them, so leaving them behind
    //--- would tell every other product that a replay is still running.
    g_publisher.Withdraw();
+   for(int i = 0; i < g_extra; i++)
+      g_publisher2[i].Withdraw();
 
+   g_session_dlg.Destroy();
    g_panel.Destroy();
 
    //--- REASON_CHARTCHANGE and friends destroy this EA and rebuild it.
@@ -686,6 +770,8 @@ void OnTimer()
    //--- one command per pump at most, so a client cannot drive the
    //--- replay faster than the person watching it can react
    g_publisher.Poll();
+   for(int i = 0; i < g_extra; i++)
+      g_publisher2[i].Poll();
 
    //--- chart housekeeping is cheap but not free; keep it off the hot path
    g_slow_tick++;
@@ -695,6 +781,8 @@ void OnTimer()
       //--- enough that a client never sees a live session as stale,
       //--- rarely enough that it is not on the hot path
       g_publisher.Publish();
+      for(int i = 0; i < g_extra; i++)
+         g_publisher2[i].Publish();
       g_charts.Sync();
       for(int i = 0; i < g_extra; i++)
          g_charts2[i].Sync();
@@ -718,7 +806,17 @@ void OnChartEvent(const int id, const long &lparam,
    if(!g_ready)
       return;
 
-   //--- the dialog is modal over the panel, so it looks first
+   //--- the session list is modal over everything, so it looks first
+   if(g_session_dlg.IsOpen())
+     {
+      if(g_session_dlg.OnEvent(id, lparam, dparam, sparam))
+        {
+         g_panel.Render();
+         return;
+        }
+     }
+
+   //--- the range dialog is modal over the panel, so it looks next
    if(g_dialog.IsOpen())
      {
       if(g_dialog.OnEvent(id, lparam, dparam, sparam))
@@ -742,6 +840,14 @@ void OnChartEvent(const int id, const long &lparam,
 
    if(g_panel.OnEvent(id, lparam, dparam, sparam))
       return;
+
+   //--- S opens the saved-session list. The host owns it because the
+   //--- dialog needs the session manager, which knows every layer.
+   if(id == CHARTEVENT_KEYDOWN && SSRKeyToCommand(lparam) == SSR_CMD_SESSIONS)
+     {
+      g_session_dlg.Open();
+      return;
+     }
 
    //--- J opens the range dialog; the panel maps the key, the host owns
    //--- the dialog because the dialog needs the catalogue

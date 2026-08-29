@@ -31,7 +31,8 @@ enum ENUM_SSR_CMD
    SSR_CMD_FOLLOW,
    SSR_CMD_FIDELITY_CYCLE,
    SSR_CMD_REPLAY_FROM_HERE,
-   SSR_CMD_COLLAPSE
+   SSR_CMD_COLLAPSE,
+   SSR_CMD_SESSIONS          // open the saved-session list
   };
 
 //--- virtual key codes as MetaTrader reports them in CHARTEVENT_KEYDOWN
@@ -49,6 +50,7 @@ enum ENUM_SSR_CMD
 #define SSR_VK_PGDN    34
 #define SSR_VK_J       74
 #define SSR_VK_B       66
+#define SSR_VK_S       83
 
 //+------------------------------------------------------------------+
 ENUM_SSR_CMD SSRKeyToCommand(const long key)
@@ -64,6 +66,7 @@ ENUM_SSR_CMD SSRKeyToCommand(const long key)
       case SSR_VK_PGUP:    return SSR_CMD_STEP_BACK_10;
       case SSR_VK_J:       return SSR_CMD_JUMP;
       case SSR_VK_B:       return SSR_CMD_BOOKMARK;
+      case SSR_VK_S:       return SSR_CMD_SESSIONS;
       case SSR_VK_R:       return SSR_CMD_RESET;
       case SSR_VK_F:       return SSR_CMD_FOLLOW;
       case SSR_VK_D:       return SSR_CMD_FIDELITY_CYCLE;
@@ -78,7 +81,7 @@ ENUM_SSR_CMD SSRKeyToCommand(const long key)
 string SSRKeyHint(void)
   {
    return "SPACE play  <- -> step  PgUp/PgDn x10  J jump  B mark  "
-          "+/- speed  F follow  D fidelity  R reset";
+          "S sessions  +/- speed  F follow  D fidelity  R reset";
   }
 
 #endif // SSR_KEYS_MQH

@@ -37,7 +37,7 @@ private:
    int               m_drag_dx, m_drag_dy;
 
    SSRUiState        m_state;
-   string            m_cache[24];   // last text written per slot
+   string            m_cache[32];   // last text written per slot
    int               m_renders;
    int               m_writes;
 
@@ -46,20 +46,20 @@ private:
                           const string text, const color col,
                           const int size = SSR_FS_BODY, const string font = SSR_FONT)
      {
-      if(slot >= 0 && slot < 24 && m_cache[slot] == text && m_w.Exists(id))
+      if(slot >= 0 && slot < 32 && m_cache[slot] == text && m_w.Exists(id))
         {
          ObjectSetInteger(m_chart, m_w.N(id), OBJPROP_COLOR, col);
          return;
         }
       m_w.Label(id, x, y, text, col, size, font);
       m_writes++;
-      if(slot >= 0 && slot < 24)
+      if(slot >= 0 && slot < 32)
          m_cache[slot] = text;
      }
 
    void              ClearCache(void)
      {
-      for(int i = 0; i < 24; i++)
+      for(int i = 0; i < 32; i++)
          m_cache[i] = "\x01";     // a value no label can legitimately hold
      }
 
@@ -158,12 +158,23 @@ public:
            SSR_C_TEXT_DIM, SSR_FS_SMALL, SSR_FONT_MONO);
       Text(2, "status", x + W - SSR_PAD - 62, cy,
            SSRStateName(m_state.status), SSRStateColor(m_state.status), SSR_FS_SMALL);
+      //--- BLIND is a badge, not a silence. A trader who forgot they
+      //--- turned it on would read the masked clock as a broken one.
+      Text(20, "blind", x + W - SSR_PAD - 120, cy,
+           (m_state.blind ? "BLIND" : ""), SSR_C_ACCENT, SSR_FS_SMALL);
       cy += SSR_ROW_H - 4;
 
-      //--- the clock: the single most-read thing on the panel ---------
+      //--- the clock: the single most-read thing on the panel.
+      //---
+      //--- THE TEXT COMES FROM THE PORT, already masked if the session
+      //--- is blind. A panel formatting the instant itself would be a
+      //--- second place that has to know about blind mode - and the
+      //--- one that gets forgotten, printing the date the mode exists
+      //--- to hide in the largest font on the screen.
       Text(3, "clock", x + SSR_PAD, cy,
-           (m_state.now_msc > 0 ? SSRFormatMsc(m_state.now_msc) : "--"),
-           SSR_C_TEXT, SSR_FS_CLOCK, SSR_FONT_MONO);
+           (m_state.clock_text == "" ? "--" : m_state.clock_text),
+           (m_state.blind ? SSR_C_ACCENT : SSR_C_TEXT),
+           SSR_FS_CLOCK, SSR_FONT_MONO);
       cy += 26;
 
       //--- progress ---------------------------------------------------
@@ -266,6 +277,80 @@ public:
       Text(13, "warn", x + SSR_PAD, cy, warn, wcol, SSR_FS_SMALL);
       cy += SSR_ROW_H - 4;
 
+      //================================================================
+      //  TRADING
+      //
+      //  Risk and stop first, buttons second. That order is the point:
+      //  the size follows from the two numbers above it, and a trader
+      //  who has not set them gets a refusal with a reason rather than
+      //  a trade at some default nobody chose.
+      //================================================================
+      Text(21, "acct", x + SSR_PAD, cy,
+           (m_state.can_trade
+            ? StringFormat("%.2f  %s%.2f  %d open",
+                           m_state.balance,
+                           (m_state.floating >= 0.0 ? "+" : ""),
+                           m_state.floating, m_state.open_positions)
+            : "no account"),
+           (m_state.floating < 0.0 ? SSR_C_STOP : SSR_C_TEXT_DIM),
+           SSR_FS_SMALL, SSR_FONT_MONO);
+      cy += SSR_ROW_H - 6;
+
+      //--- which instrument the buttons act on. On a multi-symbol
+      //--- board the account follows the primary stream only, and
+      //--- saying so is the difference between a limitation and a trap.
+      Text(22, "tsym", x + SSR_PAD, cy,
+           (m_state.streams > 1 && m_state.trade_symbol != ""
+            ? "trades: " + m_state.trade_symbol
+            : ""),
+           SSR_C_TEXT_FAINT, SSR_FS_SMALL, SSR_FONT_MONO);
+      cy += (m_state.streams > 1 ? SSR_ROW_H - 6 : 0);
+
+      Text(23, "risklbl", x + SSR_PAD, cy + 4,
+           StringFormat("RISK %.2f%%", m_state.risk_percent),
+           SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      m_w.Button("riskdn", x + W - SSR_PAD - 46, cy, 20, SSR_ROW_H - 2, "-");
+      m_w.Button("riskup", x + W - SSR_PAD - 22, cy, 20, SSR_ROW_H - 2, "+");
+      cy += SSR_ROW_H - 2;
+
+      Text(24, "stoplbl", x + SSR_PAD, cy + 4,
+           //--- a stop of zero is not a stop, and the panel says so
+           //--- in the label rather than only when a button is pressed
+           (m_state.stop_points > 0.0
+            ? StringFormat("STOP %.0f pts", m_state.stop_points)
+            : "STOP not set"),
+           (m_state.stop_points > 0.0 ? SSR_C_TEXT_DIM : SSR_C_HOLD),
+           SSR_FS_SMALL);
+      m_w.Button("stopdn", x + W - SSR_PAD - 46, cy, 20, SSR_ROW_H - 2, "-");
+      m_w.Button("stopup", x + W - SSR_PAD - 22, cy, 20, SSR_ROW_H - 2, "+");
+      cy += SSR_ROW_H;
+
+      bool armed = (m_state.can_trade && m_state.stop_points > 0.0);
+      int  tw = (W - 2 * SSR_PAD - 3 * 3) / 4;
+      int  tx = x + SSR_PAD;
+      m_w.Button("buy",  tx, cy, tw, SSR_BTN_H, "BUY",  false, armed);
+      tx += tw + 3;
+      m_w.Button("sell", tx, cy, tw, SSR_BTN_H, "SELL", false, armed);
+      tx += tw + 3;
+      m_w.Button("be",   tx, cy, tw, SSR_BTN_H, "B/E",  false,
+                 m_state.open_positions > 0);
+      tx += tw + 3;
+      m_w.Button("flat", tx, cy, tw, SSR_BTN_H, "FLAT", false,
+                 m_state.open_positions > 0);
+      cy += SSR_BTN_H + 2;
+
+      //--- what the last trade attempt said. Loud, because a refused
+      //--- order that says nothing looks like a broken button.
+      Text(25, "traderr", x + SSR_PAD, cy,
+           (m_port != NULL ? m_port.TradeError() : ""),
+           SSR_C_HOLD, SSR_FS_SMALL);
+      cy += SSR_ROW_H - 6;
+
+      //--- and what the strategies are doing, if any are
+      Text(26, "strat", x + SSR_PAD, cy, m_state.strategy_text,
+           SSR_C_TEXT_FAINT, SSR_FS_SMALL);
+      cy += (m_state.strategy_text == "" ? 0 : SSR_ROW_H - 6);
+
       Text(14, "keys", x + SSR_PAD, cy, "SPACE  <->  PgUp/Dn  J  B  +/-",
            SSR_C_TEXT_FAINT, SSR_FS_SMALL, SSR_FONT_MONO);
      }
@@ -276,7 +361,10 @@ public:
                       "play","pause","step","follow","reset",
                       "speedlbl","spdn","speedval","spup",
                       "fidlbl","fidval","datalbl","dataval",
-                      "tickslbl","ticksval","warn","keys"};
+                      "tickslbl","ticksval","warn","keys",
+                      "blind","acct","tsym","risklbl","riskdn","riskup",
+                      "stoplbl","stopdn","stopup",
+                      "buy","sell","be","flat","traderr","strat"};
       for(int i = 0; i < ArraySize(ids); i++)
          m_w.Hide(ids[i], hidden);
      }
@@ -284,6 +372,58 @@ public:
    //+------------------------------------------------------------------+
    //| One path for both a click and a key press.                       |
    //+------------------------------------------------------------------+
+   //+------------------------------------------------------------------+
+   //| The trade controls. Every one goes through the port, so the      |
+   //| panel still knows nothing about accounts - only about buttons.   |
+   //+------------------------------------------------------------------+
+   bool              TradeButton(const string id)
+     {
+      if(m_port == NULL)
+         return false;
+
+      if(id == "buy")   return m_port.Buy();
+      if(id == "sell")  return m_port.Sell();
+      if(id == "flat")  return m_port.CloseAll();
+      if(id == "be")    return m_port.BreakEvenAll();
+
+      //--- risk moves in steps a person actually uses. Not a text box:
+      //--- typing into a chart object is worse than two buttons, and
+      //--- a mistyped 10 where 1 was meant is a real loss to learn from
+      //--- in the wrong way.
+      if(id == "riskdn") return m_port.SetRiskPercent(StepRisk(-1));
+      if(id == "riskup") return m_port.SetRiskPercent(StepRisk(+1));
+      if(id == "stopdn") return m_port.SetStopPoints(StepStop(-1));
+      if(id == "stopup") return m_port.SetStopPoints(StepStop(+1));
+      return false;
+     }
+
+   //--- 0.10 / 0.25 / 0.50 / 1.00 / 2.00 - the sizes people trade,
+   //--- rather than a linear ramp through numbers nobody chooses
+   double            StepRisk(const int dir)
+     {
+      double ladder[] = {0.10, 0.25, 0.50, 1.00, 2.00, 3.00, 5.00};
+      int    n = ArraySize(ladder), at = 2;
+      for(int i = 0; i < n; i++)
+         if(MathAbs(ladder[i] - m_state.risk_percent) < 0.001)
+           { at = i; break; }
+      at += dir;
+      if(at < 0)      at = 0;
+      if(at >= n)     at = n - 1;
+      return ladder[at];
+     }
+
+   double            StepStop(const int dir)
+     {
+      double s = m_state.stop_points;
+      //--- coarser as it grows, so 10 -> 20 costs one press and
+      //--- 500 -> 600 does not cost fifty
+      double step = (s < 50.0 ? 5.0 : (s < 200.0 ? 10.0 : 50.0));
+      s += dir * step;
+      if(s < 0.0)
+         s = 0.0;
+      return s;
+     }
+
    bool              Execute(const ENUM_SSR_CMD cmd)
      {
       if(m_port == NULL)
@@ -365,6 +505,11 @@ public:
 
          if(c != SSR_CMD_NONE)
             Execute(c);
+         else
+            //--- the trade controls have no keyboard equivalent, so
+            //--- they are not commands: they are buttons, handled here
+            TradeButton(what);
+
          //--- MetaTrader latches the button down; release it either way
          ObjectSetInteger(m_chart, sparam, OBJPROP_STATE, false);
          Render();

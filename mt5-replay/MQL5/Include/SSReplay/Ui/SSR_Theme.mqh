@@ -53,7 +53,12 @@
 
 //--- metrics, in pixels
 #define SSR_PANEL_W        228
-#define SSR_PANEL_H        250
+//--- Grown in Phase 15 for the trade and strategy rows. Measured
+//--- against the layout rather than guessed: header 22 + identity 16
+//--- + clock 26 + progress 32 + transport 30 + speed 44 + fidelity 48
+//--- + warning 16 + account 14 + risk 18 + stop 20 + buttons 26
+//--- + trade error 14 + strategy 14 + keys 14.
+#define SSR_PANEL_H        368
 #define SSR_PAD            10
 #define SSR_ROW_H          20
 #define SSR_HEADER_H       22

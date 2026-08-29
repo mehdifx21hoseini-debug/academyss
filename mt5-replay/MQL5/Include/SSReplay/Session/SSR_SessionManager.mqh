@@ -116,6 +116,42 @@ public:
    bool              Exists(const string name)
      { return FileIsExist(Path(name)); }
 
+   //+------------------------------------------------------------------+
+   //| What sessions exist on disk.                                     |
+   //|                                                                  |
+   //| So the user PICKS from what is there rather than typing a name   |
+   //| and finding out it was not the one they meant. Newest first is   |
+   //| not offered, because FileFindNext gives no order and sorting by  |
+   //| a time this API does not expose would be inventing one.          |
+   //+------------------------------------------------------------------+
+   int               List(string &out[], const int max_names = 64)
+     {
+      ArrayResize(out, 0);
+      string found = "";
+      long h = FileFindFirst(SSR_SESSION_DIR + "\\*" + SSR_SESSION_EXT, found);
+      if(h == INVALID_HANDLE)
+         return 0;
+
+      int n = 0;
+      do
+        {
+         if(n >= max_names)
+            break;
+         //--- the name the user gave, without our extension
+         string name = found;
+         int    dot  = StringFind(name, SSR_SESSION_EXT);
+         if(dot > 0)
+            name = StringSubstr(name, 0, dot);
+         if(name == "")
+            continue;
+         ArrayResize(out, n + 1);
+         out[n++] = name;
+        }
+      while(FileFindNext(h, found));
+      FileFindClose(h);
+      return n;
+     }
+
    //================================================================
    //  SAVE
    //================================================================
