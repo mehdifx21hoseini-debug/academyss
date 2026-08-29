@@ -20,9 +20,10 @@
 #include "../Common/SSR_Platform.mqh"
 #include "../Core/SSR_IDataSource.mqh"
 
-//--- Seed throughput, bars per second. A DOCUMENTED GUESS until spike
-//--- D1 measures it on the target machine; the quote it produces is
-//--- labelled as an estimate for exactly that reason.
+//--- Seed throughput, bars per second. The STARTING guess only: the
+//--- engine measures its own seed and feeds the real figure back through
+//--- SetMeasuredSeedRate, so every quote after the first session is
+//--- taken from this machine rather than from this line.
 #define SSR_SEED_BARS_PER_SEC_DEFAULT   6000.0
 //--- rough on-disk cost of one M1 bar in the custom symbol store
 #define SSR_SEED_BYTES_PER_BAR          60
@@ -46,7 +47,10 @@ struct SSRSeedQuote
       warmup_bars = 0; replay_bars = 0; total_bars = 0;
       seconds = 0.0; megabytes = 0.0;
       exceeds_history = false; exceeds_maxbars = false; available_bars = 0;
+      measured = false;
      }
+
+   bool              measured;        // is the time figure real or a guess?
 
    bool              IsFeasible(void) { return (!exceeds_history && total_bars > 0); }
 
@@ -55,8 +59,9 @@ struct SSRSeedQuote
       if(exceeds_history)
          return StringFormat("needs %d M1 bars, broker has %d",
                              (int)total_bars, (int)available_bars);
-      return StringFormat("%d bars, about %.0fs, %.1f MB",
-                          (int)total_bars, seconds, megabytes);
+      return StringFormat("%d bars, %s%.0fs, %.1f MB",
+                          (int)total_bars,
+                          (measured ? "" : "about "), seconds, megabytes);
      }
   };
 
@@ -68,10 +73,12 @@ private:
    SSRDataRange         m_range;
    string               m_symbol;
    double               m_bars_per_sec;
+   bool                 m_measured;
 
 public:
                      CSSRHistoryCatalog(void)
-     : m_hist(NULL), m_symbol(""), m_bars_per_sec(SSR_SEED_BARS_PER_SEC_DEFAULT)
+     : m_hist(NULL), m_symbol(""),
+       m_bars_per_sec(SSR_SEED_BARS_PER_SEC_DEFAULT), m_measured(false)
      { m_range.Init(); }
 
    void              Attach(CSSRHistoryProvider *h) { m_hist = h; }
@@ -79,8 +86,14 @@ public:
    //--- once spike D1 has run, feed it the measured figure and every
    //--- quote the panel shows becomes real instead of estimated
    void              SetMeasuredSeedRate(const double bars_per_sec)
-     { if(bars_per_sec > 0.0) m_bars_per_sec = bars_per_sec; }
-   double            SeedRate(void) { return m_bars_per_sec; }
+     {
+      if(bars_per_sec <= 0.0)
+         return;
+      m_bars_per_sec = bars_per_sec;
+      m_measured     = true;
+     }
+   double            SeedRate(void)     { return m_bars_per_sec; }
+   bool              RateMeasured(void) { return m_measured; }
 
    bool              Scan(const string symbol)
      {
@@ -122,7 +135,8 @@ public:
       q.replay_bars = replay_minutes;
       q.total_bars  = q.warmup_bars + q.replay_bars;
 
-      q.seconds   = (m_bars_per_sec > 0.0 ? (double)q.total_bars / m_bars_per_sec : 0.0);
+      q.seconds  = (m_bars_per_sec > 0.0 ? (double)q.total_bars / m_bars_per_sec : 0.0);
+      q.measured = m_measured;
       q.megabytes = (double)q.total_bars * SSR_SEED_BYTES_PER_BAR / 1048576.0;
 
       q.available_bars  = m_range.bar_count;

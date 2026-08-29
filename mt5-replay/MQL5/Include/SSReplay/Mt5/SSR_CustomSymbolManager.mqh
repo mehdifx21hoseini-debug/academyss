@@ -30,7 +30,10 @@
 
 //--- CustomRatesUpdate in slices: one enormous call blocks the terminal
 #define SSR_RATES_CHUNK       10000
-//--- CustomTicksAdd in slices, for the same reason
+//--- CustomTicksAdd in slices. This is a SAFETY BOUND on one API call,
+//--- not a throughput knob: the engine's pump budget already limits how
+//--- much reaches this class, derived from measured cost. It exists so
+//--- a bulk write cannot hand MetaTrader a single colossal array.
 #define SSR_TICKS_CHUNK       4096
 //--- the far edge used when deleting "everything from here on"
 #define SSR_FAR_FUTURE        D'2038.01.01 00:00'

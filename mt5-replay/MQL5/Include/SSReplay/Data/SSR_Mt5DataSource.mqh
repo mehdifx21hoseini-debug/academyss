@@ -11,6 +11,7 @@
 
 #include "../Core/SSR_IDataSource.mqh"
 #include "SSR_Mt5Providers.mqh"
+#include "SSR_HistoryCatalog.mqh"
 
 //+------------------------------------------------------------------+
 class CSSRMt5DataSource : public CSSRDataSource
@@ -105,6 +106,18 @@ public:
       if(CheckPointer(m_hist)  == POINTER_DYNAMIC) m_hist.SetGuard(g);
       if(CheckPointer(m_bars)  == POINTER_DYNAMIC) m_bars.SetGuard(g);
       if(CheckPointer(m_ticks) == POINTER_DYNAMIC) m_ticks.SetGuard(g);
+     }
+
+   //+------------------------------------------------------------------+
+   //| Size the read window from the session rather than from a fixed   |
+   //| default: a short replay should not hold two weeks of bars, and a |
+   //| long one should not reload every few minutes.                    |
+   //+------------------------------------------------------------------+
+   virtual void      OnSessionPlanned(const long replay_minutes) override
+     {
+      if(replay_minutes <= 0)
+         return;
+      m_bars.SetWindowBars(CSSRHistoryCatalog::SuggestWindowBars(replay_minutes));
      }
 
    //--- guard lifetime (closes Phase 1 TODO T1) ----------------------

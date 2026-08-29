@@ -12,9 +12,12 @@
 
 #include "../Common/SSR_Types.mqh"
 
-//--- redraws per second. MetaTrader already repaints on every injected
-//--- tick, so our own ChartRedraw exists purely for overlay objects.
-//--- Calling it per tick would double the paint cost for nothing.
+//--- Minimum gap between our own repaints. Chosen against HUMAN
+//--- PERCEPTION, not throughput: ten frames a second is past the point
+//--- where a moving label reads as continuous, and MetaTrader already
+//--- repaints price on every injected tick, so this only governs
+//--- overlay objects. That makes it a justified figure rather than a
+//--- number waiting to be measured.
 #define SSR_REDRAW_MIN_INTERVAL_MS   100
 
 //--- how far the view may drift from the right edge before we conclude

@@ -29,6 +29,9 @@
 //--- window sizing. 20,000 M1 bars is about two weeks of continuous
 //--- market time and a few megabytes - large enough that the cursor
 //--- rarely leaves it, small enough to reload without a visible stall.
+//--- the fallback when no session has been announced. Real sizing comes
+//--- from CSSRHistoryCatalog::SuggestWindowBars via OnSessionPlanned;
+//--- this only covers a source used without one.
 #define SSR_WINDOW_BARS_DEFAULT    20000
 #define SSR_WINDOW_LOAD_TIMEOUT_MS 15000
 #define SSR_WINDOW_RETRY_SLEEP_MS  50

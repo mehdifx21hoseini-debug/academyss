@@ -36,7 +36,12 @@ struct SSRUiState
    long               end_msc;
    double             progress;        // 0..1
    long               speed_x100;
-   ENUM_SSR_FIDELITY  fidelity;
+   ENUM_SSR_FIDELITY  fidelity;            // what the user asked for
+   ENUM_SSR_FIDELITY  fidelity_effective;  // what is actually running
+   string             fidelity_note;       // why they differ, if they do
+   bool               perf_calibrated;
+   double             us_per_tick;
+   double             pump_p95_ms;
    ENUM_SSR_DATA_MODE data_mode;
    long               ticks_emitted;
    long               bars_consumed;
@@ -53,7 +58,12 @@ struct SSRUiState
       now_msc = SSR_INVALID_TIME; start_msc = SSR_INVALID_TIME;
       end_msc = SSR_INVALID_TIME; progress = 0.0;
       speed_x100 = SSR_SPEED_1;
-      fidelity = SSR_FIDELITY_SYNTHETIC_TICK;
+      fidelity           = SSR_FIDELITY_SYNTHETIC_TICK;
+      fidelity_effective = SSR_FIDELITY_SYNTHETIC_TICK;
+      fidelity_note      = "";
+      perf_calibrated    = false;
+      us_per_tick        = 0.0;
+      pump_p95_ms        = 0.0;
       data_mode = SSR_DATA_MEMORY;
       ticks_emitted = 0; bars_consumed = 0; ticks_rejected = 0;
       guard_violations = 0;

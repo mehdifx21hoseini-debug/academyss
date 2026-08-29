@@ -203,9 +203,13 @@ public:
       //--- fidelity. Colour-coded because the user must be able to see
       //--- at a glance that they are watching approximated ticks.
       Text(7, "fidlbl", x + SSR_PAD, cy, "FIDELITY", SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      //--- show what is RUNNING, not what was asked for. A tool that
+      //--- displays the request while emitting something else is the
+      //--- quiet dishonesty this whole product exists to avoid.
+      bool degraded = (m_state.fidelity_effective != m_state.fidelity);
       Text(8, "fidval", x + W - SSR_PAD - 92, cy,
-           SSRFidelityName(m_state.fidelity), SSRFidelityColor(m_state.fidelity),
-           SSR_FS_SMALL);
+           SSRFidelityName(m_state.fidelity_effective) + (degraded ? " *" : ""),
+           SSRFidelityColor(m_state.fidelity_effective), SSR_FS_SMALL);
       cy += SSR_ROW_H - 4;
 
       Text(9, "datalbl", x + SSR_PAD, cy, "DATA", SSR_C_TEXT_DIM, SSR_FS_SMALL);
@@ -215,8 +219,13 @@ public:
 
       Text(11, "tickslbl", x + SSR_PAD, cy, "TICKS", SSR_C_TEXT_DIM, SSR_FS_SMALL);
       Text(12, "ticksval", x + W - SSR_PAD - 92, cy,
-           IntegerToString(m_state.ticks_emitted), SSR_C_TEXT_DIM,
-           SSR_FS_SMALL, SSR_FONT_MONO);
+           //--- an uncalibrated engine says so rather than showing a zero
+           //--- that looks like a measurement
+           (m_state.perf_calibrated
+            ? StringFormat("%d  %.0fus/tk", (int)m_state.ticks_emitted,
+                           m_state.us_per_tick)
+            : IntegerToString(m_state.ticks_emitted)),
+           SSR_C_TEXT_DIM, SSR_FS_SMALL, SSR_FONT_MONO);
       cy += SSR_ROW_H - 2;
 
       //--- warnings. The panel is loud when something is wrong and
@@ -230,6 +239,11 @@ public:
       else if(m_state.ticks_rejected > 0)
         {
          warn = StringFormat("%d ticks refused by terminal", (int)m_state.ticks_rejected);
+         wcol = SSR_C_HOLD;
+        }
+      else if(m_state.fidelity_note != "")
+        {
+         warn = m_state.fidelity_note;
          wcol = SSR_C_HOLD;
         }
       else if(m_state.guard_violations > 0)

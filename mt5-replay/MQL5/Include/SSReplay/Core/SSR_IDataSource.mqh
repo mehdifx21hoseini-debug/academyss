@@ -173,6 +173,15 @@ public:
    virtual bool      Open(const string symbol) = 0;
    virtual void      Close(void) = 0;
 
+   //+------------------------------------------------------------------+
+   //| The session about to run, announced before any reading starts.   |
+   //|                                                                  |
+   //| A source that buffers can size that buffer from the session      |
+   //| instead of from a constant; one that does not simply ignores the |
+   //| call. Core learns nothing about buffering either way.            |
+   //+------------------------------------------------------------------+
+   virtual void       OnSessionPlanned(const long replay_minutes) {}
+
    virtual CSSRHistoryProvider *History(void) = 0;
    virtual CSSRBarProvider     *Bars(void)    = 0;
    virtual CSSRTickProvider    *Ticks(void)   = 0;   // NULL when unsupported

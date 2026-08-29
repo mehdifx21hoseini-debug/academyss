@@ -55,7 +55,15 @@ public:
       out.end_msc          = m_ctrl.EndMsc();
       out.progress         = m_ctrl.Progress();
       out.speed_x100       = m_ctrl.SpeedX100();
-      out.fidelity         = m_ctrl.Fidelity();
+      out.fidelity           = m_ctrl.Fidelity();
+      out.fidelity_effective = m_ctrl.EffectiveFidelity();
+      out.fidelity_note      = m_ctrl.FidelityReason();
+
+      SSRPerfSnapshot perf;
+      m_ctrl.PerfInto(perf);
+      out.perf_calibrated = perf.calibrated;
+      out.us_per_tick     = perf.us_per_tick;
+      out.pump_p95_ms     = perf.pump_p95_ms;
       out.ticks_emitted    = m_ctrl.TicksEmitted();
       out.bars_consumed    = m_ctrl.BarsConsumed();
       out.guard_violations = m_ctrl.Violations();

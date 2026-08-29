@@ -27,11 +27,14 @@
 #include "SSR_IDataSource.mqh"
 #include "SSR_IReplaySink.mqh"
 #include "SSR_TickSynthesizer.mqh"
+#include "SSR_Metrics.mqh"
+#include "SSR_PumpBudget.mqh"
+#include "SSR_FidelityPolicy.mqh"
 
-//--- how many M1 bars one pump may consume before yielding.
-//--- a hard ceiling, so a huge speed or a long stall cannot turn one
-//--- pump into a multi-second freeze. Phase 7 tunes this properly.
-#define SSR_MAX_BARS_PER_PUMP   512
+//--- The per-pump ceiling is no longer a constant. CSSRPumpBudget
+//--- derives it from measured cost per tick; this only bounds the
+//--- reserved read buffer so a single read cannot allocate wildly.
+#define SSR_BAR_READ_CEILING    8192
 
 //+------------------------------------------------------------------+
 class CSSRReplayController
@@ -43,6 +46,9 @@ private:
    SSRReplayCursor     m_cursor;
    CSSRFutureGuard     m_guard;
    CSSRTickSynthesizer m_synth;
+   CSSRMetrics         m_metrics;
+   CSSRPumpBudget      m_budget;
+   CSSRFidelityPolicy  m_fidelity;
 
    CSSRDataSource     *m_source;      // not owned
    CSSRReplaySink     *m_sink;        // not owned
@@ -54,6 +60,9 @@ private:
 
    int                 m_digits;
    double              m_point;
+   //--- per-pump accumulators, read and cleared by Pump()
+   double              m_pump_emit_us;
+   bool                m_pump_deferred;
    long                m_warmup_bars;
 
    //--- state machine -----------------------------------------------
@@ -149,7 +158,11 @@ private:
 
       int emitted = 0;
 
-      if(m_state.fidelity == SSR_FIDELITY_FULL_TICK)
+      //--- the fidelity for THIS window, which may differ from the one
+      //--- the user asked for; the policy records why and the panel says so
+      ENUM_SSR_FIDELITY fid = m_fidelity.Decide(hi - lo);
+
+      if(fid == SSR_FIDELITY_FULL_TICK)
         {
          CSSRTickProvider *tp = m_source.Ticks();
          if(tp == NULL)
@@ -159,7 +172,8 @@ private:
             //--- dishonest option.
             if(m_log != NULL && m_log.IsWarn())
                m_log.Warn("source has no tick provider; falling back to SYNTHETIC_TICK");
-            m_state.fidelity = SSR_FIDELITY_SYNTHETIC_TICK;
+            m_fidelity.SetTicksAvailable(false);
+            fid = m_fidelity.Decide(hi - lo);
            }
          else
            {
@@ -172,11 +186,13 @@ private:
             //--- guard layer 2 already ran inside the provider; this is
             //--- the belt-and-braces pass over what came back
             n = m_guard.FilterTicks(m_ticks, n);
+            ulong t_emit_ft = GetMicrosecondCount();
             if(n > 0 && !m_sink.EmitTicks(m_ticks, n))
               {
                SetError(SSR_ERR_SINK_FAILED, "sink rejected ticks: " + m_sink.LastErrorText());
                return -1;
               }
+            m_pump_emit_us += (double)(GetMicrosecondCount() - t_emit_ft);
             emitted = n;
             m_cursor.Advance(hi, emitted, 0);
             return emitted;
@@ -205,15 +221,23 @@ private:
          m_cursor.Advance(hi, 0, 0);
          return 0;
         }
-      if(nb > SSR_MAX_BARS_PER_PUMP)
-         nb = SSR_MAX_BARS_PER_PUMP;
+
+      //--- the ceiling comes from what a tick actually costs on this
+      //--- machine, not from a constant. Anything above it stays owed.
+      int cap = m_budget.MaxBars(m_synth.TicksForBar(fid));
+      if(nb > cap)
+        {
+         nb = cap;
+         m_budget.NoteDeferral();
+         m_pump_deferred = true;
+        }
 
       //--- skip bars already consumed, so a pump never re-emits
       int first = 0;
       while(first < nb && SSRToMsc(m_bars[first].time) < bar_lo)
          first++;
 
-      int per_bar = m_synth.TicksForBar(m_state.fidelity);
+      int per_bar = m_synth.TicksForBar(fid);
       int need    = (nb - first) * per_bar;
       if(need <= 0)
         {
@@ -230,7 +254,7 @@ private:
       int bars_used = 0;
       for(int i = first; i < nb; i++)
         {
-         int w = (m_state.fidelity == SSR_FIDELITY_BAR)
+         int w = (fid == SSR_FIDELITY_BAR)
                  ? m_synth.SynthesizeClose(m_bars[i], m_ticks, written)
                  : m_synth.Synthesize(m_bars[i], m_ticks, written);
          if(w <= 0)
@@ -245,11 +269,13 @@ private:
       written = TrimWindow(m_ticks, written, lo, hi);
       written = m_guard.FilterTicks(m_ticks, written);
 
+      ulong t_emit = GetMicrosecondCount();
       if(written > 0 && !m_sink.EmitTicks(m_ticks, written))
         {
          SetError(SSR_ERR_SINK_FAILED, "sink rejected ticks: " + m_sink.LastErrorText());
          return -1;
         }
+      m_pump_emit_us += (double)(GetMicrosecondCount() - t_emit);
 
       emitted = written;
 
@@ -272,7 +298,8 @@ private:
 public:
                      CSSRReplayController(void)
      : m_source(NULL), m_sink(NULL), m_log(NULL),
-       m_digits(5), m_point(0.00001), m_warmup_bars(0)
+       m_digits(5), m_point(0.00001), m_pump_emit_us(0.0),
+       m_pump_deferred(false), m_warmup_bars(0)
      {
       m_state.Init();
       m_clock.Init();
@@ -280,6 +307,7 @@ public:
       m_cursor.Init();
       ArrayResize(m_bars, 1024);
       ArrayResize(m_ticks, 8192);
+      m_budget.Attach(GetPointer(m_metrics));
      }
 
                     ~CSSRReplayController(void)
@@ -352,8 +380,24 @@ public:
    bool              SetFidelity(const ENUM_SSR_FIDELITY f)
      {
       m_state.fidelity = f;
+      m_fidelity.SetRequested(f);
       return true;
      }
+
+   //--- a user who pins fidelity gets it, bulk moment or not
+   void              LockFidelity(const bool on) { m_fidelity.SetLocked(on); }
+   bool              FidelityLocked(void)        { return m_fidelity.IsLocked(); }
+   ENUM_SSR_FIDELITY EffectiveFidelity(void)     { return m_fidelity.Effective(); }
+   bool              FidelityDegraded(void)      { return m_fidelity.IsDegraded(); }
+   string            FidelityReason(void)        { return m_fidelity.ReasonText(); }
+
+   //--- measurement, exposed so the UI can show real numbers and the
+   //--- catalogue can quote the next session from this one
+   void              PerfInto(SSRPerfSnapshot &out) { m_metrics.Snapshot(out); }
+   double            SeedBarsPerSec(void)           { return m_metrics.SeedBarsPerSec(); }
+   bool              PerfCalibrated(void)           { return m_metrics.IsCalibrated(); }
+   void              SetPumpBudgetMs(const double ms) { m_budget.SetBudgetMs(ms); }
+   string            BudgetText(void)               { return m_budget.ToString(); }
 
    void              SetDataMode(const ENUM_SSR_DATA_MODE m) { m_state.data_mode = m; }
 
@@ -412,6 +456,10 @@ public:
         }
       m_timeline.SetWarmupBars(m_warmup_bars);
 
+      //--- tell the source what it is about to serve, so anything it
+      //--- buffers can be sized from the session instead of a constant
+      m_source.OnSessionPlanned((m_timeline.end_msc - m_timeline.start_msc) / SSR_MSC_PER_MIN);
+
       if(!hp.Ensure(symbol, (m_timeline.warmup_first_msc > 0 ? m_timeline.warmup_first_msc
                                                              : m_timeline.start_msc),
                     m_timeline.end_msc))
@@ -428,6 +476,9 @@ public:
          return false;
         }
       m_clock.SetSpeedX100(m_state.speed_x100);
+      m_fidelity.SetRequested(m_state.fidelity);
+      m_fidelity.SetTicksAvailable(range.has_ticks);
+      m_metrics.Reset();
 
       //--- The sink may be able to reuse a warmup it seeded previously,
       //--- but only if it knows which range this session needs BEFORE it
@@ -499,6 +550,7 @@ public:
       long hi = m_timeline.start_msc - 1;
 
       MqlRates seed[];
+      ulong t_seed = GetMicrosecondCount();
       int n = bp.ReadBars(m_state.symbol, lo, hi, seed);
       if(n < 0)
         {
@@ -514,9 +566,13 @@ public:
          return false;
         }
 
+      //--- the seed measures itself, so the next session is quoted from
+      //--- this machine rather than from a constant
+      m_metrics.RecordSeed(n, (double)(GetMicrosecondCount() - t_seed) / 1000.0);
+
       if(m_log != NULL && m_log.IsInfo())
-         m_log.Info(StringFormat("warmup seeded: %d bars up to %s",
-                                 n, SSRFormatMsc(hi)));
+         m_log.Info(StringFormat("warmup seeded: %d bars up to %s at %.0f bars/s",
+                                 n, SSRFormatMsc(hi), m_metrics.SeedBarsPerSec()));
       return true;
      }
 
@@ -551,6 +607,10 @@ public:
       if(m_state.status != SSR_STATE_PLAYING)
          return 0;
 
+      ulong t_pump   = GetMicrosecondCount();
+      m_pump_emit_us  = 0.0;
+      m_pump_deferred = false;
+
       long before = m_clock.now_msc;
       long now    = m_clock.Advance(wall_delta_ms);
 
@@ -574,6 +634,10 @@ public:
         }
 
       Publish();
+
+      m_metrics.RecordPump((double)(GetMicrosecondCount() - t_pump),
+                           m_pump_emit_us, emitted,
+                           (int)m_cursor.bar_count, m_pump_deferred);
 
       if(m_clock.IsCompleted())
         {

@@ -28,9 +28,14 @@
 #include "SSR_BarWindow.mqh"
 #include "SSR_DataValidator.mqh"
 
+//--- how long to wait for MetaTrader to deliver history it is fetching
+//--- from the server. Generous on purpose: giving up early reports "no
+//--- data" for a symbol that simply had not arrived yet.
 #define SSR_SYNC_TIMEOUT_MS     20000
 #define SSR_TICK_TIMEOUT_MS     15000
-#define SSR_TICK_PAGE_GUARD     64      // max CopyTicksRange pages per request
+//--- a hard stop on the paging loop. Not a tuning figure: it exists so
+//--- a provider that stops making forward progress cannot spin forever.
+#define SSR_TICK_PAGE_GUARD     64
 
 //+------------------------------------------------------------------+
 //| History discovery and preparation.                               |
