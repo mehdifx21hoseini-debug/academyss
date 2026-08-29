@@ -38,23 +38,43 @@ void OnStart()
      }
    Sleep(500);
 
-   //--- product replay symbols: <origin>.SSR<slot>, any origin, slots 0-9
-   int dropped = 0;
+   //+------------------------------------------------------------------+
+   //| THE ORDER IS THE WHOLE TRICK.                                    |
+   //|                                                                  |
+   //| MetaTrader refuses to delete a symbol that is selected in Market |
+   //| Watch (error 5306), and it needs a moment after being told to    |
+   //| deselect one. Charts first, then deselect, then a beat, then     |
+   //| delete - the same sequence CSSRCustomSymbolManager::Destroy uses. |
+   //|                                                                  |
+   //| And a refusal is REPORTED BY NAME with what to do about it.      |
+   //| "symbols deleted=0" tells nobody anything.                       |
+   //+------------------------------------------------------------------+
+   int    dropped = 0, stuck = 0;
+   string stuck_list = "";
+
+   //--- product replay symbols: <origin>.SSR<slot>, any origin, any slot
    for(int i = SymbolsTotal(false) - 1; i >= 0; i--)
      {
       string name = SymbolName(i, false);
-      if(StringFind(name, ".SSR") >= 0)
+      if(StringFind(name, ".SSR") < 0)
+         continue;
+      SymbolSelect(name, false);
+      Sleep(120);
+      ResetLastError();
+      if(CustomSymbolDelete(name))
+         dropped++;
+      else
         {
-         SymbolSelect(name, false);
-         if(CustomSymbolDelete(name))
-            dropped++;
+         stuck++;
+         stuck_list += StringFormat("\n    %s  (error %d)", name, GetLastError());
         }
      }
 
    for(int i = 0; i < ArraySize(g_syms); i++)
      {
-      ResetLastError();
       SymbolSelect(g_syms[i], false);
+      Sleep(60);
+      ResetLastError();
       if(CustomSymbolDelete(g_syms[i]))
          dropped++;
      }
@@ -72,6 +92,17 @@ void OnStart()
 
    PrintFormat("[Cleanup] charts closed=%d  symbols deleted=%d  globals deleted=%d",
                closed, dropped, gv);
+
+   if(stuck > 0)
+     {
+      Print("[Cleanup] these would NOT delete:", stuck_list);
+      Print("[Cleanup] error 5306 means the symbol is still selected in "
+            "Market Watch. Right-click it there and choose Hide, then run "
+            "this again. If that does not do it, a chart of it is still "
+            "open somewhere - including in another profile.");
+     }
+   else
+      Print("[Cleanup] nothing of ours is left behind.");
 
    if(InpDeleteResults)
      {
