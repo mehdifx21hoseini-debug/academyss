@@ -14,7 +14,8 @@
 
 #include <SSReplay/Spike/SSR_SpikeKit.mqh>
 
-input string   InpOrigin   = "US30Cash";           // Origin symbol
+input string   InpOrigin = "";                 // Origin symbol (blank = this chart's symbol)
+
 input string   InpTest     = "SSRD3";              // Test symbol
 input datetime InpStart    = D'2024.01.08 00:00';  // Start time
 input double   InpBase     = 38000.0;              // Base price
@@ -23,12 +24,15 @@ input int      InpBatch    = 1000;                 // Ticks per injection
 input int      InpSampleSec = 10;                  // Sampling interval (seconds)
 input int      InpCharts   = 1;                    // Charts to keep open
 
+string g_origin = "";   //--- resolved from InpOrigin at the top of OnStart
+
 //+------------------------------------------------------------------+
 void OnStart()
   {
    SSR_Begin("D3_SustainedRun");
 
-   if(!SSR_MakeSymbol(InpTest, InpOrigin))
+   g_origin = SSR_Origin(InpOrigin);
+   if(!SSR_MakeSymbol(InpTest, g_origin))
      {
       SSR_Verdict("symbol_ready", false, "created", "failed", "");
       SSR_End();

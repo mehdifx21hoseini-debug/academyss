@@ -15,12 +15,15 @@
 
 #include <SSReplay/Spike/SSR_SpikeKit.mqh>
 
-input string   InpOrigin    = "US30Cash";           // Origin symbol
+input string   InpOrigin = "";                 // Origin symbol (blank = this chart's symbol)
+
 input string   InpTest      = "SSRA2";              // Test symbol
 input datetime InpStart     = D'2024.01.08 00:00';  // Golden dataset start (a Monday)
 input int      InpBars      = 4320;                 // M1 bars (4320 = 3 days)
 input double   InpBase      = 38000.0;              // Base price
 input bool     InpTestNonM1 = true;                 // Also probe writing non-M1 rates
+
+string g_origin = "";   //--- resolved from InpOrigin at the top of OnStart
 
 //+------------------------------------------------------------------+
 void CheckTimeframe(const string sym, const MqlRates &m1[], const ENUM_TIMEFRAMES tf,
@@ -91,14 +94,15 @@ void OnStart()
   {
    SSR_Begin("A2_RatesAndAggregation");
 
-   if(!SymbolSelect(InpOrigin, true))
+   g_origin = SSR_Origin(InpOrigin);
+   if(!SymbolSelect(g_origin, true))
      {
-      SSR_Verdict("origin_available", false, "selectable", "failed", InpOrigin);
+      SSR_Verdict("origin_available", false, "selectable", "failed", g_origin);
       SSR_End();
       return;
      }
 
-   if(!SSR_MakeSymbol(InpTest, InpOrigin))
+   if(!SSR_MakeSymbol(InpTest, g_origin))
      {
       SSR_Verdict("symbol_ready", false, "created", "failed", "");
       SSR_End();
@@ -186,7 +190,7 @@ void OnStart()
    if(InpTestNonM1)
      {
       string sym2 = InpTest + "N";
-      if(SSR_MakeSymbol(sym2, InpOrigin))
+      if(SSR_MakeSymbol(sym2, g_origin))
         {
          MqlRates m5[];
          int n5 = SSR_AggregateM1(m1, PERIOD_M5, m5);

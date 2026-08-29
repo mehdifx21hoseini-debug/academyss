@@ -14,8 +14,11 @@
 
 #include <SSReplay/Spike/SSR_SpikeKit.mqh>
 
-input string InpOrigin = "US30Cash";   // Origin symbol (must exist at the broker)
+input string   InpOrigin = "";                 // Origin symbol (blank = this chart's symbol)
+
 input string InpTest   = "SSRA1";      // Test symbol name
+
+string g_origin = "";   //--- resolved from InpOrigin at the top of OnStart
 
 //+------------------------------------------------------------------+
 int CompareLong(const string sym, const string origin, const ENUM_SYMBOL_INFO_INTEGER p, const string name)
@@ -48,21 +51,22 @@ void OnStart()
   {
    SSR_Begin("A1_SymbolLifecycle");
 
+   g_origin = SSR_Origin(InpOrigin);
    //--- 0. origin must be available
-   if(!SymbolSelect(InpOrigin, true))
+   if(!SymbolSelect(g_origin, true))
      {
       SSR_Verdict("origin_available", false, "selectable", "SymbolSelect failed",
                   "err=" + IntegerToString(GetLastError()));
       SSR_End();
       return;
      }
-   SSR_Verdict("origin_available", true, "selectable", "ok", InpOrigin);
+   SSR_Verdict("origin_available", true, "selectable", "ok", g_origin);
 
    //--- 1. creation
    SSR_DropSymbol(InpTest);
    ulong t0 = SSR_Now();
    ResetLastError();
-   bool created = CustomSymbolCreate(InpTest, "SSReplay\\Spike", InpOrigin);
+   bool created = CustomSymbolCreate(InpTest, "SSReplay\\Spike", g_origin);
    double t_create = SSR_ElapsedMs(t0);
    int err_create = GetLastError();
 
@@ -81,22 +85,63 @@ void OnStart()
 
    //--- 2. the 12 critical properties for correct lot / PnL maths
    int bad = 0;
-   bad += CompareLong  (InpTest, InpOrigin, SYMBOL_DIGITS,              "DIGITS");
-   bad += CompareDouble(InpTest, InpOrigin, SYMBOL_POINT,               "POINT");
-   bad += CompareDouble(InpTest, InpOrigin, SYMBOL_TRADE_TICK_SIZE,     "TRADE_TICK_SIZE");
-   bad += CompareDouble(InpTest, InpOrigin, SYMBOL_TRADE_TICK_VALUE,    "TRADE_TICK_VALUE");
-   bad += CompareDouble(InpTest, InpOrigin, SYMBOL_TRADE_CONTRACT_SIZE, "TRADE_CONTRACT_SIZE");
-   bad += CompareDouble(InpTest, InpOrigin, SYMBOL_VOLUME_MIN,          "VOLUME_MIN");
-   bad += CompareDouble(InpTest, InpOrigin, SYMBOL_VOLUME_MAX,          "VOLUME_MAX");
-   bad += CompareDouble(InpTest, InpOrigin, SYMBOL_VOLUME_STEP,         "VOLUME_STEP");
-   bad += CompareDouble(InpTest, InpOrigin, SYMBOL_MARGIN_INITIAL,      "MARGIN_INITIAL");
-   bad += CompareString(InpTest, InpOrigin, SYMBOL_CURRENCY_BASE,       "CURRENCY_BASE");
-   bad += CompareString(InpTest, InpOrigin, SYMBOL_CURRENCY_PROFIT,     "CURRENCY_PROFIT");
-   bad += CompareString(InpTest, InpOrigin, SYMBOL_CURRENCY_MARGIN,     "CURRENCY_MARGIN");
+   bad += CompareLong  (InpTest, g_origin, SYMBOL_DIGITS,              "DIGITS");
+   bad += CompareDouble(InpTest, g_origin, SYMBOL_POINT,               "POINT");
+   bad += CompareDouble(InpTest, g_origin, SYMBOL_TRADE_TICK_SIZE,     "TRADE_TICK_SIZE");
+   bad += CompareDouble(InpTest, g_origin, SYMBOL_TRADE_TICK_VALUE,    "TRADE_TICK_VALUE");
+   bad += CompareDouble(InpTest, g_origin, SYMBOL_TRADE_CONTRACT_SIZE, "TRADE_CONTRACT_SIZE");
+   bad += CompareDouble(InpTest, g_origin, SYMBOL_VOLUME_MIN,          "VOLUME_MIN");
+   bad += CompareDouble(InpTest, g_origin, SYMBOL_VOLUME_MAX,          "VOLUME_MAX");
+   bad += CompareDouble(InpTest, g_origin, SYMBOL_VOLUME_STEP,         "VOLUME_STEP");
+   bad += CompareDouble(InpTest, g_origin, SYMBOL_MARGIN_INITIAL,      "MARGIN_INITIAL");
+   bad += CompareString(InpTest, g_origin, SYMBOL_CURRENCY_BASE,       "CURRENCY_BASE");
+   bad += CompareString(InpTest, g_origin, SYMBOL_CURRENCY_PROFIT,     "CURRENCY_PROFIT");
+   bad += CompareString(InpTest, g_origin, SYMBOL_CURRENCY_MARGIN,     "CURRENCY_MARGIN");
 
    SSR_Metric("spec_fidelity", "properties_checked", 12, "count");
    SSR_Metric("spec_fidelity", "properties_mismatch", (double)bad, "count",
               (bad == 0 ? "clone is faithful" : "PLAN B: manual property map required"));
+
+   //--- 2b. does the clone inherit a CONTRACT LIFETIME?
+   //---
+   //--- Nobody asked this in Phase 0 because the origin then was a
+   //--- cash index with no expiry. On a futures contract it matters:
+   //--- if start/expiration come across, a replay window outside the
+   //--- contract's life would be writing into a symbol the terminal
+   //--- considers dead - and the failure would look like "my bars
+   //--- vanished" rather than "you picked an expiring origin".
+   //--- Measure it here rather than assume it either way.
+   long o_start = SymbolInfoInteger(g_origin, SYMBOL_START_TIME);
+   long o_exp   = SymbolInfoInteger(g_origin, SYMBOL_EXPIRATION_TIME);
+   long c_start = SymbolInfoInteger(InpTest,  SYMBOL_START_TIME);
+   long c_exp   = SymbolInfoInteger(InpTest,  SYMBOL_EXPIRATION_TIME);
+
+   SSR_Metric("lifetime", "origin_start",     (double)o_start, "epoch",
+              (o_start > 0 ? TimeToString((datetime)o_start, TIME_DATE) : "none"));
+   SSR_Metric("lifetime", "origin_expiration", (double)o_exp, "epoch",
+              (o_exp > 0 ? TimeToString((datetime)o_exp, TIME_DATE) : "none"));
+   SSR_Metric("lifetime", "clone_start",      (double)c_start, "epoch",
+              (c_start > 0 ? TimeToString((datetime)c_start, TIME_DATE) : "none"));
+   SSR_Metric("lifetime", "clone_expiration",  (double)c_exp, "epoch",
+              (c_exp > 0 ? TimeToString((datetime)c_exp, TIME_DATE) : "none"));
+
+   bool inherits = (c_start > 0 || c_exp > 0);
+   SSR_Metric("lifetime", "clone_inherits_lifetime", (inherits ? 1 : 0), "bool",
+              (inherits
+               ? "replay symbol carries the origin's contract dates - the engine must clear them"
+               : "clone has no lifetime - any replay window is writable"));
+
+   //--- and can we clear it if it does?
+   if(inherits)
+     {
+      bool c1 = CustomSymbolSetInteger(InpTest, SYMBOL_START_TIME, 0);
+      bool c2 = CustomSymbolSetInteger(InpTest, SYMBOL_EXPIRATION_TIME, 0);
+      long a_start = SymbolInfoInteger(InpTest, SYMBOL_START_TIME);
+      long a_exp   = SymbolInfoInteger(InpTest, SYMBOL_EXPIRATION_TIME);
+      SSR_Verdict("lifetime_clearable", (c1 && c2 && a_start == 0 && a_exp == 0),
+                  "0/0", StringFormat("%I64d/%I64d", a_start, a_exp),
+                  "the fix depends on this being true");
+     }
 
    //--- 3. can we override what the engine needs to override?
    ResetLastError();
@@ -155,7 +200,7 @@ void OnStart()
                "reading a deleted symbol must fail");
 
    //--- 6. delete must be refused while a chart is open (orderly teardown matters)
-   if(SSR_MakeSymbol(InpTest, InpOrigin))
+   if(SSR_MakeSymbol(InpTest, g_origin))
      {
       long cid = ChartOpen(InpTest, PERIOD_M1);
       Sleep(500);

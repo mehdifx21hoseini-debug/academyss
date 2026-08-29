@@ -12,7 +12,8 @@
 
 #include <SSReplay/Spike/SSR_SpikeKit.mqh>
 
-input string InpSymbols = "US30Cash,XAUUSD,BTCUSD,EURUSD";  // Comma separated
+input string InpSymbols = "";   // Comma separated (blank = this chart + Market Watch)
+input int    InpMaxAuto = 6;    // Cap when the list is blank
 
 //+------------------------------------------------------------------+
 void AuditSymbol(const string sym)
@@ -88,8 +89,33 @@ void OnStart()
   {
    SSR_Begin("B4_BrokerDataAudit");
 
+   //--- A typed-in symbol list is a guess about someone else's Market
+   //--- Watch, and a wrong guess makes the audit report "not available"
+   //--- four times and measure nothing. Blank means "audit what this
+   //--- terminal actually has", starting with the chart we were dropped
+   //--- on. The cap is there because each symbol can wait up to 30s for
+   //--- a history download, and a 40-symbol Market Watch would look
+   //--- like a hang.
+   string list = InpSymbols;
+   if(StringLen(list) == 0)
+     {
+      list = Symbol();
+      int have = 1;
+      int total = SymbolsTotal(true);
+      for(int i = 0; i < total && have < InpMaxAuto; i++)
+        {
+         string s = SymbolName(i, true);
+         if(s == Symbol() || s == "")
+            continue;
+         list += "," + s;
+         have++;
+        }
+      PrintFormat("[B4] no list given - auditing %d symbol(s) from this terminal: %s",
+                  have, list);
+     }
+
    string parts[];
-   int n = StringSplit(InpSymbols, StringGetCharacter(",", 0), parts);
+   int n = StringSplit(list, StringGetCharacter(",", 0), parts);
    for(int i = 0; i < n; i++)
      {
       string s = parts[i];

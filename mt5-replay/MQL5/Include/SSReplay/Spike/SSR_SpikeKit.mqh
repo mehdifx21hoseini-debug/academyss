@@ -217,6 +217,42 @@ void SSR_Set247Sessions(const string sym)
      }
   }
 
+//+------------------------------------------------------------------+
+//| Resolve the origin symbol a spike should clone from.             |
+//|                                                                  |
+//| These spikes were written before any broker was in front of      |
+//| them, and each carried a symbol name typed into its default.     |
+//| A name typed by me is a guess about someone else's Market Watch, |
+//| and a wrong guess makes every spike fail on its first line for a |
+//| reason that has nothing to do with what it measures.             |
+//|                                                                  |
+//| So: blank means "the chart this script was dropped on". The      |
+//| chart is a fact, not a guess. An explicit name still wins, and   |
+//| a name that is not selectable falls back to the chart with the   |
+//| substitution PRINTED - a silent substitution would make the      |
+//| results file lie about what was measured.                        |
+//+------------------------------------------------------------------+
+string SSR_Origin(const string requested)
+  {
+   string here = Symbol();
+
+   if(StringLen(requested) == 0)
+     {
+      PrintFormat("[SSR] origin: %s (from the chart)", here);
+      return here;
+     }
+
+   if(SymbolSelect(requested, true))
+     {
+      PrintFormat("[SSR] origin: %s (as asked)", requested);
+      return requested;
+     }
+
+   PrintFormat("[SSR] origin: '%s' is not available at this broker - using %s instead",
+               requested, here);
+   return here;
+  }
+
 //--- create a clean custom symbol cloned from an origin symbol
 bool SSR_MakeSymbol(const string sym, const string origin, const bool sessions_247 = true)
   {
@@ -231,6 +267,15 @@ bool SSR_MakeSymbol(const string sym, const string origin, const bool sessions_2
 
    CustomSymbolSetInteger(sym, SYMBOL_SPREAD_FLOAT, true);
    CustomSymbolSetInteger(sym, SYMBOL_TRADE_MODE, SYMBOL_TRADE_MODE_DISABLED);
+
+   //--- A clone of a futures contract can arrive carrying that
+   //--- contract's start and expiration dates. Every spike here writes
+   //--- bars at a date of its own choosing, so an inherited lifetime
+   //--- would make them fail for a reason that has nothing to do with
+   //--- what they measure. A1 reports whether the inheritance happens;
+   //--- this line makes sure it never confounds anyone else.
+   CustomSymbolSetInteger(sym, SYMBOL_START_TIME, 0);
+   CustomSymbolSetInteger(sym, SYMBOL_EXPIRATION_TIME, 0);
 
    if(sessions_247)
       SSR_Set247Sessions(sym);

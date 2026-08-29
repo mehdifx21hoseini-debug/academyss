@@ -27,7 +27,7 @@
 //--- fixed two rounds ago, the only useful question is which copy of
 //--- the source the terminal actually has. This answers it in one line
 //--- instead of a conversation.
-#define SSR_BUILD           "v12 2026-08-29  window-snap-assert"
+#define SSR_BUILD           "v13 2026-08-29  spike-origin-follows-chart"
 
 //+------------------------------------------------------------------+
 //| Replay state machine                                             |

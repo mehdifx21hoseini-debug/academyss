@@ -15,12 +15,15 @@
 
 #include <SSReplay/Spike/SSR_SpikeKit.mqh>
 
-input string   InpOrigin = "US30Cash";           // Origin symbol
+input string   InpOrigin = "";                 // Origin symbol (blank = this chart's symbol)
+
 input string   InpTest   = "SSRA3";              // Test symbol
 input datetime InpStart  = D'2024.01.08 00:00';  // Golden dataset start
 input int      InpBars   = 4320;                 // M1 bars
 input double   InpBase   = 38000.0;              // Base price
 input int      InpCuts   = 100;                  // Random cut points to test
+
+string g_origin = "";   //--- resolved from InpOrigin at the top of OnStart
 
 ENUM_TIMEFRAMES g_tf[7]     = {PERIOD_M1, PERIOD_M5, PERIOD_M15, PERIOD_M30, PERIOD_H1, PERIOD_H4, PERIOD_D1};
 string          g_tfname[7] = {"M1", "M5", "M15", "M30", "H1", "H4", "D1"};
@@ -94,7 +97,8 @@ void OnStart()
   {
    SSR_Begin("A3_FutureIsolation");
 
-   if(!SSR_MakeSymbol(InpTest, InpOrigin))
+   g_origin = SSR_Origin(InpOrigin);
+   if(!SSR_MakeSymbol(InpTest, g_origin))
      {
       SSR_Verdict("symbol_ready", false, "created", "failed", "");
       SSR_End();

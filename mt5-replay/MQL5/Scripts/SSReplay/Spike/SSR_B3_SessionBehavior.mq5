@@ -14,9 +14,12 @@
 
 #include <SSReplay/Spike/SSR_SpikeKit.mqh>
 
-input string   InpOrigin = "US30Cash";           // Origin symbol
+input string   InpOrigin = "";                 // Origin symbol (blank = this chart's symbol)
+
 input datetime InpMonday = D'2024.01.08 00:00';  // A Monday 00:00
 input double   InpBase   = 38000.0;              // Base price
+
+string g_origin = "";   //--- resolved from InpOrigin at the top of OnStart
 
 //+------------------------------------------------------------------+
 //| Inject one tick per hour of a week, then read them all back.     |
@@ -25,7 +28,7 @@ input double   InpBase   = 38000.0;              // Base price
 //+------------------------------------------------------------------+
 void RunCase(const string sym, const bool with_sessions, const string label)
   {
-   if(!SSR_MakeSymbol(sym, InpOrigin, with_sessions))
+   if(!SSR_MakeSymbol(sym, g_origin, with_sessions))
      {
       SSR_Verdict(label + "_symbol", false, "created", "failed", "");
       return;
@@ -122,6 +125,7 @@ void OnStart()
   {
    SSR_Begin("B3_SessionBehavior");
 
+   g_origin = SSR_Origin(InpOrigin);
    RunCase("SSRB3A", false, "no_sessions");
    RunCase("SSRB3B", true,  "sessions_247");
 

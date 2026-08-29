@@ -128,6 +128,15 @@ void OnStart()
                  SymbolInfoInteger(sym, SYMBOL_TRADE_MODE));
          Check("floating spread enabled",
                SymbolInfoInteger(sym, SYMBOL_SPREAD_FLOAT) != 0);
+
+         //--- The origin may be an expiring contract. Ours never is:
+         //--- the user picks the replay window, and a window outside
+         //--- an inherited contract life would be written into a
+         //--- symbol the terminal treats as dead.
+         CheckEq("replay symbol has no start date",
+                 0, SymbolInfoInteger(sym, SYMBOL_START_TIME));
+         CheckEq("replay symbol has no expiry",
+                 0, SymbolInfoInteger(sym, SYMBOL_EXPIRATION_TIME));
         }
    }
 

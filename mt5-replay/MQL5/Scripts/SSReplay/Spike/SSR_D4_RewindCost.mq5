@@ -17,13 +17,16 @@
 
 #include <SSReplay/Spike/SSR_SpikeKit.mqh>
 
-input string   InpOrigin = "US30Cash";           // Origin symbol
+input string   InpOrigin = "";                 // Origin symbol (blank = this chart's symbol)
+
 input string   InpTest   = "SSRD4";              // Test symbol
 input datetime InpStart  = D'2023.01.02 00:00';  // Seed start
 input double   InpBase   = 34000.0;              // Base price
 input int      InpDepth  = 100000;               // Seed depth (M1 bars)
 input int      InpTrials = 20;                   // Trials per strategy
 input bool     InpOpenChart = true;              // Open a chart during the test
+
+string g_origin = "";   //--- resolved from InpOrigin at the top of OnStart
 
 //+------------------------------------------------------------------+
 void Seed(const MqlRates &m1[], const int count)
@@ -43,7 +46,8 @@ void OnStart()
   {
    SSR_Begin("D4_RewindCost");
 
-   if(!SSR_MakeSymbol(InpTest, InpOrigin))
+   g_origin = SSR_Origin(InpOrigin);
+   if(!SSR_MakeSymbol(InpTest, g_origin))
      {
       SSR_Verdict("symbol_ready", false, "created", "failed", "");
       SSR_End();
@@ -93,7 +97,7 @@ void OnStart()
 
    //--- restore, then strategy 2: delete a 100-bar tail
    SSR_DropSymbol(InpTest);
-   SSR_MakeSymbol(InpTest, InpOrigin);
+   SSR_MakeSymbol(InpTest, g_origin);
    Seed(m1, InpDepth);
    SymbolSelect(InpTest, true);
    SSR_WaitSeries(InpTest, PERIOD_M1, 60000);
@@ -121,7 +125,7 @@ void OnStart()
      {
       ulong t = SSR_Now();
       SSR_DropSymbol(InpTest);
-      SSR_MakeSymbol(InpTest, InpOrigin);
+      SSR_MakeSymbol(InpTest, g_origin);
       Seed(m1, InpDepth - 1 - i);
       SymbolSelect(InpTest, true);
       SSR_WaitSeries(InpTest, PERIOD_M1, 60000);

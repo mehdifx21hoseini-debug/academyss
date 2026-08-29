@@ -15,11 +15,14 @@
 
 #include <SSReplay/Spike/SSR_SpikeKit.mqh>
 
-input string   InpOrigin = "US30Cash";           // Origin symbol
+input string   InpOrigin = "";                 // Origin symbol (blank = this chart's symbol)
+
 input string   InpTest   = "SSRD1";              // Test symbol
 input datetime InpStart  = D'2020.01.06 00:00';  // Seed start
 input double   InpBase   = 30000.0;              // Base price
 input bool     InpBig    = false;                // Include 250k and 500k cases
+
+string g_origin = "";   //--- resolved from InpOrigin at the top of OnStart
 
 int g_sizes[5]  = {10000, 50000, 100000, 250000, 500000};
 int g_chunks[5] = {1000, 5000, 10000, 50000, 0};   // 0 = single call
@@ -27,7 +30,7 @@ int g_chunks[5] = {1000, 5000, 10000, 50000, 0};   // 0 = single call
 //+------------------------------------------------------------------+
 void SeedCase(const int total, const int chunk, const int digits, const double point)
   {
-   if(!SSR_MakeSymbol(InpTest, InpOrigin))
+   if(!SSR_MakeSymbol(InpTest, g_origin))
       return;
 
    MqlRates m1[];
@@ -84,7 +87,8 @@ void OnStart()
   {
    SSR_Begin("D1_SeedPerformance");
 
-   if(!SSR_MakeSymbol(InpTest, InpOrigin))
+   g_origin = SSR_Origin(InpOrigin);
+   if(!SSR_MakeSymbol(InpTest, g_origin))
      {
       SSR_Verdict("symbol_ready", false, "created", "failed", "");
       SSR_End();

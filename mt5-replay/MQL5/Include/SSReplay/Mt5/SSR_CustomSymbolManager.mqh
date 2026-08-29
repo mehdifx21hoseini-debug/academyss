@@ -153,6 +153,15 @@ public:
    //+------------------------------------------------------------------+
    void              CloneMoneyProperties(const string origin)
      {
+      //--- A replay symbol is a container, not a contract. Whatever the
+      //--- origin's lifetime is, ours has to be "always", because the
+      //--- user chooses the replay window and it may sit outside an
+      //--- expiring instrument's life. Clearing is unconditional: the
+      //--- invariant holds whether or not the clone inherits the dates,
+      //--- and spike A1 reports which of the two this terminal does.
+      CustomSymbolSetInteger(m_symbol, SYMBOL_START_TIME, 0);
+      CustomSymbolSetInteger(m_symbol, SYMBOL_EXPIRATION_TIME, 0);
+
       CloneDouble(origin, SYMBOL_TRADE_TICK_SIZE);
       CloneDouble(origin, SYMBOL_TRADE_TICK_VALUE);
       CloneDouble(origin, SYMBOL_TRADE_TICK_VALUE_PROFIT);

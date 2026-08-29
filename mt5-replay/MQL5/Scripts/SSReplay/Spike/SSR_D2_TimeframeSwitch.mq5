@@ -13,11 +13,14 @@
 
 #include <SSReplay/Spike/SSR_SpikeKit.mqh>
 
-input string   InpOrigin = "US30Cash";           // Origin symbol
+input string   InpOrigin = "";                 // Origin symbol (blank = this chart's symbol)
+
 input string   InpTest   = "SSRD2";              // Test symbol
 input datetime InpStart  = D'2022.01.03 00:00';  // Seed start
 input double   InpBase   = 33000.0;              // Base price
 input int      InpRepeat = 10;                   // Cycles per depth
+
+string g_origin = "";   //--- resolved from InpOrigin at the top of OnStart
 
 ENUM_TIMEFRAMES g_cycle[7]  = {PERIOD_M1, PERIOD_M5, PERIOD_M15, PERIOD_M30, PERIOD_H1, PERIOD_H4, PERIOD_M1};
 string          g_cname[7]  = {"M1", "M5", "M15", "M30", "H1", "H4", "M1b"};
@@ -26,7 +29,7 @@ int             g_depths[3] = {10000, 50000, 100000};
 //+------------------------------------------------------------------+
 void MeasureDepth(const int depth, const int digits, const double point, const bool with_ticks)
   {
-   if(!SSR_MakeSymbol(InpTest, InpOrigin))
+   if(!SSR_MakeSymbol(InpTest, g_origin))
       return;
 
    MqlRates m1[];
@@ -107,7 +110,8 @@ void OnStart()
   {
    SSR_Begin("D2_TimeframeSwitch");
 
-   if(!SSR_MakeSymbol(InpTest, InpOrigin)) { SSR_End(); return; }
+   g_origin = SSR_Origin(InpOrigin);
+   if(!SSR_MakeSymbol(InpTest, g_origin)) { SSR_End(); return; }
    int    digits = (int)SymbolInfoInteger(InpTest, SYMBOL_DIGITS);
    double point  = SymbolInfoDouble(InpTest, SYMBOL_POINT);
    if(point <= 0.0) point = MathPow(10, -digits);
