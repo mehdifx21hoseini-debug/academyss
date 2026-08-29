@@ -34,6 +34,35 @@ void Skip(const string n, const string w) { g_skip++; PrintFormat("  SKIP  %s  (
 void Section(const string t) { PrintFormat("--- %s", t); }
 
 //+------------------------------------------------------------------+
+//| SERIES_BARS_COUNT IS A REPORT, NOT A QUESTION.                   |
+//|                                                                  |
+//| MetaTrader builds a timeframe series lazily, when something      |
+//| first asks for its bars. Until then it answers zero - not "no    |
+//| bars" but "no series yet", and the two look identical.           |
+//|                                                                  |
+//| T3.6 read M5 and H1 cold, got zero for both, and reported that   |
+//| the terminal had failed to derive higher timeframes from our M1  |
+//| - the central claim of this entire architecture. Nothing had     |
+//| failed. Nobody had asked.                                        |
+//+------------------------------------------------------------------+
+long SeriesBars(const string sym, const ENUM_TIMEFRAMES tf)
+  {
+   long n = 0;
+   SeriesInfoInteger(sym, tf, SERIES_BARS_COUNT, n);
+   if(n > 0)
+      return n;
+   MqlRates probe[];
+   for(int i = 0; i < 10 && n <= 0; i++)
+     {
+      CopyRates(sym, tf, 0, 1, probe);        // touch it into existence
+      SeriesInfoInteger(sym, tf, SERIES_BARS_COUNT, n);
+      if(n <= 0)
+         Sleep(100);
+     }
+   return n;
+  }
+
+//+------------------------------------------------------------------+
 void OnStart()
   {
    string origin = (InpSymbol == "" ? _Symbol : InpSymbol);
@@ -331,10 +360,13 @@ void OnStart()
             //--- the architecture's central claim, measured on real data:
             //--- we wrote M1 and ticks only, and the terminal built the
             //--- rest by itself
-            long rm1 = 0, rm5 = 0, rh1 = 0;
-            SeriesInfoInteger(rsym, PERIOD_M1, SERIES_BARS_COUNT, rm1);
-            SeriesInfoInteger(rsym, PERIOD_M5, SERIES_BARS_COUNT, rm5);
-            SeriesInfoInteger(rsym, PERIOD_H1, SERIES_BARS_COUNT, rh1);
+            //--- ASK BEFORE READING THE COUNT. SERIES_BARS_COUNT is
+            //--- zero for a timeframe nothing has requested yet, and
+            //--- this read it cold - then blamed the terminal for not
+            //--- deriving what it had never been asked to derive.
+            long rm1 = SeriesBars(rsym, PERIOD_M1);
+            long rm5 = SeriesBars(rsym, PERIOD_M5);
+            long rh1 = SeriesBars(rsym, PERIOD_H1);
             Check("M1 present on the replay symbol", rm1 > 0, IntegerToString((int)rm1));
             Check("M5 derived by the terminal",     rm5 > 0, IntegerToString((int)rm5));
             Check("H1 derived by the terminal",     rh1 > 0, IntegerToString((int)rh1));

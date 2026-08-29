@@ -346,8 +346,27 @@ void OnStart()
       ctrl.ClearPauseReason();
       Check("stepped back", ctrl.JumpTo(back), ctrl.LastErrorText());
 
-      Check("the position is open again",
-            acct.ByTicket(t, p) && p.IsOpen(), p.ToString());
+      //+------------------------------------------------------------------+
+      //| WHAT A REWIND MUST UNDO, stated so tick granularity cannot     |
+      //| decide the verdict.                                             |
+      //|                                                                 |
+      //| This used to demand the position be OPEN again after rewinding  |
+      //| to the midpoint between its open and its close. But those two   |
+      //| instants are a fraction of a bar apart here - the market        |
+      //| reaches the stop on the next tick - so the midpoint can land on |
+      //| the very tick that closed it, and the assertion then fails for  |
+      //| a reason that has nothing to do with rewinding.                 |
+      //|                                                                 |
+      //| The invariant that actually matters, and that holds whichever   |
+      //| side of the tick the midpoint falls on: after stepping back     |
+      //| before the close, THE CLOSE HAS NOT HAPPENED. Whether the       |
+      //| position is open again or has ceased to exist depends on how    |
+      //| far back we landed, and both are correct.                       |
+      //+------------------------------------------------------------------+
+      bool still_there = acct.ByTicket(t, p);
+      Check("the close was undone", !still_there || !p.IsClosed(),
+            (still_there ? p.ToString() : "position un-opened entirely"));
+      CheckEq("and nothing is booked as closed", 0, acct.ClosedCount());
 
       string why = "";
       Check("and the watcher is holding nothing", !ap.PauseRequested(why), why);

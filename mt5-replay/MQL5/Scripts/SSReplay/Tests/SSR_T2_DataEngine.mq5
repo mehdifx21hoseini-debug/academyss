@@ -377,7 +377,18 @@ void OnStart()
          CheckEq("stream is ordered",           0, sink.OrderViolations());
          CheckEq("no duplicate stamps",         0, sink.DuplicateStamps());
          CheckEq("nothing beyond replay time",  0, sink.CountAfter(ctrl.Now()));
-         CheckEq("clock advanced 120s", win_start + 120000, ctrl.Now());
+         //--- WHEN THIS FAILS, SAY ENOUGH TO DIAGNOSE IT. A clock that
+         //--- stopped short can mean the engine errored, completed, or
+         //--- was paused by an observer - and a bare pair of numbers
+         //--- cannot tell those apart. It cost a whole round trip once.
+         Check("clock advanced 120s", ctrl.Now() == win_start + 120000,
+               StringFormat("expected=%I64d actual=%I64d (%+I64d ms)  state=%s  "
+                            "window=%I64d..%I64d  err=%s",
+                            win_start + 120000, ctrl.Now(),
+                            ctrl.Now() - (win_start + 120000),
+                            SSRStateName(ctrl.Status()),
+                            ctrl.StartMsc(), ctrl.EndMsc(),
+                            ctrl.LastErrorText()));
          CheckEq("no guard violations in normal play", 0, ctrl.Violations());
 
          //--- Phase 1 said Core would not change to accept a real source.

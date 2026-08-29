@@ -93,10 +93,13 @@ void OnStart()
       CheckEq("numpad + also",      SSR_CMD_SPEED_UP,       SSRKeyToCommand(SSR_VK_NUMPLUS));
       CheckEq("- slows down",       SSR_CMD_SPEED_DOWN,     SSRKeyToCommand(SSR_VK_MINUS));
 
-      //--- LEFT is unbound on purpose until Phase 8 has a real rewind.
-      //--- A key that silently does nothing is better than one that
-      //--- pretends to work.
-      CheckEq("LEFT is deliberately unbound", SSR_CMD_NONE, SSRKeyToCommand(SSR_VK_LEFT));
+      //--- LEFT WAS unbound on purpose, until Phase 8 gave it a real
+      //--- rewind to be bound to. This assertion outlived that: it went
+      //--- on demanding silence from a key that had done something for
+      //--- seven phases, while T8.1 two files over asserted the
+      //--- opposite. A test that contradicts another test is not a
+      //--- second opinion; one of them is stale, and this was it.
+      CheckEq("LEFT steps back", SSR_CMD_STEP_BACK, SSRKeyToCommand(SSR_VK_LEFT));
       CheckEq("unknown keys are ignored",     SSR_CMD_NONE, SSRKeyToCommand(999));
    }
 
@@ -233,10 +236,25 @@ void OnStart()
       Check("twenty identical renders wrote almost nothing", spent <= 2,
             StringFormat("%d label writes", spent));
 
-      //--- but a real change must still get through
-      port.state.now_msc += 60000;
+      //+------------------------------------------------------------------+
+      //| CHANGE WHAT THE PANEL ACTUALLY RENDERS.                        |
+      //|                                                                |
+      //| This bumped now_msc and expected the clock label to be         |
+      //| rewritten. The panel does not format the clock from the        |
+      //| instant - it prints clock_text, which the port hands over       |
+      //| already masked when the session is blind. That is deliberate:  |
+      //| a panel that formatted the instant itself would be a second    |
+      //| place that has to know about Blind Mode, and the one that gets |
+      //| forgotten, printing the date in the largest font on screen.    |
+      //|                                                                |
+      //| So the test was asserting against a design the product had     |
+      //| deliberately moved away from, and the panel was right.         |
+      //+------------------------------------------------------------------+
+      port.state.now_msc   += 60000;
+      port.state.clock_text = "2024.01.08 10:38:00";
       panel.Render();
-      Check("a changed clock is written", panel.Writes() > w0 + spent);
+      Check("a changed clock is written", panel.Writes() > w0 + spent,
+            StringFormat("%d writes after %d", panel.Writes(), w0 + spent));
    }
 
    //================================================================

@@ -95,10 +95,28 @@ private:
          if(was == now)
             continue;
 
-         //--- a slot we had never seen before is not a transition; it
-         //--- is the first sight of an order that may already be open
-         bool is_new = (was == 255);
-
+         //+------------------------------------------------------------+
+         //| A SLOT SEEN FOR THE FIRST TIME IS STILL AN EVENT.          |
+         //|                                                            |
+         //| This used to skip any close on a slot it had never seen    |
+         //| open, reasoning that first sight is not a transition. That |
+         //| is true for an account adopted whole - a restored session, |
+         //| a rewind - and false for the case that actually matters:   |
+         //| a position that opens and closes between two of this       |
+         //| watcher's own looks.                                       |
+         //|                                                            |
+         //| Which is not exotic. It is a scalp. It is any stop close   |
+         //| enough to be reached by the next tick, and at 50x it is    |
+         //| most of them. The replay ran straight past every one of    |
+         //| them without stopping, and the test that caught it had to  |
+         //| pump six hundred times to prove the pause never came.      |
+         //|                                                            |
+         //| Adoption is handled where it belongs - Reseed(), which     |
+         //| takes the account's current state WITHOUT raising          |
+         //| anything, on a rewind and on a session start. With that in |
+         //| place, anything Scan() sees for the first time genuinely   |
+         //| happened while it was watching.                            |
+         //+------------------------------------------------------------+
          if(now == SSR_POS_OPEN)
            {
             //--- new and open, or pending that just filled: an ENTRY
@@ -109,7 +127,7 @@ private:
             continue;
            }
 
-         if(now != SSR_POS_CLOSED || is_new)
+         if(now != SSR_POS_CLOSED)
             continue;
 
          switch(p.reason)
@@ -196,7 +214,11 @@ public:
      {
       m_want   = false;
       m_reason = "";
-      m_seen_count = 0;
+      //--- ADOPT, do not merely forget. Zeroing the count alone would
+      //--- make the next scan treat every standing position as brand
+      //--- new - which, now that first sight counts as an event, is
+      //--- exactly the storm of phantom pauses Reseed() exists to stop.
+      Reseed();
      }
 
    //--- adopt the account's current state WITHOUT raising anything:

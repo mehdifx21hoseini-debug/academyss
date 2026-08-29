@@ -1237,7 +1237,25 @@ public:
 
       if(target < m_clock.now_msc)
         {
-         long bars = (m_clock.now_msc - target) / SSR_MSC_PER_MIN + 1;
+         //+------------------------------------------------------------+
+         //| HOW MANY BARS BACK, and the off-by-one that lived here.    |
+         //|                                                            |
+         //| StepBackward counts from the OPEN of the current bar, so   |
+         //| the distance has to be measured from there too. And the    |
+         //| count is a CEILING - enough bars to reach the one holding  |
+         //| the target - not a floor with one added.                   |
+         //|                                                            |
+         //| "floor + 1" is right only when the distance is NOT a whole |
+         //| number of bars. When it is - which is exactly what happens |
+         //| every time a user returns to a bookmark, since a bookmark  |
+         //| sits on a bar open - it overshoots by one and lands the    |
+         //| user on the candle BEFORE the one they marked.             |
+         //+------------------------------------------------------------+
+         long here  = SSRBarOpenMsc(m_clock.now_msc, PERIOD_M1);
+         long delta = here - target;
+         if(delta <= 0)
+            return true;               // the current bar already holds it
+         long bars = (delta + SSR_MSC_PER_MIN - 1) / SSR_MSC_PER_MIN;
          return StepBackward((int)MathMin(bars, 2147483000));
         }
       if(target == m_clock.now_msc)

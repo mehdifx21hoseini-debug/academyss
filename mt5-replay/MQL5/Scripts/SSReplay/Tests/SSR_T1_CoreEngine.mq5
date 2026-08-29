@@ -372,7 +372,12 @@ void OnStart()
          ctrl.SetFidelity(modes[f]);
          ctrl.Load("TEST", start, endt);
          ctrl.Play();
-         for(int i = 0; i < 10; i++)
+         //--- LONG ENOUGH FOR A BAR TO CLOSE. BAR fidelity emits once
+         //--- per bar close and a bar is sixty seconds, so ten pumps of
+         //--- one second could never produce a single tick. The
+         //--- assertion below was right; the setup never gave it a
+         //--- chance to be true.
+         for(int i = 0; i < 180; i++)
             ctrl.Pump(1000);
          counts[f] = sink.TickCount();
         }

@@ -134,6 +134,43 @@ public:
    void              StatsInto(SSRSymbolStats &out) { out = m_stats; }
 
    //+------------------------------------------------------------------+
+   //| COPY THE PROPERTIES MONEY IS COMPUTED FROM.                      |
+   //|                                                                  |
+   //| CustomSymbolCreate takes an origin symbol and clones most of it, |
+   //| but not all of it: on build 6090, tick size came back wrong on   |
+   //| the replay symbol while digits, point and contract size were     |
+   //| right. A test caught it; nothing else would have.                |
+   //|                                                                  |
+   //| That matters more than it looks. Every money figure in this      |
+   //| product divides a price distance by TICK SIZE and multiplies by  |
+   //| TICK VALUE - never by point. A replay symbol carrying the wrong  |
+   //| tick size reports the wrong profit on every trade taken on it,   |
+   //| quietly, in the direction of whatever the default happened to be.|
+   //|                                                                  |
+   //| So they are set explicitly rather than assumed to have come      |
+   //| along for the ride. A property that already matches is set to    |
+   //| the same value, which costs nothing.                             |
+   //+------------------------------------------------------------------+
+   void              CloneMoneyProperties(const string origin)
+     {
+      CloneDouble(origin, SYMBOL_TRADE_TICK_SIZE);
+      CloneDouble(origin, SYMBOL_TRADE_TICK_VALUE);
+      CloneDouble(origin, SYMBOL_TRADE_TICK_VALUE_PROFIT);
+      CloneDouble(origin, SYMBOL_TRADE_TICK_VALUE_LOSS);
+      CloneDouble(origin, SYMBOL_TRADE_CONTRACT_SIZE);
+      CloneDouble(origin, SYMBOL_VOLUME_MIN);
+      CloneDouble(origin, SYMBOL_VOLUME_MAX);
+      CloneDouble(origin, SYMBOL_VOLUME_STEP);
+     }
+
+   void              CloneDouble(const string origin, const ENUM_SYMBOL_INFO_DOUBLE prop)
+     {
+      double v = SymbolInfoDouble(origin, prop);
+      if(v > 0.0)
+         CustomSymbolSetDouble(m_symbol, prop, v);
+     }
+
+   //+------------------------------------------------------------------+
    //| Create the replay symbol as a clone of `origin`.                 |
    //| An existing symbol of the same name is torn down first, so a     |
    //| crashed previous session cannot poison this one.                 |
@@ -189,6 +226,7 @@ public:
       CustomSymbolSetInteger(m_symbol, SYMBOL_SPREAD_FLOAT, true);
       CustomSymbolSetInteger(m_symbol, SYMBOL_TRADE_MODE, SYMBOL_TRADE_MODE_DISABLED);
       Apply247Sessions();
+      CloneMoneyProperties(origin);
 
       //--- CustomTicksAdd only broadcasts to charts for a symbol that is
       //--- in Market Watch, so selection is part of creation, not a
@@ -242,6 +280,7 @@ public:
       CustomSymbolSetInteger(m_symbol, SYMBOL_SPREAD_FLOAT, true);
       CustomSymbolSetInteger(m_symbol, SYMBOL_TRADE_MODE, SYMBOL_TRADE_MODE_DISABLED);
       Apply247Sessions();
+      CloneMoneyProperties(origin);
 
       if(!SymbolSelect(m_symbol, true))
         {
@@ -504,12 +543,39 @@ public:
       return SymbolInfoInteger(m_symbol, SYMBOL_TIME_MSC);
      }
 
+   //+------------------------------------------------------------------+
+   //| SERIES_BARS_COUNT IS A REPORT, NOT A QUESTION.                   |
+   //|                                                                  |
+   //| MetaTrader builds a timeframe series lazily, when something      |
+   //| first asks for its bars. Until then SeriesInfoInteger answers    |
+   //| zero - not "no bars", but "no series yet", and the two are       |
+   //| indistinguishable to the caller.                                 |
+   //|                                                                  |
+   //| A test read M5 and H1 straight off SERIES_BARS_COUNT, got zero   |
+   //| for both, and reported that the terminal had failed to derive    |
+   //| higher timeframes from our M1 - the central claim of the whole   |
+   //| architecture. Nothing had failed. Nobody had asked.              |
+   //|                                                                  |
+   //| So this asks first, with one CopyRates for a single bar, and     |
+   //| gives the terminal a bounded moment to answer.                   |
+   //+------------------------------------------------------------------+
    long              BarCount(const ENUM_TIMEFRAMES tf)
      {
       if(!m_created)
          return 0;
       long n = 0;
       SeriesInfoInteger(m_symbol, tf, SERIES_BARS_COUNT, n);
+      if(n > 0)
+         return n;
+
+      MqlRates probe[];
+      for(int i = 0; i < 10 && n <= 0; i++)
+        {
+         CopyRates(m_symbol, tf, 0, 1, probe);   // touch it into existence
+         SeriesInfoInteger(m_symbol, tf, SERIES_BARS_COUNT, n);
+         if(n <= 0)
+            Sleep(100);
+        }
       return n;
      }
 
