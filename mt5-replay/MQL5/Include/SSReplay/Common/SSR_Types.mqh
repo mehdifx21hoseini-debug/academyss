@@ -27,7 +27,7 @@
 //--- fixed two rounds ago, the only useful question is which copy of
 //--- the source the terminal actually has. This answers it in one line
 //--- instead of a conversation.
-#define SSR_BUILD           "v6  2026-08-29  heap-log"
+#define SSR_BUILD           "v7  2026-08-29  measured-warmup"
 
 //+------------------------------------------------------------------+
 //| Replay state machine                                             |

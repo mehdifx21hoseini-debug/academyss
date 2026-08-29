@@ -23,6 +23,7 @@
 input string InpSymbol      = "";      // Symbol to check (empty = this chart)
 input int    InpWantBars    = 20000;   // M1 bars a real session wants
 input bool   InpTestCharts  = true;    // Open and close a chart (visible, brief)
+input int    InpBenchBars   = 50000;   // Bars per write-rate pass (0 = skip)
 
 int    g_blockers = 0, g_limits = 0, g_ok = 0;
 string g_notes    = "";
@@ -112,6 +113,22 @@ void OnStart()
             Limit("risk sizing",
                   "this symbol reports no tick value or tick size, so lot "
                   "sizes will fall back to a 1:1 assumption");
+
+         //--- POINT IS NOT TICK SIZE, and code that assumes it is will be
+         //--- wrong by exactly the ratio between them. Every money figure
+         //--- in this product goes through CSSRRiskEngine, which divides
+         //--- by tick_size and never by point; this line is here so the
+         //--- difference is on the record when a symbol has one.
+         if(ts > 0.0 && point > 0.0 && MathAbs(ts - point) > point * 0.001)
+            Ok("point vs tick size",
+               StringFormat("they differ (%g vs %g) - money is computed from "
+                            "tick size, so this is handled", point, ts));
+
+         //--- WHAT ONE LOT MOVING ONE POINT IS WORTH. The number a user
+         //--- can sanity-check against their broker in one glance.
+         if(tv > 0.0 && ts > 0.0 && point > 0.0)
+            PrintFormat("      one lot, one point = %.5g %s",
+                        tv * (point / ts), AccountInfoString(ACCOUNT_CURRENCY));
 
          //--- SESSION HOURS, which Phase 6 and Phase 11 both read
          datetime from = 0, to = 0;
@@ -281,22 +298,11 @@ void OnStart()
                                  wrote, GetLastError()));
          else
            {
-            //--- A MEASURED RATE, not an adjective. The catalogue uses
-            //--- this to quote what a warmup will cost on THIS machine.
-            double rate = (ms > 0.0 ? wrote / (ms / 1000.0) : 0.0);
+            //--- CORRECTNESS ONLY. This write is 500 bars, and 500 bars
+            //--- cannot measure a 288,000-bar warmup. Section 5 does
+            //--- the measuring, at the scale it is quoting.
             Ok("custom bars write",
-               StringFormat("%d bars in %.1f ms = %.0f bars/sec", wrote, ms, rate));
-            if(rate > 0.0)
-              {
-               double secs_288k = 288000.0 / rate;
-               PrintFormat("      at that rate a 200-day D1 warmup (288,000 M1 "
-                           "bars) would take %.0f seconds", secs_288k);
-               if(secs_288k > 120.0)
-                  Limit("warmup cost",
-                        StringFormat("%.0f seconds for a full D1 warmup - "
-                                     "usable, but not something to do often",
-                                     secs_288k));
-              }
+               StringFormat("%d bars accepted in %.1f ms", wrote, ms));
 
             MqlRates back[];
             int read = CopyRates(test, PERIOD_M1, w[0].time, w[499].time, back);
@@ -388,7 +394,168 @@ void OnStart()
    }
 
    //================================================================
-   Head("5. the places this product writes to");
+   Head("5. write rate, measured at the scale it is quoted at");
+   {
+      //+------------------------------------------------------------------+
+      //| WHY THIS SECTION EXISTS.                                         |
+      //|                                                                  |
+      //| The first version of this script timed a 500-bar write and       |
+      //| multiplied by 576 to quote a 288,000-bar warmup. Two real runs   |
+      //| then reported 35,159 and 180,245 bars/sec from that same 500-bar |
+      //| sample - a 5x spread, out of a sample small enough to be mostly  |
+      //| call overhead and whatever the terminal happened to be doing.    |
+      //| Either number would have been quoted to a user as fact.          |
+      //|                                                                  |
+      //| A rule I set at the start of this project: no performance claim  |
+      //| without measurement. Extrapolating 576x is a claim.              |
+      //|                                                                  |
+      //| So this writes at warmup scale, three times, in the shape a      |
+      //| warmup actually uses - forward, disjoint, into a growing series  |
+      //| - and quotes the SLOWEST pass, because the slowest is the one    |
+      //| a user will sooner or later sit through.                         |
+      //+------------------------------------------------------------------+
+      if(InpBenchBars < 1000)
+        {
+         Print("      (skipped - InpBenchBars is below 1000, too small to measure)");
+        }
+      else
+        {
+         string bs = "SSRPreflight" + SSR_SYMBOL_SUFFIX + "B";
+         CustomSymbolDelete(bs);
+         ResetLastError();
+
+         if(!CustomSymbolCreate(bs, SSRReplaySymbolPath(), sym))
+           {
+            Limit("write rate", StringFormat("could not create the benchmark "
+                                             "symbol (error %d) - rate unknown",
+                                             GetLastError()));
+           }
+         else
+           {
+            CustomSymbolSetInteger(bs, SYMBOL_TRADE_MODE, SYMBOL_TRADE_MODE_DISABLED);
+
+            MqlRates b[];
+            ArrayResize(b, InpBenchBars);
+
+            double   worst_rate = 0.0;
+            double   best_rate  = 0.0;
+            bool     failed     = false;
+            datetime cursor     = D'2015.01.05 00:00';
+
+            for(int pass = 0; pass < 3; pass++)
+              {
+               for(int i = 0; i < InpBenchBars; i++)
+                 {
+                  b[i].time        = cursor + i * 60;
+                  b[i].open        = 100.0 + (i % 500) * 0.01;
+                  b[i].close       = b[i].open;
+                  b[i].high        = b[i].open + 0.02;
+                  b[i].low         = b[i].open - 0.02;
+                  b[i].tick_volume = 10;
+                  b[i].spread      = 2;
+                  b[i].real_volume = 0;
+                 }
+
+               ulong  t0 = GetMicrosecondCount();
+               int    n  = CustomRatesUpdate(bs, b);
+               double ms = (GetMicrosecondCount() - t0) / 1000.0;
+
+               if(n != InpBenchBars)
+                 {
+                  Limit("write rate",
+                        StringFormat("pass %d wrote %d of %d (error %d)",
+                                     pass + 1, n, InpBenchBars, GetLastError()));
+                  failed = true;
+                  break;
+                 }
+
+               double rate = (ms > 0.0 ? n / (ms / 1000.0) : 0.0);
+               PrintFormat("      pass %d: %d bars in %.0f ms = %.0f bars/sec",
+                           pass + 1, n, ms, rate);
+               if(worst_rate == 0.0 || rate < worst_rate) worst_rate = rate;
+               if(rate > best_rate)                       best_rate  = rate;
+
+               //--- next pass appends AFTER this one, so each write goes
+               //--- into a series that is already longer than the last
+               cursor += InpBenchBars * 60;
+              }
+
+            if(!failed && worst_rate > 0.0)
+              {
+               Ok("write rate", StringFormat("%.0f bars/sec at %d-bar scale "
+                                             "(slowest of 3; fastest was %.0f)",
+                                             worst_rate, InpBenchBars, best_rate));
+
+               //--- Say plainly how far this is being stretched. A 200-day
+               //--- D1 warmup is 288,000 M1 bars; anything short of that
+               //--- measured here is extrapolation, and is labelled so.
+               double secs = 288000.0 / worst_rate;
+               double reach = 288000.0 / (double)InpBenchBars;
+               if(reach <= 1.0)
+                  PrintFormat("      a 200-day D1 warmup (288,000 bars) is "
+                              "MEASURED at %.0f seconds", secs);
+               else
+                  PrintFormat("      a 200-day D1 warmup (288,000 bars) "
+                              "extrapolates to %.0f seconds - %.1fx beyond "
+                              "what was measured, so treat it as an estimate",
+                              secs, reach);
+
+               if(secs > 120.0)
+                  Limit("warmup cost",
+                        StringFormat("about %.0f seconds for a full D1 warmup "
+                                     "- usable, but not something to do often",
+                                     secs));
+
+               //--- THE OTHER RATE, and the one that decides whether replay
+               //--- keeps up at speed: a warmup writes in bulk, but a running
+               //--- replay appends one bar at a time. They are not the same
+               //--- number and quoting the bulk one for both would mislead.
+               MqlRates one[1];
+               ulong    t1 = GetMicrosecondCount();
+               int      appended = 0;
+               for(int i = 0; i < 500; i++)
+                 {
+                  one[0].time        = cursor + i * 60;
+                  one[0].open        = 100.0;
+                  one[0].close       = 100.0;
+                  one[0].high        = 100.02;
+                  one[0].low         = 99.98;
+                  one[0].tick_volume = 10;
+                  one[0].spread      = 2;
+                  one[0].real_volume = 0;
+                  if(CustomRatesUpdate(bs, one) == 1) appended++;
+                 }
+               double per_bar_us = (GetMicrosecondCount() - t1) / 500.0;
+
+               if(appended < 500)
+                  Limit("single-bar append",
+                        StringFormat("%d of 500 single-bar writes accepted "
+                                     "(error %d)", appended, GetLastError()));
+               else
+                 {
+                  Ok("single-bar append",
+                     StringFormat("%.0f us per bar = %.0f bars/sec streaming",
+                                  per_bar_us, 1000000.0 / per_bar_us));
+                  //--- 1x speed on M1 is one bar per 60 seconds. The number
+                  //--- that matters is the ceiling, not the comfort.
+                  PrintFormat("      at that cost the M1 stream saturates "
+                              "around %.0fx real time", 60000000.0 / per_bar_us);
+                 }
+              }
+
+            SymbolSelect(bs, false);
+            Sleep(100);
+            ResetLastError();
+            if(!CustomSymbolDelete(bs))
+               Limit("benchmark cleanup",
+                     StringFormat("could not delete %s (error %d) - remove it "
+                                  "by hand from Market Watch", bs, GetLastError()));
+           }
+        }
+   }
+
+   //================================================================
+   Head("6. the places this product writes to");
    {
       string path = "SSReplay\\preflight.txt";
       int h = FileOpen(path, FILE_WRITE | FILE_TXT | FILE_ANSI);
