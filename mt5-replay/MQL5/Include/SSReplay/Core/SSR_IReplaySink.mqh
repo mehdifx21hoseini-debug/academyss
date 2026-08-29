@@ -1,0 +1,63 @@
+//+------------------------------------------------------------------+
+//|                                              SSR_IReplaySink.mqh |
+//|                              SS Replay - Output Sink Contract(L2)|
+//|                                                                  |
+//|  The seam between the engine and MetaTrader.                     |
+//|                                                                  |
+//|  The core produces a stream of ticks and lifecycle events, and   |
+//|  hands them to a sink. It has no idea whether the sink writes to |
+//|  a custom symbol (Phase 3), to a test recorder (Phase 1), or to  |
+//|  nothing at all. That is exactly what keeps the core testable    |
+//|  without MetaTrader and free of any Custom*/Chart* dependency.   |
+//+------------------------------------------------------------------+
+#ifndef SSR_IREPLAYSINK_MQH
+#define SSR_IREPLAYSINK_MQH
+
+#include "../Common/SSR_Types.mqh"
+
+//+------------------------------------------------------------------+
+class CSSRReplaySink
+  {
+protected:
+   ENUM_SSR_ERR      m_last_error;
+   string            m_last_error_text;
+
+   void              Fail(const ENUM_SSR_ERR e, const string t)
+     {
+      m_last_error = e;
+      m_last_error_text = t;
+     }
+
+public:
+                     CSSRReplaySink(void) : m_last_error(SSR_OK), m_last_error_text("") {}
+   virtual          ~CSSRReplaySink(void) {}
+
+   virtual string    Name(void) = 0;
+
+   //--- called once before any data flows; the sink prepares itself
+   virtual bool      Prepare(const string symbol, const int digits, const double point) = 0;
+
+   //--- warmup history, delivered in bulk before replay begins
+   virtual bool      SeedBars(const MqlRates &bars[], const int count) = 0;
+
+   //--- the replay stream. `count` may be 0, which is not an error.
+   virtual bool      EmitTicks(const MqlTick &ticks[], const int count) = 0;
+
+   //--- everything at or after `from_msc` must cease to exist.
+   //--- this is what makes rewind and reset structural rather than cosmetic.
+   virtual bool      TruncateFrom(const long from_msc) = 0;
+
+   //--- lifecycle notifications; a sink may ignore any of them
+   virtual void      OnStateChanged(const ENUM_SSR_STATE from, const ENUM_SSR_STATE to) {}
+   virtual void      OnSeek(const long msc) {}
+   virtual void      OnReset(void) {}
+
+   //--- called when replay is torn down; release resources here
+   virtual void      Release(void) {}
+
+   ENUM_SSR_ERR      LastError(void)     { return m_last_error; }
+   string            LastErrorText(void) { return m_last_error_text; }
+  };
+
+#endif // SSR_IREPLAYSINK_MQH
+//+------------------------------------------------------------------+
