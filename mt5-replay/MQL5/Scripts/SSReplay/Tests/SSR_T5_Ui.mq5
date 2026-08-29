@@ -33,7 +33,13 @@ class CFakePort : public CSSRReplayPort
 public:
    SSRUiState state;
    int play, pause, reset, step, seek, speed, fidelity, follow, hide;
-   int last_step_bars;
+   //--- Phase 8 added three verbs to the port and this fake was never
+   //--- brought up to them, which left it ABSTRACT: the class could
+   //--- not be instantiated and this whole file could not compile.
+   //--- Found by the Phase 16 audit, not by any brace count.
+   int back, restart, jump;
+   int last_step_bars, last_back_bars;
+   long last_jump_msc;
    long last_speed;
    ENUM_SSR_FIDELITY last_fidelity;
 
@@ -42,7 +48,9 @@ public:
    void Clear(void)
      {
       play = pause = reset = step = seek = speed = fidelity = follow = hide = 0;
-      last_step_bars = 0; last_speed = 0; last_fidelity = SSR_FIDELITY_BAR;
+      back = restart = jump = 0;
+      last_step_bars = 0; last_back_bars = 0; last_jump_msc = 0;
+      last_speed = 0; last_fidelity = SSR_FIDELITY_BAR;
      }
 
    virtual string Name(void) override        { return "fake"; }
@@ -54,6 +62,11 @@ public:
    virtual bool   Reset(void) override { reset++; state.status = SSR_STATE_READY;   return true; }
    virtual bool   StepBars(const int b) override { step++; last_step_bars = b; return true; }
    virtual bool   SeekTo(const long m) override  { seek++; return true; }
+   virtual bool   StepBack(const int b) override
+     { back++; last_back_bars = b; return true; }
+   virtual bool   JumpTo(const long m) override
+     { jump++; last_jump_msc = m; return true; }
+   virtual bool   Restart(void) override { restart++; return true; }
    virtual bool   SetSpeedX100(const long s) override
      { speed++; last_speed = s; state.speed_x100 = s; return true; }
    virtual bool   SetFidelity(const ENUM_SSR_FIDELITY f) override
@@ -252,6 +265,35 @@ void OnStart()
       Check("real ticks look different from synthetic",
             SSRFidelityColor(SSR_FIDELITY_FULL_TICK) !=
             SSRFidelityColor(SSR_FIDELITY_SYNTHETIC_TICK));
+   }
+
+   //================================================================
+   Section("T5.9  the navigation verbs reach the port");
+   {
+      //--- ADDED IN PHASE 16. Phase 8 put StepBack, JumpTo and Restart
+      //--- on the port and this fake was never brought up to them,
+      //--- which left it abstract and this whole file uncompilable.
+      //--- The assertions below exist so that cannot happen silently
+      //--- again: they will not link unless the verbs are implemented.
+      CFakePort p59;
+      CSSRPanel panel59;
+      panel59.Create(cid, GetPointer(p59), "SSRT59_");
+
+      p59.state.status = SSR_STATE_PAUSED;
+      panel59.OnEvent(CHARTEVENT_KEYDOWN, SSR_VK_LEFT, 0.0, "");
+      CheckEq("LEFT stepped back", 1, p59.back);
+      CheckEq("by one bar",        1, p59.last_back_bars);
+
+      panel59.OnEvent(CHARTEVENT_KEYDOWN, SSR_VK_PGUP, 0.0, "");
+      CheckEq("PgUp stepped back again", 2, p59.back);
+      CheckEq("by ten bars",            10, p59.last_back_bars);
+
+      Check("the port can be jumped", p59.JumpTo(123456789));
+      CheckEq("which was recorded",   123456789, p59.last_jump_msc);
+      Check("and restarted", p59.Restart());
+      CheckEq("counted", 1, p59.restart);
+
+      panel59.Destroy();
    }
 
    //================================================================
