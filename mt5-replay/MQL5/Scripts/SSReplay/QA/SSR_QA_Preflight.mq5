@@ -46,6 +46,10 @@ void OnStart()
    Print("  SS REPLAY - PREFLIGHT");
    Print("  build: ", SSR_BUILD);
    Print("  symbol under test: ", sym);
+   //--- WHICH TERMINAL. More than one MT5 install is normal, and a
+   //--- compile that lands in one data folder while the script runs
+   //--- from another looks exactly like a copy that never happened.
+   Print("  data folder: ", TerminalInfoString(TERMINAL_DATA_PATH));
    Print("==================================================");
 
    //================================================================
@@ -253,19 +257,54 @@ void OnStart()
    {
       string test = "SSRPreflight" + SSR_SYMBOL_SUFFIX + "9";
 
-      //--- a leftover from a previous run must not fail the check
+      //+------------------------------------------------------------------+
+      //| A LEFTOVER FROM A PREVIOUS RUN MUST NOT FAIL THE CHECK -         |
+      //| and the first two versions of this let it.                       |
+      //|                                                                  |
+      //| A selected symbol cannot be deleted (5306), so a bare            |
+      //| CustomSymbolDelete leaves the leftover in place; the create       |
+      //| that follows then fails with 5304 (already exists) and the        |
+      //| script declares NO GO over its own litter. That is exactly       |
+      //| what happened on the third real run.                             |
+      //|                                                                  |
+      //| Deselect, wait a beat, delete - the order the product has used    |
+      //| since Phase 3. And if creation still fails because the symbol     |
+      //| is there, do what CSSRCustomSymbolManager::Create does: ADOPT     |
+      //| it rather than refuse. Being unable to start because of a         |
+      //| previous crash is not an acceptable answer.                      |
+      //+------------------------------------------------------------------+
+      SymbolSelect(test, false);
+      Sleep(120);
       CustomSymbolDelete(test);
       ResetLastError();
 
+      bool adopted = false;
       if(!CustomSymbolCreate(test, SSRReplaySymbolPath(), sym))
         {
-         Blocker("custom symbol create",
-                 StringFormat("error %d - without this NOTHING in this "
-                              "product works", GetLastError()));
+         int create_err = GetLastError();
+
+         ResetLastError();
+         bool exists = (SymbolInfoInteger(test, SYMBOL_DIGITS) > 0 &&
+                        GetLastError() == 0);
+
+         if(exists)
+           {
+            adopted = true;
+            Limit("custom symbol create",
+                  StringFormat("%s was still there from an earlier run "
+                               "(error %d) - adopted it, which is what the "
+                               "product itself does", test, create_err));
+           }
+         else
+            Blocker("custom symbol create",
+                    StringFormat("error %d - without this NOTHING in this "
+                                 "product works", create_err));
         }
-      else
+
+      if(adopted || SymbolInfoInteger(test, SYMBOL_DIGITS) > 0)
         {
-         Ok("custom symbol create", test);
+         if(!adopted)
+            Ok("custom symbol create", test);
          CustomSymbolSetInteger(test, SYMBOL_TRADE_MODE, SYMBOL_TRADE_MODE_DISABLED);
 
          if(!SymbolSelect(test, true))
