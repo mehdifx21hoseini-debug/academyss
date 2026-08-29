@@ -37,6 +37,7 @@ enum ENUM_SSR_CLOSE_REASON
    SSR_CLOSE_SL,
    SSR_CLOSE_TP,
    SSR_CLOSE_PARTIAL,
+   SSR_CLOSE_STOPOUT,
    SSR_CLOSE_SESSION_END
   };
 
@@ -62,6 +63,7 @@ string SSRCloseReasonName(const ENUM_SSR_CLOSE_REASON r)
       case SSR_CLOSE_SL:          return "stop loss";
       case SSR_CLOSE_TP:          return "take profit";
       case SSR_CLOSE_PARTIAL:     return "partial";
+      case SSR_CLOSE_STOPOUT:     return "stop out";
       case SSR_CLOSE_SESSION_END: return "session end";
      }
    return "open";
@@ -75,6 +77,41 @@ bool SSRIsPending(const ENUM_SSR_ORDER t)
   { return (t != SSR_ORDER_BUY && t != SSR_ORDER_SELL); }
 
 //+------------------------------------------------------------------+
+//| One reduction of a position's size, and everything needed to     |
+//| put it back.                                                     |
+//|                                                                  |
+//| WHY THIS EXISTS                                                  |
+//| A rewind means the future did not happen. That has to include    |
+//| the parts of a trade that were taken off in it. Without a record |
+//| of each exit, an engine can only restore a position wholesale -  |
+//| which is right for a trade that was closed in one go and wrong   |
+//| for one that was scaled out of, leaving the trader holding a     |
+//| size they never chose at a moment they never traded.             |
+//|                                                                  |
+//| So every exit, partial or final, is a leg, and a rewind unwinds  |
+//| legs newest-first until none of them is in the future.           |
+//+------------------------------------------------------------------+
+struct SSRTradeLeg
+  {
+   double            volume;      // taken off by this leg
+   double            price;
+   long              msc;
+   double            realised;    // profit this leg booked
+   double            fee;         // commission this leg charged
+   bool              closing;     // this leg ended the position
+
+   //--- what the leg overwrote, so undoing it is exact rather than
+   //--- recomputed from a state that no longer exists
+   double            prev_swap_locked;
+   long              prev_swap_from_msc;
+   bool              prev_ambiguous;
+  };
+
+//--- legs per position. One is always reserved for the final close,
+//--- so a trade can be scaled out of SSR_MAX_TRADE_LEGS-1 times.
+#define SSR_MAX_TRADE_LEGS  8
+
+//+------------------------------------------------------------------+
 //| One virtual position, from order to history.                     |
 //+------------------------------------------------------------------+
 struct SSRVirtualPosition
@@ -85,7 +122,13 @@ struct SSRVirtualPosition
 
    double             volume;         // remaining
    double             volume_initial;
+   //--- what was ASKED for, kept alongside what happened. A rewind
+   //--- past a fill has to put the order back the way it was placed,
+   //--- and by then `type` and `open_msc` describe the fill instead.
    double             request_price;  // for pendings
+   long               request_msc;    // when the order was placed
+   ENUM_SSR_ORDER     request_type;   // as placed, before the fill
+
    double             open_price;
    long               open_msc;
    double             sl;
@@ -109,6 +152,24 @@ struct SSRVirtualPosition
    //--- order of prices inside a bar rather than on observed ticks.
    bool               ambiguous;
 
+   //--- Swap already fixed by an earlier partial exit, and the instant
+   //--- the CURRENT size began accruing. Without these, scaling out of
+   //--- a position would retroactively restate the swap on the days it
+   //--- was held at full size.
+   double             swap_locked;
+   long               swap_from_msc;
+
+   //--- every exit, so a rewind can undo the ones that never happened
+   SSRTradeLeg        legs[SSR_MAX_TRADE_LEGS];
+   int                leg_count;
+
+   //--- Money at risk when the position OPENED.
+   //---
+   //--- Recorded at entry on purpose: an R measured against the loss
+   //--- that actually happened makes every loss exactly -1R, and so
+   //--- flatters the discipline of a trader who never used a stop.
+   double             risk_at_entry;
+
    string             tag;
    string             note;
 
@@ -116,14 +177,23 @@ struct SSRVirtualPosition
      {
       ticket = 0; type = SSR_ORDER_BUY; state = SSR_POS_PENDING;
       volume = 0.0; volume_initial = 0.0;
-      request_price = 0.0; open_price = 0.0; open_msc = SSR_INVALID_TIME;
+      request_price = 0.0; request_msc = SSR_INVALID_TIME;
+      request_type = SSR_ORDER_BUY;
+      open_price = 0.0; open_msc = SSR_INVALID_TIME;
       sl = 0.0; tp = 0.0; trail_points = 0.0; trail_peak = 0.0;
       close_price = 0.0; close_msc = SSR_INVALID_TIME; reason = SSR_CLOSE_NONE;
       commission = 0.0; swap = 0.0; profit = 0.0;
-      mae = 0.0; mfe = 0.0;
+      swap_locked = 0.0; swap_from_msc = SSR_INVALID_TIME; leg_count = 0;
+      mae = 0.0; mfe = 0.0; risk_at_entry = 0.0;
       ambiguous = false;
       tag = ""; note = "";
      }
+
+   //--- R is UNDEFINED without a stop, and callers must check rather
+   //--- than average a zero into everyone else's results
+   bool               HasR(void)     { return (risk_at_entry > 0.0); }
+   double             RMultiple(void)
+     { return (risk_at_entry > 0.0 ? (profit + swap) / risk_at_entry : 0.0); }
 
    bool               IsLong(void)   { return SSRIsLong(type); }
    bool               IsOpen(void)   { return (state == SSR_POS_OPEN); }

@@ -17,6 +17,8 @@
 
 #define SSR_MSC_PER_SEC     1000
 #define SSR_MSC_PER_MIN     60000
+#define SSR_MSC_PER_HOUR    3600000
+#define SSR_MSC_PER_DAY     86400000
 #define SSR_INVALID_TIME    (-1)
 #define SSR_VERSION         "0.1.0"
 

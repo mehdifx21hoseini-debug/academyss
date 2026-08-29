@@ -40,6 +40,9 @@
 #include <SSReplay/Ui/SSR_Panel.mqh>
 #include <SSReplay/Ui/SSR_RangeDialog.mqh>
 #include <SSReplay/Data/SSR_HistoryCatalog.mqh>
+#include <SSReplay/Trading/SSR_TradingEngine.mqh>
+#include <SSReplay/Trading/SSR_Statistics.mqh>
+#include <SSReplay/Trading/SSR_Journal.mqh>
 
 input string          InpSymbol     = "";                   // Symbol (empty = this chart)
 input datetime        InpStart      = 0;                    // Replay start (0 = auto)
@@ -51,6 +54,18 @@ input int             InpTicksPerBar = 8;                   // Ticks per M1 bar 
 input double          InpSpreadPoints = 20;                 // Simulated spread, in points
 input int             InpPumpMs     = 40;                   // Engine tick interval (ms)
 
+//--- The execution model. Every one of these is an ASSUMPTION about a
+//--- broker, so every one is an input rather than a constant buried in
+//--- the code. Left at zero, a cost is not modelled - and the
+//--- statistics say so out loud rather than pretending it was free.
+input double          InpBalance    = 10000.0;              // Virtual starting balance
+input double          InpCommission = 0.0;                  // Commission per lot, per side
+input double          InpSlippage   = 0.0;                  // Slippage, in points (always adverse)
+input double          InpSwapLong   = 0.0;                  // Swap per lot per day, long
+input double          InpSwapShort  = 0.0;                  // Swap per lot per day, short
+input double          InpMarginLot  = 0.0;                  // Margin per lot (fallback; 0 = not modelled)
+input double          InpStopout    = 0.0;                  // Stop out level, percent (0 = off)
+
 CSSRMt5DataSource    g_src;
 CSSRCustomSymbolSink g_sink;
 CSSRReplayController g_ctrl;
@@ -60,6 +75,14 @@ CSSRPanel            g_panel;
 CSSRHistoryCatalog   g_catalog;
 CSSRRangeDialog      g_dialog;
 
+//--- The virtual account. It observes the replay stream and NOTHING
+//--- ELSE: there is no OrderSend anywhere below it, so no path exists
+//--- from a replay session to a live order.
+CSSRTradingEngine    g_acct;
+CSSRStatsEngine      g_stats;
+CSSRJournal          g_journal;
+
+string g_origin      = "";
 long  g_replay_chart = 0;
 ulong g_last_pump_us = 0;
 int   g_slow_tick    = 0;
@@ -69,6 +92,7 @@ bool  g_ready        = false;
 int OnInit()
   {
    string origin = (InpSymbol == "" ? _Symbol : InpSymbol);
+   g_origin = origin;
    g_ssr_log.SetTag("host");
    g_ssr_log.SetLevel(SSR_LOG_INFO);
 
@@ -113,6 +137,27 @@ int OnInit()
    g_ctrl.SetFidelity(range.has_ticks ? SSR_FIDELITY_FULL_TICK
                                       : SSR_FIDELITY_SYNTHETIC_TICK);
    g_ctrl.Attach(GetPointer(g_src), GetPointer(g_sink));
+
+   //--- the execution model, declared before the session opens so the
+   //--- first trade is priced under the same assumptions as the last
+   SSRExecutionModel exec;
+   exec.Init();
+   exec.commission_per_lot = InpCommission;
+   exec.slippage_points    = InpSlippage;
+   exec.swap_long_per_lot  = InpSwapLong;
+   exec.swap_short_per_lot = InpSwapShort;
+   exec.use_real_spread    = true;
+   g_acct.SetExecution(exec);
+   g_acct.SetBalance(InpBalance);
+   g_acct.SetMarginPerLot(InpMarginLot);
+   g_acct.SetStopoutLevel(InpStopout);
+
+   //--- order matters: the account must see a tick before the
+   //--- statistics sample the equity it produces
+   g_ctrl.AddObserver(GetPointer(g_acct));
+   g_ctrl.AddObserver(GetPointer(g_stats));
+   g_stats.Attach(GetPointer(g_acct));
+   g_journal.Attach(GetPointer(g_acct), GetPointer(g_stats));
 
    if(!g_ctrl.Load(origin, win_start, win_end))
      {
@@ -181,6 +226,19 @@ void OnDeinit(const int reason)
                         reason == REASON_CLOSE);
    if(user_removed)
      {
+      //--- a session's results are worth nothing if they die with the
+      //--- chart. Summary to the log, detail to a file, both carrying
+      //--- the caveat that says what the numbers rest on.
+      if(g_journal.Count() > 0)
+        {
+         Print("[host] ", g_journal.Summary());
+         string stamp = TimeToString(TimeLocal(), TIME_DATE);
+         StringReplace(stamp, ".", "");
+         if(g_journal.ExportCsv(g_origin + "_" + stamp))
+            Print("[host] journal -> ", g_journal.LastPath());
+         else
+            Print("[host] journal export failed: ", g_journal.LastError());
+        }
       g_charts.CloseOwned();
       g_ctrl.Release();
      }
