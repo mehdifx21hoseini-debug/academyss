@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v29 2026-08-30  install-stages-first"
+#define SSR_BUILD           "v30 2026-08-30  compile-only-our-own"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

@@ -211,11 +211,30 @@ if "%MEDIT%"=="" (
 )
 
 echo     using %MEDIT%
+
+REM ---------------------------------------------------------------
+REM  COMPILE ONLY OUR OWN TREES.
+REM
+REM  This used to point MetaEditor at the whole MQL5 folder, which
+REM  compiles every other product in there as well. Somebody else's
+REM  pre-existing errors then filled the window and pushed ours off
+REM  the top - a report about code that is not under test, which is
+REM  worse than no report at all.
+REM ---------------------------------------------------------------
 set "CLOG=%TEMP%\ssr_compile.log"
 del /q "%CLOG%" 2>nul
-"%MEDIT%" /compile:"%CD%" /include:"%CD%" /log:"%CLOG%"
 
-powershell -NoProfile -Command "$l = $env:TEMP + '\ssr_compile.log'; if (-not (Test-Path -LiteralPath $l)) { Write-Host '    (no compile log was produced)'; exit }; $t = Get-Content -LiteralPath $l; $bad = @($t | Where-Object { $_ -match 'error' -and $_ -notmatch '0 error' }); Write-Host ''; $t | Select-Object -Last 2 | ForEach-Object { Write-Host ('    ' + $_) }; if ($bad.Count -gt 0) { Write-Host ''; Write-Host '    ERRORS:'; $bad | Select-Object -First 12 | ForEach-Object { Write-Host ('    ' + $_) } } else { Write-Host ''; Write-Host '    no errors' }"
+for %%D in (Experts Scripts Indicators Services) do (
+  if exist "%%D\SSReplay\" (
+    echo     compiling %%D\SSReplay
+    "%MEDIT%" /compile:"%CD%\%%D\SSReplay" /include:"%CD%" /log:"%CLOG%.%%D"
+    if exist "%CLOG%.%%D" type "%CLOG%.%%D" >> "%CLOG%" 2>nul
+  )
+)
+
+powershell -NoProfile -Command "$l = $env:TEMP + '\ssr_compile.log'; if (-not (Test-Path -LiteralPath $l)) { Write-Host '    (no compile log was produced)'; exit }; $t = Get-Content -LiteralPath $l; $bad = @($t | Where-Object { $_ -match ' error ' }); Write-Host ''; if ($bad.Count -gt 0) { Write-Host ('    ' + $bad.Count + ' ERROR(S) IN SSReplay:'); $bad | Select-Object -First 25 | ForEach-Object { Write-Host ('    ' + $_) }; Write-Host ''; Write-Host ('    full log: ' + $l) } else { Write-Host '    no errors in SSReplay' }"
+
+del /q "%CLOG%.Experts" "%CLOG%.Scripts" "%CLOG%.Indicators" "%CLOG%.Services" 2>nul
 
 :done
 echo.
