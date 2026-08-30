@@ -127,11 +127,19 @@ void OnStart()
         }
 
       //--- 3. did the wick actually stretch to the injected extremes?
-      double h0 = iHigh(InpTest, PERIOD_M1, 0);
-      double l0 = iLow(InpTest, PERIOD_M1, 0);
-      if(h0 >= NormalizeDouble(bars[b].high, digits) - point &&
-         l0 <= NormalizeDouble(bars[b].low, digits) + point)
-         hl_expanded++;
+      //--- Same asynchrony as the close: give the series the same
+      //--- chance to catch up rather than reading it a moment early.
+      ulong  t3 = SSR_Now();
+      double hi = NormalizeDouble(bars[b].high, digits);
+      double lo = NormalizeDouble(bars[b].low,  digits);
+      while(SSR_ElapsedMs(t3) < InpReflectMs)
+        {
+         double h0 = iHigh(InpTest, PERIOD_M1, 0);
+         double l0 = iLow(InpTest, PERIOD_M1, 0);
+         if(h0 >= hi - point && l0 <= lo + point)
+           { hl_expanded++; break; }
+         SSR_Pause(1);
+        }
 
       SSR_Metric("batch", "ticksadd_elapsed", t_add, "us",
                  StringFormat("bar=%d ticks=%d", b, nt));

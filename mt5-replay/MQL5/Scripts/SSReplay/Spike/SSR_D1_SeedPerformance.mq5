@@ -64,6 +64,13 @@ void SeedCase(const int total, const int chunk, const int digits, const double p
    double t_write = SSR_ElapsedMs(t0);
 
    SymbolSelect(InpTest, true);
+
+   //--- Two different waits, because they are two different questions.
+   //--- t_read is when the bars can actually be read back; t_sync is
+   //--- when the terminal gets around to flagging the series
+   //--- synchronised. Only the first is a cost the user pays.
+   double t_read = SSR_WaitReadable(InpTest, PERIOD_M1,
+                                    m1[ArraySize(m1) - 1].time, 60000);
    double t_sync = SSR_WaitSeries(InpTest, PERIOD_M1, 60000);
 
    string c = StringFormat("seed_%dk_chunk%d", total / 1000, (chunk <= 0 ? total : chunk));
@@ -71,10 +78,13 @@ void SeedCase(const int total, const int chunk, const int digits, const double p
    SSR_Metric(c, "bars_written",  (double)written, "count");
    SSR_Metric(c, "generate_time", t_gen,           "ms");
    SSR_Metric(c, "write_time",    t_write,         "ms");
-   SSR_Metric(c, "sync_wait",     t_sync,          "ms");
+   SSR_Metric(c, "readable_wait", t_read, "ms",
+              "until CopyRates returns the last written bar");
+   SSR_Metric(c, "sync_wait",     t_sync,          "ms",
+              "until SERIES_SYNCHRONIZED - a flag, not a cost");
    SSR_Metric(c, "symbol_recreated", (reused ? 1 : 0), "bool",
               "the name already existed and was deleted first");
-   double t_total = (t_write + MathMax(t_sync, 0)) / 1000.0;
+   double t_total = (t_write + MathMax(t_read, 0)) / 1000.0;
    SSR_Metric(c, "total_time", t_total, "s");
 
    //--- TIME THE SEED UNTIL IT IS READABLE, NOT UNTIL THE CALL RETURNS.
@@ -86,7 +96,7 @@ void SeedCase(const int total, const int chunk, const int digits, const double p
    //--- The write-call rate is still worth having; it is just not the
    //--- number a user waits for, so it is labelled as what it is.
    SSR_Metric(c, "bars_per_sec", (t_total > 0 ? total / t_total : 0), "bars/s",
-              "until readable - this is the number the user waits for");
+              "write + readable - this is the number the user waits for");
    SSR_Metric(c, "write_call_bars_per_sec",
               (t_write > 0 ? total / (t_write / 1000.0) : 0), "bars/s",
               "WRITE CEILING ONLY - excludes the series build");

@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v19 2026-08-30  b4-probe-cheap-again"
+#define SSR_BUILD           "v20 2026-08-30  readable-is-not-synchronized"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

@@ -388,6 +388,39 @@ void SSR_RateMetric(const string testcase, const string metric,
   }
 
 //+------------------------------------------------------------------+
+//| WAIT UNTIL THE DATA CAN BE READ - WHICH IS NOT WHEN THE TERMINAL |
+//| SAYS "SYNCHRONIZED".                                             |
+//|                                                                  |
+//| SSR_WaitSeries polls SERIES_SYNCHRONIZED, and on this terminal   |
+//| that flag takes about nine seconds after a custom-symbol rewrite |
+//| - for 10,000 bars and for 100,000 bars alike. Size-independent,  |
+//| so it is a timer, not work.                                      |
+//|                                                                  |
+//| Meanwhile CopyRates returns the freshly written bars in tens of  |
+//| milliseconds. The preflight, which times until CopyRates answers,|
+//| measured a 50,000-bar seed at 449ms; D1, which waited for the    |
+//| flag, called the same operation twenty times slower. Neither was |
+//| wrong - they were timing different things, and only one of them  |
+//| is what a user waits for.                                        |
+//|                                                                  |
+//| Returns ms waited, or -1 on timeout.                             |
+//+------------------------------------------------------------------+
+double SSR_WaitReadable(const string sym, const ENUM_TIMEFRAMES tf,
+                        const datetime last_bar, const int timeout_ms = 30000)
+  {
+   ulong t0 = SSR_Now();
+   while(SSR_ElapsedMs(t0) < timeout_ms)
+     {
+      MqlRates r[];
+      int got = CopyRates(sym, tf, last_bar, 1, r);
+      if(got > 0 && r[0].time == last_bar)
+         return SSR_ElapsedMs(t0);
+      SSR_Pause(2);
+     }
+   return -1.0;
+  }
+
+//+------------------------------------------------------------------+
 //| Golden dataset - deterministic synthetic M1 bars.                |
 //| Broker-independent, so every machine measures the same thing.    |
 //+------------------------------------------------------------------+
