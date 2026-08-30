@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v42 2026-08-30  bars-not-minutes"
+#define SSR_BUILD           "v43 2026-08-30  gaps-are-skipped"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

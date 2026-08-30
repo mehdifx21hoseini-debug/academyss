@@ -894,9 +894,24 @@ int OnInit()
       g_ctrl.PeekPosition(origin, saved) &&
       saved.taken_at_msc > win_start && saved.taken_at_msc < win_end)
      {
-      //--- through the GROUP, so every chart resumes together
-      if(g_group.JumpTo(saved.taken_at_msc))
-         PrintFormat("[host] resumed at %s", SSRFormatMsc(saved.taken_at_msc));
+      //--- ONLY IF THERE IS SOMETHING LEFT TO PLAY THERE. The Sunday
+      //--- session saved its position at the edge of the weekend gap;
+      //--- resuming to it put the user in front of a chart with four
+      //--- bars of future and a Play button that had nothing to say.
+      //--- A saved place with no road ahead is not worth going back to.
+      int ahead = Bars(origin, PERIOD_M1,
+                       (datetime)(saved.taken_at_msc / 1000),
+                       (datetime)(win_end / 1000));
+      if(ahead >= 50)
+        {
+         //--- through the GROUP, so every chart resumes together
+         if(g_group.JumpTo(saved.taken_at_msc))
+            PrintFormat("[host] resumed at %s", SSRFormatMsc(saved.taken_at_msc));
+        }
+      else
+         PrintFormat("[host] not resuming to %s - only %d bars ahead of it. "
+                     "Starting at the window start instead.",
+                     SSRFormatMsc(saved.taken_at_msc), ahead);
      }
 
    EventSetMillisecondTimer(InpPumpMs);

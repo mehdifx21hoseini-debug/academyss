@@ -284,6 +284,44 @@ public:
       return n;
      }
 
+   //+------------------------------------------------------------------+
+   //| The next bar's OPEN TIME - deliberately not the guarded path.    |
+   //|                                                                  |
+   //| ReadBars clamps to the horizon, as it must: prices beyond `now`  |
+   //| do not exist for this product. But the generic NextBarOpen goes  |
+   //| through ReadBars, so inside a weekend gap - the one place it is  |
+   //| needed - it always came back empty and the gap skip never fired. |
+   //|                                                                  |
+   //| A TIMESTAMP is different in kind from a price. "The market       |
+   //| reopens Monday 01:00" is the exchange's schedule, printed on     |
+   //| every broker's website; no candle, high, low or direction leaks  |
+   //| with it. CopyTime reads times only, the guard's violation        |
+   //| counters stay untouched, and the clock still has to WALK to that |
+   //| bar before anyone sees what is inside it.                        |
+   //+------------------------------------------------------------------+
+   virtual long      NextBarOpen(const string symbol, const long after_msc) override
+     {
+      datetime t[];
+      long spans[4];
+      spans[0] = 3600;      // 1h  - dense data, one cheap call
+      spans[1] = 86400;     // 1d
+      spans[2] = 691200;    // 8d  - any weekend
+      spans[3] = 3456000;   // 40d - any holiday run
+      datetime from = (datetime)(after_msc / 1000 + 1);
+      for(int i = 0; i < 4; i++)
+        {
+         datetime to = (datetime)(after_msc / 1000 + spans[i]);
+         int n = CopyTime(symbol, PERIOD_M1, from, to, t);
+         for(int k = 0; k < n; k++)
+           {
+            long open = (long)t[k] * 1000;
+            if(open > after_msc)
+               return open;
+           }
+        }
+      return SSR_INVALID_TIME;
+     }
+
    virtual bool      ReadBarAt(const string symbol, const long msc, MqlRates &out) override
      {
       long open = SSRBarOpenMsc(msc, PERIOD_M1);

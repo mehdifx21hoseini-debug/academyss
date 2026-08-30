@@ -132,6 +132,38 @@ public:
    //--- the single bar containing `msc`, if it exists
    virtual bool      ReadBarAt(const string symbol, const long msc, MqlRates &out) = 0;
 
+   //+------------------------------------------------------------------+
+   //| The open time of the first bar STRICTLY AFTER `after_msc`, or    |
+   //| SSR_INVALID_TIME when none exists.                               |
+   //|                                                                  |
+   //| "The next minute" and "the next bar" are the same thing on a     |
+   //| Tuesday afternoon and 33 hours apart across a weekend. Stepping  |
+   //| and gap-skipping need the BAR; only the data knows where it is.  |
+   //|                                                                  |
+   //| Generic implementation via ReadBars with a widening search - an  |
+   //| hour, a day, eight days, forty. NOTE: a provider whose ReadBars  |
+   //| is clamped by the future guard will answer INVALID from inside a |
+   //| gap - correctly, and uselessly. Such a provider must override    |
+   //| this with a TIMES-ONLY read; see CSSRMt5BarProvider for why a    |
+   //| timestamp is schedule, not price, and may cross the horizon.     |
+   //+------------------------------------------------------------------+
+   virtual long      NextBarOpen(const string symbol, const long after_msc)
+     {
+      MqlRates tmp[];
+      long spans[4];
+      spans[0] = 3600000;        // 1h  - the dense-data case, cheap
+      spans[1] = 86400000;       // 1d
+      spans[2] = 691200000;      // 8d  - any weekend
+      spans[3] = 3456000000;     // 40d - any holiday run
+      for(int i = 0; i < 4; i++)
+        {
+         int n = ReadBars(symbol, after_msc + 1, after_msc + spans[i], tmp);
+         if(n > 0)
+            return SSRToMsc(tmp[0].time);
+        }
+      return SSR_INVALID_TIME;
+     }
+
    virtual long      BarCount(const string symbol) = 0;
   };
 

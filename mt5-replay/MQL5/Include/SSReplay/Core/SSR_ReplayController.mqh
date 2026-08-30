@@ -902,6 +902,21 @@ public:
    //| Advance by whole M1 bars without waiting for real time.          |
    //| Phase 8 builds Step Forward on this.                             |
    //+------------------------------------------------------------------+
+   //--- the next bar of THIS stream's timeline after `after_msc`, or
+   //--- SSR_INVALID_TIME past the end. The group asks all its streams
+   //--- and takes the earliest, so a gap is only a gap when it is a
+   //--- gap for every instrument on the board.
+   long              NextTimelineBarOpen(const long after_msc)
+     {
+      CSSRBarProvider *bp = m_source.Bars();
+      if(bp == NULL)
+         return SSR_INVALID_TIME;
+      long nb = bp.NextBarOpen(m_state.symbol, after_msc);
+      if(nb == SSR_INVALID_TIME || nb > m_timeline.end_msc)
+         return SSR_INVALID_TIME;
+      return nb;
+     }
+
    int               StepBars(const int bars)
      {
       ClearError();
@@ -914,8 +929,15 @@ public:
          return -1;
         }
 
-      long target = SSRNextBarOpenMsc(m_clock.now_msc, PERIOD_M1)
-                    + (long)(bars - 1) * SSR_MSC_PER_MIN - 1;
+      //--- land on the next bar that EXISTS. The next minute and the
+      //--- next bar are the same thing in dense data and 33 hours apart
+      //--- across a weekend; four presses of ">" that moved nothing on
+      //--- a Sunday were four steps into empty minutes.
+      long base = SSRNextBarOpenMsc(m_clock.now_msc, PERIOD_M1);
+      long nb   = NextTimelineBarOpen(m_clock.now_msc);
+      if(nb != SSR_INVALID_TIME && nb > base)
+         base = nb;
+      long target = base + (long)(bars - 1) * SSR_MSC_PER_MIN - 1;
       if(target > m_timeline.end_msc)
          target = m_timeline.end_msc;
 

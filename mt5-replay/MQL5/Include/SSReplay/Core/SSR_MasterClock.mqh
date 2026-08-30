@@ -45,6 +45,7 @@ private:
    string                m_last_error;
    string                m_pause_reason;
    long                  m_pumps;
+   int               m_idle_pumps;
    long                  m_group_pauses;
 
    void              Fail(const string why) { m_last_error = why; }
@@ -52,7 +53,7 @@ private:
 public:
                      CSSRReplayGroup(void)
      : m_count(0), m_aligned(false), m_last_error(""), m_pause_reason(""),
-       m_pumps(0), m_group_pauses(0)
+       m_pumps(0), m_idle_pumps(0), m_group_pauses(0)
      {
       m_master.Init();
       for(int i = 0; i < SSR_MAX_STREAMS; i++)
@@ -91,6 +92,14 @@ public:
    string            LastError(void)   { return m_last_error; }
    bool              IsAligned(void)   { return m_aligned; }
    long              Pumps(void)       { return m_pumps; }
+
+   bool              AnyPlaying(void)
+     {
+      for(int i = 0; i < m_count; i++)
+         if(m_member[i].Status() == SSR_STATE_PLAYING)
+            return true;
+      return false;
+     }
    long              GroupPauses(void) { return m_group_pauses; }
 
    //+------------------------------------------------------------------+
@@ -189,6 +198,32 @@ public:
          int n = m_member[i].PumpTo(target);
          if(n > 0)
             emitted += n;
+        }
+
+      //+------------------------------------------------------------------+
+      //| PLAY MUST NOT SPEND HOURS PLAYING NOTHING.                       |
+      //|                                                                  |
+      //| Resumed at Saturday 15:49, the next bar is Monday 01:00: at 1x   |
+      //| that is 33 wall-clock hours of a running clock and an unmoving   |
+      //| chart. After ~a second of pumps that emitted nothing, ask where  |
+      //| the next bar actually is; if it is more than two minutes ahead,  |
+      //| move the clock to just before it and say so once. Weekends pass  |
+      //| in a heartbeat, and the pause between two live ticks - never    |
+      //| more than a minute of bar time - is left untouched.              |
+      //+------------------------------------------------------------------+
+      if(emitted > 0)
+         m_idle_pumps = 0;
+      else if(AnyPlaying() && ++m_idle_pumps >= 25)
+        {
+         m_idle_pumps = 0;
+         long nb = NextBarAcross(m_master.now_msc);
+         if(nb != SSR_INVALID_TIME && nb > m_master.now_msc + 2 * SSR_MSC_PER_MIN)
+           {
+            PrintFormat("[SSR] market closed from %s - skipping to the next "
+                        "bar at %s", SSRFormatMsc(m_master.now_msc),
+                        SSRFormatMsc(nb));
+            SeekAllTo(nb - 1);
+           }
         }
 
       //--- IF ONE STREAM STOPS, THE BOARD STOPS. A stop hit on gold
@@ -297,12 +332,31 @@ public:
 
    bool              JumpTo(const long target_msc) { return SeekAllTo(target_msc); }
 
+   //--- the earliest next bar any stream has. A gap is only a gap when
+   //--- it is a gap for EVERY instrument on the board.
+   long              NextBarAcross(const long after_msc)
+     {
+      long best = SSR_INVALID_TIME;
+      for(int i = 0; i < m_count; i++)
+        {
+         long n = m_member[i].NextTimelineBarOpen(after_msc);
+         if(n != SSR_INVALID_TIME && (best == SSR_INVALID_TIME || n < best))
+            best = n;
+        }
+      return best;
+     }
+
    bool              StepBars(const int bars)
      {
       if(!m_aligned || bars <= 0)
          return false;
-      long target = SSRNextBarOpenMsc(m_master.now_msc, PERIOD_M1)
-                    + (long)(bars - 1) * SSR_MSC_PER_MIN - 1;
+      //--- land on a bar that EXISTS - see the controller's StepBars
+      //--- for the Sunday this rule was written on
+      long base = SSRNextBarOpenMsc(m_master.now_msc, PERIOD_M1);
+      long nb   = NextBarAcross(m_master.now_msc);
+      if(nb != SSR_INVALID_TIME && nb > base)
+         base = nb;
+      long target = base + (long)(bars - 1) * SSR_MSC_PER_MIN - 1;
       if(target > m_master.end_msc)
          target = m_master.end_msc;
 
