@@ -92,14 +92,6 @@ public:
    string            LastError(void)   { return m_last_error; }
    bool              IsAligned(void)   { return m_aligned; }
    long              Pumps(void)       { return m_pumps; }
-
-   bool              AnyPlaying(void)
-     {
-      for(int i = 0; i < m_count; i++)
-         if(m_member[i].Status() == SSR_STATE_PLAYING)
-            return true;
-      return false;
-     }
    long              GroupPauses(void) { return m_group_pauses; }
 
    //+------------------------------------------------------------------+

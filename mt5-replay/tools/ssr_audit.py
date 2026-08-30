@@ -371,6 +371,56 @@ OVERRIDE_DECL = re.compile(r'^\s*(?:virtual\s+)?[A-Za-z_][\w:]*\s*[\*&]?\s*'
 VIRTUAL_DECL  = re.compile(r'^\s*virtual\s+[A-Za-z_][\w:]*\s*[\*&]?\s*'
                            r'([A-Za-z_]\w*)\s*\(', re.M)
 
+#--- A9: the same method defined twice in the same class.
+#---
+#--- AnyPlaying() was added to CSSRMasterClock by a patch that never
+#--- looked whether the class already had one - it did, in a "queries"
+#--- section 300 lines down. MetaEditor: "member function already
+#--- defined". Nothing here checked for that shape.
+#---
+#--- Overloads are legal, so the key is (class, name, normalised args).
+#--- Class scope is tracked by brace depth, because several structs in
+#--- one file legitimately each define Init(void).
+CLASS_HEAD = re.compile(r'^\s*(?:class|struct)\s+([A-Za-z_]\w*)')
+METHOD_DEF = re.compile(r'^\s*(?:virtual\s+|static\s+|const\s+)*'
+                        r'[A-Za-z_][\w:]*\s*[\*&]?\s+'
+                        r'([A-Za-z_]\w*)\s*\(([^)]*)\)')
+
+def audit_a9():
+    for path, body in CLEAN.items():
+        depth = 0
+        cls = None
+        cls_depth = -1
+        seen = {}
+        entered = False
+        for ln, line in enumerate(body.splitlines(), 1):
+            m = CLASS_HEAD.match(line)
+            if m and depth == 0:
+                cls, cls_depth, seen, entered = m.group(1), depth, {}, False
+            if cls is not None and depth == 1:
+                d = METHOD_DEF.match(line)
+                if d and d.group(1) not in NOT_A_RETURN_TYPE:
+                    args = re.sub(r'\s+', '', re.sub(r'\bconst\b', '', d.group(2)))
+                    key = (d.group(1), args)
+                    if key in seen:
+                        report("A9", path, ln,
+                               "%s::%s() is defined twice (first at line %d) - "
+                               "a patch added what the class already had"
+                               % (cls, d.group(1), seen[key]))
+                    else:
+                        seen[key] = ln
+            depth += line.count("{") - line.count("}")
+            #--- the header line itself still sits AT cls_depth; the class
+            #--- is only over once we have been inside and come back out.
+            #--- Without `entered`, cls died on the very line it was set -
+            #--- and this audit approved the live duplicate it was written
+            #--- to catch, on its first run.
+            if cls is not None and depth > cls_depth:
+                entered = True
+            if cls is not None and entered and depth <= cls_depth:
+                cls = None
+    return
+
 def audit_a8():
     bases = set()
     for path, body in CLEAN.items():
@@ -418,7 +468,7 @@ def audit_a7():
                    "%s() is called on a member of ours but declared nowhere - "
                    "the other half of a change did not land" % name)
 
-for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8):
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9):
     fn()
 
 if findings:

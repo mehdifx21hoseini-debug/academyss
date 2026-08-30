@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v43 2026-08-30  gaps-are-skipped"
+#define SSR_BUILD           "v44 2026-08-30  a9-and-one-anyplaying"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
