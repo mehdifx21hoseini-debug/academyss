@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v21 2026-08-30  d4-ratio-was-a-flag"
+#define SSR_BUILD           "v22 2026-08-30  short-history-says-so"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

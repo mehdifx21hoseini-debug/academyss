@@ -429,6 +429,37 @@ int OnInit()
    if(win_start < floor_msc)
       win_start = floor_msc;
 
+   //--- SAY IT WHEN THE WINDOW HAD TO SHRINK.
+   //---
+   //--- A user who asks for 2,000 replay bars behind 1,000 of warmup
+   //--- and gets a day and a half is entitled to know. The engine
+   //--- clamps to local history and carries on, which is the right
+   //--- behaviour - but it used to carry on QUIETLY, and a line that
+   //--- reads "warmup seeded: 939 bars" looks like success unless you
+   //--- happen to remember you asked for 1,000.
+   //---
+   //--- And the terminal usually knows there is more: SERIES_SERVER_-
+   //--- FIRSTDATE said 2020 on a symbol whose local history began two
+   //--- days ago. Silently replaying 0.1% of what the broker holds is
+   //--- the difference between a limitation and a trap.
+   long want_bars  = (long)InpReplayBars + (long)InpWarmupBars;
+   long have_bars  = (win_end - range.first_msc) / SSR_MSC_PER_MIN;
+   if(!resuming && have_bars < want_bars)
+     {
+      PrintFormat("[host] SHORT ON HISTORY: asked for %d replay + %d warmup "
+                  "= %d M1 bars, this terminal holds %d (from %s)",
+                  InpReplayBars, InpWarmupBars, (int)want_bars,
+                  (int)have_bars, SSRFormatMsc(range.first_msc));
+
+      if(range.CanExtendBackwards())
+         PrintFormat("[host] the broker HAS more - back to %s. "
+                     "Open an M1 chart of %s and scroll left, or press Home, "
+                     "to download it, then reload this EA.",
+                     SSRFormatMsc(range.server_first_msc), origin);
+      else
+         Print("[host] and the broker has no more either - this is all there is.");
+     }
+
    if(resuming)
      {
       win_start = saved_start;
