@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v31 2026-08-30  a6-catches-half-a-patch"
+#define SSR_BUILD           "v32 2026-08-30  font-probe"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
