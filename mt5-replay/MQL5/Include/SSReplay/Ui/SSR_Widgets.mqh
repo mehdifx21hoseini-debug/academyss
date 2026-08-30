@@ -135,9 +135,13 @@ public:
       ObjectSetInteger(m_chart, n, OBJPROP_COLOR,        fg);
       ObjectSetInteger(m_chart, n, OBJPROP_FONTSIZE,     size);
       ObjectSetString (m_chart, n, OBJPROP_TEXT,         text);
-      //--- MetaTrader latches a button down after a click; the panel
-      //--- would otherwise show every control it ever pressed as held
-      ObjectSetInteger(m_chart, n, OBJPROP_STATE,        false);
+      //--- THE PRESSED STATE IS NOT CLEARED HERE ANY MORE.
+      //--- MetaTrader latches a button down when it is clicked, and
+      //--- that latch is now how the panel LEARNS about the click -
+      //--- it polls OBJPROP_STATE, because it lives on a chart whose
+      //--- events it cannot receive. Clearing the latch during a
+      //--- repaint would erase presses that landed in the moment
+      //--- between one poll and the next. The poll clears it.
       return true;
      }
 
@@ -159,53 +163,48 @@ public:
      }
 
    //+------------------------------------------------------------------+
-   //| A TRACKBAR: groove, fill, tick row, and a thumb you can drag.    |
+   //| A SEGMENTED TRACKBAR.                                            |
    //|                                                                  |
-   //| MetaTrader has no slider, so this is four rectangles and a row   |
-   //| of one-pixel ticks. The thumb is a BUTTON rather than a          |
-   //| rectangle for one reason: a rectangle label does not report      |
-   //| clicks, and a control you can only move by dragging - never by   |
-   //| clicking beside it - is a control people think is broken.        |
-   //|                                                                  |
-   //| Hit-testing lives in the panel, because only the panel knows     |
-   //| where the trackbar was drawn this frame.                         |
+   //| It was a groove with a draggable thumb. Dragging needs mouse-move|
+   //| events, and the panel now lives on a chart that sends this        |
+   //| program none - so the thumb was a control that looked like it     |
+   //| worked and did not.                                               |
+   //|                                                                   |
+   //| Every stop is its own button instead. Clicking anywhere along the |
+   //| bar lands on that speed, which is most of what dragging bought,   |
+   //| and it works through the one input we actually have. The cells    |
+   //| left of the current one are filled, so it still reads as a level  |
+   //| at a glance; the current one is darker, so it reads as the handle.|
+   //|                                                                   |
+   //| Cells are laid out by rounding both edges from the same division, |
+   //| so they tile the full width exactly instead of leaving a ragged   |
+   //| remainder at the right-hand end.                                  |
    //+------------------------------------------------------------------+
-   bool              Track(const string id, const int x, const int y,
-                           const int w, const double fraction,
-                           const int stops, const bool dragging)
+   bool              TrackSegments(const string id, const int x, const int y,
+                                   const int w, const int h,
+                                   const int at, const int stops)
      {
-      double f = fraction;
-      if(f < 0.0) f = 0.0;
-      if(f > 1.0) f = 1.0;
-
-      //--- groove
-      if(!Rect(id + "_gr", x, y + 4, w, 6, SSR_C_TRACK, SSR_C_TRACK_EDGE))
+      if(stops < 2 || w < stops)
          return false;
-      int fw = (int)MathRound((w - 2) * f);
-      if(fw < 1) fw = 1;
-      Rect(id + "_fl", x + 1, y + 5, fw, 4, SSR_C_TRACK_FILL, SSR_C_TRACK_FILL);
-
-      //--- ticks, one per stop. Capped so a longer ladder cannot turn
-      //--- the groove into a solid grey bar.
-      int drawn = (stops > 1 && stops <= 24) ? stops : 0;
-      for(int i = 0; i < 24; i++)
+      for(int i = 0; i < stops; i++)
         {
-         string tn = id + "_t" + IntegerToString(i);
-         if(i >= drawn)
-           { Remove(tn); continue; }
-         int tx = x + (int)MathRound((double)i * (w - 1) / (double)(drawn - 1));
-         Rect(tn, tx, y + 12, 1, 3, SSR_C_TICK, SSR_C_TICK);
-        }
+         int x0 = x + (int)MathRound((double)i       * w / (double)stops);
+         int x1 = x + (int)MathRound((double)(i + 1) * w / (double)stops);
+         int cw = x1 - x0 - 1;
+         if(cw < 1) cw = 1;
 
-      //--- the thumb, centred on the stop
-      int tw = 9, th = 15;
-      int cx = x + (int)MathRound(f * (w - 1)) - tw / 2;
-      if(cx < x)          cx = x;
-      if(cx > x + w - tw) cx = x + w - tw;
-      return ButtonC(id + "_th", cx, y, tw, th, "",
-                     dragging ? SSR_C_BTN_ON : SSR_C_THUMB,
-                     dragging ? SSR_C_BTN_ON_EDGE : SSR_C_THUMB_EDGE,
-                     SSR_C_TEXT, SSR_FS_SMALL);
+         color bg   = (i <  at ? SSR_C_TRACK_FILL : SSR_C_TRACK);
+         color edge = SSR_C_TRACK_EDGE;
+         if(i == at)
+           {
+            bg   = SSR_C_THUMB;
+            edge = SSR_C_BTN_ON_EDGE;
+           }
+         if(!ButtonC(id + IntegerToString(i), x0, y, cw, h, "",
+                     bg, edge, SSR_C_TEXT, SSR_FS_SMALL))
+            return false;
+        }
+      return true;
      }
 
    //+------------------------------------------------------------------+

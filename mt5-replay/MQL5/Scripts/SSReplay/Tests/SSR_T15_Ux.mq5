@@ -452,17 +452,25 @@ void OnStart()
       CSSRPanel     panel2;
       panel2.Create(ChartID(), GetPointer(port2), "T15_move_");
 
-      panel2.SetPosition(40, 60);
-      long x_before = ObjectGetInteger(ChartID(), "T15_move_acct", OBJPROP_XDISTANCE);
+      //--- the panel moves by CORNER now, not by coordinate: it lives on
+      //--- a chart whose mouse events this program never receives, so
+      //--- there is nothing to drag it with. The bug the cache caused is
+      //--- the same either way - a label that stays behind when the
+      //--- panel goes - so the test still asks the same question.
+      panel2.SetCorner(0);                       // top-left
+      long x_before = ObjectGetInteger(ChartID(), "T15_move_stbal",
+                                       OBJPROP_XDISTANCE);
 
-      panel2.SetPosition(300, 60);
-      long x_after = ObjectGetInteger(ChartID(), "T15_move_acct", OBJPROP_XDISTANCE);
+      panel2.SetCorner(1);                       // top-right
+      long x_after = ObjectGetInteger(ChartID(), "T15_move_stbal",
+                                      OBJPROP_XDISTANCE);
 
       Check("the label moved with the panel", x_after != x_before,
             StringFormat("before=%d after=%d (both would mean a stranded label)",
                          (int)x_before, (int)x_after));
-      CheckEq("and it moved by the same amount the panel did",
-              260, (int)(x_after - x_before));
+      Check("and it moved to the right, with the panel",
+            x_after > x_before,
+            StringFormat("%d -> %d", (int)x_before, (int)x_after));
 
       panel2.Destroy();
    }

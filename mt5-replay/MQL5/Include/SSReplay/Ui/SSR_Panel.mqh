@@ -69,6 +69,7 @@ private:
    bool              m_track_drag;
    int               m_track_x, m_track_y, m_track_w;
    uint              m_last_drag_paint;
+   int               m_corner;      // 0 TL, 1 TR, 2 BR, 3 BL
 
    int               m_tab;
 
@@ -148,7 +149,7 @@ public:
        m_saved(false), m_collapsed(false), m_dragging(false),
        m_drag_dx(0), m_drag_dy(0),
        m_track_drag(false), m_track_x(0), m_track_y(0), m_track_w(0),
-       m_last_drag_paint(0),
+       m_last_drag_paint(0), m_corner(0),
        m_tab(SSR_TAB_TRADE), m_renders(0), m_writes(0)
      { m_state.Init(); ClearCache(); }
 
@@ -222,7 +223,12 @@ public:
       m_track_drag = false;
      }
 
-   void              SetPosition(const int x, const int y) { m_x = x; m_y = y; Render(); }
+   //--- the panel sits in a corner, not at a coordinate: ApplyCorner
+   //--- recomputes x and y every frame, so a caller setting them
+   //--- directly would be overruled on the next repaint and would
+   //--- rightly call that a bug
+   void              SetCorner(const int c) { m_corner = (c & 3); Render(); }
+   int               Corner(void)           { return m_corner; }
 
    //+------------------------------------------------------------------+
    //| A DRAG DOES NOT NEED A FULL REPAINT PER EVENT.                   |
@@ -233,6 +239,37 @@ public:
    //| thins the moves; this thins what each one costs. Thirty           |
    //| milliseconds is still smoother than a hand can move a window.     |
    //+------------------------------------------------------------------+
+   //+------------------------------------------------------------------+
+   //| PUT THE PANEL WHERE THE CORNER SAYS.                             |
+   //|                                                                  |
+   //| Dragging needs mouse-move events and the panel lives on a chart  |
+   //| that sends this program none. Four corners is what dragging a    |
+   //| fixed-size panel is actually for: getting it off whatever you    |
+   //| are trying to look at. The Move button steps through them.       |
+   //|                                                                  |
+   //| Recomputed every frame, so resizing the terminal keeps the panel |
+   //| in its corner instead of stranding it off the edge.              |
+   //+------------------------------------------------------------------+
+   void              ApplyCorner(const int W, const int H)
+     {
+      int cw = (int)ChartGetInteger(m_chart, CHART_WIDTH_IN_PIXELS);
+      int ch = (int)ChartGetInteger(m_chart, CHART_HEIGHT_IN_PIXELS);
+      //--- a chart that has not been measured yet must not throw the
+      //--- panel to a negative coordinate, where it is simply gone
+      if(cw < W + 24) cw = W + 24;
+      if(ch < H + 40) ch = H + 40;
+
+      int left = 12,          right = cw - W - 12;
+      int top  = 24,          bottom = ch - H - 16;
+      switch(m_corner)
+        {
+         case 1: m_x = right; m_y = top;    break;
+         case 2: m_x = right; m_y = bottom; break;
+         case 3: m_x = left;  m_y = bottom; break;
+         default: m_x = left; m_y = top;    break;
+        }
+     }
+
    void              RenderDragging(void)
      {
       uint now = GetTickCount();
@@ -260,6 +297,7 @@ public:
 
       int W = SSR_PANEL_W;
       int H = m_collapsed ? SSR_HEADER_H + 2 : SSR_PANEL_H;
+      ApplyCorner(W, H);
       int x = m_x, y = m_y;
 
       m_w.Rect("bg",  x, y, W, H, SSR_C_PANEL, SSR_C_PANEL_EDGE);
@@ -313,6 +351,7 @@ private:
       Text(1, "capinfo", x + 92, y + 5, right,
            SSRStateColor(m_state.status), SSR_FS_SMALL);
 
+      m_w.Button("move", x + W - 42, y + 3, 18, SSR_HEADER_H - 5, "[]");
       m_w.Button("collapse", x + W - 22, y + 3, 17, SSR_HEADER_H - 5,
                  m_collapsed ? "+" : "-");
      }
@@ -384,13 +423,14 @@ private:
            SSR_C_TEXT, SSR_FS_BODY);
       m_w.Button("spup", bx + 68, y, 18, SSR_ROW_H, "+");
 
-      //--- the track. Remembered so a drag can turn a pixel into a stop.
+      //--- the bar. Twenty cells, each one clickable, because a click is
+      //--- the only input a chart we are not attached to can give us.
       m_track_x = bx + 92;
-      m_track_y = y + 1;
+      m_track_y = y + 2;
       m_track_w = (x + W - SSR_PAD) - m_track_x;
-      m_w.Track("spd", m_track_x, m_track_y, m_track_w,
-                SSRSpeedFraction(m_state.speed_x100),
-                SSR_SPEED_LADDER_SIZE, m_track_drag);
+      m_w.TrackSegments("spdseg", m_track_x, m_track_y, m_track_w, 14,
+                        SSRSpeedLadderIndex(m_state.speed_x100),
+                        SSR_SPEED_LADDER_SIZE);
 
       //--- "5x" is a number. "1h in 12m" is something you can plan an
       //--- afternoon around, so the panel says both.
@@ -719,14 +759,13 @@ private:
       string ids[] = {"clock","prog","bar_bg","bar_fill",
                       "restart","back10","back","toggle","step","step10","reset",
                       "spdlbl","spdn","spdbox","spdval","spup","spdmean",
-                      "spd_gr","spd_fl","spd_th",
                       "tab0","tab1","tab2","tab3","tabline",
                       "follow","lines","bookmark","jump","sessions","fidelity",
                       "status","stbal","stflt","stopen","stfid"};
       for(int i = 0; i < ArraySize(ids); i++)
          m_w.Hide(ids[i], hidden);
-      for(int t = 0; t < 24; t++)
-         m_w.Hide("spd_t" + IntegerToString(t), hidden);
+      for(int t = 0; t < SSR_SPEED_LADDER_SIZE; t++)
+         m_w.Hide("spdseg" + IntegerToString(t), hidden);
       if(hidden)
          HideSheets();
      }
@@ -877,6 +916,134 @@ public:
      }
 
    //+------------------------------------------------------------------+
+   //| ASK THE BUTTONS, DO NOT WAIT TO BE TOLD.                         |
+   //|                                                                  |
+   //| MetaTrader delivers OnChartEvent only to the chart a program is  |
+   //| attached to. The panel now lives on the replay chart and this    |
+   //| program does not, so no click will ever be delivered here. Two   |
+   //| attempts were made to route them across and the second one is    |
+   //| why this exists: an indicator created with iCustom and shown by  |
+   //| ChartIndicatorAdd keeps the CREATOR's chart context, so it       |
+   //| received the host's events, not the replay chart's, and its own  |
+   //| log line said so - "chart X -> host X", the same number twice.   |
+   //|                                                                  |
+   //| But a click leaves a mark. MetaTrader latches OBJ_BUTTON down    |
+   //| when it is pressed, and OBJPROP_STATE can be read from ANY       |
+   //| chart. So the panel asks, once a tick, which of its buttons is   |
+   //| held - and clears it, which is both how the press is consumed    |
+   //| and how the button pops back up.                                 |
+   //|                                                                  |
+   //| This is not a workaround invented here. It is the same reasoning |
+   //| already written for the stop and target lines one layer over:    |
+   //| a dragged object updates itself whether anyone was listening or  |
+   //| not, so asking needs no events at all. The lines have worked      |
+   //| that way since the day they were built.                          |
+   //|                                                                  |
+   //| It walks the chart's object list rather than a list of names,    |
+   //| so a button added to a sheet later cannot be forgotten here.     |
+   //|                                                                  |
+   //| Returns a command the HOST must run (the dialogs it owns), or    |
+   //| SSR_CMD_NONE. Everything this layer owns is already done.        |
+   //+------------------------------------------------------------------+
+   ENUM_SSR_CMD      PollClicks(void)
+     {
+      if(m_chart == 0)
+         return SSR_CMD_NONE;
+
+      ENUM_SSR_CMD  for_host = SSR_CMD_NONE;
+      bool          acted    = false;
+      int           total    = ObjectsTotal(m_chart, -1, OBJ_BUTTON);
+
+      for(int i = total - 1; i >= 0; i--)
+        {
+         string name = ObjectName(m_chart, i, -1, OBJ_BUTTON);
+         if(StringFind(name, m_prefix) != 0)
+            continue;
+         if(!ObjectGetInteger(m_chart, name, OBJPROP_STATE))
+            continue;
+
+         //--- consume it first. If anything below throws the frame away,
+         //--- the button must still come back up rather than stay held
+         //--- and fire again on the next tick.
+         ObjectSetInteger(m_chart, name, OBJPROP_STATE, false);
+
+         ENUM_SSR_CMD c = Dispatch(StringSubstr(name, StringLen(m_prefix)));
+         acted = true;
+         if(c != SSR_CMD_NONE)
+            for_host = c;
+        }
+
+      if(acted)
+         Render();
+      return for_host;
+     }
+
+   //--- one place that turns an object name into an action, shared by
+   //--- the poll and by the event path, so the two cannot drift
+   ENUM_SSR_CMD      Dispatch(const string what)
+     {
+      //--- the tab strip is not a command: it changes nothing in the
+      //--- engine, only which sheet is on top
+      if(StringLen(what) == 4 && StringSubstr(what, 0, 3) == "tab")
+        {
+         m_tab = (int)StringToInteger(StringSubstr(what, 3));
+         return SSR_CMD_NONE;
+        }
+
+      //--- a speed cell. Twenty of them make the groove, so clicking
+      //--- anywhere along the bar lands on that stop.
+      if(StringLen(what) > 6 && StringSubstr(what, 0, 6) == "spdseg")
+        {
+         if(m_port != NULL)
+            m_port.SetSpeedX100(SSRSpeedLadder((int)StringToInteger(
+                                   StringSubstr(what, 6))));
+         return SSR_CMD_NONE;
+        }
+
+      //--- the panel has no mouse events on a chart it is not attached
+      //--- to, so it cannot be dragged. It steps between the corners
+      //--- instead, which is what dragging a fixed-size panel is for.
+      if(what == "move")
+        {
+         m_corner = (m_corner + 1) % 4;
+         return SSR_CMD_NONE;
+        }
+
+      ENUM_SSR_CMD c = SSR_CMD_NONE;
+      if(what == "toggle")        c = SSR_CMD_TOGGLE;
+      else if(what == "step")     c = SSR_CMD_STEP_FWD;
+      else if(what == "step10")   c = SSR_CMD_STEP_FWD_10;
+      else if(what == "back")     c = SSR_CMD_STEP_BACK;
+      else if(what == "back10")   c = SSR_CMD_STEP_BACK_10;
+      else if(what == "reset")    c = SSR_CMD_RESET;
+      else if(what == "restart")  c = SSR_CMD_RESTART;
+      else if(what == "follow")   c = SSR_CMD_FOLLOW;
+      else if(what == "bookmark") c = SSR_CMD_BOOKMARK;
+      else if(what == "fidelity") c = SSR_CMD_FIDELITY_CYCLE;
+      else if(what == "jump")     c = SSR_CMD_JUMP;
+      else if(what == "sessions") c = SSR_CMD_SESSIONS;
+      else if(what == "lines")    c = SSR_CMD_LINES_TOGGLE;
+      else if(what == "armbtn")   c = SSR_CMD_LINES_TOGGLE;
+      else if(what == "clrbtn")   c = SSR_CMD_LINES_TOGGLE;
+      else if(what == "flipbtn")  c = SSR_CMD_LINES_FLIP;
+      else if(what == "spup")     c = SSR_CMD_SPEED_UP;
+      else if(what == "spdn")     c = SSR_CMD_SPEED_DOWN;
+      else if(what == "collapse") c = SSR_CMD_COLLAPSE;
+
+      if(c == SSR_CMD_NONE)
+        {
+         //--- the trade controls have no keyboard equivalent, so they
+         //--- are not commands: they are buttons, handled here
+         TradeButton(what);
+         return SSR_CMD_NONE;
+        }
+      if(!Owns(c))
+         return c;              // the host's dialog; it runs it
+      Execute(c);
+      return SSR_CMD_NONE;
+     }
+
+   //+------------------------------------------------------------------+
    //| Chart events. The host forwards them verbatim.                   |
    //+------------------------------------------------------------------+
    bool              OnEvent(const int id, const long &lparam,
@@ -906,61 +1073,11 @@ public:
          return true;
         }
 
-      if(id == CHARTEVENT_OBJECT_CLICK)
-        {
-         if(StringFind(sparam, m_prefix) != 0)
-            return false;
-         string what = StringSubstr(sparam, StringLen(m_prefix));
-
-         //--- the tab strip is not a command: it changes nothing in the
-         //--- engine, only which sheet is on top
-         if(StringLen(what) == 4 && StringSubstr(what, 0, 3) == "tab")
-           {
-            m_tab = (int)StringToInteger(StringSubstr(what, 3));
-            ObjectSetInteger(m_chart, sparam, OBJPROP_STATE, false);
-            Render();
-            return true;
-           }
-
-         ENUM_SSR_CMD c = SSR_CMD_NONE;
-         if(what == "toggle")        c = SSR_CMD_TOGGLE;
-         else if(what == "step")     c = SSR_CMD_STEP_FWD;
-         else if(what == "step10")   c = SSR_CMD_STEP_FWD_10;
-         else if(what == "back")     c = SSR_CMD_STEP_BACK;
-         else if(what == "back10")   c = SSR_CMD_STEP_BACK_10;
-         else if(what == "reset")    c = SSR_CMD_RESET;
-         else if(what == "restart")  c = SSR_CMD_RESTART;
-         else if(what == "follow")   c = SSR_CMD_FOLLOW;
-         else if(what == "bookmark") c = SSR_CMD_BOOKMARK;
-         else if(what == "fidelity") c = SSR_CMD_FIDELITY_CYCLE;
-         else if(what == "jump")     c = SSR_CMD_JUMP;
-         else if(what == "sessions") c = SSR_CMD_SESSIONS;
-         else if(what == "lines")    c = SSR_CMD_LINES_TOGGLE;
-         else if(what == "armbtn")   c = SSR_CMD_LINES_TOGGLE;
-         else if(what == "clrbtn")   c = SSR_CMD_LINES_TOGGLE;
-         else if(what == "flipbtn")  c = SSR_CMD_LINES_FLIP;
-         else if(what == "spup")     c = SSR_CMD_SPEED_UP;
-         else if(what == "spdn")     c = SSR_CMD_SPEED_DOWN;
-         else if(what == "collapse") c = SSR_CMD_COLLAPSE;
-
-         //--- release the latch BEFORE anything that might not return
-         ObjectSetInteger(m_chart, sparam, OBJPROP_STATE, false);
-
-         //--- a command this layer does not own must reach the host,
-         //--- exactly as it does for a key press
-         if(c != SSR_CMD_NONE && !Owns(c))
-            return false;
-
-         if(c != SSR_CMD_NONE)
-            Execute(c);
-         else
-            //--- the trade controls have no keyboard equivalent, so
-            //--- they are not commands: they are buttons, handled here
-            TradeButton(what);
-
-         Render();
-         return true;
-        }
+      //--- CHARTEVENT_OBJECT_CLICK is deliberately not handled here.
+      //--- PollClicks is the ONE mechanism, so that a panel on the
+      //--- replay chart and a panel on this one behave identically
+      //--- rather than through two paths, one of which stops being
+      //--- maintained.
 
       //--- dragging: the panel by its caption, the thumb along its groove
       if(id == CHARTEVENT_MOUSE_MOVE)

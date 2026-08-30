@@ -327,6 +327,14 @@ CALL_ON_GLOBAL = re.compile(r'\bg_[A-Za-z_]\w*\s*\.\s*([A-Za-z_]\w*)\s*\(')
 #--- and the other does not - and A6 could not see any of them.
 CALL_ON_MEMBER = re.compile(r'\bm_[a-z_]\w*\s*\.\s*([A-Za-z_]\w*)\s*\(')
 
+#--- ...and to LOCAL objects of our own classes. Removing
+#--- CSSRPanel::SetPosition broke SSR_T15_Ux, which calls it on a local
+#--- named panel2 - a receiver neither the g_ nor the m_ pattern
+#--- matches. The tests are compiled by the updater and are exactly
+#--- where a removed method surfaces last, so they are the ones that
+#--- most need this.
+LOCAL_DECL = re.compile(r'\b(CSSR[A-Za-z]\w*)\s+([a-z]\w*)\s*[;=]')
+
 def audit_a6():
     declared = set()
     for path, body in CLEAN.items():
@@ -357,6 +365,17 @@ def audit_a7():
     declared |= {"Detach", "Release"}
 
     for path, body in CLEAN.items():
+        locals_here = set(n for _, n in LOCAL_DECL.findall(body))
+        if locals_here:
+            pat = re.compile(r'\b(?:%s)\s*\.\s*([A-Za-z_]\w*)\s*\('
+                             % "|".join(sorted(re.escape(n) for n in locals_here)))
+            for m in pat.finditer(body):
+                if m.group(1) in declared:
+                    continue
+                report("A7", path, body[:m.start()].count("\n") + 1,
+                       "%s() is called on one of our objects but declared "
+                       "nowhere - the other half of a change did not land"
+                       % m.group(1))
         for m in CALL_ON_MEMBER.finditer(body):
             name = m.group(1)
             if name in declared:

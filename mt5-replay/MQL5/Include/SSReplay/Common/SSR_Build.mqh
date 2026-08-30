@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v35 2026-08-30  bridge-stops-flooding"
+#define SSR_BUILD           "v36 2026-08-30  panel-polls-its-buttons"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

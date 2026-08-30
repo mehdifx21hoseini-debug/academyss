@@ -109,7 +109,7 @@ input bool            InpAllowTrade  = false;                // Let them place V
 
 //--- Phase 15 -------------------------------------------------------
 input double          InpRiskPercent = 0.5;                  // Risk per trade from the panel, percent
-input bool            InpOnePanel    = true;                 // Put the panel ON the replay chart (one window)
+input bool            InpOnePanel    = true;                 // Panel on the replay chart (one window; keys then work on THIS chart)
 input bool            InpTradeLines  = true;                 // Draw draggable stop/target lines
 input double          InpStopPoints  = 0;                    // Default stop, in points (0 = 10x the spread)
 input double          InpRR          = 2.0;                  // Target distance, as a multiple of the stop
@@ -173,10 +173,7 @@ CSSRJournal          g_journal;
 string g_origin      = "";
 long  g_replay_chart = 0;
 long  g_panel_chart  = 0;      // where the panel and dialogs actually are
-int   g_bridge       = INVALID_HANDLE;
 uint  g_panel_paint  = 0;      // last panel repaint, for the UI throttle
-long  g_forwarded    = 0;      // events that arrived from the bridge
-bool  g_said_bridge  = false;
 ulong g_last_pump_us = 0;
 int   g_slow_tick    = 0;
 bool  g_ready        = false;
@@ -354,37 +351,6 @@ int OpenExtraStreams(const long win_start, const long win_end,
   }
 
 //+------------------------------------------------------------------+
-//+------------------------------------------------------------------+
-//| Put the event bridge on the replay chart.                        |
-//|                                                                  |
-//| Returns false for every reason it might not be there - a missing |
-//| file, a failed handle, a refused add - because the caller has to |
-//| distinguish "installed" from "probably installed".               |
-//+------------------------------------------------------------------+
-bool InstallBridge(const long chart, const ENUM_TIMEFRAMES tf, const string sym)
-  {
-   if(chart == 0 || sym == "")
-      return false;
-
-   g_bridge = iCustom(sym, tf, "SSReplay\\SSR_EventBridge", ChartID());
-   if(g_bridge == INVALID_HANDLE)
-     {
-      PrintFormat("[host] bridge handle failed (%d) - is "
-                  "Indicators\\SSReplay\\SSR_EventBridge compiled?",
-                  GetLastError());
-      return false;
-     }
-   if(!ChartIndicatorAdd(chart, 0, g_bridge))
-     {
-      PrintFormat("[host] bridge could not be added to chart %d (%d)",
-                  (int)chart, GetLastError());
-      IndicatorRelease(g_bridge);
-      g_bridge = INVALID_HANDLE;
-      return false;
-     }
-   return true;
-  }
-
 //+------------------------------------------------------------------+
 int OnInit()
   {
@@ -714,35 +680,30 @@ int OnInit()
    g_catalog.Attach(g_src.History());
    g_catalog.Scan(origin);
    //+------------------------------------------------------------------+
-   //| ONE WINDOW.                                                      |
+   //| ONE WINDOW - AND THE PANEL ASKS ITS BUTTONS INSTEAD OF WAITING.  |
    //|                                                                  |
-   //| Drawing was never the obstacle - ObjectCreate takes a chart id,  |
-   //| so the panel can be painted onto the replay chart. Only EVENTS   |
-   //| are chart-local: MetaTrader delivers OnChartEvent to the chart a |
-   //| program is attached to and nowhere else. SSR_EventBridge is a    |
-   //| do-nothing indicator that sits on the replay chart and forwards  |
-   //| its events here, which is the missing half.                      |
+   //| Drawing on another chart was never the obstacle: ObjectCreate    |
+   //| takes a chart id. Only EVENTS are chart-local, and the previous  |
+   //| build tried to route them across with a forwarding indicator.    |
+   //| That could not work and its own log line proved it: an indicator |
+   //| created with iCustom and shown by ChartIndicatorAdd keeps the    |
+   //| CREATOR's chart context, so it printed "chart X -> host X", the  |
+   //| same id twice, and forwarded the host's events to the host.      |
    //|                                                                  |
-   //| AND IF IT DOES NOT INSTALL, THE PANEL DOES NOT MOVE.             |
-   //| A panel on a chart whose events never arrive renders perfectly   |
-   //| and answers nothing - the worst possible failure, because it     |
-   //| looks like it is working. So the move is conditional on the      |
-   //| bridge actually being there, and the fallback says so out loud   |
-   //| rather than leaving the user to discover it by clicking.         |
+   //| The panel polls OBJPROP_STATE instead. MetaTrader latches a      |
+   //| button down when it is clicked and that latch is readable from   |
+   //| any chart - the same reasoning already used for the stop and     |
+   //| target lines, which have worked from day one precisely because   |
+   //| they ask rather than listen.                                     |
+   //|                                                                  |
+   //| WHAT THIS COSTS: the KEYBOARD. Keys reach only the chart this    |
+   //| program is attached to, and nothing latches them, so there is    |
+   //| nothing to poll. Every command has a button, so nothing is out   |
+   //| of reach - but the keys work on THIS chart, not the replay one.  |
+   //| Said out loud below rather than left to be discovered.           |
    //+------------------------------------------------------------------+
-   g_panel_chart = ChartID();
-   if(InpOnePanel && g_replay_chart != 0)
-     {
-      if(InstallBridge(g_replay_chart, InpChartTf, g_sink.ReplaySymbol()))
-        {
-         g_panel_chart = g_replay_chart;
-         Print("[host] one window: the panel is on the replay chart");
-        }
-      else
-         Print("[host] ONE-WINDOW MODE FAILED - SSR_EventBridge did not "
-               "install, so the panel stays on THIS chart. Compile "
-               "Indicators\\SSReplay\\SSR_EventBridge.mq5 and restart.");
-     }
+   g_panel_chart = (InpOnePanel && g_replay_chart != 0 ? g_replay_chart
+                                                       : ChartID());
 
    g_dialog.Create(g_panel_chart, GetPointer(g_catalog));
    g_session_dlg.Create(g_panel_chart, GetPointer(g_gport));
@@ -791,13 +752,19 @@ int OnInit()
    //--- user reasonably presses keys where the candles are. There they
    //--- do nothing: MetaTrader delivers key events only to the chart a
    //--- program is attached to. Saying which one costs a line.
-   //--- SAY WHERE THE PANEL ACTUALLY IS. This printed "the panel is on
-   //--- the <host symbol> chart" unconditionally, which stopped being
-   //--- true the moment one-window mode worked - and a tool that tells
-   //--- the user to go and click the wrong window is worse than silent.
+   //--- SAY WHERE EACH HALF IS, SEPARATELY. They are no longer on the
+   //--- same chart, and one sentence naming one of them would be wrong
+   //--- about the other.
    if(g_panel_chart == g_replay_chart && g_replay_chart != 0)
-      PrintFormat("[host] the panel and the keyboard are on the %s chart - "
-                  "the one you are watching.", g_sink.ReplaySymbol());
+     {
+      PrintFormat("[host] one window: the panel and ALL its buttons are on "
+                  "the %s chart - the one you are watching.",
+                  g_sink.ReplaySymbol());
+      PrintFormat("[host] the KEYBOARD still belongs to the %s chart, because "
+                  "MetaTrader delivers keys only to the chart a program sits "
+                  "on. Every command has a button, so nothing is out of reach.",
+                  _Symbol);
+     }
    else
       PrintFormat("[host] the panel and the keyboard are on the %s chart - "
                   "click it first. The replay chart is for watching.", _Symbol);
@@ -820,20 +787,6 @@ void OnDeinit(const int reason)
    g_session_dlg.Destroy();
    g_dialog.Destroy();
    g_panel.Destroy();
-
-   //--- the bridge is ours too. Left behind it would sit on a chart
-   //--- forwarding events to an EA that no longer exists.
-   if(g_bridge != INVALID_HANDLE)
-     {
-      PrintFormat("[host] %d events came through the bridge", (int)g_forwarded);
-      if(g_panel_chart != 0 && g_panel_chart != ChartID())
-         ChartIndicatorDelete(g_panel_chart, 0, "SSR EventBridge");
-      IndicatorRelease(g_bridge);
-      g_bridge = INVALID_HANDLE;
-     }
-   //--- the lines are ours, and a chart handed back with two stray
-   //--- horizontal lines on it is a chart we did not clean up
-   g_lines.Clear();
 
    //--- REASON_CHARTCHANGE and friends destroy this EA and rebuild it.
    //--- Tearing the replay symbol down on every one of those would
@@ -1036,6 +989,18 @@ void OnTimer()
    //| clicks and keys call Render themselves and do not come through    |
    //| here.                                                             |
    //+------------------------------------------------------------------+
+   //+------------------------------------------------------------------+
+   //| POLL FIRST, PAINT SECOND - AND THE ORDER MATTERS.                |
+   //|                                                                  |
+   //| A repaint rewrites every button. If it ran first it could rewrite|
+   //| one that the user pressed a millisecond earlier and the press     |
+   //| would be gone before anyone read it. Polling first means the      |
+   //| longest a click can wait is one pump.                             |
+   //+------------------------------------------------------------------+
+   ENUM_SSR_CMD host_cmd = g_panel.PollClicks();
+   if(host_cmd != SSR_CMD_NONE)
+      RunHostCommand(host_cmd);
+
    uint now_ms = GetTickCount();
    if(now_ms - g_panel_paint >= 100)
      {
@@ -1044,7 +1009,39 @@ void OnTimer()
      }
   }
 
-//--- declared before it is called, so the compiler never has to guess
+//+------------------------------------------------------------------+
+//| The commands the HOST owns, because their dialogs need layers    |
+//| the panel is not allowed to know about.                          |
+//|                                                                  |
+//| One function, reached from both the key path and the button poll,|
+//| so pressing J and clicking Jump cannot end up doing different    |
+//| things - which is exactly what happened while they were two.     |
+//+------------------------------------------------------------------+
+void RunHostCommand(const ENUM_SSR_CMD cmd)
+  {
+   if(cmd == SSR_CMD_SESSIONS)
+     {
+      g_session_dlg.Open();
+      g_panel.Render();
+      return;
+     }
+   if(cmd == SSR_CMD_JUMP)
+     {
+      SSRSessionRange r;
+      r.Init();
+      r.origin    = (InpSymbol == "" ? _Symbol : InpSymbol);
+      r.start_msc = g_group.Now();
+      r.end_msc   = g_group.EndMsc();
+      g_dialog.Open(r);
+      PrintFormat("[host] jump dialog: open=%s catalog=%s",
+                  (g_dialog.IsOpen() ? "yes" : "NO"),
+                  (g_catalog.Available() ? "available" : "NOT AVAILABLE"));
+      g_panel.Render();
+     }
+  }
+
+//--- declared before they are called, so the compiler never has to guess
+void RunHostCommand(const ENUM_SSR_CMD cmd);
 void RouteEvent(const int id, const long &lparam,
                 const double &dparam, const string &sparam);
 
@@ -1055,31 +1052,7 @@ void OnChartEvent(const int id, const long &lparam,
    if(!g_ready)
       return;
 
-   //+------------------------------------------------------------------+
-   //| A FORWARDED EVENT IS AN EVENT.                                   |
-   //|                                                                  |
-   //| SSR_EventBridge sends the replay chart's events here with the    |
-   //| original id carried as the custom event number. Unwrapping it at |
-   //| the door means everything below sees the event it always saw -   |
-   //| one code path for local and forwarded alike, because two paths   |
-   //| means one of them stops being maintained.                        |
-   //+------------------------------------------------------------------+
-   int ev = id;
-   if(ev >= CHARTEVENT_CUSTOM)
-     {
-      ev -= CHARTEVENT_CUSTOM;
-      g_forwarded++;
-      //--- ONE line, the first time, so "is the bridge alive" is never
-      //--- a question that costs a round trip again
-      if(!g_said_bridge)
-        {
-         g_said_bridge = true;
-         Print("[host] first event arrived from the bridge - "
-               "the replay chart is wired to the panel");
-        }
-     }
-
-   RouteEvent(ev, lparam, dparam, sparam);
+   RouteEvent(id, lparam, dparam, sparam);
   }
 
 //+------------------------------------------------------------------+
@@ -1122,36 +1095,22 @@ void RouteEvent(const int id, const long &lparam,
    if(g_panel.OnEvent(id, lparam, dparam, sparam))
       return;
 
-   //--- S opens the saved-session list. The host owns it because the
-   //--- dialog needs the session manager, which knows every layer.
-   if(id == CHARTEVENT_KEYDOWN && SSRKeyToCommand(lparam) == SSR_CMD_SESSIONS)
+   //--- S and J on THIS chart. The button poll reaches the same place.
+   if(id == CHARTEVENT_KEYDOWN)
      {
-      g_session_dlg.Open();
-      return;
+      ENUM_SSR_CMD kc = SSRKeyToCommand(lparam);
+      if(kc == SSR_CMD_SESSIONS || kc == SSR_CMD_JUMP)
+        {
+         RunHostCommand(kc);
+         return;
+        }
      }
 
-   //--- J opens the range dialog; the panel maps the key, the host owns
-   //--- the dialog because the dialog needs the catalogue
-   if(id == CHARTEVENT_KEYDOWN && SSRKeyToCommand(lparam) == SSR_CMD_JUMP)
-     {
-      SSRSessionRange r;
-      r.Init();
-      r.origin    = (InpSymbol == "" ? _Symbol : InpSymbol);
-      r.start_msc = g_group.Now();
-      r.end_msc   = g_group.EndMsc();
-      g_dialog.Open(r);
-      PrintFormat("[route] range dialog opened: is_open=%s catalog=%s "
-                  "seed=%s..%s problem=\"%s\"",
-                  (g_dialog.IsOpen() ? "yes" : "NO"),
-                  (g_catalog.Available() ? "available" : "NOT AVAILABLE"),
-                  SSRFormatMsc(r.start_msc), SSRFormatMsc(r.end_msc),
-                  g_dialog.Problem());
-      return;
-     }
-
-   //--- "Replay From Here" still needs events from the REPLAY chart,
-   //--- which this EA cannot receive. It arrives with the indicator
-   //--- panel, which lives on that chart itself.
+   //--- "Replay From Here" needs a click on a CANDLE, not on a panel
+   //--- object, and only the chart this program is attached to reports
+   //--- those. It waits for the engine to move into a Service, which
+   //--- is what lets the UI live on the replay chart as a program in
+   //--- its own right rather than as objects drawn from over here.
   }
 
 //+------------------------------------------------------------------+
