@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v30 2026-08-30  compile-only-our-own"
+#define SSR_BUILD           "v31 2026-08-30  a6-catches-half-a-patch"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

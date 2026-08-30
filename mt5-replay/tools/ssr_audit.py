@@ -285,7 +285,58 @@ def audit_a5():
                    "%s is %s bytes inline; one on the stack eats %.1f%% of the 2 MB cap"
                    % (name, format(size, ','), 100.0 * size / CAP))
 
-for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5):
+#---------------------------------------------------------------------------
+# A6 - a method called on one of our own objects must exist somewhere.
+#
+# `g_gport.AttachLines(...)` compiled here and failed in MetaEditor with
+# "undeclared identifier": a patch had written the call site but its other
+# half - the method itself - never reached disk. Two errors, one round
+# trip, and the only reason it took a round trip is that there is no MQL5
+# compiler on this machine.
+#
+# So: collect every method declared anywhere in the tree, then check every
+# call made on a `g_`-prefixed global. Deliberately narrow. It only flags a
+# name that appears NOWHERE as a declaration, which cannot be an inherited
+# method, a MetaTrader builtin, or a name this crude parser mis-reads - it
+# can only be a call to something that does not exist.
+#---------------------------------------------------------------------------
+#--- the star hugs the NAME in this codebase - `CSSRBarProvider *Bars(void)`
+#--- - so whitespace after it must be optional, or every pointer-returning
+#--- method reads as undeclared. Three false positives said so immediately.
+DECL_METHOD = re.compile(
+    r'^\s*(?:virtual\s+|static\s+|const\s+)*'
+    r'([A-Za-z_][\w:]*)\s*[\*&]?\s*'
+    r'([A-Za-z_]\w*)\s*\(', re.M)
+
+#--- `return Foo(...)` is a call, not a declaration of a method named Foo
+NOT_A_RETURN_TYPE = {
+    'return', 'if', 'while', 'for', 'switch', 'else', 'do', 'case',
+    'delete', 'new', 'break', 'continue', 'goto', 'sizeof',
+}
+
+CALL_ON_GLOBAL = re.compile(r'\bg_[A-Za-z_]\w*\s*\.\s*([A-Za-z_]\w*)\s*\(')
+
+def audit_a6():
+    declared = set()
+    for path, body in CLEAN.items():
+        for m in DECL_METHOD.finditer(body):
+            if m.group(1) in NOT_A_RETURN_TYPE:
+                continue
+            declared.add(m.group(2))
+
+    #--- MQL5 gives every object these; they are never declared by us
+    declared |= {"Detach", "Release"}
+
+    for path, body in CLEAN.items():
+        for m in CALL_ON_GLOBAL.finditer(body):
+            name = m.group(1)
+            if name in declared:
+                continue
+            report("A6", path, body[:m.start()].count("\n") + 1,
+                   "%s() is called on one of our objects but declared nowhere - "
+                   "the other half of a change did not land" % name)
+
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6):
     fn()
 
 if findings:

@@ -354,8 +354,20 @@ public:
       if(pts < 0.0)
         { m_trade_error = "a stop distance cannot be negative"; return false; }
       m_stop_points = pts;
+
+      //--- KEEP THE LINE AND THE NUMBER TELLING THE SAME STORY.
+      //--- The stop is read back off the chart every tick, so a stepper
+      //--- that only changed the number would be overwritten a moment
+      //--- later and read as a dead button. Move the line instead; the
+      //--- number then follows from it, which is the right direction.
+      if(m_lines != NULL && m_lines.IsArmed() && m_acct != NULL &&
+         m_acct.Bid() > 0.0 && pts > 0.0)
+         m_lines.SetStopPoints(m_acct.Bid(), pts);
+
       return true;
      }
+
+   void              AttachLines(CSSRTradeLines *lines) { m_lines = lines; }
 
    //--- the target is not on the base port: nothing else needs it, and
    //--- adding it there would oblige every other port to carry a field
