@@ -43,6 +43,8 @@ private:
    //--- this one.
    long              m_saved_mouse_move;
    long              m_saved_mouse_scroll;
+   long              m_saved_quick_nav;
+   long              m_saved_key_control;
    bool              m_saved;
 
    bool              m_collapsed;
@@ -80,6 +82,7 @@ public:
                      CSSRPanel(void)
      : m_chart(0), m_port(NULL), m_prefix("SSRP_"),
        m_x(12), m_y(24), m_saved_mouse_move(0), m_saved_mouse_scroll(1),
+       m_saved_quick_nav(1), m_saved_key_control(1),
        m_saved(false), m_collapsed(false), m_dragging(false),
        m_drag_dx(0), m_drag_dy(0), m_renders(0), m_writes(0)
      { m_state.Init(); ClearCache(); }
@@ -106,9 +109,36 @@ public:
         {
          m_saved_mouse_move   = ChartGetInteger(m_chart, CHART_EVENT_MOUSE_MOVE);
          m_saved_mouse_scroll = ChartGetInteger(m_chart, CHART_MOUSE_SCROLL);
+         m_saved_quick_nav    = ChartGetInteger(m_chart, CHART_QUICK_NAVIGATION);
+         m_saved_key_control  = ChartGetInteger(m_chart, CHART_KEYBOARD_CONTROL);
          m_saved = true;
         }
       ChartSetInteger(m_chart, CHART_EVENT_MOUSE_MOVE, true);
+
+      //+------------------------------------------------------------------+
+      //| THE TWO LINES THAT MAKE THE KEYBOARD EXIST.                      |
+      //|                                                                  |
+      //| MetaTrader opens its quick-navigation bar when SPACE or ENTER is |
+      //| pressed on a chart. SPACE is this product's play/pause key, so   |
+      //| the first thing a user ever presses opens a text box in the      |
+      //| corner and every key after it is typed into that box instead of  |
+      //| reaching OnChartEvent. The replay stops responding and looks     |
+      //| frozen. It is not frozen - it is not being spoken to.            |
+      //|                                                                  |
+      //| Fifteen phases of logic and 1,159 automated assertions could not |
+      //| find this, because no test presses a key on a real chart. Thirty |
+      //| seconds of a person using it did.                                |
+      //|                                                                  |
+      //| CHART_KEYBOARD_CONTROL is the second half: left on, the arrows,  |
+      //| PgUp/PgDn and +/- ALSO scroll and zoom the chart underneath our  |
+      //| own meaning for them, so every step command moved the view too.  |
+      //|                                                                  |
+      //| Both are saved above and restored in Destroy, because a chart    |
+      //| the user gets back must be the chart they had.                   |
+      //+------------------------------------------------------------------+
+      ChartSetInteger(m_chart, CHART_QUICK_NAVIGATION, false);
+      ChartSetInteger(m_chart, CHART_KEYBOARD_CONTROL, false);
+
       Render();
      }
 
@@ -123,6 +153,8 @@ public:
         {
          ChartSetInteger(m_chart, CHART_EVENT_MOUSE_MOVE, m_saved_mouse_move);
          ChartSetInteger(m_chart, CHART_MOUSE_SCROLL,     m_saved_mouse_scroll);
+         ChartSetInteger(m_chart, CHART_QUICK_NAVIGATION, m_saved_quick_nav);
+         ChartSetInteger(m_chart, CHART_KEYBOARD_CONTROL, m_saved_key_control);
          m_saved = false;
         }
       m_dragging = false;

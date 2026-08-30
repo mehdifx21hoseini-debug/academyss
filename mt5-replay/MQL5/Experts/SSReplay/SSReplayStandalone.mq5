@@ -699,6 +699,13 @@ int OnInit()
 
    PrintFormat("[host] ready  %s -> %s  %s .. %s",
                origin, rsym, SSRFormatMsc(win_start), SSRFormatMsc(win_end));
+   //--- NAME THE CHART THAT OWNS THE KEYBOARD.
+   //--- The candles are on one chart and the controls on another, and a
+   //--- user reasonably presses keys where the candles are. There they
+   //--- do nothing: MetaTrader delivers key events only to the chart a
+   //--- program is attached to. Saying which one costs a line.
+   PrintFormat("[host] the keyboard and the panel are on the %s chart - "
+               "click it first. The replay chart is for watching.", _Symbol);
    Print("[host] ", SSRKeyHint());
    return INIT_SUCCEEDED;
   }

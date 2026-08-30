@@ -30,6 +30,7 @@
 #include <SSReplay/Strategy/SSR_RefStrategy.mqh>
 #include <SSReplay/Ui/SSR_GroupPort.mqh>
 #include <SSReplay/Ui/SSR_Keys.mqh>
+#include <SSReplay/Ui/SSR_Panel.mqh>
 
 input datetime InpStart  = D'2024.01.08 00:00';
 input int      InpBars   = 4320;
@@ -401,6 +402,42 @@ void OnStart()
             SSRKeyToCommand(SSR_VK_R)     == SSR_CMD_RESET);
       Check("the hint mentions it",
             StringFind(SSRKeyHint(), "S sessions") >= 0, SSRKeyHint());
+   }
+
+   //================================================================
+   Section("T15.8  the panel takes the keyboard away from MetaTrader");
+   {
+      //--- THE ASSERTION THAT WOULD HAVE CAUGHT IT.
+      //---
+      //--- MetaTrader opens a quick-navigation text box when SPACE is
+      //--- pressed on a chart, and SPACE is this product's play key.
+      //--- Every key after that went into the box instead of the EA, so
+      //--- the replay stopped answering and read as frozen.
+      //---
+      //--- Fifteen phases and 1,159 assertions never saw it, because
+      //--- every one of them tested logic and none of them touched a
+      //--- chart's own behaviour. Thirty seconds of real use found it.
+      //--- So the fix arrives with the test that was missing.
+      long chart = ChartID();
+      long was_nav = ChartGetInteger(chart, CHART_QUICK_NAVIGATION);
+      long was_key = ChartGetInteger(chart, CHART_KEYBOARD_CONTROL);
+
+      CSSRGroupPort port;
+      CSSRPanel     panel;
+      panel.Create(chart, GetPointer(port), "T15_kbd_");
+
+      CheckEq("quick navigation is off while the panel lives",
+              0, ChartGetInteger(chart, CHART_QUICK_NAVIGATION));
+      CheckEq("the chart no longer steals the arrows",
+              0, ChartGetInteger(chart, CHART_KEYBOARD_CONTROL));
+
+      panel.Destroy();
+
+      //--- and the chart the user gets back is the chart they had
+      CheckEq("quick navigation is given back",
+              was_nav, ChartGetInteger(chart, CHART_QUICK_NAVIGATION));
+      CheckEq("keyboard control is given back",
+              was_key, ChartGetInteger(chart, CHART_KEYBOARD_CONTROL));
    }
 
    //================================================================

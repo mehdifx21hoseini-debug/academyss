@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v22 2026-08-30  short-history-says-so"
+#define SSR_BUILD           "v23 2026-08-30  the-keyboard-exists"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

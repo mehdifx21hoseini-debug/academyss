@@ -272,6 +272,14 @@ public:
      {
       ChartSetInteger(id, CHART_AUTOSCROLL, true);
       ChartSetInteger(id, CHART_SHIFT, true);
+
+      //--- The replay charts are for LOOKING at. MetaTrader only
+      //--- delivers key events to the chart a program runs on, so a key
+      //--- pressed here reaches nothing - and with quick navigation on,
+      //--- SPACE opens a text box in the corner instead, which reads as
+      //--- the whole product freezing. Nothing here can act on a key,
+      //--- so nothing here should appear to.
+      ChartSetInteger(id, CHART_QUICK_NAVIGATION, false);
      }
 
    //+------------------------------------------------------------------+
