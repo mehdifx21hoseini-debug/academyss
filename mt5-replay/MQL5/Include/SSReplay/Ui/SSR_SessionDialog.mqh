@@ -159,6 +159,30 @@ public:
          m_w.Button(id, x + 6, ry - 2, SSR_SD_W - 12, SSR_ROW_H - 3,
                     m_port.SessionSummary(idx), idx == m_selected);
         }
+      //--- AN EMPTY LIST HAS TO SAY IT IS EMPTY.
+      //--- Reported as "a window opens but there is nothing in it" - and
+      //--- that is correct behaviour with no sessions saved yet. A blank
+      //--- panel cannot tell the user whether it found nothing or failed
+      //--- to look, so it says which, and how to make one.
+      if(m_count == 0)
+        {
+         m_w.Label("empty1", x + SSR_PAD, cy + 6,
+                   "No saved sessions yet.",
+                   SSR_C_TEXT_DIM, SSR_FS_SMALL);
+         m_w.Label("empty2", x + SSR_PAD, cy + 26,
+                   "Set InpSession=\"a name\" on the EA and one is saved",
+                   SSR_C_TEXT_FAINT, SSR_FS_SMALL);
+         m_w.Label("empty3", x + SSR_PAD, cy + 42,
+                   "when you remove it - trades, clock and all.",
+                   SSR_C_TEXT_FAINT, SSR_FS_SMALL);
+        }
+      else
+        {
+         m_w.Hide("empty1", true);
+         m_w.Hide("empty2", true);
+         m_w.Hide("empty3", true);
+        }
+
       cy += SSR_SD_ROWS * (SSR_ROW_H - 2) + SSR_GAP;
 
       m_w.Button("up",   x + SSR_PAD, cy, 40, SSR_BTN_H, "^", false, m_top > 0);

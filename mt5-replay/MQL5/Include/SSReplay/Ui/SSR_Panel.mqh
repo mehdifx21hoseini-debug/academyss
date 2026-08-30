@@ -279,7 +279,16 @@ public:
       Text(6, "speedval", x + W - SSR_PAD - 62, cy + 4,
            SSRSpeedName(m_state.speed_x100), SSR_C_TEXT, SSR_FS_BODY, SSR_FONT_MONO);
       m_w.Button("spup", x + W - SSR_PAD - 22, cy, 22, SSR_ROW_H, "+");
-      m_w.Button("follow", x + SSR_PAD + 46, cy, 40, SSR_ROW_H, "FOL");
+      //--- FOLLOW is a one-shot, so the button states its own reason:
+      //--- the number of charts that have drifted off the live edge.
+      //--- "FOL" alone told the user nothing, and pressing it with
+      //--- nothing detached looked like a key that did not work.
+      m_w.Button("follow", x + SSR_PAD + 46, cy, 40, SSR_ROW_H,
+                 (m_state.charts_detached > 0
+                  ? "FOL " + IntegerToString(m_state.charts_detached)
+                  : "FOL"),
+                 m_state.charts_detached > 0,
+                 m_state.charts_detached > 0);
       cy += SSR_ROW_H + 4;
 
       //--- fidelity. Colour-coded because the user must be able to see

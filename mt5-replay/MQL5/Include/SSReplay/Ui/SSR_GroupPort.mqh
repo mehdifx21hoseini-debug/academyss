@@ -20,6 +20,7 @@
 #define SSR_GROUP_PORT_MQH
 
 #include "SSR_ReplayPort.mqh"
+#include "SSR_Theme.mqh"        // for the mark colour it hands down
 #include "../Core/SSR_MasterClock.mqh"
 #include "../Mt5/SSR_CustomSymbolSink.mqh"
 #include "../Chart/SSR_ChartManager.mqh"
@@ -106,6 +107,7 @@ public:
       out.end_msc   = m_group.EndMsc();
       out.progress  = m_group.Progress();
       out.streams   = m_group.Count();
+      out.charts_detached = (m_charts != NULL ? m_charts.DetachedCount() : 0);
       out.skew_msc  = m_group.MaxSkewMsc();
 
       //--- the group's reason if it has one, otherwise the stream's
@@ -280,7 +282,16 @@ public:
    virtual bool      Bookmark(const string label) override
      {
       CSSRReplayController *c = Primary();
-      return (c != NULL && c.Bookmark(label));
+      if(c == NULL || !c.Bookmark(label))
+         return false;
+
+      //--- ...and put it where the user can see it. A stored bookmark
+      //--- that leaves no mark is indistinguishable from one that was
+      //--- never stored - which is exactly how it was reported.
+      if(m_charts != NULL)
+         m_charts.MarkTime(SSRToTime(c.Now()), "bookmark " + label,
+                           SSR_C_ACCENT);
+      return true;
      }
 
    virtual bool      SavePosition(void) override

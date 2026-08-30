@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v26 2026-08-30  invisible-dialog-repaints"
+#define SSR_BUILD           "v27 2026-08-30  feedback-and-a-route-trace"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

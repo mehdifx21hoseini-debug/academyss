@@ -862,6 +862,23 @@ void OnChartEvent(const int id, const long &lparam,
    if(!g_ready)
       return;
 
+   //+------------------------------------------------------------------+
+   //| TRACE THE ROUTE, BECAUSE GUESSING IT COST TWO ROUNDS.            |
+   //|                                                                  |
+   //| J still does nothing. The panel passes it on - it prints no line |
+   //| - and the host's branch calls Open() on a dialog that draws and  |
+   //| now repaints. Two theories tested, one wrong. So instead of a    |
+   //| third, every key says which layer took it. One run, one answer.  |
+   //+------------------------------------------------------------------+
+   if(id == CHARTEVENT_KEYDOWN)
+     {
+      ENUM_SSR_CMD kc = SSRKeyToCommand(lparam);
+      PrintFormat("[route] key vk=%d -> %s | sessdlg=%s rangedlg=%s",
+                  (int)lparam, SSRCmdName(kc),
+                  (g_session_dlg.IsOpen() ? "OPEN" : "closed"),
+                  (g_dialog.IsOpen() ? "OPEN" : "closed"));
+     }
+
    //--- the session list is modal over everything, so it looks first
    if(g_session_dlg.IsOpen())
      {
@@ -915,6 +932,12 @@ void OnChartEvent(const int id, const long &lparam,
       r.start_msc = g_group.Now();
       r.end_msc   = g_group.EndMsc();
       g_dialog.Open(r);
+      PrintFormat("[route] range dialog opened: is_open=%s catalog=%s "
+                  "seed=%s..%s problem=\"%s\"",
+                  (g_dialog.IsOpen() ? "yes" : "NO"),
+                  (g_catalog.Available() ? "available" : "NOT AVAILABLE"),
+                  SSRFormatMsc(r.start_msc), SSRFormatMsc(r.end_msc),
+                  g_dialog.Problem());
       return;
      }
 

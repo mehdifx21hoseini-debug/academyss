@@ -147,6 +147,43 @@ public:
 
    string             Symbol(void) { return m_symbol; }
    int                Count(void)  { return m_count; }
+   long               IdAt(const int i)
+     { return (i >= 0 && i < m_count ? m_charts[i].id : 0); }
+
+   //+------------------------------------------------------------------+
+   //| Put a visible mark at a moment, on every replay chart.            |
+   //|                                                                   |
+   //| A bookmark that only exists in a counter is a bookmark the user    |
+   //| has to take on trust. The whole point of marking a moment is to    |
+   //| find it again by eye.                                              |
+   //+------------------------------------------------------------------+
+   //--- the colour comes from the caller: this layer has no theme, and
+   //--- reaching up into Ui for one would invert the dependency
+   int                MarkTime(const datetime when, const string label,
+                               const color col)
+     {
+      int drawn = 0;
+      string base = "SSR_MARK_" + IntegerToString((int)when);
+      for(int i = 0; i < m_count; i++)
+        {
+         long id = m_charts[i].id;
+         if(id == 0)
+            continue;
+         string n = base + "_" + IntegerToString(i);
+         if(ObjectFind(id, n) < 0 && !ObjectCreate(id, n, OBJ_VLINE, 0, when, 0))
+            continue;
+         ObjectSetInteger(id, n, OBJPROP_COLOR,      col);
+         ObjectSetInteger(id, n, OBJPROP_STYLE,      STYLE_DASH);
+         ObjectSetInteger(id, n, OBJPROP_WIDTH,      1);
+         ObjectSetInteger(id, n, OBJPROP_BACK,       true);
+         ObjectSetInteger(id, n, OBJPROP_SELECTABLE, false);
+         ObjectSetInteger(id, n, OBJPROP_HIDDEN,     true);
+         ObjectSetString (id, n, OBJPROP_TOOLTIP,    label);
+         ChartRedraw(id);
+         drawn++;
+        }
+      return drawn;
+     }
    CSSRLeakGuard     *Leak(void)   { return GetPointer(m_leak); }
 
    bool               InfoAt(const int i, SSRChartInfo &out)

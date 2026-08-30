@@ -60,6 +60,12 @@ struct SSRUiState
    //--- from one that froze.
    string             pause_reason;
    int                streams;         // 1 for a single instrument
+
+   //--- how many charts the user has scrolled away from the live edge.
+   //--- FOLLOW is a one-shot that brings them back, not a toggle, so the
+   //--- button has to show the number it would act on - otherwise
+   //--- pressing it with nothing detached looks like a dead key.
+   int                charts_detached;
    long               skew_msc;        // between streams; must be 0
 
    //--- Phase 15. THE PANEL NEVER FORMATS THE CLOCK ITSELF any more.
@@ -101,6 +107,7 @@ struct SSRUiState
       leak_clean = true; leak_advice = "";
       last_error = SSR_OK; last_error_text = "";
       pause_reason = ""; streams = 1; skew_msc = 0;
+      charts_detached = 0;
       clock_text = "--"; blind = false;
       balance = 0.0; equity = 0.0; floating = 0.0;
       open_positions = 0; risk_percent = 0.0; stop_points = 0.0;
