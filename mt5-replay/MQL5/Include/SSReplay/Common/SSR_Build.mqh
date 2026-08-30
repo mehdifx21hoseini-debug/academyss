@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v17 2026-08-30  updater-installs-and-compiles"
+#define SSR_BUILD           "v18 2026-08-30  updater-knows-which-folder"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

@@ -17,8 +17,27 @@ REM ---------------------------------------------------------------
 cd /d "%~dp0"
 set "TMPF=%TEMP%\ssr_update_tmp.txt"
 
-if not exist "Include\" goto notmql5
-if not exist "Scripts\" goto notmql5
+REM ---------------------------------------------------------------
+REM  IS THIS THE TERMINAL'S MQL5 FOLDER, OR THE ZIP'S?
+REM
+REM  Include\ and Scripts\ are not enough to tell them apart - the
+REM  ZIP contains an MQL5 folder with exactly those names, so running
+REM  this file from an unpacked ZIP passed every check and quietly
+REM  reinstalled the build on top of itself while the terminal kept
+REM  running the old one.
+REM
+REM  The parent settles it. A MetaTrader data folder always carries
+REM  origin.txt, config\ and profiles\ beside MQL5. An unpacked ZIP
+REM  carries none of them.
+REM ---------------------------------------------------------------
+if not exist "Include" goto notmql5
+if not exist "Scripts" goto notmql5
+
+set "ISDATA="
+if exist "..\origin.txt" set "ISDATA=1"
+if exist "..\config"     set "ISDATA=1"
+if exist "..\profiles"   set "ISDATA=1"
+if not defined ISDATA goto notterminal
 
 echo.
 echo   ===============================================
@@ -183,8 +202,32 @@ exit /b 1
 :notmql5
 echo.
 echo   [STOP] This is not an MQL5 folder.
-echo          Put SSR-Update.bat next to Include\ and Scripts\
+echo          Put SSR-Update.bat next to Include and Scripts
 echo          Current folder: %CD%
+echo.
+pause
+exit /b 1
+
+:notterminal
+echo.
+echo   ===============================================
+echo     WRONG FOLDER - nothing was changed
+echo   ===============================================
+echo.
+echo   This looks like the MQL5 folder from inside the ZIP,
+echo   not MetaTrader's own one.
+echo.
+echo   Current folder:
+echo       %CD%
+echo.
+echo   MetaTrader's data folder always has origin.txt, config and
+echo   profiles beside MQL5. This folder has none of them.
+echo.
+echo   To find the right one:
+echo       MetaTrader  File  ^>  Open Data Folder  ^>  MQL5
+echo.
+echo   Copy SSR-Update.bat into THAT folder and run it from there.
+echo   Leave the ZIP in Downloads - it finds it by itself.
 echo.
 pause
 exit /b 1
