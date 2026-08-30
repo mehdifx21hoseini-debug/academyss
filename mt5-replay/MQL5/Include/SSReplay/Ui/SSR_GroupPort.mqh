@@ -51,6 +51,7 @@ private:
    double                m_risk_percent;
    double                m_tp_points;    // 0 = no target on the order
    CSSRTradeLines       *m_lines;        // not owned; may be NULL
+   bool                  m_line_long;    // which side Flip last chose
    double                m_stop_points;   // no default: there is no safe one
    string                m_trade_error;
    string                m_session_error;
@@ -64,7 +65,7 @@ public:
      : m_group(NULL), m_sink(NULL), m_charts(NULL), m_blind(NULL),
        m_acct(NULL), m_stats(NULL), m_strategies(NULL), m_sessions(NULL),
        m_risk_percent(0.5), m_stop_points(0.0), m_tp_points(0.0),
-       m_lines(NULL),
+       m_lines(NULL), m_line_long(true),
        m_trade_error(""), m_session_error("") {}
 
    void              Attach(CSSRReplayGroup *g,
@@ -196,6 +197,57 @@ public:
          //--- saying so is the difference between a limitation and a
          //--- trap.
          out.trade_symbol   = (c != NULL ? c.Symbol() : "");
+
+         //+------------------------------------------------------------------+
+         //| WHAT THE LINES SAY, AND WHAT PRESSING BUY WOULD COST.            |
+         //|                                                                  |
+         //| The side is read from the geometry rather than asked of the      |
+         //| user: stop below price and target above is a long. The panel     |
+         //| then dims the other button, so the chart and the dialog cannot   |
+         //| disagree about which trade is being set up.                      |
+         //|                                                                  |
+         //| The size comes from the trading engine's own preview, on the     |
+         //| same fill price the order would use. Recomputing it here would   |
+         //| be a second formula, and the second one is the one that drifts.  |
+         //+------------------------------------------------------------------+
+         out.bid            = m_acct.Bid();
+         out.ask            = m_acct.Ask();
+         out.price_digits   = m_acct.Digits();
+         double pt          = PricePoint();
+         if(pt > 0.0)
+            out.spread_points = (out.ask - out.bid) / pt;
+
+         if(m_lines != NULL && m_lines.IsArmed())
+           {
+            out.lines_armed = true;
+            out.sl_price    = m_lines.SlPrice();
+            out.tp_price    = m_lines.TpPrice();
+            out.line_long   = (out.sl_price < out.bid);
+
+            ENUM_SSR_ORDER side = (out.line_long ? SSR_ORDER_BUY : SSR_ORDER_SELL);
+            double entry = 0.0;
+            out.lot_from_risk = m_acct.PreviewLot(side, m_risk_percent,
+                                                  out.sl_price, entry);
+            if(out.lot_from_risk > 0.0 && entry > 0.0)
+              {
+               //--- money, not points: the number a person decides on.
+               //--- Both sides come from the same lot and the same entry,
+               //--- so the ratio below cannot be quietly inconsistent.
+               double risk_dist = MathAbs(entry - out.sl_price);
+               double rew_dist  = MathAbs(out.tp_price - entry);
+               out.risk_money   = m_acct.MoneyFor(out.lot_from_risk, risk_dist);
+               out.reward_money = m_acct.MoneyFor(out.lot_from_risk, rew_dist);
+               if(risk_dist > 0.0)
+                  out.rr = rew_dist / risk_dist;
+              }
+            //--- keep the legacy point fields in step, so anything still
+            //--- reading them sees the lines rather than a stale stepper
+            if(pt > 0.0)
+              {
+               out.stop_points = MathAbs(out.bid - out.sl_price) / pt;
+               out.tp_points   = MathAbs(out.tp_price - out.bid) / pt;
+              }
+           }
         }
 
       if(m_strategies != NULL && m_strategies.Count() > 0)
@@ -368,6 +420,72 @@ public:
      }
 
    void              AttachLines(CSSRTradeLines *lines) { m_lines = lines; }
+
+   //+------------------------------------------------------------------+
+   //| THE LINE VERBS.                                                  |
+   //|                                                                  |
+   //| One button arms them, one clears them, one mirrors them across   |
+   //| the price. Everything between those three presses is the mouse.  |
+   //+------------------------------------------------------------------+
+   virtual bool      ArmLines(void) override
+     {
+      m_trade_error = "";
+      if(m_lines == NULL)
+        { m_trade_error = "the chart lines are not available"; return false; }
+      if(m_acct == NULL || m_acct.Bid() <= 0.0)
+        { m_trade_error = "no price yet - let one tick through first"; return false; }
+
+      //--- A DEFAULT THAT IS NOT INSIDE THE SPREAD.
+      //--- Ten times the spread is a distance a person can see and then
+      //--- drag; a fixed number of points is right on one instrument and
+      //--- absurd on the next, which is exactly the hardcoded-symbol
+      //--- logic this product is not allowed to contain.
+      double pt = PricePoint();
+      double spread_pts = (pt > 0.0 ? (m_acct.Ask() - m_acct.Bid()) / pt : 0.0);
+      double stop_pts   = (m_stop_points > 0.0 ? m_stop_points
+                                               : MathMax(10.0 * spread_pts, 10.0));
+      bool ok = m_lines.ArmSide(m_acct.Bid(), stop_pts,
+                                (m_tp_points > 0.0 && stop_pts > 0.0
+                                 ? m_tp_points / stop_pts : 2.0),
+                                m_line_long);
+      if(!ok)
+         m_trade_error = "could not place the lines on the chart";
+      return ok;
+     }
+
+   virtual bool      ClearLines(void) override
+     {
+      m_trade_error = "";
+      if(m_lines == NULL)
+        { m_trade_error = "the chart lines are not available"; return false; }
+      m_lines.Clear();
+      return true;
+     }
+
+   virtual bool      FlipLines(void) override
+     {
+      m_line_long = !m_line_long;
+      //--- unarmed, this is just a preference for the next Arm. Armed,
+      //--- it has to re-place the lines, because their PRICES are what
+      //--- the trade is sized and filled from - repainting them the
+      //--- other colour would be a lie with a tidy appearance.
+      if(m_lines != NULL && m_lines.IsArmed())
+         return ArmLines();
+      return true;
+     }
+
+   //--- one price step of the instrument the account trades. Asked of
+   //--- the symbol, never assumed: a hardcoded 0.0001 is wrong on an
+   //--- index, a metal, and every JPY pair.
+   double            PricePoint(void)
+     {
+      if(m_acct == NULL)
+         return 0.0;
+      int d = m_acct.Digits();
+      if(d < 0 || d > 10)
+         return 0.0;
+      return MathPow(10.0, -d);
+     }
 
    //--- the target is not on the base port: nothing else needs it, and
    //--- adding it there would oblige every other port to carry a field

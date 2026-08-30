@@ -109,6 +109,7 @@ input bool            InpAllowTrade  = false;                // Let them place V
 
 //--- Phase 15 -------------------------------------------------------
 input double          InpRiskPercent = 0.5;                  // Risk per trade from the panel, percent
+input bool            InpOnePanel    = true;                 // Put the panel ON the replay chart (one window)
 input bool            InpTradeLines  = true;                 // Draw draggable stop/target lines
 input double          InpStopPoints  = 0;                    // Default stop, in points (0 = 10x the spread)
 input double          InpRR          = 2.0;                  // Target distance, as a multiple of the stop
@@ -171,6 +172,8 @@ CSSRJournal          g_journal;
 
 string g_origin      = "";
 long  g_replay_chart = 0;
+long  g_panel_chart  = 0;      // where the panel and dialogs actually are
+int   g_bridge       = INVALID_HANDLE;
 ulong g_last_pump_us = 0;
 int   g_slow_tick    = 0;
 bool  g_ready        = false;
@@ -345,6 +348,38 @@ int OpenExtraStreams(const long win_start, const long win_end,
       built++;
      }
    return built;
+  }
+
+//+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| Put the event bridge on the replay chart.                        |
+//|                                                                  |
+//| Returns false for every reason it might not be there - a missing |
+//| file, a failed handle, a refused add - because the caller has to |
+//| distinguish "installed" from "probably installed".               |
+//+------------------------------------------------------------------+
+bool InstallBridge(const long chart, const ENUM_TIMEFRAMES tf, const string sym)
+  {
+   if(chart == 0 || sym == "")
+      return false;
+
+   g_bridge = iCustom(sym, tf, "SSReplay\\SSR_EventBridge", ChartID());
+   if(g_bridge == INVALID_HANDLE)
+     {
+      PrintFormat("[host] bridge handle failed (%d) - is "
+                  "Indicators\\SSReplay\\SSR_EventBridge compiled?",
+                  GetLastError());
+      return false;
+     }
+   if(!ChartIndicatorAdd(chart, 0, g_bridge))
+     {
+      PrintFormat("[host] bridge could not be added to chart %d (%d)",
+                  (int)chart, GetLastError());
+      IndicatorRelease(g_bridge);
+      g_bridge = INVALID_HANDLE;
+      return false;
+     }
+   return true;
   }
 
 //+------------------------------------------------------------------+
@@ -612,6 +647,16 @@ int OnInit()
    g_gport.AttachStrategies(GetPointer(g_strategies));
    g_gport.AttachSessions(GetPointer(g_session_mgr));
    g_gport.SetRiskPercent(InpRiskPercent);
+   //--- the DEFAULT the SL/TP button starts from. Zero leaves it to the
+   //--- port, which uses ten times the live spread - an instrument-
+   //--- independent distance rather than a number that is sane on one
+   //--- symbol and absurd on the next.
+   if(InpStopPoints > 0.0)
+     {
+      g_gport.SetStopPoints(InpStopPoints);
+      if(InpRR > 0.0)
+         g_gport.SetTpPoints(InpStopPoints * InpRR);
+     }
    if(InpTradeLines)
       g_gport.AttachLines(GetPointer(g_lines));
 
@@ -665,14 +710,40 @@ int OnInit()
    //--- measured, so the estimate stops being a constant after one run
    g_catalog.Attach(g_src.History());
    g_catalog.Scan(origin);
-   g_dialog.Create(ChartID(), GetPointer(g_catalog));
-   g_session_dlg.Create(ChartID(), GetPointer(g_gport));
+   //+------------------------------------------------------------------+
+   //| ONE WINDOW.                                                      |
+   //|                                                                  |
+   //| Drawing was never the obstacle - ObjectCreate takes a chart id,  |
+   //| so the panel can be painted onto the replay chart. Only EVENTS   |
+   //| are chart-local: MetaTrader delivers OnChartEvent to the chart a |
+   //| program is attached to and nowhere else. SSR_EventBridge is a    |
+   //| do-nothing indicator that sits on the replay chart and forwards  |
+   //| its events here, which is the missing half.                      |
+   //|                                                                  |
+   //| AND IF IT DOES NOT INSTALL, THE PANEL DOES NOT MOVE.             |
+   //| A panel on a chart whose events never arrive renders perfectly   |
+   //| and answers nothing - the worst possible failure, because it     |
+   //| looks like it is working. So the move is conditional on the      |
+   //| bridge actually being there, and the fallback says so out loud   |
+   //| rather than leaving the user to discover it by clicking.         |
+   //+------------------------------------------------------------------+
+   g_panel_chart = ChartID();
+   if(InpOnePanel && g_replay_chart != 0)
+     {
+      if(InstallBridge(g_replay_chart, InpChartTf, g_sink.ReplaySymbol()))
+        {
+         g_panel_chart = g_replay_chart;
+         Print("[host] one window: the panel is on the replay chart");
+        }
+      else
+         Print("[host] ONE-WINDOW MODE FAILED - SSR_EventBridge did not "
+               "install, so the panel stays on THIS chart. Compile "
+               "Indicators\\SSReplay\\SSR_EventBridge.mq5 and restart.");
+     }
 
-   //--- The panel MUST live on this EA's own chart. MetaTrader delivers
-   //--- OnChartEvent only for the chart a program is attached to, so a
-   //--- panel drawn on the replay chart would render perfectly and
-   //--- respond to nothing. The replay chart is opened separately.
-   g_panel.Create(ChartID(), GetPointer(g_gport));
+   g_dialog.Create(g_panel_chart, GetPointer(g_catalog));
+   g_session_dlg.Create(g_panel_chart, GetPointer(g_gport));
+   g_panel.Create(g_panel_chart, GetPointer(g_gport));
 
    //--- A SAVED SESSION, if one was named and exists. This restores
    //--- the account and every trade in it, not just the position -
@@ -736,7 +807,18 @@ void OnDeinit(const int reason)
       g_publisher2[i].Withdraw();
 
    g_session_dlg.Destroy();
+   g_dialog.Destroy();
    g_panel.Destroy();
+
+   //--- the bridge is ours too. Left behind it would sit on a chart
+   //--- forwarding events to an EA that no longer exists.
+   if(g_bridge != INVALID_HANDLE)
+     {
+      if(g_panel_chart != 0 && g_panel_chart != ChartID())
+         ChartIndicatorDelete(g_panel_chart, 0, "SSR EventBridge");
+      IndicatorRelease(g_bridge);
+      g_bridge = INVALID_HANDLE;
+     }
    //--- the lines are ours, and a chart handed back with two stray
    //--- horizontal lines on it is a chart we did not clean up
    g_lines.Clear();
@@ -884,16 +966,20 @@ void OnTimer()
       double px = g_acct.Bid();
       if(px > 0.0)
         {
-         if(!g_lines.IsArmed())
-           {
-            double def_pts = (InpStopPoints > 0.0 ? InpStopPoints
-                                                  : InpSpreadPoints * 10.0);
-            if(g_lines.Arm(px, def_pts, InpRR))
-               PrintFormat("[host] stop and target lines placed on %s - "
-                           "drag them; the lot size follows the stop",
-                           g_sink.ReplaySymbol());
-           }
-         else
+         //+------------------------------------------------------------------+
+         //| THE LINES ARE NOT ARMED HERE ANY MORE.                           |
+         //|                                                                  |
+         //| They used to appear on their own at the first tick. Two lines a  |
+         //| user did not ask for, on every session, whether or not they were |
+         //| about to trade - and no way to get rid of them. The panel has an |
+         //| SL/TP button now (and the L key), so arming is a decision.        |
+         //|                                                                  |
+         //| What stays here is the POLL, and it stays for the reason it was  |
+         //| written: the lines live on the replay chart, this program is not |
+         //| attached to that chart, so no drag event can ever arrive. Asking |
+         //| them where they are, once a tick, needs no events at all.         |
+         //+------------------------------------------------------------------+
+         if(g_lines.IsArmed())
            {
             g_lines.Poll();
             double pts = g_lines.StopPointsFrom(px);
@@ -925,6 +1011,10 @@ void OnTimer()
    g_panel.Render();
   }
 
+//--- declared before it is called, so the compiler never has to guess
+void RouteEvent(const int id, const long &lparam,
+                const double &dparam, const string &sparam);
+
 //+------------------------------------------------------------------+
 void OnChartEvent(const int id, const long &lparam,
                   const double &dparam, const string &sparam)
@@ -933,21 +1023,25 @@ void OnChartEvent(const int id, const long &lparam,
       return;
 
    //+------------------------------------------------------------------+
-   //| TRACE THE ROUTE, BECAUSE GUESSING IT COST TWO ROUNDS.            |
+   //| A FORWARDED EVENT IS AN EVENT.                                   |
    //|                                                                  |
-   //| J still does nothing. The panel passes it on - it prints no line |
-   //| - and the host's branch calls Open() on a dialog that draws and  |
-   //| now repaints. Two theories tested, one wrong. So instead of a    |
-   //| third, every key says which layer took it. One run, one answer.  |
+   //| SSR_EventBridge sends the replay chart's events here with the    |
+   //| original id carried as the custom event number. Unwrapping it at |
+   //| the door means everything below sees the event it always saw -   |
+   //| one code path for local and forwarded alike, because two paths   |
+   //| means one of them stops being maintained.                        |
    //+------------------------------------------------------------------+
-   if(id == CHARTEVENT_KEYDOWN)
-     {
-      ENUM_SSR_CMD kc = SSRKeyToCommand(lparam);
-      PrintFormat("[route] key vk=%d -> %s | sessdlg=%s rangedlg=%s",
-                  (int)lparam, SSRCmdName(kc),
-                  (g_session_dlg.IsOpen() ? "OPEN" : "closed"),
-                  (g_dialog.IsOpen() ? "OPEN" : "closed"));
-     }
+   int ev = id;
+   if(ev >= CHARTEVENT_CUSTOM)
+      ev -= CHARTEVENT_CUSTOM;
+
+   RouteEvent(ev, lparam, dparam, sparam);
+  }
+
+//+------------------------------------------------------------------+
+void RouteEvent(const int id, const long &lparam,
+                const double &dparam, const string &sparam)
+  {
 
    //--- the session list is modal over everything, so it looks first
    if(g_session_dlg.IsOpen())

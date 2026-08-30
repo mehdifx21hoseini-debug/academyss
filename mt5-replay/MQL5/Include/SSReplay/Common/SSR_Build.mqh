@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v33 2026-08-30  font-probe-digits"
+#define SSR_BUILD           "v34 2026-08-30  one-window-classic-panel"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

@@ -89,6 +89,32 @@ struct SSRUiState
    //--- one line per strategy, already formatted. Empty when none.
    string             strategy_text;
 
+   //+------------------------------------------------------------------+
+   //| THE STOP AND TARGET ARE LINES, NOT NUMBERS.                      |
+   //|                                                                  |
+   //| The panel used to carry two steppers in points. A stop typed in  |
+   //| points is a stop chosen by arithmetic; a stop dragged on the     |
+   //| chart is a stop chosen by structure, which is the whole reason   |
+   //| a person practises on a replay. So the panel now shows what the  |
+   //| LINES say and the mouse is what sets them.                       |
+   //|                                                                  |
+   //| line_long is read from geometry, not asked of the user: stop     |
+   //| below price and target above means long. That is one fewer       |
+   //| decision to make in a dialog, and it cannot disagree with what   |
+   //| is drawn on the chart.                                           |
+   //+------------------------------------------------------------------+
+   bool               lines_armed;
+   double             sl_price;
+   double             tp_price;
+   bool               line_long;      // meaningless while !lines_armed
+   double             bid, ask;
+   int                price_digits;
+   double             spread_points;
+   double             lot_from_risk;  // what Buy/Sell would send
+   double             risk_money;     // ...and what it puts at stake
+   double             reward_money;   // ...against what it plays for
+   double             rr;             // reward : risk, 0 when unknown
+
    void               Init(void)
      {
       connected = false; symbol = ""; status = SSR_STATE_IDLE;
@@ -114,6 +140,9 @@ struct SSRUiState
       open_positions = 0; risk_percent = 0.0; stop_points = 0.0;
       trade_symbol = ""; can_trade = false; tp_points = 0.0;
       strategy_text = "";
+      lines_armed = false; sl_price = 0.0; tp_price = 0.0; line_long = true;
+      bid = 0.0; ask = 0.0; price_digits = 2; spread_points = 0.0;
+      lot_from_risk = 0.0; risk_money = 0.0; reward_money = 0.0; rr = 0.0;
      }
 
    bool               IsRunning(void)  { return (status == SSR_STATE_PLAYING); }
@@ -177,6 +206,13 @@ public:
    virtual bool      BreakEvenAll(void)                 { return false; }
    virtual bool      SetRiskPercent(const double pct)   { return false; }
    virtual bool      SetStopPoints(const double pts)    { return false; }
+
+   //--- the stop and target as LINES. ArmLines puts them on the chart
+   //--- at a sane default; after that the mouse owns them and the port
+   //--- only reports where they ended up.
+   virtual bool      ArmLines(void)                      { return false; }
+   virtual bool      ClearLines(void)                    { return false; }
+   virtual bool      FlipLines(void)                     { return false; }
    virtual string    TradeError(void)                   { return ""; }
 
    //+------------------------------------------------------------------+

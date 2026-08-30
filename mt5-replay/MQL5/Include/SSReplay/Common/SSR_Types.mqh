@@ -80,7 +80,11 @@ enum ENUM_SSR_SPEED
    SSR_SPEED_5   = 500,
    SSR_SPEED_10  = 1000,
    SSR_SPEED_25  = 2500,
-   SSR_SPEED_50  = 5000
+   SSR_SPEED_50  = 5000,
+   //--- not a multiplier: "emit as fast as the sink accepts".
+   //--- The engine clamps to what it can really do, and the panel
+   //--- shows what is running rather than what was asked for.
+   SSR_SPEED_MAX = 100000
   };
 
 //+------------------------------------------------------------------+
@@ -171,36 +175,128 @@ double SSRSpeedToDouble(const long speed_x100) { return (double)speed_x100 / 100
 
 string SSRSpeedName(const long speed_x100)
   {
+   if(speed_x100 >= SSR_SPEED_MAX)
+      return "MAX";
    double v = SSRSpeedToDouble(speed_x100);
    if(v == MathFloor(v))
       return StringFormat("%dx", (int)v);
-   return StringFormat("%.2gx", v);
+   //--- %.2g turned 0.25 into "0.25" but 0.1 into "0.1" and 0.75 into
+   //--- "0.75" only by luck of the exponent. Two decimals, trimmed,
+   //--- is the same answer without depending on that luck.
+   string t = StringFormat("%.2f", v);
+   while(StringLen(t) > 1 && StringSubstr(t, StringLen(t) - 1) == "0")
+      t = StringSubstr(t, 0, StringLen(t) - 1);
+   if(StringSubstr(t, StringLen(t) - 1) == ".")
+      t = StringSubstr(t, 0, StringLen(t) - 1);
+   return t + "x";
   }
 
-//--- the speed ladder the UI steps through (Phase 5 consumes this)
+//+------------------------------------------------------------------+
+//| THE SPEED LADDER.                                                |
+//|                                                                  |
+//| Twenty stops, not eight, because the panel now has a trackbar    |
+//| you drag with the mouse and eight stops on a 250-pixel bar makes |
+//| dragging feel like flicking a switch.                            |
+//|                                                                  |
+//| The stops are spaced EVENLY on the bar, and the values grow      |
+//| geometrically - so the bar is a logarithmic scale in speed. That |
+//| is the only scale that works here: on a linear bar from 0.1x to  |
+//| 200x, everything below 10x lives in the first 5% of the travel   |
+//| and cannot be picked. 1x -> 2x has to cost the same travel as    |
+//| 25x -> 50x, because that is what it costs in perception.         |
+//|                                                                  |
+//| Every stop is a number a person can say out loud. Dragging feels |
+//| continuous because consecutive stops are close in perception,    |
+//| not because the value became a float nobody chose.               |
+//+------------------------------------------------------------------+
 long SSRSpeedLadder(const int index)
   {
    switch(index)
      {
-      case 0: return SSR_SPEED_025;
-      case 1: return SSR_SPEED_050;
-      case 2: return SSR_SPEED_1;
-      case 3: return SSR_SPEED_2;
-      case 4: return SSR_SPEED_5;
-      case 5: return SSR_SPEED_10;
-      case 6: return SSR_SPEED_25;
-      case 7: return SSR_SPEED_50;
+      case  0: return   10;   // 0.1x
+      case  1: return   25;   // 0.25x
+      case  2: return   50;   // 0.5x
+      case  3: return   75;   // 0.75x
+      case  4: return  100;   // 1x
+      case  5: return  150;
+      case  6: return  200;
+      case  7: return  300;
+      case  8: return  400;
+      case  9: return  500;
+      case 10: return  700;
+      case 11: return 1000;   // 10x
+      case 12: return 1500;
+      case 13: return 2000;
+      case 14: return 3000;
+      case 15: return 5000;   // 50x
+      case 16: return 7500;
+      case 17: return 10000;  // 100x
+      case 18: return 20000;  // 200x
+      case 19: return SSR_SPEED_MAX;
      }
    return SSR_SPEED_1;
   }
-#define SSR_SPEED_LADDER_SIZE 8
+#define SSR_SPEED_LADDER_SIZE 20
+#define SSR_SPEED_DEFAULT_IX  4      /* 1x */
 
+//+------------------------------------------------------------------+
+//| Where on the ladder is this speed?                               |
+//|                                                                  |
+//| NEAREST, not exact. The old version returned 1x for anything it  |
+//| did not recognise, so a session restored at 3x would jump to 1x  |
+//| the first time the user pressed "+". A speed that is off-ladder  |
+//| is still SOMEWHERE on it, and the honest answer is the closest   |
+//| stop rather than a default that silently discards the value.     |
+//+------------------------------------------------------------------+
 int SSRSpeedLadderIndex(const long speed_x100)
   {
+   int  best = SSR_SPEED_DEFAULT_IX;
+   long gap  = -1;
    for(int i = 0; i < SSR_SPEED_LADDER_SIZE; i++)
-      if(SSRSpeedLadder(i) == speed_x100)
-         return i;
-   return 2;   // 1x
+     {
+      long d = SSRSpeedLadder(i) - speed_x100;
+      if(d < 0) d = -d;
+      if(gap < 0 || d < gap)
+        { gap = d; best = i; }
+     }
+   return best;
+  }
+
+//--- 0..1 along the bar, for the trackbar to place its thumb
+double SSRSpeedFraction(const long speed_x100)
+  {
+   return (double)SSRSpeedLadderIndex(speed_x100) /
+          (double)(SSR_SPEED_LADDER_SIZE - 1);
+  }
+
+//--- and back again, for a click or a drag at fraction f
+long SSRSpeedAtFraction(const double f)
+  {
+   double c = f;
+   if(c < 0.0) c = 0.0;
+   if(c > 1.0) c = 1.0;
+   return SSRSpeedLadder((int)MathRound(c * (SSR_SPEED_LADDER_SIZE - 1)));
+  }
+
+//+------------------------------------------------------------------+
+//| What the speed MEANS, in the only unit that helps a decision.    |
+//|                                                                  |
+//| "5x" is a number. "1h in 12m" is something you can plan an       |
+//| afternoon around.                                                |
+//+------------------------------------------------------------------+
+string SSRSpeedMeaning(const long speed_x100)
+  {
+   if(speed_x100 >= SSR_SPEED_MAX)
+      return "as fast as ticks feed";
+   double v = SSRSpeedToDouble(speed_x100);
+   if(v <= 0.0)
+      return "";
+   double sec = 3600.0 / v;
+   if(sec >= 5400.0)
+      return StringFormat("1h in %.1fh", sec / 3600.0);
+   if(sec >= 90.0)
+      return StringFormat("1h in %dm", (int)MathRound(sec / 60.0));
+   return StringFormat("1h in %ds", (int)MathRound(sec));
   }
 
 #endif // SSR_TYPES_MQH

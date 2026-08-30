@@ -665,6 +665,37 @@ public:
       return Open(type, lot, sl, tp, 0.0, tag);
      }
 
+   //+------------------------------------------------------------------+
+   //| WHAT WOULD THIS TRADE COST, WITHOUT SENDING IT.                  |
+   //|                                                                  |
+   //| The panel draws the stop as a line and has to show the size and  |
+   //| the money BEFORE the user clicks Buy. Recomputing that in the UI |
+   //| would be a second lot-sizing formula, and the second one is the  |
+   //| one that drifts. So the preview and the order come from exactly  |
+   //| the same call, on the same fill price.                           |
+   //|                                                                  |
+   //| Returns 0 and sets nothing else when it cannot size the trade -  |
+   //| the caller shows that as "no size", never as a guess.            |
+   //+------------------------------------------------------------------+
+   double            PreviewLot(const ENUM_SSR_ORDER type, const double risk_percent,
+                                const double sl, double &entry_out)
+     {
+      entry_out = 0.0;
+      if(m_bid <= 0.0 || sl <= 0.0)
+         return 0.0;
+      entry_out = FillPrice(SSRIsLong(type), true);
+      return m_risk.LotForRisk(Equity(), risk_percent, entry_out, sl);
+     }
+
+   //--- what a price distance is WORTH at this size, from the same risk
+   //--- model the sizing uses. The panel shows money because money is
+   //--- what a person decides on; points are the instrument's units,
+   //--- not the trader's.
+   double            MoneyFor(const double volume, const double price_distance)
+     {
+      return m_risk.RiskOf(volume, price_distance);
+     }
+
    bool              Modify(const long ticket, const double sl, const double tp)
      {
       int i = Find(ticket);

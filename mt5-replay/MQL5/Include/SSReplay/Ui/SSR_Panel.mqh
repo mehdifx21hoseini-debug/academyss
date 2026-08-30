@@ -7,10 +7,29 @@
 //|  decides what a state means - it renders what the port hands it  |
 //|  and forwards what the user pressed.                             |
 //|                                                                  |
-//|  It runs inside an indicator, so it may not sleep and must stay  |
-//|  cheap: rendering only touches objects whose text actually       |
-//|  changed, because rewriting twenty labels sixty times a second   |
-//|  is how a panel makes a terminal feel slow.                      |
+//|  THE SHAPE, AND WHY                                              |
+//|  A classic Windows dialog: caption, a clock and transport that   |
+//|  are ALWAYS visible, a speed trackbar, a tab strip, a column of  |
+//|  always-reachable buttons beside the sheet, and a status strip.  |
+//|                                                                  |
+//|  What is always visible is not a style choice. The clock, the    |
+//|  transport and the speed are the three things a person touches   |
+//|  every few seconds; putting any of them behind a tab means the   |
+//|  tool is only usable on one page. Everything that is consulted   |
+//|  rather than operated - positions, statistics, the session -     |
+//|  lives on a tab.                                                 |
+//|                                                                  |
+//|  WHAT WAS TAKEN OUT                                              |
+//|  Templates, Presets and a chart-layout button were drawn in an   |
+//|  earlier design with nothing behind them. A control that does    |
+//|  nothing is worse than a missing one: it teaches the user that   |
+//|  pressing things here may or may not work. Every control on this |
+//|  panel reaches something the engine actually implements.         |
+//|                                                                  |
+//|  It runs on the host's timer, so it must stay cheap: rendering   |
+//|  only touches objects whose text or position actually changed,   |
+//|  because rewriting forty labels sixty times a second is how a    |
+//|  panel makes a terminal feel slow.                               |
 //+------------------------------------------------------------------+
 #ifndef SSR_PANEL_MQH
 #define SSR_PANEL_MQH
@@ -21,6 +40,8 @@
 #include "SSR_Widgets.mqh"
 #include "SSR_ReplayPort.mqh"
 #include "SSR_Keys.mqh"
+
+#define SSR_SLOTS 64
 
 //+------------------------------------------------------------------+
 class CSSRPanel
@@ -34,13 +55,6 @@ private:
    int               m_x, m_y;
 
    //--- What the chart looked like before the panel touched it.
-   //---
-   //--- These were USED from Phase 5 onward - in the constructor, in
-   //--- Create and in Destroy - and never declared. Eleven phases and
-   //--- every structural check I wrote passed over it; the compiler
-   //--- found it in one second. Declared here in the order the
-   //--- constructor initialises them, so that list stays in step with
-   //--- this one.
    long              m_saved_mouse_move;
    long              m_saved_mouse_scroll;
    long              m_saved_quick_nav;
@@ -51,12 +65,13 @@ private:
    bool              m_dragging;
    int               m_drag_dx, m_drag_dy;
 
+   //--- the speed trackbar, which is dragged rather than clicked
+   bool              m_track_drag;
+   int               m_track_x, m_track_y, m_track_w;
+
+   int               m_tab;
+
    SSRUiState        m_state;
-   string            m_cache[32];   // last text written per slot
-   int               m_cache_x[32]; // ...and WHERE it was written
-   int               m_cache_y[32];
-   int               m_renders;
-   int               m_writes;
 
    //+------------------------------------------------------------------+
    //| Write only when something actually changed - and POSITION is     |
@@ -68,16 +83,20 @@ private:
    //| have no cache, so they moved. The panel tore in half: labels     |
    //| stranded over the candles, controls somewhere else.              |
    //|                                                                  |
-   //| That is the "it doesn't move properly when I drag it" report,    |
-   //| and it was an optimisation that forgot what it was optimising.   |
    //| Skipping a write is only safe when NOTHING about the write would |
    //| differ - the text, and where it goes.                            |
    //+------------------------------------------------------------------+
+   string            m_cache[SSR_SLOTS];
+   int               m_cache_x[SSR_SLOTS];
+   int               m_cache_y[SSR_SLOTS];
+   int               m_renders;
+   int               m_writes;
+
    void              Text(const int slot, const string id, const int x, const int y,
                           const string text, const color col,
                           const int size = SSR_FS_BODY, const string font = SSR_FONT)
      {
-      if(slot >= 0 && slot < 32 && m_cache[slot] == text &&
+      if(slot >= 0 && slot < SSR_SLOTS && m_cache[slot] == text &&
          m_cache_x[slot] == x && m_cache_y[slot] == y && m_w.Exists(id))
         {
          ObjectSetInteger(m_chart, m_w.N(id), OBJPROP_COLOR, col);
@@ -85,7 +104,7 @@ private:
         }
       m_w.Label(id, x, y, text, col, size, font);
       m_writes++;
-      if(slot >= 0 && slot < 32)
+      if(slot >= 0 && slot < SSR_SLOTS)
         {
          m_cache[slot]   = text;
          m_cache_x[slot] = x;
@@ -95,12 +114,29 @@ private:
 
    void              ClearCache(void)
      {
-      for(int i = 0; i < 32; i++)
+      for(int i = 0; i < SSR_SLOTS; i++)
         {
          m_cache[i]   = "\x01";   // a value no label can legitimately hold
-         m_cache_x[i] = -32000;    // ...and a place none can legitimately sit
+         m_cache_x[i] = -32000;   // ...and a place none can legitimately sit
          m_cache_y[i] = -32000;
         }
+     }
+
+   //--- money and prices, formatted once so every row agrees
+   string            Money(const double v, const bool sign = false)
+     {
+      //--- the sign is always written on a signed number, so the column
+      //--- does not change width the moment a loss appears
+      if(sign)
+         return StringFormat("%s%.2f", (v < 0.0 ? "-" : "+"), MathAbs(v));
+      return StringFormat("%.2f", v);
+     }
+
+   string            Price(const double v)
+     {
+      int d = m_state.price_digits;
+      if(d < 0 || d > 8) d = 2;
+      return DoubleToString(v, d);
      }
 
 public:
@@ -109,7 +145,9 @@ public:
        m_x(12), m_y(24), m_saved_mouse_move(0), m_saved_mouse_scroll(1),
        m_saved_quick_nav(1), m_saved_key_control(1),
        m_saved(false), m_collapsed(false), m_dragging(false),
-       m_drag_dx(0), m_drag_dy(0), m_renders(0), m_writes(0)
+       m_drag_dx(0), m_drag_dy(0),
+       m_track_drag(false), m_track_x(0), m_track_y(0), m_track_w(0),
+       m_tab(SSR_TAB_TRADE), m_renders(0), m_writes(0)
      { m_state.Init(); ClearCache(); }
 
                     ~CSSRPanel(void) { Destroy(); }
@@ -150,10 +188,6 @@ public:
       //| reaching OnChartEvent. The replay stops responding and looks     |
       //| frozen. It is not frozen - it is not being spoken to.            |
       //|                                                                  |
-      //| Fifteen phases of logic and 1,159 automated assertions could not |
-      //| find this, because no test presses a key on a real chart. Thirty |
-      //| seconds of a person using it did.                                |
-      //|                                                                  |
       //| CHART_KEYBOARD_CONTROL is the second half: left on, the arrows,  |
       //| PgUp/PgDn and +/- ALSO scroll and zoom the chart underneath our  |
       //| own meaning for them, so every step command moved the view too.  |
@@ -182,7 +216,8 @@ public:
          ChartSetInteger(m_chart, CHART_KEYBOARD_CONTROL, m_saved_key_control);
          m_saved = false;
         }
-      m_dragging = false;
+      m_dragging   = false;
+      m_track_drag = false;
      }
 
    void              SetPosition(const int x, const int y) { m_x = x; m_y = y; Render(); }
@@ -207,263 +242,473 @@ public:
       int H = m_collapsed ? SSR_HEADER_H + 2 : SSR_PANEL_H;
       int x = m_x, y = m_y;
 
-      m_w.Rect("bg", x, y, W, H, SSR_C_PANEL, SSR_C_PANEL_EDGE);
-      m_w.Rect("hdr", x + 1, y + 1, W - 2, SSR_HEADER_H, SSR_C_HEADER, SSR_C_HEADER);
-      Text(0, "title", x + SSR_PAD, y + 5, "SS REPLAY", SSR_C_ACCENT, SSR_FS_TITLE);
-      m_w.Button("collapse", x + W - 24, y + 3, 18, SSR_HEADER_H - 5,
-                 m_collapsed ? "+" : "-");
+      m_w.Rect("bg",  x, y, W, H, SSR_C_PANEL, SSR_C_PANEL_EDGE);
+      DrawCaption(x, y, W);
 
       if(m_collapsed)
         {
          HideBody(true);
+         ChartRedraw(m_chart);
          return;
         }
       HideBody(false);
 
-      int cy = y + SSR_HEADER_H + SSR_GAP;
+      int cy = y + SSR_HEADER_H + 3;
+      cy = DrawClock(x, cy, W);
+      cy = DrawTransport(x, cy, W);
+      cy = DrawSpeed(x, cy, W);
+      cy = DrawTabs(x, cy, W);
+      DrawSide(x + SSR_PAD, cy + 4);
+      DrawSheet(x + SSR_PAD + SSR_SIDE_W + SSR_GAP, cy + 4,
+                W - 2 * SSR_PAD - SSR_SIDE_W - SSR_GAP);
+      DrawStatus(x, y + H - SSR_STATUS_H - 1, W);
 
-      //--- identity and status ---------------------------------------
-      Text(1, "sym", x + SSR_PAD, cy,
-           (m_state.symbol == "" ? "no session" : m_state.symbol),
-           SSR_C_TEXT_DIM, SSR_FS_SMALL, SSR_FONT_MONO);
-      Text(2, "status", x + W - SSR_PAD - 62, cy,
-           SSRStateName(m_state.status), SSRStateColor(m_state.status), SSR_FS_SMALL);
-      //--- BLIND is a badge, not a silence. A trader who forgot they
-      //--- turned it on would read the masked clock as a broken one.
-      Text(20, "blind", x + W - SSR_PAD - 120, cy,
-           (m_state.blind ? "BLIND" : ""), SSR_C_ACCENT, SSR_FS_SMALL);
-      cy += SSR_ROW_H - 4;
-
-      //--- the clock: the single most-read thing on the panel.
-      //---
-      //--- THE TEXT COMES FROM THE PORT, already masked if the session
-      //--- is blind. A panel formatting the instant itself would be a
-      //--- second place that has to know about blind mode - and the
-      //--- one that gets forgotten, printing the date the mode exists
-      //--- to hide in the largest font on the screen.
-      Text(3, "clock", x + SSR_PAD, cy,
-           (m_state.clock_text == "" ? "--" : m_state.clock_text),
-           (m_state.blind ? SSR_C_ACCENT : SSR_C_TEXT),
-           SSR_FS_CLOCK, SSR_FONT_MONO);
-      cy += 26;
-
-      //--- progress ---------------------------------------------------
-      m_w.Progress("prog", x + SSR_PAD, cy, W - 2 * SSR_PAD, 6,
-                   m_state.progress, SSRStateColor(m_state.status));
-      cy += 12;
-      Text(4, "progtxt", x + SSR_PAD, cy,
-           StringFormat("%.1f%%   %s left", m_state.progress * 100.0,
-                        SSRFormatSpan(m_state.end_msc > m_state.now_msc
-                                      ? m_state.end_msc - m_state.now_msc : 0)),
-           SSR_C_TEXT_FAINT, SSR_FS_SMALL, SSR_FONT_MONO);
-      cy += SSR_ROW_H;
-
-      //--- transport ---------------------------------------------------
-      int bw = (W - 2 * SSR_PAD - 4 * 3) / 5;
-      int bx = x + SSR_PAD;
-      m_w.Button("back",  bx, cy, bw, SSR_BTN_H, "|<", false, m_state.CanStep());
-      bx += bw + 3;
-      m_w.Button("play",  bx, cy, bw, SSR_BTN_H, "PLAY",
-                 m_state.IsRunning(), m_state.CanPlay() || m_state.IsRunning());
-      bx += bw + 3;
-      m_w.Button("pause", bx, cy, bw, SSR_BTN_H, "II", false, m_state.IsRunning());
-      bx += bw + 3;
-      m_w.Button("step",  bx, cy, bw, SSR_BTN_H, ">|", false, m_state.CanStep());
-      bx += bw + 3;
-      m_w.Button("reset", bx, cy, bw, SSR_BTN_H, "RST");
-      cy += SSR_BTN_H + SSR_GAP;
-
-      //--- speed --------------------------------------------------------
-      Text(5, "speedlbl", x + SSR_PAD, cy + 5, "SPEED", SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      m_w.Button("spdn", x + W - SSR_PAD - 92, cy, 22, SSR_ROW_H, "-");
-      Text(6, "speedval", x + W - SSR_PAD - 62, cy + 4,
-           SSRSpeedName(m_state.speed_x100), SSR_C_TEXT, SSR_FS_BODY, SSR_FONT_MONO);
-      m_w.Button("spup", x + W - SSR_PAD - 22, cy, 22, SSR_ROW_H, "+");
-      //--- FOLLOW is a one-shot, so the button states its own reason:
-      //--- the number of charts that have drifted off the live edge.
-      //--- "FOL" alone told the user nothing, and pressing it with
-      //--- nothing detached looked like a key that did not work.
-      m_w.Button("follow", x + SSR_PAD + 46, cy, 40, SSR_ROW_H,
-                 (m_state.charts_detached > 0
-                  ? "FOL " + IntegerToString(m_state.charts_detached)
-                  : "FOL"),
-                 m_state.charts_detached > 0,
-                 m_state.charts_detached > 0);
-      cy += SSR_ROW_H + 4;
-
-      //--- fidelity. Colour-coded because the user must be able to see
-      //--- at a glance that they are watching approximated ticks.
-      Text(7, "fidlbl", x + SSR_PAD, cy, "FIDELITY", SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      //--- show what is RUNNING, not what was asked for. A tool that
-      //--- displays the request while emitting something else is the
-      //--- quiet dishonesty this whole product exists to avoid.
-      bool degraded = (m_state.fidelity_effective != m_state.fidelity);
-      Text(8, "fidval", x + W - SSR_PAD - 92, cy,
-           SSRFidelityName(m_state.fidelity_effective) + (degraded ? " *" : ""),
-           SSRFidelityColor(m_state.fidelity_effective), SSR_FS_SMALL);
-      cy += SSR_ROW_H - 4;
-
-      Text(9, "datalbl", x + SSR_PAD, cy, "DATA", SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      Text(10, "dataval", x + W - SSR_PAD - 92, cy,
-           SSRDataModeName(m_state.data_mode), SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      cy += SSR_ROW_H - 4;
-
-      Text(11, "tickslbl", x + SSR_PAD, cy, "TICKS", SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      Text(12, "ticksval", x + W - SSR_PAD - 92, cy,
-           //--- an uncalibrated engine says so rather than showing a zero
-           //--- that looks like a measurement
-           (m_state.perf_calibrated
-            ? StringFormat("%d  %.0fus/tk", (int)m_state.ticks_emitted,
-                           m_state.us_per_tick)
-            : IntegerToString(m_state.ticks_emitted)),
-           SSR_C_TEXT_DIM, SSR_FS_SMALL, SSR_FONT_MONO);
-      cy += SSR_ROW_H - 2;
-
-      //--- warnings. The panel is loud when something is wrong and
-      //--- silent when nothing is, which is the only honest split.
-      string warn = "";
-      color  wcol = SSR_C_STOP;
-      if(m_state.last_error != SSR_OK)
-         warn = SSRErrName(m_state.last_error);
-      //--- WHY IT STOPPED, ahead of everything except an outright
-      //--- error. A tool that pauses itself and says nothing is
-      //--- indistinguishable from one that froze.
-      else if(m_state.pause_reason != "")
-        {
-         warn = m_state.pause_reason;
-         wcol = SSR_C_HOLD;
-        }
-      //--- and a board that has drifted must never look aligned
-      else if(m_state.skew_msc != 0)
-         warn = StringFormat("streams %I64dms apart", m_state.skew_msc);
-      else if(!m_state.leak_clean)
-         warn = m_state.leak_advice;
-      else if(m_state.ticks_rejected > 0)
-        {
-         warn = StringFormat("%d ticks refused by terminal", (int)m_state.ticks_rejected);
-         wcol = SSR_C_HOLD;
-        }
-      else if(m_state.fidelity_note != "")
-        {
-         warn = m_state.fidelity_note;
-         wcol = SSR_C_HOLD;
-        }
-      else if(m_state.guard_violations > 0)
-        {
-         warn = StringFormat("%d future reads blocked", (int)m_state.guard_violations);
-         wcol = SSR_C_HOLD;
-        }
-      Text(13, "warn", x + SSR_PAD, cy, warn, wcol, SSR_FS_SMALL);
-      cy += SSR_ROW_H - 4;
-
-      //================================================================
-      //  TRADING
-      //
-      //  Risk and stop first, buttons second. That order is the point:
-      //  the size follows from the two numbers above it, and a trader
-      //  who has not set them gets a refusal with a reason rather than
-      //  a trade at some default nobody chose.
-      //================================================================
-      Text(21, "acct", x + SSR_PAD, cy,
-           (m_state.can_trade
-            ? StringFormat("%.2f  %s%.2f  %d open",
-                           m_state.balance,
-                           (m_state.floating >= 0.0 ? "+" : ""),
-                           m_state.floating, m_state.open_positions)
-            : "no account"),
-           (m_state.floating < 0.0 ? SSR_C_STOP : SSR_C_TEXT_DIM),
-           SSR_FS_SMALL, SSR_FONT_MONO);
-      cy += SSR_ROW_H - 6;
-
-      //--- which instrument the buttons act on. On a multi-symbol
-      //--- board the account follows the primary stream only, and
-      //--- saying so is the difference between a limitation and a trap.
-      Text(22, "tsym", x + SSR_PAD, cy,
-           (m_state.streams > 1 && m_state.trade_symbol != ""
-            ? "trades: " + m_state.trade_symbol
-            : ""),
-           SSR_C_TEXT_FAINT, SSR_FS_SMALL, SSR_FONT_MONO);
-      cy += (m_state.streams > 1 ? SSR_ROW_H - 6 : 0);
-
-      Text(23, "risklbl", x + SSR_PAD, cy + 4,
-           StringFormat("RISK %.2f%%", m_state.risk_percent),
-           SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      m_w.Button("riskdn", x + W - SSR_PAD - 46, cy, 20, SSR_ROW_H - 2, "-");
-      m_w.Button("riskup", x + W - SSR_PAD - 22, cy, 20, SSR_ROW_H - 2, "+");
-      cy += SSR_ROW_H - 2;
-
-      Text(24, "stoplbl", x + SSR_PAD, cy + 4,
-           //--- a stop of zero is not a stop, and the panel says so
-           //--- in the label rather than only when a button is pressed
-           //--- when a target is set the row says both, because the
-           //--- pair is what a trader actually decides - and the R
-           //--- multiple is the form they decide it in
-           (m_state.stop_points > 0.0
-            ? (m_state.tp_points > 0.0
-               ? StringFormat("STOP %.0f  TP %.1fR",
-                              m_state.stop_points,
-                              m_state.tp_points / m_state.stop_points)
-               : StringFormat("STOP %.0f pts", m_state.stop_points))
-            : "STOP not set - drag the red line"),
-           (m_state.stop_points > 0.0 ? SSR_C_TEXT_DIM : SSR_C_HOLD),
-           SSR_FS_SMALL);
-      m_w.Button("stopdn", x + W - SSR_PAD - 46, cy, 20, SSR_ROW_H - 2, "-");
-      m_w.Button("stopup", x + W - SSR_PAD - 22, cy, 20, SSR_ROW_H - 2, "+");
-      cy += SSR_ROW_H;
-
-      bool armed = (m_state.can_trade && m_state.stop_points > 0.0);
-      int  tw = (W - 2 * SSR_PAD - 3 * 3) / 4;
-      int  tx = x + SSR_PAD;
-      m_w.Button("buy",  tx, cy, tw, SSR_BTN_H, "BUY",  false, armed);
-      tx += tw + 3;
-      m_w.Button("sell", tx, cy, tw, SSR_BTN_H, "SELL", false, armed);
-      tx += tw + 3;
-      m_w.Button("be",   tx, cy, tw, SSR_BTN_H, "B/E",  false,
-                 m_state.open_positions > 0);
-      tx += tw + 3;
-      m_w.Button("flat", tx, cy, tw, SSR_BTN_H, "FLAT", false,
-                 m_state.open_positions > 0);
-      cy += SSR_BTN_H + 2;
-
-      //--- what the last trade attempt said. Loud, because a refused
-      //--- order that says nothing looks like a broken button.
-      Text(25, "traderr", x + SSR_PAD, cy,
-           (m_port != NULL ? m_port.TradeError() : ""),
-           SSR_C_HOLD, SSR_FS_SMALL);
-      cy += SSR_ROW_H - 6;
-
-      //--- and what the strategies are doing, if any are
-      Text(26, "strat", x + SSR_PAD, cy, m_state.strategy_text,
-           SSR_C_TEXT_FAINT, SSR_FS_SMALL);
-      cy += (m_state.strategy_text == "" ? 0 : SSR_ROW_H - 6);
-
-      Text(14, "keys", x + SSR_PAD, cy, "SPACE  <->  PgUp/Dn  J  B  +/-",
-           SSR_C_TEXT_FAINT, SSR_FS_SMALL, SSR_FONT_MONO);
-
-      //--- The panel got away with never asking for a repaint because the
-      //--- host chart is a live symbol and ticks repaint it anyway. That
-      //--- is luck, not design: on a closed market it would freeze the
-      //--- same way the range dialog did. Ask.
+      //+------------------------------------------------------------------+
+      //| CREATING AN OBJECT IS NOT SHOWING IT.                            |
+      //| On a chart with no incoming ticks - a weekend, a closed market,  |
+      //| a paused replay - MetaTrader does not repaint by itself, so the  |
+      //| panel exists and is invisible. One call, every frame, ends a      |
+      //| whole class of "it did nothing" reports.                          |
+      //+------------------------------------------------------------------+
       ChartRedraw(m_chart);
      }
 
-   void              HideBody(const bool hidden)
+private:
+   //================================================================
+   //  CAPTION
+   //================================================================
+   void              DrawCaption(const int x, const int y, const int W)
      {
-      string ids[] = {"sym","status","clock","prog_bg","prog_fill","progtxt",
-                      "play","pause","step","follow","reset",
-                      "speedlbl","spdn","speedval","spup",
-                      "fidlbl","fidval","datalbl","dataval",
-                      "tickslbl","ticksval","warn","keys",
-                      "blind","acct","tsym","risklbl","riskdn","riskup",
-                      "stoplbl","stopdn","stopup",
-                      "buy","sell","be","flat","traderr","strat"};
-      for(int i = 0; i < ArraySize(ids); i++)
-         m_w.Hide(ids[i], hidden);
+      m_w.Rect("hdr", x + 1, y + 1, W - 2, SSR_HEADER_H, SSR_C_HEADER, SSR_C_HEADER);
+      Text(0, "title", x + SSR_PAD, y + 4, "SS Replay", SSR_C_ACCENT, SSR_FS_TITLE);
+
+      //--- the caption says WHAT IS RUNNING, in one line: state, symbol,
+      //--- and whether the identity is hidden. It is the first thing a
+      //--- screenshot has to answer.
+      string right = SSRStateName(m_state.status);
+      if(m_state.trade_symbol != "")
+         right += "   " + m_state.trade_symbol;
+      if(m_state.blind)
+         right += "   [BLIND]";
+      Text(1, "capinfo", x + 92, y + 5, right,
+           SSRStateColor(m_state.status), SSR_FS_SMALL);
+
+      m_w.Button("collapse", x + W - 22, y + 3, 17, SSR_HEADER_H - 5,
+                 m_collapsed ? "+" : "-");
      }
 
-   //+------------------------------------------------------------------+
-   //| One path for both a click and a key press.                       |
-   //+------------------------------------------------------------------+
+   //================================================================
+   //  CLOCK + PROGRESS - always visible
+   //================================================================
+   int               DrawClock(const int x, const int y, const int W)
+     {
+      //--- the panel never formats the clock itself: Blind Mode has to
+      //--- reach the text, and a second place that knows about blind
+      //--- mode is the one that gets forgotten
+      Text(2, "clock", x + SSR_PAD, y, m_state.clock_text,
+           SSR_C_TEXT, SSR_FS_CLOCK);
+
+      string pct = StringFormat("%d%%", (int)MathRound(m_state.progress * 100.0));
+      if(m_state.pause_reason != "")
+         pct += "   " + m_state.pause_reason;
+      Text(3, "prog", x + W - SSR_PAD - 160, y + 6, pct,
+           SSR_C_TEXT_DIM, SSR_FS_SMALL);
+
+      m_w.Progress("bar", x + SSR_PAD, y + 22, W - 2 * SSR_PAD, 6,
+                   m_state.progress, SSRStateColor(m_state.status));
+      return y + 32;
+     }
+
+   //================================================================
+   //  TRANSPORT - always visible
+   //================================================================
+   int               DrawTransport(const int x, const int y, const int W)
+     {
+      int n  = 7;
+      int gp = 4;
+      int bw = (W - 2 * SSR_PAD - (n - 1) * gp) / n;
+      int bx = x + SSR_PAD;
+
+      m_w.Button("restart", bx, y, bw, SSR_BTN_H, "|<",
+                 false, m_state.connected);                       bx += bw + gp;
+      m_w.Button("back10",  bx, y, bw, SSR_BTN_H, "<<",
+                 false, m_state.CanStep());                       bx += bw + gp;
+      m_w.Button("back",    bx, y, bw, SSR_BTN_H, "<",
+                 false, m_state.CanStep());                       bx += bw + gp;
+      m_w.Button("toggle",  bx, y, bw, SSR_BTN_H,
+                 m_state.IsRunning() ? "Pause" : "Play",
+                 m_state.IsRunning(),
+                 m_state.CanPlay() || m_state.IsRunning());        bx += bw + gp;
+      m_w.Button("step",    bx, y, bw, SSR_BTN_H, ">",
+                 false, m_state.CanStep());                       bx += bw + gp;
+      m_w.Button("step10",  bx, y, bw, SSR_BTN_H, ">>",
+                 false, m_state.CanStep());                       bx += bw + gp;
+      m_w.Button("reset",   bx, y, bw, SSR_BTN_H, "Reset",
+                 false, m_state.connected);
+      return y + SSR_BTN_H + SSR_GAP;
+     }
+
+   //================================================================
+   //  SPEED - a real trackbar, always visible
+   //================================================================
+   int               DrawSpeed(const int x, const int y, const int W)
+     {
+      Text(4, "spdlbl", x + SSR_PAD, y + 3, "Speed", SSR_C_TEXT_DIM, SSR_FS_SMALL);
+
+      int bx = x + SSR_PAD + 34;
+      m_w.Button("spdn", bx, y, 18, SSR_ROW_H, "-");
+      //--- the readout is a sunken field, not floating text: it is a
+      //--- VALUE, and a value in a dialog sits in a box
+      m_w.Rect("spdbox", bx + 20, y, 46, SSR_ROW_H, SSR_C_WELL, SSR_C_WELL_EDGE);
+      Text(5, "spdval", bx + 24, y + 4, SSRSpeedName(m_state.speed_x100),
+           SSR_C_TEXT, SSR_FS_BODY);
+      m_w.Button("spup", bx + 68, y, 18, SSR_ROW_H, "+");
+
+      //--- the track. Remembered so a drag can turn a pixel into a stop.
+      m_track_x = bx + 92;
+      m_track_y = y + 1;
+      m_track_w = (x + W - SSR_PAD) - m_track_x;
+      m_w.Track("spd", m_track_x, m_track_y, m_track_w,
+                SSRSpeedFraction(m_state.speed_x100),
+                SSR_SPEED_LADDER_SIZE, m_track_drag);
+
+      //--- "5x" is a number. "1h in 12m" is something you can plan an
+      //--- afternoon around, so the panel says both.
+      Text(6, "spdmean", x + W - SSR_PAD - 96, y + SSR_ROW_H + 1,
+           SSRSpeedMeaning(m_state.speed_x100), SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      return y + SSR_ROW_H + 14;
+     }
+
+   //================================================================
+   //  TABS
+   //================================================================
+   string            TabName(const int i)
+     {
+      switch(i)
+        {
+         case SSR_TAB_TRADE:     return "Trade";
+         case SSR_TAB_POSITIONS: return "Positions";
+         case SSR_TAB_STATS:     return "Stats";
+         case SSR_TAB_SESSION:   return "Session";
+        }
+      return "";
+     }
+
+   int               DrawTabs(const int x, const int y, const int W)
+     {
+      int tw = 74, tx = x + SSR_PAD;
+      for(int i = 0; i < SSR_TAB_COUNT; i++)
+        {
+         bool on = (i == m_tab);
+         m_w.ButtonC("tab" + IntegerToString(i), tx, y, tw, SSR_TAB_H,
+                     TabName(i),
+                     on ? SSR_C_TAB_ON : SSR_C_TAB,
+                     SSR_C_TAB_EDGE,
+                     on ? SSR_C_TEXT : SSR_C_TEXT_DIM);
+         tx += tw + 2;
+        }
+      //--- the sheet edge under the strip, so the tabs read as tabs
+      m_w.Rect("tabline", x + SSR_PAD, y + SSR_TAB_H, W - 2 * SSR_PAD, 1,
+               SSR_C_TAB_EDGE, SSR_C_TAB_EDGE);
+      return y + SSR_TAB_H;
+     }
+
+   //================================================================
+   //  THE ALWAYS-REACHABLE COLUMN
+   //
+   //  Beside the sheet, not inside it. Something you may want at any
+   //  moment must not be behind a tab - and every one of these six
+   //  reaches an engine feature that exists.
+   //================================================================
+   void              DrawSide(const int x, const int y)
+     {
+      int h = SSR_BTN_H, gp = 3, cy = y;
+
+      m_w.Button("follow", x, cy, SSR_SIDE_W, h,
+                 (m_state.charts_detached > 0
+                  ? "Follow " + IntegerToString(m_state.charts_detached) + "  F"
+                  : "Follow  F"),
+                 m_state.charts_detached > 0,
+                 m_state.charts_detached > 0);                  cy += h + gp;
+      m_w.Button("lines", x, cy, SSR_SIDE_W, h,
+                 m_state.lines_armed ? "Lines on  L" : "SL / TP  L",
+                 m_state.lines_armed, m_state.can_trade);       cy += h + gp;
+      m_w.Button("bookmark", x, cy, SSR_SIDE_W, h, "Bookmark  B",
+                 false, m_state.connected);                     cy += h + gp;
+      m_w.Button("jump", x, cy, SSR_SIDE_W, h, "Jump...  J",
+                 false, m_state.connected);                     cy += h + gp;
+      m_w.Button("sessions", x, cy, SSR_SIDE_W, h, "Sessions...  S",
+                 false, m_state.connected);                     cy += h + gp;
+      m_w.Button("fidelity", x, cy, SSR_SIDE_W, h, "Fidelity  D",
+                 false, m_state.connected);
+     }
+
+   //================================================================
+   //  THE SHEET
+   //================================================================
+   void              DrawSheet(const int x, const int y, const int w)
+     {
+      HideSheets();
+      switch(m_tab)
+        {
+         case SSR_TAB_TRADE:     SheetTrade(x, y, w);     break;
+         case SSR_TAB_POSITIONS: SheetPositions(x, y, w); break;
+         case SSR_TAB_STATS:     SheetStats(x, y, w);     break;
+         case SSR_TAB_SESSION:   SheetSession(x, y, w);   break;
+        }
+     }
+
+   //--- every sheet's controls, so switching tabs cannot leave a button
+   //--- from the previous one floating over the new one. Listed once,
+   //--- because two lists drift.
+   void              HideSheets(void)
+     {
+      string ids[] = {"riskdn","riskup","armbtn","flipbtn","clrbtn",
+                      "buy","sell","be","flat",
+                      "g1_fr","g1_lb","g1_lg","g2_fr","g2_lb","g2_lg",
+                      "risklbl","riskval","slrow","tprow","rrrow",
+                      "sizerow","hintrow","setuprow","poslist","posmore",
+                      "st1","st2","st3","st4","st5","st6",
+                      "pos1","pos2","ses1","ses2","ses3","ses4","ses5",
+                      "keyhint","spreadrow","traderr"};
+      for(int i = 0; i < ArraySize(ids); i++)
+         m_w.Remove(ids[i]);
+     }
+
+   //----------------------------------------------------------------
+   //  TRADE
+   //----------------------------------------------------------------
+   void              SheetTrade(const int x, const int y, const int w)
+     {
+      //--- risk
+      m_w.Group("g1", x, y, w, 40, "Risk");
+      Text(10, "risklbl", x + 8, y + 14, "Risk per trade", SSR_C_TEXT_DIM);
+      m_w.Button("riskdn", x + w - 96, y + 11, 16, 16, "-");
+      Text(11, "riskval", x + w - 76, y + 14,
+           StringFormat("%.2f %%   %s", m_state.risk_percent,
+                        Money(m_state.balance * m_state.risk_percent / 100.0)),
+           SSR_C_TEXT);
+      m_w.Button("riskup", x + w - 18, y + 11, 16, 16, "+");
+
+      //+------------------------------------------------------------------+
+      //| STOP AND TARGET ARE LINES.                                       |
+      //|                                                                  |
+      //| There is no points box here and there will not be one. A stop    |
+      //| typed in points is chosen by arithmetic; a stop dragged on the   |
+      //| chart is chosen by structure, and structure is the entire        |
+      //| reason a person practises on a replay.                           |
+      //+------------------------------------------------------------------+
+      int gy = y + 44;
+      m_w.Group("g2", x, gy, w, 82, "Stop & target");
+
+      if(!m_state.lines_armed)
+        {
+         m_w.Button("armbtn", x + 8, gy + 14, w - 16, SSR_BTN_H,
+                    "Place SL / TP lines on the chart", false, m_state.can_trade);
+         Text(12, "hintrow", x + 8, gy + 42,
+              m_state.can_trade
+              ? "Then drag them. Buy / Sell would open with no stop until you do."
+              : "Waiting for the first price.",
+              SSR_C_TEXT_DIM, SSR_FS_SMALL);
+        }
+      else
+        {
+         //--- the side is read from the geometry, never asked for
+         Text(12, "setuprow", x + 8, gy + 13,
+              m_state.line_long ? "LONG setup - stop below, target above"
+                                : "SHORT setup - stop above, target below",
+              m_state.line_long ? SSR_C_RUN : SSR_C_STOP, SSR_FS_SMALL);
+
+         Text(13, "slrow", x + 8, gy + 26,
+              StringFormat("Stop      %s      %s",
+                           Price(m_state.sl_price),
+                           Money(-m_state.risk_money, true)), SSR_C_TEXT);
+         Text(14, "tprow", x + 8, gy + 39,
+              StringFormat("Target    %s      %s",
+                           Price(m_state.tp_price),
+                           Money(m_state.reward_money, true)), SSR_C_TEXT);
+         Text(15, "rrrow", x + w - 96, gy + 26,
+              m_state.rr > 0.0 ? StringFormat("%.2f R", m_state.rr) : "- R",
+              SSR_C_TEXT_DIM);
+         Text(16, "sizerow", x + w - 96, gy + 39,
+              m_state.lot_from_risk > 0.0
+              ? StringFormat("%.2f lot", m_state.lot_from_risk)
+              : "no size",
+              m_state.lot_from_risk > 0.0 ? SSR_C_TEXT_DIM : SSR_C_STOP);
+
+         m_w.Button("flipbtn", x + 8, gy + 54, (w - 22) / 2, 18, "Flip  X");
+         m_w.Button("clrbtn",  x + 14 + (w - 22) / 2, gy + 54, (w - 22) / 2, 18,
+                    "Remove lines");
+        }
+
+      //--- the deal buttons. The side the lines did not draw is dimmed,
+      //--- so the chart and the dialog cannot disagree.
+      int dy = gy + 88;
+      int dw = (w - SSR_GAP) / 2;
+      bool dim_buy  = (m_state.lines_armed && !m_state.line_long);
+      bool dim_sell = (m_state.lines_armed &&  m_state.line_long);
+
+      m_w.ButtonC("buy", x, dy, dw, 26,
+                  StringFormat("Buy  %s", Price(m_state.ask)),
+                  dim_buy ? SSR_C_DEAL_DIM : SSR_C_BUY,
+                  dim_buy ? SSR_C_DEAL_DIM : SSR_C_BUY_EDGE,
+                  SSR_C_DEAL_TEXT, SSR_FS_TITLE);
+      m_w.ButtonC("sell", x + dw + SSR_GAP, dy, dw, 26,
+                  StringFormat("Sell  %s", Price(m_state.bid)),
+                  dim_sell ? SSR_C_DEAL_DIM : SSR_C_SELL,
+                  dim_sell ? SSR_C_DEAL_DIM : SSR_C_SELL_EDGE,
+                  SSR_C_DEAL_TEXT, SSR_FS_TITLE);
+
+      Text(17, "spreadrow", x, dy + 30,
+           StringFormat("Spread %.1f pt", m_state.spread_points),
+           SSR_C_TEXT_DIM, SSR_FS_SMALL);
+
+      //--- a refused order says why, where the order was refused
+      if(m_port != NULL && m_port.TradeError() != "")
+         Text(18, "traderr", x + 84, dy + 30, m_port.TradeError(),
+              SSR_C_STOP, SSR_FS_SMALL);
+     }
+
+   //----------------------------------------------------------------
+   //  POSITIONS
+   //----------------------------------------------------------------
+   void              SheetPositions(const int x, const int y, const int w)
+     {
+      m_w.Group("g1", x, y, w, 96, "Open");
+      m_w.Rect("poslist", x + 8, y + 14, w - 16, 74, SSR_C_WELL, SSR_C_WELL_EDGE);
+
+      if(m_state.open_positions <= 0)
+         Text(20, "posmore", x + 14, y + 20, "Nothing open.",
+              SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      else
+        {
+         Text(20, "posmore", x + 14, y + 20,
+              StringFormat("%d open      floating %s",
+                           m_state.open_positions,
+                           Money(m_state.floating, true)),
+              m_state.floating >= 0.0 ? SSR_C_RUN : SSR_C_STOP);
+         Text(21, "pos1", x + 14, y + 36,
+              "Stops and targets are the dashed lines on the chart.",
+              SSR_C_TEXT_DIM, SSR_FS_SMALL);
+         Text(22, "pos2", x + 14, y + 48,
+              "Drag one to move it; the trade follows.",
+              SSR_C_TEXT_DIM, SSR_FS_SMALL);
+        }
+
+      int by = y + 104;
+      int bw = (w - 3 * SSR_GAP) / 4;
+      m_w.Button("be",   x, by, bw, SSR_BTN_H, "B/E",
+                 false, m_state.open_positions > 0);
+      m_w.Button("flat", x + bw + SSR_GAP, by, bw, SSR_BTN_H, "Close all",
+                 false, m_state.open_positions > 0);
+     }
+
+   //----------------------------------------------------------------
+   //  STATS
+   //----------------------------------------------------------------
+   void              SheetStats(const int x, const int y, const int w)
+     {
+      m_w.Group("g1", x, y, w, 68, "Account");
+      Text(30, "st1", x + 8, y + 14,
+           StringFormat("Balance      %s", Money(m_state.balance)), SSR_C_TEXT);
+      Text(31, "st2", x + 8, y + 28,
+           StringFormat("Equity       %s", Money(m_state.equity)), SSR_C_TEXT);
+      Text(32, "st3", x + 8, y + 42,
+           StringFormat("Floating     %s", Money(m_state.floating, true)),
+           m_state.floating >= 0.0 ? SSR_C_RUN : SSR_C_STOP);
+
+      m_w.Group("g2", x, y + 72, w, 68, "This run");
+      Text(33, "st4", x + 8, y + 86,
+           StringFormat("Bars         %d", (int)m_state.bars_consumed),
+           SSR_C_TEXT_DIM);
+      Text(34, "st5", x + 8, y + 100,
+           StringFormat("Ticks        %d", (int)m_state.ticks_emitted),
+           SSR_C_TEXT_DIM);
+      //--- rejected ticks are shown even when zero. A counter that only
+      //--- appears when it is non-zero teaches nobody what it counts.
+      Text(35, "st6", x + 8, y + 114,
+           StringFormat("Rejected     %d      guard %d",
+                        (int)m_state.ticks_rejected,
+                        (int)m_state.guard_violations),
+           m_state.ticks_rejected > 0 ? SSR_C_HOLD : SSR_C_TEXT_DIM);
+     }
+
+   //----------------------------------------------------------------
+   //  SESSION
+   //----------------------------------------------------------------
+   void              SheetSession(const int x, const int y, const int w)
+     {
+      m_w.Group("g1", x, y, w, 68, "Session");
+      Text(40, "ses1", x + 8, y + 14,
+           StringFormat("Bookmarks    %d", m_state.bookmarks), SSR_C_TEXT_DIM);
+      Text(41, "ses2", x + 8, y + 28,
+           StringFormat("Streams      %d      skew %d ms",
+                        m_state.streams, (int)m_state.skew_msc),
+           m_state.skew_msc == 0 ? SSR_C_TEXT_DIM : SSR_C_STOP);
+      Text(42, "ses3", x + 8, y + 42,
+           m_state.leak_clean ? "Charts       clean"
+                              : "Charts       " + m_state.leak_advice,
+           m_state.leak_clean ? SSR_C_TEXT_DIM : SSR_C_HOLD);
+
+      m_w.Group("g2", x, y + 72, w, 68, "Keyboard");
+      Text(43, "ses4", x + 8, y + 86,
+           "Space play/pause    < > step    PgUp/PgDn x10",
+           SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      Text(44, "keyhint", x + 8, y + 99,
+           "+ - speed    R reset    J jump    B bookmark",
+           SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      Text(45, "ses5", x + 8, y + 112,
+           "S sessions    F follow    D fidelity    L lines    X flip",
+           SSR_C_TEXT_DIM, SSR_FS_SMALL);
+     }
+
+   //================================================================
+   //  STATUS STRIP
+   //================================================================
+   void              DrawStatus(const int x, const int y, const int W)
+     {
+      m_w.Rect("status", x + 1, y, W - 2, SSR_STATUS_H,
+               SSR_C_STATUS, SSR_C_GROUP_EDGE);
+
+      Text(50, "stbal", x + SSR_PAD, y + 4,
+           StringFormat("Balance %s", Money(m_state.balance)), SSR_C_TEXT_DIM,
+           SSR_FS_SMALL);
+      Text(51, "stflt", x + 132, y + 4,
+           StringFormat("Floating %s", Money(m_state.floating, true)),
+           m_state.floating >= 0.0 ? SSR_C_RUN : SSR_C_STOP, SSR_FS_SMALL);
+      Text(52, "stopen", x + 244, y + 4,
+           StringFormat("%d open", m_state.open_positions),
+           SSR_C_TEXT_DIM, SSR_FS_SMALL);
+
+      //--- SHOW WHAT IS RUNNING, NOT WHAT WAS ASKED FOR. A tool that
+      //--- displays the request while emitting something else is the
+      //--- quiet dishonesty this whole product exists to avoid.
+      bool degraded = (m_state.fidelity_effective != m_state.fidelity);
+      Text(53, "stfid", x + 306, y + 4,
+           SSRFidelityName(m_state.fidelity_effective) + (degraded ? " !" : ""),
+           degraded ? SSR_C_HOLD : SSRFidelityColor(m_state.fidelity_effective),
+           SSR_FS_SMALL);
+     }
+
+   //--- everything below the caption, hidden when collapsed
+   void              HideBody(const bool hidden)
+     {
+      string ids[] = {"clock","prog","bar_bg","bar_fill",
+                      "restart","back10","back","toggle","step","step10","reset",
+                      "spdlbl","spdn","spdbox","spdval","spup","spdmean",
+                      "spd_gr","spd_fl","spd_th",
+                      "tab0","tab1","tab2","tab3","tabline",
+                      "follow","lines","bookmark","jump","sessions","fidelity",
+                      "status","stbal","stflt","stopen","stfid"};
+      for(int i = 0; i < ArraySize(ids); i++)
+         m_w.Hide(ids[i], hidden);
+      for(int t = 0; t < 24; t++)
+         m_w.Hide("spd_t" + IntegerToString(t), hidden);
+      if(hidden)
+         HideSheets();
+     }
+
+public:
    //+------------------------------------------------------------------+
    //| The trade controls. Every one goes through the port, so the      |
    //| panel still knows nothing about accounts - only about buttons.   |
@@ -484,8 +729,6 @@ public:
       //--- in the wrong way.
       if(id == "riskdn") return m_port.SetRiskPercent(StepRisk(-1));
       if(id == "riskup") return m_port.SetRiskPercent(StepRisk(+1));
-      if(id == "stopdn") return m_port.SetStopPoints(StepStop(-1));
-      if(id == "stopup") return m_port.SetStopPoints(StepStop(+1));
       return false;
      }
 
@@ -502,18 +745,6 @@ public:
       if(at < 0)      at = 0;
       if(at >= n)     at = n - 1;
       return ladder[at];
-     }
-
-   double            StepStop(const int dir)
-     {
-      double s = m_state.stop_points;
-      //--- coarser as it grows, so 10 -> 20 costs one press and
-      //--- 500 -> 600 does not cost fifty
-      double step = (s < 50.0 ? 5.0 : (s < 200.0 ? 10.0 : 50.0));
-      s += dir * step;
-      if(s < 0.0)
-         s = 0.0;
-      return s;
      }
 
    //+------------------------------------------------------------------+
@@ -538,10 +769,9 @@ public:
      }
 
    //--- EVERY COMMAND SAYS WHAT IT DID.
-   //--- Four keys were reported as broken. They may be broken, or they
-   //--- may be working silently - a bookmark that is stored and shows
-   //--- nothing looks exactly like a bookmark that was never stored.
-   //--- One line per command settles it in one run instead of three.
+   //--- A bookmark that is stored and shows nothing looks exactly like
+   //--- a bookmark that was never stored. One line per command settles
+   //--- that in one run instead of three.
    bool              Execute(const ENUM_SSR_CMD cmd)
      {
       bool ok = ExecuteInner(cmd);
@@ -572,6 +802,11 @@ public:
             return m_port.Bookmark(SSRFormatMsc(m_state.now_msc));
          case SSR_CMD_FOLLOW:    return m_port.FollowCharts();
 
+         case SSR_CMD_LINES_TOGGLE:
+            return (m_state.lines_armed ? m_port.ClearLines() : m_port.ArmLines());
+         case SSR_CMD_LINES_FLIP:
+            return m_port.FlipLines();
+
          case SSR_CMD_SPEED_UP:
            {
             int i = SSRSpeedLadderIndex(m_state.speed_x100);
@@ -598,6 +833,27 @@ public:
      }
 
    //+------------------------------------------------------------------+
+   //| Turn a pixel on the groove into a speed.                         |
+   //|                                                                  |
+   //| Clicking the groove jumps there; dragging the thumb follows the  |
+   //| mouse. Both go through here, so a click and a drag cannot land   |
+   //| on different stops for the same pixel.                           |
+   //+------------------------------------------------------------------+
+   bool              SpeedFromPixel(const int mx)
+     {
+      if(m_port == NULL || m_track_w <= 1)
+         return false;
+      double f = (double)(mx - m_track_x) / (double)(m_track_w - 1);
+      return m_port.SetSpeedX100(SSRSpeedAtFraction(f));
+     }
+
+   bool              OnTrack(const int mx, const int my)
+     {
+      return (mx >= m_track_x - 6 && mx <= m_track_x + m_track_w + 6 &&
+              my >= m_track_y - 2 && my <= m_track_y + SSR_TRACK_H);
+     }
+
+   //+------------------------------------------------------------------+
    //| Chart events. The host forwards them verbatim.                   |
    //+------------------------------------------------------------------+
    bool              OnEvent(const int id, const long &lparam,
@@ -618,10 +874,6 @@ public:
          //| and the two dialogs they open were never reached. The keys were  |
          //| not broken and the dialogs were not broken - the panel was       |
          //| answering mail addressed to someone else.                        |
-         //|                                                                  |
-         //| Found because the log line added last round said                 |
-         //| "sessions -> refused": the panel had received it, could not do   |
-         //| it, and still claimed it.                                        |
          //+------------------------------------------------------------------+
          if(!Owns(c))
             return false;
@@ -637,16 +889,44 @@ public:
             return false;
          string what = StringSubstr(sparam, StringLen(m_prefix));
 
+         //--- the tab strip is not a command: it changes nothing in the
+         //--- engine, only which sheet is on top
+         if(StringLen(what) == 4 && StringSubstr(what, 0, 3) == "tab")
+           {
+            m_tab = (int)StringToInteger(StringSubstr(what, 3));
+            ObjectSetInteger(m_chart, sparam, OBJPROP_STATE, false);
+            Render();
+            return true;
+           }
+
          ENUM_SSR_CMD c = SSR_CMD_NONE;
-         if(what == "play")          c = SSR_CMD_PLAY;
-         else if(what == "pause")    c = SSR_CMD_PAUSE;
+         if(what == "toggle")        c = SSR_CMD_TOGGLE;
          else if(what == "step")     c = SSR_CMD_STEP_FWD;
+         else if(what == "step10")   c = SSR_CMD_STEP_FWD_10;
          else if(what == "back")     c = SSR_CMD_STEP_BACK;
+         else if(what == "back10")   c = SSR_CMD_STEP_BACK_10;
          else if(what == "reset")    c = SSR_CMD_RESET;
+         else if(what == "restart")  c = SSR_CMD_RESTART;
          else if(what == "follow")   c = SSR_CMD_FOLLOW;
+         else if(what == "bookmark") c = SSR_CMD_BOOKMARK;
+         else if(what == "fidelity") c = SSR_CMD_FIDELITY_CYCLE;
+         else if(what == "jump")     c = SSR_CMD_JUMP;
+         else if(what == "sessions") c = SSR_CMD_SESSIONS;
+         else if(what == "lines")    c = SSR_CMD_LINES_TOGGLE;
+         else if(what == "armbtn")   c = SSR_CMD_LINES_TOGGLE;
+         else if(what == "clrbtn")   c = SSR_CMD_LINES_TOGGLE;
+         else if(what == "flipbtn")  c = SSR_CMD_LINES_FLIP;
          else if(what == "spup")     c = SSR_CMD_SPEED_UP;
          else if(what == "spdn")     c = SSR_CMD_SPEED_DOWN;
          else if(what == "collapse") c = SSR_CMD_COLLAPSE;
+
+         //--- release the latch BEFORE anything that might not return
+         ObjectSetInteger(m_chart, sparam, OBJPROP_STATE, false);
+
+         //--- a command this layer does not own must reach the host,
+         //--- exactly as it does for a key press
+         if(c != SSR_CMD_NONE && !Owns(c))
+            return false;
 
          if(c != SSR_CMD_NONE)
             Execute(c);
@@ -655,13 +935,11 @@ public:
             //--- they are not commands: they are buttons, handled here
             TradeButton(what);
 
-         //--- MetaTrader latches the button down; release it either way
-         ObjectSetInteger(m_chart, sparam, OBJPROP_STATE, false);
          Render();
          return true;
         }
 
-      //--- dragging by the header strip
+      //--- dragging: the panel by its caption, the thumb along its groove
       if(id == CHARTEVENT_MOUSE_MOVE)
         {
          int mx = (int)lparam;
@@ -670,6 +948,31 @@ public:
          //--- bare non-zero test starts a drag whenever Shift is held.
          //--- Bit 1 is the left button; nothing else counts.
          bool down = ((StringToInteger(sparam) & 1) != 0);
+
+         //--- the trackbar first: it sits inside the panel body, so the
+         //--- caption test below must not get the chance to claim it
+         if(down && !m_track_drag && !m_dragging && !m_collapsed &&
+            OnTrack(mx, my))
+           {
+            m_track_drag = true;
+            ChartSetInteger(m_chart, CHART_MOUSE_SCROLL, false);
+            SpeedFromPixel(mx);
+            Render();
+            return true;
+           }
+         if(m_track_drag && down)
+           {
+            SpeedFromPixel(mx);
+            Render();
+            return true;
+           }
+         if(m_track_drag && !down)
+           {
+            m_track_drag = false;
+            ChartSetInteger(m_chart, CHART_MOUSE_SCROLL, m_saved_mouse_scroll);
+            Render();
+            return true;
+           }
 
          if(down && !m_dragging &&
             mx >= m_x && mx <= m_x + SSR_PANEL_W &&

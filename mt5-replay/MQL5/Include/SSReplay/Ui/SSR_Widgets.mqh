@@ -94,10 +94,28 @@ public:
      }
 
    //--- clickable ----------------------------------------------------
+   //--- Colours are ARGUMENTS with theme defaults, not constants baked
+   //--- into the widget. The tab strip, the Buy/Sell pair and the plain
+   //--- dialog buttons are the same control wearing three palettes; a
+   //--- widget that hard-codes one of them forces the other two to be
+   //--- re-implemented somewhere else.
    bool              Button(const string id, const int x, const int y,
                             const int w, const int h, const string text,
                             const bool engaged = false,
                             const bool enabled = true)
+     {
+      return ButtonC(id, x, y, w, h, text,
+                     engaged ? SSR_C_BTN_ON      : SSR_C_BTN,
+                     engaged ? SSR_C_BTN_ON_EDGE : SSR_C_BTN_EDGE,
+                     enabled ? (engaged ? SSR_C_BTN_ON_TEXT : SSR_C_BTN_TEXT)
+                             : SSR_C_TEXT_FAINT,
+                     SSR_FS_BODY);
+     }
+
+   bool              ButtonC(const string id, const int x, const int y,
+                             const int w, const int h, const string text,
+                             const color bg, const color edge,
+                             const color fg, const int size = SSR_FS_BODY)
      {
       string n = N(id);
       if(ObjectFind(m_chart, n) < 0)
@@ -112,12 +130,10 @@ public:
       ObjectSetInteger(m_chart, n, OBJPROP_YDISTANCE,    y);
       ObjectSetInteger(m_chart, n, OBJPROP_XSIZE,        w);
       ObjectSetInteger(m_chart, n, OBJPROP_YSIZE,        h);
-      ObjectSetInteger(m_chart, n, OBJPROP_BGCOLOR,      engaged ? SSR_C_BTN_ON : SSR_C_BTN);
-      ObjectSetInteger(m_chart, n, OBJPROP_BORDER_COLOR, SSR_C_BTN_EDGE);
-      ObjectSetInteger(m_chart, n, OBJPROP_COLOR,
-                       enabled ? (engaged ? SSR_C_BTN_ON_TEXT : SSR_C_BTN_TEXT)
-                               : SSR_C_TEXT_FAINT);
-      ObjectSetInteger(m_chart, n, OBJPROP_FONTSIZE,     SSR_FS_BODY);
+      ObjectSetInteger(m_chart, n, OBJPROP_BGCOLOR,      bg);
+      ObjectSetInteger(m_chart, n, OBJPROP_BORDER_COLOR, edge);
+      ObjectSetInteger(m_chart, n, OBJPROP_COLOR,        fg);
+      ObjectSetInteger(m_chart, n, OBJPROP_FONTSIZE,     size);
       ObjectSetString (m_chart, n, OBJPROP_TEXT,         text);
       //--- MetaTrader latches a button down after a click; the panel
       //--- would otherwise show every control it ever pressed as held
@@ -133,13 +149,79 @@ public:
       double f = fraction;
       if(f < 0.0) f = 0.0;
       if(f > 1.0) f = 1.0;
-      if(!Rect(id + "_bg", x, y, w, h, SSR_C_WELL, SSR_C_PANEL_EDGE))
+      if(!Rect(id + "_bg", x, y, w, h, SSR_C_WELL, SSR_C_WELL_EDGE))
          return false;
       int fw = (int)MathRound((w - 2) * f);
       //--- a zero-width rectangle is rejected, so a fresh replay would
       //--- lose its track entirely at 0%
       if(fw < 1) fw = 1;
       return Rect(id + "_fill", x + 1, y + 1, fw, h - 2, fill, fill);
+     }
+
+   //+------------------------------------------------------------------+
+   //| A TRACKBAR: groove, fill, tick row, and a thumb you can drag.    |
+   //|                                                                  |
+   //| MetaTrader has no slider, so this is four rectangles and a row   |
+   //| of one-pixel ticks. The thumb is a BUTTON rather than a          |
+   //| rectangle for one reason: a rectangle label does not report      |
+   //| clicks, and a control you can only move by dragging - never by   |
+   //| clicking beside it - is a control people think is broken.        |
+   //|                                                                  |
+   //| Hit-testing lives in the panel, because only the panel knows     |
+   //| where the trackbar was drawn this frame.                         |
+   //+------------------------------------------------------------------+
+   bool              Track(const string id, const int x, const int y,
+                           const int w, const double fraction,
+                           const int stops, const bool dragging)
+     {
+      double f = fraction;
+      if(f < 0.0) f = 0.0;
+      if(f > 1.0) f = 1.0;
+
+      //--- groove
+      if(!Rect(id + "_gr", x, y + 4, w, 6, SSR_C_TRACK, SSR_C_TRACK_EDGE))
+         return false;
+      int fw = (int)MathRound((w - 2) * f);
+      if(fw < 1) fw = 1;
+      Rect(id + "_fl", x + 1, y + 5, fw, 4, SSR_C_TRACK_FILL, SSR_C_TRACK_FILL);
+
+      //--- ticks, one per stop. Capped so a longer ladder cannot turn
+      //--- the groove into a solid grey bar.
+      int drawn = (stops > 1 && stops <= 24) ? stops : 0;
+      for(int i = 0; i < 24; i++)
+        {
+         string tn = id + "_t" + IntegerToString(i);
+         if(i >= drawn)
+           { Remove(tn); continue; }
+         int tx = x + (int)MathRound((double)i * (w - 1) / (double)(drawn - 1));
+         Rect(tn, tx, y + 12, 1, 3, SSR_C_TICK, SSR_C_TICK);
+        }
+
+      //--- the thumb, centred on the stop
+      int tw = 9, th = 15;
+      int cx = x + (int)MathRound(f * (w - 1)) - tw / 2;
+      if(cx < x)          cx = x;
+      if(cx > x + w - tw) cx = x + w - tw;
+      return ButtonC(id + "_th", cx, y, tw, th, "",
+                     dragging ? SSR_C_BTN_ON : SSR_C_THUMB,
+                     dragging ? SSR_C_BTN_ON_EDGE : SSR_C_THUMB_EDGE,
+                     SSR_C_TEXT, SSR_FS_SMALL);
+     }
+
+   //+------------------------------------------------------------------+
+   //| A group box: a hairline frame with its legend punched into the   |
+   //| top edge, the way a Windows dialog draws one.                    |
+   //+------------------------------------------------------------------+
+   bool              Group(const string id, const int x, const int y,
+                           const int w, const int h, const string legend)
+     {
+      if(!Rect(id + "_fr", x, y + 5, w, h - 5, SSR_C_PANEL, SSR_C_GROUP_EDGE))
+         return false;
+      //--- the legend sits ON the frame line, so the line has to be
+      //--- broken behind it or the text is struck through
+      int lw = 7 + StringLen(legend) * 5;
+      Rect(id + "_lb", x + 6, y + 1, lw, 9, SSR_C_PANEL, SSR_C_PANEL);
+      return Label(id + "_lg", x + 9, y, legend, SSR_C_TEXT_DIM, SSR_FS_SMALL);
      }
 
    //--- teardown -----------------------------------------------------

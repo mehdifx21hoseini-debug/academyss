@@ -32,7 +32,10 @@ enum ENUM_SSR_CMD
    SSR_CMD_FIDELITY_CYCLE,
    SSR_CMD_REPLAY_FROM_HERE,
    SSR_CMD_COLLAPSE,
-   SSR_CMD_SESSIONS          // open the saved-session list
+   SSR_CMD_SESSIONS,         // open the saved-session list
+   //--- the stop and target are lines now, so they need verbs
+   SSR_CMD_LINES_TOGGLE,     // put them on the chart / take them off
+   SSR_CMD_LINES_FLIP        // mirror them: long <-> short
   };
 
 //--- virtual key codes as MetaTrader reports them in CHARTEVENT_KEYDOWN
@@ -51,6 +54,8 @@ enum ENUM_SSR_CMD
 #define SSR_VK_J       74
 #define SSR_VK_B       66
 #define SSR_VK_S       83
+#define SSR_VK_L       76
+#define SSR_VK_X       88
 
 //+------------------------------------------------------------------+
 ENUM_SSR_CMD SSRKeyToCommand(const long key)
@@ -67,6 +72,8 @@ ENUM_SSR_CMD SSRKeyToCommand(const long key)
       case SSR_VK_J:       return SSR_CMD_JUMP;
       case SSR_VK_B:       return SSR_CMD_BOOKMARK;
       case SSR_VK_S:       return SSR_CMD_SESSIONS;
+      case SSR_VK_L:       return SSR_CMD_LINES_TOGGLE;
+      case SSR_VK_X:       return SSR_CMD_LINES_FLIP;
       case SSR_VK_R:       return SSR_CMD_RESET;
       case SSR_VK_F:       return SSR_CMD_FOLLOW;
       case SSR_VK_D:       return SSR_CMD_FIDELITY_CYCLE;
@@ -97,6 +104,8 @@ string SSRCmdName(const ENUM_SSR_CMD c)
       case SSR_CMD_STEP_BACK_10:     return "step back x10";
       case SSR_CMD_JUMP:             return "jump";
       case SSR_CMD_BOOKMARK:         return "bookmark";
+      case SSR_CMD_LINES_TOGGLE:     return "sl/tp lines";
+      case SSR_CMD_LINES_FLIP:       return "flip lines";
       case SSR_CMD_RESTART:          return "restart";
       case SSR_CMD_SPEED_UP:         return "speed up";
       case SSR_CMD_SPEED_DOWN:       return "speed down";

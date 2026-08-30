@@ -137,13 +137,22 @@ public:
    bool              Arm(const double price, const double stop_points,
                          const double rr)
      {
+      return ArmSide(price, stop_points, rr, true);
+     }
+
+   //--- the same thing for a short: stop ABOVE, target BELOW. Flip is a
+   //--- real re-place rather than a repaint, because the two prices are
+   //--- what the trade is sized and filled from.
+   bool              ArmSide(const double price, const double stop_points,
+                             const double rr, const bool is_long)
+     {
       if(m_chart == 0 || price <= 0.0 || stop_points <= 0.0)
          return false;
 
       double dist = stop_points * m_point;
-      m_sl_price  = NormalizeDouble(price - dist, m_digits);
-      m_tp_price  = NormalizeDouble(price + dist * (rr > 0.0 ? rr : 1.0),
-                                    m_digits);
+      double  rew = dist * (rr > 0.0 ? rr : 1.0);
+      m_sl_price  = NormalizeDouble(is_long ? price - dist : price + dist, m_digits);
+      m_tp_price  = NormalizeDouble(is_long ? price + rew  : price - rew,  m_digits);
 
       bool a = Ensure(m_sl_name, m_sl_price, m_sl_col, "STOP - drag me");
       bool b = Ensure(m_tp_name, m_tp_price, m_tp_col, "TARGET - drag me");

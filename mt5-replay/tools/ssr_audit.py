@@ -316,6 +316,17 @@ NOT_A_RETURN_TYPE = {
 
 CALL_ON_GLOBAL = re.compile(r'\bg_[A-Za-z_]\w*\s*\.\s*([A-Za-z_]\w*)\s*\(')
 
+#--- A7 widens A6 from globals to MEMBERS.
+#---
+#--- A6 was written after `g_gport.AttachLines(...)` shipped without the
+#--- method: two compile errors and an EA missing from the Navigator,
+#--- because a patch script printed success for a hunk it never applied.
+#--- It only watched g_ names. The panel rewrite added dozens of
+#--- m_w., m_port., m_acct. and m_lines. calls across four layers at
+#--- once, which is precisely the shape of change where one half lands
+#--- and the other does not - and A6 could not see any of them.
+CALL_ON_MEMBER = re.compile(r'\bm_[a-z_]\w*\s*\.\s*([A-Za-z_]\w*)\s*\(')
+
 def audit_a6():
     declared = set()
     for path, body in CLEAN.items():
@@ -336,7 +347,25 @@ def audit_a6():
                    "%s() is called on one of our objects but declared nowhere - "
                    "the other half of a change did not land" % name)
 
-for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6):
+def audit_a7():
+    declared = set()
+    for path, body in CLEAN.items():
+        for m in DECL_METHOD.finditer(body):
+            if m.group(1) in NOT_A_RETURN_TYPE:
+                continue
+            declared.add(m.group(2))
+    declared |= {"Detach", "Release"}
+
+    for path, body in CLEAN.items():
+        for m in CALL_ON_MEMBER.finditer(body):
+            name = m.group(1)
+            if name in declared:
+                continue
+            report("A7", path, body[:m.start()].count("\n") + 1,
+                   "%s() is called on a member of ours but declared nowhere - "
+                   "the other half of a change did not land" % name)
+
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7):
     fn()
 
 if findings:
