@@ -1,58 +1,88 @@
 @echo off
 setlocal enabledelayedexpansion
 title SS Replay - Update
+color 0F
 
 REM ---------------------------------------------------------------
 REM  Put this file in your MQL5 folder (next to Include, Scripts,
 REM  Experts, Indicators, Services). Close MetaTrader AND MetaEditor,
-REM  then run it and give it the new SSReplay ZIP.
+REM  then double-click it.
+REM
+REM  It finds the newest SSReplay ZIP in Downloads, removes the old
+REM  build, installs the new one, and compiles it.
 REM
 REM  It touches NOTHING except the SSReplay folders and SSR*.ex5.
-REM  Every deletion is printed before it happens.
 REM ---------------------------------------------------------------
 
 cd /d "%~dp0"
+set "TMPF=%TEMP%\ssr_update_tmp.txt"
 
 if not exist "Include\" goto notmql5
 if not exist "Scripts\" goto notmql5
 
 echo.
+echo   ===============================================
+echo     SS Replay - Update
+echo   ===============================================
+echo.
 echo   MQL5 folder : %CD%
 echo.
 
-REM --- MetaTrader must be closed or the .ex5 files are locked
+REM --- both programs hold the files open
 tasklist /fi "imagename eq terminal64.exe" 2>nul | find /i "terminal64.exe" >nul
 if not errorlevel 1 (
   echo   [STOP] MetaTrader is still running. Close it and run this again.
-  echo.
-  pause
-  exit /b 1
+  goto fail
 )
 tasklist /fi "imagename eq metaeditor64.exe" 2>nul | find /i "metaeditor64.exe" >nul
 if not errorlevel 1 (
   echo   [STOP] MetaEditor is still running. Close it and run this again.
-  echo.
-  pause
-  exit /b 1
+  goto fail
 )
 
+REM ---------------------------------------------------------------
+REM  Find the ZIP.
+REM
+REM  An empty answer used to mean "clean, install nothing". It ended
+REM  with the same pause as a success, so pressing Enter looked like
+REM  an install and silently left the old build running for a whole
+REM  round of tests. Enter now means "yes, install that one".
+REM ---------------------------------------------------------------
 set "ZIP=%~1"
+
 if "%ZIP%"=="" (
-  echo   Drag the SSReplay ZIP onto this window and press Enter
-  echo   ^(or just press Enter to only clean, without installing^)
-  echo.
-  set /p "ZIP=  ZIP: "
+  del /q "%TMPF%" 2>nul
+  powershell -NoProfile -Command "$c=@(); foreach($d in @(\"$env:USERPROFILE\Downloads\", (Get-Location).Path, (Split-Path (Get-Location).Path))) { if (Test-Path -LiteralPath $d) { $c += Get-ChildItem -LiteralPath $d -Filter 'SSReplay*.zip' -File -ErrorAction SilentlyContinue } }; $n = $c | Sort-Object LastWriteTime -Descending | Select-Object -First 1; if ($n) { Set-Content -LiteralPath $env:TEMP'\ssr_update_tmp.txt' -Value $n.FullName }"
+  if exist "%TMPF%" set /p ZIP=<"%TMPF%"
+  del /q "%TMPF%" 2>nul
 )
-set "ZIP=%ZIP:"=%"
 
 if not "%ZIP%"=="" (
-  if not exist "%ZIP%" (
-    echo.
-    echo   [STOP] Not found: %ZIP%
-    echo.
-    pause
-    exit /b 1
-  )
+  echo   Found this ZIP:
+  echo       %ZIP%
+  echo.
+  set "ANS="
+  set /p "ANS=  Press Enter to install it, or paste a different path: "
+  if not "!ANS!"=="" set "ZIP=!ANS!"
+) else (
+  echo   No SSReplay ZIP found in your Downloads folder.
+  echo.
+  set "ZIP="
+  set /p "ZIP=  Drag the ZIP onto this window, then press Enter: "
+)
+
+set "ZIP=%ZIP:"=%"
+
+if "%ZIP%"=="" (
+  echo.
+  echo   [STOP] No ZIP given. Nothing was changed.
+  goto fail
+)
+if not exist "%ZIP%" (
+  echo.
+  echo   [STOP] Not found: %ZIP%
+  echo          Nothing was changed.
+  goto fail
 )
 
 echo.
@@ -65,12 +95,11 @@ for %%D in (Include Scripts Experts Indicators Services) do (
   )
 )
 
-REM --- compiled leftovers are the reason a "new" build can run as the old one
+REM --- stale .ex5 are why a "new" build can still run as the old one
 set /a GONE=0
 for %%D in (Scripts Experts Indicators Services) do (
   if exist "%%D\" (
     for /r "%%D" %%F in (SSR*.ex5) do (
-      echo     delete  %%~nxF
       del /q "%%F" 2>nul
       set /a GONE+=1
     )
@@ -78,53 +107,83 @@ for %%D in (Scripts Experts Indicators Services) do (
 )
 echo     %GONE% stale .ex5 removed
 
-if "%ZIP%"=="" (
-  echo.
-  echo   Cleaned. No ZIP given, so nothing was installed.
-  echo.
-  pause
-  exit /b 0
-)
-
 echo.
 echo   --- installing ---
 echo     from  %ZIP%
 
-REM --- the ZIP contains an MQL5\ folder, so it unpacks one level up
-powershell -NoProfile -Command ^
-  "try { Expand-Archive -LiteralPath '%ZIP%' -DestinationPath '%CD%\..' -Force; exit 0 } catch { Write-Host $_.Exception.Message; exit 1 }"
+powershell -NoProfile -Command "try { Expand-Archive -LiteralPath '%ZIP%' -DestinationPath (Split-Path (Get-Location).Path) -Force; exit 0 } catch { Write-Host $_.Exception.Message; exit 1 }"
 
 if errorlevel 1 (
   echo.
   echo   [STOP] Extract failed. Unpack the ZIP by hand into:
   echo          %CD%\..
+  goto fail
+)
+
+if not exist "Include\SSReplay\Common\SSR_Build.mqh" (
   echo.
-  pause
-  exit /b 1
+  echo   [STOP] Include\SSReplay is missing after the extract.
+  echo          The ZIP layout is not what was expected.
+  goto fail
 )
 
 echo.
-if exist "Include\SSReplay\Common\SSR_Types.mqh" (
-  echo   installed build:
-  findstr /c:"#define SSR_BUILD" "Include\SSReplay\Common\SSR_Types.mqh"
-) else (
-  echo   [WARN] Include\SSReplay is missing after extract - check the ZIP layout.
+echo   --- installed build ---
+findstr /c:"#define SSR_BUILD" "Include\SSReplay\Common\SSR_Build.mqh"
+
+REM ---------------------------------------------------------------
+REM  Compile here rather than leaving it as a step to remember.
+REM  Forgetting it produces exactly the same symptom as a failed
+REM  install: new source on disk, old .ex5 still running.
+REM  origin.txt in the data folder holds the terminal's install path.
+REM ---------------------------------------------------------------
+echo.
+echo   --- compiling ---
+
+set "MEDIT="
+del /q "%TMPF%" 2>nul
+powershell -NoProfile -Command "$o = Join-Path (Split-Path (Get-Location).Path) 'origin.txt'; $e = $null; if (Test-Path -LiteralPath $o) { $p = (Get-Content -LiteralPath $o -Raw).Trim(); $c = Join-Path $p 'metaeditor64.exe'; if (Test-Path -LiteralPath $c) { $e = $c } }; if (-not $e) { foreach ($r in @($env:ProgramFiles, ${env:ProgramFiles(x86)})) { if ($r -and -not $e) { $h = Get-ChildItem -LiteralPath $r -Filter 'metaeditor64.exe' -Recurse -Depth 3 -File -ErrorAction SilentlyContinue | Select-Object -First 1; if ($h) { $e = $h.FullName } } } }; if ($e) { Set-Content -LiteralPath $env:TEMP'\ssr_update_tmp.txt' -Value $e }"
+if exist "%TMPF%" set /p MEDIT=<"%TMPF%"
+del /q "%TMPF%" 2>nul
+
+if "%MEDIT%"=="" (
+  echo     [WARN] MetaEditor was not found automatically.
+  echo            Open MetaEditor and press Ctrl+F7 ^(Compile All^) yourself.
+  goto done
 )
 
+echo     using %MEDIT%
+set "CLOG=%TEMP%\ssr_compile.log"
+del /q "%CLOG%" 2>nul
+"%MEDIT%" /compile:"%CD%" /include:"%CD%" /log:"%CLOG%"
+
+powershell -NoProfile -Command "$l = $env:TEMP + '\ssr_compile.log'; if (-not (Test-Path -LiteralPath $l)) { Write-Host '    (no compile log was produced)'; exit }; $t = Get-Content -LiteralPath $l; $bad = @($t | Where-Object { $_ -match 'error' -and $_ -notmatch '0 error' }); Write-Host ''; $t | Select-Object -Last 2 | ForEach-Object { Write-Host ('    ' + $_) }; if ($bad.Count -gt 0) { Write-Host ''; Write-Host '    ERRORS:'; $bad | Select-Object -First 12 | ForEach-Object { Write-Host ('    ' + $_) } } else { Write-Host ''; Write-Host '    no errors' }"
+
+:done
 echo.
-echo   Done. Now:
-echo     1. open MetaEditor
-echo     2. Compile All  ^(Ctrl+F7^)
-echo     3. run SSR_Z_Cleanup, then SSR_QA_Preflight
-echo     4. check the build: line matches what is printed above
+echo   ===============================================
+echo     DONE - the build printed above is installed
+echo   ===============================================
+echo.
+echo   Next: in MetaTrader run SSR_Z_Cleanup, and check its first
+echo         line shows that same build.
 echo.
 pause
 exit /b 0
 
+:fail
+echo.
+echo   ===============================================
+echo     STOPPED - nothing was installed
+echo   ===============================================
+echo.
+pause
+exit /b 1
+
 :notmql5
 echo.
 echo   [STOP] This is not an MQL5 folder.
-echo          Put SSR-Update.bat next to Include\ and Scripts\, then run it.
+echo          Put SSR-Update.bat next to Include\ and Scripts\
 echo          Current folder: %CD%
 echo.
 pause

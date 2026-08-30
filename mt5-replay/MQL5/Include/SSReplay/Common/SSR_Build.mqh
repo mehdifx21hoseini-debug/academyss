@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v16 2026-08-30  build-stamp-on-every-spike"
+#define SSR_BUILD           "v17 2026-08-30  updater-installs-and-compiles"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
