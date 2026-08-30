@@ -683,11 +683,22 @@ int OnInit()
    g_charts.Configure(rsym, origin);
    //--- on the second pass THIS chart already is the replay chart, so
    //--- opening another would be the second window we just removed
-   //--- pass 2: this chart IS it. Pass 1 with one-chart on: none at all,
-   //--- because it is seconds from handing this chart over and a window
-   //--- it opened now would be orphaned by its own restart.
+   //+------------------------------------------------------------------+
+   //| WHICH CHART SHOWS THE REPLAY.                                    |
+   //|                                                                  |
+   //| Pass 2: this chart IS it. Pass 1 that is about to hand itself    |
+   //| over: none - a window opened now would be orphaned by its own    |
+   //| restart. Two-window mode: open one.                              |
+   //|                                                                  |
+   //| The test is one_chart_ok, NOT InpOneChart. They differ exactly   |
+   //| when a failed handover poisoned the stash: the input still says  |
+   //| one window, the poison says two. Testing the input here left the |
+   //| recovery run with NO replay chart at all - no candles, no lines  |
+   //| to arm ("sl/tp lines -> refused" in the user's log), while every |
+   //| transport button cheerfully worked on a chart showing nothing.   |
+   //+------------------------------------------------------------------+
    g_replay_chart = (g_on_replay_chart ? ChartID()
-                     : (InpOneChart ? 0 : g_charts.OpenChart(InpChartTf)));
+                     : (one_chart_ok ? 0 : g_charts.OpenChart(InpChartTf)));
 
    //--- the stop and target belong on the chart the user is watching,
    //--- not in a stepper. They are armed later, once a price exists.
@@ -1209,9 +1220,14 @@ void OnTimer()
    //| would be gone before anyone read it. Polling first means the      |
    //| longest a click can wait is one pump.                             |
    //+------------------------------------------------------------------+
-   ENUM_SSR_CMD host_cmd = g_panel.PollClicks();
-   if(host_cmd != SSR_CMD_NONE)
-      RunHostCommand(host_cmd);
+   //--- not while a dialog is up: it is modal, and a panel that still
+   //--- answers clicks underneath one is two UIs fighting for one mouse
+   if(!g_session_dlg.IsOpen() && !g_dialog.IsOpen())
+     {
+      ENUM_SSR_CMD host_cmd = g_panel.PollClicks();
+      if(host_cmd != SSR_CMD_NONE)
+         RunHostCommand(host_cmd);
+     }
 
    uint now_ms = GetTickCount();
    if(now_ms - g_panel_paint >= 100)

@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v40 2026-08-30  zero-digits-is-a-price-not-an-error"
+#define SSR_BUILD           "v41 2026-08-30  full-pass"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

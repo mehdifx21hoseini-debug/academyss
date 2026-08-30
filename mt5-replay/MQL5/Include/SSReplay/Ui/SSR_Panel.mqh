@@ -492,7 +492,10 @@ private:
       switch(i)
         {
          case SSR_TAB_TRADE:     return "Trade";
-         case SSR_TAB_POSITIONS: return "Positions";
+         case SSR_TAB_POSITIONS:
+            return (m_state.open_positions > 0
+                    ? "Positions " + IntegerToString(m_state.open_positions)
+                    : "Positions");
          case SSR_TAB_STATS:     return "Stats";
          case SSR_TAB_SESSION:   return "Session";
         }
@@ -572,12 +575,19 @@ private:
                       "buy","sell","be","flat",
                       "g1_fr","g1_lb","g1_lg","g2_fr","g2_lb","g2_lg",
                       "risklbl","riskval","riskmon","slrow","tprow","rrrow",
-                      "sizerow","hintrow","setuprow","poslist","posmore",
+                      "sizerow","hintrow","setuprow","posempty","posmore",
                       "st1","st2","st3","st4","st5","st6",
-                      "pos1","pos2","ses1","ses2","ses3","ses4","ses5",
+                      "ses1","ses2","ses3","ses4","ses5",
                       "ses6","keyhint","spreadrow","traderr"};
       for(int i = 0; i < ArraySize(ids); i++)
          m_w.Remove(ids[i]);
+      for(int r = 0; r < 5; r++)
+        {
+         string t = IntegerToString(r);
+         m_w.Remove("pr" + t);
+         m_w.Remove("pl" + t);
+         m_w.Remove("px" + t);
+        }
      }
 
    //----------------------------------------------------------------
@@ -666,8 +676,10 @@ private:
       //--- so the chart and the dialog cannot disagree.
       int dy = gy + 112;
       int dw = (w - SSR_GAP) / 2;
-      bool dim_buy  = (m_state.lines_armed && !m_state.line_long);
-      bool dim_sell = (m_state.lines_armed &&  m_state.line_long);
+      bool dim_buy  = !m_state.can_trade ||
+                      (m_state.lines_armed && !m_state.line_long);
+      bool dim_sell = !m_state.can_trade ||
+                      (m_state.lines_armed &&  m_state.line_long);
 
       m_w.ButtonC("buy", x, dy, dw, 26,
                   StringFormat("Buy  %s", Price(m_state.ask)),
@@ -695,30 +707,42 @@ private:
    //----------------------------------------------------------------
    void              SheetPositions(const int x, const int y, const int w)
      {
-      m_w.Group("g1", x, y, w, 96, "Open");
-      m_w.Rect("poslist", x + 8, y + 14, w - 16, 74, SSR_C_WELL, SSR_C_WELL_EDGE);
+      m_w.Group("g1", x, y, w, 138, "Open positions");
 
-      if(m_state.open_positions <= 0)
-         Text(20, "posmore", x + 14, y + 20, "Nothing open.",
-              SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      else
+      if(m_state.pos_rows <= 0)
         {
-         Text(20, "posmore", x + 14, y + 20,
-              StringFormat("%d open      floating %s",
-                           m_state.open_positions,
-                           Money(m_state.floating, true)),
-              m_state.floating >= 0.0 ? SSR_C_RUN : SSR_C_STOP);
-         Text(21, "pos1", x + 14, y + 36,
-              "Stops and targets are the dashed lines on the chart.",
-              SSR_C_TEXT_DIM, SSR_FS_SMALL);
-         Text(22, "pos2", x + 14, y + 48,
-              "Drag one to move it; the trade follows.",
+         Text(20, "posempty", x + 8, y + 16,
+              "Nothing open. Place the lines (L), drag the stop, press Open.",
               SSR_C_TEXT_DIM, SSR_FS_SMALL);
         }
+      else
+        {
+         //--- one row per position: side and size, its P/L in money,
+         //--- and its own close button. Managed from the panel, not by
+         //--- hunting the chart for the right dashed line.
+         for(int r = 0; r < m_state.pos_rows; r++)
+           {
+            int ry = y + 14 + r * 20;
+            string t = IntegerToString(r);
+            Text(20 + r, "pr" + t, x + 8, ry + 3, m_state.pos_text[r],
+                 SSR_C_TEXT);
+            Text(25 + r, "pl" + t, x + w - 96, ry + 3,
+                 Money(m_state.pos_pl[r], true),
+                 m_state.pos_pl[r] >= 0.0 ? SSR_C_RUN : SSR_C_STOP);
+            m_w.ButtonC("px" + t, x + w - 26, ry, 18, 17, "X",
+                        SSR_C_BTN, SSR_C_BTN_EDGE, SSR_C_STOP, SSR_FS_SMALL);
+           }
+         //--- the cap is a display cap; when it hides trades, say so
+         if(m_state.open_positions > m_state.pos_rows)
+            Text(30, "posmore", x + 8, y + 118,
+                 StringFormat("+%d more - Close all still closes everything",
+                              m_state.open_positions - m_state.pos_rows),
+                 SSR_C_HOLD, SSR_FS_SMALL);
+        }
 
-      int by = y + 104;
-      int bw = (w - 3 * SSR_GAP) / 4;
-      m_w.Button("be",   x, by, bw, SSR_BTN_H, "B/E",
+      int by = y + 144;
+      int bw = (w - SSR_GAP) / 2;
+      m_w.Button("be",   x, by, bw, SSR_BTN_H, "Break-even all",
                  false, m_state.open_positions > 0);
       m_w.Button("flat", x + bw + SSR_GAP, by, bw, SSR_BTN_H, "Close all",
                  false, m_state.open_positions > 0);
@@ -1078,6 +1102,19 @@ public:
         }
       if(what == "close")  { m_closed = true;  return SSR_CMD_NONE; }
       if(what == "reopen") { m_closed = false; return SSR_CMD_NONE; }
+
+      //--- a row's own close button: px0..px4 -> the ticket that row
+      //--- was showing when it was pressed
+      if(StringLen(what) == 3 && StringSubstr(what, 0, 2) == "px")
+        {
+         int r = (int)StringToInteger(StringSubstr(what, 2));
+         if(m_port != NULL && r >= 0 && r < m_state.pos_rows)
+            PrintFormat("[panel] close #%d -> %s",
+                        (int)m_state.pos_ticket[r],
+                        (m_port.ClosePosition(m_state.pos_ticket[r])
+                         ? "ok" : "refused (" + m_port.TradeError() + ")"));
+         return SSR_CMD_NONE;
+        }
 
       ENUM_SSR_CMD c = SSR_CMD_NONE;
       if(what == "toggle")        c = SSR_CMD_TOGGLE;

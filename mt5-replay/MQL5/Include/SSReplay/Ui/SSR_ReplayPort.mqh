@@ -89,6 +89,15 @@ struct SSRUiState
    //--- one line per strategy, already formatted. Empty when none.
    string             strategy_text;
 
+   //--- THE OPEN POSITIONS, as rows the panel can show and act on.
+   //--- Five is a display cap, not a trading cap: pos_rows says how
+   //--- many are shown, open_positions how many exist, and when they
+   //--- differ the panel says "+N more" instead of lying by omission.
+   int                pos_rows;
+   long               pos_ticket[5];
+   string             pos_text[5];     // "BUY 1.00 @ 53513"
+   double             pos_pl[5];
+
    //+------------------------------------------------------------------+
    //| THE STOP AND TARGET ARE LINES, NOT NUMBERS.                      |
    //|                                                                  |
@@ -140,6 +149,9 @@ struct SSRUiState
       open_positions = 0; risk_percent = 0.0; stop_points = 0.0;
       trade_symbol = ""; can_trade = false; tp_points = 0.0;
       strategy_text = "";
+      pos_rows = 0;
+      for(int i = 0; i < 5; i++)
+        { pos_ticket[i] = 0; pos_text[i] = ""; pos_pl[i] = 0.0; }
       lines_armed = false; sl_price = 0.0; tp_price = 0.0; line_long = true;
       bid = 0.0; ask = 0.0; price_digits = 2; spread_points = 0.0;
       lot_from_risk = 0.0; risk_money = 0.0; reward_money = 0.0; rr = 0.0;
@@ -218,6 +230,9 @@ public:
    //--- come from where they were dragged to. The panel never decides
    //--- the direction, so the chart and the order cannot disagree.
    virtual bool      OpenFromLines(void)                  { return false; }
+
+   //--- close ONE position, by the ticket the state row named
+   virtual bool      ClosePosition(const long ticket)     { return false; }
    virtual string    TradeError(void)                   { return ""; }
 
    //+------------------------------------------------------------------+

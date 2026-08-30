@@ -248,6 +248,31 @@ public:
                out.tp_points   = MathAbs(out.tp_price - out.bid) / pt;
               }
            }
+
+         //--- THE OPEN POSITIONS, as rows. The panel shows them and puts
+         //--- a close button on each, so a trade can be managed without
+         //--- hunting the chart for its lines. Newest first, because the
+         //--- trade being managed is almost always the trade just opened.
+         int total = m_acct.Total();
+         for(int pi = total - 1; pi >= 0 && out.pos_rows < 5; pi--)
+           {
+            SSRVirtualPosition vp;
+            if(!m_acct.At(pi, vp) || vp.state != SSR_POS_OPEN)
+               continue;
+            int r = out.pos_rows++;
+            out.pos_ticket[r] = vp.ticket;
+            out.pos_text[r]   = StringFormat("%s %.2f @ %s",
+                                (SSRIsLong(vp.type) ? "BUY" : "SELL"),
+                                vp.volume,
+                                DoubleToString(vp.open_price, out.price_digits));
+            //--- MoneyFor returns a magnitude; the sign comes from which
+            //--- way the price moved relative to the side
+            double px    = (SSRIsLong(vp.type) ? out.bid : out.ask);
+            double moved = (SSRIsLong(vp.type) ? px - vp.open_price
+                                               : vp.open_price - px);
+            out.pos_pl[r] = (moved >= 0 ? 1.0 : -1.0)
+                            * m_acct.MoneyFor(vp.volume, MathAbs(moved));
+           }
         }
 
       if(m_strategies != NULL && m_strategies.Count() > 0)
@@ -534,10 +559,26 @@ public:
          return false;
         }
 
-      bool ok = Market(is_long ? SSR_ORDER_BUY : SSR_ORDER_SELL);
+      //--- the exact prices the user dragged to - not a distance
+      //--- recomputed from the bid, which would drift by the spread
+      //--- and by every tick between the drag and the click
+      bool ok = MarketAt(is_long ? SSR_ORDER_BUY : SSR_ORDER_SELL, sl, tp);
       if(ok)
          m_lines.Clear();
       return ok;
+     }
+
+   //+------------------------------------------------------------------+
+   //| Close one position, from its row in the panel.                   |
+   //+------------------------------------------------------------------+
+   virtual bool      ClosePosition(const long ticket) override
+     {
+      m_trade_error = "";
+      if(m_acct == NULL)
+        { m_trade_error = "no account"; return false; }
+      if(!m_acct.Close(ticket))
+        { m_trade_error = m_acct.LastError(); return false; }
+      return true;
      }
 
    virtual bool      Buy(void) override  { return Market(SSR_ORDER_BUY); }
@@ -644,6 +685,26 @@ private:
    //| A tool for learning to trade should not let its own panel be     |
    //| the one place where a trade is taken without knowing the risk.   |
    //+------------------------------------------------------------------+
+   //--- an order at EXPLICIT prices. Market() derives them from the
+   //--- configured distances; the lines hand them over as dragged.
+   bool              MarketAt(const ENUM_SSR_ORDER type,
+                              const double sl, const double tp)
+     {
+      m_trade_error = "";
+      if(m_acct == NULL)
+        { m_trade_error = "no account"; return false; }
+      if(m_acct.Bid() <= 0.0)
+        { m_trade_error = "no price yet - let the replay run first"; return false; }
+      if(sl <= 0.0)
+        { m_trade_error = "no stop - the size comes from the risk, and "
+                          "the risk needs a stop"; return false; }
+      long t = m_acct.OpenWithRisk(type, m_risk_percent, sl,
+                                   (tp > 0.0 ? tp : 0.0), "");
+      if(t <= 0)
+        { m_trade_error = m_acct.LastError(); return false; }
+      return true;
+     }
+
    bool              Market(const ENUM_SSR_ORDER type)
      {
       m_trade_error = "";
