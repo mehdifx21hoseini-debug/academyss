@@ -423,6 +423,12 @@ public:
 
       Text(14, "keys", x + SSR_PAD, cy, "SPACE  <->  PgUp/Dn  J  B  +/-",
            SSR_C_TEXT_FAINT, SSR_FS_SMALL, SSR_FONT_MONO);
+
+      //--- The panel got away with never asking for a repaint because the
+      //--- host chart is a live symbol and ticks repaint it anyway. That
+      //--- is luck, not design: on a closed market it would freeze the
+      //--- same way the range dialog did. Ask.
+      ChartRedraw(m_chart);
      }
 
    void              HideBody(const bool hidden)

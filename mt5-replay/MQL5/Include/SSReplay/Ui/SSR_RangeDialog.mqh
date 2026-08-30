@@ -115,6 +115,9 @@ public:
      {
       m_open = false;
       m_w.RemoveAll();
+      //--- removing objects needs a repaint just as much as adding them,
+      //--- or the dialog stays on screen after it has closed
+      ChartRedraw(m_chart);
      }
 
    //+------------------------------------------------------------------+
@@ -218,6 +221,21 @@ public:
       m_w.Button("more", x + SSR_PAD, cy, 96, SSR_BTN_H, "LOAD MORE");
       m_w.Button("start", x + W - SSR_PAD - 96, cy, 96, SSR_BTN_H, "START",
                  false, CanStart());
+
+      //+------------------------------------------------------------------+
+      //| ASK THE CHART TO PAINT. Creating objects does not show them.     |
+      //|                                                                  |
+      //| MetaTrader repaints a chart when something happens to it - a     |
+      //| tick, a resize, a scroll. On a weekend, on a symbol with no      |
+      //| incoming quotes, none of those happen, so this whole dialog was  |
+      //| built correctly and stayed invisible. Pressing J did nothing at  |
+      //| all, and the objects were there the entire time.                 |
+      //|                                                                  |
+      //| The session dialog next door has always called this, and it      |
+      //| opened. That contrast is what identified this - one file calls   |
+      //| ChartRedraw and appears, the other does not and does not.        |
+      //+------------------------------------------------------------------+
+      ChartRedraw(m_chart);
      }
 
    //+------------------------------------------------------------------+

@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v25 2026-08-30  keys-reach-their-owner"
+#define SSR_BUILD           "v26 2026-08-30  invisible-dialog-repaints"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
