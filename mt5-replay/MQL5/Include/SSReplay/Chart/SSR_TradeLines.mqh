@@ -44,6 +44,29 @@ private:
    double            m_tp_price;
    color             m_sl_col;
    color             m_tp_col;
+   color             m_long_col;
+   color             m_short_col;
+   long              m_seen[];       // tickets drawn in the current sweep
+
+   //--- a plain price level; positions are not draggable, they are a
+   //--- record of what happened
+   void              Level(const string n, const double price, const color col,
+                           const int style, const int width, const string tip)
+     {
+      if(ObjectFind(m_chart, n) < 0)
+        {
+         if(!ObjectCreate(m_chart, n, OBJ_HLINE, 0, 0, price))
+            return;
+         ObjectSetInteger(m_chart, n, OBJPROP_SELECTABLE, false);
+         ObjectSetInteger(m_chart, n, OBJPROP_HIDDEN,     true);
+         ObjectSetInteger(m_chart, n, OBJPROP_BACK,       true);
+        }
+      ObjectSetInteger(m_chart, n, OBJPROP_COLOR,   col);
+      ObjectSetInteger(m_chart, n, OBJPROP_STYLE,   style);
+      ObjectSetInteger(m_chart, n, OBJPROP_WIDTH,   width);
+      ObjectSetString (m_chart, n, OBJPROP_TOOLTIP, tip);
+      ObjectSetDouble (m_chart, n, OBJPROP_PRICE,   price);
+     }
 
    //--- draggable means SELECTABLE. Everything else about these lines
    //--- is defensive: they sit behind the candles, they never join a
@@ -84,7 +107,8 @@ public:
      : m_chart(0), m_digits(0), m_point(0.0), m_armed(false),
        m_sl_name("SSR_LINE_SL"), m_tp_name("SSR_LINE_TP"),
        m_sl_price(0.0), m_tp_price(0.0),
-       m_sl_col(clrTomato), m_tp_col(clrMediumSeaGreen) {}
+       m_sl_col(clrTomato), m_tp_col(clrMediumSeaGreen),
+       m_long_col(clrDodgerBlue), m_short_col(clrOrange) {}
 
                     ~CSSRTradeLines(void) { Clear(); }
 
@@ -194,13 +218,100 @@ public:
    bool              IsLongSetup(const double price)
      { return (m_armed && m_sl_price > 0.0 && m_sl_price < price); }
 
+   //+------------------------------------------------------------------+
+   //| OPEN POSITIONS, DRAWN THE WAY THE PLATFORM DRAWS REAL ONES.      |
+   //|                                                                  |
+   //| A virtual trade that exists only as a number in a panel asks the |
+   //| user to hold the whole position in their head. The point of      |
+   //| practising on a chart is to read it off the chart.               |
+   //|                                                                  |
+   //| Deliberately NOT typed against the trading layer: this file is   |
+   //| in Chart, which depends on Common and nothing else. It takes     |
+   //| prices and a ticket number, and the host - which knows both      |
+   //| sides - does the walking.                                        |
+   //|                                                                  |
+   //| Begin / Draw* / End is a sweep: anything not redrawn this pass   |
+   //| was closed, and its lines go with it.                            |
+   //+------------------------------------------------------------------+
+   void              BeginPositions(void)
+     {
+      ArrayResize(m_seen, 0);
+     }
+
+   bool              DrawPosition(const long ticket, const double entry,
+                                  const double sl, const double tp,
+                                  const bool is_long, const double volume)
+     {
+      if(m_chart == 0 || entry <= 0.0)
+         return false;
+
+      int k = ArraySize(m_seen);
+      ArrayResize(m_seen, k + 1);
+      m_seen[k] = ticket;
+
+      string base = "SSR_POS_" + IntegerToString((int)ticket);
+      string side = (is_long ? "BUY" : "SELL");
+      string tip  = StringFormat("%s %.2f @ %s", side, volume,
+                                 DoubleToString(entry, m_digits));
+
+      Level(base + "_E", entry, (is_long ? m_long_col : m_short_col),
+            STYLE_SOLID, 2, tip);
+
+      if(sl > 0.0)
+         Level(base + "_S", sl, m_sl_col, STYLE_DOT, 1,
+               "stop of " + IntegerToString((int)ticket));
+      else
+         ObjectDelete(m_chart, base + "_S");
+
+      if(tp > 0.0)
+         Level(base + "_T", tp, m_tp_col, STYLE_DOT, 1,
+               "target of " + IntegerToString((int)ticket));
+      else
+         ObjectDelete(m_chart, base + "_T");
+
+      return true;
+     }
+
+   void              EndPositions(void)
+     {
+      if(m_chart == 0)
+         return;
+
+      //--- sweep: an object for a ticket nobody drew this pass belongs
+      //--- to a position that has closed
+      int total = ObjectsTotal(m_chart, 0, OBJ_HLINE);
+      for(int i = total - 1; i >= 0; i--)
+        {
+         string n = ObjectName(m_chart, i, 0, OBJ_HLINE);
+         if(StringFind(n, "SSR_POS_") != 0)
+            continue;
+
+         //--- SSR_POS_<ticket>_X
+         string rest = StringSubstr(n, 8);
+         int    us   = StringFind(rest, "_");
+         if(us <= 0)
+            continue;
+         long tk = StringToInteger(StringSubstr(rest, 0, us));
+
+         bool alive = false;
+         for(int j = 0; j < ArraySize(m_seen); j++)
+            if(m_seen[j] == tk)
+              { alive = true; break; }
+
+         if(!alive)
+            ObjectDelete(m_chart, n);
+        }
+      ChartRedraw(m_chart);
+     }
+
    void              Clear(void)
      {
       if(m_chart == 0)
          return;
       ObjectDelete(m_chart, m_sl_name);
       ObjectDelete(m_chart, m_tp_name);
-      ChartRedraw(m_chart);
+      ArrayResize(m_seen, 0);
+      EndPositions();
       m_armed = false;
      }
   };

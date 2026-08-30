@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v28 2026-08-30  the-stop-is-a-line"
+#define SSR_BUILD           "v29 2026-08-30  install-stages-first"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

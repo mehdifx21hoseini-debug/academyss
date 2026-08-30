@@ -104,6 +104,42 @@ if not exist "%ZIP%" (
   goto fail
 )
 
+REM ---------------------------------------------------------------
+REM  UNPACK BEFORE DESTROYING ANYTHING.
+REM
+REM  This used to delete the installed build and then extract. When the
+REM  extract failed - and it can, not least because this very file is
+REM  open and running while the archive tries to overwrite it - the old
+REM  build was already gone and the new one never arrived. "It deleted
+REM  and did not install" is exactly that order of operations.
+REM
+REM  So: unpack to a temp folder, check the unpacked copy is real, and
+REM  only then touch what is installed.
+REM ---------------------------------------------------------------
+set "STAGE=%TEMP%\ssr_stage"
+
+echo.
+echo   --- unpacking to a staging folder ---
+
+if exist "%STAGE%" rmdir /s /q "%STAGE%"
+mkdir "%STAGE%" 2>nul
+
+powershell -NoProfile -Command "try { Expand-Archive -LiteralPath '%ZIP%' -DestinationPath $env:TEMP'\ssr_stage' -Force; exit 0 } catch { Write-Host $_.Exception.Message; exit 1 }"
+
+if errorlevel 1 (
+  echo.
+  echo   [STOP] Could not unpack the ZIP. NOTHING was changed.
+  goto fail
+)
+
+if not exist "%STAGE%\MQL5\Include\SSReplay\Common\SSR_Build.mqh" (
+  echo.
+  echo   [STOP] That ZIP does not contain MQL5\Include\SSReplay.
+  echo          NOTHING was changed.
+  goto fail
+)
+
+echo     ok - the new build is staged and complete
 echo.
 echo   --- removing the old build ---
 
@@ -130,19 +166,22 @@ echo.
 echo   --- installing ---
 echo     from  %ZIP%
 
-powershell -NoProfile -Command "try { Expand-Archive -LiteralPath '%ZIP%' -DestinationPath (Split-Path (Get-Location).Path) -Force; exit 0 } catch { Write-Host $_.Exception.Message; exit 1 }"
-
-if errorlevel 1 (
+REM --- /XF skips this file: it is running, so Windows holds it open and
+REM --- copying over it would fail the whole install for no benefit
+robocopy "%STAGE%\MQL5" "%CD%" /E /NFL /NDL /NJH /NJS /NP /XF SSR-Update.bat >nul
+if errorlevel 8 (
   echo.
-  echo   [STOP] Extract failed. Unpack the ZIP by hand into:
-  echo          %CD%\..
+  echo   [STOP] Copy failed. Your old build has been removed - unpack
+  echo          %ZIP%
+  echo          by hand into  %CD%\..
   goto fail
 )
 
+rmdir /s /q "%STAGE%" 2>nul
+
 if not exist "Include\SSReplay\Common\SSR_Build.mqh" (
   echo.
-  echo   [STOP] Include\SSReplay is missing after the extract.
-  echo          The ZIP layout is not what was expected.
+  echo   [STOP] Include\SSReplay is missing after the copy.
   goto fail
 )
 

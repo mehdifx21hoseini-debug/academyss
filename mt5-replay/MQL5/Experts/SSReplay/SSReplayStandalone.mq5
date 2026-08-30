@@ -902,6 +902,22 @@ void OnTimer()
                g_gport.SetStopPoints(pts);
                g_gport.SetTpPoints(g_lines.RewardRatio(px) * pts);
               }
+
+            //--- and every OPEN trade, on the chart, the way the
+            //--- platform draws a real one. A virtual position that
+            //--- lives only as a number in a panel asks the user to
+            //--- carry it in their head; the point of practising on a
+            //--- chart is to read it off the chart.
+            g_lines.BeginPositions();
+            for(int pi = 0; pi < g_acct.Total(); pi++)
+              {
+               SSRVirtualPosition vp;
+               if(!g_acct.At(pi, vp) || vp.state != SSR_POS_OPEN)
+                  continue;
+               g_lines.DrawPosition(vp.ticket, vp.open_price, vp.sl, vp.tp,
+                                    SSRIsLong(vp.type), vp.volume);
+              }
+            g_lines.EndPositions();
            }
         }
      }
