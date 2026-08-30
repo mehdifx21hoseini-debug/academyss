@@ -441,6 +441,33 @@ void OnStart()
    }
 
    //================================================================
+   Section("T15.9  a dragged panel takes its labels with it");
+   {
+      //--- The text cache was keyed on the text alone, so moving the
+      //--- panel left every unchanged label exactly where it was while
+      //--- the buttons followed the mouse. The panel tore in half.
+      //--- A cache is only safe when it remembers everything that
+      //--- would have changed the write - including where it goes.
+      CSSRGroupPort port2;
+      CSSRPanel     panel2;
+      panel2.Create(ChartID(), GetPointer(port2), "T15_move_");
+
+      panel2.SetPosition(40, 60);
+      long x_before = ObjectGetInteger(ChartID(), "T15_move_acct", OBJPROP_XDISTANCE);
+
+      panel2.SetPosition(300, 60);
+      long x_after = ObjectGetInteger(ChartID(), "T15_move_acct", OBJPROP_XDISTANCE);
+
+      Check("the label moved with the panel", x_after != x_before,
+            StringFormat("before=%d after=%d (both would mean a stranded label)",
+                         (int)x_before, (int)x_after));
+      CheckEq("and it moved by the same amount the panel did",
+              260, (int)(x_after - x_before));
+
+      panel2.Destroy();
+   }
+
+   //================================================================
    PrintFormat("=== Phase 15: PASS=%d  FAIL=%d  ===> %s",
                g_pass, g_fail, (g_fail == 0 ? "GREEN" : "RED"));
   }

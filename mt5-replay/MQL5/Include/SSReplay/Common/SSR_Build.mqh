@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v23 2026-08-30  the-keyboard-exists"
+#define SSR_BUILD           "v24 2026-08-30  the-panel-moves-as-one"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

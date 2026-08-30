@@ -53,15 +53,32 @@ private:
 
    SSRUiState        m_state;
    string            m_cache[32];   // last text written per slot
+   int               m_cache_x[32]; // ...and WHERE it was written
+   int               m_cache_y[32];
    int               m_renders;
    int               m_writes;
 
-   //--- write only when the text actually changed
+   //+------------------------------------------------------------------+
+   //| Write only when something actually changed - and POSITION is     |
+   //| something.                                                       |
+   //|                                                                  |
+   //| This cache was keyed on the text alone. Dragging the panel moves |
+   //| x and y while every label's text stays the same, so every one of |
+   //| them took the early return and stayed where it was. The buttons  |
+   //| have no cache, so they moved. The panel tore in half: labels     |
+   //| stranded over the candles, controls somewhere else.              |
+   //|                                                                  |
+   //| That is the "it doesn't move properly when I drag it" report,    |
+   //| and it was an optimisation that forgot what it was optimising.   |
+   //| Skipping a write is only safe when NOTHING about the write would |
+   //| differ - the text, and where it goes.                            |
+   //+------------------------------------------------------------------+
    void              Text(const int slot, const string id, const int x, const int y,
                           const string text, const color col,
                           const int size = SSR_FS_BODY, const string font = SSR_FONT)
      {
-      if(slot >= 0 && slot < 32 && m_cache[slot] == text && m_w.Exists(id))
+      if(slot >= 0 && slot < 32 && m_cache[slot] == text &&
+         m_cache_x[slot] == x && m_cache_y[slot] == y && m_w.Exists(id))
         {
          ObjectSetInteger(m_chart, m_w.N(id), OBJPROP_COLOR, col);
          return;
@@ -69,13 +86,21 @@ private:
       m_w.Label(id, x, y, text, col, size, font);
       m_writes++;
       if(slot >= 0 && slot < 32)
-         m_cache[slot] = text;
+        {
+         m_cache[slot]   = text;
+         m_cache_x[slot] = x;
+         m_cache_y[slot] = y;
+        }
      }
 
    void              ClearCache(void)
      {
       for(int i = 0; i < 32; i++)
-         m_cache[i] = "\x01";     // a value no label can legitimately hold
+        {
+         m_cache[i]   = "\x01";   // a value no label can legitimately hold
+         m_cache_x[i] = -32000;    // ...and a place none can legitimately sit
+         m_cache_y[i] = -32000;
+        }
      }
 
 public:
@@ -469,7 +494,21 @@ public:
       return s;
      }
 
+   //--- EVERY COMMAND SAYS WHAT IT DID.
+   //--- Four keys were reported as broken. They may be broken, or they
+   //--- may be working silently - a bookmark that is stored and shows
+   //--- nothing looks exactly like a bookmark that was never stored.
+   //--- One line per command settles it in one run instead of three.
    bool              Execute(const ENUM_SSR_CMD cmd)
+     {
+      bool ok = ExecuteInner(cmd);
+      if(cmd != SSR_CMD_NONE)
+         PrintFormat("[panel] %s -> %s", SSRCmdName(cmd),
+                     (ok ? "ok" : "refused"));
+      return ok;
+     }
+
+   bool              ExecuteInner(const ENUM_SSR_CMD cmd)
      {
       if(m_port == NULL)
          return false;

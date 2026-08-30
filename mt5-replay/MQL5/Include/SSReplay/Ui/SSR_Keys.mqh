@@ -78,6 +78,37 @@ ENUM_SSR_CMD SSRKeyToCommand(const long key)
    return SSR_CMD_NONE;
   }
 
+//+------------------------------------------------------------------+
+//| Name a command, so a key that did nothing can say which one it    |
+//| was. "B does not work" and "B worked and showed nothing" look     |
+//| identical from the outside, and they need opposite fixes.         |
+//+------------------------------------------------------------------+
+string SSRCmdName(const ENUM_SSR_CMD c)
+  {
+   switch(c)
+     {
+      case SSR_CMD_TOGGLE:           return "play/pause";
+      case SSR_CMD_PLAY:             return "play";
+      case SSR_CMD_PAUSE:            return "pause";
+      case SSR_CMD_RESET:            return "reset";
+      case SSR_CMD_STEP_FWD:         return "step forward";
+      case SSR_CMD_STEP_FWD_10:      return "step forward x10";
+      case SSR_CMD_STEP_BACK:        return "step back";
+      case SSR_CMD_STEP_BACK_10:     return "step back x10";
+      case SSR_CMD_JUMP:             return "jump";
+      case SSR_CMD_BOOKMARK:         return "bookmark";
+      case SSR_CMD_RESTART:          return "restart";
+      case SSR_CMD_SPEED_UP:         return "speed up";
+      case SSR_CMD_SPEED_DOWN:       return "speed down";
+      case SSR_CMD_FOLLOW:           return "follow charts";
+      case SSR_CMD_FIDELITY_CYCLE:   return "fidelity";
+      case SSR_CMD_REPLAY_FROM_HERE: return "replay from here";
+      case SSR_CMD_COLLAPSE:         return "collapse";
+      case SSR_CMD_SESSIONS:         return "sessions";
+     }
+   return "none";
+  }
+
 string SSRKeyHint(void)
   {
    return "SPACE play  <- -> step  PgUp/PgDn x10  J jump  B mark  "
