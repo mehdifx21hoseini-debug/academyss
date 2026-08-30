@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v20 2026-08-30  readable-is-not-synchronized"
+#define SSR_BUILD           "v21 2026-08-30  d4-ratio-was-a-flag"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

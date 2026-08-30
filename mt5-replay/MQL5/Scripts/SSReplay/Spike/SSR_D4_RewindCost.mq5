@@ -61,10 +61,17 @@ void OnStart()
    MqlRates m1[];
    SSR_GenM1(m1, InpStart, InpDepth, InpBase, point, digits);
 
+   //--- EVERY TIMING BELOW USED TO INCLUDE SERIES_SYNCHRONIZED.
+   //--- D1 later showed that flag takes 0.002ms, or 9,200ms, or never,
+   //--- for the same operation. It sat on BOTH sides of this spike's
+   //--- headline ratio - and the rebuild side's 8,560ms is the same
+   //--- size-independent number D1 saw, which means the "317x cheaper"
+   //--- this spike published was mostly a measurement of a flag.
+   //--- Wait for the data to read back instead.
    ulong t0 = SSR_Now();
    Seed(m1, InpDepth);
    SymbolSelect(InpTest, true);
-   SSR_WaitSeries(InpTest, PERIOD_M1, 60000);
+   SSR_WaitLastBar(InpTest, PERIOD_M1, m1[InpDepth - 1].time, 60000);
    double t_full_seed = SSR_ElapsedMs(t0);
    SSR_Metric("baseline", "full_seed_time", t_full_seed, "ms",
               StringFormat("%d bars", InpDepth));
@@ -87,7 +94,7 @@ void OnStart()
       ulong t = SSR_Now();
       CustomRatesDelete(InpTest, cut, D'2038.01.01 00:00');
       CustomTicksDelete(InpTest, (long)cut * 1000, LONG_MAX);
-      SSR_WaitSeries(InpTest, PERIOD_M5, 15000);
+      SSR_WaitLastBarBefore(InpTest, PERIOD_M5, cut, 15000);
       double e = SSR_ElapsedMs(t);
       sum1 += e;
       if(e > worst1) worst1 = e;
@@ -100,7 +107,7 @@ void OnStart()
    SSR_MakeSymbol(InpTest, g_origin);
    Seed(m1, InpDepth);
    SymbolSelect(InpTest, true);
-   SSR_WaitSeries(InpTest, PERIOD_M1, 60000);
+   SSR_WaitLastBar(InpTest, PERIOD_M1, m1[InpDepth - 1].time, 60000);
 
    double sum2 = 0, worst2 = 0;
    int trials2 = MathMax(1, InpTrials / 2);
@@ -110,7 +117,7 @@ void OnStart()
       ulong t = SSR_Now();
       CustomRatesDelete(InpTest, cut, D'2038.01.01 00:00');
       CustomTicksDelete(InpTest, (long)cut * 1000, LONG_MAX);
-      SSR_WaitSeries(InpTest, PERIOD_M5, 15000);
+      SSR_WaitLastBarBefore(InpTest, PERIOD_M5, cut, 15000);
       double e = SSR_ElapsedMs(t);
       sum2 += e;
       if(e > worst2) worst2 = e;
@@ -128,7 +135,7 @@ void OnStart()
       SSR_MakeSymbol(InpTest, g_origin);
       Seed(m1, InpDepth - 1 - i);
       SymbolSelect(InpTest, true);
-      SSR_WaitSeries(InpTest, PERIOD_M1, 60000);
+      SSR_WaitLastBar(InpTest, PERIOD_M1, m1[InpDepth - 2 - i].time, 60000);
       sum3 += SSR_ElapsedMs(t);
      }
    double avg3 = sum3 / trials3;

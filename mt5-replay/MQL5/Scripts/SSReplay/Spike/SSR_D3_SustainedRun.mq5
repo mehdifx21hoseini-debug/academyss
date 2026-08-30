@@ -86,6 +86,7 @@ void OnStart()
 
    long   mem_first = -1, mem_last = 0;
    double rate_first = -1, rate_last = 0;
+   double rate_peak = 0, rate_min1 = -1;
    double limit_s = InpMinutes * 60.0;
 
    while(SSR_ElapsedSec(t_run) < limit_s && !IsStopped())
@@ -126,6 +127,11 @@ void OnStart()
             mem_first  = mt;      // baseline taken after warm-up, not at t=0
             rate_first = rate;
            }
+         if(rate > rate_peak)
+            rate_peak = rate;
+         if(minute >= 1.0 && rate_min1 < 0)
+            rate_min1 = rate;
+
          mem_last  = mt;
          rate_last = rate;
 
@@ -164,7 +170,28 @@ void OnStart()
    SSR_Metric("sustained", "mem_growth",      mem_growth,     "%");
    SSR_Metric("sustained", "rate_at_min10",   rate_first,     "ticks/s");
    SSR_Metric("sustained", "rate_at_end",     rate_last,      "ticks/s");
-   SSR_Metric("sustained", "rate_degradation", rate_drop,     "%");
+   SSR_Metric("sustained", "rate_degradation", rate_drop,     "%",
+              "from minute 10 to the end - NOT the whole run");
+
+   //--- THE MINUTE-10 BASELINE HIDES THE FINDING.
+   //--- It exists to skip warm-up, but on this terminal most of the
+   //--- decay has already happened by then: the first run fell from
+   //--- ~12,000 to ~780 ticks/s before minute 10, then reported a
+   //--- comfortable PASS on what was left. The shape of the whole run
+   //--- belongs in the data, not only in whatever window the verdict
+   //--- happens to look at.
+   SSR_Metric("sustained", "rate_peak",    rate_peak, "ticks/s",
+              "highest sample, usually the first");
+   SSR_Metric("sustained", "rate_at_min1", rate_min1, "ticks/s",
+              "after warm-up, before the long decay");
+   if(rate_peak > 0)
+      SSR_Metric("sustained", "decay_peak_to_end",
+                 100.0 * (rate_peak - rate_last) / rate_peak, "%",
+                 "the whole run, not just the tail");
+   if(rate_min1 > 0)
+      SSR_Metric("sustained", "decay_min1_to_end",
+                 100.0 * (rate_min1 - rate_last) / rate_min1, "%",
+                 "from the first settled sample");
 
    //--- A RUN TOO SHORT TO HAVE A BASELINE MUST NOT REPORT PASS.
    //--- mem_first is only taken at minute 10. Below that it stays -1,

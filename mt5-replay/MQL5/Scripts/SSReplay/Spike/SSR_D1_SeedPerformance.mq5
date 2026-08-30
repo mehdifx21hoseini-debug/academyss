@@ -71,7 +71,10 @@ void SeedCase(const int total, const int chunk, const int digits, const double p
    //--- synchronised. Only the first is a cost the user pays.
    double t_read = SSR_WaitReadable(InpTest, PERIOD_M1,
                                     m1[ArraySize(m1) - 1].time, 60000);
-   double t_sync = SSR_WaitSeries(InpTest, PERIOD_M1, 60000);
+   //--- Capped hard. This run spent 300 of its 315 seconds waiting for
+   //--- a flag that was never going to be set. Three seconds is enough
+   //--- to record which of its three behaviours we got.
+   double t_sync = SSR_WaitSeries(InpTest, PERIOD_M1, 3000);
 
    string c = StringFormat("seed_%dk_chunk%d", total / 1000, (chunk <= 0 ? total : chunk));
    SSR_Metric(c, "bars_target",   (double)total,   "count");

@@ -405,6 +405,46 @@ void SSR_RateMetric(const string testcase, const string metric,
 //|                                                                  |
 //| Returns ms waited, or -1 on timeout.                             |
 //+------------------------------------------------------------------+
+//| Wait until the series' LAST bar is what we expect.                |
+//|                                                                  |
+//| The general form of the same lesson: ask the data, not the flag.  |
+//| Seeding wants "the last bar I wrote is there"; a tail delete      |
+//| wants "everything past the cut is gone". Both are answerable by   |
+//| reading, and neither needs SERIES_SYNCHRONIZED - which on this    |
+//| terminal has been observed at 0.002ms, at 9,200ms, and never.     |
+//|                                                                  |
+//| Returns ms waited, or -1 on timeout.                             |
+//+------------------------------------------------------------------+
+double SSR_WaitLastBar(const string sym, const ENUM_TIMEFRAMES tf,
+                       const datetime expected, const int timeout_ms = 30000)
+  {
+   ulong t0 = SSR_Now();
+   while(SSR_ElapsedMs(t0) < timeout_ms)
+     {
+      MqlRates r[];
+      if(CopyRates(sym, tf, 0, 1, r) > 0 && r[0].time == expected)
+         return SSR_ElapsedMs(t0);
+      SSR_Pause(1);
+     }
+   return -1.0;
+  }
+
+//--- ...and the delete side: nothing at or beyond `cut` may remain
+double SSR_WaitLastBarBefore(const string sym, const ENUM_TIMEFRAMES tf,
+                             const datetime cut, const int timeout_ms = 30000)
+  {
+   ulong t0 = SSR_Now();
+   while(SSR_ElapsedMs(t0) < timeout_ms)
+     {
+      MqlRates r[];
+      if(CopyRates(sym, tf, 0, 1, r) > 0 && r[0].time < cut)
+         return SSR_ElapsedMs(t0);
+      SSR_Pause(1);
+     }
+   return -1.0;
+  }
+
+//+------------------------------------------------------------------+
 double SSR_WaitReadable(const string sym, const ENUM_TIMEFRAMES tf,
                         const datetime last_bar, const int timeout_ms = 30000)
   {
