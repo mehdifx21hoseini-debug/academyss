@@ -68,6 +68,7 @@ private:
    //--- the speed trackbar, which is dragged rather than clicked
    bool              m_track_drag;
    int               m_track_x, m_track_y, m_track_w;
+   uint              m_last_drag_paint;
 
    int               m_tab;
 
@@ -147,6 +148,7 @@ public:
        m_saved(false), m_collapsed(false), m_dragging(false),
        m_drag_dx(0), m_drag_dy(0),
        m_track_drag(false), m_track_x(0), m_track_y(0), m_track_w(0),
+       m_last_drag_paint(0),
        m_tab(SSR_TAB_TRADE), m_renders(0), m_writes(0)
      { m_state.Init(); ClearCache(); }
 
@@ -221,6 +223,24 @@ public:
      }
 
    void              SetPosition(const int x, const int y) { m_x = x; m_y = y; Render(); }
+
+   //+------------------------------------------------------------------+
+   //| A DRAG DOES NOT NEED A FULL REPAINT PER EVENT.                   |
+   //|                                                                  |
+   //| Render() re-reads the whole engine state and rewrites every       |
+   //| object. Doing that for each mouse move puts sixty of them a       |
+   //| second on the same thread that is pumping ticks. The bridge now   |
+   //| thins the moves; this thins what each one costs. Thirty           |
+   //| milliseconds is still smoother than a hand can move a window.     |
+   //+------------------------------------------------------------------+
+   void              RenderDragging(void)
+     {
+      uint now = GetTickCount();
+      if(now - m_last_drag_paint < 30)
+         return;
+      m_last_drag_paint = now;
+      Render();
+     }
    bool              IsCollapsed(void) { return m_collapsed; }
    int               Renders(void)     { return m_renders; }
    int               Writes(void)      { return m_writes; }
@@ -466,7 +486,7 @@ private:
       string ids[] = {"riskdn","riskup","armbtn","flipbtn","clrbtn",
                       "buy","sell","be","flat",
                       "g1_fr","g1_lb","g1_lg","g2_fr","g2_lb","g2_lg",
-                      "risklbl","riskval","slrow","tprow","rrrow",
+                      "risklbl","riskval","riskmon","slrow","tprow","rrrow",
                       "sizerow","hintrow","setuprow","poslist","posmore",
                       "st1","st2","st3","st4","st5","st6",
                       "pos1","pos2","ses1","ses2","ses3","ses4","ses5",
@@ -483,11 +503,14 @@ private:
       //--- risk
       m_w.Group("g1", x, y, w, 40, "Risk");
       Text(10, "risklbl", x + 8, y + 14, "Risk per trade", SSR_C_TEXT_DIM);
-      m_w.Button("riskdn", x + w - 96, y + 11, 16, 16, "-");
-      Text(11, "riskval", x + w - 76, y + 14,
-           StringFormat("%.2f %%   %s", m_state.risk_percent,
-                        Money(m_state.balance * m_state.risk_percent / 100.0)),
-           SSR_C_TEXT);
+      //--- the money answers "how much is that", and it sits with the
+      //--- label rather than between the steppers, where it used to run
+      //--- underneath the + button
+      Text(19, "riskmon", x + 88, y + 14,
+           Money(m_state.balance * m_state.risk_percent / 100.0), SSR_C_TEXT_DIM);
+      m_w.Button("riskdn", x + w - 84, y + 11, 16, 16, "-");
+      Text(11, "riskval", x + w - 62, y + 14,
+           StringFormat("%.2f %%", m_state.risk_percent), SSR_C_TEXT);
       m_w.Button("riskup", x + w - 18, y + 11, 16, 16, "+");
 
       //+------------------------------------------------------------------+
@@ -963,14 +986,14 @@ public:
          if(m_track_drag && down)
            {
             SpeedFromPixel(mx);
-            Render();
+            RenderDragging();
             return true;
            }
          if(m_track_drag && !down)
            {
             m_track_drag = false;
             ChartSetInteger(m_chart, CHART_MOUSE_SCROLL, m_saved_mouse_scroll);
-            Render();
+            Render();          // never thinned: this is the resting frame
             return true;
            }
 
@@ -992,13 +1015,14 @@ public:
             m_y = my - m_drag_dy;
             if(m_x < 0) m_x = 0;
             if(m_y < 0) m_y = 0;
-            Render();
+            RenderDragging();
             return true;
            }
          if(m_dragging && !down)
            {
             m_dragging = false;
             ChartSetInteger(m_chart, CHART_MOUSE_SCROLL, m_saved_mouse_scroll);
+            Render();          // never thinned: this is the resting frame
             return true;
            }
         }

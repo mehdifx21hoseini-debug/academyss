@@ -174,6 +174,9 @@ string g_origin      = "";
 long  g_replay_chart = 0;
 long  g_panel_chart  = 0;      // where the panel and dialogs actually are
 int   g_bridge       = INVALID_HANDLE;
+uint  g_panel_paint  = 0;      // last panel repaint, for the UI throttle
+long  g_forwarded    = 0;      // events that arrived from the bridge
+bool  g_said_bridge  = false;
 ulong g_last_pump_us = 0;
 int   g_slow_tick    = 0;
 bool  g_ready        = false;
@@ -788,8 +791,16 @@ int OnInit()
    //--- user reasonably presses keys where the candles are. There they
    //--- do nothing: MetaTrader delivers key events only to the chart a
    //--- program is attached to. Saying which one costs a line.
-   PrintFormat("[host] the keyboard and the panel are on the %s chart - "
-               "click it first. The replay chart is for watching.", _Symbol);
+   //--- SAY WHERE THE PANEL ACTUALLY IS. This printed "the panel is on
+   //--- the <host symbol> chart" unconditionally, which stopped being
+   //--- true the moment one-window mode worked - and a tool that tells
+   //--- the user to go and click the wrong window is worse than silent.
+   if(g_panel_chart == g_replay_chart && g_replay_chart != 0)
+      PrintFormat("[host] the panel and the keyboard are on the %s chart - "
+                  "the one you are watching.", g_sink.ReplaySymbol());
+   else
+      PrintFormat("[host] the panel and the keyboard are on the %s chart - "
+                  "click it first. The replay chart is for watching.", _Symbol);
    Print("[host] ", SSRKeyHint());
    return INIT_SUCCEEDED;
   }
@@ -814,6 +825,7 @@ void OnDeinit(const int reason)
    //--- forwarding events to an EA that no longer exists.
    if(g_bridge != INVALID_HANDLE)
      {
+      PrintFormat("[host] %d events came through the bridge", (int)g_forwarded);
       if(g_panel_chart != 0 && g_panel_chart != ChartID())
          ChartIndicatorDelete(g_panel_chart, 0, "SSR EventBridge");
       IndicatorRelease(g_bridge);
@@ -1008,7 +1020,28 @@ void OnTimer()
         }
      }
 
-   g_panel.Render();
+   //+------------------------------------------------------------------+
+   //| THE PANEL PAINTS AT UI RATE, NOT AT ENGINE RATE.                 |
+   //|                                                                  |
+   //| This ran on every pump - twenty-five times a second - and each    |
+   //| pass rewrites every rectangle, button and label the panel owns,   |
+   //| then calls ChartRedraw. That was affordable while the panel sat   |
+   //| on an idle host chart. It is not affordable now that it sits on   |
+   //| the replay chart, which MetaTrader is already repainting with     |
+   //| incoming ticks: the two compete, the terminal goes sluggish, and  |
+   //| a sluggish terminal is one that answers clicks late or not at all.|
+   //|                                                                  |
+   //| Ten frames a second is more than enough for a clock that counts   |
+   //| in seconds. Anything the user DOES still repaints immediately -   |
+   //| clicks and keys call Render themselves and do not come through    |
+   //| here.                                                             |
+   //+------------------------------------------------------------------+
+   uint now_ms = GetTickCount();
+   if(now_ms - g_panel_paint >= 100)
+     {
+      g_panel_paint = now_ms;
+      g_panel.Render();
+     }
   }
 
 //--- declared before it is called, so the compiler never has to guess
@@ -1033,7 +1066,18 @@ void OnChartEvent(const int id, const long &lparam,
    //+------------------------------------------------------------------+
    int ev = id;
    if(ev >= CHARTEVENT_CUSTOM)
+     {
       ev -= CHARTEVENT_CUSTOM;
+      g_forwarded++;
+      //--- ONE line, the first time, so "is the bridge alive" is never
+      //--- a question that costs a round trip again
+      if(!g_said_bridge)
+        {
+         g_said_bridge = true;
+         Print("[host] first event arrived from the bridge - "
+               "the replay chart is wired to the panel");
+        }
+     }
 
    RouteEvent(ev, lparam, dparam, sparam);
   }

@@ -43,7 +43,18 @@
 //--- and 0 means "not configured" rather than "this chart".
 input long InpHostChart = 0;   // Host chart id (set by SS Replay)
 
-long g_host = 0;
+long  g_host      = 0;
+bool  g_was_down  = false;
+int   g_last_x    = -1;
+int   g_last_y    = -1;
+uint  g_last_move = 0;
+long  g_sent      = 0;
+long  g_dropped   = 0;
+bool  g_said_drop = false;
+
+//--- a drag needs to feel continuous; it does not need every pixel.
+//--- 16ms is one frame at 60Hz, which is more than a person can see.
+#define BRIDGE_MOVE_MS 16
 
 //+------------------------------------------------------------------+
 int OnInit()
@@ -69,11 +80,43 @@ int OnInit()
   }
 
 //+------------------------------------------------------------------+
+void OnDeinit(const int reason)
+  {
+   if(g_sent > 0 || g_dropped > 0)
+      PrintFormat("[bridge] forwarded %d, dropped %d", (int)g_sent, (int)g_dropped);
+  }
+
+//+------------------------------------------------------------------+
 int OnCalculate(const int rates_total, const int prev_calculated,
                 const int begin, const double &price[])
   {
    //--- nothing to compute. The bridge exists for its event handler.
    return rates_total;
+  }
+
+//+------------------------------------------------------------------+
+//| Post one event to the host, and NOTICE when the post fails.      |
+//|                                                                  |
+//| EventChartCustom returns false when the target chart's queue is  |
+//| full. Ignoring that return is how a control stops responding     |
+//| with nothing anywhere saying why.                                |
+//+------------------------------------------------------------------+
+void Post(const int id, const long lparam, const double dparam,
+          const string sparam)
+  {
+   if(EventChartCustom(g_host, (ushort)id, lparam, dparam, sparam))
+     {
+      g_sent++;
+      return;
+     }
+   g_dropped++;
+   if(!g_said_drop)
+     {
+      g_said_drop = true;
+      PrintFormat("[bridge] the host chart's event queue is FULL - events "
+                  "are being dropped from here on. First drop at event %d.",
+                  (int)g_sent);
+     }
   }
 
 //+------------------------------------------------------------------+
@@ -89,6 +132,51 @@ void OnChartEvent(const int id, const long &lparam,
    if(id >= CHARTEVENT_CUSTOM)
       return;
 
-   EventChartCustom(g_host, (ushort)id, lparam, dparam, sparam);
+   //+------------------------------------------------------------------+
+   //| MOUSE MOVES ARE NOT FORWARDED WHOLESALE. THIS WAS THE BUG.       |
+   //|                                                                  |
+   //| The first version sent every CHARTEVENT_MOUSE_MOVE across. Moving |
+   //| a mouse produces hundreds of those a second, and a chart's event  |
+   //| queue is finite: it filled with mouse moves and every click,      |
+   //| key and button press behind them was discarded. The panel worked  |
+   //| for the first few presses - the log shows play/pause and three    |
+   //| speed steps - and then went deaf, with nothing anywhere saying    |
+   //| that anything had been thrown away.                               |
+   //|                                                                   |
+   //| The panel only USES a mouse move while a button is held: it drags |
+   //| itself by the caption and its speed thumb along the groove. So    |
+   //| the only moves worth a slot in that queue are the ones with the   |
+   //| button down, plus the single one that reports the release - and   |
+   //| even those are thinned to one frame's worth, because a drag has   |
+   //| to feel continuous, not be sampled at every pixel.                |
+   //|                                                                   |
+   //| Everything else - clicks, keys, object clicks - goes straight     |
+   //| through. Those are rare and every one of them matters.            |
+   //+------------------------------------------------------------------+
+   if(id == CHARTEVENT_MOUSE_MOVE)
+     {
+      bool down = ((StringToInteger(sparam) & 1) != 0);
+
+      //--- the release edge still has to arrive, or a drag never ends
+      //--- and the chart stays locked to the pointer
+      if(!down && !g_was_down)
+         return;
+
+      int  x = (int)lparam, y = (int)dparam;
+      uint now = GetTickCount();
+      if(down && g_was_down && x == g_last_x && y == g_last_y)
+         return;                                   // nothing moved
+      if(down && g_was_down && (now - g_last_move) < BRIDGE_MOVE_MS)
+         return;                                   // faster than the eye
+
+      g_was_down  = down;
+      g_last_x    = x;
+      g_last_y    = y;
+      g_last_move = now;
+      Post(id, lparam, dparam, sparam);
+      return;
+     }
+
+   Post(id, lparam, dparam, sparam);
   }
 //+------------------------------------------------------------------+

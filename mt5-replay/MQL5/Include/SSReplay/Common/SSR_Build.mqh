@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v34 2026-08-30  one-window-classic-panel"
+#define SSR_BUILD           "v35 2026-08-30  bridge-stops-flooding"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
