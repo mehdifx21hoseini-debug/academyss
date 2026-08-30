@@ -82,6 +82,7 @@ struct SSRUiState
    int                open_positions;
    double             risk_percent;    // what the trade buttons will risk
    double             stop_points;     // and the stop they size against
+   double             tp_points;       // 0 when no target is set
    string             trade_symbol;    // which instrument they act on
    bool               can_trade;
 
@@ -111,7 +112,7 @@ struct SSRUiState
       clock_text = "--"; blind = false;
       balance = 0.0; equity = 0.0; floating = 0.0;
       open_positions = 0; risk_percent = 0.0; stop_points = 0.0;
-      trade_symbol = ""; can_trade = false;
+      trade_symbol = ""; can_trade = false; tp_points = 0.0;
       strategy_text = "";
      }
 

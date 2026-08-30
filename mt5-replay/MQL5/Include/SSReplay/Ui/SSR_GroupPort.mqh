@@ -24,6 +24,7 @@
 #include "../Core/SSR_MasterClock.mqh"
 #include "../Mt5/SSR_CustomSymbolSink.mqh"
 #include "../Chart/SSR_ChartManager.mqh"
+#include "../Chart/SSR_TradeLines.mqh"
 #include "../Chart/SSR_BlindMode.mqh"
 #include "../Trading/SSR_TradingEngine.mqh"
 #include "../Strategy/SSR_StrategyHost.mqh"
@@ -48,6 +49,8 @@ private:
    CSSRSessionManager   *m_sessions;
 
    double                m_risk_percent;
+   double                m_tp_points;    // 0 = no target on the order
+   CSSRTradeLines       *m_lines;        // not owned; may be NULL
    double                m_stop_points;   // no default: there is no safe one
    string                m_trade_error;
    string                m_session_error;
@@ -60,7 +63,8 @@ public:
                      CSSRGroupPort(void)
      : m_group(NULL), m_sink(NULL), m_charts(NULL), m_blind(NULL),
        m_acct(NULL), m_stats(NULL), m_strategies(NULL), m_sessions(NULL),
-       m_risk_percent(0.5), m_stop_points(0.0),
+       m_risk_percent(0.5), m_stop_points(0.0), m_tp_points(0.0),
+       m_lines(NULL),
        m_trade_error(""), m_session_error("") {}
 
    void              Attach(CSSRReplayGroup *g,
@@ -108,6 +112,7 @@ public:
       out.progress  = m_group.Progress();
       out.streams   = m_group.Count();
       out.charts_detached = (m_charts != NULL ? m_charts.DetachedCount() : 0);
+      out.tp_points       = m_tp_points;
       out.skew_msc  = m_group.MaxSkewMsc();
 
       //--- the group's reason if it has one, otherwise the stream's
@@ -352,6 +357,18 @@ public:
       return true;
      }
 
+   //--- the target is not on the base port: nothing else needs it, and
+   //--- adding it there would oblige every other port to carry a field
+   //--- it has no use for
+   bool              SetTpPoints(const double pts)
+     {
+      if(pts < 0.0)
+         return false;
+      m_tp_points = pts;
+      return true;
+     }
+   double            TpPoints(void) { return m_tp_points; }
+
    virtual bool      Buy(void) override  { return Market(SSR_ORDER_BUY); }
    virtual bool      Sell(void) override { return Market(SSR_ORDER_SELL); }
 
@@ -480,7 +497,18 @@ private:
       if(sl <= 0.0)
         { m_trade_error = "that stop falls below zero"; return false; }
 
-      long t = m_acct.OpenWithRisk(type, m_risk_percent, sl, 0.0, "");
+      //--- and the target, when one has been set. Zero still means "no
+      //--- target", so an order without one behaves exactly as before.
+      double tp = 0.0;
+      if(m_tp_points > 0.0)
+        {
+         double tdist = m_tp_points * m_acct.Point();
+         tp = (is_long ? m_acct.Ask() + tdist : m_acct.Bid() - tdist);
+         if(tp <= 0.0)
+            tp = 0.0;
+        }
+
+      long t = m_acct.OpenWithRisk(type, m_risk_percent, sl, tp, "");
       if(t <= 0)
         { m_trade_error = m_acct.LastError(); return false; }
       return true;

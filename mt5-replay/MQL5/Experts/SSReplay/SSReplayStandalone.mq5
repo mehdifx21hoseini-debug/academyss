@@ -36,6 +36,7 @@
 #include <SSReplay/Data/SSR_Mt5DataSource.mqh>
 #include <SSReplay/Mt5/SSR_CustomSymbolSink.mqh>
 #include <SSReplay/Chart/SSR_ChartManager.mqh>
+#include <SSReplay/Chart/SSR_TradeLines.mqh>
 #include <SSReplay/Ui/SSR_Panel.mqh>
 #include <SSReplay/Ui/SSR_RangeDialog.mqh>
 #include <SSReplay/Data/SSR_HistoryCatalog.mqh>
@@ -108,6 +109,9 @@ input bool            InpAllowTrade  = false;                // Let them place V
 
 //--- Phase 15 -------------------------------------------------------
 input double          InpRiskPercent = 0.5;                  // Risk per trade from the panel, percent
+input bool            InpTradeLines  = true;                 // Draw draggable stop/target lines
+input double          InpStopPoints  = 0;                    // Default stop, in points (0 = 10x the spread)
+input double          InpRR          = 2.0;                  // Target distance, as a multiple of the stop
 
 CSSRMt5DataSource    g_src;
 CSSRCustomSymbolSink g_sink;
@@ -116,6 +120,7 @@ CSSRChartManager     g_charts;
 CSSRPanel            g_panel;
 CSSRHistoryCatalog   g_catalog;
 CSSRRangeDialog      g_dialog;
+CSSRTradeLines       g_lines;
 
 //--- Phase 11. One clock over every stream; the panel talks to the
 //--- GROUP, so a transport command can never move one chart alone.
@@ -555,6 +560,12 @@ int OnInit()
    g_charts.Configure(rsym, origin);
    g_replay_chart = g_charts.OpenChart(InpChartTf);
 
+   //--- the stop and target belong on the chart the user is watching,
+   //--- not in a stepper. They are armed later, once a price exists.
+   if(InpTradeLines && g_replay_chart != 0)
+      g_lines.Attach(g_replay_chart, digits, point,
+                     clrTomato, clrMediumSeaGreen);
+
    //--- MULTI TIMEFRAME COSTS NOTHING. The engine writes M1 into a
    //--- custom symbol and MetaTrader derives H1 from it; an extra
    //--- chart is an extra chart, not an extra code path.
@@ -601,6 +612,8 @@ int OnInit()
    g_gport.AttachStrategies(GetPointer(g_strategies));
    g_gport.AttachSessions(GetPointer(g_session_mgr));
    g_gport.SetRiskPercent(InpRiskPercent);
+   if(InpTradeLines)
+      g_gport.AttachLines(GetPointer(g_lines));
 
    //--- other products may now see this session. The symbol they are
    //--- told about is the REPLAY symbol, because that is the one a
@@ -724,6 +737,9 @@ void OnDeinit(const int reason)
 
    g_session_dlg.Destroy();
    g_panel.Destroy();
+   //--- the lines are ours, and a chart handed back with two stray
+   //--- horizontal lines on it is a chart we did not clean up
+   g_lines.Clear();
 
    //--- REASON_CHARTCHANGE and friends destroy this EA and rebuild it.
    //--- Tearing the replay symbol down on every one of those would
@@ -850,6 +866,44 @@ void OnTimer()
       //--- quote comes from this machine rather than from a constant
       if(g_ctrl.SeedBarsPerSec() > 0.0)
          g_catalog.SetMeasuredSeedRate(g_ctrl.SeedBarsPerSec());
+     }
+
+   //+------------------------------------------------------------------+
+   //| THE STOP LINE, READ RATHER THAN LISTENED FOR.                    |
+   //|                                                                  |
+   //| The lines are on the replay chart and this EA is on the host, so |
+   //| no drag event can ever arrive. Asking them where they are, once  |
+   //| a tick, needs no events at all - and a dragged object updates    |
+   //| its own price whether anyone was listening or not.               |
+   //|                                                                  |
+   //| The distance is recomputed against the live price every pass,    |
+   //| so the lot size tracks both the line and the market.             |
+   //+------------------------------------------------------------------+
+   if(InpTradeLines && g_replay_chart != 0)
+     {
+      double px = g_acct.Bid();
+      if(px > 0.0)
+        {
+         if(!g_lines.IsArmed())
+           {
+            double def_pts = (InpStopPoints > 0.0 ? InpStopPoints
+                                                  : InpSpreadPoints * 10.0);
+            if(g_lines.Arm(px, def_pts, InpRR))
+               PrintFormat("[host] stop and target lines placed on %s - "
+                           "drag them; the lot size follows the stop",
+                           g_sink.ReplaySymbol());
+           }
+         else
+           {
+            g_lines.Poll();
+            double pts = g_lines.StopPointsFrom(px);
+            if(pts > 0.0)
+              {
+               g_gport.SetStopPoints(pts);
+               g_gport.SetTpPoints(g_lines.RewardRatio(px) * pts);
+              }
+           }
+        }
      }
 
    g_panel.Render();

@@ -395,9 +395,16 @@ public:
       Text(24, "stoplbl", x + SSR_PAD, cy + 4,
            //--- a stop of zero is not a stop, and the panel says so
            //--- in the label rather than only when a button is pressed
+           //--- when a target is set the row says both, because the
+           //--- pair is what a trader actually decides - and the R
+           //--- multiple is the form they decide it in
            (m_state.stop_points > 0.0
-            ? StringFormat("STOP %.0f pts", m_state.stop_points)
-            : "STOP not set"),
+            ? (m_state.tp_points > 0.0
+               ? StringFormat("STOP %.0f  TP %.1fR",
+                              m_state.stop_points,
+                              m_state.tp_points / m_state.stop_points)
+               : StringFormat("STOP %.0f pts", m_state.stop_points))
+            : "STOP not set - drag the red line"),
            (m_state.stop_points > 0.0 ? SSR_C_TEXT_DIM : SSR_C_HOLD),
            SSR_FS_SMALL);
       m_w.Button("stopdn", x + W - SSR_PAD - 46, cy, 20, SSR_ROW_H - 2, "-");

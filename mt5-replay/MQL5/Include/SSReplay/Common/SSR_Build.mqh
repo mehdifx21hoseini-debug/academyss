@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v27 2026-08-30  feedback-and-a-route-trace"
+#define SSR_BUILD           "v28 2026-08-30  the-stop-is-a-line"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
