@@ -62,6 +62,7 @@ private:
    bool              m_saved;
 
    bool              m_collapsed;
+   bool              m_closed;      // hidden entirely; one button brings it back
    bool              m_dragging;
    int               m_drag_dx, m_drag_dy;
 
@@ -146,7 +147,7 @@ public:
      : m_chart(0), m_port(NULL), m_prefix("SSRP_"),
        m_x(12), m_y(24), m_saved_mouse_move(0), m_saved_mouse_scroll(1),
        m_saved_quick_nav(1), m_saved_key_control(1),
-       m_saved(false), m_collapsed(false), m_dragging(false),
+       m_saved(false), m_collapsed(false), m_closed(false), m_dragging(false),
        m_drag_dx(0), m_drag_dy(0),
        m_track_drag(false), m_track_x(0), m_track_y(0), m_track_w(0),
        m_last_drag_paint(0), m_corner(0),
@@ -240,27 +241,40 @@ public:
    //| milliseconds is still smoother than a hand can move a window.     |
    //+------------------------------------------------------------------+
    //+------------------------------------------------------------------+
-   //| PUT THE PANEL WHERE THE CORNER SAYS.                             |
+   //| KEEP THE PANEL ON THE CHART, AND NOTHING MORE.                   |
    //|                                                                  |
-   //| Dragging needs mouse-move events and the panel lives on a chart  |
-   //| that sends this program none. Four corners is what dragging a    |
-   //| fixed-size panel is actually for: getting it off whatever you    |
-   //| are trying to look at. The Move button steps through them.       |
-   //|                                                                  |
-   //| Recomputed every frame, so resizing the terminal keeps the panel |
-   //| in its corner instead of stranding it off the edge.              |
+   //| This used to force the panel into a corner on EVERY frame, which |
+   //| made dragging impossible: the mouse moved it and the next repaint|
+   //| put it straight back. Position is the user's now; this only stops |
+   //| a resized terminal from stranding the panel off the edge, where   |
+   //| there is no way to get it back.                                   |
    //+------------------------------------------------------------------+
-   void              ApplyCorner(const int W, const int H)
+   void              ClampToChart(const int W, const int H)
      {
       int cw = (int)ChartGetInteger(m_chart, CHART_WIDTH_IN_PIXELS);
       int ch = (int)ChartGetInteger(m_chart, CHART_HEIGHT_IN_PIXELS);
-      //--- a chart that has not been measured yet must not throw the
-      //--- panel to a negative coordinate, where it is simply gone
+      if(cw <= 0 || ch <= 0)
+         return;                       // not measured yet; leave it alone
+      //--- always leave the caption reachable, so a panel pushed off the
+      //--- bottom can still be grabbed and dragged back
+      if(m_x > cw - 60)        m_x = cw - 60;
+      if(m_y > ch - SSR_HEADER_H - 4) m_y = ch - SSR_HEADER_H - 4;
+      if(m_x < 0) m_x = 0;
+      if(m_y < 0) m_y = 0;
+     }
+
+   //--- the Move button steps through the corners: a shortcut for
+   //--- "get out of the way", not a replacement for dragging
+   void              SnapToCorner(void)
+     {
+      m_corner = (m_corner + 1) % 4;
+      int W = SSR_PANEL_W;
+      int H = m_collapsed ? SSR_HEADER_H + 2 : SSR_PANEL_H;
+      int cw = (int)ChartGetInteger(m_chart, CHART_WIDTH_IN_PIXELS);
+      int ch = (int)ChartGetInteger(m_chart, CHART_HEIGHT_IN_PIXELS);
       if(cw < W + 24) cw = W + 24;
       if(ch < H + 40) ch = H + 40;
-
-      int left = 12,          right = cw - W - 12;
-      int top  = 24,          bottom = ch - H - 16;
+      int left = 12, right = cw - W - 12, top = 24, bottom = ch - H - 16;
       switch(m_corner)
         {
          case 1: m_x = right; m_y = top;    break;
@@ -295,9 +309,38 @@ public:
       else
          m_state.Init();
 
+      //+------------------------------------------------------------------+
+      //| CLOSED MEANS CLOSED - BUT NOT UNREACHABLE.                       |
+      //|                                                                  |
+      //| The X takes the whole panel off the chart. What it leaves is one |
+      //| small button, because a control that removes its own only way    |
+      //| back is a trap: the alternative would be detaching and           |
+      //| reattaching the tool, which restarts the entire session.         |
+      //+------------------------------------------------------------------+
+      if(m_closed)
+        {
+         HideBody(true);
+         m_w.Hide("bg", true);
+         m_w.Hide("hdr", true);
+         m_w.Hide("title", true);
+         m_w.Hide("capinfo", true);
+         m_w.Hide("collapse", true);
+         m_w.Hide("move", true);
+         m_w.Hide("close", true);
+         m_w.Button("reopen", m_x, m_y, 76, SSR_HEADER_H, "SS Replay");
+         ChartRedraw(m_chart);
+         return;
+        }
+      //--- coming back from closed: the caption was hidden by hand, so
+      //--- it has to be shown by hand. HideBody does not own these.
+      m_w.Remove("reopen");
+      string cap[] = {"bg","hdr","title","capinfo","collapse","move","close"};
+      for(int ci = 0; ci < ArraySize(cap); ci++)
+         m_w.Hide(cap[ci], false);
+
       int W = SSR_PANEL_W;
       int H = m_collapsed ? SSR_HEADER_H + 2 : SSR_PANEL_H;
-      ApplyCorner(W, H);
+      ClampToChart(W, H);
       int x = m_x, y = m_y;
 
       m_w.Rect("bg",  x, y, W, H, SSR_C_PANEL, SSR_C_PANEL_EDGE);
@@ -351,9 +394,11 @@ private:
       Text(1, "capinfo", x + 92, y + 5, right,
            SSRStateColor(m_state.status), SSR_FS_SMALL);
 
-      m_w.Button("move", x + W - 42, y + 3, 18, SSR_HEADER_H - 5, "[]");
-      m_w.Button("collapse", x + W - 22, y + 3, 17, SSR_HEADER_H - 5,
+      m_w.Button("move", x + W - 62, y + 3, 18, SSR_HEADER_H - 5, "[]");
+      m_w.Button("collapse", x + W - 42, y + 3, 18, SSR_HEADER_H - 5,
                  m_collapsed ? "+" : "-");
+      m_w.ButtonC("close", x + W - 22, y + 3, 18, SSR_HEADER_H - 5, "X",
+                  SSR_C_BTN, SSR_C_BTN_EDGE, SSR_C_STOP, SSR_FS_BODY);
      }
 
    //================================================================
@@ -523,14 +568,14 @@ private:
    //--- because two lists drift.
    void              HideSheets(void)
      {
-      string ids[] = {"riskdn","riskup","armbtn","flipbtn","clrbtn",
+      string ids[] = {"riskdn","riskup","armbtn","flipbtn","clrbtn","openln",
                       "buy","sell","be","flat",
                       "g1_fr","g1_lb","g1_lg","g2_fr","g2_lb","g2_lg",
                       "risklbl","riskval","riskmon","slrow","tprow","rrrow",
                       "sizerow","hintrow","setuprow","poslist","posmore",
                       "st1","st2","st3","st4","st5","st6",
                       "pos1","pos2","ses1","ses2","ses3","ses4","ses5",
-                      "keyhint","spreadrow","traderr"};
+                      "ses6","keyhint","spreadrow","traderr"};
       for(int i = 0; i < ArraySize(ids); i++)
          m_w.Remove(ids[i]);
      }
@@ -562,7 +607,7 @@ private:
       //| reason a person practises on a replay.                           |
       //+------------------------------------------------------------------+
       int gy = y + 44;
-      m_w.Group("g2", x, gy, w, 82, "Stop & target");
+      m_w.Group("g2", x, gy, w, 106, "Stop & target");
 
       if(!m_state.lines_armed)
         {
@@ -599,14 +644,27 @@ private:
               : "no size",
               m_state.lot_from_risk > 0.0 ? SSR_C_TEXT_DIM : SSR_C_STOP);
 
-         m_w.Button("flipbtn", x + 8, gy + 54, (w - 22) / 2, 18, "Flip  X");
-         m_w.Button("clrbtn",  x + 14 + (w - 22) / 2, gy + 54, (w - 22) / 2, 18,
+         //--- ONE press opens what the lines describe. The side is not
+         //--- asked for: it is already drawn on the chart.
+         m_w.ButtonC("openln", x + 8, gy + 52, w - 16, 22,
+                     m_state.lot_from_risk > 0.0
+                     ? StringFormat("Open %s  %.2f lot",
+                                    (m_state.line_long ? "LONG" : "SHORT"),
+                                    m_state.lot_from_risk)
+                     : "Open - no size at this stop",
+                     m_state.lot_from_risk <= 0.0 ? SSR_C_DEAL_DIM
+                     : (m_state.line_long ? SSR_C_BUY : SSR_C_SELL),
+                     m_state.lot_from_risk <= 0.0 ? SSR_C_DEAL_DIM
+                     : (m_state.line_long ? SSR_C_BUY_EDGE : SSR_C_SELL_EDGE),
+                     SSR_C_DEAL_TEXT, SSR_FS_TITLE);
+         m_w.Button("flipbtn", x + 8, gy + 78, (w - 22) / 2, 18, "Flip  X");
+         m_w.Button("clrbtn",  x + 14 + (w - 22) / 2, gy + 78, (w - 22) / 2, 18,
                     "Remove lines");
         }
 
       //--- the deal buttons. The side the lines did not draw is dimmed,
       //--- so the chart and the dialog cannot disagree.
-      int dy = gy + 88;
+      int dy = gy + 112;
       int dw = (w - SSR_GAP) / 2;
       bool dim_buy  = (m_state.lines_armed && !m_state.line_long);
       bool dim_sell = (m_state.lines_armed &&  m_state.line_long);
@@ -721,7 +779,10 @@ private:
            "+ - speed    R reset    J jump    B bookmark",
            SSR_C_TEXT_DIM, SSR_FS_SMALL);
       Text(45, "ses5", x + 8, y + 112,
-           "S sessions    F follow    D fidelity    L lines    X flip",
+           "S sessions   F follow   D fidelity   L lines   X flip",
+           SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      Text(46, "ses6", x + 8, y + 125,
+           "caption:  [] corner    -  collapse    X  close",
            SSR_C_TEXT_DIM, SSR_FS_SMALL);
      }
 
@@ -1005,9 +1066,11 @@ public:
       //--- instead, which is what dragging a fixed-size panel is for.
       if(what == "move")
         {
-         m_corner = (m_corner + 1) % 4;
+         SnapToCorner();
          return SSR_CMD_NONE;
         }
+      if(what == "close")  { m_closed = true;  return SSR_CMD_NONE; }
+      if(what == "reopen") { m_closed = false; return SSR_CMD_NONE; }
 
       ENUM_SSR_CMD c = SSR_CMD_NONE;
       if(what == "toggle")        c = SSR_CMD_TOGGLE;
@@ -1024,11 +1087,20 @@ public:
       else if(what == "sessions") c = SSR_CMD_SESSIONS;
       else if(what == "lines")    c = SSR_CMD_LINES_TOGGLE;
       else if(what == "armbtn")   c = SSR_CMD_LINES_TOGGLE;
-      else if(what == "clrbtn")   c = SSR_CMD_LINES_TOGGLE;
+      else if(what == "clrbtn")   { if(m_port != NULL) m_port.ClearLines();
+                                    return SSR_CMD_NONE; }
       else if(what == "flipbtn")  c = SSR_CMD_LINES_FLIP;
       else if(what == "spup")     c = SSR_CMD_SPEED_UP;
       else if(what == "spdn")     c = SSR_CMD_SPEED_DOWN;
       else if(what == "collapse") c = SSR_CMD_COLLAPSE;
+
+      if(what == "openln")
+        {
+         if(m_port != NULL)
+            PrintFormat("[panel] open from lines -> %s",
+                        (m_port.OpenFromLines() ? "ok" : "refused"));
+         return SSR_CMD_NONE;
+        }
 
       if(c == SSR_CMD_NONE)
         {

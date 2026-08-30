@@ -109,7 +109,7 @@ input bool            InpAllowTrade  = false;                // Let them place V
 
 //--- Phase 15 -------------------------------------------------------
 input double          InpRiskPercent = 0.5;                  // Risk per trade from the panel, percent
-input bool            InpOnePanel    = true;                 // Panel on the replay chart (one window; keys then work on THIS chart)
+input bool            InpOneChart    = true;                 // Turn THIS chart into the replay chart (one window)
 input bool            InpTradeLines  = true;                 // Draw draggable stop/target lines
 input double          InpStopPoints  = 0;                    // Default stop, in points (0 = 10x the spread)
 input double          InpRR          = 2.0;                  // Target distance, as a multiple of the stop
@@ -174,6 +174,8 @@ string g_origin      = "";
 long  g_replay_chart = 0;
 long  g_panel_chart  = 0;      // where the panel and dialogs actually are
 uint  g_panel_paint  = 0;      // last panel repaint, for the UI throttle
+bool  g_on_replay_chart = false;   // is THIS chart the replay chart?
+bool  g_switching       = false;   // pass 1 asked for the symbol change
 ulong g_last_pump_us = 0;
 int   g_slow_tick    = 0;
 bool  g_ready        = false;
@@ -352,10 +354,79 @@ int OpenExtraStreams(const long win_start, const long win_end,
 
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| THE ORIGIN SYMBOL, ACROSS A RESTART.                             |
+//|                                                                  |
+//| Changing a chart's symbol destroys this EA and builds it again,  |
+//| and on the second pass _Symbol is the replay symbol - the origin |
+//| is gone. Terminal globals hold only doubles, so the name is left |
+//| in a hidden label on our own chart, which survives the symbol    |
+//| change because objects belong to the chart, not to the symbol.   |
+//+------------------------------------------------------------------+
+#define SSR_HANDOFF  "SSR_ORIGIN_HANDOFF"
+
+void StashOrigin(const string origin)
+  {
+   if(ObjectFind(0, SSR_HANDOFF) < 0)
+      ObjectCreate(0, SSR_HANDOFF, OBJ_LABEL, 0, 0, 0);
+   ObjectSetInteger(0, SSR_HANDOFF, OBJPROP_XDISTANCE, -1000);
+   ObjectSetInteger(0, SSR_HANDOFF, OBJPROP_YDISTANCE, -1000);
+   ObjectSetInteger(0, SSR_HANDOFF, OBJPROP_SELECTABLE, false);
+   ObjectSetInteger(0, SSR_HANDOFF, OBJPROP_HIDDEN, true);
+   ObjectSetString (0, SSR_HANDOFF, OBJPROP_TEXT, origin);
+  }
+
+string ReadStashedOrigin(void)
+  {
+   if(ObjectFind(0, SSR_HANDOFF) < 0)
+      return "";
+   return ObjectGetString(0, SSR_HANDOFF, OBJPROP_TEXT);
+  }
+
+//+------------------------------------------------------------------+
 int OnInit()
   {
-   string origin = (InpSymbol == "" ? _Symbol : InpSymbol);
+   //+------------------------------------------------------------------+
+   //| ONE WINDOW, DONE PROPERLY THIS TIME.                             |
+   //|                                                                  |
+   //| Two earlier attempts put the panel on a SEPARATE replay chart    |
+   //| and tried to reach its events from here. Drawing across charts    |
+   //| works; events do not. A forwarding indicator could not work at    |
+   //| all - iCustom keeps the creator's chart context, and its own log  |
+   //| line printed the same id twice saying so. Polling the buttons     |
+   //| worked, but nothing latches a KEY and nothing latches a DRAG, so  |
+   //| the keyboard and the mouse stayed on the wrong window.            |
+   //|                                                                  |
+   //| The only way a program gets a chart's events is to BE on it. So   |
+   //| this EA now turns its own chart into the replay chart and stays   |
+   //| there. One window, and every input arrives the ordinary way.      |
+   //|                                                                  |
+   //| It costs one restart: changing the symbol deinitialises and       |
+   //| reinitialises this EA. The code already survives that - the       |
+   //| replay symbol and the session are deliberately kept through       |
+   //| REASON_CHARTCHANGE - so the second pass adopts what the first     |
+   //| one left and carries on.                                          |
+   //+------------------------------------------------------------------+
+   bool on_replay = SSRIsReplaySymbol(_Symbol);
+
+   string origin = (on_replay ? ReadStashedOrigin()
+                              : (InpSymbol == "" ? _Symbol : InpSymbol));
+
+   if(on_replay && origin == "")
+     {
+      //--- attached straight to a replay chart with nothing to go on.
+      //--- Refuse, and say what to do, rather than replaying a replay.
+      Print("[host] this chart is already a replay symbol and I do not know "
+            "which instrument it came from. Attach SS Replay to a normal "
+            "chart, or set InpSymbol to the origin, and try again.");
+      return INIT_FAILED;
+     }
+
    g_origin = origin;
+   g_on_replay_chart = on_replay;
+   g_sink.SetAdoptExisting(on_replay);
+   for(int i = 0; i < SSR_EXTRA_STREAMS; i++)
+      g_sink2[i].SetAdoptExisting(false);
    Print("[host] SS Replay build ", SSR_BUILD);
    g_ssr_log.SetTag("host");
    g_ssr_log.SetLevel(SSR_LOG_INFO);
@@ -562,7 +633,13 @@ int OnInit()
 
    string rsym = g_sink.ReplaySymbol();
    g_charts.Configure(rsym, origin);
-   g_replay_chart = g_charts.OpenChart(InpChartTf);
+   //--- on the second pass THIS chart already is the replay chart, so
+   //--- opening another would be the second window we just removed
+   //--- pass 2: this chart IS it. Pass 1 with one-chart on: none at all,
+   //--- because it is seconds from handing this chart over and a window
+   //--- it opened now would be orphaned by its own restart.
+   g_replay_chart = (g_on_replay_chart ? ChartID()
+                     : (InpOneChart ? 0 : g_charts.OpenChart(InpChartTf)));
 
    //--- the stop and target belong on the chart the user is watching,
    //--- not in a stepper. They are armed later, once a price exists.
@@ -575,7 +652,10 @@ int OnInit()
    //--- chart is an extra chart, not an extra code path.
    ENUM_TIMEFRAMES extra_tfs[];
    int n_tfs = ParseTimeframes(InpExtraTfs, extra_tfs);
-   if(n_tfs > 0)
+   //--- not on the pass that is about to hand this chart over: charts it
+   //--- opened now would be owned by a CSSRChartManager that its own
+   //--- restart destroys, and nothing would ever close them
+   if(n_tfs > 0 && g_replay_chart != 0)
       PrintFormat("[host] opened %d extra chart(s)",
                   g_charts.OpenLayout(extra_tfs, n_tfs));
    g_charts.ScanLeaks();
@@ -702,8 +782,7 @@ int OnInit()
    //| of reach - but the keys work on THIS chart, not the replay one.  |
    //| Said out loud below rather than left to be discovered.           |
    //+------------------------------------------------------------------+
-   g_panel_chart = (InpOnePanel && g_replay_chart != 0 ? g_replay_chart
-                                                       : ChartID());
+   g_panel_chart = ChartID();
 
    g_dialog.Create(g_panel_chart, GetPointer(g_catalog));
    g_session_dlg.Create(g_panel_chart, GetPointer(g_gport));
@@ -752,23 +831,56 @@ int OnInit()
    //--- user reasonably presses keys where the candles are. There they
    //--- do nothing: MetaTrader delivers key events only to the chart a
    //--- program is attached to. Saying which one costs a line.
-   //--- SAY WHERE EACH HALF IS, SEPARATELY. They are no longer on the
-   //--- same chart, and one sentence naming one of them would be wrong
-   //--- about the other.
-   if(g_panel_chart == g_replay_chart && g_replay_chart != 0)
-     {
-      PrintFormat("[host] one window: the panel and ALL its buttons are on "
-                  "the %s chart - the one you are watching.",
-                  g_sink.ReplaySymbol());
-      PrintFormat("[host] the KEYBOARD still belongs to the %s chart, because "
-                  "MetaTrader delivers keys only to the chart a program sits "
-                  "on. Every command has a button, so nothing is out of reach.",
-                  _Symbol);
-     }
+   if(g_on_replay_chart)
+      PrintFormat("[host] one window: the chart, the panel, the mouse and the "
+                  "keyboard are all on %s. Nothing else to click.", _Symbol);
    else
       PrintFormat("[host] the panel and the keyboard are on the %s chart - "
                   "click it first. The replay chart is for watching.", _Symbol);
    Print("[host] ", SSRKeyHint());
+
+   //+------------------------------------------------------------------+
+   //| PASS 1 ENDS BY HANDING ITS OWN CHART OVER.                       |
+   //|                                                                  |
+   //| Everything above already ran: the symbol exists, it is seeded,    |
+   //| the engine is loaded and the session is restored. Only now does   |
+   //| the chart change, which deinitialises this EA and starts it       |
+   //| again on the replay symbol - where the second pass adopts the     |
+   //| symbol rather than rebuilding it, because MetaTrader will not     |
+   //| delete a symbol a chart is open on.                               |
+   //|                                                                   |
+   //| The origin is stashed FIRST. If the switch succeeds and the name  |
+   //| is not there, the second pass has nothing to work from and the    |
+   //| user is left on a chart with no tool - the one failure here that  |
+   //| would need a manual rescue.                                       |
+   //|                                                                   |
+   //| Done from OnInit's tail rather than the timer because there is    |
+   //| nothing left to do in this instance either way; the timer would   |
+   //| only add a window in which the user could press something that    |
+   //| is about to be destroyed.                                         |
+   //+------------------------------------------------------------------+
+   if(InpOneChart && !g_on_replay_chart)
+     {
+      StashOrigin(origin);
+      string rs = g_sink.ReplaySymbol();
+      if(rs != "" && SymbolSelect(rs, true))
+        {
+         g_switching = true;
+         PrintFormat("[host] handing this chart over to %s - "
+                     "SS Replay will restart once on it. This is expected.", rs);
+         if(!ChartSetSymbolPeriod(ChartID(), rs, InpChartTf))
+           {
+            g_switching = false;
+            PrintFormat("[host] could not switch this chart to %s (%d). "
+                        "Staying on two windows; the keyboard is on THIS one.",
+                        rs, GetLastError());
+           }
+        }
+      else
+         PrintFormat("[host] %s is not selectable in Market Watch, so this "
+                     "chart cannot show it. Staying on two windows.", rs);
+     }
+
    return INIT_SUCCEEDED;
   }
 
@@ -844,6 +956,31 @@ void OnDeinit(const int reason)
       //--- back to the settings it had before we touched it
       g_blind.RestoreAll();
 
+      //+------------------------------------------------------------------+
+      //| GIVE THE CHART BACK BEFORE THE SYMBOL GOES.                      |
+      //|                                                                  |
+      //| MetaTrader will not delete a symbol a chart is open on, and this |
+      //| chart is open on it. Switching back to the origin first is both  |
+      //| the courtesy - the user gets the chart they had - and the only   |
+      //| way the delete below can succeed.                                |
+      //|                                                                  |
+      //| The switch is asynchronous, so the delete may still lose the     |
+      //| race. That is reported rather than hidden: the symbol is one per |
+      //| slot and the next run adopts it, so a survivor costs nothing but |
+      //| a line in the log.                                               |
+      //+------------------------------------------------------------------+
+      if(g_on_replay_chart && g_origin != "")
+        {
+         ObjectDelete(ChartID(), SSR_HANDOFF);
+         if(ChartSetSymbolPeriod(ChartID(), g_origin, _Period))
+            PrintFormat("[host] this chart is back on %s", g_origin);
+         else
+            PrintFormat("[host] could not put this chart back on %s (%d) - "
+                        "switch it yourself; the replay symbol may survive "
+                        "until then, which the next run will simply reuse.",
+                        g_origin, GetLastError());
+        }
+
       g_charts.CloseOwned();
       g_ctrl.Release();
       for(int i = 0; i < g_extra; i++)
@@ -862,6 +999,12 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTimer()
   {
+   //--- a pass that has asked for the symbol change is seconds from
+   //--- being destroyed. Pumping ticks into a symbol whose chart is
+   //--- mid-switch buys nothing and can only produce half-written bars.
+   if(g_switching)
+      return;
+
    if(!g_ready)
       return;
 

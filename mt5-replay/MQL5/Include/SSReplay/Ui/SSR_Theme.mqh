@@ -103,12 +103,15 @@
 //| Metrics, in pixels.                                              |
 //|                                                                  |
 //| Added up rather than guessed, so a row added later has to change |
-//| a number here instead of quietly overflowing the frame:          |
-//|   caption 20 + clock 24 + progress 10 + transport 26             |
-//| + speed 40 + tabs 21 + sheet 168 + status 18 + padding 9 = 336   |
+//| a number here instead of quietly overflowing the frame. Walked    |
+//| from the top of Render, in the order the rows are drawn:          |
+//|   caption 23 + clock+progress 32 + transport 27 + speed 33        |
+//| + tabs 21 + sheet 200 + status 18 + margin 14 = 368               |
+//| The sheet is sized by the tallest one - Trade: risk 40, gap 4,    |
+//| stop & target 106, gap 6, deal buttons 26, spread 14 = 196.       |
 //+------------------------------------------------------------------+
 #define SSR_PANEL_W        420
-#define SSR_PANEL_H        336
+#define SSR_PANEL_H        368
 #define SSR_PAD            8
 #define SSR_ROW_H          19
 #define SSR_HEADER_H       20
@@ -117,7 +120,7 @@
 
 #define SSR_SIDE_W         104     // the always-visible button column
 #define SSR_TAB_H          21
-#define SSR_SHEET_H        168
+#define SSR_SHEET_H        200
 #define SSR_STATUS_H       18
 #define SSR_TRACK_H        16      // the speed groove and its thumb
 

@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v36 2026-08-30  panel-polls-its-buttons"
+#define SSR_BUILD           "v37 2026-08-30  the-chart-becomes-the-replay"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

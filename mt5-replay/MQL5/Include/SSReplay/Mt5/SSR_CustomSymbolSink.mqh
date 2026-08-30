@@ -42,6 +42,7 @@ private:
    long                    m_warmup_to_msc;
    bool                    m_reused_seed;
    bool                    m_prepared;
+   bool                    m_adopt_existing;
    bool                    m_own_symbol;   // did we create it, or adopt one?
 
    //--- instrumentation for Phase 7
@@ -56,7 +57,7 @@ public:
                      CSSRCustomSymbolSink(void)
      : m_slot(1), m_anonymous(false), m_warmup_from_msc(SSR_INVALID_TIME),
        m_warmup_to_msc(SSR_INVALID_TIME), m_reused_seed(false),
-       m_prepared(false), m_own_symbol(true),
+       m_prepared(false), m_adopt_existing(false), m_own_symbol(true),
        m_emit_calls(0), m_emit_ticks(0), m_seed_bars(0), m_truncates(0),
        m_emit_time_ms(0), m_last_emit_msc(SSR_INVALID_TIME) {}
 
@@ -83,6 +84,27 @@ public:
      { m_warmup_from_msc = from_msc; m_warmup_to_msc = to_msc; }
 
    void              SetCacheEnabled(const bool on) { m_cache.SetEnabled(on); }
+
+   //+------------------------------------------------------------------+
+   //| ADOPT THE REPLAY SYMBOL INSTEAD OF REBUILDING IT.                |
+   //|                                                                  |
+   //| Creating a replay symbol deletes any symbol of that name first,  |
+   //| and MetaTrader refuses to delete a symbol a CHART IS OPEN ON.    |
+   //| That matters now that the host puts its own chart on the replay  |
+   //| symbol so the panel, the keyboard and the mouse all live in one  |
+   //| window: on the second pass the chart is already there, so Create |
+   //| would fail and take the session with it.                         |
+   //|                                                                  |
+   //| Adopting keeps the symbol and clears its history, which reaches  |
+   //| the same state - an empty symbol ready to be seeded - without    |
+   //| the deletion MetaTrader will not allow. Deleting RATES is fine;  |
+   //| only deleting the SYMBOL is blocked.                             |
+   //|                                                                  |
+   //| Explicit rather than inferred from the seed cache: the cache is  |
+   //| a heuristic about whether reuse is WORTH it, and this is a fact  |
+   //| about whether recreation is POSSIBLE. Two different questions.   |
+   //+------------------------------------------------------------------+
+   void              SetAdoptExisting(const bool on) { m_adopt_existing = on; }
    bool              ReusedSeed(void)               { return m_reused_seed; }
    string            CacheReason(void)              { return m_cache.LastReason(); }
    CSSRSeedCache    *Cache(void)                    { return GetPointer(m_cache); }
@@ -118,6 +140,20 @@ public:
            }
         }
 
+      if(!m_reused_seed && m_adopt_existing)
+        {
+         //--- a chart of ours is sitting on it; take it over as it is
+         if(!m_mgr.Adopt(replay_name, symbol))
+           {
+            Fail(SSR_ERR_INTERNAL,
+                 "could not adopt the existing replay symbol " + replay_name +
+                 " - it is what this chart is showing, so it cannot be "
+                 "recreated either");
+            return false;
+           }
+         m_mgr.ClearAll();
+        }
+      else
       if(!m_reused_seed)
         {
          if(!m_mgr.Create(symbol, m_slot))

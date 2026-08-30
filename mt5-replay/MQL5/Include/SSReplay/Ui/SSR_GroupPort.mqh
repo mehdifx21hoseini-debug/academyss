@@ -499,6 +499,47 @@ public:
      }
    double            TpPoints(void) { return m_tp_points; }
 
+   //+------------------------------------------------------------------+
+   //| THE TRADE THE LINES DESCRIBE.                                    |
+   //|                                                                  |
+   //| One press instead of "read the lines, work out the side, find    |
+   //| the matching button". The side is the geometry - stop below the  |
+   //| price is a long - which is the same rule the panel paints, read  |
+   //| here so there is exactly one place that knows it.                |
+   //|                                                                  |
+   //| The lines are cleared on success. Leaving them would mean the    |
+   //| next press opens a second trade against a stop that belonged to  |
+   //| the first, which is the kind of accident a practice tool must    |
+   //| not be able to cause.                                            |
+   //+------------------------------------------------------------------+
+   virtual bool      OpenFromLines(void) override
+     {
+      m_trade_error = "";
+      if(m_lines == NULL || !m_lines.IsArmed())
+        { m_trade_error = "no lines on the chart yet"; return false; }
+      if(m_acct == NULL || m_acct.Bid() <= 0.0)
+        { m_trade_error = "no price yet"; return false; }
+
+      double sl = m_lines.SlPrice();
+      double tp = m_lines.TpPrice();
+      bool   is_long = (sl < m_acct.Bid());
+
+      //--- REFUSE A SETUP THAT MAKES NO SENSE, and say which one.
+      //--- Both lines on the same side of the price is not a trade; it
+      //--- is a stop that is already hit or a target already reached.
+      if((is_long && tp <= m_acct.Bid()) || (!is_long && tp >= m_acct.Bid()))
+        {
+         m_trade_error = "the target is on the wrong side of the price - "
+                         "drag it past the entry, or press Flip";
+         return false;
+        }
+
+      bool ok = Market(is_long ? SSR_ORDER_BUY : SSR_ORDER_SELL);
+      if(ok)
+         m_lines.Clear();
+      return ok;
+     }
+
    virtual bool      Buy(void) override  { return Market(SSR_ORDER_BUY); }
    virtual bool      Sell(void) override { return Market(SSR_ORDER_SELL); }
 
