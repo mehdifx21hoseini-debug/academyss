@@ -547,12 +547,32 @@ int OnInit()
       resuming = false;
      }
 
-   //--- pick a window. Auto lands near the end of what the broker has,
-   //--- leaving room for the warmup the higher timeframes need.
+   //+------------------------------------------------------------------+
+   //| PICK A WINDOW - IN BARS, NOT MINUTES.                            |
+   //|                                                                  |
+   //| "end minus 2000 minutes" assumes the minutes exist. Run on a     |
+   //| Sunday evening, the broker's last bar is Monday 01:09 and the    |
+   //| 2000 minutes behind it are the WEEKEND: the window lands almost  |
+   //| entirely inside the gap, the warmup finds 48 bars of Friday      |
+   //| tail, and Play plays nothing while every button says ok. That is |
+   //| the user's "nothing works" log, line by line.                    |
+   //|                                                                  |
+   //| Counting BARS back through the series skips gaps by construction:|
+   //| 2000 bars ending Monday 01:09 starts mid-Thursday, dense data.   |
+   //+------------------------------------------------------------------+
    long win_end   = range.last_msc;
+   long auto_start = win_end - (long)InpReplayBars * SSR_MSC_PER_MIN;
+   MqlRates back[];
+   int got = CopyRates(origin, PERIOD_M1, 0, InpReplayBars, back);
+   if(got > 0)
+      auto_start = (long)back[0].time * 1000;
+   else
+      PrintFormat("[host] could not count %d bars back (%d) - falling back "
+                  "to minutes, which a weekend gap will make too short",
+                  InpReplayBars, GetLastError());
+
    long win_start = (random_start > 0 ? random_start
-                     : (InpStart > 0 ? SSRToMsc(InpStart)
-                                     : win_end - (long)InpReplayBars * SSR_MSC_PER_MIN));
+                     : (InpStart > 0 ? SSRToMsc(InpStart) : auto_start));
    long floor_msc = range.first_msc + (long)InpWarmupBars * SSR_MSC_PER_MIN;
    if(win_start < floor_msc)
       win_start = floor_msc;
@@ -890,6 +910,41 @@ int OnInit()
    //--- user reasonably presses keys where the candles are. There they
    //--- do nothing: MetaTrader delivers key events only to the chart a
    //--- program is attached to. Saying which one costs a line.
+   //--- TWO SESSIONS ON ONE SLOT share the publisher's terminal
+   //--- globals and quietly fight over them. The user just did exactly
+   //--- this - US30 and XAUUSD both on slot 1 - so it is detected,
+   //--- not left in a manual.
+   string suffix = SSR_SYMBOL_SUFFIX + IntegerToString(InpSlot);
+   string mine   = g_sink.ReplaySymbol();
+   for(int si = SymbolsTotal(false) - 1; si >= 0; si--)
+     {
+      string sn = SymbolName(si, false);
+      if(sn == mine || !SSRIsReplaySymbol(sn))
+         continue;
+      if(StringLen(sn) > StringLen(suffix) &&
+         StringSubstr(sn, StringLen(sn) - StringLen(suffix)) == suffix)
+        {
+         PrintFormat("[host] NOTE: %s also uses replay slot %d. Two "
+                     "instruments at once want different slots - set "
+                     "'Replay slot' to %d on one of them.",
+                     sn, InpSlot, InpSlot + 1);
+         break;
+        }
+     }
+
+   //--- HOW MUCH IS ACTUALLY IN THE WINDOW. A window that opens fine
+   //--- and contains a weekend is the one failure that looks exactly
+   //--- like a healthy tool with a dead Play button.
+   int win_bars = Bars(origin, PERIOD_M1,
+                       (datetime)(win_start / 1000), (datetime)(win_end / 1000));
+   if(win_bars >= 0 && win_bars < 30)
+      PrintFormat("[host] WARNING: only %d bars inside the replay window - "
+                  "this is mostly a market-closed gap (weekend?). Set "
+                  "'Replay start' to a weekday, or raise 'Bars to replay'.",
+                  win_bars);
+   else
+      PrintFormat("[host] %d M1 bars inside the replay window", win_bars);
+
    if(g_on_replay_chart)
       PrintFormat("[host] one window: the chart, the panel, the mouse and the "
                   "keyboard are all on %s. Nothing else to click.", _Symbol);

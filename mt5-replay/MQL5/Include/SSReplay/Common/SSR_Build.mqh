@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v41 2026-08-30  full-pass"
+#define SSR_BUILD           "v42 2026-08-30  bars-not-minutes"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
