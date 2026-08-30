@@ -14,6 +14,7 @@
 
 input string InpSymbols = "";   // Comma separated (blank = this chart + Market Watch)
 input int    InpMaxAuto = 6;    // Cap when the list is blank
+input int    InpEmptyTolerance = 4;  // Empty samples tolerated before the walk stops
 
 //+------------------------------------------------------------------+
 void AuditSymbol(const string sym)
@@ -56,8 +57,15 @@ void AuditSymbol(const string sym)
    //--- its own next line reporting a million ticks in the last week.
    //--- An empty hour is a closed market, not an absent history.
    //---
-   //--- So: sample a whole DAY, and let a few empty ones pass before
-   //--- concluding the history has run out. Weekends are two.
+   //--- The bug was never the window SIZE - it was stopping at the
+   //--- first empty sample. Widening the window to a full day fixed
+   //--- the wrong half and made each probe fetch ~150,000 ticks, times
+   //--- twelve steps, times every symbol, with the older days pulled
+   //--- from the server. The audit went from seconds to looking hung.
+   //---
+   //--- Keep the cheap one-hour sample. Just do not treat one empty
+   //--- hour as the end of history: let a few pass first, because a
+   //--- closed market and an absent history are not the same thing.
    datetime now = TimeCurrent();
    int deepest_days = 0;
    int misses = 0;
@@ -66,7 +74,7 @@ void AuditSymbol(const string sym)
       MqlTick tk[];
       datetime from = now - d * 86400;
       int got = CopyTicksRange(sym, tk, COPY_TICKS_INFO,
-                               (long)from * 1000, (long)(from + 86400) * 1000);
+                               (long)from * 1000, (long)(from + 3600) * 1000);
       if(got > 0)
         {
          deepest_days = d;
@@ -74,7 +82,7 @@ void AuditSymbol(const string sym)
          continue;
         }
       misses++;
-      if(misses >= 3)
+      if(misses >= InpEmptyTolerance)
          break;
      }
    SSR_Metric(sym, "tick_history_depth", (double)deepest_days, "days",
@@ -146,8 +154,9 @@ void OnStart()
       StringTrimLeft(s);
       StringTrimRight(s);
       if(s == "") continue;
-      Print("[B4] auditing ", s);
+      PrintFormat("[B4] auditing %s  (%d of %d)", s, i + 1, n);
       AuditSymbol(s);
+      PrintFormat("[B4] %s done", s);
      }
 
    SSR_Verdict("audit_completed", true, "report produced",
