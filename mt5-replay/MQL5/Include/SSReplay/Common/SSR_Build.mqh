@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v37 2026-08-30  the-chart-becomes-the-replay"
+#define SSR_BUILD           "v38 2026-08-30  a8-catches-a-missing-base"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

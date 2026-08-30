@@ -355,6 +355,40 @@ def audit_a6():
                    "%s() is called on one of our objects but declared nowhere - "
                    "the other half of a change did not land" % name)
 
+#--- A8: every `override` needs something to override.
+#---
+#--- CSSRGroupPort::OpenFromLines shipped with `override` while the base
+#--- port never got the declaration - a string replacement that matched
+#--- nothing because the anchor's whitespace differed by one space, and
+#--- that I had not asserted on. Three compile errors, and A7 was blind
+#--- to it because the method IS declared: just on the wrong class.
+#---
+#--- A base declaration is a line that says `virtual` and does NOT say
+#--- `override`. So an override whose name never appears that way has
+#--- nothing above it, which is exactly the error MetaEditor reports.
+OVERRIDE_DECL = re.compile(r'^\s*(?:virtual\s+)?[A-Za-z_][\w:]*\s*[\*&]?\s*'
+                           r'([A-Za-z_]\w*)\s*\([^;{]*\)\s*(?:const\s*)?override', re.M)
+VIRTUAL_DECL  = re.compile(r'^\s*virtual\s+[A-Za-z_][\w:]*\s*[\*&]?\s*'
+                           r'([A-Za-z_]\w*)\s*\(', re.M)
+
+def audit_a8():
+    bases = set()
+    for path, body in CLEAN.items():
+        for line in body.splitlines():
+            if "override" in line:
+                continue
+            m = VIRTUAL_DECL.match(line)
+            if m:
+                bases.add(m.group(1))
+
+    for path, body in CLEAN.items():
+        for m in OVERRIDE_DECL.finditer(body):
+            if m.group(1) in bases:
+                continue
+            report("A8", path, body[:m.start()].count("\n") + 1,
+                   "%s() is marked override but no base declares it virtual - "
+                   "the base half of the change did not land" % m.group(1))
+
 def audit_a7():
     declared = set()
     for path, body in CLEAN.items():
@@ -384,7 +418,7 @@ def audit_a7():
                    "%s() is called on a member of ours but declared nowhere - "
                    "the other half of a change did not land" % name)
 
-for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7):
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8):
     fn()
 
 if findings:

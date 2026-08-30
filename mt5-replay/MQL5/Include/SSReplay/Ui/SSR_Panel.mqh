@@ -224,7 +224,7 @@ public:
       m_track_drag = false;
      }
 
-   //--- the panel sits in a corner, not at a coordinate: ApplyCorner
+   //--- the panel sits in a corner, not at a coordinate: ClampToChart
    //--- recomputes x and y every frame, so a caller setting them
    //--- directly would be overruled on the next repaint and would
    //--- rightly call that a bug

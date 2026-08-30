@@ -213,6 +213,11 @@ public:
    virtual bool      ArmLines(void)                      { return false; }
    virtual bool      ClearLines(void)                    { return false; }
    virtual bool      FlipLines(void)                     { return false; }
+
+   //--- open the trade the LINES describe: side, stop and target all
+   //--- come from where they were dragged to. The panel never decides
+   //--- the direction, so the chart and the order cannot disagree.
+   virtual bool      OpenFromLines(void)                  { return false; }
    virtual string    TradeError(void)                   { return ""; }
 
    //+------------------------------------------------------------------+
