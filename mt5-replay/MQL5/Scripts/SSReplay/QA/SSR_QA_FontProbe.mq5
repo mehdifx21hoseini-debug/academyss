@@ -155,6 +155,52 @@ void DrawBlock(const int idx, const string font, const int x, const int y,
   }
 
 //+------------------------------------------------------------------+
+//| Do this font's DIGITS all have the same width?                   |
+//|                                                                  |
+//| This decides whether the panel needs a monospaced font for       |
+//| numbers at all. A value that changes in place - the clock, the   |
+//| price, floating P/L - jitters only if its digits are different   |
+//| widths. Most classic screen faces (Tahoma, Segoe UI, Verdana)    |
+//| draw every digit on the same advance width on purpose, exactly   |
+//| so tables line up. If that holds here, the second font is not    |
+//| buying us anything and one face is both simpler AND better.      |
+//|                                                                  |
+//| Measured, not assumed. I have been wrong about this class of     |
+//| thing often enough to stop guessing.                             |
+//+------------------------------------------------------------------+
+void DigitReport(const string font)
+  {
+   uint wmin = 0xFFFFFFFF, wmax = 0, w = 0, h = 0;
+   int  bad = -1;
+   for(int d = 0; d < 10; d++)
+     {
+      if(!MeasurePt(font, FS_PRINT, IntegerToString(d), w, h))
+        { Print("      digits: measure failed"); return; }
+      if(w < wmin) wmin = w;
+      if(w > wmax) { wmax = w; bad = d; }
+     }
+
+   //--- the practical test: two prices the panel really shows. If these
+   //--- differ, the number moves sideways every time it updates.
+   uint p1 = 0, p2 = 0;
+   MeasurePt(font, FS_BODY, "53 671.4", p1, h);
+   MeasurePt(font, FS_BODY, "53 999.9", p2, h);
+
+   if(wmin == wmax)
+      PrintFormat("      digits: TABULAR (all 10 are %dpx at %dpt) - "
+                  "numbers will not jitter. A mono font is not needed here.",
+                  (int)wmax, FS_PRINT);
+   else
+      PrintFormat("      digits: PROPORTIONAL (%d..%dpx, widest is '%d') - "
+                  "a changing number WILL shift sideways.",
+                  (int)wmin, (int)wmax, bad);
+
+   PrintFormat("      price width "53 671.4"=%dpx vs "53 999.9"=%dpx  -> %s",
+               (int)p1, (int)p2,
+               (p1 == p2 ? "stable" : "JITTERS"));
+  }
+
+//+------------------------------------------------------------------+
 //| Widths of strings the panel really draws, against the space it   |
 //| really has. A font that reads beautifully and overflows the      |
 //| button is not a better font.                                     |
@@ -247,7 +293,10 @@ void OnStart()
          Print("      ^^ identical to the fallback: either NOT installed, "
                "or it IS the face Windows falls back to. This probe cannot tell which.");
       if(verdicts[i] != "MEASURE FAILED" && verdicts[i] != "EMPTY")
+        {
+         DigitReport(names[i]);
          FitReport(names[i]);
+        }
      }
 
    //--- two different names that measure identically mean at least
