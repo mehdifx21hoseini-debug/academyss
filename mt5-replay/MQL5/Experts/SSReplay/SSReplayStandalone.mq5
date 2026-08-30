@@ -175,7 +175,8 @@ long  g_replay_chart = 0;
 long  g_panel_chart  = 0;      // where the panel and dialogs actually are
 uint  g_panel_paint  = 0;      // last panel repaint, for the UI throttle
 bool  g_on_replay_chart = false;   // is THIS chart the replay chart?
-bool  g_switching       = false;   // pass 1 asked for the symbol change
+bool  g_switching       = false;   // the handover is under way
+string g_switch_to      = "";      // ...to this symbol, on the first tick
 ulong g_last_pump_us = 0;
 int   g_slow_tick    = 0;
 bool  g_ready        = false;
@@ -384,6 +385,33 @@ string ReadStashedOrigin(void)
   }
 
 //+------------------------------------------------------------------+
+//| A SECOND PASS THAT FAILS MUST NOT LEAVE THE USER STRANDED.       |
+//|                                                                  |
+//| When OnInit returns INIT_FAILED MetaTrader unloads the EA. On the |
+//| second pass that means a chart sitting on a replay symbol with no |
+//| tool on it and no obvious way back - which is exactly what        |
+//| happened, and it is the tool's fault, not the user's.             |
+//|                                                                  |
+//| So a failed second pass puts the chart back on the origin AND     |
+//| poisons the handoff, so the next attempt runs in two-window mode  |
+//| instead of walking into the same wall again. The poison clears     |
+//| itself once read, so a later attempt is free to try once more.     |
+//+------------------------------------------------------------------+
+int FailInit(void)
+  {
+   if(g_on_replay_chart && g_origin != "")
+     {
+      StashOrigin("!" + g_origin);
+      Print("[host] this pass failed on the replay chart. Putting the chart "
+            "back on ", g_origin, " and switching one-window mode off for "
+            "the next attempt - attach SS Replay again and it will use two "
+            "windows.");
+      ChartSetSymbolPeriod(ChartID(), g_origin, _Period);
+     }
+   return INIT_FAILED;
+  }
+
+//+------------------------------------------------------------------+
 int OnInit()
   {
    //+------------------------------------------------------------------+
@@ -408,9 +436,32 @@ int OnInit()
    //| one left and carries on.                                          |
    //+------------------------------------------------------------------+
    bool on_replay = SSRIsReplaySymbol(_Symbol);
+   //--- set BEFORE any failure path: FailInit reads these to put the
+   //--- chart back, and a failure that happens before they are assigned
+   //--- is exactly the one that would strand the user
+   g_on_replay_chart = on_replay;
 
-   string origin = (on_replay ? ReadStashedOrigin()
+   string stashed = ReadStashedOrigin();
+
+   //--- a "!" prefix is last run's failed second pass telling this one
+   //--- not to try the handover again. Read once, then cleared.
+   bool one_chart_ok = InpOneChart;
+   if(StringLen(stashed) > 0 && StringSubstr(stashed, 0, 1) == "!")
+     {
+      stashed = StringSubstr(stashed, 1);
+      one_chart_ok = false;
+      ObjectDelete(0, SSR_HANDOFF);
+      Print("[host] one-window mode is OFF for this run: the last attempt "
+            "failed after the chart was handed over. Two windows this time.");
+     }
+
+   string origin = (on_replay ? stashed
                               : (InpSymbol == "" ? _Symbol : InpSymbol));
+   g_origin = origin;
+
+   PrintFormat("[host] SS Replay build %s   pass=%s  chart=%s  origin=%s",
+               SSR_BUILD, (on_replay ? "2 (on the replay chart)" : "1"),
+               _Symbol, (origin == "" ? "<UNKNOWN>" : origin));
 
    if(on_replay && origin == "")
      {
@@ -419,15 +470,12 @@ int OnInit()
       Print("[host] this chart is already a replay symbol and I do not know "
             "which instrument it came from. Attach SS Replay to a normal "
             "chart, or set InpSymbol to the origin, and try again.");
-      return INIT_FAILED;
+      return FailInit();
      }
 
-   g_origin = origin;
-   g_on_replay_chart = on_replay;
    g_sink.SetAdoptExisting(on_replay);
    for(int i = 0; i < SSR_EXTRA_STREAMS; i++)
       g_sink2[i].SetAdoptExisting(false);
-   Print("[host] SS Replay build ", SSR_BUILD);
    g_ssr_log.SetTag("host");
    g_ssr_log.SetLevel(SSR_LOG_INFO);
 
@@ -442,7 +490,7 @@ int OnInit()
    if(!g_src.Open(origin))
      {
       Print("[host] no M1 history for ", origin);
-      return INIT_FAILED;
+      return FailInit();
      }
 
    SSRDataRange range;
@@ -473,7 +521,7 @@ int OnInit()
             if(!g_src.Open(origin))
               {
                Print("[host] random pick has no history: ", origin);
-               return INIT_FAILED;
+               return FailInit();
               }
             range.Init();
             g_src.RangeInto(range);
@@ -551,7 +599,7 @@ int OnInit()
      {
       PrintFormat("[host] not enough history: %s .. %s",
                   SSRFormatMsc(range.first_msc), SSRFormatMsc(range.last_msc));
-      return INIT_FAILED;
+      return FailInit();
      }
 
    int    digits = (int)SymbolInfoInteger(origin, SYMBOL_DIGITS);
@@ -628,7 +676,7 @@ int OnInit()
    if(!g_ctrl.Load(origin, win_start, win_end))
      {
       Print("[host] load failed: ", g_ctrl.LastErrorText());
-      return INIT_FAILED;
+      return FailInit();
      }
 
    string rsym = g_sink.ReplaySymbol();
@@ -680,7 +728,7 @@ int OnInit()
    if(!g_group.Align())
      {
       Print("[host] streams will not align: ", g_group.LastError());
-      return INIT_FAILED;
+      return FailInit();
      }
 
    //--- THE PANEL TALKS TO THE GROUP, never to one stream. A transport
@@ -859,26 +907,23 @@ int OnInit()
    //| only add a window in which the user could press something that    |
    //| is about to be destroyed.                                         |
    //+------------------------------------------------------------------+
-   if(InpOneChart && !g_on_replay_chart)
+   //+------------------------------------------------------------------+
+   //| THE HANDOVER IS ARMED HERE AND DONE ON THE FIRST TIMER TICK.     |
+   //|                                                                  |
+   //| ChartSetSymbolPeriod is asynchronous and it deinitialises this    |
+   //| very program. Calling it from inside OnInit asks MetaTrader to    |
+   //| tear down a program that has not finished starting, and what      |
+   //| happens then is not something the documentation promises. From    |
+   //| the timer, OnInit has returned and the EA is fully alive, which   |
+   //| is the ordinary way anything else changes a chart.                |
+   //+------------------------------------------------------------------+
+   if(one_chart_ok && !g_on_replay_chart)
      {
       StashOrigin(origin);
-      string rs = g_sink.ReplaySymbol();
-      if(rs != "" && SymbolSelect(rs, true))
-        {
-         g_switching = true;
-         PrintFormat("[host] handing this chart over to %s - "
-                     "SS Replay will restart once on it. This is expected.", rs);
-         if(!ChartSetSymbolPeriod(ChartID(), rs, InpChartTf))
-           {
-            g_switching = false;
-            PrintFormat("[host] could not switch this chart to %s (%d). "
-                        "Staying on two windows; the keyboard is on THIS one.",
-                        rs, GetLastError());
-           }
-        }
-      else
-         PrintFormat("[host] %s is not selectable in Market Watch, so this "
-                     "chart cannot show it. Staying on two windows.", rs);
+      g_switch_to = g_sink.ReplaySymbol();
+      if(g_switch_to == "")
+         Print("[host] no replay symbol name to hand this chart over to; "
+               "staying on two windows.");
      }
 
    return INIT_SUCCEEDED;
@@ -1004,6 +1049,30 @@ void OnTimer()
    //--- mid-switch buys nothing and can only produce half-written bars.
    if(g_switching)
       return;
+
+   if(g_switch_to != "")
+     {
+      string rs = g_switch_to;
+      g_switch_to = "";
+      if(!SymbolSelect(rs, true))
+        {
+         PrintFormat("[host] %s will not go into Market Watch, so this chart "
+                     "cannot show it. Staying on two windows.", rs);
+        }
+      else
+        {
+         g_switching = true;
+         PrintFormat("[host] handing this chart over to %s - SS Replay will "
+                     "restart once on it. This is expected.", rs);
+         if(!ChartSetSymbolPeriod(ChartID(), rs, InpChartTf))
+           {
+            g_switching = false;
+            PrintFormat("[host] could not switch this chart to %s (%d). "
+                        "Staying on two windows.", rs, GetLastError());
+           }
+         return;
+        }
+     }
 
    if(!g_ready)
       return;
