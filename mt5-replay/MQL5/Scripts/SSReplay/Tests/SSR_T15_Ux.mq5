@@ -468,6 +468,36 @@ void OnStart()
    }
 
    //================================================================
+   Section("T15.10  the panel lets the host's own keys through");
+   {
+      //--- The panel returned "handled" for every key it could map,
+      //--- including the two it does not implement. The host checks the
+      //--- panel first and stops when it claims an event, so S and J
+      //--- were swallowed and their dialogs never opened. Nothing was
+      //--- broken except who answered.
+      CSSRGroupPort port3;
+      CSSRPanel     panel3;
+      panel3.Create(ChartID(), GetPointer(port3), "T15_own_");
+
+      double dummy_f = 0;
+      string dummy_s = "";
+
+      long key_s = SSR_VK_S, key_j = SSR_VK_J, key_space = SSR_VK_SPACE;
+
+      Check("S is passed to the host",
+            !panel3.OnEvent(CHARTEVENT_KEYDOWN, key_s, dummy_f, dummy_s),
+            "true here means the session list never opens");
+      Check("J is passed to the host",
+            !panel3.OnEvent(CHARTEVENT_KEYDOWN, key_j, dummy_f, dummy_s),
+            "true here means the range dialog never opens");
+      Check("but the panel still claims its own keys",
+            panel3.OnEvent(CHARTEVENT_KEYDOWN, key_space, dummy_f, dummy_s),
+            "play/pause is the panel's to run");
+
+      panel3.Destroy();
+   }
+
+   //================================================================
    PrintFormat("=== Phase 15: PASS=%d  FAIL=%d  ===> %s",
                g_pass, g_fail, (g_fail == 0 ? "GREEN" : "RED"));
   }

@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v24 2026-08-30  the-panel-moves-as-one"
+#define SSR_BUILD           "v25 2026-08-30  keys-reach-their-owner"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

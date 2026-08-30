@@ -494,6 +494,27 @@ public:
       return s;
      }
 
+   //+------------------------------------------------------------------+
+   //| Which commands are THIS layer's to run.                          |
+   //|                                                                  |
+   //| One list, so the answer cannot drift from what Execute actually  |
+   //| implements. Everything else belongs to the host, which owns the  |
+   //| dialogs and the objects they need, and it only gets the event if |
+   //| the panel lets it past.                                          |
+   //+------------------------------------------------------------------+
+   bool              Owns(const ENUM_SSR_CMD c)
+     {
+      switch(c)
+        {
+         case SSR_CMD_NONE:
+         case SSR_CMD_SESSIONS:          // the host owns the session list
+         case SSR_CMD_JUMP:              // ...and the range dialog
+         case SSR_CMD_REPLAY_FROM_HERE:  // ...and this one is not bound yet
+            return false;
+        }
+      return true;
+     }
+
    //--- EVERY COMMAND SAYS WHAT IT DID.
    //--- Four keys were reported as broken. They may be broken, or they
    //--- may be working silently - a bookmark that is stored and shows
@@ -565,6 +586,24 @@ public:
          ENUM_SSR_CMD c = SSRKeyToCommand(lparam);
          if(c == SSR_CMD_NONE)
             return false;
+
+         //+------------------------------------------------------------------+
+         //| CLAIMING AN EVENT YOU CANNOT ACT ON IS HOW A KEY DIES.           |
+         //|                                                                  |
+         //| This returned true for EVERY mapped key, including the ones the  |
+         //| panel does not implement. The host checks the panel first and    |
+         //| returns when it says "handled", so S and J were swallowed here   |
+         //| and the two dialogs they open were never reached. The keys were  |
+         //| not broken and the dialogs were not broken - the panel was       |
+         //| answering mail addressed to someone else.                        |
+         //|                                                                  |
+         //| Found because the log line added last round said                 |
+         //| "sessions -> refused": the panel had received it, could not do   |
+         //| it, and still claimed it.                                        |
+         //+------------------------------------------------------------------+
+         if(!Owns(c))
+            return false;
+
          Execute(c);
          Render();
          return true;
