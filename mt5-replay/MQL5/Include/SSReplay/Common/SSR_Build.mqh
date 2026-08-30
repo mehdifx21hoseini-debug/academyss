@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v39 2026-08-30  handover-recovers-and-reports"
+#define SSR_BUILD           "v40 2026-08-30  zero-digits-is-a-price-not-an-error"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

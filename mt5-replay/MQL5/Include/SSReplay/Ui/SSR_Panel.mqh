@@ -899,8 +899,15 @@ public:
      {
       bool ok = ExecuteInner(cmd);
       if(cmd != SSR_CMD_NONE)
-         PrintFormat("[panel] %s -> %s", SSRCmdName(cmd),
-                     (ok ? "ok" : "refused"));
+        {
+         //--- "refused" on its own sends the user back here to ask why.
+         //--- The port already knows; print it.
+         string why = "";
+         if(!ok && m_port != NULL && m_port.TradeError() != "")
+            why = "  (" + m_port.TradeError() + ")";
+         PrintFormat("[panel] %s -> %s%s", SSRCmdName(cmd),
+                     (ok ? "ok" : "refused"), why);
+        }
       return ok;
      }
 

@@ -266,11 +266,36 @@ public:
    //+------------------------------------------------------------------+
    bool              Adopt(const string replay_symbol, const string origin)
      {
+      //+------------------------------------------------------------------+
+      //| ASK WHETHER THE SYMBOL EXISTS, NOT HOW MANY DECIMALS IT HAS.     |
+      //|                                                                  |
+      //| This used to read SYMBOL_DIGITS and treat "<= 0" as "no such     |
+      //| symbol". Zero digits is not an error - it is what an index CFD   |
+      //| quoted in whole points HAS. On US30 the check rejected a symbol  |
+      //| that was sitting right there, and the one-window handover died   |
+      //| on it: "could not adopt the existing replay symbol".             |
+      //|                                                                  |
+      //| It had been failing silently long before that. The seed cache    |
+      //| adopts through this same call to reuse a warmup, so on every     |
+      //| whole-point instrument the cache quietly never worked and never  |
+      //| said so - it just rebuilt from scratch each run.                 |
+      //|                                                                  |
+      //| SYMBOL_EXIST answers the question that was being asked, and      |
+      //| SYMBOL_CUSTOM is a stronger test of "ours" than a name pattern:  |
+      //| a broker symbol that happened to contain ".SSR" would have       |
+      //| passed the old one.                                              |
+      //+------------------------------------------------------------------+
       ResetLastError();
-      long digits = SymbolInfoInteger(replay_symbol, SYMBOL_DIGITS);
-      if(digits <= 0 || GetLastError() != 0)
+      if(!(bool)SymbolInfoInteger(replay_symbol, SYMBOL_EXIST))
         {
          Fail(SSR_ERR_NO_DATA, "no symbol to adopt: " + replay_symbol);
+         return false;
+        }
+      if(!(bool)SymbolInfoInteger(replay_symbol, SYMBOL_CUSTOM))
+        {
+         Fail(SSR_ERR_INVALID_ARG,
+              "refusing to adopt " + replay_symbol +
+              ": it is a broker symbol, not one of ours");
          return false;
         }
       if(!SSRIsReplaySymbol(replay_symbol))
