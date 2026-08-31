@@ -422,21 +422,27 @@ void OnStart()
 
       //--- the statement. A file that is merely CREATED proves nothing;
       //--- an empty one would pass that test and fail the user.
+      //--- ExportHtml puts the file in its own folder and appends the
+      //--- extension itself, so the name handed IN is not the path that
+      //--- comes out. The first version of this stage opened the name it
+      //--- had passed, failed, and reported it as a product defect. The
+      //--- function has always been able to say where it wrote; ASK IT.
       CSSRJournal jrn;
       jrn.Attach(GetPointer(acct));
-      string html = "SSReplay-smoke-statement.html";
-      if(Check("the statement exports", jrn.ExportHtml(html, 2), html))
+      string html = "SSReplay-smoke-statement";
+      if(Check("the statement exports", jrn.ExportHtml(html, 2),
+               jrn.LastPath() + (jrn.LastError() == "" ? "" : "  " + jrn.LastError())))
         {
-         int jh = FileOpen(html, FILE_READ | FILE_TXT | FILE_ANSI);
+         int jh = FileOpen(jrn.LastPath(), FILE_READ | FILE_TXT | FILE_ANSI);
          if(Check("the statement file is readable", jh != INVALID_HANDLE,
-                  "MQL5\\Files\\" + html))
+                  "MQL5\\Files\\" + jrn.LastPath()))
            {
             int bytes = (int)FileSize(jh);
             FileClose(jh);
             Check("and it has a statement in it", bytes > 2000,
                   StringFormat("%d bytes - a file that exists but is empty "
                                "would pass a weaker test than this", bytes));
-            FileDelete(html);
+            FileDelete(jrn.LastPath());
            }
         }
      }

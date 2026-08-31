@@ -37,6 +37,15 @@ private:
       return r;
      }
 
+   //--- Lots at two decimals hide a 0.001 lot as "0.00", which is the
+   //--- same lie in a smaller font. Show what is there.
+   string             VolumeText(const double v)
+     {
+      if(v > 0.0 && v < 0.005)
+         return DoubleToString(v, 3);
+      return DoubleToString(v, 2);
+     }
+
    string             Row(SSRVirtualPosition &p, const int digits)
      {
       return StringFormat(
@@ -249,14 +258,26 @@ public:
             continue;
          double net = p.profit + p.swap - p.commission;
          FileWriteString(h, StringFormat(
-            "<tr><td>%d</td><td>%s</td><td>%s</td><td class=\"n\">%.2f</td>"
+            "<tr><td>%d</td><td>%s</td><td>%s</td><td class=\"n\">%s</td>"
             "<td>%s</td><td class=\"n\">%s</td><td>%s</td><td class=\"n\">%s</td>"
             "<td>%s%s</td><td class=\"n\">%s</td>"
             "<td class=\"n\"><span class=\"%s\">%.2f</span></td></tr>\r\n",
             (int)p.ticket,
             (SSRIsLong(p.type) ? "BUY" : "SELL"),
             Html(p.tag),
-            p.volume,
+            //+------------------------------------------------------------------+
+            //| volume_initial, NOT volume.                                      |
+            //|                                                                  |
+            //| `volume` is what REMAINS - zero for every closed trade - so the  |
+            //| statement reported "0.00 lots" for two real 0.21 lot trades that |
+            //| had lost a hundred dollars between them. A statement that        |
+            //| contradicts its own profit column is worse than no statement:    |
+            //| it is a document the user might show someone.                    |
+            //|                                                                  |
+            //| The CSV export next door had it right all along, which is how a  |
+            //| single field can be wrong in one place for a whole release.      |
+            //+------------------------------------------------------------------+
+            VolumeText(p.volume_initial),
             SSRFormatMsc(p.open_msc),  DoubleToString(p.open_price, digits),
             SSRFormatMsc(p.close_msc), DoubleToString(p.close_price, digits),
             SSRCloseReasonName(p.reason),

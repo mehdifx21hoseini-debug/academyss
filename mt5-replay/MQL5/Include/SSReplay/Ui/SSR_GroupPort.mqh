@@ -722,8 +722,12 @@ private:
       if(sl <= 0.0)
         { m_trade_error = "no stop - the size comes from the risk, and "
                           "the risk needs a stop"; return false; }
+      //--- tagged, because the statement has a Tag column and it came
+      //--- back empty on the first real session. A column that is always
+      //--- blank is either dead or a question the tool refused to answer;
+      //--- this one can say how the trade was placed.
       long t = m_acct.OpenWithRisk(type, m_risk_percent, sl,
-                                   (tp > 0.0 ? tp : 0.0), "");
+                                   (tp > 0.0 ? tp : 0.0), "lines");
       if(t <= 0)
         { m_trade_error = m_acct.LastError(); return false; }
       return true;

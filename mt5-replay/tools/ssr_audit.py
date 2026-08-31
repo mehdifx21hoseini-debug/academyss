@@ -822,6 +822,16 @@ def audit_a13():
         seen = set()
         for m in CALL_ANY.finditer(body):
             name = m.group(1)
+            #--- A constructor's initialiser list is `m_thing(0)`, which
+            #--- looks exactly like a call. This project names members
+            #--- m_, globals g_ and statics s_, and none of those is ever
+            #--- a function - so they are data, not calls. Without this
+            #--- the baseline absorbed 223 member names on the day it was
+            #--- generated, and every one of them was then permanently
+            #--- allowed: an audit quietly holding a list of things it
+            #--- promises never to notice.
+            if name[:2] in ("m_", "g_", "s_"):
+                continue
             if (name in CALL_KEYWORDS or name in declared or name in known
                     or name in seen):
                 continue

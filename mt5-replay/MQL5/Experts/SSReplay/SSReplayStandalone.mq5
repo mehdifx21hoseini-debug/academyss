@@ -219,6 +219,7 @@ CSSRFlightRecorder g_flight;
 long  g_pumps        = 0;      // how many times the engine was actually driven
 string g_init_note   = "";     // what OnInit inherited from the pass before it
 long  g_timer_ticks  = 0;      // how many times OnTimer has ENTERED, guards or not
+long  g_starved      = 0;      // pumps that arrived late enough to lose time
 uint  g_ready_at_ms  = 0;      // when the session became ready, for the watchdog
 
 //+------------------------------------------------------------------+
@@ -1706,6 +1707,16 @@ void PrintVitals()
                (int)g_sink.EmitTicks(),
                (int)g_charts.Snaps(),
                charts);
+   //--- a replay that cannot keep up is not a replay running at the
+   //--- speed on the dial, and saying nothing about it would be a
+   //--- performance claim with no measurement behind it
+   if(g_starved > 0 && g_timer_ticks > 0)
+      PrintFormat("[vitals] LATE %d of %d pumps arrived too late and lost "
+                  "time - the replay is running slower than %.0fx. Something "
+                  "on this chart is stalling the terminal; a slow indicator "
+                  "is the usual cause.",
+                  (int)g_starved, (int)g_timer_ticks,
+                  g_ctrl.SpeedX100() / 100.0);
   }
 
 //+------------------------------------------------------------------+
@@ -1911,10 +1922,28 @@ void OnTimer()
    ulong delta = (now - g_last_pump_us) / 1000;
    g_last_pump_us = now;
 
-   //--- a stalled terminal must not be replayed as a giant jump: the
-   //--- engine would try to emit minutes of ticks in one call
-   if(delta > 1000)
-      delta = 1000;
+   //+------------------------------------------------------------------+
+   //| MISSED TIME IS DROPPED, NOT REPAID.                              |
+   //|                                                                  |
+   //| A replay is not a live feed. There is nothing to catch up to, so |
+   //| a stall should make it run LATE, never make it run FAST.         |
+   //|                                                                  |
+   //| The old ceiling of one second repaid the stall: a chart carrying |
+   //| a third-party indicator that MetaTrader itself called "too slow, |
+   //| 3047 ms" starved this timer, and the pumps that followed injected |
+   //| a second of wall time each. Measured from a recording: 73 minutes |
+   //| of market crossed in 52 seconds of wall clock at a setting of     |
+   //| 50x - 84x, and the user watching it saw the candles lurch.        |
+   //|                                                                  |
+   //| Four pump intervals is enough to absorb ordinary scheduling jitter |
+   //| and short enough that a real stall is simply lost.                |
+   //+------------------------------------------------------------------+
+   ulong ceiling = (ulong)MathMax(4 * InpPumpMs, 100);
+   if(delta > ceiling)
+     {
+      g_starved++;
+      delta = ceiling;
+     }
 
    //+------------------------------------------------------------------+
    //| PRESSING PLAY MEANS "I WANT TO WATCH THIS RUN".                  |

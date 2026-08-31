@@ -3090,3 +3090,84 @@ never called. A13 named it as undeclared, correctly, and it was added to
 baseline can only be widened on purpose.
 
 **Not measured:** v60 has not been run on MetaTrader.
+
+## v61 — four defects from the first real trading session
+
+The whole trading path worked on its first run: stop/target lines, opening
+from them, auto-pause on the stop, and the HTML statement. Four defects
+came out of that same session — three in the product, one in the test.
+
+### 1. The statement reported 0.00 lots
+
+```
+Volume  0.00        Profit  -49.98
+```
+
+Two real 0.21-lot trades that had lost a hundred dollars between them were
+documented as zero lots. The HTML wrote `p.volume` — the **remaining**
+volume, which is zero for every closed trade. `volume_initial` is the
+field. The CSV export next door had it right from the start, which is how
+one field can be wrong in one place for a whole release.
+
+A statement whose volume column contradicts its profit column is worse than
+no statement: it is a document the user might show someone. Lots under
+0.005 now print at three decimals rather than rounding to the same lie in a
+smaller font.
+
+### 2. Buttons repeated at 25 Hz while held
+
+```
+05:54:25.564  play/pause -> ok
+05:54:25.629  play/pause -> ok
+05:54:25.800  play/pause -> ok
+05:54:25.914  play/pause -> ok
+```
+
+Four toggles in 350 ms, and step-forward three times in 100 ms. The user
+pressed each once. Consuming `OBJPROP_STATE` is not enough — MetaTrader
+re-latches it for as long as the mouse is down. A 200 ms floor per button
+kills hold-to-repeat and still allows five deliberate presses a second.
+
+### 3. The replay outran its own speed setting
+
+73 minutes of market in 52 seconds of wall clock at a 50x setting — 84x.
+The cause is external: a third-party `candletime` indicator on the chart
+that MetaTrader itself reported as `too slow, 3047 ms`, twice. It starved
+the timer, and the pumps that followed each injected a full second of wall
+time under the old one-second ceiling.
+
+**Missed time is now dropped, not repaid.** A replay is not a live feed;
+there is nothing to catch up to, so a stall must make it run *late*, never
+*fast*. The ceiling is four pump intervals, and late pumps are counted and
+reported — a replay quietly running below its dial is a performance claim
+with no measurement behind it. The fix removes the lurch, not the slowness;
+the indicator is still the user's to remove.
+
+### 4. The Tag column was always empty
+
+Trades opened from the lines now carry `lines`. A column that is always
+blank is either dead or a question the tool declined to answer.
+
+### The smoke FAIL was the test, not the product
+
+`ExportHtml` writes into its own folder and appends the extension itself,
+so the name passed *in* is not the path that comes *out*. The stage opened
+the name it had passed, failed, and reported it as a product defect. The
+function has always been able to say where it wrote; it is now asked.
+
+### A13 stopped me twice, and one of those was A13's own fault
+
+It flagged `m_last_btn_ms(0)` in a constructor initialiser list — the shape
+really is indistinguishable from a call, but the verdict was wrong. Worse,
+the baseline had absorbed **223 member names** on the day it was generated,
+and every one was thereafter permanently allowed: an audit quietly holding
+a list of things it had promised never to notice. Members (`m_`), globals
+(`g_`) and statics (`s_`) are now data by convention, and the baseline
+shrank from 383 entries to 160 genuine built-ins. Re-verified by sabotage
+on both the missing-definition and misspelt-built-in cases.
+
+**Recorded lesson.** *A green audit over a polluted baseline is worse than
+a red one.* The instrument was silent for two releases while holding a
+blanket exemption it had granted itself.
+
+**Not measured:** v61 has not been run on MetaTrader.

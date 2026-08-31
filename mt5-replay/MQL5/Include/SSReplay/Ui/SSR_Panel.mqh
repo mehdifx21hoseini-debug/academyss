@@ -56,6 +56,12 @@ private:
    //--- only works while a recorder exists would be a panel that only
    //--- works while someone is watching.
    CSSRFlightRecorder *m_flight;
+   //--- the last button that fired, and when. A held mouse re-latches
+   //--- OBJPROP_STATE on every pass, so without this a press becomes a
+   //--- burst - measured at four play/pause toggles in 350ms and three
+   //--- step-forwards in 100ms, none of them asked for.
+   string            m_last_btn;
+   uint              m_last_btn_ms;
    string            m_prefix;
 
    int               m_x, m_y;
@@ -151,7 +157,8 @@ private:
 
 public:
                      CSSRPanel(void)
-     : m_chart(0), m_port(NULL), m_flight(NULL), m_prefix("SSRP_"),
+     : m_chart(0), m_port(NULL), m_flight(NULL),
+       m_last_btn(""), m_last_btn_ms(0), m_prefix("SSRP_"),
        m_x(12), m_y(24), m_saved_mouse_move(0), m_saved_mouse_scroll(1),
        m_saved_quick_nav(1), m_saved_key_control(1),
        m_saved(false), m_collapsed(false), m_closed(false), m_compact(false),
@@ -1124,6 +1131,28 @@ public:
          //--- the button must still come back up rather than stay held
          //--- and fire again on the next tick.
          ObjectSetInteger(m_chart, name, OBJPROP_STATE, false);
+
+         //+------------------------------------------------------------------+
+         //| ONE PRESS IS ONE COMMAND.                                        |
+         //|                                                                  |
+         //| Consuming the state is not enough: MetaTrader re-latches it for  |
+         //| as long as the mouse is down, so this poll ran the same command  |
+         //| twenty-five times a second. A recording caught play/pause firing |
+         //| four times in 350ms and step-forward three times in 100ms - the  |
+         //| user pressed each of them once.                                  |
+         //|                                                                  |
+         //| A floor of 200ms kills hold-to-repeat and still allows five      |
+         //| deliberate presses a second, which is faster than anyone steps   |
+         //| through a replay on purpose.                                     |
+         //+------------------------------------------------------------------+
+         uint now_ms = GetTickCount();
+         if(name == m_last_btn && (now_ms - m_last_btn_ms) < 200)
+           {
+            acted = true;          // repaint, so the button visibly lifts
+            continue;
+           }
+         m_last_btn    = name;
+         m_last_btn_ms = now_ms;
 
          ENUM_SSR_CMD c = Dispatch(StringSubstr(name, StringLen(m_prefix)));
          acted = true;
