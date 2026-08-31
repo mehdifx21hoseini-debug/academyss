@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v50 2026-08-31  a11-right-class"
+#define SSR_BUILD           "v51 2026-08-31  speed-and-smoke-test"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

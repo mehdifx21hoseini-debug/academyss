@@ -65,6 +65,11 @@ input int             InpSlot       = 1;                    // Replay slot
 input int             InpTicksPerBar = 8;                   // Ticks per M1 bar (synthetic)
 input double          InpSpreadPoints = 20;                 // Simulated spread, in points
 input int             InpPumpMs     = 40;                   // Engine tick interval (ms)
+//--- 1x means ONE M5 CANDLE EVERY FIVE REAL MINUTES. Pressing Play and
+//--- watching nothing happen for twenty seconds is not a slow replay,
+//--- it is a broken-looking one - and it was the default. 30x puts a
+//--- new M5 candle on screen every ten seconds, which reads as alive.
+input double          InpStartSpeed = 30.0;                 // Speed when it starts (1 = real time)
 
 //--- The execution model. Every one of these is an ASSUMPTION about a
 //--- broker, so every one is an input rather than a constant buried in
@@ -1077,6 +1082,15 @@ bool BuildSession(string origin, const bool on_replay,
 
    EventSetMillisecondTimer(InpPumpMs);
    g_last_pump_us = GetMicrosecondCount();
+   //--- the speed the session opens at, through the port so the panel
+   //--- and the engine agree from the first frame
+   if(InpStartSpeed > 0.0)
+     {
+      g_gport.SetSpeedX100((long)MathRound(InpStartSpeed * 100.0));
+      PrintFormat("[host] speed %s - %s", SSRSpeedName((long)MathRound(InpStartSpeed * 100.0)),
+                  SSRSpeedMeaning((long)MathRound(InpStartSpeed * 100.0)));
+     }
+
    g_ready = true;
 
    PrintFormat("[host] ready  %s -> %s  %s .. %s",
@@ -1157,6 +1171,17 @@ bool BuildSession(string origin, const bool on_replay,
                SSRFormatMsc(win_start), SSRFormatMsc(win_end), win_bars,
                (g_panel_chart == g_replay_chart ? "the replay chart" : "this chart"),
                SSRStateName(g_ctrl.Status()));
+
+   //--- A PANEL TALLER THAN THE CHART IS AN INVISIBLE PANEL. The user's
+   //--- Toolbox was open to three quarters of the screen, leaving a 90
+   //--- pixel chart and a panel showing only its caption - which reads
+   //--- exactly like a tool that did not start.
+   int chart_h = (int)ChartGetInteger(g_panel_chart, CHART_HEIGHT_IN_PIXELS);
+   if(chart_h > 0 && chart_h < SSR_PANEL_H + 20)
+      PrintFormat("[host] THE CHART IS ONLY %d PIXELS TALL and the panel needs "
+                  "%d. Press Ctrl+T to close the Toolbox, or drag its top edge "
+                  "down - the panel is there, it just has nowhere to draw.",
+                  chart_h, SSR_PANEL_H + 20);
 
    if(g_on_replay_chart)
       PrintFormat("[host] one window: the chart, the panel, the mouse and the "
