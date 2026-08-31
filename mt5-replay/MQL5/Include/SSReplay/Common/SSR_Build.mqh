@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v58 2026-08-31  the-definition-that-never-landed"
+#define SSR_BUILD           "v59 2026-08-31  it-runs"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

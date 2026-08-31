@@ -218,6 +218,8 @@ int   g_vitals_left  = 10;
 CSSRFlightRecorder g_flight;
 long  g_pumps        = 0;      // how many times the engine was actually driven
 string g_init_note   = "";     // what OnInit inherited from the pass before it
+long  g_timer_ticks  = 0;      // how many times OnTimer has ENTERED, guards or not
+uint  g_ready_at_ms  = 0;      // when the session became ready, for the watchdog
 
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
@@ -1154,6 +1156,8 @@ bool BuildSession(string origin, const bool on_replay,
    EventSetMillisecondTimer(InpPumpMs);
    g_last_pump_us = GetMicrosecondCount();
    g_vitals_left  = 10;
+   g_timer_ticks  = 0;
+   g_ready_at_ms  = GetTickCount();
    PrintFormat("[host] vitals %s - one line per second in the Experts tab, "
                "the first %d whatever the input says",
                (InpVitals ? "ON (InpVitals)" : "off, but"), 10);
@@ -1779,15 +1783,13 @@ void FlightGuard(const string which)
 //+------------------------------------------------------------------+
 void OnTimer()
   {
-   //--- proof that the timer is alive at all, written once. Its
-   //--- ABSENCE from a recording is the other half of the diagnosis.
-   static bool s_timer_seen = false;
-   if(!s_timer_seen)
-     {
-      s_timer_seen = true;
-      if(g_flight.IsOpen())
-         g_flight.Event("OnTimer fired for the first time");
-     }
+   //--- proof that the timer is alive at all, COUNTED rather than
+   //--- flagged: the watchdog has to know whether it ever fired, and a
+   //--- static local inside this function cannot tell anyone. Its
+   //--- absence from a recording is half of the diagnosis.
+   g_timer_ticks++;
+   if(g_timer_ticks == 1 && g_flight.IsOpen())
+      g_flight.Event("OnTimer fired for the first time");
 
    //+------------------------------------------------------------------+
    //| WAITING FOR THE USER TO PLACE THE LINE.                          |
@@ -2148,8 +2150,17 @@ void OnChartEvent(const int id, const long &lparam,
    //| not be papered over: the recording says plainly that this fired,  |
    //| so a self-heal can never be mistaken for a healthy session.       |
    //+------------------------------------------------------------------+
+   //--- g_pumps == 0 was the wrong test and this file caught it: pumps
+   //--- only count while PLAYING, so a session sitting at READY has
+   //--- zero of them quite legitimately, and the first mouse move fired
+   //--- the watchdog on a timer that was running perfectly. A watchdog
+   //--- that cries wolf devalues every line around it in the recording.
+   //---
+   //--- The honest test is that the timer has NEVER entered, and that
+   //--- enough time has passed for it to have done so many times over.
    static bool s_rearmed = false;
-   if(!s_rearmed && g_pumps == 0 && !g_switching && !g_picking)
+   if(!s_rearmed && g_timer_ticks == 0 && !g_switching && !g_picking &&
+      g_ready_at_ms != 0 && (GetTickCount() - g_ready_at_ms) > 1500)
      {
       s_rearmed = true;
       EventSetMillisecondTimer(InpPumpMs);

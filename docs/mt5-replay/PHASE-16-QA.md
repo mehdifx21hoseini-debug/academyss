@@ -2980,3 +2980,66 @@ nothing.* Every edit it contained must be re-applied, not just the one that
 failed. The previous discipline — assert on every replacement — was
 necessary and turned out not to be sufficient, because a passing assertion
 in an aborted script still leaves nothing on disk.
+
+## v59 — it runs, and the cause is now measured
+
+**Reported:** "الان ریپلی کار کرد", with the recording.
+
+### The cause, finally a fact
+
+```
+E,02:29:40,...,OnInit found switching=1 switch_to='' picking=0 ready=0 pumps=0
+```
+
+`switching=1`. Global variables **survive** the deinit/init that a chart
+symbol change causes. Pass one set `g_switching` immediately before handing
+its chart over; `OnDeinit`'s teardown zeroed `g_ready` (which is why the
+same line reads `ready=0`) and nothing zeroed `g_switching`. Pass two was
+born already switching, and `OnTimer`'s second line —
+`if(g_switching) return;` — turned its timer back at the door forever.
+
+That question had been assumed both ways in this project and measured
+neither way. It is now measured, and the same line records it for anyone
+reading the file later.
+
+### And the rest of the file says it works
+
+| | start | end |
+|---|---|---|
+| clock | 2026.08.21 11:05:01 | 11:41:49 |
+| m1 bars | 940 | 975 |
+| emit_ticks | 6 | 5353 |
+| pumps | 1 | 1019 |
+| snaps | 1 | 36 |
+| view offset | 0 | 0 (all 164 samples) |
+
+37 minutes of market in 75 seconds of wall clock is 30x, which is what was
+asked for. `off=0` throughout means the view never fell behind the newest
+bar — the v54 snap doing its job, now with evidence instead of a mechanism
+argument.
+
+### A defect in the same file
+
+The watchdog fired spuriously, at 02:29:40, on a timer that was working.
+Its test was `g_pumps == 0` — but pumps only increment while PLAYING, so a
+session sitting at READY legitimately has none, and the first mouse move
+tripped it. **A watchdog that cries wolf devalues every line around it in
+the recording.** It now tests what it actually means: that `OnTimer` has
+never once entered (a real counter, not a proxy), and that 1.5 s have
+passed since the session became ready.
+
+### What this recording cannot settle
+
+The watchdog fired before the first sample, so this file cannot prove
+whether the timer started on its own or the watchdog started it. One
+inference does survive: the watchdog's own condition includes
+`!g_switching`, so it could not have fired unless `OnInit` had already
+cleared the flag — and with it cleared, `OnTimer` passes its guards. From
+v59 on the file states this outright: no `WATCHDOG` line means the timer
+ran on its own.
+
+**Recorded lesson.** *The instrument found in one run what five releases of
+better guessing had not — and then found its own defect in the same file.*
+Every fix from v53 to v57 addressed a real bug and none of them could have
+worked, because the engine was never being driven. The order was wrong the
+whole time: build the thing that measures first.
