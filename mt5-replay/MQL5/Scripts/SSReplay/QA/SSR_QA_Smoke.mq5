@@ -876,6 +876,126 @@ void OnStart()
             StringFormat("breakout %d, fade %d, session %d",
                          sb.trades, sf.trades, all.trades));
 
+      //+------------------------------------------------------------------+
+      //| 17b. THE BUCKETS, AND THE ACCOUNTING THAT FEEDS THEM.            |
+      //|                                                                  |
+      //| ComputeFor subtracted swap but not commission, while the drawdown|
+      //| twenty lines below it in the same class - and the statement's own |
+      //| Profit column - always used profit + swap - commission. With the  |
+      //| default commission of zero the two agree and nothing shows; this  |
+      //| sets a commission so they cannot.                                 |
+      //+------------------------------------------------------------------+
+      {
+         CSSRTradingEngine ca;
+         SSRExecutionModel cx;
+         cx.Init();
+         cx.commission_per_lot = 7.0;
+         ca.SetExecution(cx);
+         ca.OnSessionStart("SMOKE", 5, 0.00001, 0);
+         ca.SetBalance(10000.0);
+
+         MqlTick ct[1];
+         ct[0].time     = (datetime)0;
+         ct[0].time_msc = 0;
+         ct[0].bid      = 1000.0;
+         ct[0].ask      = 1000.0;
+         ct[0].last     = 1000.0;
+         ct[0].volume   = 1;
+         ct[0].flags    = 0;
+         ca.OnTicks(ct, 1);
+
+         long ct1 = ca.Open(SSR_ORDER_BUY, 1.0);
+         ca.Close(ct1);
+
+         CSSRStatsEngine cs;
+         cs.Attach(GetPointer(ca));
+         SSRStatistics cst;
+         cst.Init();
+         cs.Compute(cst);
+
+         //--- one round turn at 7 per lot per side. Nothing moved, so the
+         //--- whole result IS the commission and it must be a loss.
+         Check("commission is inside the trade's result",
+               cst.trades == 1 && cst.net_profit < -0.5 && cst.losses == 1,
+               StringFormat("net %.2f over %d trade(s), %d counted as a loss "
+                            "- a flat trade that cost 14 to place is not a win",
+                            cst.net_profit, cst.trades, cst.losses));
+      }
+
+      //+------------------------------------------------------------------+
+      //| 17c. WHEN THE TRADES WERE TAKEN.                                 |
+      //|                                                                  |
+      //| The buckets are read straight back off the trades this stage has  |
+      //| already opened and closed, so the totals must agree with the      |
+      //| session's own. Two views of one set of books that do not add up   |
+      //| to the same number is the failure this checks for.                |
+      //+------------------------------------------------------------------+
+      SSRBucket wk[], hr[];
+      stats.ByWeekday(wk);
+      stats.ByHour(hr);
+
+      int wk_trades = 0, hr_trades = 0;
+      double wk_net = 0.0, hr_net = 0.0;
+      for(int i = 0; i < ArraySize(wk); i++)
+        { wk_trades += wk[i].trades; wk_net += wk[i].net; }
+      for(int i = 0; i < ArraySize(hr); i++)
+        { hr_trades += hr[i].trades; hr_net += hr[i].net; }
+
+      Check("the weekday buckets hold every trade",
+            ArraySize(wk) == 7 && wk_trades == all.trades &&
+            MathAbs(wk_net - all.net_profit) < 0.01,
+            StringFormat("%d trades / %.2f across 7 days, session says %d / %.2f",
+                         wk_trades, wk_net, all.trades, all.net_profit));
+      Check("and so do the hourly ones",
+            ArraySize(hr) == 24 && hr_trades == all.trades &&
+            MathAbs(hr_net - all.net_profit) < 0.01,
+            StringFormat("%d trades / %.2f across 24 hours", hr_trades, hr_net));
+
+      //+------------------------------------------------------------------+
+      //| 17d. THE EQUITY CURVE IS READABLE, not only measurable.          |
+      //|                                                                  |
+      //| The samples have existed since Phase 10 and only ever produced a  |
+      //| drawdown number. Drawing them needs them handed out one at a      |
+      //| time, in order, with the times going forwards - a curve whose x   |
+      //| axis went backwards would still compute the right drawdown and    |
+      //| draw a scribble.                                                  |
+      //+------------------------------------------------------------------+
+      {
+         //--- THE CURVE NEEDS A CLOCK. This engine was built a few lines
+         //--- up for the tag work and never observed the replay, so it
+         //--- holds no samples at all - and a stage that asserted "more
+         //--- than two samples" against it would have failed for a reason
+         //--- that has nothing to do with the product. It is driven here
+         //--- through OnClock, the same entry point the controller uses,
+         //--- at the sampler's own one-a-minute spacing rather than around
+         //--- it.
+         long feed = 1000000000000;
+         for(int i = 0; i < 40; i++)
+            stats.OnClock(feed + (long)i * 60000);
+
+         int    es = stats.EquitySamples();
+         long   pm = 0, sm = 0;
+         double sv = 0.0;
+         bool   ordered = true, all_read = true;
+         for(int i = 0; i < es; i++)
+           {
+            if(!stats.EquityAt(i, sm, sv))
+              { all_read = false; break; }
+            if(i > 0 && sm < pm)
+               ordered = false;
+            pm = sm;
+           }
+         Check("the equity curve can be walked, in order",
+               es > 2 && all_read && ordered,
+               StringFormat("%d samples, times %s", es,
+                            (ordered ? "increasing" : "OUT OF ORDER")));
+         long dummy = 0;
+         double dv = 0.0;
+         Check("and it says where it ends",
+               !stats.EquityAt(es, dummy, dv) && !stats.EquityAt(-1, dummy, dv),
+               "one past the end and one before the start both refuse");
+      }
+
       CSSRJournal tj;
       tj.Attach(GetPointer(acct), GetPointer(stats));
       string tname = "SSReplay-smoke-tags";
@@ -900,6 +1020,31 @@ void OnStart()
                StringFormat("%d chars, all three markers present "
                             "- a size check alone would pass an empty table",
                             StringLen(body)));
+
+         //--- and so are the four sections v70 added. Each is checked by
+         //--- something only that section writes: a heading proves the
+         //--- markup ran, a <polyline> proves the curve has geometry in
+         //--- it rather than an empty figure with a caption under it.
+         Check("the statement carries an equity curve with a line in it",
+               StringFind(body, "Equity curve") >= 0 &&
+               StringFind(body, "<polyline") >= 0 &&
+               StringFind(body, "var SSRE=[[") >= 0,
+               "heading, polyline and hover data all present");
+         Check("and the weekday and hour breakdowns",
+               StringFind(body, "By weekday") >= 0 &&
+               StringFind(body, "By hour of the day") >= 0 &&
+               StringFind(body, "Wednesday") >= 0,
+               "both headings and a named day");
+         Check("and every measure, not only the nine on the header",
+               StringFind(body, "Every measure") >= 0 &&
+               StringFind(body, "Average MFE") >= 0 &&
+               StringFind(body, "Trades without a stop") >= 0,
+               "three of the twenty-two that were computed and never shown");
+         Check("and it is legible in either theme",
+               StringFind(body, "prefers-color-scheme:dark") >= 0 &&
+               StringFind(body, "[data-theme=") >= 0,
+               "a colour defined only inside a media query is a colour a "
+               "system-default reader never gets");
          FileDelete(tj.LastPath());
         }
    }

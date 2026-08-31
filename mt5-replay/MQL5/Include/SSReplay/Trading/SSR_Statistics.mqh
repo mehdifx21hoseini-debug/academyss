@@ -139,6 +139,37 @@ struct SSRStatistics
   };
 
 //+------------------------------------------------------------------+
+//| One slice of the session - a weekday, an hour of the day.        |
+//|                                                                  |
+//| Deliberately thin. A bucket answers "how many, how often right,  |
+//| how much" and nothing else: everything richer belongs to         |
+//| SSRStatistics, which computes it over a filter rather than over  |
+//| a bucket, and two structures that both claim to know the profit  |
+//| factor is exactly how they come to disagree.                     |
+//+------------------------------------------------------------------+
+struct SSRBucket
+  {
+   int               trades;
+   int               wins;
+   double            net;
+   double            total_r;
+   int               r_trades;
+
+   void              Init(void)
+     { trades = 0; wins = 0; net = 0.0; total_r = 0.0; r_trades = 0; }
+
+   double            WinRate(void)
+     { return (trades > 0 ? 100.0 * (double)wins / (double)trades : 0.0); }
+
+   double            AverageR(void)
+     { return (r_trades > 0 ? total_r / (double)r_trades : 0.0); }
+  };
+
+//--- 0 = Sunday, as MqlDateTime counts them
+#define SSR_WEEKDAYS   7
+#define SSR_DAYHOURS  24
+
+//+------------------------------------------------------------------+
 //| Computes the statistics, and samples equity so drawdown reflects |
 //| what the trader actually lived through rather than only what     |
 //| showed up in the closed-trade record.                            |
@@ -162,6 +193,40 @@ private:
          return true;
       return (ArrayResize(m_eq_msc, SSR_EQUITY_SAMPLES) == SSR_EQUITY_SAMPLES &&
               ArrayResize(m_eq_val, SSR_EQUITY_SAMPLES) == SSR_EQUITY_SAMPLES);
+     }
+
+   void              Bucket(SSRBucket &out[], const int slots, const bool weekday)
+     {
+      ArrayResize(out, slots);
+      for(int i = 0; i < slots; i++)
+         out[i].Init();
+      if(m_acct == NULL)
+         return;
+
+      int total = m_acct.Total();
+      for(int i = 0; i < total; i++)
+        {
+         SSRVirtualPosition p;
+         if(!m_acct.At(i, p) || !p.IsClosed())
+            continue;
+
+         MqlDateTime dt;
+         TimeToStruct((datetime)(p.open_msc / 1000), dt);
+         int at = (weekday ? dt.day_of_week : dt.hour);
+         if(at < 0 || at >= slots)
+            continue;
+
+         out[at].trades++;
+         double net = p.profit + p.swap - p.commission;
+         out[at].net += net;
+         if(net > 0.0)
+            out[at].wins++;
+         if(p.HasR())
+           {
+            out[at].total_r += p.RMultiple();
+            out[at].r_trades++;
+           }
+        }
      }
 
    void              Sample(const long msc)
@@ -199,6 +264,18 @@ public:
    virtual string    Name(void) override { return "statistics"; }
    void              Attach(CSSRTradingEngine *a) { m_acct = a; }
    int               EquitySamples(void) { return m_eq_count; }
+
+   //--- one sample, so a report can DRAW the curve rather than only be
+   //--- told its deepest drawdown. Returns false past the end, which is
+   //--- how a caller walks it without asking the count twice.
+   bool              EquityAt(const int i, long &msc, double &value)
+     {
+      if(i < 0 || i >= m_eq_count)
+        { msc = SSR_INVALID_TIME; value = 0.0; return false; }
+      msc   = m_eq_msc[i];
+      value = m_eq_val[i];
+      return true;
+     }
 
    virtual void      OnSessionStart(const string symbol, const int digits,
                                     const double point, const long start_msc) override
@@ -293,7 +370,23 @@ public:
             continue;
 
          out.trades++;
-         double net = p.profit + p.swap;
+         //+------------------------------------------------------------------+
+         //| COMMISSION IS PART OF THE RESULT.                                |
+         //|                                                                  |
+         //| This line read `p.profit + p.swap` and left the commission out,  |
+         //| while ClosedDrawdownFor - twenty lines further down in the same  |
+         //| class - has always used `profit + swap - commission`, and so has |
+         //| the statement's own Profit column. Two accounting rules in one   |
+         //| file: with commission at its default of zero they agree, and the |
+         //| day somebody sets one the headline Net profit stops matching the |
+         //| sum of the column printed underneath it.                         |
+         //|                                                                  |
+         //| A statement that contradicts itself is worse than none - it is a |
+         //| document the user might show someone. It also decides wins from  |
+         //| losses: a trade that made 2 and cost 3 to place is a loss, and   |
+         //| the old rule counted it as a win.                                |
+         //+------------------------------------------------------------------+
+         double net = p.profit + p.swap - p.commission;
          out.commission += p.commission;
          out.swap       += p.swap;
 
@@ -442,6 +535,20 @@ public:
         }
       return n;
      }
+
+   //+------------------------------------------------------------------+
+   //| WHEN the trades were taken, not only how they went.              |
+   //|                                                                  |
+   //| Bucketed by the moment of ENTRY. The exit is chosen by the market |
+   //| as often as by the trader; the entry is the decision, and "I lose |
+   //| money on Monday mornings" is a decision a person can change.      |
+   //|                                                                  |
+   //| Server time, like every other clock in this tool. A statement     |
+   //| that silently converted to local time would move a trade to the   |
+   //| wrong hour for anyone reading it in a different country.          |
+   //+------------------------------------------------------------------+
+   void              ByWeekday(SSRBucket &out[]) { Bucket(out, SSR_WEEKDAYS, true); }
+   void              ByHour(SSRBucket &out[])    { Bucket(out, SSR_DAYHOURS, false); }
 
    double            ClosedDrawdown(void) { return ClosedDrawdownFor(""); }
 

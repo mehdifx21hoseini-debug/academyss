@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v69 2026-08-31  managing-the-trade"
+#define SSR_BUILD           "v70 2026-08-31  the-whole-statement"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
