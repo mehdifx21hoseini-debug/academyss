@@ -939,10 +939,26 @@ int OnInit()
       if(StringLen(sn) > StringLen(suffix) &&
          StringSubstr(sn, StringLen(sn) - StringLen(suffix)) == suffix)
         {
-         PrintFormat("[host] NOTE: %s also uses replay slot %d. Two "
-                     "instruments at once want different slots - set "
-                     "'Replay slot' to %d on one of them.",
-                     sn, InpSlot, InpSlot + 1);
+         //--- LIVE OR LEFTOVER? The two need opposite advice, and the
+         //--- first version of this line asserted "two instruments at
+         //--- once" without checking - then printed it at a user who
+         //--- was running one, beside a symbol left by a session that
+         //--- had ended. A chart open on it is the difference.
+         bool live = false;
+         for(long cid = ChartFirst(); cid >= 0; cid = ChartNext(cid))
+            if(ChartSymbol(cid) == sn)
+              { live = true; break; }
+
+         if(live)
+            PrintFormat("[host] NOTE: %s is OPEN and also on replay slot %d. "
+                        "Two sessions at once need different slots - set "
+                        "'Replay slot' to %d on one of them.",
+                        sn, InpSlot, InpSlot + 1);
+         else
+            PrintFormat("[host] NOTE: %s is left over from an earlier session "
+                        "(no chart is open on it). Harmless; run "
+                        "Scripts/SSReplay/Spike/SSR_Z_Cleanup to remove it.",
+                        sn);
          break;
         }
      }
@@ -958,11 +974,28 @@ int OnInit()
                   "'Replay start' to a weekday, or raise 'Bars to replay'.",
                   win_bars);
    else
-      PrintFormat("[host] %d M1 bars inside the replay window", win_bars);
+     {
+      //--- A window can be perfectly healthy AND contain a weekend. The
+      //--- user meets that gap minutes later as a chart that stops
+      //--- moving, so it is named now rather than discovered then.
+      long span_min = (win_end - win_start) / SSR_MSC_PER_MIN;
+      if(win_bars > 0 && span_min > win_bars * 2)
+         PrintFormat("[host] %d M1 bars inside the replay window, spanning "
+                     "%d minutes - it crosses a market-closed gap. Play "
+                     "skips it automatically and says so.",
+                     win_bars, (int)span_min);
+      else
+         PrintFormat("[host] %d M1 bars inside the replay window", win_bars);
+     }
 
    if(g_on_replay_chart)
       PrintFormat("[host] one window: the chart, the panel, the mouse and the "
                   "keyboard are all on %s. Nothing else to click.", _Symbol);
+   else if(one_chart_ok)
+      //--- a pass that is about to hand this chart over must not tell
+      //--- the user to click it. Fifty milliseconds later it is gone.
+      Print("[host] this pass is only preparing the session - the panel "
+            "arrives after the handover below.");
    else
       PrintFormat("[host] the panel and the keyboard are on the %s chart - "
                   "click it first. The replay chart is for watching.", _Symbol);

@@ -2276,3 +2276,53 @@ member function already defined   SSR_MasterClock.mqh 396
 بعد کد اصلاح شد. ترتیبِ درست همین است: ابزارِ سنجش اول، سوژه دوم.
 
 شمارش: ۹ ممیزی، همه سابوتاژ-تأییدشده — این یکی روی باگِ زنده، نه ساختگی.
+
+---
+
+## v45: لاگِ سالم، سه ادعای بدون بررسی
+
+**لاگ کاربر (v44) کاملاً موفق بود** و ارزش ثبت دارد، چون اولین اجرای تمامِ
+زنجیره است:
+
+```
+pass=1  chart=XAUUSD@  origin=XAUUSD@
+warmup seeded: 1000 bars up to 2026.08.27 20:54:59 at 509424 bars/s
+1999 M1 bars inside the replay window
+handing this chart over to XAUUSD@.SSR1 ...
+pass=2 (on the replay chart)  chart=XAUUSD@.SSR1  origin=XAUUSD@
+warmup already present in the sink; skipping the read
+one window: the chart, the panel, the mouse and the keyboard are all on ...
+```
+
+### تأییدِ یک چیزی که می‌توانست فاجعه باشد
+
+`warmup already present in the sink; skipping the read` روی پاسی که نماد را
+**Adopt** کرده، نگران‌کننده است: اگر adopt مسیرِ `ClearAll()` را رفته باشد،
+تاریخچه پاک شده و seed هم رد شده — یعنی چارتِ خالی.
+
+بررسی شد: `NeedsWarmup()` برابر `!m_reused_seed` است. رد شدنِ seed یعنی
+`m_reused_seed == true` بوده، یعنی مسیرِ `else { Truncate(...) }` اجرا شده،
+نه `ClearAll`. warmup سرِ جایش است. **و این یعنی کشِ seed برای اولین بار در
+عمرِ پروژه شلیک کرد** — همان قابلیتی که تا v40 روی هر نمادِ صحیح‌قیمت
+بی‌صدا شکست می‌خورد. هر دو شاخه سالم‌اند:
+
+| `m_reused_seed` | مسیر | نتیجه |
+|---|---|---|
+| true | Adopt (بالا) → Truncate | warmup می‌مانَد، seed رد می‌شود ✔ |
+| false + adopt | Adopt → ClearAll | warmup می‌رود، seed اجرا می‌شود ✔ |
+
+### و سه پیام که چیزی را که بررسی نکرده بودند اعلام کردند
+
+1. **`NOTE: ... also uses replay slot 1. Two instruments at once...`** —
+   کاربر یک نماد اجرا کرده بود. آن یکی بازمانده‌ی جلسه‌ی قبل بود. حالا
+   وجودِ چارتِ باز روی آن نماد چک می‌شود و دو جوابِ متفاوت داده می‌شود
+   (عوض کردن slot / اجرای Z_Cleanup).
+2. **`the panel and the keyboard are on the XAUUSD@ chart - click it first`**
+   در پاسِ اول، پنجاه میلی‌ثانیه پیش از تحویلِ همان چارت. باز هم جمله‌ای که
+   لحظه‌ی چاپ شدن غلط بود.
+3. **`1999 M1 bars`** بدون گفتنِ اینکه آن ۱۹۹۹ کندل روی ۴۸۸۰ دقیقه پخش
+   شده‌اند — یعنی آخرهفته وسطش است. سالم، ولی کاربر چند دقیقه بعد با
+   چارتی که می‌ایستد روبه‌رو می‌شود. حالا از اول نامش را می‌برد.
+
+هیچ‌کدام باگِ عملکردی نبودند. هر سه از همان خانواده‌اند که این سند پر از
+آن است: **جمله‌ای که چیزی را اعلام می‌کند که پشتش سنجشی نبوده.**

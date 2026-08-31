@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v44 2026-08-30  a9-and-one-anyplaying"
+#define SSR_BUILD           "v45 2026-08-30  the-log-stops-guessing"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
