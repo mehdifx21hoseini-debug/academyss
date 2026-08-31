@@ -841,7 +841,40 @@ def audit_a13():
                    "either a definition that never landed, or a built-in "
                    "that belongs in tools/ssr_known_calls.txt" % name)
 
-for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13):
+
+#--- A14: MetaTrader cuts an object's text at 63 characters.
+#---
+#--- A screen recording showed the picker hint ending mid-word:
+#--- "...then press the gre". Counted from the frame, the cut lands at
+#--- exactly 63 - the platform's limit on OBJPROP_TEXT.
+#---
+#--- Nothing else could have caught it. No log prints an object's
+#--- description, no test reads the screen, and the string in the source
+#--- is perfectly correct. Only the pixels were wrong.
+#---
+#--- Only literal strings are measured. A concatenation with a runtime
+#--- value cannot be measured here, so those are left alone rather than
+#--- guessed at - but a literal already past the limit is past it for
+#--- every possible value of everything else.
+SET_TEXT = re.compile(
+    r'ObjectSetString\s*\([^;]*?OBJPROP_TEXT\s*,\s*"((?:[^"\\]|\\.)*)"\s*\)',
+    re.S)
+OBJ_TEXT_MAX = 63
+
+def audit_a14():
+    for path, body in KEEPSTR.items():
+        raw = FILES[path]
+        for m in SET_TEXT.finditer(raw):
+            text = m.group(1)
+            if len(text) <= OBJ_TEXT_MAX:
+                continue
+            report("A14", path, raw[:m.start()].count("\n") + 1,
+                   "object text is %d characters; MetaTrader shows %d and "
+                   "cuts the rest: \"%s|%s\""
+                   % (len(text), OBJ_TEXT_MAX,
+                      text[:OBJ_TEXT_MAX], text[OBJ_TEXT_MAX:]))
+
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13, audit_a14):
     fn()
 
 if findings:

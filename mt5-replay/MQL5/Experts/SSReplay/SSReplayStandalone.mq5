@@ -1851,9 +1851,21 @@ void OnTimer()
       FlightGuard("g_picking - still waiting for a start line to be placed");
       datetime at = (datetime)ObjectGetInteger(0, SSR_PICK_LINE, OBJPROP_TIME);
       if(at > 0)
+         //+------------------------------------------------------------------+
+         //| SIXTY-THREE CHARACTERS, AND METATRADER CUTS THE REST.            |
+         //|                                                                  |
+         //| This line was 72 characters and the user's screen recording      |
+         //| showed it ending mid-word: "...then press the gre". Counted from |
+         //| the frame, the cut lands at exactly 63 - the platform's limit on |
+         //| an object's text.                                                 |
+         //|                                                                  |
+         //| A hint that stops mid-word reads as a broken tool, and it was    |
+         //| invisible to every log and every test because nothing here ever  |
+         //| looked at the screen.                                             |
+         //+------------------------------------------------------------------+
          ObjectSetString(0, SSR_PICK_INFO, OBJPROP_TEXT,
                          "Start: " + TimeToString(at, TIME_DATE | TIME_MINUTES) +
-                         "   -   drag the line, then press the green button");
+                         "   -   drag it, then press START");
 
       if(ObjectGetInteger(0, SSR_PICK_HERE, OBJPROP_STATE))
         {

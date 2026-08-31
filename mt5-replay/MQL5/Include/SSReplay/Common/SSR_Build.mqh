@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v65 2026-08-31  managed-is-not-owned"
+#define SSR_BUILD           "v66 2026-08-31  sixty-three-characters"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

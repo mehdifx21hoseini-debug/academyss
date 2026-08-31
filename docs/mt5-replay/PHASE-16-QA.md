@@ -3386,3 +3386,65 @@ contracts. That the *host* walks the right set is still only covered by a
 real session.
 
 **Not measured:** v65 has not been run on MetaTrader.
+
+## v66 — three defects only a screen could show
+
+A 93-second screen recording, decoded to 24 frames and read. Three
+defects, none of which any log or test could have caught, because all
+three are visible only as pixels.
+
+### 1. The picker hint was cut mid-word
+
+On screen: `Start: 2026.08.31 09:50   -   drag the line, then press the gre`
+
+Counted from the frame, the cut lands at **exactly 63 characters** — the
+platform's limit on an object's text. The string in the source was
+perfectly correct; only the pixels were wrong.
+
+**Audit A14** now measures every literal `OBJPROP_TEXT` and names the cut
+point:
+
+```
+A14  object text is 69 characters; MetaTrader shows 63 and cuts the rest:
+     "Drag the orange line to the candle where you want the replay to| start"
+```
+
+Only literals are measured — a concatenation with a runtime value cannot be
+measured statically, so those are left alone rather than guessed at. A
+literal already past the limit is past it for every value of everything
+else.
+
+### 2. The history arrows drew, and could not be seen
+
+Zoomed in on the frame: the entry arrow (orange) and exit arrow (green)
+were both there, correctly placed, correct colours — and at default size
+they are two six-pixel specks on one candle. **"It draws" was true while
+"you can see it" was not**, and the smoke stage that asserts the objects
+exist would pass forever.
+
+Arrows to width 3, the connecting line to width 2 solid and in front of the
+candles. That line matters most exactly when entry and exit fall inside one
+bar, which is most trades on a higher timeframe — and behind the candles it
+was hidden by the very bar it was describing.
+
+### 3. The panel covers the level labels
+
+MetaTrader writes trade-level descriptions at the chart's left edge and our
+panel defaults to top-left. There is no offset control for those labels, so
+this is a layout collision with no clean code fix — the panel drags and
+collapses, and the user did exactly that mid-recording. Recorded rather than
+worked around.
+
+### What the video confirmed working
+
+Short setup (entry with stop above and target below, `Positions 1`), trade
+history arrows, position levels with price tags on the scale, the picker,
+the handover, and auto-pause on take profit. **Two of the three items
+listed as individually unconfirmed after v64 are now confirmed — by being
+seen, not assumed.**
+
+**Recorded lesson.** *A test that asserts an object exists cannot tell you
+it is visible.* Three releases of chart work were verified by `ObjectFind`,
+which is exactly as strong as checking that a light bulb is screwed in.
+
+**Not measured:** v66 has not been run on MetaTrader.

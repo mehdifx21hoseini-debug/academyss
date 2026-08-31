@@ -432,11 +432,26 @@ public:
 
       color won = (net >= 0.0 ? clrMediumSeaGreen : clrTomato);
 
+      //+------------------------------------------------------------------+
+      //| BIG ENOUGH TO SEE.                                               |
+      //|                                                                  |
+      //| A screen recording settled this: the arrows were drawn, correctly |
+      //| placed and the right colours - and at their default size they     |
+      //| read as two specks on a candle. Six pixels of orange is not a     |
+      //| record of a trade, it is a smudge, and "it draws" was true while  |
+      //| "you can see it" was not.                                          |
+      //|                                                                  |
+      //| Width 3 on the arrows and 2 on the line between them, because     |
+      //| when entry and exit fall inside one bar - which is most trades on |
+      //| a higher timeframe - that line is all there is to join them.       |
+      //+------------------------------------------------------------------+
       string a = base + "_A";
       if(ObjectCreate(m_chart, a, (is_long ? OBJ_ARROW_BUY : OBJ_ARROW_SELL),
                       0, open_time, open_price))
         {
          ObjectSetInteger(m_chart, a, OBJPROP_COLOR, (is_long ? m_long_col : m_short_col));
+         ObjectSetInteger(m_chart, a, OBJPROP_WIDTH, 3);
+         ObjectSetInteger(m_chart, a, OBJPROP_ANCHOR, ANCHOR_TOP);
          ObjectSetInteger(m_chart, a, OBJPROP_SELECTABLE, false);
          ObjectSetInteger(m_chart, a, OBJPROP_HIDDEN, true);
          ObjectSetString (m_chart, a, OBJPROP_TOOLTIP,
@@ -451,6 +466,8 @@ public:
                       0, close_time, close_price))
         {
          ObjectSetInteger(m_chart, b, OBJPROP_COLOR, won);
+         ObjectSetInteger(m_chart, b, OBJPROP_WIDTH, 3);
+         ObjectSetInteger(m_chart, b, OBJPROP_ANCHOR, ANCHOR_TOP);
          ObjectSetInteger(m_chart, b, OBJPROP_SELECTABLE, false);
          ObjectSetInteger(m_chart, b, OBJPROP_HIDDEN, true);
          ObjectSetString (m_chart, b, OBJPROP_TOOLTIP,
@@ -464,11 +481,13 @@ public:
                       open_time, open_price, close_time, close_price))
         {
          ObjectSetInteger(m_chart, l, OBJPROP_COLOR,      won);
-         ObjectSetInteger(m_chart, l, OBJPROP_STYLE,      STYLE_DOT);
-         ObjectSetInteger(m_chart, l, OBJPROP_WIDTH,      1);
+         ObjectSetInteger(m_chart, l, OBJPROP_STYLE,      STYLE_SOLID);
+         ObjectSetInteger(m_chart, l, OBJPROP_WIDTH,      2);
          ObjectSetInteger(m_chart, l, OBJPROP_RAY_RIGHT,  false);
          ObjectSetInteger(m_chart, l, OBJPROP_RAY_LEFT,   false);
-         ObjectSetInteger(m_chart, l, OBJPROP_BACK,       true);
+         //--- in front, like every other trade level here. Behind, a
+         //--- trade that happened inside one candle is hidden by it.
+         ObjectSetInteger(m_chart, l, OBJPROP_BACK,       false);
          ObjectSetInteger(m_chart, l, OBJPROP_SELECTABLE, false);
          ObjectSetInteger(m_chart, l, OBJPROP_HIDDEN,     true);
         }
