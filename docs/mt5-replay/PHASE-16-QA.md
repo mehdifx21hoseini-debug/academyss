@@ -3316,3 +3316,25 @@ arriving a minute later.
 fails the second.
 
 **Not measured:** v64 has not been run on MetaTrader.
+
+### v64 confirmed on MetaTrader
+
+The user reports it working. That closes, on real measurement rather than
+mechanism, the defect chain that ran from v53:
+
+| | status |
+|---|---|
+| candles advance (the `g_switching` guard) | measured, v59 recording |
+| view follows the newest bar | measured, `off=0` across 164 samples |
+| the 2-minute stall | measured as a hole in broker history |
+| stop/target lines, open from them | confirmed by session |
+| statement volume, button repeat, speed lurch | fixed v61 |
+| lines hand over to the trade | fixed v62 |
+| short setup, MT5 wording, trade history | fixed v63–v64, **user confirms** |
+
+**What "درست شد" does not itemise.** The report was a single sentence, so it
+confirms the release, not each stage in it. Individually still unconfirmed:
+the short direction actually placing a SELL, the closed-trade history
+arrows appearing, and the statement's volume column now reading 0.21 rather
+than 0.00. Each has a passing smoke stage behind it; none has a screenshot
+or a recording. Recording that gap is cheaper than assuming it away.
