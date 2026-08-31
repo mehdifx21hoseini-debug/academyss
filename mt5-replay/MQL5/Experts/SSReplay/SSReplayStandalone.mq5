@@ -217,6 +217,7 @@ bool  g_was_playing  = false;      // to notice the moment Play is pressed
 int   g_vitals_left  = 10;
 CSSRFlightRecorder g_flight;
 long  g_pumps        = 0;      // how many times the engine was actually driven
+string g_init_note   = "";     // what OnInit inherited from the pass before it
 
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
@@ -1134,6 +1135,7 @@ bool BuildSession(string origin, const bool on_replay,
                            (int)((win_end - win_start) / SSR_MSC_PER_MIN),
                            one_chart_ok, g_sink.ReusedSeed(), g_pick_msc,
                            InpStartSpeed, InpPumpMs);
+         g_flight.Event(g_init_note);
          g_panel.SetFlightRecorder(GetPointer(g_flight));
          PrintFormat("[host] BLACK BOX RECORDING to MQL5/Files/%s - when "
                      "anything looks wrong, send that file rather than a "
@@ -1314,6 +1316,40 @@ bool BuildSession(string origin, const bool on_replay,
 //+------------------------------------------------------------------+
 int OnInit()
   {
+   //+------------------------------------------------------------------+
+   //| THE HANDOVER FLAGS ARE CLEARED BEFORE ANYTHING ELSE RUNS.        |
+   //|                                                                  |
+   //| A black box recording finally settled what five releases could    |
+   //| not: 86 seconds, three event rows, ZERO samples. The user pressed |
+   //| Space, the key arrived, the panel executed it - and OnTimer never |
+   //| wrote a single sample. Keys and buttons come through              |
+   //| OnChartEvent; the engine is driven by the timer. So the panel     |
+   //| felt alive while nothing moved, which is exactly what was         |
+   //| reported, release after release.                                  |
+   //|                                                                  |
+   //| Pass one sets g_switching just before handing its chart over, and |
+   //| OnTimer's second line is `if(g_switching) return;`. If a global   |
+   //| survives the deinit/init that a chart symbol change causes, pass  |
+   //| two starts life already switching and its timer is turned back at |
+   //| the door forever. This project has assumed both answers about     |
+   //| that at different times and measured neither.                     |
+   //|                                                                  |
+   //| So stop assuming. Clearing them here is correct under BOTH        |
+   //| answers - a no-op if globals reset, the fix if they do not - and  |
+   //| what they held on the way in goes into the recording, so the next |
+   //| file states the fact instead of inheriting another guess.         |
+   //+------------------------------------------------------------------+
+   g_init_note = StringFormat("OnInit found switching=%d switch_to='%s' "
+                              "picking=%d ready=%d pumps=%d",
+                              (int)g_switching, g_switch_to,
+                              (int)g_picking, (int)g_ready, (int)g_pumps);
+   g_switching = false;
+   g_switch_to = "";
+   g_picking   = false;
+   g_ready     = false;
+   g_pumps     = 0;
+   g_slow_tick = 0;
+
    //+------------------------------------------------------------------+
    //| ONE WINDOW, DONE PROPERLY THIS TIME.                             |
    //|                                                                  |
@@ -1735,6 +1771,7 @@ void OnTimer()
    //+------------------------------------------------------------------+
    if(g_picking)
      {
+      FlightGuard("g_picking - still waiting for a start line to be placed");
       datetime at = (datetime)ObjectGetInteger(0, SSR_PICK_LINE, OBJPROP_TIME);
       if(at > 0)
          ObjectSetString(0, SSR_PICK_INFO, OBJPROP_TEXT,
@@ -1830,7 +1867,10 @@ void OnTimer()
      }
 
    if(!g_ready)
+     {
+      FlightGuard("g_ready is false - the session never finished building");
       return;
+     }
 
    ulong now   = GetMicrosecondCount();
    ulong delta = (now - g_last_pump_us) / 1000;
@@ -2061,6 +2101,32 @@ void OnChartEvent(const int id, const long &lparam,
   {
    if(!g_ready)
       return;
+
+   //+------------------------------------------------------------------+
+   //| A DEAD TIMER IS NOTICED HERE, BECAUSE HERE STILL RUNS.           |
+   //|                                                                  |
+   //| The whole failure was that the engine timer stopped delivering    |
+   //| while keys and buttons kept arriving - so this function is the    |
+   //| one place with proof of life and a chance to act on it. If the    |
+   //| session is ready, has never been pumped, and the user is already  |
+   //| interacting, the timer is not coming back on its own.             |
+   //|                                                                  |
+   //| Re-armed once. A second failure is a different fault and must     |
+   //| not be papered over: the recording says plainly that this fired,  |
+   //| so a self-heal can never be mistaken for a healthy session.       |
+   //+------------------------------------------------------------------+
+   static bool s_rearmed = false;
+   if(!s_rearmed && g_pumps == 0 && !g_switching && !g_picking)
+     {
+      s_rearmed = true;
+      EventSetMillisecondTimer(InpPumpMs);
+      if(g_flight.IsOpen())
+         g_flight.Event("WATCHDOG re-armed the engine timer - it had "
+                        "delivered nothing while events were arriving");
+      Print("[host] the engine timer had stopped; restarted it. If the "
+            "replay now runs, send the black box file - this is a fault "
+            "even though it recovered.");
+     }
 
    RouteEvent(id, lparam, dparam, sparam);
   }

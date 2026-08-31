@@ -47,8 +47,47 @@ def strip_comments(text):
             out.append(c); i += 1
     return ''.join(out)
 
+def blank_comments_keep_strings(text):
+    """Comments blanked, string literals kept as a same-length token.
+
+    CLEAN blanks literals outright, which is right for every audit that
+    reads code shape - and wrong for counting arguments, because a call
+    whose only argument is a string became an empty pair of brackets.
+    A12's first version reported exactly that as "passed 0 arguments".
+    An audit that cries wolf is worse than none, and this is the third
+    time that has had to be fixed before the audit could be trusted.
+
+    Length is preserved character for character so offsets found in
+    CLEAN address the same place here.
+    """
+    out, i, n = [], 0, len(text)
+    while i < n:
+        c = text[i]
+        if c == '/' and i + 1 < n and text[i+1] == '/':
+            j = text.find('\n', i)
+            j = n if j < 0 else j
+            out.append(' ' * (j - i)); i = j
+        elif c == '/' and i + 1 < n and text[i+1] == '*':
+            j = text.find('*/', i + 2)
+            j = n if j < 0 else j + 2
+            out.append(''.join(ch if ch == '\n' else ' ' for ch in text[i:j])); i = j
+        elif c in '"\'':
+            j, q = i + 1, c
+            while j < n and text[j] != q:
+                j += 2 if text[j] == '\\' else 1
+            j = min(j + 1, n)
+            body = text[i:j]
+            out.append(q + ''.join(ch if ch == '\n' else '_'
+                                   for ch in body[1:-1]) + q
+                       if len(body) >= 2 else body)
+            i = j
+        else:
+            out.append(c); i += 1
+    return ''.join(out)
+
 FILES = {p: open(p, encoding="utf-8", errors="replace").read() for p in sources()}
 CLEAN = {p: strip_comments(t) for p, t in FILES.items()}
+KEEPSTR = {p: blank_comments_keep_strings(t) for p, t in FILES.items()}
 
 findings = []
 def report(audit, path, line, msg):
@@ -605,7 +644,7 @@ def audit_a7():
 def method_arities():
     """cls -> name -> set of (min_args, max_args) pairs."""
     own, base = {}, {}
-    for path, body in CLEAN.items():
+    for path, body in KEEPSTR.items():
         lines = body.splitlines()
         for m in CLASS_BODY.finditer(body):
             cls = m.group(1)
@@ -717,7 +756,7 @@ def param_range(raw):
 
 def audit_a12():
     arities = method_arities()
-    for path, body in CLEAN.items():
+    for path, body in KEEPSTR.items():
         types = {}
         for m in GLOBAL_DECL.finditer(body):
             if m.group(1) in arities:

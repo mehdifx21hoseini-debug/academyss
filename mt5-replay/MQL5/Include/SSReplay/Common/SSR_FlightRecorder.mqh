@@ -185,6 +185,12 @@ public:
       Line("# start_speed," + DoubleToString(start_speed, 2));
       Line("# pump_ms," + IntegerToString(pump_ms));
       Line("# origin_m1_bars," + IntegerToString(Bars(origin, PERIOD_M1)));
+      //--- what this build is capable of recording. Without it a reader
+      //--- cannot tell "the marker is absent because the thing did not
+      //--- happen" from "the marker is absent because this build never
+      //--- wrote one" - and the first is a diagnosis while the second
+      //--- is a guess wearing its clothes.
+      Line("# markers,timer-entry,timer-guard,init-inherited,watchdog");
       Line("#");
       Line("# rows: kind=S is a sample, kind=E is an event");
       Line("kind,t,state,clock,playing,speed,rsym,m1,lastbar,emit_calls,"

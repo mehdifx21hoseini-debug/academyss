@@ -70,8 +70,39 @@ def main(path):
             print("  %s  %s" % (e.get("t", ""), e.get("note", "")))
 
     if not rows:
-        print("\nNo samples. The timer never ran, or the session never "
-              "reached ready.")
+        #--- The first real recording landed here: 86 seconds, three
+        #--- events, no samples. That said the engine was never driven,
+        #--- but not why - so the recorder now names the guard, and this
+        #--- reads it back rather than offering the reader a choice of
+        #--- two explanations and no way to pick.
+        notes = " | ".join(e.get("note", "") for e in events)
+        print("\n--- verdict ---")
+        print("  NO SAMPLES. The engine was never driven: OnTimer wrote "
+              "nothing for the whole recording, so the clock could not "
+              "advance and no candle could appear.")
+        guard = [e.get("note", "") for e in events
+                 if e.get("note", "").startswith("OnTimer turned back at:")]
+        fired = any(e.get("note", "").startswith("OnTimer fired")
+                    for e in events)
+        if guard:
+            print("  CAUSE: %s" % guard[0])
+        elif fired:
+            print("  The timer FIRED but produced no sample and named no "
+                  "guard - look between the guards and RecordFlight.")
+        elif "timer-entry" in meta.get("markers", ""):
+            print("  The timer NEVER FIRED - this build records its first "
+                  "entry and there is none. EventSetMillisecondTimer did "
+                  "not take effect, or it was killed after being set.")
+        else:
+            print("  This recording cannot say whether the timer fired and "
+                  "was turned back, or never fired at all: it was made by a "
+                  "build with no timer marker. A newer recording can.")
+        keys = [e for e in events if e.get("note", "").startswith("key ")]
+        if keys:
+            print("  Note that %d key event(s) DID arrive, so the program "
+                  "was alive and OnChartEvent was running. A panel that "
+                  "answers while nothing moves is this exact fault."
+                  % len(keys))
         return 1
 
     play = playing_rows(rows)

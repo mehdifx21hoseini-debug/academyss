@@ -2879,3 +2879,73 @@ build the thing that measures.* The smoke test proved this once already —
 it answered in 32 seconds what five round trips had not — and the same
 answer applied one level up: the smoke test can only speak for a synthetic
 session, and the fault only appears in the user's real one.
+
+## v57 — the timer that never fired
+
+The black box answered on its first real run. Eighty-six seconds:
+
+```
+E,01:22:07,...,key 32 -> play/pause
+E,01:22:07,...,panel play/pause -> ok
+E,01:23:25,...,deinit reason=1
+# closed,2026.08.31 01:23:25,rows,3
+```
+
+Three events. **Zero samples.** The user pressed Space, the key arrived,
+the panel executed it — and `OnTimer` never wrote a single row.
+
+Keys and buttons arrive through `OnChartEvent`. The engine is driven by
+the timer. So the panel felt alive while nothing moved: exactly the report,
+release after release, and none of the chart, autoscroll, snap, or seed-
+cache work had anything to do with it. Those were real defects, found and
+fixed on the way past; none of them was *this*.
+
+One further deduction comes free from the same file: `OnChartEvent` begins
+`if(!g_ready) return;`, and a key event got through — so `g_ready` was
+true. That eliminates the "session never finished building" branch without
+another round trip. The remaining candidates are `g_switching`, `g_picking`,
+or a timer that never started.
+
+`g_switching` is set by pass one immediately before it hands its chart
+over, and `OnTimer`'s second line is `if(g_switching) return;`. If a global
+survives the deinit/init that a chart symbol change causes, pass two is born
+already switching and its timer is turned back at the door forever. This
+project has assumed both answers to that question at different times and
+measured neither.
+
+**Fixes.**
+
+1. `OnInit` clears the handover flags before anything else runs — correct
+   under both answers: a no-op if globals reset, the fix if they do not.
+2. What they held on the way in is written into the recording, so the next
+   file *states* MetaTrader's behaviour rather than inheriting another guess.
+3. All three `OnTimer` guards now name themselves in the recording, once
+   each, and the first entry into `OnTimer` is marked. "The timer never
+   fired" and "the timer fired and was turned back" were indistinguishable
+   until now.
+4. A watchdog in `OnChartEvent` — the one place with proof of life —
+   re-arms the timer once if the session is ready and has never been
+   pumped. Recorded loudly: a self-heal must never be mistaken for health.
+
+**Instrument changes.**
+
+- The preamble now declares `# markers,...`. Without it a reader cannot
+  tell "the marker is absent because the thing did not happen" from "absent
+  because this build never wrote one" — the first is a diagnosis, the
+  second is a guess wearing its clothes. The analyser reads it and refuses
+  to over-claim on older files.
+- **A12's first working run was a false positive.** The audit blanks string
+  literals, so a call whose only argument was a string looked like zero
+  arguments. Fixed with a second cleaned view that preserves literals as
+  same-length tokens, then re-verified by sabotage. Third time an audit has
+  had to be repaired before its subject could be.
+
+**Recorded lesson.** *Five releases of chart-layer fixes were aimed at a
+symptom whose cause was in the host's first two lines of `OnTimer`.* Every
+one of those fixes was justified by a real defect found on the way — and
+none of them could have worked, because the engine was never being driven
+at all. The instrument that separated the layers found in one run what
+better guessing had not found in five.
+
+**Not measured:** whether `g_switching` was in fact the guard. The next
+recording says so outright.
