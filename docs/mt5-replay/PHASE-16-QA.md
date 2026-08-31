@@ -3043,3 +3043,50 @@ better guessing had not — and then found its own defect in the same file.*
 Every fix from v53 to v57 addressed a real bug and none of them could have
 worked, because the engine was never being driven. The order was wrong the
 whole time: build the thing that measures first.
+
+## v60 — the stall was the data, and the trading side gets measured
+
+### The stall, answered by measurement
+
+`SSR_Z_Gaps` on the exact window from the recording:
+
+```
+59 bars across 60 minutes (98.3% present)
+HOLE  2 minute(s) missing after 2026.08.21 11:05  (next bar 2026.08.21 11:08)
+```
+
+The recording showed the replay clock running 11:05:39 → 11:08:03 with
+`emit_ticks` frozen at 58 and the bar count frozen at 941. The broker has
+no M1 bars for 11:06 and 11:07. Not a defect — the tool correctly showed
+nothing where there was nothing. The engine is now measured end to end,
+including its only anomaly.
+
+### Trading coverage in the smoke test
+
+The draggable stop and target, opening from them, closing a position and
+the HTML statement had **never been run on MetaTrader**. Not "probably
+broken" — unmeasured, which is the state every defect in this project has
+been found hiding in.
+
+The lines themselves need a chart and a hand on a mouse. Everything
+underneath them does not, and is now covered: an account attached to the
+replay's own tick stream, a market position with a stop and a target, an
+hour of replay priced through it, a close, the books balancing, and a
+statement written to disk.
+
+The last assertion checks the statement's **size**, not its existence: an
+empty file passes "was it created?" and fails the user. That is the same
+mistake as v54's diagnostic line — a check that a thing happened, where
+what mattered was whether it did anything.
+
+The split is the point. If these pass and the lines still do not work, the
+answer is already known: it is the lines, not the account.
+
+### A13 earned its keep the same hour it shipped
+
+Writing this stage I used `FileSize` — a genuine MQL5 built-in the tree had
+never called. A13 named it as undeclared, correctly, and it was added to
+`tools/ssr_known_calls.txt` deliberately. That friction is the design: the
+baseline can only be widened on purpose.
+
+**Not measured:** v60 has not been run on MetaTrader.

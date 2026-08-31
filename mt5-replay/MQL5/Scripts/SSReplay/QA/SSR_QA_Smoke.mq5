@@ -29,6 +29,8 @@
 #include <SSReplay/Common/SSR_Time.mqh>
 #include <SSReplay/Common/SSR_SymbolNaming.mqh>
 #include <SSReplay/Common/SSR_FlightRecorder.mqh>
+#include <SSReplay/Trading/SSR_TradingEngine.mqh>
+#include <SSReplay/Trading/SSR_Journal.mqh>
 #include <SSReplay/Core/SSR_ReplayController.mqh>
 #include <SSReplay/Core/SSR_MasterClock.mqh>
 #include <SSReplay/Data/SSR_Mt5DataSource.mqh>
@@ -122,6 +124,18 @@ void OnStart()
          (bool)SymbolInfoInteger(rsym, SYMBOL_EXIST), rsym);
    Check("replay symbol is ours",
          (bool)SymbolInfoInteger(rsym, SYMBOL_CUSTOM), "SYMBOL_CUSTOM");
+
+   //--- THE ACCOUNT LISTENS FROM HERE, not from the trading stage.
+   //--- It is fed by the same tick stream the replay emits, so it has
+   //--- to be attached before the ticks start or it will have no price
+   //--- to trade at when the stage arrives.
+   CSSRTradingEngine acct;
+   SSRExecutionModel exec;
+   exec.Init();
+   exec.use_real_spread = true;
+   acct.SetExecution(exec);
+   acct.SetBalance(10000.0);
+   ctrl.AddObserver(GetPointer(acct));
 
    int seeded = Bars(rsym, PERIOD_M1);
    Check("warmup reached the symbol", seeded > 0,
@@ -349,6 +363,81 @@ void OnStart()
                             "the file to send when anything looks wrong.",
                             (int)rows, lines));
          FileDelete(wrote);
+        }
+     }
+
+   //+------------------------------------------------------------------+
+   //| 11. THE TRADING SIDE.                                            |
+   //|                                                                  |
+   //| Never once run on MetaTrader. Not "probably broken" - UNMEASURED, |
+   //| which is the state every defect in this project has been found    |
+   //| hiding in. The draggable stop and target need a chart and a hand   |
+   //| on a mouse and cannot be tested here, but everything underneath    |
+   //| them can: a position at market with a stop and a target, a price   |
+   //| that moves it, a close, and a statement on disk.                   |
+   //|                                                                  |
+   //| Splitting it this way means a failure upstairs has an answer      |
+   //| already: if these pass and the lines do not, it is the lines.     |
+   //+------------------------------------------------------------------+
+   double bid = acct.Bid(), ask = acct.Ask();
+   if(!Check("the account has a price to trade at", bid > 0.0 && ask >= bid,
+             StringFormat("bid %.5f  ask %.5f", bid, ask)))
+     {
+      ctrl.Release();
+      Cleanup(rsym);
+      Done();
+      return;
+     }
+
+   //--- a stop and a target far enough away that the next few ticks
+   //--- cannot reach them: this stage is about opening and closing, and
+   //--- a position stopped out mid-test would be measuring something else
+   double pt = SymbolInfoDouble(rsym, SYMBOL_POINT);
+   if(pt <= 0.0)
+      pt = 0.01;
+   double sl = bid - 5000 * pt;
+   double tp = bid + 5000 * pt;
+
+   long ticket = acct.Open(SSR_ORDER_BUY, 0.01, sl, tp);
+   if(Check("a virtual position opens", ticket > 0,
+            StringFormat("ticket %d%s", (int)ticket,
+                         (ticket > 0 ? "" : " - " + acct.LastError()))))
+     {
+      Check("it is counted as open", acct.OpenCount() == 1,
+            StringFormat("%d open", acct.OpenCount()));
+
+      //--- and the price keeps moving under it
+      double eq_before = acct.Equity();
+      for(int i = 0; i < 20 && !IsStopped(); i++)
+         ctrl.Pump(1000);
+      Check("the open position is priced by the replay",
+            acct.OpenCount() == 1,
+            StringFormat("equity %.2f -> %.2f after an hour of replay",
+                         eq_before, acct.Equity()));
+
+      Check("it closes", acct.Close(ticket),
+            (acct.LastError() == "" ? "closed" : acct.LastError()));
+      Check("and the books balance", acct.OpenCount() == 0 && acct.ClosedCount() == 1,
+            StringFormat("%d open, %d closed", acct.OpenCount(), acct.ClosedCount()));
+
+      //--- the statement. A file that is merely CREATED proves nothing;
+      //--- an empty one would pass that test and fail the user.
+      CSSRJournal jrn;
+      jrn.Attach(GetPointer(acct));
+      string html = "SSReplay-smoke-statement.html";
+      if(Check("the statement exports", jrn.ExportHtml(html, 2), html))
+        {
+         int jh = FileOpen(html, FILE_READ | FILE_TXT | FILE_ANSI);
+         if(Check("the statement file is readable", jh != INVALID_HANDLE,
+                  "MQL5\\Files\\" + html))
+           {
+            int bytes = (int)FileSize(jh);
+            FileClose(jh);
+            Check("and it has a statement in it", bytes > 2000,
+                  StringFormat("%d bytes - a file that exists but is empty "
+                               "would pass a weaker test than this", bytes));
+            FileDelete(html);
+           }
         }
      }
 

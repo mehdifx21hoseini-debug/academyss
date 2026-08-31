@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v59 2026-08-31  it-runs"
+#define SSR_BUILD           "v60 2026-08-31  the-trading-side-measured"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

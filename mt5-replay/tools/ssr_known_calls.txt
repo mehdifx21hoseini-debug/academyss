@@ -65,6 +65,7 @@ FileIsExist
 FileOpen
 FileReadString
 FileSeek
+FileSize
 FileWriteString
 FolderCreate
 GetLastError
