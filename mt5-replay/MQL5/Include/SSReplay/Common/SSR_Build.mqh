@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v47 2026-08-31  the-button-actually-builds"
+#define SSR_BUILD           "v48 2026-08-31  a10-const-parameters"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

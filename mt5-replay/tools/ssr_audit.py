@@ -386,6 +386,61 @@ METHOD_DEF = re.compile(r'^\s*(?:virtual\s+|static\s+|const\s+)*'
                         r'[A-Za-z_][\w:]*\s*[\*&]?\s+'
                         r'([A-Za-z_]\w*)\s*\(([^)]*)\)')
 
+#--- A10: writing to a parameter declared const.
+#---
+#--- Extracting BuildSession out of OnInit gave every parameter a const
+#--- it had not earned: the random-session path reassigns `origin` to
+#--- the instrument it picked. MetaEditor: "'origin' - constant cannot
+#--- be modified". Nothing here read the body before deciding.
+#---
+#--- Only same-line, unambiguous writes are reported: `x =`, `x +=`,
+#--- `x++`, `--x`. Comparisons and `==` are excluded, so a false
+#--- positive would need a genuinely strange line.
+FUNC_HEAD = re.compile(r'^[A-Za-z_][\w:]*\s*[\*&]?\s*([A-Za-z_]\w*)\s*\(([^)]*)\)\s*$', re.M)
+CONST_PARAM = re.compile(r'\bconst\s+[A-Za-z_][\w:]*\s*[\*&]?\s*([A-Za-z_]\w*)\s*(?:,|$)')
+
+def audit_a10():
+    for path, body in CLEAN.items():
+        lines = body.splitlines()
+        for m in FUNC_HEAD.finditer(body):
+            names = CONST_PARAM.findall(m.group(2))
+            if not names:
+                continue
+            start = body[:m.end()].count("\n")
+            #--- a DEFINITION, not a prototype or a call: the next
+            #--- non-empty line must open a body. Without this the scan
+            #--- ran past the header into whatever followed and read
+            #--- another function's locals as writes to these names.
+            nxt = start + 1
+            while nxt < len(lines) and lines[nxt].strip() == "":
+                nxt += 1
+            if nxt >= len(lines) or not lines[nxt].strip().startswith("{"):
+                continue
+            depth, seen_open, end = 0, False, start
+            for i in range(start, min(start + 900, len(lines))):
+                depth += lines[i].count("{") - lines[i].count("}")
+                if depth > 0:
+                    seen_open = True
+                if seen_open and depth <= 0:
+                    end = i
+                    break
+            for n in names:
+                w = re.compile(r'(?<![\w.])' + re.escape(n) +
+                               r'\s*(?:\+\+|--|(?:[+\-*/|&^]?=(?!=)))')
+                #--- `long n = 0;` DECLARES a local; it does not write to
+                #--- a parameter that happens to share the name
+                decl = re.compile(r'^\s*(?:const\s+)?[A-Za-z_][\w:]*\s*[\*&]?\s+' +
+                                  re.escape(n) + r'\s*(?:=|;|\[)')
+                for i in range(start + 1, end + 1):
+                    if decl.match(lines[i]):
+                        break
+                    if w.search(lines[i]):
+                        report("A10", path, i + 1,
+                               "%s() writes to '%s', which it declares const - "
+                               "the signature was chosen without reading the body"
+                               % (m.group(1), n))
+                        break
+
 def audit_a9():
     for path, body in CLEAN.items():
         depth = 0
@@ -468,7 +523,7 @@ def audit_a7():
                    "%s() is called on a member of ours but declared nowhere - "
                    "the other half of a change did not land" % name)
 
-for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9):
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10):
     fn()
 
 if findings:

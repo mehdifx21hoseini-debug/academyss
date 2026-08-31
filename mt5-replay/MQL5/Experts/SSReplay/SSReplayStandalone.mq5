@@ -645,7 +645,11 @@ int FailInit(void)
 //| A restart was never needed. This is the build; whoever has the     |
 //| answer calls it.                                                   |
 //+------------------------------------------------------------------+
-bool BuildSession(const string origin, const bool on_replay,
+//--- `origin` is NOT const: a random session may pick a different
+//--- instrument than the one this chart shows, and the whole build has
+//--- to follow it. The extraction that created this signature made it
+//--- const without reading what the body does with it.
+bool BuildSession(string origin, const bool on_replay,
                   const bool one_chart_ok)
   {
    SSRDataRange range;
