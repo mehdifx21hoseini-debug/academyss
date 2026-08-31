@@ -782,7 +782,56 @@ def audit_a12():
                    "%s.%s() is passed %d argument(s); %s::%s takes %s"
                    % (m.group(1), name, given, cls, name, want))
 
-for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12):
+
+#--- A13: a name is called that nothing in this tree declares.
+#---
+#--- FlightGuard() shipped as a call with no definition. A patch script
+#--- made three edits, its third assertion failed, and the file was
+#--- never written - so two edits were silently discarded while the
+#--- third, applied by a later script, went in and referred to a
+#--- function that no longer existed. Four compile errors reached the
+#--- user, who had already installed the build.
+#---
+#--- The trap is that MQL5 has hundreds of built-ins and no list of
+#--- them here, so "undeclared" cannot be computed from first
+#--- principles without inventing false positives. It can be computed
+#--- from HISTORY: every name the compiling tree calls but does not
+#--- declare is, by definition, a built-in. Baseline those once, and
+#--- anything new is a name someone just introduced.
+BASELINE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                        "ssr_known_calls.txt")
+CALL_ANY = re.compile(r'(?<![\w.])([A-Za-z_]\w*)\s*\(')
+CALL_KEYWORDS = {'if', 'while', 'for', 'switch', 'return', 'sizeof', 'else',
+                 'do', 'case', 'new', 'delete', 'catch'}
+
+def audit_a13():
+    try:
+        with open(BASELINE) as fh:
+            known = set(l.strip() for l in fh
+                        if l.strip() and not l.startswith("#"))
+    except IOError:
+        return                      # no baseline, no opinion
+
+    declared = set()
+    for body in CLEAN.values():
+        for m in DECL_METHOD.finditer(body):
+            if m.group(1) not in NOT_A_RETURN_TYPE:
+                declared.add(m.group(2))
+
+    for path, body in CLEAN.items():
+        seen = set()
+        for m in CALL_ANY.finditer(body):
+            name = m.group(1)
+            if (name in CALL_KEYWORDS or name in declared or name in known
+                    or name in seen):
+                continue
+            seen.add(name)
+            report("A13", path, body[:m.start()].count("\n") + 1,
+                   "%s() is called but nothing in this tree declares it - "
+                   "either a definition that never landed, or a built-in "
+                   "that belongs in tools/ssr_known_calls.txt" % name)
+
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13):
     fn()
 
 if findings:

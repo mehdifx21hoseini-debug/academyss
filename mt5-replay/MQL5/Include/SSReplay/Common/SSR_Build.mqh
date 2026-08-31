@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v57 2026-08-31  the-timer-that-never-fired"
+#define SSR_BUILD           "v58 2026-08-31  the-definition-that-never-landed"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

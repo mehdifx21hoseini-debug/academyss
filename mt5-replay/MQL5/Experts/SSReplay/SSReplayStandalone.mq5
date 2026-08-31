@@ -1758,8 +1758,37 @@ void RecordFlight(const ulong delta_ms)
   }
 
 //+------------------------------------------------------------------+
+//| "The timer never fired" and "the timer fired and was turned back  |
+//| at the door" are different faults with different fixes, and the   |
+//| first black box recording could not tell them apart - it could    |
+//| only say that no sample ever arrived. One line per distinct       |
+//| reason, once, so a guard that stops the engine forever cannot do  |
+//| it quietly.                                                       |
+//+------------------------------------------------------------------+
+string g_guard_said = "";
+
+void FlightGuard(const string which)
+  {
+   if(g_guard_said == which || !g_flight.IsOpen())
+      return;
+   g_guard_said = which;
+   g_flight.Event("OnTimer turned back at: " + which);
+   PrintFormat("[host] the engine timer is being turned back at: %s", which);
+  }
+
+//+------------------------------------------------------------------+
 void OnTimer()
   {
+   //--- proof that the timer is alive at all, written once. Its
+   //--- ABSENCE from a recording is the other half of the diagnosis.
+   static bool s_timer_seen = false;
+   if(!s_timer_seen)
+     {
+      s_timer_seen = true;
+      if(g_flight.IsOpen())
+         g_flight.Event("OnTimer fired for the first time");
+     }
+
    //+------------------------------------------------------------------+
    //| WAITING FOR THE USER TO PLACE THE LINE.                          |
    //|                                                                  |
@@ -1840,7 +1869,11 @@ void OnTimer()
    //--- being destroyed. Pumping ticks into a symbol whose chart is
    //--- mid-switch buys nothing and can only produce half-written bars.
    if(g_switching)
+     {
+      FlightGuard("g_switching - a handover this instance believes is "
+                  "still under way");
       return;
+     }
 
    if(g_switch_to != "")
      {
