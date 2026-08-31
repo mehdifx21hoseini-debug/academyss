@@ -109,6 +109,9 @@ input bool            InpAllowTrade  = false;                // Let them place V
 
 //--- Phase 15 -------------------------------------------------------
 input double          InpRiskPercent = 0.5;                  // Risk per trade from the panel, percent
+input bool            InpAutoHistory = true;                 // Download M1 history for this symbol on start
+input int             InpHistoryBars = 60000;                // How many M1 bars to have available (~6 weeks)
+input bool            InpPickStart   = true;                 // Pick the start by dragging a line on the chart
 input bool            InpOneChart    = true;                 // Turn THIS chart into the replay chart (one window)
 input bool            InpTradeLines  = true;                 // Draw draggable stop/target lines
 input double          InpStopPoints  = 0;                    // Default stop, in points (0 = 10x the spread)
@@ -176,6 +179,16 @@ long  g_panel_chart  = 0;      // where the panel and dialogs actually are
 uint  g_panel_paint  = 0;      // last panel repaint, for the UI throttle
 bool  g_on_replay_chart = false;   // is THIS chart the replay chart?
 bool  g_switching       = false;   // the handover is under way
+bool  g_picking         = false;   // waiting for the user to place the start line
+
+//--- declared before they are called, so the compiler never has to guess.
+//--- RunHostCommand was called from OnTimer NINETEEN LINES before its
+//--- definition and its old prototype sat below both - a prototype that
+//--- comes after the call is not a prototype, it is a comment.
+void RunHostCommand(const ENUM_SSR_CMD cmd);
+void RouteEvent(const int id, const long &lparam,
+                const double &dparam, const string &sparam);
+long  g_pick_msc        = SSR_INVALID_TIME;
 string g_switch_to      = "";      // ...to this symbol, on the first tick
 ulong g_last_pump_us = 0;
 int   g_slow_tick    = 0;
@@ -384,6 +397,168 @@ string ReadStashedOrigin(void)
    return ObjectGetString(0, SSR_HANDOFF, OBJPROP_TEXT);
   }
 
+#define SSR_PICK_STASH  "SSR_PICK_HANDOFF"
+#define SSR_PICK_LINE   "SSR_PICK_LINE"
+#define SSR_PICK_GO     "SSR_PICK_GO"
+#define SSR_PICK_INFO   "SSR_PICK_INFO"
+
+//--- SERIES_FIRSTDATE as a value, for a one-line log
+long SeriesInfoIntegerOrZero(const string sym)
+  {
+   long v = 0;
+   SeriesInfoInteger(sym, PERIOD_M1, SERIES_FIRSTDATE, v);
+   return v;
+  }
+
+//+------------------------------------------------------------------+
+//| DOWNLOAD THE M1 HISTORY, INSTEAD OF ASKING THE USER TO.          |
+//|                                                                  |
+//| Every session so far has been cramped by the four days of M1 the |
+//| terminal happened to have cached, and the remedy was a paragraph |
+//| of instructions about pressing Home on an M1 chart. A tool that  |
+//| needs history should fetch history.                              |
+//|                                                                  |
+//| MetaTrader pulls history asynchronously: CopyRates on a range it |
+//| does not hold starts a download and returns nothing. So this     |
+//| asks, waits, and asks again, stopping the moment the broker      |
+//| stops giving more - which is a fact about the broker, not a      |
+//| failure, and is reported as such.                                |
+//+------------------------------------------------------------------+
+int EnsureHistory(const string sym, const int want_bars)
+  {
+   int have = Bars(sym, PERIOD_M1);
+   if(have >= want_bars)
+     {
+      PrintFormat("[host] history: %d M1 bars already local, %d wanted - "
+                  "nothing to download", have, want_bars);
+      return have;
+     }
+
+   PrintFormat("[host] history: %d M1 bars local, downloading up to %d...",
+               have, want_bars);
+
+   long first = 0, server_first = 0;
+   SeriesInfoInteger(sym, PERIOD_M1, SERIES_SERVER_FIRSTDATE, server_first);
+
+   MqlRates tmp[];
+   ulong t0 = GetTickCount();
+   int   stalls = 0;
+   while(have < want_bars && (GetTickCount() - t0) < 60000 && !IsStopped())
+     {
+      SeriesInfoInteger(sym, PERIOD_M1, SERIES_FIRSTDATE, first);
+      if(first <= 0)
+         first = (long)TimeCurrent();
+
+      //--- the broker has nothing older; this is an answer, not an error
+      if(server_first > 0 && first <= server_first)
+        {
+         PrintFormat("[host] history: the broker's earliest M1 bar is %s - "
+                     "that is everything it has (%d bars).",
+                     TimeToString((datetime)server_first), have);
+         return have;
+        }
+
+      datetime want_from = (datetime)(first - (long)(want_bars - have) * 60);
+      if(server_first > 0 && want_from < (datetime)server_first)
+         want_from = (datetime)server_first;
+
+      ResetLastError();
+      CopyRates(sym, PERIOD_M1, want_from, (datetime)first, tmp);
+      Sleep(300);
+
+      int now_have = Bars(sym, PERIOD_M1);
+      if(now_have <= have)
+        {
+         //--- no progress. Two dead passes means the download is not
+         //--- coming, so say how far it got rather than spin for a minute.
+         if(++stalls >= 6)
+           {
+            PrintFormat("[host] history: stopped at %d M1 bars - the download "
+                        "stopped progressing. Usually that is all the broker "
+                        "serves for this symbol.", now_have);
+            return now_have;
+           }
+        }
+      else
+        {
+         stalls = 0;
+         if(now_have / 10000 != have / 10000)
+            PrintFormat("[host] history: %d M1 bars...", now_have);
+        }
+      have = now_have;
+     }
+
+   PrintFormat("[host] history: %d M1 bars available, back to %s",
+               have, TimeToString((datetime)SeriesInfoIntegerOrZero(sym)));
+   return have;
+  }
+
+//+------------------------------------------------------------------+
+//| PICK THE START BY DRAGGING A LINE, THE WAY SOFT4FX DOES.         |
+//|                                                                  |
+//| Typing a date into an inputs dialog is not how anyone chooses a  |
+//| moment on a chart. This puts a draggable vertical line on the    |
+//| REAL symbol's chart - which still has its whole history at this  |
+//| point, because the handover has not happened yet - and a button  |
+//| next to it. Drag the line to the candle you want to start from,  |
+//| press the button, and everything after it ceases to exist.       |
+//+------------------------------------------------------------------+
+void ShowPicker(const string sym, const long default_msc)
+  {
+   datetime at = (datetime)(default_msc / 1000);
+
+   ObjectDelete(0, SSR_PICK_LINE);
+   ObjectCreate(0, SSR_PICK_LINE, OBJ_VLINE, 0, at, 0);
+   ObjectSetInteger(0, SSR_PICK_LINE, OBJPROP_COLOR,      clrOrange);
+   ObjectSetInteger(0, SSR_PICK_LINE, OBJPROP_WIDTH,      2);
+   ObjectSetInteger(0, SSR_PICK_LINE, OBJPROP_STYLE,      STYLE_SOLID);
+   ObjectSetInteger(0, SSR_PICK_LINE, OBJPROP_SELECTABLE, true);
+   ObjectSetInteger(0, SSR_PICK_LINE, OBJPROP_SELECTED,   true);
+   ObjectSetInteger(0, SSR_PICK_LINE, OBJPROP_BACK,       false);
+   ObjectSetString (0, SSR_PICK_LINE, OBJPROP_TEXT,       "SS Replay starts here");
+
+   ObjectDelete(0, SSR_PICK_GO);
+   ObjectCreate(0, SSR_PICK_GO, OBJ_BUTTON, 0, 0, 0);
+   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_CORNER,       CORNER_LEFT_UPPER);
+   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_XDISTANCE,    14);
+   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_YDISTANCE,    26);
+   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_XSIZE,        240);
+   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_YSIZE,        30);
+   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_BGCOLOR,      C'46,139,87');
+   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_BORDER_COLOR, C'34,105,65');
+   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_COLOR,        clrWhite);
+   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_FONTSIZE,     10);
+   ObjectSetString (0, SSR_PICK_GO, OBJPROP_FONT,         SSR_FONT);
+   ObjectSetString (0, SSR_PICK_GO, OBJPROP_TEXT,         "START REPLAY HERE");
+   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_STATE,        false);
+   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_SELECTABLE,   false);
+
+   ObjectDelete(0, SSR_PICK_INFO);
+   ObjectCreate(0, SSR_PICK_INFO, OBJ_LABEL, 0, 0, 0);
+   ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_CORNER,     CORNER_LEFT_UPPER);
+   ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_XDISTANCE,  14);
+   ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_YDISTANCE,  60);
+   ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_COLOR,      clrOrange);
+   ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_FONTSIZE,   9);
+   ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_SELECTABLE, false);
+   ObjectSetString (0, SSR_PICK_INFO, OBJPROP_FONT,       SSR_FONT);
+   ObjectSetString (0, SSR_PICK_INFO, OBJPROP_TEXT,
+                    "Drag the orange line to where you want to start");
+
+   ChartRedraw(0);
+   PrintFormat("[host] PICK A START: drag the orange line on this %s chart to "
+               "the candle you want to begin from, then press START REPLAY "
+               "HERE. Everything after it will not exist.", sym);
+  }
+
+void RemovePicker(void)
+  {
+   ObjectDelete(0, SSR_PICK_LINE);
+   ObjectDelete(0, SSR_PICK_GO);
+   ObjectDelete(0, SSR_PICK_INFO);
+   ChartRedraw(0);
+  }
+
 //+------------------------------------------------------------------+
 //| A SECOND PASS THAT FAILS MUST NOT LEAVE THE USER STRANDED.       |
 //|                                                                  |
@@ -493,9 +668,62 @@ int OnInit()
       return FailInit();
      }
 
+   //--- FETCH THE HISTORY BEFORE ANYTHING DEPENDS ON IT. Only on the
+   //--- first pass: the second is on a custom symbol whose history we
+   //--- wrote ourselves, and asking the broker for that is meaningless.
+   if(InpAutoHistory && !on_replay)
+     {
+      EnsureHistory(origin, InpHistoryBars);
+      g_src.Close();
+      if(!g_src.Open(origin))
+        {
+         Print("[host] no M1 history for ", origin, " after the download");
+         return FailInit();
+        }
+     }
+
    SSRDataRange range;
    range.Init();
    g_src.RangeInto(range);
+
+   //+------------------------------------------------------------------+
+   //| THE PICKER. Offered before anything is built, because what it    |
+   //| picks decides what gets built.                                   |
+   //|                                                                  |
+   //| It runs on the REAL symbol's chart, which still holds the whole  |
+   //| history - that is the only moment such a choice can be made by   |
+   //| looking at price. An explicit 'Replay start' or a random session |
+   //| has already answered the question, so the picker stays out of    |
+   //| the way in both cases.                                           |
+   //+------------------------------------------------------------------+
+   if(InpPickStart && !on_replay && InpStart == 0 && !InpRandom)
+     {
+      string picked = "";
+      if(ObjectFind(0, SSR_PICK_STASH) >= 0)
+        {
+         picked = ObjectGetString(0, SSR_PICK_STASH, OBJPROP_TEXT);
+         ObjectDelete(0, SSR_PICK_STASH);
+        }
+
+      if(picked == "")
+        {
+         //--- default the line to where the auto window would have
+         //--- started, so pressing the button without dragging gives
+         //--- exactly the old behaviour
+         long def = range.last_msc - (long)InpReplayBars * SSR_MSC_PER_MIN;
+         MqlRates back[];
+         if(CopyRates(origin, PERIOD_M1, 0, InpReplayBars, back) > 0)
+            def = (long)back[0].time * 1000;
+         ShowPicker(origin, def);
+         g_picking = true;
+         EventSetMillisecondTimer(200);
+         return INIT_SUCCEEDED;
+        }
+
+      g_pick_msc = (long)StringToTime(picked) * 1000;
+      PrintFormat("[host] starting from the line you placed: %s",
+                  SSRFormatMsc(g_pick_msc));
+     }
 
    //--- RANDOM REPLAY. Decided here because it decides the window, and
    //--- the seed is printed because a session you cannot return to is
@@ -572,7 +800,9 @@ int OnInit()
                   InpReplayBars, GetLastError());
 
    long win_start = (random_start > 0 ? random_start
-                     : (InpStart > 0 ? SSRToMsc(InpStart) : auto_start));
+                     : (InpStart > 0 ? SSRToMsc(InpStart)
+                        : (g_pick_msc != SSR_INVALID_TIME ? g_pick_msc
+                                                          : auto_start)));
    long floor_msc = range.first_msc + (long)InpWarmupBars * SSR_MSC_PER_MIN;
    if(win_start < floor_msc)
       win_start = floor_msc;
@@ -1055,6 +1285,10 @@ void OnDeinit(const int reason)
    for(int i = 0; i < g_extra; i++)
       g_publisher2[i].Withdraw();
 
+   RemovePicker();
+   if(reason == REASON_REMOVE || reason == REASON_PROGRAM || reason == REASON_CLOSE)
+      ObjectDelete(ChartID(), SSR_PICK_STASH);
+
    g_session_dlg.Destroy();
    g_dialog.Destroy();
    g_panel.Destroy();
@@ -1158,6 +1392,51 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTimer()
   {
+   //+------------------------------------------------------------------+
+   //| WAITING FOR THE USER TO PLACE THE LINE.                          |
+   //|                                                                  |
+   //| Nothing is built yet. When the button is pressed, the line's     |
+   //| time is stashed and the EA is restarted by re-applying its own   |
+   //| symbol and period - which costs nothing and brings us back into  |
+   //| OnInit with the answer in hand, instead of duplicating the whole |
+   //| build sequence out here where it would drift.                    |
+   //+------------------------------------------------------------------+
+   if(g_picking)
+     {
+      datetime at = (datetime)ObjectGetInteger(0, SSR_PICK_LINE, OBJPROP_TIME);
+      if(at > 0)
+         ObjectSetString(0, SSR_PICK_INFO, OBJPROP_TEXT,
+                         "Start: " + TimeToString(at, TIME_DATE | TIME_MINUTES) +
+                         "   -   drag the line, then press the green button");
+
+      if(ObjectGetInteger(0, SSR_PICK_GO, OBJPROP_STATE))
+        {
+         ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_STATE, false);
+         if(at <= 0)
+           {
+            Print("[host] the start line is gone - put it back, or turn "
+                  "'Pick the start' off.");
+            return;
+           }
+         RemovePicker();
+         g_picking = false;
+         EventKillTimer();
+
+         if(ObjectFind(0, SSR_PICK_STASH) < 0)
+            ObjectCreate(0, SSR_PICK_STASH, OBJ_LABEL, 0, 0, 0);
+         ObjectSetInteger(0, SSR_PICK_STASH, OBJPROP_XDISTANCE, -1000);
+         ObjectSetInteger(0, SSR_PICK_STASH, OBJPROP_YDISTANCE, -1000);
+         ObjectSetInteger(0, SSR_PICK_STASH, OBJPROP_HIDDEN,    true);
+         ObjectSetString (0, SSR_PICK_STASH, OBJPROP_TEXT,
+                          TimeToString(at, TIME_DATE | TIME_MINUTES));
+
+         PrintFormat("[host] start set to %s - building the session",
+                     TimeToString(at, TIME_DATE | TIME_MINUTES));
+         ChartSetSymbolPeriod(ChartID(), _Symbol, _Period);
+        }
+      return;
+     }
+
    //--- a pass that has asked for the symbol change is seconds from
    //--- being destroyed. Pumping ticks into a symbol whose chart is
    //--- mid-switch buys nothing and can only produce half-written bars.
@@ -1370,11 +1649,6 @@ void RunHostCommand(const ENUM_SSR_CMD cmd)
       g_panel.Render();
      }
   }
-
-//--- declared before they are called, so the compiler never has to guess
-void RunHostCommand(const ENUM_SSR_CMD cmd);
-void RouteEvent(const int id, const long &lparam,
-                const double &dparam, const string &sparam);
 
 //+------------------------------------------------------------------+
 void OnChartEvent(const int id, const long &lparam,
