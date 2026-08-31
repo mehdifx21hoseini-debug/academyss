@@ -3214,3 +3214,63 @@ Saying so is cheaper than discovering later that a green test meant less
 than it looked.
 
 **Not measured:** v62 has not been run on MetaTrader.
+
+## v63 — shorts, MetaTrader-style levels, and trade history
+
+**Reported:** "معامله شورت اصلا نمیگیره نمیذاره اس ال رو ببرم بالا" — a
+short cannot be set up; the stop will not stay above the price. Plus two
+requests: lines that look like MetaTrader's own, and closed trades left on
+the chart.
+
+### The short was blocked by a feedback loop
+
+The host read the stop distance off the chart every pump and handed it
+straight back to `SetStopPoints`, which was hardcoded long:
+
+```
+m_sl_price = price - points * point;   // always below
+m_tp_price = price + ...;              // always above
+```
+
+So a stop dragged above the price was pushed back below within 40 ms.
+Building a short with a mouse was impossible, and Flip did not rescue it —
+it placed the lines short and the next pump dragged them back.
+
+The user's own recording shows it plainly: nine `sl/tp lines -> ok` events
+and not one `open from lines`.
+
+Two fixes, and the second matters more than the first:
+
+- `SetStopPoints` derives the side from where the stop already is.
+- The host stops writing back what it just read. `NoteLineDistances`
+  records the number for sizing and for the panel and touches nothing.
+  **Reading a value and then writing it back onto its own source was never
+  a thing that needed doing**; it existed only so a stepper button could
+  move the line, and it cost the product an entire trade direction.
+
+### Levels the way the platform draws them
+
+Entry solid with `#12 buy 0.21 4438.48`, stop and target dashed with
+`sl …` / `tp …`, all as object descriptions rather than tooltips — and
+`CHART_SHOW_OBJECT_DESCR` turned on at attach, without which the labels
+exist and nothing displays them, which is the same as not writing them.
+
+### Closed trades stay on the chart
+
+Entry arrow, exit arrow pointing the opposite way (the closing deal
+genuinely is the opposite side), and a dotted line between them coloured by
+the net result. Drawn once and left alone — history does not change.
+`InpTradeHistory` turns it off.
+
+A replay whose trades vanish the moment they close makes the user rebuild
+the session from a table afterwards, which is the work practising on a
+chart is supposed to replace.
+
+### Smoke
+
+Arm short and assert the stop is above the price; apply a stop distance and
+assert it is *still* above — that second assertion is the bug. Sabotage-
+verified: restoring `is_long = true` moves the stop from 4443.93 to 4432.93
+and the stage fails. History gets its own three stages.
+
+**Not measured:** v63 has not been run on MetaTrader.

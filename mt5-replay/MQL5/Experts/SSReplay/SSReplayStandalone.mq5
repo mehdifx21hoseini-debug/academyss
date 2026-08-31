@@ -124,6 +124,7 @@ input double          InpStopPoints  = 0;                    // Default stop, in
 input double          InpRR          = 2.0;                  // Target distance, as a multiple of the stop
 input bool            InpVitals      = true;                 // Print one diagnostic line a second to the Experts log
 input bool            InpFlightRec   = true;                 // Record a black box file to MQL5/Files (send it when reporting a fault)
+input bool            InpTradeHistory = true;                // Leave closed trades drawn on the chart
 
 CSSRMt5DataSource    g_src;
 CSSRCustomSymbolSink g_sink;
@@ -2065,10 +2066,11 @@ void OnTimer()
             g_lines.Poll();
             double pts = g_lines.StopPointsFrom(px);
             if(pts > 0.0)
-              {
-               g_gport.SetStopPoints(pts);
-               g_gport.SetTpPoints(g_lines.RewardRatio(px) * pts);
-              }
+               //--- NOTE, not Set. Set moves the lines, and moving the
+               //--- thing you have just finished reading is how a stop
+               //--- dragged above the price got pushed back below it.
+               g_gport.NoteLineDistances(pts, g_lines.RewardRatio(px) * pts,
+                                         g_lines.IsLongSetup(px));
            }
 
          //+------------------------------------------------------------------+
@@ -2095,10 +2097,28 @@ void OnTimer()
             for(int pi = 0; pi < g_acct.Total(); pi++)
               {
                SSRVirtualPosition vp;
-               if(!g_acct.At(pi, vp) || vp.state != SSR_POS_OPEN)
+               if(!g_acct.At(pi, vp))
                   continue;
-               g_lines.DrawPosition(vp.ticket, vp.open_price, vp.sl, vp.tp,
-                                    SSRIsLong(vp.type), vp.volume);
+
+               if(vp.state == SSR_POS_OPEN)
+                 {
+                  g_lines.DrawPosition(vp.ticket, vp.open_price, vp.sl, vp.tp,
+                                       SSRIsLong(vp.type), vp.volume);
+                  continue;
+                 }
+
+               //--- and the ones that are over. A replay whose trades
+               //--- vanish the moment they close makes the user rebuild
+               //--- the session from a table afterwards, which is the
+               //--- work practising on a chart is meant to replace.
+               //--- DrawClosed returns early once the objects exist, so
+               //--- this costs one ObjectFind per closed trade per pass.
+               if(InpTradeHistory && vp.state == SSR_POS_CLOSED)
+                  g_lines.DrawClosed(vp.ticket,
+                                     (datetime)(vp.open_msc / 1000), vp.open_price,
+                                     (datetime)(vp.close_msc / 1000), vp.close_price,
+                                     SSRIsLong(vp.type), vp.volume_initial,
+                                     vp.profit + vp.swap - vp.commission);
               }
             g_lines.EndPositions();
            }

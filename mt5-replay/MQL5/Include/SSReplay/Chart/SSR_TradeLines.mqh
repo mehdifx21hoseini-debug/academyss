@@ -51,7 +51,8 @@ private:
    //--- a plain price level; positions are not draggable, they are a
    //--- record of what happened
    void              Level(const string n, const double price, const color col,
-                           const int style, const int width, const string tip)
+                           const int style, const int width, const string tip,
+                           const string label = "")
      {
       if(ObjectFind(m_chart, n) < 0)
         {
@@ -65,6 +66,10 @@ private:
       ObjectSetInteger(m_chart, n, OBJPROP_STYLE,   style);
       ObjectSetInteger(m_chart, n, OBJPROP_WIDTH,   width);
       ObjectSetString (m_chart, n, OBJPROP_TOOLTIP, tip);
+      //--- the text MetaTrader prints beside its own position lines. It
+      //--- only shows while the chart is set to draw descriptions, which
+      //--- Attach turns on, so a level is readable without hovering it.
+      ObjectSetString (m_chart, n, OBJPROP_TEXT, label == "" ? tip : label);
       ObjectSetDouble (m_chart, n, OBJPROP_PRICE,   price);
      }
 
@@ -121,6 +126,9 @@ public:
       m_point  = (point > 0.0 ? point : 1.0);
       m_sl_col = sl_col;
       m_tp_col = tp_col;
+      //--- without this the descriptions exist and nothing shows them,
+      //--- which is the same as not having written them
+      ChartSetInteger(m_chart, CHART_SHOW_OBJECT_DESCR, true);
      }
 
    bool              IsArmed(void)  { return m_armed; }
@@ -168,10 +176,26 @@ public:
      {
       if(!m_armed || price <= 0.0 || points <= 0.0)
          return false;
+      //+------------------------------------------------------------------+
+      //| WHICH SIDE THE LINES ARE ALREADY ON DECIDES WHERE THEY GO.       |
+      //|                                                                  |
+      //| This was hardcoded long: stop below, target above, every time.   |
+      //| The host read the stop distance off the chart and fed it back    |
+      //| here on every pump, so a stop dragged ABOVE the price was pushed  |
+      //| back below it within forty milliseconds - and a short setup was  |
+      //| impossible to build with a mouse. The user's recording shows     |
+      //| them arming the lines nine times and never once reaching the     |
+      //| Open button.                                                     |
+      //|                                                                  |
+      //| Flip did not rescue it either: it re-placed the lines short, and |
+      //| the very next pump dragged them back.                            |
+      //+------------------------------------------------------------------+
+      bool   is_long = (m_sl_price > 0.0 ? (m_sl_price < price) : true);
       double keep_rr = RewardRatio(price);
-      m_sl_price = NormalizeDouble(price - points * m_point, m_digits);
-      m_tp_price = NormalizeDouble(price + points * m_point *
-                                   (keep_rr > 0.0 ? keep_rr : 1.0), m_digits);
+      double dist    = points * m_point;
+      double rew     = dist * (keep_rr > 0.0 ? keep_rr : 1.0);
+      m_sl_price = NormalizeDouble(is_long ? price - dist : price + dist, m_digits);
+      m_tp_price = NormalizeDouble(is_long ? price + rew  : price - rew,  m_digits);
       Ensure(m_sl_name, m_sl_price, m_sl_col, "STOP - drag me");
       Ensure(m_tp_name, m_tp_price, m_tp_col, "TARGET - drag me");
       ChartRedraw(m_chart);
@@ -259,22 +283,27 @@ public:
       m_seen[k] = ticket;
 
       string base = "SSR_POS_" + IntegerToString((int)ticket);
-      string side = (is_long ? "BUY" : "SELL");
-      string tip  = StringFormat("%s %.2f @ %s", side, volume,
+      string side = (is_long ? "buy" : "sell");
+      //--- the label MetaTrader itself puts on a position: what it is,
+      //--- how big, and at what price. Read off the chart, not hovered.
+      string tip  = StringFormat("#%d %s %s %s", (int)ticket, side,
+                                 DoubleToString(volume, 2),
                                  DoubleToString(entry, m_digits));
 
       Level(base + "_E", entry, (is_long ? m_long_col : m_short_col),
-            STYLE_SOLID, 2, tip);
+            STYLE_SOLID, 1, tip, tip);
 
       if(sl > 0.0)
-         Level(base + "_S", sl, m_sl_col, STYLE_DOT, 1,
-               "stop of " + IntegerToString((int)ticket));
+         Level(base + "_S", sl, m_sl_col, STYLE_DASH, 1,
+               "stop of #" + IntegerToString((int)ticket),
+               "sl " + DoubleToString(sl, m_digits));
       else
          ObjectDelete(m_chart, base + "_S");
 
       if(tp > 0.0)
-         Level(base + "_T", tp, m_tp_col, STYLE_DOT, 1,
-               "target of " + IntegerToString((int)ticket));
+         Level(base + "_T", tp, m_tp_col, STYLE_DASH, 1,
+               "target of #" + IntegerToString((int)ticket),
+               "tp " + DoubleToString(tp, m_digits));
       else
          ObjectDelete(m_chart, base + "_T");
 
@@ -327,6 +356,94 @@ public:
    //| their job. The position's own levels take over: they are a       |
    //| record, not a proposal, which is why they are not draggable.     |
    //+------------------------------------------------------------------+
+   //+------------------------------------------------------------------+
+   //| A CLOSED TRADE STAYS ON THE CHART.                               |
+   //|                                                                  |
+   //| MetaTrader draws a finished deal as two arrows joined by a line,  |
+   //| and that is not decoration: it is how a trader reviews what they  |
+   //| did. A replay whose trades vanish the moment they close makes the |
+   //| user reconstruct the session from a table afterwards, which is    |
+   //| exactly the work practising on a chart is supposed to replace.    |
+   //|                                                                  |
+   //| The exit arrow points the opposite way to the entry, because the  |
+   //| closing deal genuinely is the opposite side.                      |
+   //|                                                                  |
+   //| Drawn once and left alone: history does not change, so a redraw   |
+   //| every pass would be work with nothing to show for it.             |
+   //+------------------------------------------------------------------+
+   bool              DrawClosed(const long ticket,
+                                const datetime open_time, const double open_price,
+                                const datetime close_time, const double close_price,
+                                const bool is_long, const double volume,
+                                const double net)
+     {
+      if(m_chart == 0 || open_price <= 0.0 || close_price <= 0.0)
+         return false;
+      if(open_time <= 0 || close_time <= 0)
+         return false;
+
+      string base = "SSR_HIST_" + IntegerToString((int)ticket);
+      if(ObjectFind(m_chart, base + "_L") >= 0)
+         return true;                       // already on the chart
+
+      color won = (net >= 0.0 ? clrMediumSeaGreen : clrTomato);
+
+      string a = base + "_A";
+      if(ObjectCreate(m_chart, a, (is_long ? OBJ_ARROW_BUY : OBJ_ARROW_SELL),
+                      0, open_time, open_price))
+        {
+         ObjectSetInteger(m_chart, a, OBJPROP_COLOR, (is_long ? m_long_col : m_short_col));
+         ObjectSetInteger(m_chart, a, OBJPROP_SELECTABLE, false);
+         ObjectSetInteger(m_chart, a, OBJPROP_HIDDEN, true);
+         ObjectSetString (m_chart, a, OBJPROP_TOOLTIP,
+                          StringFormat("#%d %s %s in at %s", (int)ticket,
+                                       (is_long ? "buy" : "sell"),
+                                       DoubleToString(volume, 2),
+                                       DoubleToString(open_price, m_digits)));
+        }
+
+      string b = base + "_B";
+      if(ObjectCreate(m_chart, b, (is_long ? OBJ_ARROW_SELL : OBJ_ARROW_BUY),
+                      0, close_time, close_price))
+        {
+         ObjectSetInteger(m_chart, b, OBJPROP_COLOR, won);
+         ObjectSetInteger(m_chart, b, OBJPROP_SELECTABLE, false);
+         ObjectSetInteger(m_chart, b, OBJPROP_HIDDEN, true);
+         ObjectSetString (m_chart, b, OBJPROP_TOOLTIP,
+                          StringFormat("#%d out at %s   %s%.2f", (int)ticket,
+                                       DoubleToString(close_price, m_digits),
+                                       (net >= 0.0 ? "+" : ""), net));
+        }
+
+      string l = base + "_L";
+      if(ObjectCreate(m_chart, l, OBJ_TREND, 0,
+                      open_time, open_price, close_time, close_price))
+        {
+         ObjectSetInteger(m_chart, l, OBJPROP_COLOR,      won);
+         ObjectSetInteger(m_chart, l, OBJPROP_STYLE,      STYLE_DOT);
+         ObjectSetInteger(m_chart, l, OBJPROP_WIDTH,      1);
+         ObjectSetInteger(m_chart, l, OBJPROP_RAY_RIGHT,  false);
+         ObjectSetInteger(m_chart, l, OBJPROP_RAY_LEFT,   false);
+         ObjectSetInteger(m_chart, l, OBJPROP_BACK,       true);
+         ObjectSetInteger(m_chart, l, OBJPROP_SELECTABLE, false);
+         ObjectSetInteger(m_chart, l, OBJPROP_HIDDEN,     true);
+        }
+      return true;
+     }
+
+   //--- history belongs to the session, so it goes when the session does
+   void              ClearHistory(void)
+     {
+      if(m_chart == 0)
+         return;
+      for(int i = ObjectsTotal(m_chart, -1, -1) - 1; i >= 0; i--)
+        {
+         string n = ObjectName(m_chart, i, -1, -1);
+         if(StringFind(n, "SSR_HIST_") == 0)
+            ObjectDelete(m_chart, n);
+        }
+     }
+
    void              Disarm(void)
      {
       if(m_chart == 0)
@@ -345,6 +462,7 @@ public:
       ObjectDelete(m_chart, m_tp_name);
       ArrayResize(m_seen, 0);
       EndPositions();
+      ClearHistory();
       m_armed = false;
      }
   };

@@ -449,6 +449,30 @@ public:
    void              AttachLines(CSSRTradeLines *lines) { m_lines = lines; }
 
    //+------------------------------------------------------------------+
+   //| RECORD WHAT THE LINES SAY. DO NOT MOVE THEM.                     |
+   //|                                                                  |
+   //| The host reads the stop distance off the chart every pump and    |
+   //| used to hand it to SetStopPoints - which moves the lines. Round  |
+   //| trip: chart to number to chart, forty times a second, and the    |
+   //| return leg was long-only, so a short setup was pushed back to    |
+   //| the long side before the user could let go of the mouse.         |
+   //|                                                                  |
+   //| The poll needs the NUMBER, for sizing and for the panel. It has  |
+   //| no business writing back to the thing it just read.              |
+   //+------------------------------------------------------------------+
+   void              NoteLineDistances(const double stop_pts, const double tp_pts,
+                                       const bool is_long)
+     {
+      if(stop_pts > 0.0)
+         m_stop_points = stop_pts;
+      if(tp_pts > 0.0)
+         m_tp_points = tp_pts;
+      //--- and which way the lines currently point, so the panel's own
+      //--- label agrees with the chart rather than with a stale button
+      m_line_long = is_long;
+     }
+
+   //+------------------------------------------------------------------+
    //| THE LINE VERBS.                                                  |
    //|                                                                  |
    //| One button arms them, one clears them, one mirrors them across   |

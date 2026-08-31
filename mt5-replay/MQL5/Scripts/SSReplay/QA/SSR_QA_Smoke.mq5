@@ -493,9 +493,54 @@ void OnStart()
             ObjectFind(lchart, "SSR_POS_4242_T") >= 0,
             "planning lines gone, the trade's stop and target still drawn");
 
+      //+------------------------------------------------------------------+
+      //| A SHORT SETUP HAS TO SURVIVE THE NEXT PUMP.                      |
+      //|                                                                  |
+      //| SetStopPoints was hardcoded long, and the host fed the polled    |
+      //| distance back into it every pump - so a stop dragged ABOVE the   |
+      //| price was pushed below it again within 40ms, and no short could  |
+      //| ever be built with a mouse. Arm short, apply a distance, and ask |
+      //| whether the stop is still on the short side.                     |
+      //+------------------------------------------------------------------+
+      Check("the lines arm SHORT with the stop above the price",
+            lines.ArmSide(lpx, 500, 2.0, false) && lines.SlPrice() > lpx &&
+            lines.TpPrice() < lpx,
+            StringFormat("price %s  sl %s  tp %s", DoubleToString(lpx, 2),
+                         DoubleToString(lines.SlPrice(), 2),
+                         DoubleToString(lines.TpPrice(), 2)));
+
+      lines.SetStopPoints(lpx, 600);
+      Check("and a stop distance does not flip it back to long",
+            lines.SlPrice() > lpx && lines.TpPrice() < lpx,
+            StringFormat("after SetStopPoints: sl %s  tp %s - below the price "
+                         "here means a short can never be placed",
+                         DoubleToString(lines.SlPrice(), 2),
+                         DoubleToString(lines.TpPrice(), 2)));
+
+      //+------------------------------------------------------------------+
+      //| AND A CLOSED TRADE STAYS ON THE CHART.                           |
+      //+------------------------------------------------------------------+
+      datetime t1 = (datetime)SeriesInfoInteger(rsym, PERIOD_M1, SERIES_LASTBAR_DATE);
+      if(t1 > 0)
+        {
+         lines.DrawClosed(777, t1 - 600, lpx, t1, lpx + 3.0, true, 0.10, 42.0);
+         Check("a closed trade leaves history on the chart",
+               ObjectFind(lchart, "SSR_HIST_777_A") >= 0 &&
+               ObjectFind(lchart, "SSR_HIST_777_B") >= 0 &&
+               ObjectFind(lchart, "SSR_HIST_777_L") >= 0,
+               "entry arrow, exit arrow and the line between them");
+
+         lines.DrawClosed(777, t1 - 600, lpx, t1, lpx + 3.0, true, 0.10, 42.0);
+         Check("and drawing it again costs nothing",
+               ObjectFind(lchart, "SSR_HIST_777_L") >= 0,
+               "history does not change, so it is not redrawn");
+        }
+
       lines.Clear();
-      Check("Clear takes everything", ObjectFind(lchart, "SSR_POS_4242_E") < 0,
-            "the sweep still works when a session really is over");
+      Check("Clear takes everything",
+            ObjectFind(lchart, "SSR_POS_4242_E") < 0 &&
+            ObjectFind(lchart, "SSR_HIST_777_L") < 0,
+            "positions and history both go when the session is over");
       ChartClose(lchart);
      }
 
