@@ -399,6 +399,72 @@ METHOD_DEF = re.compile(r'^\s*(?:virtual\s+|static\s+|const\s+)*'
 FUNC_HEAD = re.compile(r'^[A-Za-z_][\w:]*\s*[\*&]?\s*([A-Za-z_]\w*)\s*\(([^)]*)\)\s*$', re.M)
 CONST_PARAM = re.compile(r'\bconst\s+[A-Za-z_][\w:]*\s*[\*&]?\s*([A-Za-z_]\w*)\s*(?:,|$)')
 
+#--- A11: the method must exist on THAT object's class.
+#---
+#--- A7 asks "is this name declared anywhere in the tree", and that is
+#--- exactly how g_group.Status() shipped: Status() is real - on
+#--- CSSRReplayController - and g_group is a CSSRReplayGroup, which has
+#--- no such method. Three compile errors from a name that existed.
+#---
+#--- A8 covers the same shape for `override`; this covers it for plain
+#--- calls on globals whose type is written right there in the file.
+#--- Only globals declared as `CSSRThing g_name;` are checked - pointers
+#--- and locals are left to A7, which is weaker but never wrong-headed.
+GLOBAL_DECL = re.compile(r'^(CSSR[A-Za-z]\w*)\s+(g_[a-z_0-9]+)\s*(?:;|\[)', re.M)
+CLASS_BODY  = re.compile(r'^class\s+(CSSR[A-Za-z]\w*)\s*(?::\s*public\s+(CSSR[A-Za-z]\w*))?',
+                         re.M)
+
+def class_methods():
+    """name -> set of methods, following single inheritance."""
+    own, base = {}, {}
+    for path, body in CLEAN.items():
+        lines = body.splitlines()
+        for m in CLASS_BODY.finditer(body):
+            cls = m.group(1)
+            own.setdefault(cls, set())
+            if m.group(2):
+                base[cls] = m.group(2)
+            start = body[:m.end()].count("\n")
+            depth, seen, end = 0, False, len(lines) - 1
+            for i in range(start, len(lines)):
+                depth += lines[i].count("{") - lines[i].count("}")
+                if depth > 0:
+                    seen = True
+                if seen and depth <= 0:
+                    end = i
+                    break
+            for i in range(start, end + 1):
+                d = DECL_METHOD.match(lines[i])
+                if d and d.group(1) not in NOT_A_RETURN_TYPE:
+                    own[cls].add(d.group(2))
+    #--- fold bases in
+    for cls in list(own):
+        seen, cur = set(), base.get(cls)
+        while cur and cur in own and cur not in seen:
+            seen.add(cur)
+            own[cls] |= own[cur]
+            cur = base.get(cur)
+    return own
+
+def audit_a11():
+    methods = class_methods()
+    for path, body in CLEAN.items():
+        types = {}
+        for m in GLOBAL_DECL.finditer(body):
+            if m.group(1) in methods:
+                types[m.group(2)] = m.group(1)
+        if not types:
+            continue
+        pat = re.compile(r'\b(' + "|".join(sorted(re.escape(g) for g in types)) +
+                         r')\s*\.\s*([A-Za-z_]\w*)\s*\(')
+        for m in pat.finditer(body):
+            cls = types[m.group(1)]
+            if m.group(2) in methods[cls] or m.group(2) in ("Detach", "Release"):
+                continue
+            report("A11", path, body[:m.start()].count("\n") + 1,
+                   "%s.%s() - %s has no such method (the name exists on some "
+                   "other class)" % (m.group(1), m.group(2), cls))
+
 def audit_a10():
     for path, body in CLEAN.items():
         lines = body.splitlines()
@@ -523,7 +589,7 @@ def audit_a7():
                    "%s() is called on a member of ours but declared nowhere - "
                    "the other half of a change did not land" % name)
 
-for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10):
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11):
     fn()
 
 if findings:

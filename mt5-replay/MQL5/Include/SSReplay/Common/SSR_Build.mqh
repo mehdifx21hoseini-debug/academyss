@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v49 2026-08-31  the-pick-survives"
+#define SSR_BUILD           "v50 2026-08-31  a11-right-class"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

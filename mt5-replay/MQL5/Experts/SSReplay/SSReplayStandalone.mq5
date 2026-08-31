@@ -1156,7 +1156,7 @@ bool BuildSession(string origin, const bool on_replay,
                "| status %s",
                SSRFormatMsc(win_start), SSRFormatMsc(win_end), win_bars,
                (g_panel_chart == g_replay_chart ? "the replay chart" : "this chart"),
-               SSRStateName(g_group.Status()));
+               SSRStateName(g_ctrl.Status()));
 
    if(g_on_replay_chart)
       PrintFormat("[host] one window: the chart, the panel, the mouse and the "
