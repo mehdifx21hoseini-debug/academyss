@@ -474,6 +474,14 @@ void OnStart()
             ObjectFind(lchart, "SSR_LINE_TP") >= 0,
             "SSR_LINE_SL and SSR_LINE_TP are on the chart");
 
+      //--- a MetaTrader object must be SELECTED before it can be
+      //--- dragged, so an unselected stop costs a click to arm and a
+      //--- second drag to use. These lines exist only to be dragged.
+      Check("the planning lines are draggable on first touch",
+            ObjectGetInteger(lchart, "SSR_LINE_SL", OBJPROP_SELECTED) &&
+            ObjectGetInteger(lchart, "SSR_LINE_TP", OBJPROP_SELECTED),
+            "both selected - no click needed before the drag");
+
       lines.BeginPositions();
       lines.DrawPosition(4242, lpx, lpx - 5.0, lpx + 10.0, true, 0.10);
       lines.EndPositions();
@@ -482,6 +490,15 @@ void OnStart()
             ObjectFind(lchart, "SSR_POS_4242_S") >= 0 &&
             ObjectFind(lchart, "SSR_POS_4242_T") >= 0,
             "entry, stop and target");
+
+      //--- and worded the way the platform words them, because the whole
+      //--- point of the request was that ours read as a different product
+      Check("and they are labelled the MetaTrader way",
+            ObjectGetString(lchart, "SSR_POS_4242_S", OBJPROP_TEXT) == "SL" &&
+            ObjectGetString(lchart, "SSR_POS_4242_T", OBJPROP_TEXT) == "TP" &&
+            StringFind(ObjectGetString(lchart, "SSR_POS_4242_E",
+                                       OBJPROP_TEXT), "BUY ") == 0,
+            "SL, TP, and BUY <volume> at <price>");
 
       //--- THE REGRESSION, in one call
       lines.Disarm();

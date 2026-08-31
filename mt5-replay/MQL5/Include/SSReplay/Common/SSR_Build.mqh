@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v63 2026-08-31  shorts-and-history"
+#define SSR_BUILD           "v64 2026-08-31  levels-like-the-platform"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

@@ -60,7 +60,10 @@ private:
             return;
          ObjectSetInteger(m_chart, n, OBJPROP_SELECTABLE, false);
          ObjectSetInteger(m_chart, n, OBJPROP_HIDDEN,     true);
-         ObjectSetInteger(m_chart, n, OBJPROP_BACK,       true);
+         //--- MetaTrader draws trade levels OVER the candles, not behind
+         //--- them. Behind, a level crossing a dense area disappears
+         //--- into it - which is exactly where a stop matters most.
+         ObjectSetInteger(m_chart, n, OBJPROP_BACK,       false);
         }
       ObjectSetInteger(m_chart, n, OBJPROP_COLOR,   col);
       ObjectSetInteger(m_chart, n, OBJPROP_STYLE,   style);
@@ -89,13 +92,25 @@ private:
          ObjectSetInteger(m_chart, n, OBJPROP_WIDTH,      1);
          ObjectSetInteger(m_chart, n, OBJPROP_BACK,       false);
          ObjectSetInteger(m_chart, n, OBJPROP_SELECTABLE, true);
-         ObjectSetInteger(m_chart, n, OBJPROP_SELECTED,   false);
          ObjectSetInteger(m_chart, n, OBJPROP_HIDDEN,     true);
          ObjectSetInteger(m_chart, n, OBJPROP_ZORDER,     0);
         }
       ObjectSetInteger(m_chart, n, OBJPROP_COLOR,   col);
       ObjectSetInteger(m_chart, n, OBJPROP_STYLE,   STYLE_DASHDOT);
       ObjectSetString (m_chart, n, OBJPROP_TOOLTIP, tip);
+      //+------------------------------------------------------------------+
+      //| SELECTED, SO THE FIRST TOUCH DRAGS IT.                           |
+      //|                                                                  |
+      //| A MetaTrader object has to be selected before it can be moved,   |
+      //| so an unselected stop line costs a click to arm and a second     |
+      //| drag to use - and in between, the click lands on the chart and    |
+      //| does nothing visible. On a real trade level MetaTrader asks for   |
+      //| neither: you grab it and it moves.                                |
+      //|                                                                  |
+      //| These two lines exist ONLY to be dragged, so there is nothing     |
+      //| for selection to disambiguate. Selected is their resting state.   |
+      //+------------------------------------------------------------------+
+      ObjectSetInteger(m_chart, n, OBJPROP_SELECTED, true);
       ObjectSetDouble (m_chart, n, OBJPROP_PRICE,   price);
       return true;
      }
@@ -226,6 +241,16 @@ public:
                     MathAbs(tp - m_tp_price) > m_point * 0.5);
       m_sl_price = sl;
       m_tp_price = tp;
+
+      //--- and keep them selected. Clicking anywhere else on the chart
+      //--- clears the selection, and a line that silently stops being
+      //--- draggable after one stray click is the same defect arriving
+      //--- a minute later.
+      if(!ObjectGetInteger(m_chart, m_sl_name, OBJPROP_SELECTED))
+         ObjectSetInteger(m_chart, m_sl_name, OBJPROP_SELECTED, true);
+      if(!ObjectGetInteger(m_chart, m_tp_name, OBJPROP_SELECTED))
+         ObjectSetInteger(m_chart, m_tp_name, OBJPROP_SELECTED, true);
+
       return moved;
      }
 
@@ -282,28 +307,47 @@ public:
       ArrayResize(m_seen, k + 1);
       m_seen[k] = ticket;
 
+      //+------------------------------------------------------------------+
+      //| WORDED, STYLED AND COLOURED THE WAY THE PLATFORM DOES IT.        |
+      //|                                                                  |
+      //| Side by side with a real MetaTrader position, ours read as a     |
+      //| different product: "#12 buy 0.21 4438.48" against MetaTrader's   |
+      //| "BUY 0.2 at 53226", solid against dash-dot, our palette against  |
+      //| the one the user chose in the platform's own settings.           |
+      //|                                                                  |
+      //| CHART_COLOR_STOP_LEVEL is that setting - it is documented as the |
+      //| colour of the Stop Loss and Take Profit levels - so asking the   |
+      //| chart for it means these levels match every other trade level    |
+      //| the user has ever seen, on whatever scheme they run.             |
+      //+------------------------------------------------------------------+
       string base = "SSR_POS_" + IntegerToString((int)ticket);
-      string side = (is_long ? "buy" : "sell");
-      //--- the label MetaTrader itself puts on a position: what it is,
-      //--- how big, and at what price. Read off the chart, not hovered.
-      string tip  = StringFormat("#%d %s %s %s", (int)ticket, side,
+      string side = (is_long ? "BUY" : "SELL");
+      string tip  = StringFormat("%s %s at %s", side,
                                  DoubleToString(volume, 2),
                                  DoubleToString(entry, m_digits));
 
+      color stop_col = (color)ChartGetInteger(m_chart, CHART_COLOR_STOP_LEVEL);
+      if(stop_col == clrNONE || stop_col == (color)ChartGetInteger(m_chart, CHART_COLOR_BACKGROUND))
+         stop_col = m_sl_col;      // an invisible level is not a level
+
       Level(base + "_E", entry, (is_long ? m_long_col : m_short_col),
-            STYLE_SOLID, 1, tip, tip);
+            STYLE_DASHDOT, 1, tip, tip);
 
       if(sl > 0.0)
-         Level(base + "_S", sl, m_sl_col, STYLE_DASH, 1,
-               "stop of #" + IntegerToString((int)ticket),
-               "sl " + DoubleToString(sl, m_digits));
+         Level(base + "_S", sl, stop_col, STYLE_DASHDOT, 1,
+               StringFormat("stop of %s %s at %s", side,
+                            DoubleToString(volume, 2),
+                            DoubleToString(sl, m_digits)),
+               "SL");
       else
          ObjectDelete(m_chart, base + "_S");
 
       if(tp > 0.0)
-         Level(base + "_T", tp, m_tp_col, STYLE_DASH, 1,
-               "target of #" + IntegerToString((int)ticket),
-               "tp " + DoubleToString(tp, m_digits));
+         Level(base + "_T", tp, stop_col, STYLE_DASHDOT, 1,
+               StringFormat("target of %s %s at %s", side,
+                            DoubleToString(volume, 2),
+                            DoubleToString(tp, m_digits)),
+               "TP");
       else
          ObjectDelete(m_chart, base + "_T");
 

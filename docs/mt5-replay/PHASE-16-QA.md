@@ -3274,3 +3274,45 @@ verified: restoring `is_long = true` moves the stop from 4443.93 to 4432.93
 and the stage fails. History gets its own three stages.
 
 **Not measured:** v63 has not been run on MetaTrader.
+
+## v64 — levels the way the platform draws them
+
+Two screenshots side by side settled it. Ours read as a different product:
+
+| MetaTrader | v63 |
+|---|---|
+| `BUY 0.2 at 53226` | `#12 buy 0.21 4438.48` |
+| `SL` | `sl 4436.10` |
+| `TP` | `tp 4450.00` |
+| dash-dot | solid / dashed |
+| the user's own scheme | our palette |
+
+**Fixes.**
+
+- MetaTrader's exact wording: `BUY 0.20 at 4445.61`, `SL`, `TP`. No more.
+- `STYLE_DASHDOT`, width 1, on all three.
+- Colour read from `CHART_COLOR_STOP_LEVEL` — the platform's own documented
+  setting for Stop Loss and Take Profit levels. Our levels now agree with
+  every other trade level the user has seen, on whatever scheme they run,
+  instead of with a palette chosen here. If that colour matches the
+  background — an invisible level is not a level — it falls back.
+- Drawn **over** the candles, not behind. A level that vanishes into a
+  dense area vanishes exactly where it matters most.
+
+**And the stop drags on first touch.** Reported: you have to click the line
+to select it before it will move. True — a MetaTrader object must be
+selected before it can be dragged, so an unselected stop cost a click to
+arm and a drag to use, with the arming click landing on the chart and doing
+nothing visible. MetaTrader asks for neither on a real trade level.
+
+These two lines exist *only* to be dragged, so there is nothing for
+selection to disambiguate: selected is their resting state, and `Poll`
+re-asserts it, because clicking anywhere else clears it and a line that
+silently stops being draggable after one stray click is the same defect
+arriving a minute later.
+
+**Smoke:** both covered and both sabotage-verified — restoring
+`OBJPROP_SELECTED=false` fails the first, restoring the old label wording
+fails the second.
+
+**Not measured:** v64 has not been run on MetaTrader.
