@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v52 2026-08-31  compact-panel"
+#define SSR_BUILD           "v53 2026-08-31  the-chart-follows"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

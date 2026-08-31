@@ -345,6 +345,22 @@ public:
                i = Add(id);
                if(i >= 0)
                  {
+                  //+------------------------------------------------------------------+
+                  //| A CHART WE DID NOT OPEN STILL NEEDS THE POLICY.                  |
+                  //|                                                                  |
+                  //| ApplyPolicy - which turns AUTOSCROLL on - was only reached from  |
+                  //| OpenChart. In one-window mode the host does not open a chart at  |
+                  //| all; it hands its OWN chart to the replay symbol, so the policy  |
+                  //| never ran. Bars were written, the chart held them, and the view  |
+                  //| never followed to the right-hand edge: candles appearing off     |
+                  //| screen, and a user reporting "the candles do not move" about an  |
+                  //| engine that a smoke test had just proved was writing them.       |
+                  //|                                                                  |
+                  //| Applied on DISCOVERY only. Re-applying every pass would undo     |
+                  //| DetectScroll, which deliberately releases autoscroll the moment  |
+                  //| the user scrolls back to look at something.                      |
+                  //+------------------------------------------------------------------+
+                  ApplyPolicy(id);
                   if(m_observer != NULL)
                      m_observer.OnChartOpened(id);
                  }

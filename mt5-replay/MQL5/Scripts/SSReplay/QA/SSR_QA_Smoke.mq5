@@ -32,6 +32,7 @@
 #include <SSReplay/Core/SSR_MasterClock.mqh>
 #include <SSReplay/Data/SSR_Mt5DataSource.mqh>
 #include <SSReplay/Mt5/SSR_CustomSymbolSink.mqh>
+#include <SSReplay/Chart/SSR_ChartManager.mqh>
 
 input string InpSymbol     = "";     // Symbol (empty = this chart)
 input int    InpReplayBars = 400;    // Replay window, in M1 bars
@@ -146,7 +147,39 @@ void OnStart()
    Check("new CANDLES appeared", after_bars > before_bars,
          StringFormat("%d -> %d bars in %s", before_bars, after_bars, rsym));
 
-   //--- 7. stepping ------------------------------------------------
+   //+------------------------------------------------------------------+
+   //| 7. THE CHART FOLLOWS.                                            |
+   //|                                                                  |
+   //| Bars in the symbol are not candles on a screen. The host hands   |
+   //| its own chart to the replay symbol rather than opening one, so   |
+   //| the chart arrives through Sync's DISCOVERY path - and until v53  |
+   //| that path never applied the policy. AUTOSCROLL stayed off, the   |
+   //| view never followed the new bars, and the candles "did not       |
+   //| move" while the engine was writing them perfectly.               |
+   //|                                                                  |
+   //| This opens a chart WITHOUT OpenChart, exactly as the host does,  |
+   //| and asks whether Sync made it follow.                            |
+   //+------------------------------------------------------------------+
+   long probe = ChartOpen(rsym, PERIOD_M5);
+   if(Check("a chart can be opened on the replay symbol", probe != 0, rsym))
+     {
+      ChartSetInteger(probe, CHART_AUTOSCROLL, false);   // as MT5 leaves it
+
+      CSSRChartManager mgr;
+      mgr.Configure(rsym, origin);
+      mgr.Sync();
+
+      Check("Sync makes a discovered chart follow",
+            (bool)ChartGetInteger(probe, CHART_AUTOSCROLL),
+            "CHART_AUTOSCROLL after Sync - off means new candles land "
+            "off-screen and nothing appears to move");
+
+      mgr.Redraw(true);
+      Ok("manager redraws on demand", "Redraw(force) returned");
+      ChartClose(probe);
+     }
+
+   //--- 8. stepping ------------------------------------------------
    ctrl.Pause();
    int step_before = Bars(rsym, PERIOD_M1);
    ctrl.StepBars(10);

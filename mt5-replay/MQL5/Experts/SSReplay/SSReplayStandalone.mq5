@@ -1668,6 +1668,10 @@ void OnTimer()
       for(int i = 0; i < g_extra; i++)
          g_publisher2[i].Publish();
       g_charts.Sync();
+      //--- and repaint. Free at the tick fidelities, and the only thing
+      //--- that moves the chart at bar fidelity, where no tick arrives
+      //--- to do it. The manager throttles it.
+      g_charts.Redraw();
       for(int i = 0; i < g_extra; i++)
          g_charts2[i].Sync();
      }
