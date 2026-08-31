@@ -200,6 +200,19 @@ ulong g_last_pump_us = 0;
 int   g_slow_tick    = 0;
 bool  g_ready        = false;
 bool  g_was_playing  = false;      // to notice the moment Play is pressed
+//+------------------------------------------------------------------+
+//| THE FIRST FEW VITALS LINES ARE NOT OPTIONAL.                     |
+//|                                                                  |
+//| InpVitals was added in v54 with a default of on, and the user's   |
+//| log came back with not one vitals line in it - so the one thing   |
+//| that could have ended this loop was the one thing that did not    |
+//| run, and there is no way from here to tell whether the input was  |
+//| off, saved off by an earlier attach, or never reached.            |
+//|                                                                  |
+//| A diagnostic a stale input set can silence is not a diagnostic.   |
+//| Ten lines always come out. After that the input decides.          |
+//+------------------------------------------------------------------+
+int   g_vitals_left  = 10;
 
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
@@ -1051,14 +1064,34 @@ bool BuildSession(string origin, const bool on_replay,
          Print("[host] could not resume: ", g_session_mgr.LastError());
      }
 
-   //--- otherwise a position saved by a previous run lands the user
-   //--- where they stopped rather than at the start of the window.
-   //---
-   //--- NOT after a random pick. A random session that resumes where
-   //--- the last one stopped is not a random session, and the whole
-   //--- point was to arrive somewhere the trader does not recognise.
+   //+------------------------------------------------------------------+
+   //| A SAVED POSITION NEVER OVERRULES A START THE USER CHOSE.         |
+   //|                                                                  |
+   //| Otherwise a position saved by a previous run lands the user where |
+   //| they stopped rather than at the start of the window - which is    |
+   //| right when they did not say where to begin, and wrong the moment  |
+   //| they did.                                                         |
+   //|                                                                  |
+   //| It was wrong. The user dragged the orange line to 2026.08.24      |
+   //| 19:06, pressed START REPLAY HERE, and the tool jumped to          |
+   //| 2026.08.31 02:49 - six days past the line, four hundred bars from |
+   //| the end of the window - because a previous session had stopped    |
+   //| there. The whole picker, the whole "everything after it will not  |
+   //| exist" promise, silently undone by a resume they never asked for. |
+   //|                                                                  |
+   //| Three starts are explicit: the dragged line, InpStart, and a      |
+   //| random pick. None of them may be second-guessed. A random session |
+   //| that resumes where the last one stopped is also not random, and   |
+   //| the whole point was to arrive somewhere unrecognised.             |
+   //+------------------------------------------------------------------+
+   bool start_was_chosen = (random_start > 0 || InpStart > 0 ||
+                            g_pick_msc != SSR_INVALID_TIME);
+   if(start_was_chosen && !g_resumed)
+      PrintFormat("[host] starting at %s because you chose it - not resuming "
+                  "any earlier position", SSRFormatMsc(win_start));
+
    SSRSnapshot saved;
-   if(!g_resumed && random_start <= 0 &&
+   if(!g_resumed && !start_was_chosen &&
       g_ctrl.PeekPosition(origin, saved) &&
       saved.taken_at_msc > win_start && saved.taken_at_msc < win_end)
      {
@@ -1084,6 +1117,10 @@ bool BuildSession(string origin, const bool on_replay,
 
    EventSetMillisecondTimer(InpPumpMs);
    g_last_pump_us = GetMicrosecondCount();
+   g_vitals_left  = 10;
+   PrintFormat("[host] vitals %s - one line per second in the Experts tab, "
+               "the first %d whatever the input says",
+               (InpVitals ? "ON (InpVitals)" : "off, but"), 10);
    //--- the speed the session opens at, through the port so the panel
    //--- and the engine agree from the first frame
    if(InpStartSpeed > 0.0)
@@ -1570,13 +1607,15 @@ void PrintVitals()
       charts = " | NO CHART is showing " + rsym +
                " - the view cannot move because nothing is looking at it";
 
-   PrintFormat("[vitals] %s clock=%s playing=%d spd=%.0fx | %s m1=%d last=%s snaps=%d%s",
+   PrintFormat("[vitals] %s clock=%s playing=%d spd=%.0fx | %s m1=%d last=%s "
+               "ticks=%d snaps=%d%s",
                SSRStateName(g_ctrl.Status()),
                SSRFormatMsc(g_ctrl.Now()),
                (int)g_group.AnyPlaying(),
                g_ctrl.SpeedX100() / 100.0,
                rsym, m1,
                (lastbar > 0 ? TimeToString(lastbar, TIME_DATE | TIME_MINUTES) : "-"),
+               (int)g_sink.EmitTicks(),
                (int)g_charts.Snaps(),
                charts);
   }
@@ -1764,8 +1803,13 @@ void OnTimer()
    //--- A paused replay has nothing new to say, so it says it ten
    //--- times less often: enough to still answer "is it alive", not
    //--- enough to bury the log while the user reads a chart.
-   if(InpVitals && g_slow_tick % (playing ? 25 : 250) == 0)
+   if(g_slow_tick % (playing ? 25 : 250) == 0 &&
+      (InpVitals || g_vitals_left > 0))
+     {
+      if(g_vitals_left > 0)
+         g_vitals_left--;
       PrintVitals();
+     }
    if(g_slow_tick % 50 == 0)
      {
       g_charts.ScanLeaks();

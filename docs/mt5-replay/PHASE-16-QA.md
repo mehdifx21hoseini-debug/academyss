@@ -2747,3 +2747,76 @@ thing.
 
 **Not measured:** v54 has not been run on MetaTrader — neither the EA nor
 the smoke test.
+
+## v55 — the jump that reported 5918 bars and wrote one
+
+**Reported:** "بازم کندل ها تکون نمیخورم وقتی اسپیس رو میزنم", with a full
+host log and a clean smoke run (17 passed, 0 FAILED).
+
+Three defects, all provable by putting the two logs side by side. None of
+them was visible in either log alone, which is why the smoke test earns its
+keep even on a run where everything passes.
+
+### 1. The seed cache swallowed every bulk write for the rest of the session
+
+```
+[SSR][INFO][host] jumped to 2026.08.31 02:49:59 (5918 bars in bulk)
+```
+and two minutes later, the smoke test asking the *symbol*:
+```
+PASS  M1 history present   1001 bars local
+```
+
+`InpWarmupBars` is 1000. So of 5918 reported bars, **one** was written. No
+error, no log line, `SeedBars` returned true.
+
+`m_reused_seed` means "the warmup bars are already in this symbol". It was
+tested at the top of `SeedBars` with no reference to *which* bars were being
+written — and `JumpForward` writes its bulk through `SeedBars` too. So the
+first reused-seed session turned every later bulk write into a no-op that
+reported success. Now the skip applies only when the batch ends at or before
+the warmup end, and the cache manifest is likewise only written for the
+warmup, since a jump's bars are truncated away on the next adopt.
+
+### 2. A saved position silently overruled the start the user picked
+
+The user dragged the line to 2026.08.24 19:06 and pressed START REPLAY HERE.
+The session opened at 2026.08.31 02:49 — six days later, 470 bars from the
+end of the window — because `PeekPosition` found where a previous run had
+stopped. The picker, and the "everything after it will not exist" promise
+with it, undone by a resume nobody asked for. An explicit start (the dragged
+line, `InpStart`, or a random pick) now beats any saved position, and the
+host says so in the log rather than doing it quietly.
+
+### 3. The diagnostic added to end the loop did not run
+
+`InpVitals` defaulted to on and the log contains not one `[vitals]` line.
+From here there is no way to tell whether the input was off, saved off by an
+earlier attach, or never reached — which is exactly the ambiguity the line
+existed to remove. **A diagnostic a stale input set can silence is not a
+diagnostic.** The first ten lines now print regardless of the input, the
+host states the input's value at startup, and the line carries `ticks=` so
+"the engine is writing nothing" is distinguishable from "the view is not
+looking".
+
+### Instrument changes
+
+- Smoke: *a jump delivers its bars to the symbol* — jumps an hour and asks
+  the symbol, not the engine, what arrived. It also reports whether the run
+  exercised the reused-seed path, because the defect only existed there and
+  a pass on a fresh symbol would otherwise overclaim.
+- Audit **A12**: argument count must match the declaration. Writing this
+  release I called `sink.NeedsWarmup()` on a two-argument method; A11
+  answered "the method exists on that class" and it does — with the wrong
+  shape. Same family as A7 → A8 → A11, one level finer. Verified by
+  sabotage: it names that exact line and is silent on the tree.
+
+**Recorded lesson.** *A count that is reported but not delivered is worse
+than a failure.* Every layer above `SeedBars` read success from a write that
+never happened, so the defect could only be found by comparing what the
+engine said with what the symbol held — two different logs, taken two
+minutes apart, neither wrong on its own.
+
+**Not measured:** v55 has not been run on MetaTrader. Defects 1 and 2 are
+proven from the user's logs; whether fixing them makes the candles move is
+not yet measured.

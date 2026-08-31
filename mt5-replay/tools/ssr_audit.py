@@ -589,7 +589,161 @@ def audit_a7():
                    "%s() is called on a member of ours but declared nowhere - "
                    "the other half of a change did not land" % name)
 
-for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11):
+
+#--- A12: the call must pass as many arguments as the method takes.
+#---
+#--- A11 asks "does this class have a method with that name". It said
+#--- yes to sink.NeedsWarmup() - and NeedsWarmup takes two arguments.
+#--- The name existed, on the right class, with the wrong shape: the
+#--- same family of mistake as A7 -> A8 -> A11, one level finer.
+#---
+#--- Deliberately narrow. Only globals declared as `CSSRThing g_name;`,
+#--- only methods whose every declaration on that class is unambiguous,
+#--- and a name declared with several different shapes is left alone.
+#--- An audit that cries wolf is worse than no audit, and two of these
+#--- have already had to be fixed before they could be trusted.
+def method_arities():
+    """cls -> name -> set of (min_args, max_args) pairs."""
+    own, base = {}, {}
+    for path, body in CLEAN.items():
+        lines = body.splitlines()
+        for m in CLASS_BODY.finditer(body):
+            cls = m.group(1)
+            own.setdefault(cls, {})
+            if m.group(2):
+                base[cls] = m.group(2)
+            start = body[:m.end()].count("\n")
+            depth, seen, end = 0, False, len(lines) - 1
+            for i in range(start, len(lines)):
+                depth += lines[i].count("{") - lines[i].count("}")
+                if depth > 0:
+                    seen = True
+                if seen and depth <= 0:
+                    end = i
+                    break
+            blob = "\n".join(lines[start:end + 1])
+            for d in DECL_METHOD.finditer(blob):
+                if d.group(1) in NOT_A_RETURN_TYPE:
+                    continue
+                params = balanced_args(blob, d.end() - 1)
+                if params is None:
+                    continue
+                lo, hi = param_range(params)
+                own[cls].setdefault(d.group(2), set()).add((lo, hi))
+    for cls in list(own):
+        seen, cur = set(), base.get(cls)
+        while cur and cur in own and cur not in seen:
+            seen.add(cur)
+            for name, shapes in own[cur].items():
+                own[cls].setdefault(name, set()).update(shapes)
+            cur = base.get(cur)
+    return own
+
+def balanced_args(text, open_paren):
+    """The raw argument text between a '(' and its match, or None."""
+    depth, i, n = 0, open_paren, len(text)
+    instr = None
+    while i < n:
+        c = text[i]
+        if instr:
+            if c == "\\":
+                i += 2
+                continue
+            if c == instr:
+                instr = None
+        elif c in "\"'":
+            instr = c
+        elif c == "(":
+            depth += 1
+        elif c == ")":
+            depth -= 1
+            if depth == 0:
+                return text[open_paren + 1:i]
+        i += 1
+    return None
+
+def split_args(raw):
+    """Top-level comma count, respecting nesting and string literals."""
+    if raw.strip() == "" or raw.strip() == "void":
+        return 0
+    depth, instr, parts = 0, None, 1
+    i, n = 0, len(raw)
+    while i < n:
+        c = raw[i]
+        if instr:
+            if c == "\\":
+                i += 2
+                continue
+            if c == instr:
+                instr = None
+        elif c in "\"'":
+            instr = c
+        elif c in "([{":
+            depth += 1
+        elif c in ")]}":
+            depth -= 1
+        elif c == "," and depth == 0:
+            parts += 1
+        i += 1
+    return parts
+
+def param_range(raw):
+    """(minimum, maximum) arguments a declaration accepts."""
+    total = split_args(raw)
+    if total == 0:
+        return (0, 0)
+    #--- one '=' at top level per defaulted parameter
+    depth, instr, defaults = 0, None, 0
+    i, n = 0, len(raw)
+    while i < n:
+        c = raw[i]
+        if instr:
+            if c == "\\":
+                i += 2
+                continue
+            if c == instr:
+                instr = None
+        elif c in "\"'":
+            instr = c
+        elif c in "([{":
+            depth += 1
+        elif c in ")]}":
+            depth -= 1
+        elif c == "=" and depth == 0 and raw[i - 1] not in "!<>=" and \
+             (i + 1 >= n or raw[i + 1] != "="):
+            defaults += 1
+        i += 1
+    return (total - defaults, total)
+
+def audit_a12():
+    arities = method_arities()
+    for path, body in CLEAN.items():
+        types = {}
+        for m in GLOBAL_DECL.finditer(body):
+            if m.group(1) in arities:
+                types[m.group(2)] = m.group(1)
+        if not types:
+            continue
+        pat = re.compile(r'\b(' + "|".join(sorted(re.escape(g) for g in types)) +
+                         r')\s*\.\s*([A-Za-z_]\w*)\s*\(')
+        for m in pat.finditer(body):
+            cls, name = types[m.group(1)], m.group(2)
+            shapes = arities.get(cls, {}).get(name)
+            if not shapes:
+                continue                      # A11's business, not mine
+            raw = balanced_args(body, m.end() - 1)
+            if raw is None:
+                continue                      # unbalanced: say nothing
+            given = split_args(raw)
+            if any(lo <= given <= hi for lo, hi in shapes):
+                continue
+            want = " or ".join(sorted("%d" % lo if lo == hi else "%d-%d" % (lo, hi)
+                                      for lo, hi in shapes))
+            report("A12", path, body[:m.start()].count("\n") + 1,
+                   "%s.%s() is passed %d argument(s); %s::%s takes %s"
+                   % (m.group(1), name, given, cls, name, want))
+
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12):
     fn()
 
 if findings:

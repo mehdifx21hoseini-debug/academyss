@@ -197,8 +197,28 @@ public:
       if(count <= 0)
          return true;
 
-      //--- the whole point of the cache: the expensive write is skipped
-      if(m_reused_seed)
+      //+------------------------------------------------------------------+
+      //| THE CACHE SKIPS THE WARMUP. IT MUST NOT SKIP EVERYTHING ELSE.    |
+      //|                                                                  |
+      //| m_reused_seed says "the warmup bars are already in this symbol,  |
+      //| do not write them again". It used to make this method return     |
+      //| true for EVERY bulk write for the rest of the session - and      |
+      //| SeedBars is also how a JUMP writes its bars.                     |
+      //|                                                                  |
+      //| So a jump reported "5918 bars in bulk" and put ONE bar in the    |
+      //| symbol. It reported success. Nothing failed. The user's chart    |
+      //| held a thousand warmup candles, then a gap of six days, then a   |
+      //| single candle - and every layer above said the jump had worked.  |
+      //| Measured from two of their logs: the engine said 5918, the       |
+      //| symbol said 1001, and 1000 of those were the warmup.             |
+      //|                                                                  |
+      //| The cache can only speak for what it cached: bars at or before   |
+      //| the warmup end. One bar past that and this is a real write.      |
+      //+------------------------------------------------------------------+
+      bool is_warmup = (m_warmup_to_msc > 0 &&
+                        SSRToMsc(bars[count - 1].time) <= m_warmup_to_msc);
+
+      if(m_reused_seed && is_warmup)
         {
          m_seed_bars += count;
          return true;
@@ -212,8 +232,11 @@ public:
       m_seed_bars += count;
 
       //--- record what is now in the symbol, so the next session can
-      //--- skip it. Written after the bars, never before.
-      if(m_warmup_from_msc > 0 && m_warmup_to_msc > m_warmup_from_msc)
+      //--- skip it. Written after the bars, never before - and only for
+      //--- the warmup itself. A jump's bars are replay, not cache: they
+      //--- are truncated away the next time this symbol is adopted, and
+      //--- counting them here would describe a cache that does not exist.
+      if(is_warmup && m_warmup_from_msc > 0 && m_warmup_to_msc > m_warmup_from_msc)
         {
          SSRSeedManifest man;
          man.Init();
@@ -303,6 +326,7 @@ public:
    //--- custom symbol, the data layer is never asked for them
    virtual bool      NeedsWarmup(const long from_msc, const long to_msc) override
      { return !m_reused_seed; }
+
 
    virtual void      OnReset(void) override
      {

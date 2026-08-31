@@ -252,6 +252,46 @@ void OnStart()
    Check("step forward reaches the series", step_after > step_before,
          StringFormat("%d -> %d bars after 250ms", step_before, step_after));
 
+   //+------------------------------------------------------------------+
+   //| 9. A JUMP PUTS ITS BARS IN THE SYMBOL.                           |
+   //|                                                                  |
+   //| The engine reported "jumped to ... (5918 bars in bulk)" and the  |
+   //| symbol gained ONE bar. Nothing failed, nothing was logged, and   |
+   //| every layer above it read success - because the seed cache's     |
+   //| "the warmup is already there, skip the write" flag was never     |
+   //| scoped to the warmup, and a jump writes its bars through the     |
+   //| same door.                                                       |
+   //|                                                                  |
+   //| A count that is reported but not delivered is the worst kind of  |
+   //| defect this project produces, so it gets its own stage: jump an  |
+   //| hour, and ask the SYMBOL - not the engine - what it received.    |
+   //+------------------------------------------------------------------+
+   int  jump_before = Bars(rsym, PERIOD_M1);
+   long jump_target = ctrl.Now() + 60 * SSR_MSC_PER_MIN;
+   if(jump_target < win_end)
+     {
+      ctrl.JumpTo(jump_target);
+      Sleep(300);
+      int jump_after = Bars(rsym, PERIOD_M1);
+      //--- and say which case was actually exercised. The swallowed
+      //--- write only happens on a REUSED seed, so a pass on a fresh
+      //--- symbol proves the healthy path and nothing more. A test that
+      //--- does not say which half it ran is a test that overclaims.
+      Check("a jump delivers its bars to the symbol",
+            jump_after >= jump_before + 30,
+            StringFormat("%d -> %d bars after jumping an hour (seed was %s). "
+                         "Fewer than +30 means the write was swallowed and "
+                         "the engine was told it succeeded.",
+                         jump_before, jump_after,
+                         (sink.ReusedSeed()
+                          ? "REUSED - this is the path that was broken"
+                          : "written fresh - the reused-seed path is NOT "
+                            "covered by this run")));
+     }
+   else
+      PrintFormat("  NOTE  no room ahead to test a jump (%d minutes left)",
+                  (int)((win_end - ctrl.Now()) / SSR_MSC_PER_MIN));
+
    ctrl.Release();
    Cleanup(rsym);
    Done();
