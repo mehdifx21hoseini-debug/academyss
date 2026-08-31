@@ -36,6 +36,7 @@
 
 #include "../Common/SSR_Types.mqh"
 #include "../Common/SSR_Time.mqh"
+#include "../Common/SSR_FlightRecorder.mqh"
 #include "SSR_Theme.mqh"
 #include "SSR_Widgets.mqh"
 #include "SSR_ReplayPort.mqh"
@@ -50,6 +51,11 @@ private:
    long              m_chart;
    CSSRWidgets       m_w;
    CSSRReplayPort   *m_port;        // not owned
+   //--- the black box, if the host started one. Not owned, and never
+   //--- required: every call site checks for NULL, because a panel that
+   //--- only works while a recorder exists would be a panel that only
+   //--- works while someone is watching.
+   CSSRFlightRecorder *m_flight;
    string            m_prefix;
 
    int               m_x, m_y;
@@ -145,7 +151,7 @@ private:
 
 public:
                      CSSRPanel(void)
-     : m_chart(0), m_port(NULL), m_prefix("SSRP_"),
+     : m_chart(0), m_port(NULL), m_flight(NULL), m_prefix("SSRP_"),
        m_x(12), m_y(24), m_saved_mouse_move(0), m_saved_mouse_scroll(1),
        m_saved_quick_nav(1), m_saved_key_control(1),
        m_saved(false), m_collapsed(false), m_closed(false), m_compact(false),
@@ -157,6 +163,10 @@ public:
      { m_state.Init(); ClearCache(); }
 
                     ~CSSRPanel(void) { Destroy(); }
+
+   //--- the host hands its black box down so button presses land in the
+   //--- same file as the samples. Optional by design; NULL is normal.
+   void              SetFlightRecorder(CSSRFlightRecorder *f) { m_flight = f; }
 
    //+------------------------------------------------------------------+
    void              Create(const long chart_id, CSSRReplayPort *port,
@@ -981,6 +991,12 @@ public:
             why = "  (" + m_port.TradeError() + ")";
          PrintFormat("[panel] %s -> %s%s", SSRCmdName(cmd),
                      (ok ? "ok" : "refused"), why);
+         //--- and into the black box, in the same stream as the samples,
+         //--- so a fault can be read as "he pressed this, and then this
+         //--- number stopped moving" rather than guessed at
+         if(m_flight != NULL)
+            m_flight.Event(StringFormat("panel %s -> %s%s", SSRCmdName(cmd),
+                                        (ok ? "ok" : "refused"), why));
         }
       return ok;
      }

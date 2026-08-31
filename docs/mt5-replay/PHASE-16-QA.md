@@ -2820,3 +2820,62 @@ minutes apart, neither wrong on its own.
 **Not measured:** v55 has not been run on MetaTrader. Defects 1 and 2 are
 proven from the user's logs; whether fixing them makes the candles move is
 not yet measured.
+
+## v56 — the black box
+
+**Asked:** "یه افزونه یا یه چیزی که خودت بتونی بفهمی نمیتونی بسازی؟"
+
+Yes, and it should have been built three releases ago. Five releases were
+spent diagnosing one symptom from screenshots and hand-copied log
+fragments; three diagnoses were wrong, and v54's added diagnostic line
+produced no output at all — the one thing that could have closed the loop
+was the one thing that did not run.
+
+The problem was never which layer was broken. It was that no report could
+separate the four layers — engine → symbol → chart → view — because no
+single artefact ever held all four numbers at the same instant.
+
+### What it is
+
+`CSSRFlightRecorder` (L0/Common). The host opens one file per session in
+`MQL5/Files/`, writes a preamble carrying everything a reader would
+otherwise have to ask about (build, terminal, broker, origin, replay
+symbol, window, one-chart, reused-seed, picked start, speed, pump
+interval, origin bar count), then one row every 500 ms with the engine
+state, clock, playing flag, speed, symbol bar count, newest bar, sink
+counters, chart id/symbol/timeframe/autoscroll/follow, view geometry, snap
+and pump counts. Every button press and key press is written into the same
+stream as an event row, so cause and effect keep their order.
+
+Flushed per line on purpose: the fault being chased may end in a terminal
+that is closed, killed or hung, and a recording that only survives a clean
+shutdown would be missing exactly the case worth having.
+
+It writes to the user's own disk and sends nothing anywhere.
+
+### Verification — the part v54 skipped
+
+- Smoke stages 10a–c open the recorder on the user's terminal, write rows,
+  close, reopen for reading and count lines. An unverified instrument is
+  worse than none, because its silence reads as "nothing to report".
+- The host prints the file path at startup, and prints an explicit line
+  when `InpFlightRec` is off — v54's ambiguity (input off, or code never
+  reached?) cannot recur.
+- Column counts were counted, not eyeballed: the event row was one comma
+  short of the 26-column header, which a spreadsheet would have rendered
+  shifted. Fixed before shipping.
+
+### The reader
+
+`tools/ssr_flight.py` parses the file and names the first stuck layer,
+ordered so that consequences are never reported as causes: never played →
+timer not pumping → engine emitting nothing → ticks in but no bars → no
+chart on the replay symbol → chart on the wrong symbol → bars written off
+screen → view detached. Verified against nine synthetic recordings, one per
+failure mode plus the healthy case; all nine discriminated correctly.
+
+**Recorded lesson.** *When a loop will not close, stop guessing better and
+build the thing that measures.* The smoke test proved this once already —
+it answered in 32 seconds what five round trips had not — and the same
+answer applied one level up: the smoke test can only speak for a synthetic
+session, and the fault only appears in the user's real one.

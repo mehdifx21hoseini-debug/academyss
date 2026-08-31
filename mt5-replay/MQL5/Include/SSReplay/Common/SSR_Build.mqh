@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v55 2026-08-31  the-jump-that-wrote-nothing"
+#define SSR_BUILD           "v56 2026-08-31  the-black-box"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

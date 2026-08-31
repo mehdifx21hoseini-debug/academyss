@@ -32,6 +32,7 @@
 #include <SSReplay/Common/SSR_Types.mqh>
 #include <SSReplay/Common/SSR_Time.mqh>
 #include <SSReplay/Common/SSR_Log.mqh>
+#include <SSReplay/Common/SSR_FlightRecorder.mqh>
 #include <SSReplay/Core/SSR_ReplayController.mqh>
 #include <SSReplay/Data/SSR_Mt5DataSource.mqh>
 #include <SSReplay/Mt5/SSR_CustomSymbolSink.mqh>
@@ -122,6 +123,7 @@ input bool            InpTradeLines  = true;                 // Draw draggable s
 input double          InpStopPoints  = 0;                    // Default stop, in points (0 = 10x the spread)
 input double          InpRR          = 2.0;                  // Target distance, as a multiple of the stop
 input bool            InpVitals      = true;                 // Print one diagnostic line a second to the Experts log
+input bool            InpFlightRec   = true;                 // Record a black box file to MQL5/Files (send it when reporting a fault)
 
 CSSRMt5DataSource    g_src;
 CSSRCustomSymbolSink g_sink;
@@ -213,6 +215,8 @@ bool  g_was_playing  = false;      // to notice the moment Play is pressed
 //| Ten lines always come out. After that the input decides.          |
 //+------------------------------------------------------------------+
 int   g_vitals_left  = 10;
+CSSRFlightRecorder g_flight;
+long  g_pumps        = 0;      // how many times the engine was actually driven
 
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
@@ -1115,6 +1119,36 @@ bool BuildSession(string origin, const bool on_replay,
                      SSRFormatMsc(saved.taken_at_msc), ahead);
      }
 
+   //+------------------------------------------------------------------+
+   //| THE BLACK BOX OPENS BEFORE THE FIRST PUMP.                       |
+   //|                                                                  |
+   //| Everything that has ever gone wrong here went wrong in the first |
+   //| few seconds of a session, so a recorder that starts after them   |
+   //| would miss every fault it exists to catch.                       |
+   //+------------------------------------------------------------------+
+   if(InpFlightRec)
+     {
+      if(g_flight.Open(origin))
+        {
+         g_flight.Preamble(origin, rsym, win_start, win_end,
+                           (int)((win_end - win_start) / SSR_MSC_PER_MIN),
+                           one_chart_ok, g_sink.ReusedSeed(), g_pick_msc,
+                           InpStartSpeed, InpPumpMs);
+         g_panel.SetFlightRecorder(GetPointer(g_flight));
+         PrintFormat("[host] BLACK BOX RECORDING to MQL5/Files/%s - when "
+                     "anything looks wrong, send that file rather than a "
+                     "screenshot.", g_flight.Path());
+        }
+      else
+         Print("[host] could not start the black box: ", g_flight.LastError());
+     }
+   else
+      //--- v54's diagnostic line defaulted to on and produced nothing,
+      //--- and there was no way from the log to tell whether the input
+      //--- was off or the code never ran. Now the log says which.
+      Print("[host] black box is OFF (InpFlightRec=false) - turn it on "
+            "before reporting a fault, or there is nothing to send.");
+
    EventSetMillisecondTimer(InpPumpMs);
    g_last_pump_us = GetMicrosecondCount();
    g_vitals_left  = 10;
@@ -1447,6 +1481,20 @@ void OnDeinit(const int reason)
   {
    EventKillTimer();
 
+   //--- CLOSED FIRST, and with the reason in it. A handover deinits and
+   //--- reinits this program on purpose, and a recording that ends
+   //--- without saying why reads as a crash.
+   if(g_flight.IsOpen())
+     {
+      g_flight.Event(StringFormat("deinit reason=%d (%s)", reason,
+                                  (reason == REASON_CHARTCHANGE
+                                   ? "chart symbol or period changed - the handover"
+                                   : (reason == REASON_PARAMETERS ? "inputs changed"
+                                      : (reason == REASON_RECOMPILE ? "recompiled"
+                                         : "removed or terminal closing")))));
+      g_flight.Close();
+     }
+
    //--- WITHDRAWN FIRST, and on every deinit reason. Terminal globals
    //--- outlive the program that set them, so leaving them behind
    //--- would tell every other product that a replay is still running.
@@ -1621,6 +1669,59 @@ void PrintVitals()
   }
 
 //+------------------------------------------------------------------+
+//| The same facts PrintVitals shows a person, written for a program. |
+//| One function feeding both, so the file and the log can never      |
+//| disagree about what was true at a given second.                   |
+//+------------------------------------------------------------------+
+void RecordFlight(const ulong delta_ms)
+  {
+   if(!g_flight.IsOpen() || !g_flight.Due())
+      return;
+
+   SSRFlightSample s;
+   s.Init();
+   s.state          = SSRStateName(g_ctrl.Status());
+   s.clock_msc      = g_ctrl.Now();
+   s.playing        = g_group.AnyPlaying();
+   s.speed_x100     = g_ctrl.SpeedX100();
+   s.replay_symbol  = g_sink.ReplaySymbol();
+   s.m1_bars        = (s.replay_symbol == "" ? 0 : Bars(s.replay_symbol, PERIOD_M1));
+   s.last_bar_time  = (s.replay_symbol == "" ? 0
+                       : SeriesInfoInteger(s.replay_symbol, PERIOD_M1, SERIES_LASTBAR_DATE));
+   s.emit_calls     = g_sink.EmitCalls();
+   s.emit_ticks     = g_sink.EmitTicks();
+   s.seed_bars      = g_sink.SeededBars();
+   s.truncations    = g_sink.Truncations();
+   s.chart_count    = g_charts.Count();
+   s.snaps          = g_charts.Snaps();
+   s.pumps          = g_pumps;
+   s.pump_delta_ms  = (long)delta_ms;
+
+   //--- the first managed chart is the one the user is looking at in
+   //--- one-window mode, which is every reported fault so far
+   if(s.chart_count > 0)
+     {
+      long id = g_charts.IdAt(0);
+      s.chart_id      = id;
+      s.chart_symbol  = ChartSymbol(id);
+      s.chart_period  = EnumToString(ChartPeriod(id));
+      s.autoscroll    = (bool)ChartGetInteger(id, CHART_AUTOSCROLL);
+      s.first_visible = ChartGetInteger(id, CHART_FIRST_VISIBLE_BAR);
+      s.visible_bars  = ChartGetInteger(id, CHART_VISIBLE_BARS);
+      s.view_offset   = (s.visible_bars > 0
+                         ? s.first_visible - (s.visible_bars - 1) : 0);
+      if(s.view_offset < 0)
+         s.view_offset = 0;
+      SSRChartInfo ci;
+      ci.Init();
+      if(g_charts.InfoAt(0, ci))
+         s.following = (ci.follow && !ci.user_detached);
+     }
+
+   g_flight.Write(s);
+  }
+
+//+------------------------------------------------------------------+
 void OnTimer()
   {
    //+------------------------------------------------------------------+
@@ -1766,7 +1867,12 @@ void OnTimer()
    //--- ONE PUMP FOR THE BOARD. The group takes the wall delta and
    //--- hands every stream an instant, so there is nothing to drift.
    if(playing)
+     {
       g_group.Pump(delta);
+      g_pumps++;
+     }
+
+   RecordFlight(delta);
 
    //--- A JUMP WRITES ITS BARS IN BULK and publishes none of them, so
    //--- the view is empty on the far side of one. Priming is the
@@ -1995,6 +2101,14 @@ void RouteEvent(const int id, const long &lparam,
          return;
         }
      }
+
+   //--- EVERY KEY, BEFORE ANYONE DECIDES WHETHER IT MATTERS.
+   //--- "I pressed Space and nothing happened" and "Space never
+   //--- reached the program" look identical from outside, and the
+   //--- difference is the whole diagnosis.
+   if(id == CHARTEVENT_KEYDOWN && g_flight.IsOpen())
+      g_flight.Event(StringFormat("key %d -> %s", (int)lparam,
+                                  SSRCmdName(SSRKeyToCommand(lparam))));
 
    if(g_panel.OnEvent(id, lparam, dparam, sparam))
       return;

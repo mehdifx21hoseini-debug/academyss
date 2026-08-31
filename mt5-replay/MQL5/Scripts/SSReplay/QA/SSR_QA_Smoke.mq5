@@ -28,6 +28,7 @@
 #include <SSReplay/Common/SSR_Types.mqh>
 #include <SSReplay/Common/SSR_Time.mqh>
 #include <SSReplay/Common/SSR_SymbolNaming.mqh>
+#include <SSReplay/Common/SSR_FlightRecorder.mqh>
 #include <SSReplay/Core/SSR_ReplayController.mqh>
 #include <SSReplay/Core/SSR_MasterClock.mqh>
 #include <SSReplay/Data/SSR_Mt5DataSource.mqh>
@@ -291,6 +292,65 @@ void OnStart()
    else
       PrintFormat("  NOTE  no room ahead to test a jump (%d minutes left)",
                   (int)((win_end - ctrl.Now()) / SSR_MSC_PER_MIN));
+
+   //+------------------------------------------------------------------+
+   //| 10. THE BLACK BOX ITSELF.                                        |
+   //|                                                                  |
+   //| v54 added a diagnostic line, defaulted it to on, shipped it, and  |
+   //| the user's log came back without a single one in it. The one      |
+   //| thing that could have closed the loop was the one thing that did  |
+   //| not run - and an unverified instrument is worse than none,        |
+   //| because its silence reads as "nothing to report".                 |
+   //|                                                                  |
+   //| So the recorder is exercised here, on the user's own terminal,    |
+   //| writing to the user's own disk: open it, write rows, close it,    |
+   //| read the file back, count what is in it.                          |
+   //+------------------------------------------------------------------+
+   CSSRFlightRecorder rec;
+   if(Check("the black box can open a file", rec.Open("smoke"), rec.Path()))
+     {
+      rec.Preamble(origin, rsym, win_start, win_end, 400, false, false,
+                   SSR_INVALID_TIME, 30.0, 40);
+      rec.Event("smoke test wrote this");
+      for(int i = 0; i < 3 && !IsStopped(); i++)
+        {
+         SSRFlightSample fs;
+         fs.Init();
+         fs.state         = "SMOKE";
+         fs.clock_msc     = ctrl.Now();
+         fs.replay_symbol = rsym;
+         fs.m1_bars       = Bars(rsym, PERIOD_M1);
+         fs.chart_count   = 0;
+         //--- Due() throttles to one sample per SSR_FLIGHT_SAMPLE_MS, so
+         //--- three rows need the wait the running EA gets for free
+         Sleep(SSR_FLIGHT_SAMPLE_MS + 50);
+         if(rec.Due())
+            rec.Write(fs);
+        }
+      string wrote = rec.Path();
+      long   rows  = rec.Rows();
+      rec.Close();
+
+      int fh = FileOpen(wrote, FILE_READ | FILE_TXT | FILE_ANSI);
+      if(Check("the black box file is on disk and readable",
+               fh != INVALID_HANDLE,
+               "MQL5\\Files\\" + wrote))
+        {
+         int lines = 0;
+         while(!FileIsEnding(fh) && !IsStopped())
+           {
+            FileReadString(fh);
+            lines++;
+           }
+         FileClose(fh);
+         Check("the black box actually recorded rows",
+               rows >= 4 && lines >= 20,
+               StringFormat("%d rows written, %d lines in the file. This is "
+                            "the file to send when anything looks wrong.",
+                            (int)rows, lines));
+         FileDelete(wrote);
+        }
+     }
 
    ctrl.Release();
    Cleanup(rsym);
