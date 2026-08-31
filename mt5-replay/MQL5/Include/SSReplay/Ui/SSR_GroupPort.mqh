@@ -55,6 +55,8 @@ private:
    CSSRTradeLines       *m_lines;        // not owned; may be NULL
    CSSRJournal          *m_journal;      // not owned; may be NULL
    CSSRPropEvaluation   *m_prop;         // not owned; may be NULL
+   string                m_trade_tag;    // what the next trade is labelled
+   double                m_trail_points; // 0 = no trailing stop
    bool                  m_line_long;    // which side Flip last chose
    double                m_stop_points;   // no default: there is no safe one
    string                m_trade_error;
@@ -69,7 +71,8 @@ public:
      : m_group(NULL), m_sink(NULL), m_charts(NULL), m_blind(NULL),
        m_acct(NULL), m_stats(NULL), m_strategies(NULL), m_sessions(NULL),
        m_risk_percent(0.5), m_stop_points(0.0), m_tp_points(0.0),
-       m_lines(NULL), m_journal(NULL), m_prop(NULL), m_line_long(true),
+       m_lines(NULL), m_journal(NULL), m_prop(NULL),
+       m_trade_tag(""), m_trail_points(0.0), m_line_long(true),
        m_trade_error(""), m_session_error("") {}
 
    void              Attach(CSSRReplayGroup *g,
@@ -185,6 +188,13 @@ public:
          out.blind      = false;
          out.clock_text = (out.now_msc > 0 ? SSRFormatMsc(out.now_msc) : "--");
         }
+
+      //--- what the next trade will be labelled and trailed by. Outside
+      //--- the account block on purpose: both are the port's own settings
+      //--- and a panel that could not read them back would clear the text
+      //--- box the moment there is no account attached.
+      out.trade_tag    = m_trade_tag;
+      out.trail_points = m_trail_points;
 
       //--- the account, for the trade row
       if(m_acct != NULL)
@@ -649,6 +659,89 @@ public:
       return true;
      }
 
+   //--- an untagged trade is still a trade; the statement column just
+   //--- says how it was placed rather than staying blank
+   string            TagOrDefault(void)
+     { return (m_trade_tag == "" ? "lines" : m_trade_tag); }
+
+   virtual bool      SetTradeTag(const string tag) override
+     {
+      m_trade_error = "";
+      string t = tag;
+      StringTrimLeft(t); StringTrimRight(t);
+      //--- the statement is a CSV as well as an HTML page, and a comma
+      //--- in a tag would move every column after it by one
+      StringReplace(t, ",", " ");
+      m_trade_tag = t;
+      return true;
+     }
+
+   virtual bool      SetTrailing(const double points) override
+     {
+      m_trade_error = "";
+      if(points < 0.0)
+        { m_trade_error = "a trailing distance cannot be negative"; return false; }
+      m_trail_points = points;
+
+      //--- and apply it to what is already open, because a user who
+      //--- types a distance while holding a trade means that trade
+      if(m_acct != NULL)
+        {
+         for(int i = 0; i < m_acct.Total(); i++)
+           {
+            SSRVirtualPosition p;
+            if(m_acct.At(i, p) && p.IsOpen())
+               m_acct.SetTrailing(p.ticket, points);
+           }
+        }
+      return true;
+     }
+
+   virtual bool      ClosePartial(const long ticket, const double fraction) override
+     {
+      m_trade_error = "";
+      if(m_acct == NULL)
+        { m_trade_error = "no account"; return false; }
+      if(fraction <= 0.0 || fraction >= 1.0)
+        { m_trade_error = "a partial close is between 0 and 1"; return false; }
+
+      SSRVirtualPosition p;
+      bool found = false;
+      for(int i = 0; i < m_acct.Total() && !found; i++)
+        {
+         SSRVirtualPosition q;
+         if(m_acct.At(i, q) && q.ticket == ticket && q.IsOpen())
+           { p = q; found = true; }
+        }
+      if(!found)
+        { m_trade_error = "no such open position"; return false; }
+
+      //--- ROUNDED TO THE BROKER'S LOT STEP, or the engine refuses a
+      //--- volume no venue would accept and the button looks broken.
+      double step = SymbolInfoDouble(m_acct.Symbol(), SYMBOL_VOLUME_STEP);
+      if(step <= 0.0)
+         step = 0.01;
+      double want = MathFloor(p.volume * fraction / step) * step;
+      if(want < step)
+        { m_trade_error = "too small to split at this lot step"; return false; }
+      if(want >= p.volume)
+        { m_trade_error = "that is the whole position - use Close"; return false; }
+
+      if(!m_acct.ClosePartial(ticket, want))
+        { m_trade_error = m_acct.LastError(); return false; }
+      return true;
+     }
+
+   virtual bool      BreakEven(const long ticket) override
+     {
+      m_trade_error = "";
+      if(m_acct == NULL)
+        { m_trade_error = "no account"; return false; }
+      if(!m_acct.BreakEven(ticket))
+        { m_trade_error = m_acct.LastError(); return false; }
+      return true;
+     }
+
    virtual bool      ClosePosition(const long ticket) override
      {
       m_trade_error = "";
@@ -781,9 +874,15 @@ private:
       //--- blank is either dead or a question the tool refused to answer;
       //--- this one can say how the trade was placed.
       long t = m_acct.OpenWithRisk(type, m_risk_percent, sl,
-                                   (tp > 0.0 ? tp : 0.0), "lines");
+                                   (tp > 0.0 ? tp : 0.0), TagOrDefault());
       if(t <= 0)
         { m_trade_error = m_acct.LastError(); return false; }
+
+      //--- a trailing distance set before the trade applies to it from
+      //--- the first tick. Set after, the user would have to remember to
+      //--- come back and arm it, which is a rule nobody keeps.
+      if(m_trail_points > 0.0)
+         m_acct.SetTrailing(t, m_trail_points);
       return true;
      }
 

@@ -811,6 +811,7 @@ def audit_a12():
 BASELINE = os.path.join(os.path.dirname(os.path.abspath(__file__)),
                         "ssr_known_calls.txt")
 CALL_ANY = re.compile(r'(?<![\w.])([A-Za-z_]\w*)\s*\(')
+DEFINE_NAME = re.compile(r'^\s*#\s*define\s+([A-Za-z_]\w*)', re.M)
 CALL_KEYWORDS = {'if', 'while', 'for', 'switch', 'return', 'sizeof', 'else',
                  'do', 'case', 'new', 'delete', 'catch'}
 
@@ -827,6 +828,16 @@ def audit_a13():
         for m in DECL_METHOD.finditer(body):
             if m.group(1) not in NOT_A_RETURN_TYPE:
                 declared.add(m.group(2))
+        #--- A MACRO IS A DECLARATION TOO.
+        #---
+        #--- `#define SSR_PANEL_H (23 + 32 + ...)` reads as a call to a
+        #--- function nobody wrote, and the audit said so. It was right
+        #--- about the text and wrong about the code, which is the one
+        #--- failure mode an audit is not allowed: a report that cries
+        #--- wolf gets read past, and the next finding it makes is the
+        #--- real one nobody looks at.
+        for m in DEFINE_NAME.finditer(body):
+            declared.add(m.group(1))
 
     for path, body in CLEAN.items():
         seen = set()

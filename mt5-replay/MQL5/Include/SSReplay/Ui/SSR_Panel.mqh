@@ -86,6 +86,7 @@ private:
    int               m_corner;      // 0 TL, 1 TR, 2 BR, 3 BL
 
    int               m_tab;
+   string            m_tag_sent;    // the last text handed to the port
 
    SSRUiState        m_state;
 
@@ -166,7 +167,7 @@ public:
        m_drag_dx(0), m_drag_dy(0),
        m_track_drag(false), m_track_x(0), m_track_y(0), m_track_w(0),
        m_last_drag_paint(0), m_corner(0),
-       m_tab(SSR_TAB_TRADE), m_renders(0), m_writes(0)
+       m_tab(SSR_TAB_TRADE), m_tag_sent(""), m_renders(0), m_writes(0)
      { m_state.Init(); ClearCache(); }
 
                     ~CSSRPanel(void) { Destroy(); }
@@ -620,11 +621,27 @@ private:
    //--- because two lists drift.
    void              HideSheets(void)
      {
+      //+------------------------------------------------------------------+
+      //| THE SETUP BOX IS HIDDEN, NEVER DELETED.                          |
+      //|                                                                  |
+      //| Everything else on a sheet is redrawn from state, so deleting it |
+      //| costs nothing. The box is the one control whose contents belong  |
+      //| to the USER, and this runs at the top of every repaint: deleting |
+      //| it would destroy and rebuild the object twenty-five times a      |
+      //| second, which does not merely lose the text - it makes the box   |
+      //| impossible to type in at all.                                    |
+      //|                                                                  |
+      //| Read on the way out, so leaving the tab keeps what was typed.    |
+      //+------------------------------------------------------------------+
+      ReadTag();
+      m_w.Hide("tagbox", true);
+
       string ids[] = {"riskdn","riskup","armbtn","flipbtn","clrbtn","openln",
                       "buy","sell","be","flat",
                       "g1_fr","g1_lb","g1_lg","g2_fr","g2_lb","g2_lg",
                       "risklbl","riskval","riskmon","slrow","tprow","rrrow",
                       "sizerow","hintrow","setuprow","posempty","posmore",
+                      "taglbl","poshint","trlbl","trdn","trup","troff",
                       "st1","st2","st3","st4","st5","st6","stmt",
                       "pv0","pv1","pv2","pvbg","pvfg","pvrst",
                       "g3_fr","g3_lb","g3_lg",
@@ -637,6 +654,8 @@ private:
          string t = IntegerToString(r);
          m_w.Remove("pr" + t);
          m_w.Remove("pl" + t);
+         m_w.Remove("ph" + t);
+         m_w.Remove("pb" + t);
          m_w.Remove("px" + t);
         }
      }
@@ -660,6 +679,22 @@ private:
       m_w.Button("riskup", x + w - 18, y + 11, 16, 16, "+");
 
       //+------------------------------------------------------------------+
+      //| WHICH SETUP IS THIS?                                             |
+      //|                                                                  |
+      //| The engine has carried a tag on every position since Phase 9 and |
+      //| nothing has ever set it, so the statement's Tag column has always |
+      //| been blank. Typed here, it turns a session from "how did I do"    |
+      //| into "which of my setups actually works" - the statistics engine  |
+      //| already computes per tag, it just had nothing to group by.        |
+      //|                                                                  |
+      //| Read on the way into a trade, not on edit: the same one-read      |
+      //| rule the setup panel follows, for the same reason.                |
+      //+------------------------------------------------------------------+
+      m_w.Label("taglbl", x + 8, y + 46, "Setup", SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      m_w.Edit("tagbox", x + 48, y + 42, w - 56, 18, m_state.trade_tag, false);
+      m_w.Hide("tagbox", false);
+
+      //+------------------------------------------------------------------+
       //| STOP AND TARGET ARE LINES.                                       |
       //|                                                                  |
       //| There is no points box here and there will not be one. A stop    |
@@ -667,7 +702,7 @@ private:
       //| chart is chosen by structure, and structure is the entire        |
       //| reason a person practises on a replay.                           |
       //+------------------------------------------------------------------+
-      int gy = y + 44;
+      int gy = y + 66;
       m_w.Group("g2", x, gy, w, 106, "Stop & target");
 
       if(!m_state.lines_armed)
@@ -777,9 +812,21 @@ private:
             string t = IntegerToString(r);
             Text(20 + r, "pr" + t, x + 8, ry + 3, m_state.pos_text[r],
                  SSR_C_TEXT);
-            Text(25 + r, "pl" + t, x + w - 96, ry + 3,
+            Text(25 + r, "pl" + t, x + w - 140, ry + 3,
                  Money(m_state.pos_pl[r], true),
                  m_state.pos_pl[r] >= 0.0 ? SSR_C_RUN : SSR_C_STOP);
+
+            //+------------------------------------------------------------------+
+            //| SCALE OUT AND PROTECT, on the row of the trade they act on.      |
+            //|                                                                  |
+            //| Both worked in the engine and had no button, so the tool modelled |
+            //| the five seconds of entering a trade and none of the hour of      |
+            //| managing it - which is the part being practised.                   |
+            //+------------------------------------------------------------------+
+            m_w.ButtonC("ph" + t, x + w - 68, ry, 18, 17, "H",
+                        SSR_C_BTN, SSR_C_BTN_EDGE, SSR_C_TEXT, SSR_FS_SMALL);
+            m_w.ButtonC("pb" + t, x + w - 47, ry, 18, 17, "B",
+                        SSR_C_BTN, SSR_C_BTN_EDGE, SSR_C_RUN, SSR_FS_SMALL);
             m_w.ButtonC("px" + t, x + w - 26, ry, 18, 17, "X",
                         SSR_C_BTN, SSR_C_BTN_EDGE, SSR_C_STOP, SSR_FS_SMALL);
            }
@@ -791,12 +838,38 @@ private:
                  SSR_C_HOLD, SSR_FS_SMALL);
         }
 
+      //--- the hint's line is also where a refusal goes. The Trade sheet
+      //--- has its own error row and these three buttons are not on it,
+      //--- so "too small to split at this lot step" would otherwise only
+      //--- reach the log - and a button that does nothing visible is a
+      //--- button the user reports as broken.
+      if(m_port != NULL && m_port.TradeError() != "")
+         Text(31, "poshint", x + 8, y + 132, m_port.TradeError(),
+              SSR_C_STOP, SSR_FS_SMALL);
+      else
+         Text(31, "poshint", x + 8, y + 132,
+              "H halves the position   B moves its stop to entry   X closes it",
+              SSR_C_TEXT_DIM, SSR_FS_SMALL);
+
       int by = y + 144;
       int bw = (w - SSR_GAP) / 2;
       m_w.Button("be",   x, by, bw, SSR_BTN_H, "Break-even all",
                  false, m_state.open_positions > 0);
       m_w.Button("flat", x + bw + SSR_GAP, by, bw, SSR_BTN_H, "Close all",
                  false, m_state.open_positions > 0);
+
+      //--- the trailing distance, in points, applied to what is open now
+      //--- AND to whatever opens next
+      int ty = by + SSR_BTN_H + 8;
+      Text(32, "trlbl", x + 8, ty + 3,
+           StringFormat("Trailing stop   %s",
+                        m_state.trail_points > 0.0
+                        ? StringFormat("%.0f pt", m_state.trail_points)
+                        : "off"),
+           m_state.trail_points > 0.0 ? SSR_C_RUN : SSR_C_TEXT_DIM);
+      m_w.Button("trdn", x + w - 86, ty, 18, SSR_ROW_H, "-");
+      m_w.Button("trup", x + w - 64, ty, 18, SSR_ROW_H, "+");
+      m_w.Button("troff", x + w - 42, ty, 42, SSR_ROW_H, "off");
      }
 
    //----------------------------------------------------------------
@@ -1006,6 +1079,21 @@ public:
       if(id == "riskdn") return m_port.SetRiskPercent(StepRisk(-1));
       if(id == "riskup") return m_port.SetRiskPercent(StepRisk(+1));
       return false;
+     }
+
+   //--- 0 / 50 / 100 / 150 / 200 / 300 / 500 points. Off is a rung, so
+   //--- "-" walks all the way back to it instead of sticking at 50.
+   double            StepTrail(const int dir)
+     {
+      double ladder[] = {0.0, 50.0, 100.0, 150.0, 200.0, 300.0, 500.0};
+      int    n = ArraySize(ladder), at = 0;
+      for(int i = 0; i < n; i++)
+         if(MathAbs(ladder[i] - m_state.trail_points) < 0.5)
+           { at = i; break; }
+      at += dir;
+      if(at < 0)      at = 0;
+      if(at >= n)     at = n - 1;
+      return ladder[at];
      }
 
    //--- 0.10 / 0.25 / 0.50 / 1.00 / 2.00 - the sizes people trade,
@@ -1227,10 +1315,50 @@ public:
       return for_host;
      }
 
+   //+------------------------------------------------------------------+
+   //| THE SETUP BOX HAS NO EVENT.                                      |
+   //|                                                                  |
+   //| An OBJ_EDIT on a chart this program is not attached to never     |
+   //| reaches OnChartEvent, so nothing tells the panel the user typed. |
+   //| It is read instead - once, on the way into whatever they pressed |
+   //| next - which is exactly when the tag matters and never before.   |
+   //|                                                                  |
+   //| The Exists check is not decoration: EditText answers "" for a    |
+   //| box that is not on screen, and "" is also a real answer from a   |
+   //| box the user cleared. Without it, opening the Positions tab      |
+   //| would silently wipe the tag.                                     |
+   //+------------------------------------------------------------------+
+   void              ReadTag(void)
+     {
+      if(m_port == NULL || !m_w.Exists("tagbox"))
+         return;
+      string t = m_w.EditText("tagbox");
+
+      //+------------------------------------------------------------------+
+      //| COMPARED AGAINST WHAT WAS SENT, not against what came back.      |
+      //|                                                                  |
+      //| The port cleans a tag on the way in - it trims it and takes the  |
+      //| commas out, because the journal is a CSV too - so a box holding  |
+      //| " a, b " never equals the stored "a b", and a comparison against |
+      //| the stored value would resend it on every single repaint.        |
+      //|                                                                  |
+      //| That is not merely wasteful. Every port verb clears the last     |
+      //| trade error as its first act, so a refusal from the Positions    |
+      //| sheet - "too small to split at this lot step" - would be wiped   |
+      //| by this call in the very repaint that was meant to display it,   |
+      //| and the button would look like it did nothing at all.            |
+      //+------------------------------------------------------------------+
+      if(t == m_tag_sent)
+         return;
+      m_tag_sent = t;
+      m_port.SetTradeTag(t);
+     }
+
    //--- one place that turns an object name into an action, shared by
    //--- the poll and by the event path, so the two cannot drift
    ENUM_SSR_CMD      Dispatch(const string what)
      {
+      ReadTag();
       //--- the tab strip is not a command: it changes nothing in the
       //--- engine, only which sheet is on top
       if(StringLen(what) == 4 && StringSubstr(what, 0, 3) == "tab")
@@ -1281,16 +1409,57 @@ public:
       if(what == "close")  { m_closed = true;  return SSR_CMD_NONE; }
       if(what == "reopen") { m_closed = false; return SSR_CMD_NONE; }
 
-      //--- a row's own close button: px0..px4 -> the ticket that row
-      //--- was showing when it was pressed
-      if(StringLen(what) == 3 && StringSubstr(what, 0, 2) == "px")
+      //+------------------------------------------------------------------+
+      //| THE THREE ROW BUTTONS.                                           |
+      //|                                                                  |
+      //| px halves nothing and closes everything, ph halves, pb protects. |
+      //| All three name a ROW, not a ticket: the row is what the user      |
+      //| aimed at, and the ticket it was showing is read at the moment of  |
+      //| the press. A row that has scrolled away since is out of range and |
+      //| does nothing, which is the right answer - it is better to miss a  |
+      //| click than to close a position the user was not looking at.       |
+      //+------------------------------------------------------------------+
+      if(StringLen(what) == 3 && StringSubstr(what, 0, 1) == "p" &&
+         (StringSubstr(what, 1, 1) == "x" || StringSubstr(what, 1, 1) == "h" ||
+          StringSubstr(what, 1, 1) == "b"))
         {
-         int r = (int)StringToInteger(StringSubstr(what, 2));
-         if(m_port != NULL && r >= 0 && r < m_state.pos_rows)
-            PrintFormat("[panel] close #%d -> %s",
-                        (int)m_state.pos_ticket[r],
-                        (m_port.ClosePosition(m_state.pos_ticket[r])
-                         ? "ok" : "refused (" + m_port.TradeError() + ")"));
+         string act = StringSubstr(what, 1, 1);
+         int    r   = (int)StringToInteger(StringSubstr(what, 2));
+         if(m_port == NULL || r < 0 || r >= m_state.pos_rows)
+            return SSR_CMD_NONE;
+
+         long   tk = m_state.pos_ticket[r];
+         bool   ok = false;
+         string verb = "";
+         if(act == "x")      { verb = "close";      ok = m_port.ClosePosition(tk); }
+         else if(act == "h") { verb = "half";       ok = m_port.ClosePartial(tk, 0.5); }
+         else                { verb = "break-even"; ok = m_port.BreakEven(tk); }
+
+         string line = StringFormat("%s #%d -> %s", verb, (int)tk,
+                                    ok ? "ok"
+                                    : "refused (" + m_port.TradeError() + ")");
+         PrintFormat("[panel] %s", line);
+         if(m_flight != NULL)
+            m_flight.Event("panel " + line);
+         return SSR_CMD_NONE;
+        }
+
+      //--- the trailing distance. One ladder, so "+" from off lands on a
+      //--- distance somebody would actually use rather than on 1 point.
+      if(what == "trdn" || what == "trup" || what == "troff")
+        {
+         if(m_port == NULL)
+            return SSR_CMD_NONE;
+         double pts = (what == "troff") ? 0.0
+                      : StepTrail(what == "trup" ? +1 : -1);
+         bool ok = m_port.SetTrailing(pts);
+         string line = StringFormat("trailing %s -> %s",
+                                    pts > 0.0 ? StringFormat("%.0f pt", pts) : "off",
+                                    ok ? "ok"
+                                    : "refused (" + m_port.TradeError() + ")");
+         PrintFormat("[panel] %s", line);
+         if(m_flight != NULL)
+            m_flight.Event("panel " + line);
          return SSR_CMD_NONE;
         }
 

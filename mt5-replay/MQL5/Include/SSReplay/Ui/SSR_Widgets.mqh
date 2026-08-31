@@ -131,10 +131,12 @@ public:
                           const bool set_text = true)
      {
       string n = N(id);
+      bool   fresh = false;
       if(ObjectFind(m_chart, n) < 0)
         {
          if(!ObjectCreate(m_chart, n, OBJ_EDIT, 0, 0, 0))
             return false;
+         fresh = true;
          m_created++;
          Common(n);
          ObjectSetInteger(m_chart, n, OBJPROP_ALIGN, ALIGN_LEFT);
@@ -149,9 +151,12 @@ public:
       ObjectSetInteger(m_chart, n, OBJPROP_BORDER_COLOR, SSR_C_WELL_EDGE);
       ObjectSetInteger(m_chart, n, OBJPROP_FONTSIZE,  SSR_FS_BODY);
       ObjectSetInteger(m_chart, n, OBJPROP_READONLY,  false);
-      //--- only on creation, or on an explicit reset. Writing the text
-      //--- every repaint would delete whatever the user was typing.
-      if(set_text)
+      //--- ON CREATION, or on an explicit reset. Writing the text every
+      //--- repaint would delete whatever the user was typing - but a box
+      //--- that came back EMPTY after being rebuilt would lose the value
+      //--- just as completely, and silently, so a fresh object always
+      //--- gets the caller's text whatever the caller asked for.
+      if(set_text || fresh)
          ObjectSetString(m_chart, n, OBJPROP_TEXT, text);
       return true;
      }

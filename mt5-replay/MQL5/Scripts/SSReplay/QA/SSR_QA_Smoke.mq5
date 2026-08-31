@@ -41,6 +41,8 @@
 #include <SSReplay/Data/SSR_Mt5DataSource.mqh>
 #include <SSReplay/Mt5/SSR_CustomSymbolSink.mqh>
 #include <SSReplay/Chart/SSR_ChartManager.mqh>
+#include <SSReplay/Ui/SSR_GroupPort.mqh>
+#include <SSReplay/Ui/SSR_Panel.mqh>
 
 input string InpSymbol     = "";     // Symbol (empty = this chart)
 input int    InpReplayBars = 400;    // Replay window, in M1 bars
@@ -743,6 +745,251 @@ void OnStart()
                             SSRSetupBlindName(b.blind),
                             (b.prop_on ? "on" : "off"), b.session_name));
          FileDelete("SSReplay\\setup.ini");
+        }
+   }
+
+   //+------------------------------------------------------------------+
+   //| 17. MANAGING A TRADE, AND WHAT THE TAGS SAY AFTERWARDS.          |
+   //|                                                                  |
+   //| The engine could halve a position, move a stop to entry and trail |
+   //| since Phase 9. None of the three had a button, so the tool         |
+   //| modelled the five seconds of entering a trade and none of the hour |
+   //| of managing it - which is the part being practised.                |
+   //|                                                                  |
+   //| Driven through the PORT, not the engine, because the port is what  |
+   //| the new buttons call: the lot-step rounding, the refusals and the  |
+   //| tag normalisation all live there and none of them exist downstairs.|
+   //|                                                                  |
+   //| The volumes come from the symbol's own step. A test that assumed   |
+   //| 0.01 would pass here and fail on the first broker who quotes in    |
+   //| tenths, and reporting that as a product defect is exactly the      |
+   //| hardcoded-broker trap this project is not allowed to fall into.    |
+   //+------------------------------------------------------------------+
+   {
+      double step = SymbolInfoDouble(rsym, SYMBOL_VOLUME_STEP);
+      if(step <= 0.0)
+         step = 0.01;
+
+      CSSRStatsEngine stats;
+      stats.Attach(GetPointer(acct));
+
+      CSSRGroupPort port;
+      port.AttachAccount(GetPointer(acct));
+      port.AttachStats(GetPointer(stats));
+
+      //--- the tag: trimmed, and its commas taken out, because the same
+      //--- journal is exported as a CSV and one comma in a setup name
+      //--- moves every column after it by one
+      port.SetTradeTag("  break,out  ");
+      Check("a setup tag is cleaned before it is stored",
+            port.TagOrDefault() == "break out",
+            StringFormat("[%s] from [  break,out  ]", port.TagOrDefault()));
+      Check("and an empty one still labels the trade",
+            (port.SetTradeTag("") && port.TagOrDefault() == "lines"),
+            "an untagged trade is a trade nothing can group");
+
+      double nbid = acct.Bid();
+      double nsl  = nbid - 5000 * pt;
+      double ntp  = nbid + 5000 * pt;
+
+      long t1 = acct.Open(SSR_ORDER_BUY, step * 2, nsl, ntp, 0.0, "breakout");
+      if(Check("a tagged position opens", t1 > 0,
+               StringFormat("ticket %d at %.2f lots%s", (int)t1, step * 2,
+                            (t1 > 0 ? "" : " - " + acct.LastError()))))
+        {
+         Check("half of it closes", port.ClosePartial(t1, 0.5),
+               (port.TradeError() == "" ? "closed one step"
+                : port.TradeError()));
+
+         SSRVirtualPosition p1;
+         bool seen1 = false;
+         for(int i = 0; i < acct.Total() && !seen1; i++)
+           {
+            SSRVirtualPosition q;
+            if(acct.At(i, q) && q.ticket == t1)
+              { p1 = q; seen1 = true; }
+           }
+         Check("and the other half is still open",
+               seen1 && p1.IsOpen() && MathAbs(p1.volume - step) < step / 10.0,
+               StringFormat("%.3f lots left of %.3f", p1.volume, step * 2));
+
+         Check("break-even puts the stop at the entry", port.BreakEven(t1),
+               (port.TradeError() == "" ? "" : port.TradeError()));
+         Check("a trailing distance reaches the open trade",
+               port.SetTrailing(250.0),
+               (port.TradeError() == "" ? "250 pt" : port.TradeError()));
+
+         seen1 = false;
+         for(int i = 0; i < acct.Total() && !seen1; i++)
+           {
+            SSRVirtualPosition q;
+            if(acct.At(i, q) && q.ticket == t1)
+              { p1 = q; seen1 = true; }
+           }
+         Check("the stop is AT the entry, not near it",
+               seen1 && MathAbs(p1.sl - p1.open_price) < pt / 2.0,
+               StringFormat("sl %.5f  entry %.5f", p1.sl, p1.open_price));
+         Check("and the trail is on the position, not just in the panel",
+               seen1 && MathAbs(p1.trail_points - 250.0) < 0.5,
+               StringFormat("%.0f pt on the position", p1.trail_points));
+
+         acct.Close(t1);
+        }
+
+      //--- ONE STEP CANNOT BE HALVED. The engine would silently close
+      //--- the whole thing; a user who pressed "half" and lost the
+      //--- position would be right to call that a bug.
+      long t2 = acct.Open(SSR_ORDER_BUY, step, nsl, ntp, 0.0, "breakout");
+      if(t2 > 0)
+        {
+         bool halved = port.ClosePartial(t2, 0.5);
+         //--- and it must SAY why. A silent refusal is a button that
+         //--- looks broken, which is the same defect wearing a
+         //--- different face.
+         Check("halving the minimum size is refused, and says why",
+               !halved && acct.OpenCount() >= 1 && port.TradeError() != "",
+               StringFormat("[%s] (the position is still open)",
+                            port.TradeError()));
+         acct.Close(t2);
+        }
+
+      long t3 = acct.Open(SSR_ORDER_SELL, step, ntp, nsl, 0.0, "fade");
+      if(t3 > 0)
+         acct.Close(t3);
+
+      //+------------------------------------------------------------------+
+      //| THE POINT OF TYPING A TAG.                                       |
+      //|                                                                  |
+      //| A win rate across a whole session says nothing anyone can act on.|
+      //| Two win rates, one per setup, say which setup to stop trading -   |
+      //| and the statistics engine has been able to compute per tag since  |
+      //| Phase 10 with nothing ever setting one.                           |
+      //+------------------------------------------------------------------+
+      SSRStatistics all, sb, sf;
+      all.Init(); sb.Init(); sf.Init();
+      stats.Compute(all);
+      stats.ComputeFor("breakout", sb);
+      stats.ComputeFor("fade",     sf);
+
+      Check("the statistics split by tag",
+            sb.trades == 2 && sf.trades == 1 && all.trades >= sb.trades + sf.trades,
+            StringFormat("breakout %d, fade %d, session %d",
+                         sb.trades, sf.trades, all.trades));
+
+      CSSRJournal tj;
+      tj.Attach(GetPointer(acct), GetPointer(stats));
+      string tname = "SSReplay-smoke-tags";
+      if(Check("the statement exports with tags in it", tj.ExportHtml(tname, 2),
+               tj.LastPath() + (tj.LastError() == "" ? "" : "  " + tj.LastError())))
+        {
+         //--- READ IT. A file of the right size with no breakdown in it
+         //--- passes a size check and fails the user, which is the whole
+         //--- lesson of the volume column that printed 0.00 for a year.
+         string body = "";
+         int th = FileOpen(tj.LastPath(), FILE_READ | FILE_TXT | FILE_ANSI);
+         if(th != INVALID_HANDLE)
+           {
+            while(!FileIsEnding(th))
+               body += FileReadString(th);
+            FileClose(th);
+           }
+         Check("and the breakdown is really in the file",
+               StringFind(body, "By setup") >= 0 &&
+               StringFind(body, "breakout") >= 0 &&
+               StringFind(body, "fade") >= 0,
+               StringFormat("%d chars, all three markers present "
+                            "- a size check alone would pass an empty table",
+                            StringLen(body)));
+         FileDelete(tj.LastPath());
+        }
+   }
+
+   //+------------------------------------------------------------------+
+   //| 18. EVERY CONTROL IS INSIDE THE PANEL.                           |
+   //|                                                                  |
+   //| The frame height is a constant with the sheet heights added up in |
+   //| a COMMENT beside it, and v69 put two new rows on two sheets. Both |
+   //| looked fine in the code and neither was inside the frame: a row   |
+   //| past the end is drawn over the status bar, which reads as a       |
+   //| rendering fault rather than as a number nobody updated.            |
+   //|                                                                  |
+   //| So it is measured, not reasoned about. The panel is built on a    |
+   //| real chart, every tab is opened, and every object it drew is      |
+   //| asked where its bottom edge is. Nothing here knows a single       |
+   //| layout number: the frame itself is read from the background       |
+   //| rectangle the panel drew, so a future row is caught by the same   |
+   //| test without editing it.                                          |
+   //+------------------------------------------------------------------+
+   {
+      long pchart = ChartOpen(rsym, PERIOD_M1);
+      int  pch    = (int)ChartGetInteger(pchart, CHART_HEIGHT_IN_PIXELS);
+      if(pchart == 0)
+         No("a chart for the layout test", "ChartOpen refused");
+      else if(pch > 0 && pch < SSR_PANEL_H + 24)
+        {
+         //--- NOT a pass. The panel drops the tabs on a short chart, so
+         //--- there would be no sheet to measure and a silent "ok" here
+         //--- would be the most misleading line in the whole report.
+         No("the layout can be measured",
+            StringFormat("this chart is %d px tall and the panel needs %d - "
+                         "it would run in compact mode, with no sheet to "
+                         "measure. Close the Toolbox (Ctrl+T) and re-run.",
+                         pch, SSR_PANEL_H + 24));
+         ChartClose(pchart);
+        }
+      else
+        {
+         CSSRPanel pnl;
+         pnl.Create(pchart, NULL, "SSRQ_");
+
+         int   worst_bottom = 0;
+         string worst_name  = "";
+         int   frame_top = 0, frame_bottom = 0;
+
+         for(int t = 0; t < 4; t++)
+           {
+            pnl.Dispatch("tab" + IntegerToString(t));
+            pnl.Render();
+
+            int n = ObjectsTotal(pchart, -1, -1);
+            for(int i = 0; i < n; i++)
+              {
+               string nm = ObjectName(pchart, i, -1, -1);
+               if(StringFind(nm, "SSRQ_") != 0)
+                  continue;
+
+               int oy = (int)ObjectGetInteger(pchart, nm, OBJPROP_YDISTANCE);
+               int oh = (int)ObjectGetInteger(pchart, nm, OBJPROP_YSIZE);
+
+               //--- a LABEL has no height of its own; MetaTrader answers
+               //--- zero and the text is drawn below the anchor anyway,
+               //--- so it is allowed the height of a line of it
+               if(ObjectGetInteger(pchart, nm, OBJPROP_TYPE) == OBJ_LABEL)
+                  oh = 12;
+
+               if(nm == "SSRQ_bg")
+                 { frame_top = oy; frame_bottom = oy + oh; continue; }
+
+               if(oy + oh > worst_bottom)
+                 { worst_bottom = oy + oh; worst_name = nm; }
+              }
+           }
+
+         if(Check("the panel drew a frame to measure against",
+                  frame_bottom > frame_top && worst_name != "",
+                  StringFormat("frame %d..%d px", frame_top, frame_bottom)))
+            Check("and nothing is drawn outside it",
+                  worst_bottom <= frame_bottom,
+                  StringFormat("deepest control %s ends at %d, frame ends at %d "
+                               "(%d px %s)",
+                               StringSubstr(worst_name, 5), worst_bottom,
+                               frame_bottom,
+                               (int)MathAbs(frame_bottom - worst_bottom),
+                               (worst_bottom <= frame_bottom ? "spare"
+                                : "OVER - raise SSR_SHEET_H")));
+
+         pnl.Destroy();
+         ChartClose(pchart);
         }
    }
 

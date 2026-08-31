@@ -210,6 +210,8 @@ public:
          "background:#f5f7f8;margin:0;padding:28px}\r\n"
          ".w{max-width:1000px;margin:0 auto}\r\n"
          "h1{font-size:21px;margin:0 0 4px}\r\n"
+         "h2{font-size:13px;margin:26px 0 8px;color:#5c636b;text-transform:uppercase;"
+         "letter-spacing:.06em}\r\n"
          ".sub{color:#5c636b;margin:0 0 20px;font-size:12px}\r\n"
          ".caveat{background:#fff6e5;border:1px solid #e3c88a;border-left:4px solid #a35a00;"
          "padding:11px 14px;margin:0 0 20px;color:#5a3d00}\r\n"
@@ -274,6 +276,48 @@ public:
                       st.ambiguous_trades, st.ambiguous_pct));
       FileWriteString(h, "</div>\r\n");
 
+      //+------------------------------------------------------------------+
+      //| THE SETUP BREAKDOWN.                                             |
+      //|                                                                  |
+      //| One line per tag, with the same measures as the header. This is  |
+      //| the whole point of typing a setup name: a 44% win rate across a  |
+      //| session says nothing a trader can act on, while "breakouts 61%,  |
+      //| fades 22%" says stop trading fades.                              |
+      //|                                                                  |
+      //| Printed only when there are at least two setups. With one, every |
+      //| row would repeat the header exactly, and a table that restates   |
+      //| the numbers above it teaches the reader to skip tables.          |
+      //+------------------------------------------------------------------+
+      string tags[];
+      double nets[];
+      int    ntags = CollectTags(tags, nets);
+      if(ntags > 1 && m_stats != NULL)
+        {
+         FileWriteString(h,
+            "<h2>By setup</h2>\r\n"
+            "<table><tr><th>Setup</th><th class=\"n\">Trades</th>"
+            "<th class=\"n\">Win rate</th><th class=\"n\">Profit factor</th>"
+            "<th class=\"n\">Expectancy</th><th class=\"n\">Average R</th>"
+            "<th class=\"n\">Net</th></tr>\r\n");
+         for(int t = 0; t < ntags; t++)
+           {
+            SSRStatistics ts;
+            ts.Init();
+            m_stats.ComputeFor(tags[t], ts);
+            FileWriteString(h, StringFormat(
+               "<tr><td>%s</td><td class=\"n\">%d</td><td class=\"n\">%.1f%%</td>"
+               "<td class=\"n\">%.2f</td><td class=\"n\">%.2f</td>"
+               "<td class=\"n\">%s</td>"
+               "<td class=\"n\"><span class=\"%s\">%.2f</span></td></tr>\r\n",
+               Html(tags[t] == "" ? "(untagged)" : tags[t]),
+               ts.trades, ts.win_rate, ts.profit_factor, ts.expectancy,
+               (ts.r_trades > 0 ? DoubleToString(ts.average_r, 2) : "-"),
+               (ts.net_profit >= 0 ? "g" : "r"), ts.net_profit));
+           }
+         FileWriteString(h, "</table>\r\n");
+        }
+
+      FileWriteString(h, "<h2>Trades</h2>\r\n");
       FileWriteString(h,
          "<table><tr><th>#</th><th>Type</th><th>Tag</th><th class=\"n\">Volume</th>"
          "<th>Opened</th><th class=\"n\">Price</th><th>Closed</th><th class=\"n\">Price</th>"
@@ -318,6 +362,60 @@ public:
       FileWriteString(h, "</table>\r\n</div></body></html>\r\n");
       FileClose(h);
       return true;
+     }
+
+   //+------------------------------------------------------------------+
+   //| WHICH SETUPS THE SESSION ACTUALLY CONTAINED.                     |
+   //|                                                                  |
+   //| Read from the trades rather than from a list the user maintains: |
+   //| a tag exists because it was traded, and a tag that was typed once|
+   //| and never used should not occupy a row in the report.            |
+   //|                                                                  |
+   //| Ordered by net result, worst last, because the reason to break   |
+   //| a session down by setup is to find the one to stop trading.      |
+   //+------------------------------------------------------------------+
+   int               CollectTags(string &tags[], double &nets[])
+     {
+      ArrayResize(tags, 0);
+      ArrayResize(nets, 0);
+      if(m_acct == NULL)
+         return 0;
+
+      int total = m_acct.Total();
+      for(int i = 0; i < total; i++)
+        {
+         SSRVirtualPosition p;
+         if(!m_acct.At(i, p) || !p.IsClosed())
+            continue;
+
+         int at = -1;
+         for(int k = 0; k < ArraySize(tags) && at < 0; k++)
+            if(tags[k] == p.tag)
+               at = k;
+         if(at < 0)
+           {
+            at = ArraySize(tags);
+            ArrayResize(tags, at + 1);
+            ArrayResize(nets, at + 1);
+            tags[at] = p.tag;
+            nets[at] = 0.0;
+           }
+         nets[at] += p.profit + p.swap - p.commission;
+        }
+
+      //--- a handful of tags at most; an insertion sort is the honest
+      //--- size of the problem
+      for(int i = 1; i < ArraySize(tags); i++)
+        {
+         string t = tags[i];
+         double v = nets[i];
+         int    j = i - 1;
+         while(j >= 0 && nets[j] < v)
+           { tags[j + 1] = tags[j]; nets[j + 1] = nets[j]; j--; }
+         tags[j + 1] = t;
+         nets[j + 1] = v;
+        }
+      return ArraySize(tags);
      }
 
    //--- HTML has five characters that must never arrive raw, or a tag

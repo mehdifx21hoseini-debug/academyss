@@ -106,12 +106,24 @@
 //| a number here instead of quietly overflowing the frame. Walked    |
 //| from the top of Render, in the order the rows are drawn:          |
 //|   caption 23 + clock+progress 32 + transport 27 + speed 33        |
-//| + tabs 21 + sheet 200 + status 18 + margin 14 = 368               |
+//| + tabs 21 + sheet 222 + status 18 + margin 14 = 390               |
 //| The sheet is sized by the tallest one - Trade: risk 40, gap 4,    |
-//| stop & target 106, gap 6, deal buttons 26, spread 14 = 196.       |
+//| setup box 22, stop & target 106, gap 6, deal buttons 26,          |
+//| spread 14 = 218, rounded to 222.                                  |
+//|                                                                   |
+//| v69 added the setup box to Trade and a trailing row to Positions. |
+//| Both fitted "fine" on screen and neither was inside the frame:    |
+//| the sheet is a fixed height and a row past its end is drawn over  |
+//| the status bar, where it looks like a rendering fault rather than |
+//| a number nobody updated. Positions now ends at 193, Trade at 218. |
 //+------------------------------------------------------------------+
+#define SSR_SHEET_H        222
 #define SSR_PANEL_W        420
-#define SSR_PANEL_H        368
+//--- ADDED UP BY THE COMPILER, not by me. The sum above was a comment
+//--- for eleven builds and the two rows v69 added went straight past
+//--- the end of it; written this way, a taller sheet moves the frame
+//--- with it and there is no second number to forget.
+#define SSR_PANEL_H        (23 + 32 + 27 + 33 + 21 + SSR_SHEET_H + 18 + 14)
 //--- CAPTION 23 + CLOCK/PROGRESS 32 + TRANSPORT 27 + SPEED 33
 //--- + STATUS 18 + MARGIN 7. Everything a person touches while the
 //--- replay runs, and nothing they only consult.
@@ -124,7 +136,6 @@
 
 #define SSR_SIDE_W         104     // the always-visible button column
 #define SSR_TAB_H          21
-#define SSR_SHEET_H        200
 #define SSR_STATUS_H       18
 #define SSR_TRACK_H        16      // the speed groove and its thumb
 

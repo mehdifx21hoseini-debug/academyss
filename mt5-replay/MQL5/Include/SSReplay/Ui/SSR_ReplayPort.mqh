@@ -89,6 +89,12 @@ struct SSRUiState
    //--- one line per strategy, already formatted. Empty when none.
    string             strategy_text;
 
+   //--- what the next trade will be labelled, and the trailing distance
+   //--- in points. Both live here so the panel shows what IS, rather
+   //--- than what it last sent.
+   string             trade_tag;
+   double             trail_points;
+
    //+------------------------------------------------------------------+
    //| THE EVALUATION, already decided elsewhere.                       |
    //|                                                                  |
@@ -162,6 +168,7 @@ struct SSRUiState
       pause_reason = ""; streams = 1; skew_msc = 0;
       charts_detached = 0;
       clock_text = "--"; blind = false;
+      trade_tag = ""; trail_points = 0.0;
       prop_on = false; prop_state = 0; prop_state_name = ""; prop_headline = "";
       prop_rules = ""; prop_progress = 0.0; prop_floor = 0.0; prop_days = 0;
       balance = 0.0; equity = 0.0; floating = 0.0;
@@ -252,6 +259,23 @@ public:
 
    //--- close ONE position, by the ticket the state row named
    virtual bool      ClosePosition(const long ticket)     { return false; }
+
+   //+------------------------------------------------------------------+
+   //| MANAGING A TRADE, not only opening and closing one.              |
+   //|                                                                  |
+   //| All three already worked in the engine and had no button. A tool |
+   //| that can only open and close models the five seconds a trader    |
+   //| spends entering and none of the hour they spend managing - which |
+   //| is where the skill being practised actually lives.                |
+   //+------------------------------------------------------------------+
+   virtual bool      ClosePartial(const long ticket, const double fraction)
+                                                          { return false; }
+   virtual bool      BreakEven(const long ticket)         { return false; }
+   virtual bool      SetTrailing(const double points)     { return false; }
+
+   //--- the label the next trade will carry. The engine has stored a
+   //--- tag per position since Phase 9; nothing has ever set it.
+   virtual bool      SetTradeTag(const string tag)        { return false; }
 
    //--- write the session out as a statement a person can read. Returns
    //--- the path in `path_out` so the panel can show WHERE it went; a
