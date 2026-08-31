@@ -557,7 +557,7 @@ void ShowPicker(const string sym, const long default_msc)
    ObjectCreate(0, SSR_PICK_INFO, OBJ_LABEL, 0, 0, 0);
    ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_CORNER,     CORNER_LEFT_UPPER);
    ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_XDISTANCE,  14);
-   ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_YDISTANCE,  60);
+   ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_YDISTANCE,  62);
    ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_COLOR,      clrOrange);
    ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_FONTSIZE,   9);
    ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_SELECTABLE, false);
@@ -572,10 +572,10 @@ void ShowPicker(const string sym, const long default_msc)
    ObjectDelete(0, SSR_PICK_HERE);
    ObjectCreate(0, SSR_PICK_HERE, OBJ_BUTTON, 0, 0, 0);
    ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_CORNER,       CORNER_LEFT_UPPER);
-   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_XDISTANCE,    14);
-   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_YDISTANCE,    78);
-   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_XSIZE,        240);
-   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_YSIZE,        24);
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_XDISTANCE,    260);
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_YDISTANCE,    26);
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_XSIZE,        118);
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_YSIZE,        30);
    ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_BGCOLOR,      C'225,225,225');
    ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_BORDER_COLOR, C'120,120,120');
    ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_COLOR,        C'20,20,20');
@@ -583,8 +583,7 @@ void ShowPicker(const string sym, const long default_msc)
    ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_STATE,        false);
    ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_SELECTABLE,   false);
    ObjectSetString (0, SSR_PICK_HERE, OBJPROP_FONT,         SSR_FONT);
-   ObjectSetString (0, SSR_PICK_HERE, OBJPROP_TEXT,
-                    "PUT THE LINE IN THE MIDDLE OF THIS VIEW");
+   ObjectSetString (0, SSR_PICK_HERE, OBJPROP_TEXT, "LINE TO VIEW");
 
    ChartRedraw(0);
    PrintFormat("[host] PICK A START: drag the orange line on this %s chart to "
@@ -1150,6 +1149,15 @@ bool BuildSession(string origin, const bool on_replay,
          PrintFormat("[host] %d M1 bars inside the replay window", win_bars);
      }
 
+   //--- THE STATE THAT MATTERS, ON ONE LINE. Three rounds have now been
+   //--- spent asking "does it replay?" without the log saying what the
+   //--- engine was actually holding when the user pressed Play.
+   PrintFormat("[host] SESSION READY: window %s .. %s | %d bars | panel on %s "
+               "| status %s",
+               SSRFormatMsc(win_start), SSRFormatMsc(win_end), win_bars,
+               (g_panel_chart == g_replay_chart ? "the replay chart" : "this chart"),
+               SSRStateName(g_group.Status()));
+
    if(g_on_replay_chart)
       PrintFormat("[host] one window: the chart, the panel, the mouse and the "
                   "keyboard are all on %s. Nothing else to click.", _Symbol);
@@ -1237,6 +1245,26 @@ int OnInit()
 
    string stashed = ReadStashedOrigin();
 
+   //+------------------------------------------------------------------+
+   //| THE PICKED START HAS TO SURVIVE THE HANDOVER.                    |
+   //|                                                                  |
+   //| g_pick_msc is a global, and the handover restarts this program:  |
+   //| globals are re-initialised, so on the second pass the choice was |
+   //| simply gone and the window fell back to "the last 2000 bars".    |
+   //| The user picked a moment and the tool quietly replayed a         |
+   //| different one.                                                   |
+   //|                                                                  |
+   //| It rides across in a hidden label on the chart, the same way the |
+   //| origin symbol does - objects belong to the chart and survive the |
+   //| symbol change that restarts us.                                  |
+   //+------------------------------------------------------------------+
+   if(ObjectFind(0, SSR_PICK_STASH) >= 0)
+     {
+      string ps = ObjectGetString(0, SSR_PICK_STASH, OBJPROP_TEXT);
+      if(ps != "")
+         g_pick_msc = (long)StringToTime(ps) * 1000;
+     }
+
    //--- a "!" prefix is last run's failed second pass telling this one
    //--- not to try the handover again. Read once, then cleared.
    bool one_chart_ok = InpOneChart;
@@ -1317,14 +1345,9 @@ int OnInit()
    //+------------------------------------------------------------------+
    if(InpPickStart && !on_replay && InpStart == 0 && !InpRandom)
      {
-      string picked = "";
-      if(ObjectFind(0, SSR_PICK_STASH) >= 0)
-        {
-         picked = ObjectGetString(0, SSR_PICK_STASH, OBJPROP_TEXT);
-         ObjectDelete(0, SSR_PICK_STASH);
-        }
-
-      if(picked == "")
+      //--- already chosen (this run, or before the handover)? then the
+      //--- picker has nothing left to ask
+      if(g_pick_msc == SSR_INVALID_TIME)
         {
          //--- default the line to where the auto window would have
          //--- started, so pressing the button without dragging gives
@@ -1346,7 +1369,6 @@ int OnInit()
          return INIT_SUCCEEDED;
         }
 
-      g_pick_msc = (long)StringToTime(picked) * 1000;
       PrintFormat("[host] starting from the line you placed: %s",
                   SSRFormatMsc(g_pick_msc));
      }
@@ -1518,6 +1540,15 @@ void OnTimer()
          g_picking = false;
          EventKillTimer();
          g_pick_msc = (long)at * 1000;
+
+         //--- and on the chart, so the handover's restart cannot lose it
+         if(ObjectFind(0, SSR_PICK_STASH) < 0)
+            ObjectCreate(0, SSR_PICK_STASH, OBJ_LABEL, 0, 0, 0);
+         ObjectSetInteger(0, SSR_PICK_STASH, OBJPROP_XDISTANCE, -1000);
+         ObjectSetInteger(0, SSR_PICK_STASH, OBJPROP_YDISTANCE, -1000);
+         ObjectSetInteger(0, SSR_PICK_STASH, OBJPROP_HIDDEN,    true);
+         ObjectSetString (0, SSR_PICK_STASH, OBJPROP_TEXT,
+                          TimeToString(at, TIME_DATE | TIME_MINUTES));
 
          PrintFormat("[host] start set to %s - building the session",
                      TimeToString(at, TIME_DATE | TIME_MINUTES));

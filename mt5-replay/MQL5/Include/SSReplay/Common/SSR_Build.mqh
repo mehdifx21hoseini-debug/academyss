@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v48 2026-08-31  a10-const-parameters"
+#define SSR_BUILD           "v49 2026-08-31  the-pick-survives"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
