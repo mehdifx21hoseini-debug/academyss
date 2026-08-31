@@ -1005,20 +1005,34 @@ bool BuildSession(string origin, const bool on_replay,
         }
      }
 
-   //--- and blind mode goes on every chart we own, remembering what
-   //--- each looked like so the user can leave the mode again
+   //+------------------------------------------------------------------+
+   //| BLIND MODE GOES ON EVERY MANAGED CHART, NOT ONLY THE ONES WE     |
+   //| OPENED.                                                          |
+   //|                                                                  |
+   //| This asked OwnedIds, which lists charts the manager opened for   |
+   //| itself. In one-window mode the host hands over its OWN chart, so  |
+   //| that chart is never owned - it arrives through Sync's discovery   |
+   //| path. Blind mode would therefore hide the instrument on the extra |
+   //| timeframe charts and leave the main one announcing it, which is   |
+   //| the whole feature defeated on the only chart the user watches.    |
+   //|                                                                  |
+   //| Ownership answers "may we close this?". Blind answers "what can   |
+   //| the user see?". Two different questions, and this was asking the  |
+   //| wrong one - the third time in this project that a behaviour was   |
+   //| reachable only from OpenChart.                                    |
+   //|                                                                  |
+   //| Sync first, so the handed-over chart is in the registry to find.  |
+   //+------------------------------------------------------------------+
    if(g_blind.IsOn())
      {
-      long ids[];
-      int  n = g_charts.OwnedIds(ids);
-      for(int i = 0; i < n; i++)
-         g_blind.Apply(ids[i]);
+      g_charts.Sync();
+      for(int i = 0; i < g_charts.Count(); i++)
+         g_blind.Apply(g_charts.IdAt(i));
       for(int st = 0; st < g_extra; st++)
         {
-         long ids2[];
-         int  n2 = g_charts2[st].OwnedIds(ids2);
-         for(int i = 0; i < n2; i++)
-            g_blind.Apply(ids2[i]);
+         g_charts2[st].Sync();
+         for(int i = 0; i < g_charts2[st].Count(); i++)
+            g_blind.Apply(g_charts2[st].IdAt(i));
         }
       Print("[host] ", g_blind.ToString());
       Print("[host] ", g_blind.Leaks());
@@ -1483,7 +1497,27 @@ int OnInit()
    //| has already answered the question, so the picker stays out of    |
    //| the way in both cases.                                           |
    //+------------------------------------------------------------------+
-   if(InpPickStart && !on_replay && InpStart == 0 && !InpRandom)
+   //+------------------------------------------------------------------+
+   //| A SESSION BEING RESUMED HAS ALREADY CHOSEN ITS START.            |
+   //|                                                                  |
+   //| The picker did not know about resuming - it lives in OnInit and  |
+   //| the resume decision is taken inside BuildSession - so a user with |
+   //| a saved session was asked to drag a line, pressed START REPLAY    |
+   //| HERE, and got the SAVED window instead. Their choice was          |
+   //| collected and then discarded without a word.                      |
+   //|                                                                  |
+   //| That is exactly the defect fixed in v55 for a saved POSITION,     |
+   //| arriving again through a saved SESSION. Asking a question whose   |
+   //| answer will be ignored is worse than not asking it.               |
+   //+------------------------------------------------------------------+
+   bool will_resume = (InpSession != "" && InpResume &&
+                       g_session_mgr.Exists(InpSession));
+   if(will_resume && !on_replay)
+      PrintFormat("[host] resuming session \"%s\" - not asking where to "
+                  "start, because the file already says. Clear 'Session' "
+                  "or turn 'Resume' off to pick a new start.", InpSession);
+
+   if(InpPickStart && !on_replay && InpStart == 0 && !InpRandom && !will_resume)
      {
       //--- already chosen (this run, or before the handover)? then the
       //--- picker has nothing left to ask
@@ -2003,6 +2037,13 @@ void OnTimer()
       for(int i = 0; i < g_extra; i++)
          g_publisher2[i].Publish();
       g_charts.Sync();
+      //--- a chart the user opens mid-session is a chart that would
+      //--- otherwise announce the instrument the whole mode exists to
+      //--- hide. Apply is idempotent and remembers the original state
+      //--- once, so re-applying costs nothing and forgets nothing.
+      if(g_blind.IsOn())
+         for(int bi = 0; bi < g_charts.Count(); bi++)
+            g_blind.Apply(g_charts.IdAt(bi));
       //--- and repaint. Free at the tick fidelities, and the only thing
       //--- that moves the chart at bar fidelity, where no tick arrives
       //--- to do it. The manager throttles it.

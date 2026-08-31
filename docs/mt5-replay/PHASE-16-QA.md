@@ -3338,3 +3338,51 @@ the short direction actually placing a SELL, the closed-trade history
 arrows appearing, and the statement's volume column now reading 0.21 rather
 than 0.00. Each has a passing smoke stage behind it; none has a screenshot
 or a recording. Recording that gap is cheaper than assuming it away.
+
+## v65 — the four unmeasured features, checked before being recommended
+
+Multi-timeframe, save/resume, blind mode and close-from-row all existed in
+code and none had ever run on MetaTrader. Rather than write usage notes for
+them, they were read first. Two were broken.
+
+### Blind mode never reached the chart being watched
+
+The host walked `OwnedIds` — charts the manager opened for itself. In
+one-window mode the host hands over its **own** chart, which is never
+owned; it arrives through Sync's discovery path. So blind mode hid the
+instrument on the extra timeframe charts and left it announced on the only
+chart the user actually watches.
+
+> Ownership answers "may we close this?". Blind answers "what can the user
+> see?".
+
+**Third time** in this project that a behaviour was reachable only from
+`OpenChart` — after v53's chart policy and v62's position lines. That is no
+longer a coincidence; it is a shape. The smoke test now states the fact all
+three violated:
+
+```
+PASS  a discovered chart is MANAGED but not OWNED
+      1 managed, 0 owned - anything the user must SEE has to walk
+      the managed set, never the owned one
+```
+
+### Resuming a session discarded the start the user picked
+
+The picker lives in `OnInit`; the resume decision is taken inside
+`BuildSession`. So with a saved session the user was asked to drag a start
+line, pressed START REPLAY HERE, and got the saved window — their answer
+collected and dropped without a word. **Exactly the v55 defect** (a saved
+*position* overriding a picked start) arriving through a saved *session*.
+
+Asking a question whose answer will be ignored is worse than not asking.
+The picker is now suppressed when a session will resume, and says why.
+
+### Coverage added
+
+Ownership-vs-managed, the timeframe layout, blind apply and restore, and a
+session file round trip. Honest limit, as in v62: these test the class
+contracts. That the *host* walks the right set is still only covered by a
+real session.
+
+**Not measured:** v65 has not been run on MetaTrader.

@@ -32,6 +32,8 @@
 #include <SSReplay/Trading/SSR_TradingEngine.mqh>
 #include <SSReplay/Trading/SSR_Journal.mqh>
 #include <SSReplay/Chart/SSR_TradeLines.mqh>
+#include <SSReplay/Chart/SSR_BlindMode.mqh>
+#include <SSReplay/Session/SSR_SessionManager.mqh>
 #include <SSReplay/Core/SSR_ReplayController.mqh>
 #include <SSReplay/Core/SSR_MasterClock.mqh>
 #include <SSReplay/Data/SSR_Mt5DataSource.mqh>
@@ -559,6 +561,89 @@ void OnStart()
             ObjectFind(lchart, "SSR_HIST_777_L") < 0,
             "positions and history both go when the session is over");
       ChartClose(lchart);
+     }
+
+   //+------------------------------------------------------------------+
+   //| 13. MANAGED IS NOT THE SAME SET AS OWNED.                        |
+   //|                                                                  |
+   //| Three separate defects have come from asking about ownership     |
+   //| when the question was about what the user can see: v53's chart   |
+   //| policy, v62's position lines, and blind mode reaching only the   |
+   //| charts it had opened - which in one-window mode is every chart    |
+   //| EXCEPT the one being watched.                                     |
+   //|                                                                  |
+   //| One assertion states the fact all three got wrong.                |
+   //+------------------------------------------------------------------+
+   long probe2 = ChartOpen(rsym, PERIOD_M15);
+   if(Check("a second chart for the layout tests", probe2 != 0, rsym))
+     {
+      CSSRChartManager m2;
+      m2.Configure(rsym, origin);
+      m2.Sync();
+      long owned[];
+      int  n_owned = m2.OwnedIds(owned);
+      Check("a discovered chart is MANAGED but not OWNED",
+            m2.Count() >= 1 && n_owned == 0,
+            StringFormat("%d managed, %d owned - anything the user must SEE "
+                         "has to walk the managed set, never the owned one",
+                         m2.Count(), n_owned));
+
+      //--- multi timeframe
+      ENUM_TIMEFRAMES tfs[];
+      ArrayResize(tfs, 2);
+      tfs[0] = PERIOD_M30;
+      tfs[1] = PERIOD_H1;
+      int opened = m2.OpenLayout(tfs, 2);
+      Check("extra timeframes open on the replay symbol", opened == 2,
+            StringFormat("%d of 2 opened, %d charts managed now",
+                         opened, m2.Count()));
+
+      //--- blind mode, on a chart nobody owned
+      bool had_ohlc = (bool)ChartGetInteger(probe2, CHART_SHOW_OHLC);
+      CSSRBlindMode  blind;
+      SSRBlindPolicy pol;
+      pol.Apply(SSR_BLIND_FULL);
+      blind.SetPolicy(pol);
+      blind.Apply(probe2);
+      Sleep(80);
+      Check("blind mode hides what the chart announces",
+            !(bool)ChartGetInteger(probe2, CHART_SHOW_OHLC) &&
+            !(bool)ChartGetInteger(probe2, CHART_SHOW_PRICE_SCALE),
+            "OHLC line and price scale both off");
+
+      blind.RestoreAll();
+      Sleep(80);
+      Check("and puts the chart back the way it was",
+            (bool)ChartGetInteger(probe2, CHART_SHOW_OHLC) == had_ohlc,
+            "a mode you cannot leave is a trap, not a feature");
+
+      m2.CloseOwned();
+      ChartClose(probe2);
+     }
+
+   //+------------------------------------------------------------------+
+   //| 14. A SESSION SURVIVES BEING WRITTEN AND READ BACK.              |
+   //+------------------------------------------------------------------+
+   CSSRReplayGroup     sgrp;
+   CSSRSessionManager  smgr;
+   sgrp.Add(GetPointer(ctrl));
+   smgr.Attach(GetPointer(sgrp), GetPointer(acct));
+
+   SSRSessionSettings sset;
+   sset.Init();
+   string sname = "ssr-smoke-session";
+   if(Check("a session saves", smgr.Save(sname, sset),
+            (smgr.LastError() == "" ? smgr.LastPath() : smgr.LastError())))
+     {
+      Check("and the file is there afterwards", smgr.Exists(sname),
+            smgr.LastPath());
+
+      long r_start = 0, r_end = 0;
+      Check("and the window reads back",
+            smgr.ReadWindow(sname, 0, r_start, r_end) && r_end > r_start,
+            StringFormat("%s .. %s", SSRFormatMsc(r_start), SSRFormatMsc(r_end)));
+
+      FileDelete(smgr.LastPath());
      }
 
    ctrl.Release();

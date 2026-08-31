@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v64 2026-08-31  levels-like-the-platform"
+#define SSR_BUILD           "v65 2026-08-31  managed-is-not-owned"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
