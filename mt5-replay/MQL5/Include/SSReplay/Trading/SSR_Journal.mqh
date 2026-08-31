@@ -16,6 +16,7 @@
 #include "../Common/SSR_Time.mqh"
 #include "SSR_TradingEngine.mqh"
 #include "SSR_Statistics.mqh"
+#include "SSR_PropEvaluation.mqh"
 
 #define SSR_JOURNAL_DIR   "SSReplay\\journal"
 
@@ -27,6 +28,7 @@ private:
    CSSRStatsEngine   *m_stats;     // not owned; may be NULL
    string             m_last_error;
    string             m_last_path;
+   CSSRPropEvaluation *m_prop;      // not owned; may be NULL
 
    string             Csv(const string s)
      {
@@ -71,7 +73,12 @@ private:
 
 public:
                      CSSRJournal(void)
-     : m_acct(NULL), m_stats(NULL), m_last_error(""), m_last_path("") {}
+     : m_acct(NULL), m_stats(NULL), m_last_error(""), m_last_path(""),
+       m_prop(NULL) {}
+
+   //--- the evaluation's verdict belongs in the document, not only on a
+   //--- panel that closes with the terminal
+   void              AttachProp(CSSRPropEvaluation *p) { m_prop = p; }
 
    void              Attach(CSSRTradingEngine *a, CSSRStatsEngine *s = NULL)
      { m_acct = a; m_stats = s; }
@@ -228,6 +235,28 @@ public:
       if(caveat != "")
          FileWriteString(h, "<div class=\"caveat\"><b>Read this first.</b><br>" +
                             Html(caveat) + "</div>\r\n");
+
+      //+------------------------------------------------------------------+
+      //| THE VERDICT GOES ABOVE THE NUMBERS.                              |
+      //|                                                                  |
+      //| An evaluation that passed and one that failed can produce the    |
+      //| same profit figure - the difference is a rule, and a rule buried |
+      //| under a KPI grid is a rule the reader takes on trust. It also    |
+      //| carries the RULES, so a statement can be read a year later by    |
+      //| someone who does not know what was being attempted.               |
+      //+------------------------------------------------------------------+
+      if(m_prop != NULL && m_prop.IsOn())
+        {
+         string cls = "amb";
+         if(m_prop.State() == SSR_PROP_PASSED) cls = "g";
+         if(m_prop.State() == SSR_PROP_FAILED) cls = "r";
+         FileWriteString(h, StringFormat(
+            "<div class=\"caveat\"><b>Evaluation: "
+            "<span class=\"%s\">%s</span></b><br>%s<br>%s</div>\r\n",
+            cls, Html(m_prop.StateName()),
+            Html(m_prop.Report()),
+            Html(m_prop.Reason())));
+        }
 
       FileWriteString(h, "<div class=\"kpi\">\r\n");
       FileWriteString(h, StringFormat("<div><span>Trades</span><b>%d</b></div>\r\n", st.trades));

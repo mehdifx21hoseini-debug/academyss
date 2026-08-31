@@ -89,6 +89,23 @@ struct SSRUiState
    //--- one line per strategy, already formatted. Empty when none.
    string             strategy_text;
 
+   //+------------------------------------------------------------------+
+   //| THE EVALUATION, already decided elsewhere.                       |
+   //|                                                                  |
+   //| The panel gets a state, a headline and a progress fraction - not |
+   //| the rules and the equity to compare for itself. A second place   |
+   //| that knows what a daily loss limit means is a second place that  |
+   //| can disagree with the first about whether you failed.            |
+   //+------------------------------------------------------------------+
+   bool               prop_on;
+   int                prop_state;      // ENUM_SSR_PROP_STATE
+   string             prop_state_name;
+   string             prop_headline;
+   string             prop_rules;
+   double             prop_progress;   // 0..1 toward the profit target
+   double             prop_floor;      // the equity level that ends the run
+   int                prop_days;
+
    //--- THE OPEN POSITIONS, as rows the panel can show and act on.
    //--- Five is a display cap, not a trading cap: pos_rows says how
    //--- many are shown, open_positions how many exist, and when they
@@ -145,6 +162,8 @@ struct SSRUiState
       pause_reason = ""; streams = 1; skew_msc = 0;
       charts_detached = 0;
       clock_text = "--"; blind = false;
+      prop_on = false; prop_state = 0; prop_state_name = ""; prop_headline = "";
+      prop_rules = ""; prop_progress = 0.0; prop_floor = 0.0; prop_days = 0;
       balance = 0.0; equity = 0.0; floating = 0.0;
       open_positions = 0; risk_percent = 0.0; stop_points = 0.0;
       trade_symbol = ""; can_trade = false; tp_points = 0.0;
@@ -238,6 +257,11 @@ public:
    //--- the path in `path_out` so the panel can show WHERE it went; a
    //--- file written somewhere unstated is a file the user cannot find.
    virtual bool      ExportStatement(string &path_out)     { path_out = ""; return false; }
+
+   //--- restart the evaluation on the same rules. Separate from the
+   //--- replay's own Reset, because a user who voids a run by rewinding
+   //--- wants the evaluation back, not the whole session rebuilt.
+   virtual bool      ResetEvaluation(void)                 { return false; }
    virtual string    TradeError(void)                   { return ""; }
 
    //+------------------------------------------------------------------+

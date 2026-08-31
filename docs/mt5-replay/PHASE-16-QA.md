@@ -3448,3 +3448,53 @@ it is visible.* Three releases of chart work were verified by `ObjectFind`,
 which is exactly as strong as checking that a light bulb is screwed in.
 
 **Not measured:** v66 has not been run on MetaTrader.
+
+## v67 — the prop firm evaluation
+
+The four numbers every firm publishes, run against the virtual account on
+replay time: profit target, daily loss limit, overall drawdown, minimum
+trading days, plus a deadline.
+
+`CSSRPropEvaluation` is a `CSSRTickObserver` like everything else that
+watches this replay, added after the account so it reads the equity the
+account has just finished computing — an evaluation judging last tick's
+balance would fail people a tick late.
+
+### What it deliberately does not do
+
+It is not any particular firm's rulebook. Firms differ on almost every
+detail: daily loss from balance or equity, drawdown trailing or static, a
+day counted on open or on close. So the rules are inputs, and every choice
+made on the user's behalf is written into the panel and the statement
+rather than buried in the class.
+
+### A rewind voids the run
+
+Every other observer here reconstructs its state on a rewind. This one
+refuses. **An evaluation you can rewind out of is a score you edited**, and
+reconstructing a drawdown across a rewind produces a believable number that
+means nothing. It goes `VOID`, says why, and offers a reset.
+
+The reset button appears only once the run is over. Offered mid-run it
+would be a button whose only use is erasing a bad day.
+
+### Verified before it reached MetaTrader
+
+Five cases, each breaking exactly one rule and leaving the others slack —
+target-after-enough-days, target-too-early, daily loss, drawdown with the
+daily limit far away, deadline. Every one was **transcribed into Python and
+run** before being trusted: all five reach the asserted verdict for the
+asserted reason. The arithmetic is measured, not assumed.
+
+Two more assert the rewind voids the run and that the pause request is
+consumed once, as the observer interface requires.
+
+### A12 now covers members
+
+Writing the panel block I called `m_w.Hide("x")` on a two-argument method
+and A12 said nothing — it only checked globals, and a widget toolkit is
+called almost entirely through members. Extended and sabotage-verified
+against that exact line. Checking one and not the other left the audit
+blind to the commonest call site in the tree.
+
+**Not measured:** v67 has not been run on MetaTrader.

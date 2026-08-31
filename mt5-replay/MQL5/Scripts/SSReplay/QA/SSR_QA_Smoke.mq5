@@ -34,6 +34,7 @@
 #include <SSReplay/Chart/SSR_TradeLines.mqh>
 #include <SSReplay/Chart/SSR_BlindMode.mqh>
 #include <SSReplay/Session/SSR_SessionManager.mqh>
+#include <SSReplay/Trading/SSR_PropEvaluation.mqh>
 #include <SSReplay/Core/SSR_ReplayController.mqh>
 #include <SSReplay/Core/SSR_MasterClock.mqh>
 #include <SSReplay/Data/SSR_Mt5DataSource.mqh>
@@ -52,6 +53,11 @@ int g_pass = 0, g_fail = 0;
 //--- releases to that exact mistake elsewhere.
 void Cleanup(const string rsym);
 void Done(void);
+void PropCase(const string what, const double start, const double target_pct,
+              const double daily_pct, const double total_pct,
+              const bool trailing, const int min_days, const int max_days,
+              const double final_equity, const int days,
+              const ENUM_SSR_PROP_STATE expect);
 
 void Ok(const string what, const string detail)
   { g_pass++; PrintFormat("  PASS  %-34s %s", what, detail); }
@@ -646,9 +652,124 @@ void OnStart()
       FileDelete(smgr.LastPath());
      }
 
+   //+------------------------------------------------------------------+
+   //| 15. THE EVALUATION JUDGES CORRECTLY.                             |
+   //|                                                                  |
+   //| Four rules, each given a run that breaks exactly it and nothing  |
+   //| else. A rule engine that says PASSED when it should say FAILED   |
+   //| is worse than no rule engine: the user practises against a       |
+   //| standard that does not exist and finds out at a real firm.       |
+   //|                                                                  |
+   //| Driven with a stub account rather than the replay, so each case  |
+   //| is one equity curve and one verdict, with nothing else moving.   |
+   //+------------------------------------------------------------------+
+   PropCase("target reached after enough days",
+            10000, 8.0, 5.0, 10.0, false, 2, 0,
+            10900, 3, SSR_PROP_PASSED);
+   PropCase("target reached too early still runs",
+            10000, 8.0, 5.0, 10.0, false, 5, 0,
+            10900, 2, SSR_PROP_RUNNING);
+   PropCase("daily loss ends it",
+            10000, 8.0, 5.0, 10.0, false, 1, 0,
+            9400, 1, SSR_PROP_FAILED);
+   PropCase("overall drawdown ends it, with the daily limit far away",
+            10000, 50.0, 90.0, 10.0, false, 1, 0,
+            8900, 1, SSR_PROP_FAILED);
+   PropCase("the deadline ends it",
+            10000, 8.0, 90.0, 90.0, false, 1, 3,
+            10100, 6, SSR_PROP_FAILED);
+
+   //--- and the one rule that is ours rather than any firm's
+   {
+      CSSRPropEvaluation ev;
+      SSRPropRules r;
+      r.Init();
+      r.enabled = true;
+      ev.SetRules(r);
+      ev.Reset();
+      ev.OnClock(SSR_PROP_DAY_MSC * 100);
+      ev.OnRewind(SSR_PROP_DAY_MSC * 99);
+      Check("a rewind voids the run", ev.State() == SSR_PROP_VOID,
+            "an evaluation you can rewind out of is a score you edited");
+
+      string why = "";
+      Check("and it asks the replay to stop, once", ev.PauseRequested(why) &&
+            !ev.PauseRequested(why),
+            "consumed on the way out, as the observer interface requires");
+   }
+
    ctrl.Release();
    Cleanup(rsym);
    Done();
+  }
+
+//+------------------------------------------------------------------+
+//| One evaluation, one equity curve, one verdict.                   |
+//|                                                                  |
+//| Driven through the real account interface - a tick sets a price, |
+//| a position marks the day as traded, SetBalance moves the equity  |
+//| - so nothing here is a shape the product does not already have.  |
+//| Equity sits at `start` every day but the last, which lands on    |
+//| `final_equity`, so each case breaks exactly one rule.             |
+//+------------------------------------------------------------------+
+void PropCase(const string what, const double start, const double target_pct,
+              const double daily_pct, const double total_pct,
+              const bool trailing, const int min_days, const int max_days,
+              const double final_equity, const int days,
+              const ENUM_SSR_PROP_STATE expect)
+  {
+   CSSRTradingEngine  acct;
+   SSRExecutionModel  ex;
+   ex.Init();
+   ex.use_real_spread = true;
+   acct.SetExecution(ex);
+   acct.SetBalance(start);
+
+   SSRPropRules r;
+   r.Init();
+   r.enabled            = true;
+   r.start_balance      = start;
+   r.profit_target_pct  = target_pct;
+   r.max_daily_loss_pct = daily_pct;
+   r.max_total_loss_pct = total_pct;
+   r.trailing           = trailing;
+   r.min_trading_days   = min_days;
+   r.max_days           = max_days;
+
+   CSSRPropEvaluation ev;
+   ev.Attach(GetPointer(acct));
+   ev.SetRules(r);
+   ev.Reset();
+
+   long base = 20000;                       // an arbitrary server day
+   ev.OnClock((base) * SSR_PROP_DAY_MSC + 3600000);   // establishes the day
+
+   for(int d = 0; d < days && !IsStopped(); d++)
+     {
+      //--- a price, then a trade, so the day counts as traded
+      MqlTick tk[1];
+      tk[0].time     = (datetime)(((base + d) * SSR_PROP_DAY_MSC) / 1000);
+      tk[0].time_msc = (base + d) * SSR_PROP_DAY_MSC + 3600000;
+      tk[0].bid      = 1000.0;
+      tk[0].ask      = 1000.0;
+      tk[0].last     = 1000.0;
+      tk[0].volume   = 1;
+      tk[0].flags    = 0;
+      acct.OnTicks(tk, 1);
+      long t = acct.Open(SSR_ORDER_BUY, 0.01);
+      if(t > 0)
+         acct.Close(t);
+
+      acct.SetBalance(d == days - 1 ? final_equity : start);
+      ev.OnClock((base + d) * SSR_PROP_DAY_MSC + 43200000);
+      if(ev.IsOver())
+         break;
+     }
+
+   Check("evaluation: " + what, ev.State() == expect,
+         StringFormat("%s, expected %s%s", SSRPropStateName(ev.State()),
+                      SSRPropStateName(expect),
+                      (ev.Reason() == "" ? "" : "  -  " + ev.Reason())));
   }
 
 //+------------------------------------------------------------------+

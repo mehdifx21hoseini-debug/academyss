@@ -45,6 +45,7 @@
 #include <SSReplay/Trading/SSR_Statistics.mqh>
 #include <SSReplay/Trading/SSR_Journal.mqh>
 #include <SSReplay/Trading/SSR_AutoPause.mqh>
+#include <SSReplay/Trading/SSR_PropEvaluation.mqh>
 #include <SSReplay/Core/SSR_MasterClock.mqh>
 #include <SSReplay/Ui/SSR_GroupPort.mqh>
 #include <SSReplay/Data/SSR_SessionWatcher.mqh>
@@ -126,6 +127,17 @@ input bool            InpVitals      = true;                 // Print one diagno
 input bool            InpFlightRec   = true;                 // Record a black box file to MQL5/Files (send it when reporting a fault)
 input bool            InpTradeHistory = true;                // Leave closed trades drawn on the chart
 
+//--- PROP FIRM EVALUATION -------------------------------------------
+//--- The four numbers every firm publishes. Left off by default,
+//--- because a replay that silently judges you is not a replay.
+input bool            InpProp        = false;                // Run a prop firm evaluation
+input double          InpPropTarget  = 8.0;                  // Profit target, percent
+input double          InpPropDaily   = 5.0;                  // Max daily loss, percent
+input double          InpPropTotal   = 10.0;                 // Max overall drawdown, percent
+input bool            InpPropTrail   = false;                // Drawdown trails the equity peak
+input int             InpPropMinDays = 3;                    // Minimum trading days
+input int             InpPropMaxDays = 30;                   // Deadline in days (0 = none)
+
 CSSRMt5DataSource    g_src;
 CSSRCustomSymbolSink g_sink;
 CSSRReplayController g_ctrl;
@@ -143,6 +155,7 @@ CSSRBlindMode        g_blind;
 CSSRRandomPicker     g_picker;
 CSSRSessionWatcher   g_session;
 CSSRTradeAutoPause   g_autopause;
+CSSRPropEvaluation   g_prop;
 CSSRSessionManager   g_session_mgr;
 bool                 g_resumed = false;
 
@@ -849,6 +862,33 @@ bool BuildSession(string origin, const bool on_replay,
    g_ctrl.AddObserver(GetPointer(g_acct));
    g_ctrl.AddObserver(GetPointer(g_stats));
 
+   //+------------------------------------------------------------------+
+   //| THE EVALUATION IS AN OBSERVER, like everything else that watches |
+   //| this replay. It is added AFTER the account, because it reads the |
+   //| equity the account has just finished computing - an evaluation   |
+   //| judging last tick's balance would fail people a tick late.       |
+   //+------------------------------------------------------------------+
+   SSRPropRules prop;
+   prop.Init();
+   prop.enabled            = InpProp;
+   prop.start_balance      = InpBalance;
+   prop.profit_target_pct  = InpPropTarget;
+   prop.max_daily_loss_pct = InpPropDaily;
+   prop.max_total_loss_pct = InpPropTotal;
+   prop.trailing           = InpPropTrail;
+   prop.min_trading_days   = InpPropMinDays;
+   prop.max_days           = InpPropMaxDays;
+   g_prop.Attach(GetPointer(g_acct));
+   g_prop.SetRules(prop);
+   g_prop.Reset();
+   if(InpProp)
+     {
+      g_ctrl.AddObserver(GetPointer(g_prop));
+      Print("[host] EVALUATION: ", prop.ToString());
+      Print("[host] a rewind voids the run - that is deliberate. Reset "
+            "restarts it on the same rules.");
+     }
+
    g_autopause.Attach(GetPointer(g_acct));
    g_autopause.SetFlags(SSR_PAUSE_ON_NONE);
    g_autopause.Enable(SSR_PAUSE_ON_ENTRY,   InpPauseEntry);
@@ -960,6 +1000,8 @@ bool BuildSession(string origin, const bool on_replay,
    //--- one so the port offers only what this host actually has
    g_gport.AttachBlind(GetPointer(g_blind));
    g_gport.AttachAccount(GetPointer(g_acct));
+   g_gport.AttachProp(GetPointer(g_prop));
+   g_journal.AttachProp(GetPointer(g_prop));
    g_gport.AttachStats(GetPointer(g_stats));
    g_gport.AttachStrategies(GetPointer(g_strategies));
    g_gport.AttachSessions(GetPointer(g_session_mgr));

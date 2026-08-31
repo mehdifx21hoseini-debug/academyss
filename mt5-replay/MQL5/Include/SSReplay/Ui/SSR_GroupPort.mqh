@@ -20,6 +20,7 @@
 #define SSR_GROUP_PORT_MQH
 
 #include "SSR_ReplayPort.mqh"
+#include "../Trading/SSR_PropEvaluation.mqh"
 #include "SSR_Theme.mqh"        // for the mark colour it hands down
 #include "../Core/SSR_MasterClock.mqh"
 #include "../Mt5/SSR_CustomSymbolSink.mqh"
@@ -53,6 +54,7 @@ private:
    double                m_tp_points;    // 0 = no target on the order
    CSSRTradeLines       *m_lines;        // not owned; may be NULL
    CSSRJournal          *m_journal;      // not owned; may be NULL
+   CSSRPropEvaluation   *m_prop;         // not owned; may be NULL
    bool                  m_line_long;    // which side Flip last chose
    double                m_stop_points;   // no default: there is no safe one
    string                m_trade_error;
@@ -67,7 +69,7 @@ public:
      : m_group(NULL), m_sink(NULL), m_charts(NULL), m_blind(NULL),
        m_acct(NULL), m_stats(NULL), m_strategies(NULL), m_sessions(NULL),
        m_risk_percent(0.5), m_stop_points(0.0), m_tp_points(0.0),
-       m_lines(NULL), m_journal(NULL), m_line_long(true),
+       m_lines(NULL), m_journal(NULL), m_prop(NULL), m_line_long(true),
        m_trade_error(""), m_session_error("") {}
 
    void              Attach(CSSRReplayGroup *g,
@@ -187,6 +189,22 @@ public:
       //--- the account, for the trade row
       if(m_acct != NULL)
         {
+         //--- the evaluation reads the same account, so it is filled
+         //--- here where the account is already in hand
+         if(m_prop != NULL && m_prop.IsOn())
+           {
+            SSRPropRules pr;
+            m_prop.Rules(pr);
+            out.prop_on         = true;
+            out.prop_state      = (int)m_prop.State();
+            out.prop_state_name = m_prop.StateName();
+            out.prop_headline   = m_prop.Headline();
+            out.prop_rules      = pr.ToString();
+            out.prop_progress   = m_prop.TargetProgress();
+            out.prop_floor      = m_prop.Floor();
+            out.prop_days       = m_prop.TradingDays();
+           }
+
          out.balance        = m_acct.Balance();
          out.equity         = m_acct.Equity();
          out.floating       = m_acct.FloatingPL();
@@ -600,6 +618,16 @@ public:
    //| Close one position, from its row in the panel.                   |
    //+------------------------------------------------------------------+
    void              AttachJournal(CSSRJournal *j) { m_journal = j; }
+   void              AttachProp(CSSRPropEvaluation *p) { m_prop = p; }
+
+   virtual bool      ResetEvaluation(void) override
+     {
+      m_trade_error = "";
+      if(m_prop == NULL || !m_prop.IsOn())
+        { m_trade_error = "no evaluation is running"; return false; }
+      m_prop.Reset();
+      return true;
+     }
 
    virtual bool      ExportStatement(string &path_out) override
      {

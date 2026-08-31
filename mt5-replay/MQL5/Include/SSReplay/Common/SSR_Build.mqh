@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v66 2026-08-31  sixty-three-characters"
+#define SSR_BUILD           "v67 2026-08-31  the-evaluation"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

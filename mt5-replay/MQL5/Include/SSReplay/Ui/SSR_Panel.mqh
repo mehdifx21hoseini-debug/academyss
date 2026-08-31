@@ -626,6 +626,8 @@ private:
                       "risklbl","riskval","riskmon","slrow","tprow","rrrow",
                       "sizerow","hintrow","setuprow","posempty","posmore",
                       "st1","st2","st3","st4","st5","st6","stmt",
+                      "pv0","pv1","pv2","pvbg","pvfg","pvrst",
+                      "g3_fr","g3_lb","g3_lg",
                       "ses1","ses2","ses3","ses4","ses5",
                       "ses6","keyhint","spreadrow","traderr"};
       for(int i = 0; i < ArraySize(ids); i++)
@@ -830,6 +832,66 @@ private:
       //--- person is already looking at what the session did.
       m_w.Button("stmt", x, y + 146, w, SSR_BTN_H,
                  "Save HTML statement", false, m_state.can_trade);
+
+      //+------------------------------------------------------------------+
+      //| THE EVALUATION.                                                  |
+      //|                                                                  |
+      //| Drawn only when one is running, because a panel that shows an    |
+      //| empty scoreboard to everyone who is not being scored is a panel  |
+      //| asking a question nobody put to it.                              |
+      //|                                                                  |
+      //| The bar is the profit target. The line under it is the floor -   |
+      //| the equity at which the run ends - because a target without the  |
+      //| price of missing it is only half the rule.                       |
+      //+------------------------------------------------------------------+
+      if(!m_state.prop_on)
+        {
+         m_w.Hide("pv0", true);   m_w.Hide("pv1", true);
+         m_w.Hide("pv2", true);   m_w.Hide("pvbg", true);
+         m_w.Hide("pvfg", true);  m_w.Hide("pvrst", true);
+         return;
+        }
+
+      int py = y + 146 + SSR_BTN_H + 10;
+      m_w.Group("g3", x, py, w, 84, "Evaluation");
+
+      color verdict = SSR_C_TEXT;
+      if(m_state.prop_state == 2) verdict = SSR_C_RUN;    // PASSED
+      if(m_state.prop_state == 3) verdict = SSR_C_STOP;   // FAILED
+      if(m_state.prop_state == 4) verdict = SSR_C_HOLD;   // VOID
+
+      //--- through Text, not Label, so an unchanged verdict is not
+      //--- rewritten ten times a second onto a chart that is already
+      //--- repainting itself with ticks
+      Text(54, "pv0", x + 8, py + 14, m_state.prop_state_name,
+           verdict, SSR_FS_BODY, SSR_FONT);
+      Text(55, "pv1", x + 8, py + 30, m_state.prop_rules,
+           SSR_C_TEXT_DIM, SSR_FS_SMALL, SSR_FONT);
+
+      //--- the target bar. Width is the fraction, floored at one pixel
+      //--- so "started" and "nothing yet" do not look identical.
+      int bw = w - 16;
+      int fw = (int)(bw * (m_state.prop_progress < 0.0 ? 0.0
+                           : (m_state.prop_progress > 1.0 ? 1.0
+                              : m_state.prop_progress)));
+      if(m_state.prop_progress > 0.0 && fw < 1)
+         fw = 1;
+      m_w.Rect("pvbg", x + 8, py + 46, bw, 8, SSR_C_WELL, SSR_C_WELL_EDGE);
+      if(fw > 0)
+         m_w.Rect("pvfg", x + 8, py + 46, fw, 8, SSR_C_RUN, SSR_C_RUN);
+      else
+         m_w.Hide("pvfg", true);
+
+      Text(56, "pv2", x + 8, py + 58, m_state.prop_headline,
+           verdict, SSR_FS_SMALL, SSR_FONT);
+
+      //--- Reset is offered only once the run is over. Offering it mid
+      //--- run would be a button whose only use is to erase a bad day.
+      if(m_state.prop_state >= 2)
+         m_w.Button("pvrst", x + 8, py + 74, bw, SSR_BTN_H - 4,
+                    "Reset evaluation", false, true);
+      else
+         m_w.Hide("pvrst", true);
      }
 
    //----------------------------------------------------------------
@@ -1206,6 +1268,14 @@ public:
                PrintFormat("[panel] statement -> refused (%s)",
                            m_port.TradeError());
            }
+         return SSR_CMD_NONE;
+        }
+      if(what == "pvrst")
+        {
+         if(m_port != NULL)
+            PrintFormat("[panel] reset evaluation -> %s",
+                        m_port.ResetEvaluation() ? "ok"
+                        : "refused (" + m_port.TradeError() + ")");
          return SSR_CMD_NONE;
         }
       if(what == "close")  { m_closed = true;  return SSR_CMD_NONE; }

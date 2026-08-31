@@ -754,11 +754,21 @@ def param_range(raw):
         i += 1
     return (total - defaults, total)
 
+#--- members too, not only globals. `m_w.Hide("x")` on a two-argument
+#--- Hide slipped straight past A12's first version, because m_w is a
+#--- member of the panel rather than a global - and a widget toolkit is
+#--- called almost entirely through members. Checking one and not the
+#--- other left the audit blind to the commonest call site in the tree.
+MEMBER_DECL = re.compile(r'^\s+(CSSR[A-Za-z]\w*)\s+(m_[a-z_0-9]+)\s*(?:;|\[)', re.M)
+
 def audit_a12():
     arities = method_arities()
     for path, body in KEEPSTR.items():
         types = {}
         for m in GLOBAL_DECL.finditer(body):
+            if m.group(1) in arities:
+                types[m.group(2)] = m.group(1)
+        for m in MEMBER_DECL.finditer(body):
             if m.group(1) in arities:
                 types[m.group(2)] = m.group(1)
         if not types:
