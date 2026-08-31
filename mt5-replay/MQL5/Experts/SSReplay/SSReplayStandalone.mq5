@@ -121,6 +121,7 @@ input bool            InpOneChart    = true;                 // Turn THIS chart 
 input bool            InpTradeLines  = true;                 // Draw draggable stop/target lines
 input double          InpStopPoints  = 0;                    // Default stop, in points (0 = 10x the spread)
 input double          InpRR          = 2.0;                  // Target distance, as a multiple of the stop
+input bool            InpVitals      = true;                 // Print one diagnostic line a second to the Experts log
 
 CSSRMt5DataSource    g_src;
 CSSRCustomSymbolSink g_sink;
@@ -198,6 +199,7 @@ string g_switch_to      = "";      // ...to this symbol, on the first tick
 ulong g_last_pump_us = 0;
 int   g_slow_tick    = 0;
 bool  g_ready        = false;
+bool  g_was_playing  = false;      // to notice the moment Play is pressed
 
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
@@ -1520,6 +1522,66 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 //| The pump. Real elapsed time in, replay time out.                 |
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| VITALS - one line, everything, once a second.                    |
+//|                                                                  |
+//| Three releases were spent guessing why "the candles do not move" |
+//| from screenshots. Each guess was plausible, each was wrong, and  |
+//| each cost a round trip because the report could not distinguish  |
+//| an engine that is not running from an engine that is running     |
+//| into a view that is not looking. This line separates them:       |
+//|                                                                  |
+//|   state / clock   is the ENGINE moving?                          |
+//|   m1 / last       are BARS being written?                        |
+//|   chart / auto    is the chart on the replay symbol at all?      |
+//|   first/vis/off   is the VIEW at the newest bar?                 |
+//|   snaps           is anything dragging it there?                 |
+//|                                                                  |
+//| off>0 and rising with m1 rising is the whole defect, visible in  |
+//| one line instead of five messages.                               |
+//+------------------------------------------------------------------+
+void PrintVitals()
+  {
+   string rsym = g_sink.ReplaySymbol();
+   int    m1   = (rsym == "" ? 0 : Bars(rsym, PERIOD_M1));
+   datetime lastbar = (rsym == "" ? (datetime)0
+                       : (datetime)SeriesInfoInteger(rsym, PERIOD_M1, SERIES_LASTBAR_DATE));
+
+   string charts = "";
+   for(int i = 0; i < g_charts.Count(); i++)
+     {
+      long id = g_charts.IdAt(i);
+      long first = ChartGetInteger(id, CHART_FIRST_VISIBLE_BAR);
+      long vis   = ChartGetInteger(id, CHART_VISIBLE_BARS);
+      long off   = (vis > 0 ? first - (vis - 1) : 0);
+      if(off < 0)
+         off = 0;
+      SSRChartInfo ci;
+      ci.Init();
+      bool have = g_charts.InfoAt(i, ci);
+      charts += StringFormat(" | chart#%d %s %s auto=%d follow=%d first=%d vis=%d off=%d",
+                             i, ChartSymbol(id),
+                             EnumToString(ChartPeriod(id)),
+                             (int)ChartGetInteger(id, CHART_AUTOSCROLL),
+                             (have ? (ci.follow && !ci.user_detached ? 1 : 0) : -1),
+                             (int)first, (int)vis, (int)off);
+     }
+   if(g_charts.Count() == 0)
+      charts = " | NO CHART is showing " + rsym +
+               " - the view cannot move because nothing is looking at it";
+
+   PrintFormat("[vitals] %s clock=%s playing=%d spd=%.0fx | %s m1=%d last=%s snaps=%d%s",
+               SSRStateName(g_ctrl.Status()),
+               SSRFormatMsc(g_ctrl.Now()),
+               (int)g_group.AnyPlaying(),
+               g_ctrl.SpeedX100() / 100.0,
+               rsym, m1,
+               (lastbar > 0 ? TimeToString(lastbar, TIME_DATE | TIME_MINUTES) : "-"),
+               (int)g_charts.Snaps(),
+               charts);
+  }
+
+//+------------------------------------------------------------------+
 void OnTimer()
   {
    //+------------------------------------------------------------------+
@@ -1639,9 +1701,32 @@ void OnTimer()
    if(delta > 1000)
       delta = 1000;
 
+   //+------------------------------------------------------------------+
+   //| PRESSING PLAY MEANS "I WANT TO WATCH THIS RUN".                  |
+   //|                                                                  |
+   //| A user who pauses and scrolls back to study a move is detached   |
+   //| from the right edge on purpose, and the chart layer is right to  |
+   //| leave them there. But when they press Play again they are asking |
+   //| to see it move, and a chart still parked where they left it      |
+   //| shows a replay running out of sight - the same silent failure    |
+   //| this whole release exists to remove, arrived at by a route the   |
+   //| user would blame on the tool rather than on their own scroll.    |
+   //|                                                                  |
+   //| Read as a transition, not a state, so it re-arms once per press  |
+   //| and never fights a scroll made while it is already playing.      |
+   //+------------------------------------------------------------------+
+   bool playing = g_group.AnyPlaying();
+   if(playing && !g_was_playing)
+     {
+      g_charts.FollowAll();
+      for(int i = 0; i < g_extra; i++)
+         g_charts2[i].FollowAll();
+     }
+   g_was_playing = playing;
+
    //--- ONE PUMP FOR THE BOARD. The group takes the wall delta and
    //--- hands every stream an instant, so there is nothing to drift.
-   if(g_group.AnyPlaying())
+   if(playing)
       g_group.Pump(delta);
 
    //--- A JUMP WRITES ITS BARS IN BULK and publishes none of them, so
@@ -1675,6 +1760,12 @@ void OnTimer()
       for(int i = 0; i < g_extra; i++)
          g_charts2[i].Sync();
      }
+   //--- 25 pumps of InpPumpMs is about a second at the default 40ms.
+   //--- A paused replay has nothing new to say, so it says it ten
+   //--- times less often: enough to still answer "is it alive", not
+   //--- enough to bury the log while the user reads a chart.
+   if(InpVitals && g_slow_tick % (playing ? 25 : 250) == 0)
+      PrintVitals();
    if(g_slow_tick % 50 == 0)
      {
       g_charts.ScanLeaks();

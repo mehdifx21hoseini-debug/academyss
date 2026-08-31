@@ -41,6 +41,8 @@ private:
 
    long               m_untracked;       // charts beyond SSR_MAX_CHARTS
    ulong              m_last_redraw_us;
+   long               m_snaps;            // views dragged back to the newest bar
+   long               m_last_bar_time;    // newest M1 bar we have already snapped to
    long               m_redraws;
    long               m_redraws_skipped;
    long               m_syncs;
@@ -126,7 +128,8 @@ private:
 public:
                      CSSRChartManager(void)
      : m_symbol(""), m_count(0), m_observer(NULL),
-       m_untracked(0), m_last_redraw_us(0), m_redraws(0), m_redraws_skipped(0), m_syncs(0),
+       m_untracked(0), m_last_redraw_us(0), m_snaps(0), m_last_bar_time(0),
+       m_redraws(0), m_redraws_skipped(0), m_syncs(0),
        m_owned_count(0), m_host_left_open(0)
      {
       ArrayResize(m_charts, 0);
@@ -141,6 +144,7 @@ public:
      {
       m_symbol = replay_symbol;
       m_leak.Configure(origin_symbol, replay_symbol);
+      m_last_bar_time = 0;
       m_count = 0;
       ArrayResize(m_charts, 0);
      }
@@ -432,11 +436,26 @@ public:
          return;
       long off = ViewOffset(m_charts[i].id);
 
+      //+------------------------------------------------------------------+
+      //| ONE VOTE IS ENOUGH NOW, AND HAS TO BE.                           |
+      //|                                                                  |
+      //| Redraw drags every following view back to the newest bar on      |
+      //| every pass that produced a bar. A user who scrolls back has      |
+      //| their scroll undone about five times a second, so a rule that    |
+      //| waits for two consecutive observations would never collect the   |
+      //| second one - the offset is reset to zero in between.             |
+      //|                                                                  |
+      //| Waiting was there to avoid mistaking new bars for a drag. It no  |
+      //| longer can: the snap zeroes the offset each pass, so anything    |
+      //| past the threshold within one pass is a hand on the chart.       |
+      //+------------------------------------------------------------------+
+      int votes_needed = (m_last_bar_time > 0 ? 1 : SSR_SCROLL_DETACH_VOTES);
+
       if(m_charts[i].follow && !m_charts[i].user_detached &&
          off > SSR_SCROLL_DETACH_BARS)
         {
          m_charts[i].detach_votes++;
-         if(m_charts[i].detach_votes >= SSR_SCROLL_DETACH_VOTES)
+         if(m_charts[i].detach_votes >= votes_needed)
            {
             m_charts[i].user_detached = true;
             m_charts[i].follow        = false;
@@ -463,7 +482,7 @@ public:
       m_charts[i].detach_votes  = 0;
       ChartSetInteger(id, CHART_AUTOSCROLL, true);
       ChartNavigate(id, CHART_END, 0);
-      m_charts[i].last_offset = ViewOffset(id);
+      m_charts[i].last_offset = 0;
       if(m_observer != NULL)
          m_observer.OnUserFollowed(id);
       return true;
@@ -488,11 +507,26 @@ public:
      }
 
    //+------------------------------------------------------------------+
-   //| Throttled repaint.                                               |
+   //| Throttled repaint, and the thing that actually moves the view.   |
    //|                                                                  |
-   //| Price already repaints natively on each injected tick, so this   |
-   //| exists only for overlay objects. Returns true when it actually   |
-   //| painted, so a caller can see how often it is being denied.       |
+   //| This used to say "price already repaints natively on each        |
+   //| injected tick, so this exists only for overlay objects". That    |
+   //| was an assumption, and it was wrong in the case that mattered.   |
+   //| CHART_AUTOSCROLL is MetaTrader's own promise to keep the newest  |
+   //| bar in view, and on a custom symbol being written from an EA it  |
+   //| does not reliably keep it: bars appear in the series, the chart  |
+   //| holds them, and the visible window stays exactly where it was.   |
+   //| The user sees a still picture of a replay that is running - the  |
+   //| single most-reported defect in this project, over three          |
+   //| releases, each time diagnosed as something else.                 |
+   //|                                                                  |
+   //| So the view is moved explicitly. ChartNavigate(CHART_END) is not |
+   //| a promise, it is an instruction, and it does not depend on a     |
+   //| tick arriving to be honoured.                                    |
+   //|                                                                  |
+   //| Only when the newest M1 bar has actually changed: snapping a     |
+   //| view that has nothing new to show would fight a user who is      |
+   //| simply looking around a paused replay.                           |
    //+------------------------------------------------------------------+
    bool               Redraw(const bool force = false)
      {
@@ -504,11 +538,36 @@ public:
          return false;
         }
       m_last_redraw_us = now;
+
+      //--- has anything new arrived since the last time we looked?
+      long newest = 0;
+      if(m_symbol != "")
+         newest = (long)SeriesInfoInteger(m_symbol, PERIOD_M1, SERIES_LASTBAR_DATE);
+      bool advanced = (newest > 0 && newest != m_last_bar_time);
+      if(advanced)
+         m_last_bar_time = newest;
+
       for(int i = 0; i < m_count; i++)
+        {
+         //--- a chart the user scrolled back is theirs until they ask
+         //--- for it back. DetectScroll runs in Sync, which the owner
+         //--- calls immediately before this, so follow is current.
+         if(advanced && m_charts[i].follow && !m_charts[i].user_detached)
+           {
+            ChartNavigate(m_charts[i].id, CHART_END, 0);
+            m_charts[i].last_offset = 0;
+            m_snaps++;
+           }
          ChartRedraw(m_charts[i].id);
+        }
       m_redraws++;
       return true;
      }
+
+   //--- how many times a view has been dragged back to the newest bar.
+   //--- Zero while a replay is running means the candles are not moving.
+   long               Snaps(void)          { return m_snaps; }
+   long               LastBarTime(void)    { return m_last_bar_time; }
 
    //--- set every managed chart to one timeframe (Phase 11 sync uses this)
    int                SetPeriodAll(const ENUM_TIMEFRAMES tf)
@@ -542,10 +601,10 @@ public:
 
    string             ToString(void)
      {
-      return StringFormat("charts[%s n=%d detached=%d tf_changes=%d redraw=%d/%d]",
+      return StringFormat("charts[%s n=%d detached=%d tf_changes=%d redraw=%d/%d snaps=%d]",
                           m_symbol, m_count, DetachedCount(),
                           (int)TimeframeChanges(), (int)m_redraws,
-                          (int)(m_redraws + m_redraws_skipped));
+                          (int)(m_redraws + m_redraws_skipped), (int)m_snaps);
      }
   };
 

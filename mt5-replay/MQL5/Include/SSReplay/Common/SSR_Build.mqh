@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v53 2026-08-31  the-chart-follows"
+#define SSR_BUILD           "v54 2026-08-31  the-view-is-dragged"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

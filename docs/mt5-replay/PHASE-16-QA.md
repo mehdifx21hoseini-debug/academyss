@@ -2676,3 +2676,74 @@ PASS  step forward adds bars     186 -> 192
 برداشتنِ `ApplyPolicy(id)` از مسیر کشف، تنها چیزی که می‌تواند
 `CHART_AUTOSCROLL` را بعد از `Sync` روشن کند از بین می‌رود. **اجرای واقعی
 روی MT5 هنوز انجام نشده** — این ادعا از روی مکانیزم است، نه از روی یک اجرا.
+
+## v54 — AUTOSCROLL was a promise, not an outcome
+
+**Reported:** "بازم جلو نمیرن" plus a smoke log: 14 passed, 1 FAILED.
+
+**What the smoke log actually said, beyond its own verdict.** The user
+ran it from a chart on `XAUUSD@.SSR1` — the *live* replay symbol — so
+stage 1 measured the running session as a by-product:
+
+```
+PASS  M1 history present    1055 bars local, 600 needed
+```
+
+`InpWarmupBars` is 1000. So the live replay symbol held 1000 warmup bars
+**plus 55 replayed ones**. The engine was writing candles into a symbol
+whose chart was showing none of them. That number was in the log the whole
+time and I read past it once before seeing it.
+
+**The defect.** v53 asserted `CHART_AUTOSCROLL` was on after `Sync()`. It
+was on. It shipped. The candles still did not move — because
+`CHART_AUTOSCROLL` is MetaTrader's *promise* to keep the newest bar in
+view, and on a custom symbol being written from an EA it does not reliably
+keep it. v53 tested the promise instead of the outcome.
+
+**Fixes.**
+
+1. `SSR_ChartManager::Redraw` now calls `ChartNavigate(id, CHART_END, 0)`
+   on every following chart, but only on a pass where the newest M1 bar
+   actually changed. An instruction, not a promise, and it does not wait
+   for a tick. The old comment on that method — *"price already repaints
+   natively on each injected tick, so this exists only for overlay
+   objects"* — was the assumption that hid the bug, and is now replaced by
+   what was measured.
+2. `DetectScroll` detaches on **one** observation while snapping is active.
+   With the view returning to the end five times a second, a rule that
+   waited for two consecutive observations could never collect the second.
+3. The host re-arms `FollowAll()` on the false→true transition of
+   `AnyPlaying()`. Pause, scroll back, Play used to leave the chart
+   detached forever — the same silent failure by another route.
+
+**Instrument changes.**
+
+- New stage: *the view comes back to the newest bar* — drags the view to
+  the far end, writes a bar, calls only `Redraw`, and asserts the offset
+  falls. Deliberately no `Sync` in between: `Sync` would correctly read the
+  drag as a user scrolling back, which is behaviour to keep, not the
+  behaviour under test. When every bar fits on screen it reports a NOTE
+  rather than a FAIL — a test that cannot run must not claim the product
+  is broken.
+- The step stage asked one question and got an unusable answer
+  (`261 -> 261`). It now asks three: did `StepBars` emit, did the clock
+  move, did the series catch up after 250 ms. The original could not
+  separate "the engine emitted nothing" from "MetaTrader had not finished
+  building the bar", which is the same as no report at all.
+
+**New in the product: `InpVitals` (default on).** One line a second while
+playing, a tenth of that while paused, carrying engine state, clock, bar
+count, newest bar, snap count, and every managed chart's symbol,
+autoscroll, follow flag and distance-from-the-end. Three releases were
+spent guessing this from screenshots; each guess was plausible and each was
+wrong, because the report could not distinguish an engine that is not
+running from an engine running into a view that is not looking.
+
+**Recorded lesson.** *Asserting the setting is not asserting the effect.*
+v53's new test passed and the product stayed broken, which is the worst
+outcome a test can produce: it converted a live defect into evidence of
+health. When a check and a user disagree, the check is measuring the wrong
+thing.
+
+**Not measured:** v54 has not been run on MetaTrader — neither the EA nor
+the smoke test.

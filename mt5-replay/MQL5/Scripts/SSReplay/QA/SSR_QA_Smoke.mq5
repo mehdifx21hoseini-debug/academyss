@@ -160,7 +160,10 @@ void OnStart()
    //| This opens a chart WITHOUT OpenChart, exactly as the host does,  |
    //| and asks whether Sync made it follow.                            |
    //+------------------------------------------------------------------+
-   long probe = ChartOpen(rsym, PERIOD_M5);
+   //--- M1, not M5: this stage has to scroll the view away from the
+   //--- end, and a chart with fewer bars than fit on screen cannot be
+   //--- scrolled at all. M1 has five times as many.
+   long probe = ChartOpen(rsym, PERIOD_M1);
    if(Check("a chart can be opened on the replay symbol", probe != 0, rsym))
      {
       ChartSetInteger(probe, CHART_AUTOSCROLL, false);   // as MT5 leaves it
@@ -174,17 +177,80 @@ void OnStart()
             "CHART_AUTOSCROLL after Sync - off means new candles land "
             "off-screen and nothing appears to move");
 
+      //+------------------------------------------------------------------+
+      //| AND THE VIEW ACTUALLY MOVES.                                     |
+      //|                                                                  |
+      //| AUTOSCROLL being on is MetaTrader's promise, not the outcome.    |
+      //| v53 checked the promise, shipped, and the candles still did not  |
+      //| move. So this drags the view to the far left, writes a bar, and  |
+      //| asks whether Redraw brought it back. That is the actual thing    |
+      //| the user is looking at.                                          |
+      //+------------------------------------------------------------------+
+      ChartNavigate(probe, CHART_BEGIN, 0);
+      Sleep(120);                        // let the terminal apply it
+      long away_first = ChartGetInteger(probe, CHART_FIRST_VISIBLE_BAR);
+      long away_vis   = ChartGetInteger(probe, CHART_VISIBLE_BARS);
+      long away_off   = (away_vis > 0 ? away_first - (away_vis - 1) : 0);
+
+      //--- A bar has to arrive, or there is correctly nothing to snap
+      //--- to. And NO Sync in between: Sync would see the view I just
+      //--- dragged, correctly read it as a user scrolling back, and
+      //--- release following - which is the behaviour I want kept, not
+      //--- the behaviour under test. This isolates Redraw's snap.
+      ctrl.Pump(1000);
+      ctrl.Pump(1000);
       mgr.Redraw(true);
+      Sleep(120);
+
+      long back_first = ChartGetInteger(probe, CHART_FIRST_VISIBLE_BAR);
+      long back_vis   = ChartGetInteger(probe, CHART_VISIBLE_BARS);
+      long back_off   = (back_vis > 0 ? back_first - (back_vis - 1) : 0);
+
+      if(away_off <= 0)
+         //--- every bar fits on screen, so there is no "away" to come
+         //--- back from. Reporting this as a failure would be the test
+         //--- lying about the product.
+         PrintFormat("  NOTE  the view could not be scrolled away (%d bars, "
+                     "%d visible) - the snap is untested on this screen",
+                     Bars(rsym, PERIOD_M1), (int)away_vis);
+      else
+         Check("the view comes back to the newest bar", back_off < away_off,
+               StringFormat("offset %d bars from the end -> %d after Redraw "
+                            "(snaps=%d). If this does not fall, the candles "
+                            "are being written off screen.",
+                            (int)away_off, (int)back_off, (int)mgr.Snaps()));
+
       Ok("manager redraws on demand", "Redraw(force) returned");
       ChartClose(probe);
      }
 
-   //--- 8. stepping ------------------------------------------------
+   //+------------------------------------------------------------------+
+   //| 8. STEPPING.                                                     |
+   //|                                                                  |
+   //| The first version of this compared bar counts one millisecond    |
+   //| apart and reported "261 -> 261" as a failure. That number could  |
+   //| not tell an engine that emitted nothing from a terminal that had |
+   //| not finished building the bar yet - so it was a report that      |
+   //| could not be acted on, which is the same as no report.           |
+   //|                                                                  |
+   //| Ask the engine what it did, then give MetaTrader a moment and    |
+   //| ask the series separately. Two answers, two different causes.    |
+   //+------------------------------------------------------------------+
    ctrl.Pause();
-   int step_before = Bars(rsym, PERIOD_M1);
-   ctrl.StepBars(10);
-   Check("step forward adds bars", Bars(rsym, PERIOD_M1) > step_before,
-         StringFormat("%d -> %d", step_before, Bars(rsym, PERIOD_M1)));
+   int  step_before = Bars(rsym, PERIOD_M1);
+   long step_clock  = ctrl.Now();
+   int  emitted     = ctrl.StepBars(10);
+   long after_clock = ctrl.Now();
+   Sleep(250);                            // the series is built asynchronously
+   int  step_after  = Bars(rsym, PERIOD_M1);
+
+   Check("step forward emits ticks", emitted > 0,
+         StringFormat("StepBars(10) returned %d%s", emitted,
+                      (emitted < 0 ? " - " + ctrl.LastErrorText() : "")));
+   Check("step forward advances the clock", after_clock > step_clock,
+         StringFormat("%s -> %s", SSRFormatMsc(step_clock), SSRFormatMsc(after_clock)));
+   Check("step forward reaches the series", step_after > step_before,
+         StringFormat("%d -> %d bars after 250ms", step_before, step_after));
 
    ctrl.Release();
    Cleanup(rsym);
