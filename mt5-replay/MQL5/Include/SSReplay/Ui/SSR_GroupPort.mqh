@@ -29,6 +29,7 @@
 #include "../Trading/SSR_TradingEngine.mqh"
 #include "../Strategy/SSR_StrategyHost.mqh"
 #include "../Trading/SSR_Statistics.mqh"
+#include "../Trading/SSR_Journal.mqh"
 #include "../Session/SSR_SessionManager.mqh"
 
 //+------------------------------------------------------------------+
@@ -51,6 +52,7 @@ private:
    double                m_risk_percent;
    double                m_tp_points;    // 0 = no target on the order
    CSSRTradeLines       *m_lines;        // not owned; may be NULL
+   CSSRJournal          *m_journal;      // not owned; may be NULL
    bool                  m_line_long;    // which side Flip last chose
    double                m_stop_points;   // no default: there is no safe one
    string                m_trade_error;
@@ -65,7 +67,7 @@ public:
      : m_group(NULL), m_sink(NULL), m_charts(NULL), m_blind(NULL),
        m_acct(NULL), m_stats(NULL), m_strategies(NULL), m_sessions(NULL),
        m_risk_percent(0.5), m_stop_points(0.0), m_tp_points(0.0),
-       m_lines(NULL), m_line_long(true),
+       m_lines(NULL), m_journal(NULL), m_line_long(true),
        m_trade_error(""), m_session_error("") {}
 
    void              Attach(CSSRReplayGroup *g,
@@ -571,6 +573,28 @@ public:
    //+------------------------------------------------------------------+
    //| Close one position, from its row in the panel.                   |
    //+------------------------------------------------------------------+
+   void              AttachJournal(CSSRJournal *j) { m_journal = j; }
+
+   virtual bool      ExportStatement(string &path_out) override
+     {
+      path_out = "";
+      m_trade_error = "";
+      if(m_journal == NULL)
+        { m_trade_error = "no journal attached"; return false; }
+      if(m_journal.Count() <= 0)
+        { m_trade_error = "no closed trades to report yet"; return false; }
+
+      string stamp = TimeToString(TimeLocal(), TIME_DATE | TIME_MINUTES);
+      StringReplace(stamp, ".", "");
+      StringReplace(stamp, ":", "");
+      StringReplace(stamp, " ", "-");
+      string name = "SSReplay-" + stamp;
+      if(!m_journal.ExportHtml(name))
+        { m_trade_error = m_journal.LastError(); return false; }
+      path_out = m_journal.LastPath();
+      return true;
+     }
+
    virtual bool      ClosePosition(const long ticket) override
      {
       m_trade_error = "";

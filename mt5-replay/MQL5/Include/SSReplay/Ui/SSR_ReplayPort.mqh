@@ -233,6 +233,11 @@ public:
 
    //--- close ONE position, by the ticket the state row named
    virtual bool      ClosePosition(const long ticket)     { return false; }
+
+   //--- write the session out as a statement a person can read. Returns
+   //--- the path in `path_out` so the panel can show WHERE it went; a
+   //--- file written somewhere unstated is a file the user cannot find.
+   virtual bool      ExportStatement(string &path_out)     { path_out = ""; return false; }
    virtual string    TradeError(void)                   { return ""; }
 
    //+------------------------------------------------------------------+

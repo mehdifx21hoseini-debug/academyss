@@ -576,7 +576,7 @@ private:
                       "g1_fr","g1_lb","g1_lg","g2_fr","g2_lb","g2_lg",
                       "risklbl","riskval","riskmon","slrow","tprow","rrrow",
                       "sizerow","hintrow","setuprow","posempty","posmore",
-                      "st1","st2","st3","st4","st5","st6",
+                      "st1","st2","st3","st4","st5","st6","stmt",
                       "ses1","ses2","ses3","ses4","ses5",
                       "ses6","keyhint","spreadrow","traderr"};
       for(int i = 0; i < ArraySize(ids); i++)
@@ -776,6 +776,11 @@ private:
                         (int)m_state.ticks_rejected,
                         (int)m_state.guard_violations),
            m_state.ticks_rejected > 0 ? SSR_C_HOLD : SSR_C_TEXT_DIM);
+
+      //--- the statement. On the Stats sheet because that is where a
+      //--- person is already looking at what the session did.
+      m_w.Button("stmt", x, y + 146, w, SSR_BTN_H,
+                 "Save HTML statement", false, m_state.can_trade);
      }
 
    //----------------------------------------------------------------
@@ -1098,6 +1103,19 @@ public:
       if(what == "move")
         {
          SnapToCorner();
+         return SSR_CMD_NONE;
+        }
+      if(what == "stmt")
+        {
+         if(m_port != NULL)
+           {
+            string where = "";
+            if(m_port.ExportStatement(where))
+               PrintFormat("[panel] statement saved -> MQL5\\Files\\%s", where);
+            else
+               PrintFormat("[panel] statement -> refused (%s)",
+                           m_port.TradeError());
+           }
          return SSR_CMD_NONE;
         }
       if(what == "close")  { m_closed = true;  return SSR_CMD_NONE; }

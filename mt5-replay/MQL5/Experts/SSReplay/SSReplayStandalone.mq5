@@ -401,6 +401,7 @@ string ReadStashedOrigin(void)
 #define SSR_PICK_LINE   "SSR_PICK_LINE"
 #define SSR_PICK_GO     "SSR_PICK_GO"
 #define SSR_PICK_INFO   "SSR_PICK_INFO"
+#define SSR_PICK_HERE   "SSR_PICK_HERE"
 
 //--- SERIES_FIRSTDATE as a value, for a one-line log
 long SeriesInfoIntegerOrZero(const string sym)
@@ -493,6 +494,25 @@ int EnsureHistory(const string sym, const int want_bars)
    return have;
   }
 
+//--- the time at the centre of what the chart is currently showing,
+//--- or SSR_INVALID_TIME when the chart cannot answer
+long MiddleOfView(void)
+  {
+   int first = (int)ChartGetInteger(0, CHART_FIRST_VISIBLE_BAR);
+   int shown = (int)ChartGetInteger(0, CHART_VISIBLE_BARS);
+   if(first <= 0 || shown <= 0)
+      return SSR_INVALID_TIME;
+   //--- CHART_FIRST_VISIBLE_BAR counts back from the newest bar, so the
+   //--- middle of the view is half a screen further back than the edge
+   int idx = first - shown / 2;
+   if(idx < 0)
+      idx = 0;
+   datetime t[];
+   if(CopyTime(_Symbol, _Period, idx, 1, t) != 1)
+      return SSR_INVALID_TIME;
+   return (long)t[0] * 1000;
+  }
+
 //+------------------------------------------------------------------+
 //| PICK THE START BY DRAGGING A LINE, THE WAY SOFT4FX DOES.         |
 //|                                                                  |
@@ -545,6 +565,27 @@ void ShowPicker(const string sym, const long default_msc)
    ObjectSetString (0, SSR_PICK_INFO, OBJPROP_TEXT,
                     "Drag the orange line to where you want to start");
 
+   //--- SCROLL, THEN SUMMON. The line landing two days back on its own
+   //--- was the complaint: a start you have to hunt for is not a start
+   //--- you chose. This button drops it in the middle of whatever you
+   //--- are looking at, so scrolling IS the choosing.
+   ObjectDelete(0, SSR_PICK_HERE);
+   ObjectCreate(0, SSR_PICK_HERE, OBJ_BUTTON, 0, 0, 0);
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_CORNER,       CORNER_LEFT_UPPER);
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_XDISTANCE,    14);
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_YDISTANCE,    78);
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_XSIZE,        240);
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_YSIZE,        24);
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_BGCOLOR,      C'225,225,225');
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_BORDER_COLOR, C'120,120,120');
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_COLOR,        C'20,20,20');
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_FONTSIZE,     9);
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_STATE,        false);
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_SELECTABLE,   false);
+   ObjectSetString (0, SSR_PICK_HERE, OBJPROP_FONT,         SSR_FONT);
+   ObjectSetString (0, SSR_PICK_HERE, OBJPROP_TEXT,
+                    "PUT THE LINE IN THE MIDDLE OF THIS VIEW");
+
    ChartRedraw(0);
    PrintFormat("[host] PICK A START: drag the orange line on this %s chart to "
                "the candle you want to begin from, then press START REPLAY "
@@ -556,6 +597,7 @@ void RemovePicker(void)
    ObjectDelete(0, SSR_PICK_LINE);
    ObjectDelete(0, SSR_PICK_GO);
    ObjectDelete(0, SSR_PICK_INFO);
+   ObjectDelete(0, SSR_PICK_HERE);
    ChartRedraw(0);
   }
 
@@ -587,143 +629,28 @@ int FailInit(void)
   }
 
 //+------------------------------------------------------------------+
-int OnInit()
+//+------------------------------------------------------------------+
+//| BUILD THE SESSION.                                               |
+//|                                                                  |
+//| Split out of OnInit for one reason: the start picker finishes in |
+//| the TIMER, and the build has to happen from there.                |
+//|                                                                  |
+//| The first attempt tried to get back into OnInit by calling         |
+//| ChartSetSymbolPeriod with the chart's OWN symbol and period,       |
+//| assuming that forces a reinitialise. It does not - MetaTrader      |
+//| sees nothing to change and does nothing at all. So the green       |
+//| button removed the line, killed the timer, and left the user with  |
+//| a chart doing nothing: "the orange line goes and nothing comes".   |
+//|                                                                  |
+//| A restart was never needed. This is the build; whoever has the     |
+//| answer calls it.                                                   |
+//+------------------------------------------------------------------+
+bool BuildSession(const string origin, const bool on_replay,
+                  const bool one_chart_ok)
   {
-   //+------------------------------------------------------------------+
-   //| ONE WINDOW, DONE PROPERLY THIS TIME.                             |
-   //|                                                                  |
-   //| Two earlier attempts put the panel on a SEPARATE replay chart    |
-   //| and tried to reach its events from here. Drawing across charts    |
-   //| works; events do not. A forwarding indicator could not work at    |
-   //| all - iCustom keeps the creator's chart context, and its own log  |
-   //| line printed the same id twice saying so. Polling the buttons     |
-   //| worked, but nothing latches a KEY and nothing latches a DRAG, so  |
-   //| the keyboard and the mouse stayed on the wrong window.            |
-   //|                                                                  |
-   //| The only way a program gets a chart's events is to BE on it. So   |
-   //| this EA now turns its own chart into the replay chart and stays   |
-   //| there. One window, and every input arrives the ordinary way.      |
-   //|                                                                  |
-   //| It costs one restart: changing the symbol deinitialises and       |
-   //| reinitialises this EA. The code already survives that - the       |
-   //| replay symbol and the session are deliberately kept through       |
-   //| REASON_CHARTCHANGE - so the second pass adopts what the first     |
-   //| one left and carries on.                                          |
-   //+------------------------------------------------------------------+
-   bool on_replay = SSRIsReplaySymbol(_Symbol);
-   //--- set BEFORE any failure path: FailInit reads these to put the
-   //--- chart back, and a failure that happens before they are assigned
-   //--- is exactly the one that would strand the user
-   g_on_replay_chart = on_replay;
-
-   string stashed = ReadStashedOrigin();
-
-   //--- a "!" prefix is last run's failed second pass telling this one
-   //--- not to try the handover again. Read once, then cleared.
-   bool one_chart_ok = InpOneChart;
-   if(StringLen(stashed) > 0 && StringSubstr(stashed, 0, 1) == "!")
-     {
-      stashed = StringSubstr(stashed, 1);
-      one_chart_ok = false;
-      ObjectDelete(0, SSR_HANDOFF);
-      Print("[host] one-window mode is OFF for this run: the last attempt "
-            "failed after the chart was handed over. Two windows this time.");
-     }
-
-   string origin = (on_replay ? stashed
-                              : (InpSymbol == "" ? _Symbol : InpSymbol));
-   g_origin = origin;
-
-   PrintFormat("[host] SS Replay build %s   pass=%s  chart=%s  origin=%s",
-               SSR_BUILD, (on_replay ? "2 (on the replay chart)" : "1"),
-               _Symbol, (origin == "" ? "<UNKNOWN>" : origin));
-
-   if(on_replay && origin == "")
-     {
-      //--- attached straight to a replay chart with nothing to go on.
-      //--- Refuse, and say what to do, rather than replaying a replay.
-      Print("[host] this chart is already a replay symbol and I do not know "
-            "which instrument it came from. Attach SS Replay to a normal "
-            "chart, or set InpSymbol to the origin, and try again.");
-      return FailInit();
-     }
-
-   g_sink.SetAdoptExisting(on_replay);
-   for(int i = 0; i < SSR_EXTRA_STREAMS; i++)
-      g_sink2[i].SetAdoptExisting(false);
-   g_ssr_log.SetTag("host");
-   g_ssr_log.SetLevel(SSR_LOG_INFO);
-
-   //--- BLIND MODE IS DECIDED FIRST. The replay symbol's name is fixed
-   //--- when the symbol is created, so anonymising it later is not an
-   //--- option - and the name is the one leak no chart property closes.
-   SSRBlindPolicy blind;
-   blind.Apply(InpBlind);
-   g_blind.SetPolicy(blind);
-   g_sink.SetAnonymous(blind.anonymous_symbol);
-
-   if(!g_src.Open(origin))
-     {
-      Print("[host] no M1 history for ", origin);
-      return FailInit();
-     }
-
-   //--- FETCH THE HISTORY BEFORE ANYTHING DEPENDS ON IT. Only on the
-   //--- first pass: the second is on a custom symbol whose history we
-   //--- wrote ourselves, and asking the broker for that is meaningless.
-   if(InpAutoHistory && !on_replay)
-     {
-      EnsureHistory(origin, InpHistoryBars);
-      g_src.Close();
-      if(!g_src.Open(origin))
-        {
-         Print("[host] no M1 history for ", origin, " after the download");
-         return FailInit();
-        }
-     }
-
    SSRDataRange range;
    range.Init();
    g_src.RangeInto(range);
-
-   //+------------------------------------------------------------------+
-   //| THE PICKER. Offered before anything is built, because what it    |
-   //| picks decides what gets built.                                   |
-   //|                                                                  |
-   //| It runs on the REAL symbol's chart, which still holds the whole  |
-   //| history - that is the only moment such a choice can be made by   |
-   //| looking at price. An explicit 'Replay start' or a random session |
-   //| has already answered the question, so the picker stays out of    |
-   //| the way in both cases.                                           |
-   //+------------------------------------------------------------------+
-   if(InpPickStart && !on_replay && InpStart == 0 && !InpRandom)
-     {
-      string picked = "";
-      if(ObjectFind(0, SSR_PICK_STASH) >= 0)
-        {
-         picked = ObjectGetString(0, SSR_PICK_STASH, OBJPROP_TEXT);
-         ObjectDelete(0, SSR_PICK_STASH);
-        }
-
-      if(picked == "")
-        {
-         //--- default the line to where the auto window would have
-         //--- started, so pressing the button without dragging gives
-         //--- exactly the old behaviour
-         long def = range.last_msc - (long)InpReplayBars * SSR_MSC_PER_MIN;
-         MqlRates back[];
-         if(CopyRates(origin, PERIOD_M1, 0, InpReplayBars, back) > 0)
-            def = (long)back[0].time * 1000;
-         ShowPicker(origin, def);
-         g_picking = true;
-         EventSetMillisecondTimer(200);
-         return INIT_SUCCEEDED;
-        }
-
-      g_pick_msc = (long)StringToTime(picked) * 1000;
-      PrintFormat("[host] starting from the line you placed: %s",
-                  SSRFormatMsc(g_pick_msc));
-     }
 
    //--- RANDOM REPLAY. Decided here because it decides the window, and
    //--- the seed is printed because a session you cannot return to is
@@ -749,7 +676,7 @@ int OnInit()
             if(!g_src.Open(origin))
               {
                Print("[host] random pick has no history: ", origin);
-               return FailInit();
+               return false;
               }
             range.Init();
             g_src.RangeInto(range);
@@ -849,7 +776,7 @@ int OnInit()
      {
       PrintFormat("[host] not enough history: %s .. %s",
                   SSRFormatMsc(range.first_msc), SSRFormatMsc(range.last_msc));
-      return FailInit();
+      return false;
      }
 
    int    digits = (int)SymbolInfoInteger(origin, SYMBOL_DIGITS);
@@ -926,7 +853,7 @@ int OnInit()
    if(!g_ctrl.Load(origin, win_start, win_end))
      {
       Print("[host] load failed: ", g_ctrl.LastErrorText());
-      return FailInit();
+      return false;
      }
 
    string rsym = g_sink.ReplaySymbol();
@@ -989,7 +916,7 @@ int OnInit()
    if(!g_group.Align())
      {
       Print("[host] streams will not align: ", g_group.LastError());
-      return FailInit();
+      return false;
      }
 
    //--- THE PANEL TALKS TO THE GROUP, never to one stream. A transport
@@ -1017,6 +944,7 @@ int OnInit()
      }
    if(InpTradeLines)
       g_gport.AttachLines(GetPointer(g_lines));
+   g_gport.AttachJournal(GetPointer(g_journal));
 
    //--- other products may now see this session. The symbol they are
    //--- told about is the REPLAY symbol, because that is the one a
@@ -1270,6 +1198,157 @@ int OnInit()
                "staying on two windows.");
      }
 
+   return true;
+  }
+
+//+------------------------------------------------------------------+
+int OnInit()
+  {
+   //+------------------------------------------------------------------+
+   //| ONE WINDOW, DONE PROPERLY THIS TIME.                             |
+   //|                                                                  |
+   //| Two earlier attempts put the panel on a SEPARATE replay chart    |
+   //| and tried to reach its events from here. Drawing across charts    |
+   //| works; events do not. A forwarding indicator could not work at    |
+   //| all - iCustom keeps the creator's chart context, and its own log  |
+   //| line printed the same id twice saying so. Polling the buttons     |
+   //| worked, but nothing latches a KEY and nothing latches a DRAG, so  |
+   //| the keyboard and the mouse stayed on the wrong window.            |
+   //|                                                                  |
+   //| The only way a program gets a chart's events is to BE on it. So   |
+   //| this EA now turns its own chart into the replay chart and stays   |
+   //| there. One window, and every input arrives the ordinary way.      |
+   //|                                                                  |
+   //| It costs one restart: changing the symbol deinitialises and       |
+   //| reinitialises this EA. The code already survives that - the       |
+   //| replay symbol and the session are deliberately kept through       |
+   //| REASON_CHARTCHANGE - so the second pass adopts what the first     |
+   //| one left and carries on.                                          |
+   //+------------------------------------------------------------------+
+   bool on_replay = SSRIsReplaySymbol(_Symbol);
+   //--- set BEFORE any failure path: FailInit reads these to put the
+   //--- chart back, and a failure that happens before they are assigned
+   //--- is exactly the one that would strand the user
+   g_on_replay_chart = on_replay;
+
+   string stashed = ReadStashedOrigin();
+
+   //--- a "!" prefix is last run's failed second pass telling this one
+   //--- not to try the handover again. Read once, then cleared.
+   bool one_chart_ok = InpOneChart;
+   if(StringLen(stashed) > 0 && StringSubstr(stashed, 0, 1) == "!")
+     {
+      stashed = StringSubstr(stashed, 1);
+      one_chart_ok = false;
+      ObjectDelete(0, SSR_HANDOFF);
+      Print("[host] one-window mode is OFF for this run: the last attempt "
+            "failed after the chart was handed over. Two windows this time.");
+     }
+
+   string origin = (on_replay ? stashed
+                              : (InpSymbol == "" ? _Symbol : InpSymbol));
+   g_origin = origin;
+
+   PrintFormat("[host] SS Replay build %s   pass=%s  chart=%s  origin=%s",
+               SSR_BUILD, (on_replay ? "2 (on the replay chart)" : "1"),
+               _Symbol, (origin == "" ? "<UNKNOWN>" : origin));
+
+   if(on_replay && origin == "")
+     {
+      //--- attached straight to a replay chart with nothing to go on.
+      //--- Refuse, and say what to do, rather than replaying a replay.
+      Print("[host] this chart is already a replay symbol and I do not know "
+            "which instrument it came from. Attach SS Replay to a normal "
+            "chart, or set InpSymbol to the origin, and try again.");
+      return FailInit();
+     }
+
+   g_sink.SetAdoptExisting(on_replay);
+   for(int i = 0; i < SSR_EXTRA_STREAMS; i++)
+      g_sink2[i].SetAdoptExisting(false);
+   g_ssr_log.SetTag("host");
+   g_ssr_log.SetLevel(SSR_LOG_INFO);
+
+   //--- BLIND MODE IS DECIDED FIRST. The replay symbol's name is fixed
+   //--- when the symbol is created, so anonymising it later is not an
+   //--- option - and the name is the one leak no chart property closes.
+   SSRBlindPolicy blind;
+   blind.Apply(InpBlind);
+   g_blind.SetPolicy(blind);
+   g_sink.SetAnonymous(blind.anonymous_symbol);
+
+   if(!g_src.Open(origin))
+     {
+      Print("[host] no M1 history for ", origin);
+      return FailInit();
+     }
+
+   //--- FETCH THE HISTORY BEFORE ANYTHING DEPENDS ON IT. Only on the
+   //--- first pass: the second is on a custom symbol whose history we
+   //--- wrote ourselves, and asking the broker for that is meaningless.
+   if(InpAutoHistory && !on_replay)
+     {
+      EnsureHistory(origin, InpHistoryBars);
+      g_src.Close();
+      if(!g_src.Open(origin))
+        {
+         Print("[host] no M1 history for ", origin, " after the download");
+         return FailInit();
+        }
+     }
+
+   SSRDataRange range;
+   range.Init();
+   g_src.RangeInto(range);
+
+   //+------------------------------------------------------------------+
+   //| THE PICKER. Offered before anything is built, because what it    |
+   //| picks decides what gets built.                                   |
+   //|                                                                  |
+   //| It runs on the REAL symbol's chart, which still holds the whole  |
+   //| history - that is the only moment such a choice can be made by   |
+   //| looking at price. An explicit 'Replay start' or a random session |
+   //| has already answered the question, so the picker stays out of    |
+   //| the way in both cases.                                           |
+   //+------------------------------------------------------------------+
+   if(InpPickStart && !on_replay && InpStart == 0 && !InpRandom)
+     {
+      string picked = "";
+      if(ObjectFind(0, SSR_PICK_STASH) >= 0)
+        {
+         picked = ObjectGetString(0, SSR_PICK_STASH, OBJPROP_TEXT);
+         ObjectDelete(0, SSR_PICK_STASH);
+        }
+
+      if(picked == "")
+        {
+         //--- default the line to where the auto window would have
+         //--- started, so pressing the button without dragging gives
+         //--- exactly the old behaviour
+         //--- where the user is ALREADY looking, not an arbitrary
+         //--- distance back. Falls back to the auto window's start only
+         //--- when the chart cannot say what it is showing.
+         long def = MiddleOfView();
+         if(def == SSR_INVALID_TIME)
+           {
+            MqlRates back[];
+            def = range.last_msc - (long)InpReplayBars * SSR_MSC_PER_MIN;
+            if(CopyRates(origin, PERIOD_M1, 0, InpReplayBars, back) > 0)
+               def = (long)back[0].time * 1000;
+           }
+         ShowPicker(origin, def);
+         g_picking = true;
+         EventSetMillisecondTimer(200);
+         return INIT_SUCCEEDED;
+        }
+
+      g_pick_msc = (long)StringToTime(picked) * 1000;
+      PrintFormat("[host] starting from the line you placed: %s",
+                  SSRFormatMsc(g_pick_msc));
+     }
+
+   if(!BuildSession(origin, on_replay, one_chart_ok))
+      return FailInit();
    return INIT_SUCCEEDED;
   }
 
@@ -1409,6 +1488,19 @@ void OnTimer()
                          "Start: " + TimeToString(at, TIME_DATE | TIME_MINUTES) +
                          "   -   drag the line, then press the green button");
 
+      if(ObjectGetInteger(0, SSR_PICK_HERE, OBJPROP_STATE))
+        {
+         ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_STATE, false);
+         long mid = MiddleOfView();
+         if(mid != SSR_INVALID_TIME)
+           {
+            ObjectSetInteger(0, SSR_PICK_LINE, OBJPROP_TIME,
+                             (datetime)(mid / 1000));
+            ChartRedraw(0);
+           }
+         return;
+        }
+
       if(ObjectGetInteger(0, SSR_PICK_GO, OBJPROP_STATE))
         {
          ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_STATE, false);
@@ -1421,18 +1513,26 @@ void OnTimer()
          RemovePicker();
          g_picking = false;
          EventKillTimer();
-
-         if(ObjectFind(0, SSR_PICK_STASH) < 0)
-            ObjectCreate(0, SSR_PICK_STASH, OBJ_LABEL, 0, 0, 0);
-         ObjectSetInteger(0, SSR_PICK_STASH, OBJPROP_XDISTANCE, -1000);
-         ObjectSetInteger(0, SSR_PICK_STASH, OBJPROP_YDISTANCE, -1000);
-         ObjectSetInteger(0, SSR_PICK_STASH, OBJPROP_HIDDEN,    true);
-         ObjectSetString (0, SSR_PICK_STASH, OBJPROP_TEXT,
-                          TimeToString(at, TIME_DATE | TIME_MINUTES));
+         g_pick_msc = (long)at * 1000;
 
          PrintFormat("[host] start set to %s - building the session",
                      TimeToString(at, TIME_DATE | TIME_MINUTES));
-         ChartSetSymbolPeriod(ChartID(), _Symbol, _Period);
+
+         //+------------------------------------------------------------------+
+         //| BUILD IT HERE. The previous version called                       |
+         //| ChartSetSymbolPeriod with this chart's OWN symbol and period,    |
+         //| expecting a reinitialise. MetaTrader sees nothing to change and  |
+         //| does nothing at all, so the button removed the line, killed the  |
+         //| timer, and left a chart with no tool on it - exactly what the    |
+         //| user reported. There was never a need to go back through OnInit; |
+         //| the build is a function and this is where the answer is.          |
+         //+------------------------------------------------------------------+
+         if(!BuildSession(g_origin, false, InpOneChart))
+           {
+            Print("[host] the session could not be built from that start. "
+                  "Remove SS Replay and try another point.");
+            return;
+           }
         }
       return;
      }

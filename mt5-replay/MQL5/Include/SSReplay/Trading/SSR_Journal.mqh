@@ -157,6 +157,131 @@ public:
       return true;
      }
 
+   //+------------------------------------------------------------------+
+   //| Export an HTML STATEMENT.                                        |
+   //|                                                                  |
+   //| The CSV is for a spreadsheet. This is for a person: a trader     |
+   //| reviewing their session, or a student handing it in. Same        |
+   //| numbers, same caveat, opened by double-clicking.                 |
+   //|                                                                  |
+   //| It is written to be READ, so the caveat is at the top in amber   |
+   //| rather than buried in a comment row. A statement whose header    |
+   //| says "23% of these outcomes rest on an assumed tick order" is    |
+   //| worth more than one that quietly does not mention it.            |
+   //+------------------------------------------------------------------+
+   bool              ExportHtml(const string name, const int digits = 5)
+     {
+      m_last_error = "";
+      if(m_acct == NULL)
+        { m_last_error = "no account attached"; return false; }
+
+      FolderCreate(SSR_JOURNAL_DIR);
+      string path = SSR_JOURNAL_DIR + "\\" + name + ".html";
+      int h = FileOpen(path, FILE_WRITE | FILE_TXT | FILE_ANSI);
+      if(h == INVALID_HANDLE)
+        { m_last_error = "cannot write " + path; return false; }
+      m_last_path = path;
+
+      SSRStatistics st;
+      st.Init();
+      if(m_stats != NULL)
+         m_stats.Compute(st);
+
+      FileWriteString(h,
+         "<!doctype html><html><head><meta charset=\"utf-8\">\r\n"
+         "<title>SS Replay statement</title><style>\r\n"
+         "body{font-family:Tahoma,Segoe UI,sans-serif;font-size:13px;color:#16181b;"
+         "background:#f5f7f8;margin:0;padding:28px}\r\n"
+         ".w{max-width:1000px;margin:0 auto}\r\n"
+         "h1{font-size:21px;margin:0 0 4px}\r\n"
+         ".sub{color:#5c636b;margin:0 0 20px;font-size:12px}\r\n"
+         ".caveat{background:#fff6e5;border:1px solid #e3c88a;border-left:4px solid #a35a00;"
+         "padding:11px 14px;margin:0 0 20px;color:#5a3d00}\r\n"
+         ".kpi{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 22px}\r\n"
+         ".kpi div{background:#fff;border:1px solid #dde2e7;padding:10px 14px;min-width:132px}\r\n"
+         ".kpi b{display:block;font-size:18px;margin-top:3px}\r\n"
+         ".kpi span{font-size:11px;color:#5c636b;text-transform:uppercase;letter-spacing:.04em}\r\n"
+         "table{width:100%;border-collapse:collapse;background:#fff;"
+         "border:1px solid #dde2e7;font-size:12px}\r\n"
+         "th{text-align:left;background:#eef1f4;padding:8px 9px;border-bottom:1px solid #dde2e7;"
+         "font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#5c636b}\r\n"
+         "td{padding:7px 9px;border-bottom:1px solid #eef1f4}\r\n"
+         "td.n{text-align:right;font-variant-numeric:tabular-nums}\r\n"
+         ".g{color:#1c7a45;font-weight:700} .r{color:#b03a2e;font-weight:700}\r\n"
+         ".amb{color:#a35a00}\r\n"
+         "</style></head><body><div class=\"w\">\r\n");
+
+      FileWriteString(h, "<h1>SS Replay &mdash; session statement</h1>\r\n");
+      FileWriteString(h, StringFormat("<p class=\"sub\">%s &nbsp;&middot;&nbsp; %s</p>\r\n",
+                      Html(name), TimeToString(TimeLocal(), TIME_DATE | TIME_SECONDS)));
+
+      string caveat = st.Caveat();
+      if(caveat != "")
+         FileWriteString(h, "<div class=\"caveat\"><b>Read this first.</b><br>" +
+                            Html(caveat) + "</div>\r\n");
+
+      FileWriteString(h, "<div class=\"kpi\">\r\n");
+      FileWriteString(h, StringFormat("<div><span>Trades</span><b>%d</b></div>\r\n", st.trades));
+      FileWriteString(h, StringFormat("<div><span>Net profit</span><b class=\"%s\">%.2f</b></div>\r\n",
+                      (st.net_profit >= 0 ? "g" : "r"), st.net_profit));
+      FileWriteString(h, StringFormat("<div><span>Win rate</span><b>%.1f%%</b></div>\r\n", st.win_rate));
+      FileWriteString(h, StringFormat("<div><span>Profit factor</span><b>%.2f</b></div>\r\n", st.profit_factor));
+      FileWriteString(h, StringFormat("<div><span>Expectancy</span><b>%.2f</b></div>\r\n", st.expectancy));
+      FileWriteString(h, StringFormat("<div><span>Average R</span><b>%.2f</b></div>\r\n", st.average_r));
+      FileWriteString(h, StringFormat("<div><span>Max drawdown</span><b class=\"r\">%.2f (%.1f%%)</b></div>\r\n",
+                      st.max_drawdown, st.max_drawdown_pct));
+      FileWriteString(h, StringFormat("<div><span>Win / loss streak</span><b>%d / %d</b></div>\r\n",
+                      st.win_streak, st.loss_streak));
+      FileWriteString(h, StringFormat("<div><span>Assumed tick order</span><b class=\"amb\">%d (%.1f%%)</b></div>\r\n",
+                      st.ambiguous_trades, st.ambiguous_pct));
+      FileWriteString(h, "</div>\r\n");
+
+      FileWriteString(h,
+         "<table><tr><th>#</th><th>Type</th><th>Tag</th><th class=\"n\">Volume</th>"
+         "<th>Opened</th><th class=\"n\">Price</th><th>Closed</th><th class=\"n\">Price</th>"
+         "<th>Reason</th><th class=\"n\">R</th><th class=\"n\">Profit</th></tr>\r\n");
+
+      int total = m_acct.Total();
+      for(int i = 0; i < total; i++)
+        {
+         SSRVirtualPosition p;
+         if(!m_acct.At(i, p) || !p.IsClosed())
+            continue;
+         double net = p.profit + p.swap - p.commission;
+         FileWriteString(h, StringFormat(
+            "<tr><td>%d</td><td>%s</td><td>%s</td><td class=\"n\">%.2f</td>"
+            "<td>%s</td><td class=\"n\">%s</td><td>%s</td><td class=\"n\">%s</td>"
+            "<td>%s%s</td><td class=\"n\">%s</td>"
+            "<td class=\"n\"><span class=\"%s\">%.2f</span></td></tr>\r\n",
+            (int)p.ticket,
+            (SSRIsLong(p.type) ? "BUY" : "SELL"),
+            Html(p.tag),
+            p.volume,
+            SSRFormatMsc(p.open_msc),  DoubleToString(p.open_price, digits),
+            SSRFormatMsc(p.close_msc), DoubleToString(p.close_price, digits),
+            SSRCloseReasonName(p.reason),
+            (p.ambiguous ? " <span class=\"amb\">(assumed)</span>" : ""),
+            (p.HasR() ? DoubleToString(p.RMultiple(), 2) : "-"),
+            (net >= 0 ? "g" : "r"), net));
+        }
+
+      FileWriteString(h, "</table>\r\n</div></body></html>\r\n");
+      FileClose(h);
+      return true;
+     }
+
+   //--- HTML has five characters that must never arrive raw, or a tag
+   //--- in a user's session name silently eats the rest of the page
+   string            Html(const string in)
+     {
+      string o = in;
+      StringReplace(o, "&", "&amp;");
+      StringReplace(o, "<", "&lt;");
+      StringReplace(o, ">", "&gt;");
+      StringReplace(o, "\"", "&quot;");
+      return o;
+     }
+
    //--- a compact summary for the panel and the log
    string            Summary(void)
      {

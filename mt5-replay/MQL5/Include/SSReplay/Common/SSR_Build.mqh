@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v46 2026-08-30  download-and-pick-on-chart"
+#define SSR_BUILD           "v47 2026-08-31  the-button-actually-builds"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
