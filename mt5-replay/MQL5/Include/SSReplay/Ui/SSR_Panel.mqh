@@ -63,6 +63,7 @@ private:
 
    bool              m_collapsed;
    bool              m_closed;      // hidden entirely; one button brings it back
+   bool              m_compact;     // the chart is too short for the full panel
    bool              m_dragging;
    int               m_drag_dx, m_drag_dy;
 
@@ -147,7 +148,8 @@ public:
      : m_chart(0), m_port(NULL), m_prefix("SSRP_"),
        m_x(12), m_y(24), m_saved_mouse_move(0), m_saved_mouse_scroll(1),
        m_saved_quick_nav(1), m_saved_key_control(1),
-       m_saved(false), m_collapsed(false), m_closed(false), m_dragging(false),
+       m_saved(false), m_collapsed(false), m_closed(false), m_compact(false),
+       m_dragging(false),
        m_drag_dx(0), m_drag_dy(0),
        m_track_drag(false), m_track_x(0), m_track_y(0), m_track_w(0),
        m_last_drag_paint(0), m_corner(0),
@@ -338,8 +340,35 @@ public:
       for(int ci = 0; ci < ArraySize(cap); ci++)
          m_w.Hide(cap[ci], false);
 
+      //+------------------------------------------------------------------+
+      //| A PANEL TALLER THAN ITS CHART IS AN INVISIBLE PANEL.             |
+      //|                                                                  |
+      //| The user's terminal had the Toolbox open to three quarters of    |
+      //| the screen: a ninety-pixel chart, and of a 368-pixel panel only  |
+      //| the caption drew. From their side that is a tool that did not     |
+      //| start - and the smoke test had just proved the engine ran        |
+      //| perfectly underneath it.                                          |
+      //|                                                                  |
+      //| So the panel measures the chart and, when it will not fit,       |
+      //| keeps what is OPERATED - clock, transport, speed, status - and   |
+      //| drops what is only CONSULTED. The tabs come back the moment      |
+      //| there is room; nothing is lost, only deferred.                    |
+      //+------------------------------------------------------------------+
       int W = SSR_PANEL_W;
-      int H = m_collapsed ? SSR_HEADER_H + 2 : SSR_PANEL_H;
+      int chart_h = (int)ChartGetInteger(m_chart, CHART_HEIGHT_IN_PIXELS);
+      bool was_compact = m_compact;
+      m_compact = (chart_h > 0 && chart_h < SSR_PANEL_H + 24);
+      if(m_compact != was_compact)
+        {
+         HideSheetArea(m_compact);
+         PrintFormat("[panel] %s mode - the chart is %d pixels tall%s",
+                     (m_compact ? "compact" : "full"), chart_h,
+                     (m_compact ? "; press Ctrl+T to close the Toolbox and get "
+                                  "the tabs back" : ""));
+        }
+
+      int H = m_collapsed ? SSR_HEADER_H + 2
+                          : (m_compact ? SSR_PANEL_COMPACT_H : SSR_PANEL_H);
       ClampToChart(W, H);
       int x = m_x, y = m_y;
 
@@ -358,10 +387,13 @@ public:
       cy = DrawClock(x, cy, W);
       cy = DrawTransport(x, cy, W);
       cy = DrawSpeed(x, cy, W);
-      cy = DrawTabs(x, cy, W);
-      DrawSide(x + SSR_PAD, cy + 4);
-      DrawSheet(x + SSR_PAD + SSR_SIDE_W + SSR_GAP, cy + 4,
-                W - 2 * SSR_PAD - SSR_SIDE_W - SSR_GAP);
+      if(!m_compact)
+        {
+         cy = DrawTabs(x, cy, W);
+         DrawSide(x + SSR_PAD, cy + 4);
+         DrawSheet(x + SSR_PAD + SSR_SIDE_W + SSR_GAP, cy + 4,
+                   W - 2 * SSR_PAD - SSR_SIDE_W - SSR_GAP);
+        }
       DrawStatus(x, y + H - SSR_STATUS_H - 1, W);
 
       //+------------------------------------------------------------------+
@@ -841,6 +873,19 @@ private:
            SSRFidelityName(m_state.fidelity_effective) + (degraded ? " !" : ""),
            degraded ? SSR_C_HOLD : SSRFidelityColor(m_state.fidelity_effective),
            SSR_FS_SMALL);
+     }
+
+   //--- the tab strip, the side column and the sheet: everything the
+   //--- compact panel does without. Listed here rather than inline so
+   //--- compact mode and collapse cannot disagree about what they hide.
+   void              HideSheetArea(const bool hidden)
+     {
+      string ids[] = {"tab0","tab1","tab2","tab3","tabline",
+                      "follow","lines","bookmark","jump","sessions","fidelity"};
+      for(int i = 0; i < ArraySize(ids); i++)
+         m_w.Hide(ids[i], hidden);
+      if(hidden)
+         HideSheets();
      }
 
    //--- everything below the caption, hidden when collapsed

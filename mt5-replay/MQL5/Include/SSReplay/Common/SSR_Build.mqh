@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v51 2026-08-31  speed-and-smoke-test"
+#define SSR_BUILD           "v52 2026-08-31  compact-panel"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

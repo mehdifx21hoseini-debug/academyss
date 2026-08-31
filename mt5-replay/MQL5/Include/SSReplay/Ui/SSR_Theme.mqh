@@ -112,6 +112,10 @@
 //+------------------------------------------------------------------+
 #define SSR_PANEL_W        420
 #define SSR_PANEL_H        368
+//--- CAPTION 23 + CLOCK/PROGRESS 32 + TRANSPORT 27 + SPEED 33
+//--- + STATUS 18 + MARGIN 7. Everything a person touches while the
+//--- replay runs, and nothing they only consult.
+#define SSR_PANEL_COMPACT_H 140
 #define SSR_PAD            8
 #define SSR_ROW_H          19
 #define SSR_HEADER_H       20
