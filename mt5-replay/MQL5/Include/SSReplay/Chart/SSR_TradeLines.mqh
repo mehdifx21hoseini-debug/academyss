@@ -313,6 +313,30 @@ public:
       ChartRedraw(m_chart);
      }
 
+   //+------------------------------------------------------------------+
+   //| TAKE THE PLANNING LINES AWAY AND LEAVE THE TRADE ALONE.          |
+   //|                                                                  |
+   //| Opening from the lines used to call Clear(), which also swept    |
+   //| every position line off the chart - and because the host only    |
+   //| drew positions while the planning lines were armed, and Clear    |
+   //| disarms, the stop and target of the trade just opened were never |
+   //| drawn again. The user pressed a button and watched the whole     |
+   //| trade disappear from the chart it was placed on.                 |
+   //|                                                                  |
+   //| Once the order is placed, the two draggable lines have done      |
+   //| their job. The position's own levels take over: they are a       |
+   //| record, not a proposal, which is why they are not draggable.     |
+   //+------------------------------------------------------------------+
+   void              Disarm(void)
+     {
+      if(m_chart == 0)
+         return;
+      ObjectDelete(m_chart, m_sl_name);
+      ObjectDelete(m_chart, m_tp_name);
+      m_armed = false;
+      ChartRedraw(m_chart);
+     }
+
    void              Clear(void)
      {
       if(m_chart == 0)

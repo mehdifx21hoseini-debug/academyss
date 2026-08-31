@@ -2058,6 +2058,8 @@ void OnTimer()
          //| attached to that chart, so no drag event can ever arrive. Asking |
          //| them where they are, once a tick, needs no events at all.         |
          //+------------------------------------------------------------------+
+         //--- POLLING is only for the planning lines: nothing else on
+         //--- the chart is draggable, so nothing else needs asking.
          if(g_lines.IsArmed())
            {
             g_lines.Poll();
@@ -2067,12 +2069,28 @@ void OnTimer()
                g_gport.SetStopPoints(pts);
                g_gport.SetTpPoints(g_lines.RewardRatio(px) * pts);
               }
+           }
 
-            //--- and every OPEN trade, on the chart, the way the
-            //--- platform draws a real one. A virtual position that
-            //--- lives only as a number in a panel asks the user to
-            //--- carry it in their head; the point of practising on a
-            //--- chart is to read it off the chart.
+         //+------------------------------------------------------------------+
+         //| DRAWING OPEN TRADES IS NOT CONDITIONAL ON THE PLANNING LINES.    |
+         //|                                                                  |
+         //| This whole block used to sit inside `if(IsArmed())` - and        |
+         //| placing an order disarms, by design, because the proposal has    |
+         //| become a position. So the stop and target of every trade         |
+         //| vanished the instant it was opened, and came back only if the    |
+         //| user happened to arm the lines again for the NEXT trade.         |
+         //|                                                                  |
+         //| A trade you can see on the chart and a trade you have to         |
+         //| remember are not the same product. The point of practising on a  |
+         //| chart is to read the position off the chart.                     |
+         //+------------------------------------------------------------------+
+         //--- but not twenty-five times a second. The sweep walks every
+         //--- horizontal line on the chart and ends in a ChartRedraw,
+         //--- and this release has just finished paying for a starved
+         //--- timer. Five pumps is 200ms - far below noticing, far above
+         //--- free.
+         if(g_slow_tick % 5 == 0)
+           {
             g_lines.BeginPositions();
             for(int pi = 0; pi < g_acct.Total(); pi++)
               {

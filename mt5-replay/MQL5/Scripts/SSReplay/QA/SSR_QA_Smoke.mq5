@@ -31,6 +31,7 @@
 #include <SSReplay/Common/SSR_FlightRecorder.mqh>
 #include <SSReplay/Trading/SSR_TradingEngine.mqh>
 #include <SSReplay/Trading/SSR_Journal.mqh>
+#include <SSReplay/Chart/SSR_TradeLines.mqh>
 #include <SSReplay/Core/SSR_ReplayController.mqh>
 #include <SSReplay/Core/SSR_MasterClock.mqh>
 #include <SSReplay/Data/SSR_Mt5DataSource.mqh>
@@ -445,6 +446,57 @@ void OnStart()
             FileDelete(jrn.LastPath());
            }
         }
+     }
+
+   //+------------------------------------------------------------------+
+   //| 12. THE LINES HAND OVER TO THE TRADE.                            |
+   //|                                                                  |
+   //| Placing an order disarms the planning lines - correctly, the      |
+   //| proposal has become a position. But the host only drew positions  |
+   //| while the lines were armed, so the stop and target of every trade |
+   //| vanished the instant it was opened. The user pressed one button   |
+   //| and watched the whole trade leave the chart.                      |
+   //|                                                                  |
+   //| Dragging needs a mouse. This does not: it asks whether the right  |
+   //| objects exist before and after, which is the whole of the bug.    |
+   //+------------------------------------------------------------------+
+   long lchart = ChartOpen(rsym, PERIOD_M1);
+   if(Check("a chart for the line test", lchart != 0, rsym))
+     {
+      CSSRTradeLines lines;
+      lines.Attach(lchart, (int)SymbolInfoInteger(rsym, SYMBOL_DIGITS),
+                   SymbolInfoDouble(rsym, SYMBOL_POINT),
+                   clrTomato, clrMediumSeaGreen);
+
+      double lpx = acct.Bid() > 0.0 ? acct.Bid() : 1000.0;
+      Check("the planning lines arm", lines.ArmSide(lpx, 500, 2.0, true) &&
+            ObjectFind(lchart, "SSR_LINE_SL") >= 0 &&
+            ObjectFind(lchart, "SSR_LINE_TP") >= 0,
+            "SSR_LINE_SL and SSR_LINE_TP are on the chart");
+
+      lines.BeginPositions();
+      lines.DrawPosition(4242, lpx, lpx - 5.0, lpx + 10.0, true, 0.10);
+      lines.EndPositions();
+      Check("an open trade draws its own levels",
+            ObjectFind(lchart, "SSR_POS_4242_E") >= 0 &&
+            ObjectFind(lchart, "SSR_POS_4242_S") >= 0 &&
+            ObjectFind(lchart, "SSR_POS_4242_T") >= 0,
+            "entry, stop and target");
+
+      //--- THE REGRESSION, in one call
+      lines.Disarm();
+      Check("Disarm takes the planning lines and NOTHING else",
+            ObjectFind(lchart, "SSR_LINE_SL") < 0 &&
+            ObjectFind(lchart, "SSR_LINE_TP") < 0 &&
+            ObjectFind(lchart, "SSR_POS_4242_E") >= 0 &&
+            ObjectFind(lchart, "SSR_POS_4242_S") >= 0 &&
+            ObjectFind(lchart, "SSR_POS_4242_T") >= 0,
+            "planning lines gone, the trade's stop and target still drawn");
+
+      lines.Clear();
+      Check("Clear takes everything", ObjectFind(lchart, "SSR_POS_4242_E") < 0,
+            "the sweep still works when a session really is over");
+      ChartClose(lchart);
      }
 
    ctrl.Release();

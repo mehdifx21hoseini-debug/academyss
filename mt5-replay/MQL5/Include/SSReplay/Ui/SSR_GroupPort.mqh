@@ -565,8 +565,10 @@ public:
       //--- recomputed from the bid, which would drift by the spread
       //--- and by every tick between the drag and the click
       bool ok = MarketAt(is_long ? SSR_ORDER_BUY : SSR_ORDER_SELL, sl, tp);
+      //--- Disarm, not Clear. Clear also sweeps the position lines, and
+      //--- one of those belongs to the order that was just placed.
       if(ok)
-         m_lines.Clear();
+         m_lines.Disarm();
       return ok;
      }
 

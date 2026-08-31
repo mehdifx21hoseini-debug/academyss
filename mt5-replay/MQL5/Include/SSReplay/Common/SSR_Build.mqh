@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v61 2026-08-31  the-statement-that-said-zero"
+#define SSR_BUILD           "v62 2026-08-31  the-lines-hand-over"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

@@ -3171,3 +3171,46 @@ a red one.* The instrument was silent for two releases while holding a
 blanket exemption it had granted itself.
 
 **Not measured:** v61 has not been run on MetaTrader.
+
+## v62 — the lines hand over to the trade
+
+**Asked:** when a trade opens, remove the risk lines and show the position's
+stop and target.
+
+Half of it already worked; the other half was a defect, and a bad one.
+
+Opening from the lines called `Clear()`, which removes the two planning
+lines **and sweeps every position line off the chart**, and sets
+`m_armed = false`. In the host, the entire open-position drawing block sat
+inside `if(g_lines.IsArmed())`. So:
+
+1. arm the lines → two draggable lines appear
+2. open from them → `Clear()`: lines gone, `armed = false`
+3. next timer pass → `IsArmed()` is false → position lines never drawn again
+
+One button press, and the whole trade left the chart it had been placed on.
+
+**Fixes.**
+
+- New `Disarm()`: takes only the two planning lines, leaves position lines
+  alone. `OpenFromLines` calls it instead of `Clear()`.
+- The open-position sweep moved out from under `IsArmed()`. A trade you can
+  see on the chart and a trade you have to remember are not the same
+  product.
+- Throttled to 200 ms rather than every pump: the sweep walks every
+  horizontal line and ends in a `ChartRedraw`, and this release has just
+  finished paying for a starved timer.
+
+**Smoke coverage** — arm, draw a position, `Disarm`, and assert that the
+planning objects are gone while the position's entry/stop/target are still
+there; then `Clear` and assert the sweep still works. Verified by sabotage:
+restoring the old `EndPositions()` call inside `Disarm` makes the third
+stage fail.
+
+**Honest limit:** the stage tests the *class* contract. That the port calls
+`Disarm` rather than `Clear`, and that the host no longer wraps the sweep
+in `IsArmed()`, are integration facts still covered only by a real session.
+Saying so is cheaper than discovering later that a green test meant less
+than it looked.
+
+**Not measured:** v62 has not been run on MetaTrader.
