@@ -3498,3 +3498,54 @@ against that exact line. Checking one and not the other left the audit
 blind to the commonest call site in the tree.
 
 **Not measured:** v67 has not been run on MetaTrader.
+
+## v68 — setup on the chart
+
+Everything about a session used to be set in MetaTrader's inputs dialog: a
+grid of thirty rows a user has to open, scroll, read and close before the
+tool does anything. It is the single biggest reason someone tries a replay
+tool once and does not come back — and the roadmap named it the highest-
+impact item before the product could be sold.
+
+`CSSRSetupPanel` puts the settings on the chart beside the line that chooses
+where to begin, and the same button that starts the replay reads them.
+Typed fields for numbers and text; cycling buttons for the timeframe, blind
+mode and the evaluation toggle.
+
+### Three decisions worth stating
+
+**The inputs are still the truth — as defaults.** The panel opens showing
+what the inputs say, then what the user last used. Nobody who set everything
+in the inputs dialog loses the session they asked for.
+
+**It reads once, at Start.** Not on every edit. `CHARTEVENT_OBJECT_ENDEDIT`
+only reaches the chart a program is attached to, and this project has spent
+three architectures on that lesson. One read at the moment the answer is
+needed has nothing to keep in sync.
+
+**It persists to a file, not to a chart object.** Two jobs, one file: a
+returning user retypes nothing, *and* the one-window handover restarts this
+program — the second pass knows nothing and would fall back to the inputs,
+silently discarding everything just typed. That is exactly the defect v55
+had to rescue for the picked start, arriving for every other field at once.
+A chart object could not carry it either: v66 measured MetaTrader cutting
+object text at 63 characters, and the setup is far past that.
+
+Only the replay chart restores the file. A first pass reading it would
+overrule inputs a user had deliberately set for that run.
+
+### Invalid input is refused, not passed down
+
+A balance of zero produces a risk engine that can size nothing, and the
+error it eventually raises names a layer the user never saw. Unreadable text
+keeps the previous value; an impossible number is corrected.
+
+### Instruments
+
+- Smoke: the setup saves and every field comes back. Sabotage-verified by
+  dropping one field from the write.
+- `CSSRWidgets` gained `Edit`/`EditText` and `Pressed` — the last of which
+  **A7 caught me inventing**: I called `m_w.Pressed(...)` before writing it,
+  and the audit named all five call sites before the compiler ever saw them.
+
+**Not measured:** v68 has not been run on MetaTrader.

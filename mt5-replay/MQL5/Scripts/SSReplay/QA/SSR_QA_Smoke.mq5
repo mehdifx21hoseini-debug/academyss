@@ -35,6 +35,7 @@
 #include <SSReplay/Chart/SSR_BlindMode.mqh>
 #include <SSReplay/Session/SSR_SessionManager.mqh>
 #include <SSReplay/Trading/SSR_PropEvaluation.mqh>
+#include <SSReplay/Ui/SSR_SetupPanel.mqh>
 #include <SSReplay/Core/SSR_ReplayController.mqh>
 #include <SSReplay/Core/SSR_MasterClock.mqh>
 #include <SSReplay/Data/SSR_Mt5DataSource.mqh>
@@ -696,6 +697,53 @@ void OnStart()
       Check("and it asks the replay to stop, once", ev.PauseRequested(why) &&
             !ev.PauseRequested(why),
             "consumed on the way out, as the observer interface requires");
+   }
+
+   //+------------------------------------------------------------------+
+   //| 16. THE SETUP SURVIVES BEING WRITTEN AND READ BACK.              |
+   //|                                                                  |
+   //| Not a nicety: the one-window handover restarts this program, and |
+   //| a setup that does not cross that restart is a form the user      |
+   //| filled in and the tool threw away. v55 had to rescue exactly     |
+   //| that for the picked start; this is the same trap for everything  |
+   //| else on the panel.                                               |
+   //+------------------------------------------------------------------+
+   {
+      SSRSetupValues a;
+      a.Init();
+      a.balance       = 25000.0;
+      a.risk_percent  = 1.25;
+      a.spread_points = 17.0;
+      a.speed         = 120.0;
+      a.chart_tf      = PERIOD_M15;
+      a.extra_tfs     = "M30,H1";
+      a.blind         = SSR_BLIND_FULL;
+      a.session_name  = "smoke-setup";
+      a.prop_on       = true;
+      a.prop_target   = 6.5;
+      a.prop_daily    = 4.0;
+      a.prop_total    = 9.0;
+
+      if(Check("the setup saves", CSSRSetupPanel::Save(a),
+               "MQL5\\Files\\SSReplay\\setup.ini"))
+        {
+         SSRSetupValues b;
+         b.Init();
+         Check("and every field comes back",
+               CSSRSetupPanel::Restore(b) &&
+               b.balance == a.balance && b.risk_percent == a.risk_percent &&
+               b.spread_points == a.spread_points && b.speed == a.speed &&
+               b.chart_tf == a.chart_tf && b.extra_tfs == a.extra_tfs &&
+               b.blind == a.blind && b.session_name == a.session_name &&
+               b.prop_on == a.prop_on && b.prop_target == a.prop_target &&
+               b.prop_daily == a.prop_daily && b.prop_total == a.prop_total,
+               StringFormat("balance %.2f  tf %s  extra [%s]  blind %s  "
+                            "eval %s  session [%s]",
+                            b.balance, SSRSetupTfName(b.chart_tf), b.extra_tfs,
+                            SSRSetupBlindName(b.blind),
+                            (b.prop_on ? "on" : "off"), b.session_name));
+         FileDelete("SSReplay\\setup.ini");
+        }
    }
 
    ctrl.Release();

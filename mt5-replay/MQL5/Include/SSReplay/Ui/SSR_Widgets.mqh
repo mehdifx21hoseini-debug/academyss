@@ -112,6 +112,80 @@ public:
                      SSR_FS_BODY);
      }
 
+   //+------------------------------------------------------------------+
+   //| A TYPED FIELD.                                                   |
+   //|                                                                  |
+   //| MetaTrader's own inputs dialog is a grid of rows a user has to   |
+   //| find, read and close before anything happens. A setup that sits  |
+   //| on the chart next to the thing being set up is a different       |
+   //| product, and this is the control it needs.                       |
+   //|                                                                  |
+   //| Deliberately NOT event-driven. CHARTEVENT_OBJECT_ENDEDIT only    |
+   //| fires on the chart the program is attached to, and this project  |
+   //| has already spent three architectures learning what that costs.  |
+   //| The value is READ when the user presses Start - one moment, one  |
+   //| read, nothing to keep in sync.                                   |
+   //+------------------------------------------------------------------+
+   bool              Edit(const string id, const int x, const int y,
+                          const int w, const int h, const string text,
+                          const bool set_text = true)
+     {
+      string n = N(id);
+      if(ObjectFind(m_chart, n) < 0)
+        {
+         if(!ObjectCreate(m_chart, n, OBJ_EDIT, 0, 0, 0))
+            return false;
+         m_created++;
+         Common(n);
+         ObjectSetInteger(m_chart, n, OBJPROP_ALIGN, ALIGN_LEFT);
+         ObjectSetString (m_chart, n, OBJPROP_FONT,  SSR_FONT);
+        }
+      ObjectSetInteger(m_chart, n, OBJPROP_XDISTANCE, x);
+      ObjectSetInteger(m_chart, n, OBJPROP_YDISTANCE, y);
+      ObjectSetInteger(m_chart, n, OBJPROP_XSIZE,     w);
+      ObjectSetInteger(m_chart, n, OBJPROP_YSIZE,     h);
+      ObjectSetInteger(m_chart, n, OBJPROP_BGCOLOR,   SSR_C_WELL);
+      ObjectSetInteger(m_chart, n, OBJPROP_COLOR,     SSR_C_TEXT);
+      ObjectSetInteger(m_chart, n, OBJPROP_BORDER_COLOR, SSR_C_WELL_EDGE);
+      ObjectSetInteger(m_chart, n, OBJPROP_FONTSIZE,  SSR_FS_BODY);
+      ObjectSetInteger(m_chart, n, OBJPROP_READONLY,  false);
+      //--- only on creation, or on an explicit reset. Writing the text
+      //--- every repaint would delete whatever the user was typing.
+      if(set_text)
+         ObjectSetString(m_chart, n, OBJPROP_TEXT, text);
+      return true;
+     }
+
+   //+------------------------------------------------------------------+
+   //| Was this button pressed since the last look?                     |
+   //|                                                                  |
+   //| Consuming the latch is the whole method. MetaTrader leaves a     |
+   //| pressed button pressed, so a reader that only asks would fire    |
+   //| the same command on every pass; and the state must be cleared    |
+   //| BEFORE the caller acts, so a caller that throws its frame away   |
+   //| still leaves the button up rather than held down and repeating.  |
+   //+------------------------------------------------------------------+
+   bool              Pressed(const string id)
+     {
+      string n = N(id);
+      if(ObjectFind(m_chart, n) < 0)
+         return false;
+      if(!ObjectGetInteger(m_chart, n, OBJPROP_STATE))
+         return false;
+      ObjectSetInteger(m_chart, n, OBJPROP_STATE, false);
+      return true;
+     }
+
+   //--- what the user left in the box. Empty when the box is gone,
+   //--- which the caller must treat as "unchanged", never as zero.
+   string            EditText(const string id)
+     {
+      string n = N(id);
+      if(ObjectFind(m_chart, n) < 0)
+         return "";
+      return ObjectGetString(m_chart, n, OBJPROP_TEXT);
+     }
+
    bool              ButtonC(const string id, const int x, const int y,
                              const int w, const int h, const string text,
                              const color bg, const color edge,

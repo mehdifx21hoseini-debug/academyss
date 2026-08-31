@@ -39,6 +39,7 @@
 #include <SSReplay/Chart/SSR_ChartManager.mqh>
 #include <SSReplay/Chart/SSR_TradeLines.mqh>
 #include <SSReplay/Ui/SSR_Panel.mqh>
+#include <SSReplay/Ui/SSR_SetupPanel.mqh>
 #include <SSReplay/Ui/SSR_RangeDialog.mqh>
 #include <SSReplay/Data/SSR_HistoryCatalog.mqh>
 #include <SSReplay/Trading/SSR_TradingEngine.mqh>
@@ -156,6 +157,31 @@ CSSRRandomPicker     g_picker;
 CSSRSessionWatcher   g_session;
 CSSRTradeAutoPause   g_autopause;
 CSSRPropEvaluation   g_prop;
+CSSRSetupPanel       g_setup_ui;
+
+//+------------------------------------------------------------------+
+//| WHAT THE SESSION IS ACTUALLY BUILT FROM.                         |
+//|                                                                  |
+//| The inputs are the defaults; the setup panel is what the user     |
+//| last said. Every reader goes through these, so there is one place |
+//| that knows which of the two wins - rather than thirty call sites  |
+//| each remembering, and one of them forgetting.                     |
+//+------------------------------------------------------------------+
+SSRSetupValues g_setup;
+bool           g_setup_ready = false;
+
+double          CfgBalance(void) { return g_setup_ready ? g_setup.balance       : InpBalance; }
+double          CfgRisk(void)    { return g_setup_ready ? g_setup.risk_percent  : InpRiskPercent; }
+double          CfgSpread(void)  { return g_setup_ready ? g_setup.spread_points : InpSpreadPoints; }
+double          CfgSpeed(void)   { return g_setup_ready ? g_setup.speed         : InpStartSpeed; }
+ENUM_TIMEFRAMES CfgChartTf(void) { return g_setup_ready ? g_setup.chart_tf      : InpChartTf; }
+string          CfgExtraTfs(void){ return g_setup_ready ? g_setup.extra_tfs     : InpExtraTfs; }
+ENUM_SSR_BLIND  CfgBlind(void)   { return g_setup_ready ? g_setup.blind         : InpBlind; }
+string          CfgSession(void) { return g_setup_ready ? g_setup.session_name  : InpSession; }
+bool            CfgProp(void)    { return g_setup_ready ? g_setup.prop_on       : InpProp; }
+double          CfgPropTgt(void) { return g_setup_ready ? g_setup.prop_target   : InpPropTarget; }
+double          CfgPropDly(void) { return g_setup_ready ? g_setup.prop_daily    : InpPropDaily; }
+double          CfgPropTot(void) { return g_setup_ready ? g_setup.prop_total    : InpPropTotal; }
 CSSRSessionManager   g_session_mgr;
 bool                 g_resumed = false;
 
@@ -737,10 +763,10 @@ bool BuildSession(string origin, const bool on_replay,
    //--- the account into a different window would put every trade
    //--- outside it, and the engine would refuse the restore for a
    //--- reason that looks like a bug in the file.
-   bool resuming = (InpSession != "" && InpResume &&
-                    g_session_mgr.Exists(InpSession));
+   bool resuming = (CfgSession() != "" && InpResume &&
+                    g_session_mgr.Exists(CfgSession()));
    long saved_start = SSR_INVALID_TIME, saved_end = SSR_INVALID_TIME;
-   if(resuming && !g_session_mgr.ReadWindow(InpSession, 0, saved_start, saved_end))
+   if(resuming && !g_session_mgr.ReadWindow(CfgSession(), 0, saved_start, saved_end))
      {
       Print("[host] session file unreadable, starting fresh: ",
             g_session_mgr.LastError());
@@ -814,7 +840,7 @@ bool BuildSession(string origin, const bool on_replay,
      {
       win_start = saved_start;
       win_end   = saved_end;
-      PrintFormat("[host] resuming \"%s\": %s .. %s", InpSession,
+      PrintFormat("[host] resuming \"%s\": %s .. %s", CfgSession(),
                   SSRFormatMsc(win_start), SSRFormatMsc(win_end));
      }
    if(win_start >= win_end)
@@ -831,7 +857,7 @@ bool BuildSession(string origin, const bool on_replay,
    g_sink.SetSlot(InpSlot);
    g_ctrl.SetLog(GetPointer(g_ssr_log));
    g_ctrl.SetSymbolSpec(digits, point);
-   g_ctrl.SetSpreadPoints(InpSpreadPoints);
+   g_ctrl.SetSpreadPoints(CfgSpread());
    g_ctrl.SetTicksPerBar(InpTicksPerBar);
    g_ctrl.SetWarmupBars(InpWarmupBars);
    g_ctrl.SetDataMode(SSR_DATA_BROKER);
@@ -851,7 +877,7 @@ bool BuildSession(string origin, const bool on_replay,
    exec.swap_short_per_lot = InpSwapShort;
    exec.use_real_spread    = true;
    g_acct.SetExecution(exec);
-   g_acct.SetBalance(InpBalance);
+   g_acct.SetBalance(CfgBalance());
    g_acct.SetMarginPerLot(InpMarginLot);
    g_acct.SetStopoutLevel(InpStopout);
 
@@ -870,18 +896,18 @@ bool BuildSession(string origin, const bool on_replay,
    //+------------------------------------------------------------------+
    SSRPropRules prop;
    prop.Init();
-   prop.enabled            = InpProp;
-   prop.start_balance      = InpBalance;
-   prop.profit_target_pct  = InpPropTarget;
-   prop.max_daily_loss_pct = InpPropDaily;
-   prop.max_total_loss_pct = InpPropTotal;
+   prop.enabled            = CfgProp();
+   prop.start_balance      = CfgBalance();
+   prop.profit_target_pct  = CfgPropTgt();
+   prop.max_daily_loss_pct = CfgPropDly();
+   prop.max_total_loss_pct = CfgPropTot();
    prop.trailing           = InpPropTrail;
    prop.min_trading_days   = InpPropMinDays;
    prop.max_days           = InpPropMaxDays;
    g_prop.Attach(GetPointer(g_acct));
    g_prop.SetRules(prop);
    g_prop.Reset();
-   if(InpProp)
+   if(CfgProp())
      {
       g_ctrl.AddObserver(GetPointer(g_prop));
       Print("[host] EVALUATION: ", prop.ToString());
@@ -947,7 +973,7 @@ bool BuildSession(string origin, const bool on_replay,
    //| transport button cheerfully worked on a chart showing nothing.   |
    //+------------------------------------------------------------------+
    g_replay_chart = (g_on_replay_chart ? ChartID()
-                     : (one_chart_ok ? 0 : g_charts.OpenChart(InpChartTf)));
+                     : (one_chart_ok ? 0 : g_charts.OpenChart(CfgChartTf())));
 
    //--- the stop and target belong on the chart the user is watching,
    //--- not in a stepper. They are armed later, once a price exists.
@@ -959,7 +985,7 @@ bool BuildSession(string origin, const bool on_replay,
    //--- custom symbol and MetaTrader derives H1 from it; an extra
    //--- chart is an extra chart, not an extra code path.
    ENUM_TIMEFRAMES extra_tfs[];
-   int n_tfs = ParseTimeframes(InpExtraTfs, extra_tfs);
+   int n_tfs = ParseTimeframes(CfgExtraTfs(), extra_tfs);
    //--- not on the pass that is about to hand this chart over: charts it
    //--- opened now would be owned by a CSSRChartManager that its own
    //--- restart destroys, and nothing would ever close them
@@ -981,7 +1007,7 @@ bool BuildSession(string origin, const bool on_replay,
    string want_syms[];
    int    n_want = 0;
    if(resuming)
-      n_want = g_session_mgr.ReadSymbols(InpSession, want_syms);
+      n_want = g_session_mgr.ReadSymbols(CfgSession(), want_syms);
    g_extra = OpenExtraStreams(win_start, win_end, extra_tfs, n_tfs,
                               want_syms, n_want);
 
@@ -1005,7 +1031,7 @@ bool BuildSession(string origin, const bool on_replay,
    g_gport.AttachStats(GetPointer(g_stats));
    g_gport.AttachStrategies(GetPointer(g_strategies));
    g_gport.AttachSessions(GetPointer(g_session_mgr));
-   g_gport.SetRiskPercent(InpRiskPercent);
+   g_gport.SetRiskPercent(CfgRisk());
    //--- the DEFAULT the SL/TP button starts from. Zero leaves it to the
    //--- port, which uses ten times the live spread - an instrument-
    //--- independent distance rather than a number that is sane on one
@@ -1120,7 +1146,7 @@ bool BuildSession(string origin, const bool on_replay,
                         GetPointer(g_stats));
    if(resuming)
      {
-      if(g_session_mgr.Restore(InpSession))
+      if(g_session_mgr.Restore(CfgSession()))
         {
          g_resumed = true;
          Print("[host] ", g_session_mgr.ResumeReport());
@@ -1221,11 +1247,11 @@ bool BuildSession(string origin, const bool on_replay,
                (InpVitals ? "ON (InpVitals)" : "off, but"), 10);
    //--- the speed the session opens at, through the port so the panel
    //--- and the engine agree from the first frame
-   if(InpStartSpeed > 0.0)
+   if(CfgSpeed() > 0.0)
      {
-      g_gport.SetSpeedX100((long)MathRound(InpStartSpeed * 100.0));
-      PrintFormat("[host] speed %s - %s", SSRSpeedName((long)MathRound(InpStartSpeed * 100.0)),
-                  SSRSpeedMeaning((long)MathRound(InpStartSpeed * 100.0)));
+      g_gport.SetSpeedX100((long)MathRound(CfgSpeed() * 100.0));
+      PrintFormat("[host] speed %s - %s", SSRSpeedName((long)MathRound(CfgSpeed() * 100.0)),
+                  SSRSpeedMeaning((long)MathRound(CfgSpeed() * 100.0)));
      }
 
    g_ready = true;
@@ -1491,6 +1517,38 @@ int OnInit()
       return FailInit();
      }
 
+   //+------------------------------------------------------------------+
+   //| THE SECOND PASS INHERITS WHAT THE PANEL SAID.                    |
+   //|                                                                  |
+   //| The handover restarts this program on the replay chart, and the  |
+   //| new instance knows nothing: it would fall back to the inputs and |
+   //| silently discard the balance, speed and rules the user had just  |
+   //| typed. That is precisely the defect v55 had to rescue for the    |
+   //| picked start, and it would have arrived here for everything else.|
+   //|                                                                  |
+   //| Only on the replay chart. A first pass reading the file would    |
+   //| overrule inputs a user had deliberately set for THIS run.        |
+   //+------------------------------------------------------------------+
+   if(on_replay)
+     {
+      g_setup.Init();
+      g_setup.balance       = InpBalance;
+      g_setup.risk_percent  = InpRiskPercent;
+      g_setup.spread_points = InpSpreadPoints;
+      g_setup.speed         = InpStartSpeed;
+      g_setup.chart_tf      = InpChartTf;
+      g_setup.extra_tfs     = InpExtraTfs;
+      g_setup.blind         = InpBlind;
+      g_setup.session_name  = InpSession;
+      g_setup.prop_on       = InpProp;
+      g_setup.prop_target   = InpPropTarget;
+      g_setup.prop_daily    = InpPropDaily;
+      g_setup.prop_total    = InpPropTotal;
+      g_setup_ready = CSSRSetupPanel::Restore(g_setup);
+      if(g_setup_ready)
+         Print("[host] carrying the setup across the handover");
+     }
+
    g_sink.SetAdoptExisting(on_replay);
    for(int i = 0; i < SSR_EXTRA_STREAMS; i++)
       g_sink2[i].SetAdoptExisting(false);
@@ -1501,7 +1559,7 @@ int OnInit()
    //--- when the symbol is created, so anonymising it later is not an
    //--- option - and the name is the one leak no chart property closes.
    SSRBlindPolicy blind;
-   blind.Apply(InpBlind);
+   blind.Apply(CfgBlind());
    g_blind.SetPolicy(blind);
    g_sink.SetAnonymous(blind.anonymous_symbol);
 
@@ -1552,12 +1610,12 @@ int OnInit()
    //| arriving again through a saved SESSION. Asking a question whose   |
    //| answer will be ignored is worse than not asking it.               |
    //+------------------------------------------------------------------+
-   bool will_resume = (InpSession != "" && InpResume &&
-                       g_session_mgr.Exists(InpSession));
+   bool will_resume = (CfgSession() != "" && InpResume &&
+                       g_session_mgr.Exists(CfgSession()));
    if(will_resume && !on_replay)
       PrintFormat("[host] resuming session \"%s\" - not asking where to "
                   "start, because the file already says. Clear 'Session' "
-                  "or turn 'Resume' off to pick a new start.", InpSession);
+                  "or turn 'Resume' off to pick a new start.", CfgSession());
 
    if(InpPickStart && !on_replay && InpStart == 0 && !InpRandom && !will_resume)
      {
@@ -1580,6 +1638,32 @@ int OnInit()
                def = (long)back[0].time * 1000;
            }
          ShowPicker(origin, def);
+
+         //+------------------------------------------------------------------+
+         //| THE SETUP PANEL, BESIDE THE LINE IT CONFIGURES.                  |
+         //|                                                                  |
+         //| Defaults come from the inputs, then from whatever the user last  |
+         //| used - so a returning user retypes nothing and a first-time user |
+         //| gets exactly what the inputs say.                                 |
+         //+------------------------------------------------------------------+
+         SSRSetupValues sv;
+         sv.Init();
+         sv.balance       = InpBalance;
+         sv.risk_percent  = InpRiskPercent;
+         sv.spread_points = InpSpreadPoints;
+         sv.speed         = InpStartSpeed;
+         sv.chart_tf      = InpChartTf;
+         sv.extra_tfs     = InpExtraTfs;
+         sv.blind         = InpBlind;
+         sv.session_name  = InpSession;
+         sv.prop_on       = InpProp;
+         sv.prop_target   = InpPropTarget;
+         sv.prop_daily    = InpPropDaily;
+         sv.prop_total    = InpPropTotal;
+         if(CSSRSetupPanel::Restore(sv))
+            Print("[host] setup restored from MQL5/Files/SSReplay/setup.ini");
+         g_setup_ui.Create(ChartID(), sv);
+
          g_picking = true;
          EventSetMillisecondTimer(200);
          return INIT_SUCCEEDED;
@@ -1620,6 +1704,7 @@ void OnDeinit(const int reason)
    for(int i = 0; i < g_extra; i++)
       g_publisher2[i].Withdraw();
 
+   g_setup_ui.Destroy();
    RemovePicker();
    if(reason == REASON_REMOVE || reason == REASON_PROGRAM || reason == REASON_CLOSE)
       ObjectDelete(ChartID(), SSR_PICK_STASH);
@@ -1641,11 +1726,11 @@ void OnDeinit(const int reason)
       //--- that rebuilds this EA must not cost the user their trades,
       //--- and by the time we know why we are closing it is too late
       //--- to go back for them.
-      if(InpSession != "")
+      if(CfgSession() != "")
         {
          SSRSessionSettings set;
          CollectSettings(set);
-         if(g_session_mgr.Save(InpSession, set))
+         if(g_session_mgr.Save(CfgSession(), set))
             Print("[host] session saved -> ", g_session_mgr.LastPath());
          else
             Print("[host] session NOT saved: ", g_session_mgr.LastError());
@@ -1908,8 +1993,15 @@ void OnTimer()
          ObjectSetString(0, SSR_PICK_INFO, OBJPROP_TEXT,
                          "Start: " + TimeToString(at, TIME_DATE | TIME_MINUTES) +
                          "   -   drag it, then press START");
+      if(at > 0)
+         g_setup_ui.SetStartText("Start: " +
+                                 TimeToString(at, TIME_DATE | TIME_MINUTES));
 
-      if(ObjectGetInteger(0, SSR_PICK_HERE, OBJPROP_STATE))
+      //--- the setup panel owns the two buttons now; the bare ones stay
+      //--- readable so a chart that has one and not the other still works
+      string act = g_setup_ui.Poll();
+
+      if(act == "here" || ObjectGetInteger(0, SSR_PICK_HERE, OBJPROP_STATE))
         {
          ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_STATE, false);
          long mid = MiddleOfView();
@@ -1922,9 +2014,19 @@ void OnTimer()
          return;
         }
 
-      if(ObjectGetInteger(0, SSR_PICK_GO, OBJPROP_STATE))
+      if(act == "go" || ObjectGetInteger(0, SSR_PICK_GO, OBJPROP_STATE))
         {
          ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_STATE, false);
+
+         //--- what the panel says now becomes what the session is built
+         //--- from, and is written down so the handover's restart AND
+         //--- the next run both find it. A chart object could not carry
+         //--- it: MetaTrader cuts object text at 63 characters.
+         g_setup_ui.Values(g_setup);
+         g_setup_ready = true;
+         CSSRSetupPanel::Save(g_setup);
+         Print("[host] setup: ", g_setup_ui.Summary());
+         g_setup_ui.Destroy();
          if(at <= 0)
            {
             Print("[host] the start line is gone - put it back, or turn "
@@ -1991,7 +2093,7 @@ void OnTimer()
          g_switching = true;
          PrintFormat("[host] handing this chart over to %s - SS Replay will "
                      "restart once on it. This is expected.", rs);
-         if(!ChartSetSymbolPeriod(ChartID(), rs, InpChartTf))
+         if(!ChartSetSymbolPeriod(ChartID(), rs, CfgChartTf()))
            {
             g_switching = false;
             PrintFormat("[host] could not switch this chart to %s (%d). "
