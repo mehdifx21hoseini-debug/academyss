@@ -877,23 +877,82 @@ def audit_a13():
 #--- value cannot be measured here, so those are left alone rather than
 #--- guessed at - but a literal already past the limit is past it for
 #--- every possible value of everything else.
+#---
+#--- IT USED TO WATCH ONLY ObjectSetString, and almost nothing in this
+#--- tree calls that directly any more - the widgets do. So the audit was
+#--- green over a first-run card written entirely in Label() calls, and a
+#--- deliberate 80-character line sailed straight through it. An audit
+#--- that misses is worse than no audit at the moment somebody writes a
+#--- comment saying it is covered.
 SET_TEXT = re.compile(
     r'ObjectSetString\s*\([^;]*?OBJPROP_TEXT\s*,\s*"((?:[^"\\]|\\.)*)"\s*\)',
     re.S)
+
+#--- the widget helpers whose text argument lands in OBJPROP_TEXT. Each
+#--- is (name, index of the text argument among the arguments).
+WIDGET_TEXT = (("Label", 3), ("Button", 5), ("ButtonC", 5), ("Edit", 5))
 OBJ_TEXT_MAX = 63
+
+
+def _args(raw, at):
+    """The argument list of a call whose opening paren is at `at`,
+    split on top-level commas with string literals kept whole."""
+    depth, i, cur, out = 0, at, "", []
+    while i < len(raw):
+        c = raw[i]
+        if c == '"':
+            j = i + 1
+            while j < len(raw) and (raw[j] != '"' or raw[j - 1] == "\\"):
+                j += 1
+            cur += raw[i:j + 1]
+            i = j + 1
+            continue
+        if c in "([":
+            depth += 1
+            if depth == 1 and c == "(":
+                i += 1
+                continue
+        elif c in ")]":
+            depth -= 1
+            if depth == 0:
+                out.append(cur)
+                return out
+        if depth == 1 and c == ",":
+            out.append(cur)
+            cur = ""
+        else:
+            cur += c
+        i += 1
+    return out
+
+LITERAL_ONLY = re.compile(r'^\s*"((?:[^"\\]|\\.)*)"\s*$', re.S)
+
+def _flag(path, raw, pos, text):
+    if len(text) <= OBJ_TEXT_MAX:
+        return
+    report("A14", path, raw[:pos].count("\n") + 1,
+           "object text is %d characters; MetaTrader shows %d and "
+           "cuts the rest: \"%s|%s\""
+           % (len(text), OBJ_TEXT_MAX,
+              text[:OBJ_TEXT_MAX], text[OBJ_TEXT_MAX:]))
 
 def audit_a14():
     for path, body in KEEPSTR.items():
         raw = FILES[path]
         for m in SET_TEXT.finditer(raw):
-            text = m.group(1)
-            if len(text) <= OBJ_TEXT_MAX:
-                continue
-            report("A14", path, raw[:m.start()].count("\n") + 1,
-                   "object text is %d characters; MetaTrader shows %d and "
-                   "cuts the rest: \"%s|%s\""
-                   % (len(text), OBJ_TEXT_MAX,
-                      text[:OBJ_TEXT_MAX], text[OBJ_TEXT_MAX:]))
+            _flag(path, raw, m.start(), m.group(1))
+
+        #--- and the widgets, which is where the text actually comes
+        #--- from in this tree
+        for name, idx in WIDGET_TEXT:
+            for m in re.finditer(r'\.%s\s*\(' % name, raw):
+                args = _args(raw, m.end() - 1)
+                if len(args) <= idx:
+                    continue
+                lit = LITERAL_ONLY.match(args[idx])
+                if lit is None:
+                    continue          # built at runtime; cannot be measured
+                _flag(path, raw, m.start(), lit.group(1))
 
 for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13, audit_a14):
     fn()

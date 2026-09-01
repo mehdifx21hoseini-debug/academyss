@@ -49,6 +49,7 @@
 #include <SSReplay/Trading/SSR_ShotBook.mqh>
 #include <SSReplay/Data/SSR_Calendar.mqh>
 #include <SSReplay/Chart/SSR_CalendarLines.mqh>
+#include <SSReplay/Ui/SSR_FirstRun.mqh>
 #include <SSReplay/Trading/SSR_PropEvaluation.mqh>
 #include <SSReplay/Core/SSR_MasterClock.mqh>
 #include <SSReplay/Ui/SSR_GroupPort.mqh>
@@ -147,6 +148,13 @@ input bool            InpShots       = true;                 // Screenshot the c
 //--- the bars are stamped in. Measure it once against a release you can
 //--- see in the candles and set it; there is nowhere else that answer
 //--- exists.
+//--- DROP IT AND IT WORKS. A person who sees a still picture and a
+//--- panel of thirty controls has not been given a tool, they have been
+//--- given a puzzle - and the first thirty seconds decide whether they
+//--- come back. The replay starts moving by itself, and says so.
+input bool            InpAutoPlay    = true;                 // Start playing as soon as the session is built
+input bool            InpFirstCard   = true;                 // Show the what-to-do-next card once, on the first run
+
 input ENUM_SSR_NEWS   InpNews        = SSR_NEWS_MODERATE;    // Economic calendar on the chart
 input int             InpNewsPause   = 0;                    // Pause this many minutes before HIGH impact news (0 = never)
 input int             InpNewsShift   = 0;                    // Shift calendar times by this many minutes
@@ -182,6 +190,7 @@ CSSRTradeAutoPause   g_autopause;
 CSSRShotBook         g_shots;
 CSSRCalendar         g_cal;
 CSSRCalendarLines    g_cal_lines;
+CSSRFirstRun         g_first;
 CSSRPropEvaluation   g_prop;
 CSSRSetupPanel       g_setup_ui;
 
@@ -1462,6 +1471,56 @@ bool BuildSession(string origin, const bool on_replay,
    Print("[host] ", SSRKeyHint());
 
    //+------------------------------------------------------------------+
+   //| DROP IT AND IT WORKS.                                            |
+   //|                                                                  |
+   //| Until now the session was built and then stood still, waiting for |
+   //| the user to find Play among thirty controls. A first-time user    |
+   //| looking at a motionless chart concludes the tool is broken, and   |
+   //| the log line that would have told them otherwise is behind a tab  |
+   //| they have not opened.                                             |
+   //|                                                                  |
+   //| Not on the pass that is about to hand its chart over: that        |
+   //| instance is fifty milliseconds from being destroyed, and starting |
+   //| it playing would pump ticks into a symbol whose chart is          |
+   //| mid-switch - the exact thing g_switching exists to prevent.       |
+   //+------------------------------------------------------------------+
+   if(InpAutoPlay && !one_chart_ok)
+     {
+      if(g_group.Play())
+         PrintFormat("[host] PLAYING at %s - press SPACE to pause. Nothing "
+                     "else is needed to start.",
+                     SSRSpeedName((long)MathRound(CfgSpeed() * 100.0)));
+      else
+         Print("[host] auto-play was refused: ", g_ctrl.LastErrorText());
+     }
+   else
+      if(InpAutoPlay)
+         Print("[host] auto-play waits for the handover - this pass has no "
+               "chart to play on for more than a moment.");
+      else
+         Print("[host] auto-play is off (InpAutoPlay=false) - press SPACE or "
+               "the Play button when you are ready.");
+
+   //+------------------------------------------------------------------+
+   //| AND A CARD SAYING WHAT THE THREE USEFUL THINGS ARE.              |
+   //|                                                                  |
+   //| Once per installation, not once per session: the person running   |
+   //| this twenty times a day should meet it exactly once. The marker   |
+   //| is a file rather than a variable because the handover restarts    |
+   //| this program - a variable would show the card on the pass with no |
+   //| replay chart and swallow it on the pass that has one.             |
+   //+------------------------------------------------------------------+
+   if(InpFirstCard && !one_chart_ok && g_panel_chart != 0)
+     {
+      if(CSSRFirstRun::AlreadySeen())
+         Print("[host] first-run card already shown on this installation - "
+               "delete MQL5/Files/SSReplay/seen.txt to see it again.");
+      else
+         if(g_first.Show(g_panel_chart))
+            CSSRFirstRun::MarkSeen();
+     }
+
+   //+------------------------------------------------------------------+
    //| PASS 1 ENDS BY HANDING ITS OWN CHART OVER.                       |
    //|                                                                  |
    //| Everything above already ran: the symbol exists, it is seeded,    |
@@ -1814,6 +1873,7 @@ void OnDeinit(const int reason)
    g_session_dlg.Destroy();
    g_dialog.Destroy();
    g_panel.Destroy();
+   g_first.Clear();
    g_cal_lines.Clear();
 
    //--- REASON_CHARTCHANGE and friends destroy this EA and rebuild it.
@@ -2226,6 +2286,7 @@ void OnTimer()
    //| passes where nothing was queued, which is nearly all of them.    |
    //+------------------------------------------------------------------+
    g_shots.Flush();
+   g_first.Tick();
 
    ulong now   = GetMicrosecondCount();
    ulong delta = (now - g_last_pump_us) / 1000;

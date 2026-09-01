@@ -32,6 +32,7 @@
 #include <SSReplay/Trading/SSR_TradingEngine.mqh>
 #include <SSReplay/Trading/SSR_Journal.mqh>
 #include <SSReplay/Trading/SSR_ShotBook.mqh>
+#include <SSReplay/Ui/SSR_FirstRun.mqh>
 #include <SSReplay/Data/SSR_Calendar.mqh>
 #include <SSReplay/Chart/SSR_CalendarLines.mqh>
 #include <SSReplay/Chart/SSR_TradeLines.mqh>
@@ -1683,6 +1684,64 @@ void OnStart()
                StringFormat("%d object(s) removed", first));
          ChartClose(cc);
         }
+   }
+
+   //+------------------------------------------------------------------+
+   //| 23. THE FIRST-RUN CARD.                                          |
+   //|                                                                  |
+   //| Once per installation, which means a FILE - the one-window        |
+   //| handover restarts this program, and a variable would show the     |
+   //| card on the pass with no replay chart and swallow it on the pass  |
+   //| that has one.                                                     |
+   //|                                                                  |
+   //| The user's own marker goes aside first. A QA run that deleted it  |
+   //| would make the card reappear for somebody who had already read it,|
+   //| and one that left a marker behind would hide it from somebody who |
+   //| had not.                                                          |
+   //+------------------------------------------------------------------+
+   {
+      Stash(SSR_SEEN_FILE);
+      FileDelete(SSR_SEEN_FILE);
+
+      Check("with no marker, the card has not been seen",
+            !CSSRFirstRun::AlreadySeen(), SSR_SEEN_FILE + " is not there");
+
+      long fc = ChartOpen(rsym, PERIOD_M1);
+      if(Check("a chart for the first-run card", fc != 0, rsym))
+        {
+         CSSRFirstRun fr;
+         Check("it goes up", fr.Show(fc) && fr.IsUp(),
+               "four lines and a frame");
+         Check("and it is really on the chart",
+               ObjectFind(fc, "SSRF_bg") >= 0 &&
+               ObjectFind(fc, "SSRF_l1") >= 0 &&
+               ObjectFind(fc, "SSRF_l4") >= 0,
+               "ObjectFind is a weak test, but an absent object is an "
+               "absent card");
+
+         //--- THE OBVIOUS BUG IS AN IMMEDIATE ONE. A timer that cleared
+         //--- the card on its first pass would leave nothing on screen
+         //--- and look exactly like a card that never drew.
+         fr.Tick();
+         Check("and the first timer pass does not take it away",
+               fr.IsUp() && ObjectFind(fc, "SSRF_l1") >= 0,
+               StringFormat("it stands for %d ms", SSR_FIRST_MS));
+
+         fr.Clear();
+         Check("clearing takes every piece of it",
+               !fr.IsUp() && ObjectFind(fc, "SSRF_bg") < 0 &&
+               ObjectFind(fc, "SSRF_l4") < 0,
+               "nothing left behind on the chart");
+
+         ChartClose(fc);
+        }
+
+      Check("marking it seen survives being asked again",
+            CSSRFirstRun::MarkSeen() && CSSRFirstRun::AlreadySeen(),
+            "the next run will not show it");
+
+      FileDelete(SSR_SEEN_FILE);
+      Unstash(SSR_SEEN_FILE);
    }
 
    ctrl.Release();

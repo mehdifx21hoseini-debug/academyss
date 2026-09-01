@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v74 2026-09-01  the-news-on-the-chart"
+#define SSR_BUILD           "v75 2026-09-01  drop-it-and-it-works"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
