@@ -666,6 +666,46 @@ public:
      }
 
    //+------------------------------------------------------------------+
+   //| THE SAME, FOR AN ORDER THAT HAS NOT FILLED YET.                  |
+   //|                                                                  |
+   //| Sized from the REQUESTED price, not the market. A pending order   |
+   //| sized off the bid would be sized against a distance the trade     |
+   //| will never have: the risk it actually carries is entry-to-stop,   |
+   //| and the entry is the line the user dragged. On an order placed    |
+   //| fifty points away that is the difference between one lot and      |
+   //| two.                                                              |
+   //+------------------------------------------------------------------+
+   long              OpenPendingWithRisk(const ENUM_SSR_ORDER type,
+                                         const double risk_percent,
+                                         const double price, const double sl,
+                                         const double tp = 0.0,
+                                         const string tag = "")
+     {
+      m_last_error = "";
+      if(!SSRIsPending(type))
+        { m_last_error = "that is not a pending order type"; return 0; }
+      if(price <= 0.0)
+        { m_last_error = "a pending order needs a price"; return 0; }
+      if(sl <= 0.0)
+        { m_last_error = "a pending order needs a stop to be sized from"; return 0; }
+
+      double lot = m_risk.LotForRisk(Equity(), risk_percent, price, sl);
+      if(lot <= 0.0)
+        { m_last_error = m_risk.LastReason(); return 0; }
+      return Open(type, lot, sl, tp, price, tag);
+     }
+
+   //--- what it would cost, without sending it. Same formula, same
+   //--- price: a second lot-sizing rule in the UI is the one that drifts.
+   double            PreviewPendingLot(const double risk_percent,
+                                       const double price, const double sl)
+     {
+      if(price <= 0.0 || sl <= 0.0)
+         return 0.0;
+      return m_risk.LotForRisk(Equity(), risk_percent, price, sl);
+     }
+
+   //+------------------------------------------------------------------+
    //| WHAT WOULD THIS TRADE COST, WITHOUT SENDING IT.                  |
    //|                                                                  |
    //| The panel draws the stop as a line and has to show the size and  |

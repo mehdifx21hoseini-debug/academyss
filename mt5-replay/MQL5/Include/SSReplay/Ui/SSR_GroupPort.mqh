@@ -254,10 +254,43 @@ public:
             out.tp_price    = m_lines.TpPrice();
             out.line_long   = (out.sl_price < out.bid);
 
+            //+------------------------------------------------------------------+
+            //| THREE LINES MEAN AN ORDER; TWO MEAN A MARKET TRADE.              |
+            //|                                                                  |
+            //| Everything below is sized from `entry`, and with an entry line   |
+            //| that is the line the user dragged rather than the bid. A pending  |
+            //| sized off the market is sized against a distance the trade will   |
+            //| never have.                                                       |
+            //+------------------------------------------------------------------+
+            out.entry_armed = m_lines.HasEntry();
+            out.entry_price = m_lines.EntryPrice();
+
             ENUM_SSR_ORDER side = (out.line_long ? SSR_ORDER_BUY : SSR_ORDER_SELL);
             double entry = 0.0;
-            out.lot_from_risk = m_acct.PreviewLot(side, m_risk_percent,
-                                                  out.sl_price, entry);
+
+            if(out.entry_armed)
+              {
+               ENUM_SSR_ORDER pt_type;
+               string         why = "";
+               if(SSRPendingFor(out.entry_price, out.sl_price, out.bid,
+                                pt * 2.0, pt_type, why))
+                 {
+                  side              = pt_type;
+                  out.order_name    = SSROrderName(pt_type);
+                  out.line_long     = SSRIsLong(pt_type);
+                  entry             = out.entry_price;
+                  out.lot_from_risk = m_acct.PreviewPendingLot(m_risk_percent,
+                                        out.entry_price, out.sl_price);
+                 }
+               else
+                 {
+                  out.order_why     = why;
+                  out.lot_from_risk = 0.0;
+                 }
+              }
+            else
+               out.lot_from_risk = m_acct.PreviewLot(side, m_risk_percent,
+                                                     out.sl_price, entry);
             if(out.lot_from_risk > 0.0 && entry > 0.0)
               {
                //--- money, not points: the number a person decides on.
@@ -287,10 +320,39 @@ public:
          for(int pi = total - 1; pi >= 0 && out.pos_rows < 5; pi--)
            {
             SSRVirtualPosition vp;
-            if(!m_acct.At(pi, vp) || vp.state != SSR_POS_OPEN)
+            if(!m_acct.At(pi, vp))
                continue;
+
+            //+------------------------------------------------------------------+
+            //| PENDING ORDERS ARE ROWS TOO.                                     |
+            //|                                                                  |
+            //| Without this a user places an order and it vanishes: not on the  |
+            //| Positions tab, because it is not a position, and the only way to |
+            //| cancel it would be to find its line on the chart. An order you    |
+            //| cannot see is an order you forget you left there.                  |
+            //+------------------------------------------------------------------+
+            bool pend = (vp.state == SSR_POS_PENDING);
+            if(vp.state != SSR_POS_OPEN && !pend)
+               continue;
+
             int r = out.pos_rows++;
-            out.pos_ticket[r] = vp.ticket;
+            out.pos_ticket[r]  = vp.ticket;
+            out.pos_pending[r] = pend;
+
+            if(pend)
+              {
+               out.pos_text[r] = StringFormat("%s %.2f @ %s",
+                                 SSROrderName(vp.type), vp.volume,
+                                 DoubleToString(vp.request_price,
+                                                out.price_digits));
+               //--- HOW FAR AWAY, not a profit. A pending order has no
+               //--- result yet, and printing 0.00 in the money column
+               //--- beside real positions reads as break-even.
+               out.pos_pl[r]   = 0.0;
+               out.pending_count++;
+               continue;
+              }
+
             out.pos_text[r]   = StringFormat("%s %.2f @ %s",
                                 (SSRIsLong(vp.type) ? "BUY" : "SELL"),
                                 vp.volume,
@@ -591,6 +653,41 @@ public:
    //| the first, which is the kind of accident a practice tool must    |
    //| not be able to cause.                                            |
    //+------------------------------------------------------------------+
+   //+------------------------------------------------------------------+
+   //| ADD OR REMOVE THE ENTRY LINE.                                    |
+   //|                                                                  |
+   //| It starts where a person would put it: on the stop's side of the |
+   //| price, a stop's width away, which is the pullback entry almost    |
+   //| everybody draws first. Wrong for half of setups and one drag from |
+   //| right for all of them - which is what a starting point is for.     |
+   //+------------------------------------------------------------------+
+   virtual bool      ToggleEntryLine(void) override
+     {
+      m_trade_error = "";
+      if(m_lines == NULL || !m_lines.IsArmed())
+        {
+         m_trade_error = "place the stop and target lines first - an entry "
+                         "with no stop beside it is not a setup";
+         return false;
+        }
+      if(m_lines.HasEntry())
+        { m_lines.DisarmEntry(); return true; }
+      if(m_acct == NULL || m_acct.Bid() <= 0.0)
+        { m_trade_error = "no price yet"; return false; }
+
+      double bid  = m_acct.Bid();
+      double sl   = m_lines.SlPrice();
+      double dist = MathAbs(bid - sl);
+      if(dist <= 0.0)
+        { m_trade_error = "the stop is on the price"; return false; }
+
+      bool is_long = (sl < bid);
+      double at = (is_long ? bid - dist * 0.5 : bid + dist * 0.5);
+      if(!m_lines.ArmEntry(at))
+        { m_trade_error = "the entry line would not go on the chart"; return false; }
+      return true;
+     }
+
    virtual bool      OpenFromLines(void) override
      {
       m_trade_error = "";
@@ -598,6 +695,17 @@ public:
         { m_trade_error = "no lines on the chart yet"; return false; }
       if(m_acct == NULL || m_acct.Bid() <= 0.0)
         { m_trade_error = "no price yet"; return false; }
+
+      //+------------------------------------------------------------------+
+      //| WITH AN ENTRY LINE THIS IS AN ORDER, NOT A TRADE.                |
+      //|                                                                  |
+      //| Which kind of order is read off the geometry - the side from      |
+      //| where the stop sits, limit or stop from where the entry sits.     |
+      //| The user has already said both with the mouse; asking them to     |
+      //| repeat it in a dropdown is asking them to be wrong about it.      |
+      //+------------------------------------------------------------------+
+      if(m_lines.HasEntry())
+         return PlacePending();
 
       double sl = m_lines.SlPrice();
       double tp = m_lines.TpPrice();
@@ -856,6 +964,52 @@ private:
    //| A tool for learning to trade should not let its own panel be     |
    //| the one place where a trade is taken without knowing the risk.   |
    //+------------------------------------------------------------------+
+   //+------------------------------------------------------------------+
+   //| THE PENDING ORDER THE THREE LINES DESCRIBE.                      |
+   //|                                                                  |
+   //| Sized from entry-to-stop, which is the risk the trade will        |
+   //| actually carry, and refused - with the reason - when the lines    |
+   //| do not describe a legal order. The reason names the drag that     |
+   //| fixes it, because "invalid" is not something a person can act on. |
+   //+------------------------------------------------------------------+
+   bool              PlacePending(void)
+     {
+      double en = m_lines.EntryPrice();
+      double sl = m_lines.SlPrice();
+      double tp = m_lines.TpPrice();
+      double pt = PricePoint();
+      if(pt <= 0.0)
+         pt = 0.00001;
+
+      ENUM_SSR_ORDER type;
+      string why = "";
+      if(!SSRPendingFor(en, sl, m_acct.Bid(), pt * 2.0, type, why))
+        { m_trade_error = why; return false; }
+
+      //--- a target on the wrong side of the ENTRY, not of the market:
+      //--- for a pending, the market is not where the trade begins
+      bool is_long = SSRIsLong(type);
+      if(tp > 0.0 && ((is_long && tp <= en) || (!is_long && tp >= en)))
+        {
+         m_trade_error = "the target is on the wrong side of the entry line "
+                         "- drag it past the entry, or press Flip";
+         return false;
+        }
+
+      long t = m_acct.OpenPendingWithRisk(type, m_risk_percent, en, sl, tp,
+                                          TagOrDefault());
+      if(t <= 0)
+        { m_trade_error = m_acct.LastError(); return false; }
+
+      //--- Disarm, not Clear: Clear also sweeps the position lines, and
+      //--- one of those now belongs to the order that was just placed
+      m_lines.Disarm();
+      if(m_journal != NULL)
+         PrintFormat("[port] %s placed at %s, stop %s", SSROrderName(type),
+                     DoubleToString(en, 5), DoubleToString(sl, 5));
+      return true;
+     }
+
    //--- an order at EXPLICIT prices. Market() derives them from the
    //--- configured distances; the lines hand them over as dragged.
    bool              MarketAt(const ENUM_SSR_ORDER type,

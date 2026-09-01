@@ -1878,6 +1878,162 @@ void OnStart()
       FolderDelete(SSR_CLASS_DIR);
    }
 
+   //+------------------------------------------------------------------+
+   //| 25. ORDERS FROM THE CHART.                                       |
+   //|                                                                  |
+   //| The RULE is the feature: three lines decide which of four pending |
+   //| orders this is. It is a free function over four doubles precisely |
+   //| so it can be hammered here without a chart, an account or a feed. |
+   //+------------------------------------------------------------------+
+   {
+      double B = 100.0, d = 0.01;      // bid, and one point
+      ENUM_SSR_ORDER t;
+      string why = "";
+
+      //--- long: stop below the entry. Below the market is a limit,
+      //--- above it is a stop. And the mirror image for a short.
+      bool a1 = SSRPendingFor(99.0,  98.0,  B, d, t, why) && t == SSR_ORDER_BUY_LIMIT;
+      bool a2 = SSRPendingFor(101.0, 100.5, B, d, t, why) && t == SSR_ORDER_BUY_STOP;
+      bool a3 = SSRPendingFor(101.0, 102.0, B, d, t, why) && t == SSR_ORDER_SELL_LIMIT;
+      bool a4 = SSRPendingFor(99.0,  99.5,  B, d, t, why) && t == SSR_ORDER_SELL_STOP;
+      Check("three lines name the order without being asked",
+            a1 && a2 && a3 && a4,
+            StringFormat("buy limit %s, buy stop %s, sell limit %s, sell stop %s",
+                         (a1 ? "ok" : "WRONG"), (a2 ? "ok" : "WRONG"),
+                         (a3 ? "ok" : "WRONG"), (a4 ? "ok" : "WRONG")));
+
+      //+------------------------------------------------------------------+
+      //| THE REFUSALS MATTER MORE THAN THE FOUR ABOVE.                    |
+      //|                                                                  |
+      //| An entry line ON the price is a market order somebody drew        |
+      //| instead of pressing, and placing it would fill on the next tick   |
+      //| - looking exactly like a bug in the pending logic.                |
+      //+------------------------------------------------------------------+
+      bool on_price = !SSRPendingFor(B, 99.0, B, d, t, why);
+      string why_on = why;
+      bool stacked  = !SSRPendingFor(99.0, 99.0, B, d, t, why);
+      string why_st = why;
+      bool nothing  = !SSRPendingFor(0.0, 99.0, B, d, t, why);
+
+      Check("an entry on the price is refused, not placed",
+            on_price && StringFind(why_on, "market order") > 0,
+            "[" + why_on + "]");
+      Check("an entry on top of the stop is refused",
+            stacked && StringFind(why_st, "drag") > 0, "[" + why_st + "]");
+      Check("and so is no entry at all", nothing, "[" + why + "]");
+
+      //--- 25b. THE ORDER ITSELF, through the engine.
+      {
+         CSSRTradingEngine pa;
+         SSRExecutionModel px;
+         px.Init();
+         pa.SetExecution(px);
+         pa.OnSessionStart("SMOKE", 5, 0.00001, 0);
+         pa.SetBalance(10000.0);
+
+         MqlTick pk[1];
+         pk[0].time     = (datetime)0;
+         pk[0].time_msc = 0;
+         pk[0].bid      = 100.0;
+         pk[0].ask      = 100.0;
+         pk[0].last     = 100.0;
+         pk[0].volume   = 1;
+         pk[0].flags    = 0;
+         pa.OnTicks(pk, 1);
+
+         //+------------------------------------------------------------------+
+         //| SIZED FROM THE ENTRY LINE, NOT THE MARKET.                       |
+         //|                                                                  |
+         //| The order goes in at 99 with its stop at 98: one unit of risk.    |
+         //| Sized off the bid at 100 the distance would be two, and the lot   |
+         //| would be half the right one - on every pending order, silently.   |
+         //+------------------------------------------------------------------+
+         double from_entry = pa.PreviewPendingLot(1.0, 99.0, 98.0);
+         double entry_out  = 0.0;
+         double from_market = pa.PreviewLot(SSR_ORDER_BUY, 1.0, 98.0, entry_out);
+         //--- GREATER, not "twice". The relation the code guarantees is
+         //--- that a shorter risk distance gives a bigger lot; the exact
+         //--- factor also passes through lot-step rounding and the
+         //--- broker's min and max, and a test that demanded 2.000 would
+         //--- fail on a symbol whose sizing clamps rather than on a
+         //--- defect. An audit that cries wolf is worse than none.
+         Check("a pending is sized from its own entry, not from the bid",
+               from_entry > 0.0 && from_market > 0.0 &&
+               from_entry > from_market,
+               StringFormat("%.4f lot from the line at 99, %.4f from the "
+                            "market at 100 - half the distance, so about "
+                            "twice the size (ratio %.2f)",
+                            from_entry, from_market,
+                            (from_market > 0.0 ? from_entry / from_market : 0.0)));
+
+         long pt1 = pa.OpenPendingWithRisk(SSR_ORDER_BUY_LIMIT, 1.0, 99.0,
+                                           98.0, 102.0, "orders");
+         Check("the order is placed", pt1 > 0,
+               StringFormat("ticket %d%s", (int)pt1,
+                            (pt1 > 0 ? "" : " - " + pa.LastError())));
+
+         SSRVirtualPosition vp;
+         bool seen = false;
+         for(int i = 0; i < pa.Total() && !seen; i++)
+           {
+            SSRVirtualPosition q;
+            if(pa.At(i, q) && q.ticket == pt1)
+              { vp = q; seen = true; }
+           }
+         Check("and it is PENDING, not open",
+               seen && vp.state == SSR_POS_PENDING &&
+               MathAbs(vp.request_price - 99.0) < 0.0001,
+               StringFormat("state %d at %.5f", (seen ? (int)vp.state : -1),
+                            (seen ? vp.request_price : 0.0)));
+
+         //--- a market order with no price is still refused, and a
+         //--- pending with no stop cannot be sized at all
+         Check("a pending with no stop is refused, not guessed",
+               pa.OpenPendingWithRisk(SSR_ORDER_BUY_LIMIT, 1.0, 99.0, 0.0) == 0,
+               pa.LastError());
+         Check("and a market type is not accepted as a pending",
+               pa.OpenPendingWithRisk(SSR_ORDER_BUY, 1.0, 99.0, 98.0) == 0,
+               pa.LastError());
+
+         //--- X on the row cancels it. The engine has always done this;
+         //--- what is new is that the row exists to press.
+         Check("cancelling it takes it off the books",
+               pa.Close(pt1) && pa.OpenCount() == 0,
+               StringFormat("%d open, %d closed after the cancel",
+                            pa.OpenCount(), pa.ClosedCount()));
+      }
+
+      //--- 25c. THE THIRD LINE, on a real chart.
+      long ec = ChartOpen(rsym, PERIOD_M1);
+      if(Check("a chart for the entry line", ec != 0, rsym))
+        {
+         CSSRTradeLines el;
+         el.Attach(ec, (int)SymbolInfoInteger(rsym, SYMBOL_DIGITS),
+                   SymbolInfoDouble(rsym, SYMBOL_POINT),
+                   clrTomato, clrMediumSeaGreen);
+
+         double base = (acct.Bid() > 0.0 ? acct.Bid() : 1000.0);
+         Check("the entry line refuses to exist on its own",
+               !el.ArmEntry(base) && !el.HasEntry(),
+               "an entry with no stop beside it is not a setup");
+
+         el.ArmSide(base, 500, 2.0, true);
+         Check("and goes on once the other two are there",
+               el.ArmEntry(base) && el.HasEntry() &&
+               ObjectFind(ec, "SSR_LINE_EN") >= 0,
+               "SSR_LINE_EN is on the chart");
+
+         el.DisarmEntry();
+         Check("removing it leaves the other two alone",
+               !el.HasEntry() && ObjectFind(ec, "SSR_LINE_EN") < 0 &&
+               ObjectFind(ec, "SSR_LINE_SL") >= 0,
+               "back to a market setup");
+
+         el.Clear();
+         ChartClose(ec);
+        }
+   }
+
    ctrl.Release();
    Cleanup(rsym);
    Done();

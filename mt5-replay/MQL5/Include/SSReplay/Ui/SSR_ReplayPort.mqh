@@ -96,6 +96,21 @@ struct SSRUiState
    double             trail_points;
 
    //+------------------------------------------------------------------+
+   //| THE THIRD LINE, AND WHAT IT MAKES THE BUTTON DO.                 |
+   //|                                                                  |
+   //| With no entry line the button opens at market. With one, it       |
+   //| places a pending - and `order_name` is what KIND, worked out from |
+   //| the geometry down in the port rather than picked from a list up   |
+   //| here. Empty when the three lines do not describe a legal order,   |
+   //| with `order_why` saying which way to drag.                        |
+   //+------------------------------------------------------------------+
+   bool               entry_armed;
+   double             entry_price;
+   string             order_name;
+   string             order_why;
+   int                pending_count;
+
+   //+------------------------------------------------------------------+
    //| THE EVALUATION, already decided elsewhere.                       |
    //|                                                                  |
    //| The panel gets a state, a headline and a progress fraction - not |
@@ -120,6 +135,10 @@ struct SSRUiState
    long               pos_ticket[5];
    string             pos_text[5];     // "BUY 1.00 @ 53513"
    double             pos_pl[5];
+   //--- a row that has not filled yet. Half, break-even and a running
+   //--- P/L all mean nothing on one, and offering them would be
+   //--- offering three buttons that answer "refused".
+   bool               pos_pending[5];
 
    //+------------------------------------------------------------------+
    //| THE STOP AND TARGET ARE LINES, NOT NUMBERS.                      |
@@ -169,6 +188,8 @@ struct SSRUiState
       charts_detached = 0;
       clock_text = "--"; blind = false;
       trade_tag = ""; trail_points = 0.0;
+      entry_armed = false; entry_price = 0.0;
+      order_name = ""; order_why = ""; pending_count = 0;
       prop_on = false; prop_state = 0; prop_state_name = ""; prop_headline = "";
       prop_rules = ""; prop_progress = 0.0; prop_floor = 0.0; prop_days = 0;
       balance = 0.0; equity = 0.0; floating = 0.0;
@@ -176,6 +197,9 @@ struct SSRUiState
       trade_symbol = ""; can_trade = false; tp_points = 0.0;
       strategy_text = "";
       pos_rows = 0;
+      for(int pi = 0; pi < 5; pi++)
+        { pos_ticket[pi] = 0; pos_text[pi] = ""; pos_pl[pi] = 0.0;
+          pos_pending[pi] = false; }
       for(int i = 0; i < 5; i++)
         { pos_ticket[i] = 0; pos_text[i] = ""; pos_pl[i] = 0.0; }
       lines_armed = false; sl_price = 0.0; tp_price = 0.0; line_long = true;
@@ -276,6 +300,10 @@ public:
    //--- the label the next trade will carry. The engine has stored a
    //--- tag per position since Phase 9; nothing has ever set it.
    virtual bool      SetTradeTag(const string tag)        { return false; }
+
+   //--- add or remove the entry line, which is what turns the button
+   //--- from "open at market" into "place an order"
+   virtual bool      ToggleEntryLine(void)                { return false; }
 
    //--- write the session out as a statement a person can read. Returns
    //--- the path in `path_out` so the panel can show WHERE it went; a

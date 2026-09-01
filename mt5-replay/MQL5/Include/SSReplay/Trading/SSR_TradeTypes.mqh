@@ -77,6 +77,55 @@ bool SSRIsPending(const ENUM_SSR_ORDER t)
   { return (t != SSR_ORDER_BUY && t != SSR_ORDER_SELL); }
 
 //+------------------------------------------------------------------+
+//| WHICH PENDING ORDER THREE LINES ON A CHART DESCRIBE.             |
+//|                                                                  |
+//| The side comes from where the STOP sits relative to the entry,   |
+//| and limit-versus-stop from where the entry sits relative to the  |
+//| market. Both are already drawn; asking the user to also pick     |
+//| "buy limit" from a list would be asking them to repeat, in       |
+//| words, a thing they have just said with a mouse - and to be      |
+//| wrong about it half the time.                                    |
+//|                                                                  |
+//| It lives here, as a free function over four doubles, so it can   |
+//| be tested without a chart, an account or a price feed. The rule  |
+//| is the feature; everything around it is plumbing.                |
+//+------------------------------------------------------------------+
+bool SSRPendingFor(const double entry, const double stop, const double bid,
+                   const double min_dist, ENUM_SSR_ORDER &out, string &why)
+  {
+   out = SSR_ORDER_BUY;
+   why = "";
+
+   if(entry <= 0.0 || stop <= 0.0 || bid <= 0.0)
+     { why = "there is no entry line yet"; return false; }
+
+   double gap = MathAbs(entry - stop);
+   if(gap < min_dist)
+     {
+      why = "the entry and the stop are on top of each other - "
+            "drag them apart";
+      return false;
+     }
+
+   //--- ON the price is not a pending order, it is a market order that
+   //--- has been drawn instead of pressed. Say which button they want
+   //--- rather than placing something that fills on the next tick.
+   if(MathAbs(entry - bid) < min_dist)
+     {
+      why = "the entry line is on the price - drag it away from here, "
+            "or press Buy / Sell for a market order";
+      return false;
+     }
+
+   bool is_long = (stop < entry);
+   if(is_long)
+      out = (entry < bid ? SSR_ORDER_BUY_LIMIT : SSR_ORDER_BUY_STOP);
+   else
+      out = (entry > bid ? SSR_ORDER_SELL_LIMIT : SSR_ORDER_SELL_STOP);
+   return true;
+  }
+
+//+------------------------------------------------------------------+
 //| One reduction of a position's size, and everything needed to     |
 //| put it back.                                                     |
 //|                                                                  |

@@ -756,6 +756,7 @@ private:
                       "buy","sell","be","flat",
                       "g1_fr","g1_lb","g1_lg","g2_fr","g2_lb","g2_lg",
                       "risklbl","riskval","riskmon","slrow","tprow","rrrow",
+                      "enbtn",
                       "sizerow","hintrow","setuprow","posempty","posmore",
                       "taglbl","poshint","trlbl","trdn","trup","troff",
                       "st1","st2","st3","st4","st5","st6","stmt",
@@ -856,22 +857,42 @@ private:
               : "no size",
               m_state.lot_from_risk > 0.0 ? SSR_C_TEXT_DIM : SSR_C_STOP);
 
+         //--- WHY it cannot be placed, in the words of the drag that
+         //--- fixes it. "Invalid" is not something a person can act on.
+         if(m_state.order_why != "")
+            Text(12, "setuprow", x + 8, gy + 13, m_state.order_why,
+                 SSR_C_STOP, SSR_FS_SMALL);
+
          //--- ONE press opens what the lines describe. The side is not
          //--- asked for: it is already drawn on the chart.
+         //+------------------------------------------------------------------+
+         //| THE BUTTON SAYS WHAT IT WILL DO, and it is not always the same.  |
+         //|                                                                  |
+         //| Two lines: open at market. Three: place the order the geometry   |
+         //| describes, named. A button that reads "Open LONG" and places a    |
+         //| buy stop is a button that lied to the person who pressed it.      |
+         //+------------------------------------------------------------------+
          m_w.ButtonC("openln", x + 8, gy + 52, w - 16, 22,
                      m_state.lot_from_risk > 0.0
-                     ? StringFormat("Open %s  %.2f lot",
-                                    (m_state.line_long ? "LONG" : "SHORT"),
-                                    m_state.lot_from_risk)
-                     : "Open - no size at this stop",
+                     ? (m_state.entry_armed
+                        ? StringFormat("Place %s  %.2f lot",
+                                       m_state.order_name,
+                                       m_state.lot_from_risk)
+                        : StringFormat("Open %s  %.2f lot",
+                                       (m_state.line_long ? "LONG" : "SHORT"),
+                                       m_state.lot_from_risk))
+                     : (m_state.order_why != "" ? "Cannot place this order yet"
+                                                : "Open - no size at this stop"),
                      m_state.lot_from_risk <= 0.0 ? SSR_C_DEAL_DIM
                      : (m_state.line_long ? SSR_C_BUY : SSR_C_SELL),
                      m_state.lot_from_risk <= 0.0 ? SSR_C_DEAL_DIM
                      : (m_state.line_long ? SSR_C_BUY_EDGE : SSR_C_SELL_EDGE),
                      SSR_C_DEAL_TEXT, SSR_FS_TITLE);
-         m_w.Button("flipbtn", x + 8, gy + 78, (w - 22) / 2, 18, "Flip  X");
-         m_w.Button("clrbtn",  x + 14 + (w - 22) / 2, gy + 78, (w - 22) / 2, 18,
-                    "Remove lines");
+         int bw3 = (w - 28) / 3;
+         m_w.Button("flipbtn", x + 8, gy + 78, bw3, 18, "Flip  X");
+         m_w.Button("enbtn",   x + 14 + bw3, gy + 78, bw3, 18,
+                    m_state.entry_armed ? "At market" : "Entry line");
+         m_w.Button("clrbtn",  x + 20 + bw3 * 2, gy + 78, bw3, 18, "Remove");
         }
 
       //--- the deal buttons. The side the lines did not draw is dimmed,
@@ -928,9 +949,15 @@ private:
             string t = IntegerToString(r);
             Text(20 + r, "pr" + t, x + 8, ry + 3, m_state.pos_text[r],
                  SSR_C_TEXT);
-            Text(25 + r, "pl" + t, x + w - 140, ry + 3,
-                 Money(m_state.pos_pl[r], true),
-                 m_state.pos_pl[r] >= 0.0 ? SSR_C_RUN : SSR_C_STOP);
+            //--- a pending has no result yet, and 0.00 beside real
+            //--- positions reads as break-even rather than as "not yet"
+            if(m_state.pos_pending[r])
+               Text(25 + r, "pl" + t, x + w - 140, ry + 3, "waiting",
+                    SSR_C_HOLD);
+            else
+               Text(25 + r, "pl" + t, x + w - 140, ry + 3,
+                    Money(m_state.pos_pl[r], true),
+                    m_state.pos_pl[r] >= 0.0 ? SSR_C_RUN : SSR_C_STOP);
 
             //+------------------------------------------------------------------+
             //| SCALE OUT AND PROTECT, on the row of the trade they act on.      |
@@ -939,10 +966,23 @@ private:
             //| the five seconds of entering a trade and none of the hour of      |
             //| managing it - which is the part being practised.                   |
             //+------------------------------------------------------------------+
-            m_w.ButtonC("ph" + t, x + w - 68, ry, 18, 17, "H",
-                        SSR_C_BTN, SSR_C_BTN_EDGE, SSR_C_TEXT, SSR_FS_SMALL);
-            m_w.ButtonC("pb" + t, x + w - 47, ry, 18, 17, "B",
-                        SSR_C_BTN, SSR_C_BTN_EDGE, SSR_C_RUN, SSR_FS_SMALL);
+            //--- NOT ON A ROW THAT HAS NOT FILLED. Half of nothing and
+            //--- break-even on an entry that has not happened are two
+            //--- buttons whose only possible answer is "refused", and a
+            //--- button that always refuses teaches the user to distrust
+            //--- the row it sits on. X still cancels the order.
+            if(m_state.pos_pending[r])
+              {
+               m_w.Remove("ph" + t);
+               m_w.Remove("pb" + t);
+              }
+            else
+              {
+               m_w.ButtonC("ph" + t, x + w - 68, ry, 18, 17, "H",
+                           SSR_C_BTN, SSR_C_BTN_EDGE, SSR_C_TEXT, SSR_FS_SMALL);
+               m_w.ButtonC("pb" + t, x + w - 47, ry, 18, 17, "B",
+                           SSR_C_BTN, SSR_C_BTN_EDGE, SSR_C_RUN, SSR_FS_SMALL);
+              }
             m_w.ButtonC("px" + t, x + w - 26, ry, 18, 17, "X",
                         SSR_C_BTN, SSR_C_BTN_EDGE, SSR_C_STOP, SSR_FS_SMALL);
            }
@@ -964,7 +1004,7 @@ private:
               SSR_C_STOP, SSR_FS_SMALL);
       else
          Text(31, "poshint", x + 8, y + 132,
-              "H halves the position   B moves its stop to entry   X closes it",
+              "H halves   B stop to entry   X closes, or cancels an order",
               SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
       int by = y + 144;
@@ -1601,6 +1641,15 @@ public:
       else if(what == "armbtn")   c = SSR_CMD_LINES_TOGGLE;
       else if(what == "clrbtn")   { if(m_port != NULL) m_port.ClearLines();
                                     return SSR_CMD_NONE; }
+      else if(what == "enbtn")
+        {
+         if(m_port != NULL)
+            PrintFormat("[panel] entry line -> %s",
+                        (m_port.ToggleEntryLine()
+                         ? (m_state.entry_armed ? "removed" : "placed")
+                         : "refused (" + m_port.TradeError() + ")"));
+         return SSR_CMD_NONE;
+        }
       else if(what == "flipbtn")  c = SSR_CMD_LINES_FLIP;
       else if(what == "spup")     c = SSR_CMD_SPEED_UP;
       else if(what == "spdn")     c = SSR_CMD_SPEED_DOWN;

@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v76 2026-09-01  twenty-students-one-session"
+#define SSR_BUILD           "v77 2026-09-01  orders-from-the-chart"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

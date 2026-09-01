@@ -40,6 +40,20 @@ private:
 
    string            m_sl_name;
    string            m_tp_name;
+
+   //+------------------------------------------------------------------+
+   //| THE THIRD LINE: where the order goes in.                         |
+   //|                                                                  |
+   //| Optional, and off by default. With two lines the trade is at      |
+   //| market and the entry is wherever the price happens to be when     |
+   //| the button is pressed; with three it is a pending order, and      |
+   //| which KIND of pending is read off the geometry rather than        |
+   //| chosen from a list.                                              |
+   //+------------------------------------------------------------------+
+   string            m_en_name;
+   double            m_en_price;
+   bool              m_en_armed;
+   color             m_en_col;
    double            m_sl_price;
    double            m_tp_price;
    color             m_sl_col;
@@ -126,6 +140,8 @@ public:
                      CSSRTradeLines(void)
      : m_chart(0), m_digits(0), m_point(0.0), m_armed(false),
        m_sl_name("SSR_LINE_SL"), m_tp_name("SSR_LINE_TP"),
+       m_en_name("SSR_LINE_EN"), m_en_price(0.0), m_en_armed(false),
+       m_en_col(C'214,168,60'),
        m_sl_price(0.0), m_tp_price(0.0),
        m_sl_col(clrTomato), m_tp_col(clrMediumSeaGreen),
        m_long_col(clrDodgerBlue), m_short_col(clrOrange) {}
@@ -149,6 +165,32 @@ public:
    bool              IsArmed(void)  { return m_armed; }
    double            SlPrice(void)  { return m_sl_price; }
    double            TpPrice(void)  { return m_tp_price; }
+
+   bool              HasEntry(void)   { return m_en_armed; }
+   double            EntryPrice(void) { return m_en_price; }
+
+   //--- the entry line only exists while the other two do: a price to
+   //--- enter at with no stop beside it is not a setup, it is a wish
+   bool              ArmEntry(const double price)
+     {
+      if(m_chart == 0 || !m_armed || price <= 0.0)
+         return false;
+      m_en_price = NormalizeDouble(price, m_digits);
+      m_en_armed = Ensure(m_en_name, m_en_price, m_en_col, "ENTRY - drag me");
+      if(m_en_armed)
+         ChartRedraw(m_chart);
+      return m_en_armed;
+     }
+
+   void              DisarmEntry(void)
+     {
+      if(m_chart != 0)
+         ObjectDelete(m_chart, m_en_name);
+      m_en_armed = false;
+      m_en_price = 0.0;
+      if(m_chart != 0)
+         ChartRedraw(m_chart);
+     }
 
    //+------------------------------------------------------------------+
    //| Put both lines somewhere a trader would actually start from.     |
@@ -242,6 +284,24 @@ public:
       m_sl_price = sl;
       m_tp_price = tp;
 
+      //--- and the entry, when there is one. Same rules as the other
+      //--- two: a line the user deleted is re-placed rather than
+      //--- silently un-arming the order they were building.
+      if(m_en_armed)
+        {
+         double en = Read(m_en_name);
+         if(en <= 0.0)
+            Ensure(m_en_name, m_en_price, m_en_col, "ENTRY - drag me");
+         else
+           {
+            if(MathAbs(en - m_en_price) > m_point * 0.5)
+               moved = true;
+            m_en_price = en;
+            if(!ObjectGetInteger(m_chart, m_en_name, OBJPROP_SELECTED))
+               ObjectSetInteger(m_chart, m_en_name, OBJPROP_SELECTED, true);
+           }
+        }
+
       //--- and keep them selected. Clicking anywhere else on the chart
       //--- clears the selection, and a line that silently stops being
       //--- draggable after one stray click is the same defect arriving
@@ -298,7 +358,8 @@ public:
 
    bool              DrawPosition(const long ticket, const double entry,
                                   const double sl, const double tp,
-                                  const bool is_long, const double volume)
+                                  const bool is_long, const double volume,
+                                  const string kind = "")
      {
       if(m_chart == 0 || entry <= 0.0)
          return false;
@@ -320,8 +381,11 @@ public:
       //| chart for it means these levels match every other trade level    |
       //| the user has ever seen, on whatever scheme they run.             |
       //+------------------------------------------------------------------+
+      //--- `kind` names the order when it has not filled yet - "BUY
+      //--- LIMIT" rather than "BUY". A pending drawn as though it were a
+      //--- position is a trade the user believes they are already in.
       string base = "SSR_POS_" + IntegerToString((int)ticket);
-      string side = (is_long ? "BUY" : "SELL");
+      string side = (kind != "" ? kind : (is_long ? "BUY" : "SELL"));
       string tip  = StringFormat("%s %s at %s", side,
                                  DoubleToString(volume, 2),
                                  DoubleToString(entry, m_digits));
@@ -331,7 +395,7 @@ public:
          stop_col = m_sl_col;      // an invisible level is not a level
 
       Level(base + "_E", entry, (is_long ? m_long_col : m_short_col),
-            STYLE_DASHDOT, 1, tip, tip);
+            (kind == "" ? STYLE_DASHDOT : STYLE_DOT), 1, tip, tip);
 
       if(sl > 0.0)
          Level(base + "_S", sl, stop_col, STYLE_DASHDOT, 1,
@@ -513,7 +577,10 @@ public:
          return;
       ObjectDelete(m_chart, m_sl_name);
       ObjectDelete(m_chart, m_tp_name);
-      m_armed = false;
+      ObjectDelete(m_chart, m_en_name);
+      m_armed    = false;
+      m_en_armed = false;
+      m_en_price = 0.0;
       ChartRedraw(m_chart);
      }
 
@@ -523,6 +590,9 @@ public:
          return;
       ObjectDelete(m_chart, m_sl_name);
       ObjectDelete(m_chart, m_tp_name);
+      ObjectDelete(m_chart, m_en_name);
+      m_en_armed = false;
+      m_en_price = 0.0;
       ArrayResize(m_seen, 0);
       EndPositions();
       ClearHistory();

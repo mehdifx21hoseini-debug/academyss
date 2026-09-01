@@ -2495,6 +2495,18 @@ void OnTimer()
                   continue;
                  }
 
+               //--- AN ORDER THAT HAS NOT FILLED IS STILL ON THE CHART,
+               //--- drawn dotted and named for what it is. Left out, the
+               //--- user places an order and the only sign of it is a row
+               //--- on a tab they may not be looking at.
+               if(vp.state == SSR_POS_PENDING)
+                 {
+                  g_lines.DrawPosition(vp.ticket, vp.request_price, vp.sl,
+                                       vp.tp, SSRIsLong(vp.type), vp.volume,
+                                       SSROrderName(vp.type));
+                  continue;
+                 }
+
                //--- and the ones that are over. A replay whose trades
                //--- vanish the moment they close makes the user rebuild
                //--- the session from a table afterwards, which is the
