@@ -47,6 +47,8 @@
 #include <SSReplay/Trading/SSR_Journal.mqh>
 #include <SSReplay/Trading/SSR_AutoPause.mqh>
 #include <SSReplay/Trading/SSR_ShotBook.mqh>
+#include <SSReplay/Data/SSR_Calendar.mqh>
+#include <SSReplay/Chart/SSR_CalendarLines.mqh>
 #include <SSReplay/Trading/SSR_PropEvaluation.mqh>
 #include <SSReplay/Core/SSR_MasterClock.mqh>
 #include <SSReplay/Ui/SSR_GroupPort.mqh>
@@ -136,6 +138,19 @@ input bool            InpTradeHistory = true;                // Leave closed tra
 //--- replay chart and capped, and this is the switch that stops it.
 input bool            InpShots       = true;                 // Screenshot the chart at each entry and exit
 
+//--- THE ECONOMIC CALENDAR. MetaTrader carries its own and MQL5 can
+//--- read it, so a replay over real dates can show the news that was
+//--- actually scheduled while those candles formed.
+//---
+//--- The shift exists because the calendar's times come from the
+//--- terminal in ITS timezone, which is not guaranteed to be the clock
+//--- the bars are stamped in. Measure it once against a release you can
+//--- see in the candles and set it; there is nowhere else that answer
+//--- exists.
+input ENUM_SSR_NEWS   InpNews        = SSR_NEWS_MODERATE;    // Economic calendar on the chart
+input int             InpNewsPause   = 0;                    // Pause this many minutes before HIGH impact news (0 = never)
+input int             InpNewsShift   = 0;                    // Shift calendar times by this many minutes
+
 //--- PROP FIRM EVALUATION -------------------------------------------
 //--- The four numbers every firm publishes. Left off by default,
 //--- because a replay that silently judges you is not a replay.
@@ -165,6 +180,8 @@ CSSRRandomPicker     g_picker;
 CSSRSessionWatcher   g_session;
 CSSRTradeAutoPause   g_autopause;
 CSSRShotBook         g_shots;
+CSSRCalendar         g_cal;
+CSSRCalendarLines    g_cal_lines;
 CSSRPropEvaluation   g_prop;
 CSSRSetupPanel       g_setup_ui;
 
@@ -725,6 +742,56 @@ int FailInit(void)
 //--- instrument than the one this chart shows, and the whole build has
 //--- to follow it. The extraction that created this signature made it
 //--- const without reading what the body does with it.
+//+------------------------------------------------------------------+
+//| THE NEWS THAT WAS SCHEDULED WHILE THESE CANDLES FORMED.          |
+//|                                                                  |
+//| Loaded once, drawn once. The lines do not move, so nothing here   |
+//| runs on the timer.                                                |
+//|                                                                  |
+//| BLIND MODE TURNS IT OFF ENTIRELY, and that is not caution: a line |
+//| labelled "USD Non-Farm Payrolls" on a date the mode exists to hide |
+//| gives away the whole session in one object - and so would the      |
+//| pause message that names the release.                              |
+//|                                                                  |
+//| Every outcome is announced. "No calendar on this terminal" and    |
+//| "a quiet week" produce the same empty chart, and only one of them  |
+//| is a feature that is not working.                                  |
+//+------------------------------------------------------------------+
+void LoadCalendar(const string origin, const long win_start, const long win_end)
+  {
+   if(InpNews == SSR_NEWS_OFF)
+      return;
+   if(CfgBlind() != SSR_BLIND_OFF)
+     {
+      Print("[news] off while blind mode is on - an event name and its date "
+            "would give away the session the mode exists to hide.");
+      return;
+     }
+   if(g_replay_chart == 0)
+     {
+      Print("[news] no replay chart on this pass - the lines are drawn after "
+            "the handover.");
+      return;
+     }
+
+   g_cal.Load(origin, win_start, win_end, SSRNewsFloor(InpNews));
+   g_cal_lines.Attach(g_replay_chart);
+   int drew = g_cal_lines.Draw(GetPointer(g_cal));
+
+   PrintFormat("[news] %s - %d event(s) in the window, %d line(s) drawn%s",
+               SSRNewsName(InpNews), g_cal.Count(), drew,
+               (InpNewsPause > 0
+                ? StringFormat(", pausing %d min before high impact",
+                               InpNewsPause)
+                : ""));
+   if(g_cal.Note() != "")
+      Print("[news] ", g_cal.Note());
+   if(g_cal.Count() > 0 && InpNewsShift == 0)
+      Print("[news] if a line does not sit on the candle that moved, the "
+            "calendar's clock differs from this chart's - set InpNewsShift "
+            "once and it is right for every session after.");
+  }
+
 bool BuildSession(string origin, const bool on_replay,
                   const bool one_chart_ok)
   {
@@ -938,6 +1005,12 @@ bool BuildSession(string origin, const bool on_replay,
    g_shots.Enable(InpShots);
    g_ctrl.AddObserver(GetPointer(g_shots));
 
+   //--- the calendar answers "are we about to walk into a release", so
+   //--- it is an observer like the auto-pause beside it
+   g_cal.SetShiftMinutes(InpNewsShift);
+   g_cal.SetPauseMinutes(InpNewsPause);
+   g_ctrl.AddObserver(GetPointer(g_cal));
+
    //--- what counts as a new session is READ from the instrument, not
    //--- assumed from the clock
    g_session.SetMode(InpPauseSession);
@@ -993,6 +1066,7 @@ bool BuildSession(string origin, const bool on_replay,
    //--- the pictures are of the REPLAY chart, not of whichever chart
    //--- this program happens to be attached to
    g_shots.SetChart(g_replay_chart);
+   LoadCalendar(origin, win_start, win_end);
    if(InpShots && g_replay_chart != 0)
       PrintFormat("[shots] on - a PNG of the chart at every entry and exit, "
                   "into MQL5\\Files\\%s. Turn it off with InpShots.",
@@ -1740,6 +1814,7 @@ void OnDeinit(const int reason)
    g_session_dlg.Destroy();
    g_dialog.Destroy();
    g_panel.Destroy();
+   g_cal_lines.Clear();
 
    //--- REASON_CHARTCHANGE and friends destroy this EA and rebuild it.
    //--- Tearing the replay symbol down on every one of those would

@@ -32,6 +32,8 @@
 #include <SSReplay/Trading/SSR_TradingEngine.mqh>
 #include <SSReplay/Trading/SSR_Journal.mqh>
 #include <SSReplay/Trading/SSR_ShotBook.mqh>
+#include <SSReplay/Data/SSR_Calendar.mqh>
+#include <SSReplay/Chart/SSR_CalendarLines.mqh>
 #include <SSReplay/Chart/SSR_TradeLines.mqh>
 #include <SSReplay/Chart/SSR_BlindMode.mqh>
 #include <SSReplay/Session/SSR_SessionManager.mqh>
@@ -1506,6 +1508,181 @@ void OnStart()
 
       FileDelete(SSR_PRESET_FILE);
       Unstash(SSR_PRESET_FILE);
+   }
+
+   //+------------------------------------------------------------------+
+   //| 22. THE ECONOMIC CALENDAR.                                       |
+   //|                                                                  |
+   //| Split deliberately into what is DETERMINISTIC and what depends on |
+   //| this terminal having a calendar at all. Some servers do not       |
+   //| publish one, and a stage that failed there would be reporting the |
+   //| broker as a product defect - while a stage that passed there      |
+   //| would be reporting nothing.                                       |
+   //+------------------------------------------------------------------+
+   {
+      //--- 22a. THE LABEL, whatever the terminal has. v66 measured
+      //--- MetaTrader cutting an object's text at exactly 63 characters,
+      //--- and event names are routinely longer than that once a
+      //--- currency is prefixed. A label that ends mid-word looks like a
+      //--- rendering fault rather than a name that did not fit.
+      {
+         SSRCalendarItem it;
+         it.Init();
+         it.currency = "USD";
+         it.name     = "Consumer Price Index excluding Food and Energy "
+                       "year over year for the reference month, revised";
+         string lab = it.Label();
+         Check("a long event name is clipped before MetaTrader clips it",
+               StringLen(lab) <= SSR_CAL_TEXT_MAX &&
+               StringFind(lab, "USD") == 0,
+               StringFormat("%d chars: [%s]", StringLen(lab), lab));
+
+         SSRCalendarItem sh;
+         sh.Init();
+         sh.currency = "EUR";
+         sh.name     = "ECB Rate";
+         Check("and a short one is left alone", sh.Label() == "EUR  ECB Rate",
+               "[" + sh.Label() + "]");
+      }
+
+      //--- 22b. THE FEED'S CONTRACT, with or without a calendar behind it
+      CSSRCalendar cal;
+      cal.SetShiftMinutes(0);
+      cal.SetPauseMinutes(2);
+      bool loaded = cal.Load(origin, win_start, win_end,
+                             SSRNewsFloor(SSR_NEWS_MODERATE));
+
+      SSRCalendarItem probe;
+      Check("the feed refuses an index it does not have",
+            !cal.At(-1, probe) && !cal.At(cal.Count(), probe) &&
+            probe.msc == 0,
+            "one before the start and one past the end both answer false");
+
+      //--- 22c. AND IT SAYS WHICH KIND OF EMPTY IT IS. This is the whole
+      //--- reason the class carries a note: "no calendar on this server"
+      //--- and "a quiet week" draw the same blank chart.
+      if(!loaded)
+        {
+         if(cal.Available())
+            Ok("the calendar is present and this window is quiet",
+               cal.Note());
+         else
+            //--- NOT a failure of this product. Reported as a NOTE so the
+            //--- run is honest about which half it could not measure.
+            PrintFormat("  NOTE  %-34s %s", "no calendar on this terminal",
+                        cal.Note());
+        }
+      else
+        {
+         Check("the calendar loaded events for this window", cal.Count() > 0,
+               StringFormat("%d event(s)%s", cal.Count(),
+                            (cal.Note() == "" ? "" : "  -  " + cal.Note())));
+
+         //--- every event inside the window it was asked for, widened by
+         //--- the one day each side the loader documents
+         bool inside = true;
+         long lo = win_start - 86400000, hi = win_end + 86400000;
+         for(int i = 0; i < cal.Count(); i++)
+           {
+            SSRCalendarItem it;
+            if(cal.At(i, it) && (it.msc < lo || it.msc > hi))
+               inside = false;
+           }
+         Check("and every one of them is inside that window", inside,
+               StringFormat("%s .. %s, plus a day each side",
+                            SSRFormatMsc(win_start), SSRFormatMsc(win_end)));
+
+         //+------------------------------------------------------------------+
+         //| THE PAUSE, driven through the real clock.                        |
+         //|                                                                  |
+         //| Only runs when the window actually contains a high-impact event, |
+         //| and says so when it does not - a stage that quietly passed        |
+         //| because there was nothing to test would be the most misleading    |
+         //| line in the report.                                               |
+         //+------------------------------------------------------------------+
+         //--- AN ISOLATED ONE, not merely the first. The stage asserts
+         //--- that ten minutes out is NOT a warning, and a second high
+         //--- event sitting near that instant would raise one - a test
+         //--- failing on the calendar's contents rather than on the code
+         //--- is a test that cries wolf, and this project has already
+         //--- paid for one of those.
+         int high = -1;
+         for(int i = 0; i < cal.Count() && high < 0; i++)
+           {
+            SSRCalendarItem it;
+            if(!cal.At(i, it) ||
+               it.importance < (int)CALENDAR_IMPORTANCE_HIGH)
+               continue;
+
+            bool alone = true;
+            for(int j = 0; j < cal.Count() && alone; j++)
+              {
+               SSRCalendarItem other;
+               if(j == i || !cal.At(j, other) ||
+                  other.importance < (int)CALENDAR_IMPORTANCE_HIGH)
+                  continue;
+               //--- anything else high within the twelve minutes this
+               //--- stage steps through disqualifies it
+               if(other.msc > it.msc - 12 * SSR_MSC_PER_MIN &&
+                  other.msc <= it.msc)
+                  alone = false;
+              }
+            if(alone)
+               high = i;
+           }
+         if(high < 0)
+            PrintFormat("  NOTE  %-34s %s", "no isolated high-impact event",
+                        "the pause path was not exercised this run - the "
+                        "window holds no high-impact release with twelve "
+                        "clear minutes in front of it");
+         else
+           {
+            SSRCalendarItem it;
+            cal.At(high, it);
+            string why = "";
+
+            cal.OnClock(it.msc - 10 * SSR_MSC_PER_MIN);
+            bool early = cal.PauseRequested(why);
+            cal.OnClock(it.msc - 1 * SSR_MSC_PER_MIN);
+            bool near_it = cal.PauseRequested(why);
+
+            Check("ten minutes out is not a warning, one minute is",
+                  !early && near_it,
+                  StringFormat("[%s]", why));
+
+            //--- consumed exactly once, or the replay would sit in a
+            //--- pause the user cannot leave
+            Check("and it is consumed on the way out",
+                  !cal.PauseRequested(why),
+                  "asking twice answers no the second time");
+
+            //--- a rewind un-happens it, or replaying the same hour runs
+            //--- straight through the release the user rewound to watch
+            cal.OnRewind(it.msc - 60 * SSR_MSC_PER_MIN);
+            cal.OnClock(it.msc - 1 * SSR_MSC_PER_MIN);
+            Check("a rewind puts the warning back",
+                  cal.PauseRequested(why), StringFormat("[%s]", why));
+           }
+        }
+
+      //--- 22d. THE LINES. Idempotent, and clean up after themselves.
+      long cc = ChartOpen(rsym, PERIOD_M1);
+      if(Check("a chart for the calendar lines", cc != 0, rsym))
+        {
+         CSSRCalendarLines cl;
+         cl.Attach(cc);
+         cl.Clear();
+         int first  = cl.Draw(GetPointer(cal));
+         int second = cl.Draw(GetPointer(cal));
+         Check("drawing twice draws each line once",
+               second == 0 && first == cal.Count(),
+               StringFormat("%d created, %d on the second pass", first, second));
+         Check("and clearing takes them all back",
+               cl.Clear() == first &&
+               ObjectFind(cc, SSR_CAL_PREFIX + "0") < 0,
+               StringFormat("%d object(s) removed", first));
+         ChartClose(cc);
+        }
    }
 
    ctrl.Release();

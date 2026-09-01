@@ -33,6 +33,8 @@ ChartNext
 ChartOpen
 ChartPeriod
 ChartRedraw
+CalendarEventById
+CalendarValueHistory
 ChartScreenShot
 ChartSetInteger
 ChartSetSymbolPeriod

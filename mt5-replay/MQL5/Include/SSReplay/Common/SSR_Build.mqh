@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v73 2026-09-01  one-click-not-three-numbers"
+#define SSR_BUILD           "v74 2026-09-01  the-news-on-the-chart"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
