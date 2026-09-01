@@ -35,7 +35,9 @@
 #include "SSR_TradingEngine.mqh"
 
 //--- one server day, in the milliseconds this engine counts in
-#define SSR_PROP_DAY_MSC   86400000
+//--- long, for the reason SSR_MSC_PER_DAY is: an int constant this
+//--- size overflows on the first multiplication anybody writes
+#define SSR_PROP_DAY_MSC   ((long)86400000)
 
 //+------------------------------------------------------------------+
 enum ENUM_SSR_PROP_STATE

@@ -195,7 +195,7 @@ void DigitReport(const string font)
                   "a changing number WILL shift sideways.",
                   (int)wmin, (int)wmax, bad);
 
-   PrintFormat("      price width "53 671.4"=%dpx vs "53 999.9"=%dpx  -> %s",
+   PrintFormat("      price width \"53 671.4\"=%dpx vs \"53 999.9\"=%dpx  -> %s",
                (int)p1, (int)p2,
                (p1 == p2 ? "stable" : "JITTERS"));
   }

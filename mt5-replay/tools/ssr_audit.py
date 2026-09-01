@@ -954,7 +954,99 @@ def audit_a14():
                     continue          # built at runtime; cannot be measured
                 _flag(path, raw, m.start(), lit.group(1))
 
-for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13, audit_a14):
+
+
+#--- A15: a millisecond constant defined as a bare int.
+#---
+#--- `#define SSR_PROP_DAY_MSC 86400000` fits in an int, so MQL5 typed it
+#--- as one - and computed `SSR_PROP_DAY_MSC * 100` in int arithmetic,
+#--- overflowed, and handed the caller 50065408. The compiler said
+#--- "warning", the smoke test drove a whole prop-firm evaluation off
+#--- the wrong number, and fourteen audits were silent.
+#---
+#--- The rule is narrow on purpose: a constant whose NAME says
+#--- milliseconds and whose value is big enough that one multiplication
+#--- overflows must be cast where it is defined, not at every call site
+#--- that a future author will forget.
+DEFINE_MSC = re.compile(
+    r'^[ \t]*#[ \t]*define[ \t]+(\w*(?:MSC|MS)\w*)[ \t]+([^\n]*)$',
+    re.M | re.I)
+MSC_INT_MIN = 1000000
+
+def audit_a15():
+    for path, body in KEEPSTR.items():
+        raw = FILES[path]
+        for m in DEFINE_MSC.finditer(raw):
+            name, val = m.group(1), m.group(2).strip()
+            if "long" in val:
+                continue
+            bare = re.match(r'^\(*\s*(-?\d+)\s*\)*\s*(?://.*)?$', val)
+            if bare is None:
+                continue
+            if abs(int(bare.group(1))) < MSC_INT_MIN:
+                continue
+            report("A15", path, raw[:m.start()].count("\n") + 1,
+                   "%s is %s, an int - and int arithmetic overflows at "
+                   "2147483647, so the first caller who multiplies it gets "
+                   "a wrong number and a warning. Define it as ((long)%s)."
+                   % (name, bare.group(1), bare.group(1)))
+
+
+#--- A16: two things side by side where only one can be.
+#---
+#--- MQL5 concatenates ADJACENT string literals, so a line reads
+#--- perfectly and means something else the moment an inner quote is not
+#--- escaped: `"price "53 671.4"=%d"` is the literal `"price "`, then a
+#--- bare `53`, then another literal. The compiler calls it "some
+#--- operator expected" - which is true, and says nothing about quotes.
+#---
+#--- That line had never compiled. It shipped in every package this
+#--- project has ever produced, because nothing here compiles anything.
+#--- So: a string literal may be followed by another literal or by an
+#--- operator. It may never be followed by a word or a number.
+def audit_a16():
+    for path in FILES:
+        raw = FILES[path]
+        i, n = 0, len(raw)
+        while i < n:
+            c = raw[i]
+            #--- comments first, or a quote inside one is a false alarm
+            if c == "/" and i + 1 < n and raw[i + 1] == "/":
+                j = raw.find("\n", i)
+                i = n if j < 0 else j + 1
+                continue
+            if c == "/" and i + 1 < n and raw[i + 1] == "*":
+                j = raw.find("*/", i + 2)
+                i = n if j < 0 else j + 2
+                continue
+            if c != '"':
+                i += 1
+                continue
+
+            j = i + 1
+            while j < n and raw[j] != '"':
+                j += 2 if raw[j] == "\\" else 1
+            if j >= n:
+                break
+
+            #--- SPACES AND TABS ONLY, never a newline. Two literals on
+            #--- consecutive lines are the concatenation this whole tree
+            #--- is written in, and `#include "x.mqh"` is followed by
+            #--- whatever statement comes next - both perfectly legal.
+            #--- The bug this looks for is always on ONE line.
+            k = j + 1
+            while k < n and raw[k] in " \t":
+                k += 1
+            if k < n and (raw[k].isalnum() or raw[k] == "_"):
+                report("A16", path, raw[:i].count("\n") + 1,
+                       "a string literal is followed by `%s`, which cannot "
+                       "come after one. Almost always an inner quote that "
+                       "needed a backslash: \"...\\\"like this\\\"...\""
+                       % raw[k:k + 12].split("\n")[0].strip())
+            i = j + 1
+
+
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13, audit_a14, audit_a15, audit_a16):
     fn()
 
 if findings:

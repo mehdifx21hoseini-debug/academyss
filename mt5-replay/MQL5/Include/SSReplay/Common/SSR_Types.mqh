@@ -15,10 +15,22 @@
 #ifndef SSR_TYPES_MQH
 #define SSR_TYPES_MQH
 
-#define SSR_MSC_PER_SEC     1000
-#define SSR_MSC_PER_MIN     60000
-#define SSR_MSC_PER_HOUR    3600000
-#define SSR_MSC_PER_DAY     86400000
+//+------------------------------------------------------------------+
+//| CAST TO long AT THE DEFINITION, not at every call site.          |
+//|                                                                  |
+//| 86400000 fits in an int, so MQL5 typed these as int - and then    |
+//| computed `SSR_MSC_PER_DAY * 100` in int arithmetic, overflowed,   |
+//| and handed the caller 50065408 with nothing but a warning. The    |
+//| smoke test drove a whole prop-firm evaluation off that number.    |
+//|                                                                   |
+//| Every one of the 154 uses in this tree is long arithmetic or is    |
+//| already cast at the point of printing, so the cast costs nothing   |
+//| and removes the trap for the next multiplication anybody writes.   |
+//+------------------------------------------------------------------+
+#define SSR_MSC_PER_SEC     ((long)1000)
+#define SSR_MSC_PER_MIN     ((long)60000)
+#define SSR_MSC_PER_HOUR    ((long)3600000)
+#define SSR_MSC_PER_DAY     ((long)86400000)
 #define SSR_INVALID_TIME    (-1)
 #define SSR_VERSION         "0.1.0"
 
