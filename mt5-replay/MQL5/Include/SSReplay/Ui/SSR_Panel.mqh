@@ -37,12 +37,26 @@
 #include "../Common/SSR_Types.mqh"
 #include "../Common/SSR_Time.mqh"
 #include "../Common/SSR_FlightRecorder.mqh"
+#include "../Common/SSR_SessionFile.mqh"
 #include "SSR_Theme.mqh"
 #include "SSR_Widgets.mqh"
 #include "SSR_ReplayPort.mqh"
 #include "SSR_Keys.mqh"
 
 #define SSR_SLOTS 64
+
+//+------------------------------------------------------------------+
+//| WHERE THE PANEL LIVES, remembered between sessions.              |
+//|                                                                  |
+//| Its own file, not a corner of setup.ini. setup.ini is the form   |
+//| the user fills in before a session and is written whole at Start;|
+//| the panel moves DURING one, and folding its position into that   |
+//| struct would mean every drag had to read the form back, edit one |
+//| field and write the form out again - a read-modify-write on a    |
+//| file another object owns, which is exactly how the two come to   |
+//| disagree.                                                        |
+//+------------------------------------------------------------------+
+#define SSR_PANEL_FILE "SSReplay\\panel.ini"
 
 //+------------------------------------------------------------------+
 class CSSRPanel
@@ -87,6 +101,7 @@ private:
 
    int               m_tab;
    string            m_tag_sent;    // the last text handed to the port
+   bool              m_place_loaded; // the file has been read at least once
 
    SSRUiState        m_state;
 
@@ -167,7 +182,8 @@ public:
        m_drag_dx(0), m_drag_dy(0),
        m_track_drag(false), m_track_x(0), m_track_y(0), m_track_w(0),
        m_last_drag_paint(0), m_corner(0),
-       m_tab(SSR_TAB_TRADE), m_tag_sent(""), m_renders(0), m_writes(0)
+       m_tab(SSR_TAB_TRADE), m_tag_sent(""), m_place_loaded(false),
+       m_renders(0), m_writes(0)
      { m_state.Init(); ClearCache(); }
 
                     ~CSSRPanel(void) { Destroy(); }
@@ -222,6 +238,16 @@ public:
       ChartSetInteger(m_chart, CHART_QUICK_NAVIGATION, false);
       ChartSetInteger(m_chart, CHART_KEYBOARD_CONTROL, false);
 
+      //--- BEFORE the first paint, or the panel appears in the corner
+      //--- and jumps, which reads as a glitch rather than as a memory
+      if(RestorePlace())
+         PrintFormat("[panel] restored to %d,%d  corner %d  tab %d%s",
+                     m_x, m_y, m_corner, m_tab,
+                     (m_collapsed ? "  collapsed" : ""));
+      else
+         PrintFormat("[panel] no saved position - starting at %d,%d "
+                     "(drag it by the title bar, or press Move)", m_x, m_y);
+
       Render();
      }
 
@@ -248,8 +274,16 @@ public:
    //--- recomputes x and y every frame, so a caller setting them
    //--- directly would be overruled on the next repaint and would
    //--- rightly call that a bug
-   void              SetCorner(const int c) { m_corner = (c & 3); Render(); }
+   void              SetCorner(const int c)
+     { m_corner = (c & 3); SavePlace(); Render(); }
    int               Corner(void)           { return m_corner; }
+
+   //--- where it actually is. Not decoration: without these a test can
+   //--- assert that a file was written and nothing more, and a file
+   //--- written is not a panel that came back.
+   int               X(void)                { return m_x; }
+   int               Y(void)                { return m_y; }
+   int               Tab(void)              { return m_tab; }
 
    //+------------------------------------------------------------------+
    //| A DRAG DOES NOT NEED A FULL REPAINT PER EVENT.                   |
@@ -281,6 +315,88 @@ public:
       if(m_y > ch - SSR_HEADER_H - 4) m_y = ch - SSR_HEADER_H - 4;
       if(m_x < 0) m_x = 0;
       if(m_y < 0) m_y = 0;
+     }
+
+
+   //+------------------------------------------------------------------+
+   //| REMEMBER WHERE IT WAS PUT.                                       |
+   //|                                                                  |
+   //| The panel has always been movable and has never been moved twice |
+   //| for the same reason: every session started it back in the top    |
+   //| left, on top of the price. A recording of a real session showed  |
+   //| it sitting over the stop and target labels of an open trade -    |
+   //| the one place a person is looking while a trade is on.           |
+   //|                                                                  |
+   //| It also has to cross the ONE-WINDOW HANDOVER, which restarts     |
+   //| this program: without a file, the second pass would come up in   |
+   //| the corner again and quietly undo the move just made. That is    |
+   //| the same trap v55 rescued for the picked start and v68 for the   |
+   //| setup - a chart object could not carry it either, since v66      |
+   //| measured MetaTrader cutting object text at 63 characters.        |
+   //|                                                                  |
+   //| WHAT IS NOT SAVED: `closed`. Collapsing is a preference; closing |
+   //| is "get out of the way, now". A tool that starts up hidden looks |
+   //| broken, and the one difference between the two is worth this     |
+   //| line rather than a support question.                             |
+   //+------------------------------------------------------------------+
+   bool              SavePlace(void)
+     {
+      //--- never before the file has been read: a save that ran first
+      //--- would write the constructor's defaults over a good position
+      if(!m_place_loaded)
+         return false;
+
+      FolderCreate("SSReplay");
+      CSSRSessionFile f;
+      if(!f.Create(SSR_PANEL_FILE))
+         return false;
+      f.Section("panel");
+      f.Comment("where the panel was left. Delete this file to put it "
+                "back in the corner.");
+      f.SetInt("x",         m_x);
+      f.SetInt("y",         m_y);
+      f.SetInt("corner",    m_corner);
+      f.SetInt("collapsed", m_collapsed ? 1 : 0);
+      f.SetInt("tab",       m_tab);
+      f.Close();
+      return true;
+     }
+
+   //--- false means there was nothing saved, which is a first run and
+   //--- not a failure: the caller keeps the corner it started in
+   bool              RestorePlace(void)
+     {
+      m_place_loaded = true;
+      if(!FileIsExist(SSR_PANEL_FILE))
+         return false;
+
+      CSSRSessionFile f;
+      if(!f.Load(SSR_PANEL_FILE) || !f.Select("panel"))
+         return false;
+
+      //+------------------------------------------------------------------+
+      //| A POSITION IS ONLY VALID ON THE SCREEN THAT PRODUCED IT.         |
+      //|                                                                  |
+      //| Saved on a 3440-wide monitor and restored on a laptop, x is off  |
+      //| the edge - and the panel would be gone with no way to reach its  |
+      //| caption and drag it back. ClampToChart pulls it in on the first  |
+      //| painted frame, but only once the chart reports a size; this      |
+      //| bound stops a nonsense value from surviving until then.          |
+      //+------------------------------------------------------------------+
+      int x = f.GetInt("x", m_x);
+      int y = f.GetInt("y", m_y);
+      if(x < 0 || x > 8000 || y < 0 || y > 8000)
+        { x = m_x; y = m_y; }
+
+      m_x         = x;
+      m_y         = y;
+      m_corner    = (f.GetInt("corner", m_corner) & 3);
+      m_collapsed = (f.GetInt("collapsed", m_collapsed ? 1 : 0) != 0);
+
+      int tab = f.GetInt("tab", m_tab);
+      if(tab >= 0 && tab < SSR_TAB_COUNT)
+         m_tab = tab;
+      return true;
      }
 
    //--- the Move button steps through the corners: a shortcut for
@@ -1203,6 +1319,7 @@ public:
            }
          case SSR_CMD_COLLAPSE:
             m_collapsed = !m_collapsed;
+            SavePlace();
             Render();
             return true;
         }
@@ -1363,7 +1480,10 @@ public:
       //--- engine, only which sheet is on top
       if(StringLen(what) == 4 && StringSubstr(what, 0, 3) == "tab")
         {
+         int was = m_tab;
          m_tab = (int)StringToInteger(StringSubstr(what, 3));
+         if(m_tab != was)
+            SavePlace();
          return SSR_CMD_NONE;
         }
 
@@ -1383,6 +1503,7 @@ public:
       if(what == "move")
         {
          SnapToCorner();
+         SavePlace();
          return SSR_CMD_NONE;
         }
       if(what == "stmt")
@@ -1603,6 +1724,10 @@ public:
             m_dragging = false;
             ChartSetInteger(m_chart, CHART_MOUSE_SCROLL, m_saved_mouse_scroll);
             Render();          // never thinned: this is the resting frame
+            //--- ON RELEASE, not per move. A drag is sixty events a
+            //--- second and this writes a file; the position that
+            //--- matters is the one the hand let go of.
+            SavePlace();
             return true;
            }
         }

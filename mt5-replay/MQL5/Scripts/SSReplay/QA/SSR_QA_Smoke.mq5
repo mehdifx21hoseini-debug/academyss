@@ -62,6 +62,31 @@ void PropCase(const string what, const double start, const double target_pct,
               const double final_equity, const int days,
               const ENUM_SSR_PROP_STATE expect);
 
+//+------------------------------------------------------------------+
+//| A TEST MUST NOT EAT THE USER'S SETTINGS.                         |
+//|                                                                  |
+//| Stage 16 has always written a fake setup to MQL5\Files\SSReplay |
+//| and then DELETED the file - so running the smoke test threw away  |
+//| whatever the user had typed into the setup panel, and told them   |
+//| PASS while doing it. Now the real file is moved aside first and   |
+//| put back afterwards, whatever the stage does in between.          |
+//+------------------------------------------------------------------+
+void Stash(const string path)
+  {
+   if(FileIsExist(path + ".qabak"))
+      FileDelete(path + ".qabak");
+   if(FileIsExist(path))
+      FileMove(path, 0, path + ".qabak", FILE_REWRITE);
+  }
+
+void Unstash(const string path)
+  {
+   if(FileIsExist(path))
+      FileDelete(path);
+   if(FileIsExist(path + ".qabak"))
+      FileMove(path + ".qabak", 0, path, FILE_REWRITE);
+  }
+
 void Ok(const string what, const string detail)
   { g_pass++; PrintFormat("  PASS  %-34s %s", what, detail); }
 
@@ -711,6 +736,8 @@ void OnStart()
    //| else on the panel.                                               |
    //+------------------------------------------------------------------+
    {
+      Stash(SSR_SETUP_FILE);
+
       SSRSetupValues a;
       a.Init();
       a.balance       = 25000.0;
@@ -744,8 +771,8 @@ void OnStart()
                             b.balance, SSRSetupTfName(b.chart_tf), b.extra_tfs,
                             SSRSetupBlindName(b.blind),
                             (b.prop_on ? "on" : "off"), b.session_name));
-         FileDelete("SSReplay\\setup.ini");
         }
+      Unstash(SSR_SETUP_FILE);
    }
 
    //+------------------------------------------------------------------+
@@ -765,6 +792,11 @@ void OnStart()
    //| tenths, and reporting that as a product defect is exactly the      |
    //| hardcoded-broker trap this project is not allowed to fall into.    |
    //+------------------------------------------------------------------+
+   //--- FROM HERE TO THE END, two stages drive a real panel - and a
+   //--- panel that is driven writes down where it was left. The user's
+   //--- own layout goes aside for the duration.
+   Stash(SSR_PANEL_FILE);
+
    {
       double step = SymbolInfoDouble(rsym, SYMBOL_VOLUME_STEP);
       if(step <= 0.0)
@@ -1137,6 +1169,93 @@ void OnStart()
          ChartClose(pchart);
         }
    }
+
+   //+------------------------------------------------------------------+
+   //| 19. THE PANEL COMES BACK WHERE IT WAS LEFT.                      |
+   //|                                                                  |
+   //| Not "a file was written" - a file written is not a panel that     |
+   //| came back. A second panel is built from scratch on the same chart |
+   //| and asked where it thinks it is, which is the only question the   |
+   //| user is actually asking.                                          |
+   //|                                                                  |
+   //| The real panel.ini is moved aside first: a QA run that resets the |
+   //| user's own layout has done more harm than the stage is worth.     |
+   //+------------------------------------------------------------------+
+   {
+      long rc = ChartOpen(rsym, PERIOD_M1);
+      if(Check("a chart for the position test", rc != 0, rsym))
+        {
+         int ax = 0, ay = 0, ac = 0, at = 0;
+           {
+            CSSRPanel a;
+            a.Create(rc, NULL, "SSRR_");
+            //--- move it the way a user without a mouse on this chart
+            //--- would: the Move button, twice, then a different tab
+            a.Dispatch("move");
+            a.Dispatch("move");
+            a.Dispatch("tab2");
+            ax = a.X(); ay = a.Y(); ac = a.Corner(); at = a.Tab();
+            a.Destroy();
+           }
+
+         Check("moving the panel leaves a file behind",
+               FileIsExist(SSR_PANEL_FILE),
+               "MQL5\\Files\\" + SSR_PANEL_FILE);
+
+           {
+            CSSRPanel b;
+            b.Create(rc, NULL, "SSRR_");
+            //--- SnapToCorner reads the chart's pixel size, and a chart
+            //--- that has not been measured yet puts all four corners on
+            //--- the same spot. Then x and y would match trivially and
+            //--- this stage would be proving nothing about them, so it
+            //--- says which half it actually proved.
+            bool moved = (ax != 12 || ay != 24);
+            Check("and a new panel starts where the old one stopped",
+                  b.X() == ax && b.Y() == ay && b.Corner() == ac &&
+                  b.Tab() == at,
+                  StringFormat("%d,%d corner %d tab %d  ->  %d,%d corner %d tab %d%s",
+                               ax, ay, ac, at, b.X(), b.Y(), b.Corner(), b.Tab(),
+                               (moved ? ""
+                                : "   NOTE this chart reports no size, so the "
+                                  "panel never left the corner - corner and tab "
+                                  "still prove the round trip, x and y do not")));
+            b.Destroy();
+           }
+
+         //+------------------------------------------------------------------+
+         //| A POSITION FROM A BIGGER SCREEN IS REFUSED.                      |
+         //|                                                                  |
+         //| Saved on a 3440-wide monitor, restored on a laptop: without the  |
+         //| bound the panel is off the edge with no caption to grab. The     |
+         //| test asks for the CONSTRUCTOR'S corner, not merely for something |
+         //| on screen - the later clamp would also produce something on      |
+         //| screen, and would pass a version with no guard in it at all.      |
+         //+------------------------------------------------------------------+
+           {
+            CSSRSessionFile bad;
+            if(bad.Create(SSR_PANEL_FILE))
+              {
+               bad.Section("panel");
+               bad.SetInt("x", 99999);
+               bad.SetInt("y", 77777);
+               bad.SetInt("corner", 1);
+               bad.Close();
+              }
+            CSSRPanel c;
+            c.Create(rc, NULL, "SSRR_");
+            Check("an impossible position falls back, it does not clamp",
+                  c.X() == 12 && c.Y() == 24,
+                  StringFormat("99999,77777 -> %d,%d (the corner it starts in)",
+                               c.X(), c.Y()));
+            c.Destroy();
+           }
+
+         ChartClose(rc);
+        }
+   }
+
+   Unstash(SSR_PANEL_FILE);
 
    ctrl.Release();
    Cleanup(rsym);
