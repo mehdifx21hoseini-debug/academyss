@@ -1361,6 +1361,153 @@ void OnStart()
         }
    }
 
+   //+------------------------------------------------------------------+
+   //| 21. ONE CLICK INSTEAD OF THREE NUMBERS.                          |
+   //|                                                                  |
+   //| Driven by setting the button's own latch and calling Poll - which |
+   //| is exactly what a click does, prefix and all. Asserting that a    |
+   //| preset "was loaded" would prove nothing; what the user gets is    |
+   //| three numbers changing, so that is what is measured.              |
+   //+------------------------------------------------------------------+
+   {
+      Stash(SSR_PRESET_FILE);
+
+      long pk = ChartOpen(rsym, PERIOD_M1);
+      if(Check("a chart for the preset test", pk != 0, rsym))
+        {
+         //--- 21a. NO FILE: the built-ins are used and the file is written,
+         //--- so the first thing a user looking for their own numbers finds
+         //--- is a file with the right shape in it.
+           {
+            //--- DELIBERATELY UNLIKE ANY BUILT-IN. With the struct's own
+            //--- defaults, slot 0 ("My last") and the first shipped preset
+            //--- hold the same three numbers, and a press that worked
+            //--- perfectly would look like a press that did nothing.
+            SSRSetupValues d;
+            d.Init();
+            d.prop_on     = true;
+            d.prop_target = 3.0;
+            d.prop_daily  = 2.0;
+            d.prop_total  = 4.0;
+
+            CSSRSetupPanel sp;
+            sp.Create(pk, d);
+
+            Check("a first run writes the preset file",
+                  FileIsExist(SSR_PRESET_FILE),
+                  "MQL5\\Files\\" + SSR_PRESET_FILE);
+
+            ObjectSetInteger(pk, "SSRS_bpre", OBJPROP_STATE, true);
+            sp.Poll();
+            SSRSetupValues a;
+            sp.Values(a);
+            Check("and one press moves off what the panel opened with",
+                  a.prop_on != d.prop_on || a.prop_target != d.prop_target ||
+                  a.prop_daily != d.prop_daily || a.prop_total != d.prop_total,
+                  StringFormat("%s %.1f/%.1f/%.1f -> %s %.1f/%.1f/%.1f",
+                               (d.prop_on ? "on" : "off"), d.prop_target,
+                               d.prop_daily, d.prop_total,
+                               (a.prop_on ? "on" : "off"), a.prop_target,
+                               a.prop_daily, a.prop_total));
+            sp.Destroy();
+           }
+
+         //--- 21b. THE USER'S OWN NUMBERS WIN. One row, so the cycle is
+         //--- exactly two presses long and "back to My last" is not a
+         //--- guess about how many presets happened to be in the file.
+         FileDelete(SSR_PRESET_FILE);
+           {
+            CSSRSessionFile pf;
+            if(pf.Create(SSR_PRESET_FILE))
+              {
+               pf.Section("presets");
+               pf.Set("p", "MyFirm|1|12.5|3.5|7.5");
+               pf.Close();
+              }
+
+            SSRSetupValues d;
+            d.Init();
+            d.prop_on     = false;
+            d.prop_target = 8.0;
+            d.prop_daily  = 5.0;
+            d.prop_total  = 10.0;
+
+            CSSRSetupPanel sp;
+            sp.Create(pk, d);
+
+            ObjectSetInteger(pk, "SSRS_bpre", OBJPROP_STATE, true);
+            sp.Poll();
+            SSRSetupValues a;
+            sp.Values(a);
+            Check("a preset from the file fills all four fields",
+                  a.prop_on && MathAbs(a.prop_target - 12.5) < 0.01 &&
+                  MathAbs(a.prop_daily - 3.5) < 0.01 &&
+                  MathAbs(a.prop_total - 7.5) < 0.01,
+                  StringFormat("%s %.2f/%.2f/%.2f", (a.prop_on ? "on" : "off"),
+                               a.prop_target, a.prop_daily, a.prop_total));
+
+            //--- ...and the boxes below the button really say so. The
+            //--- numbers are the only proof the user gets that the click
+            //--- did anything, and they are written by a different code
+            //--- path from the struct above.
+            Check("and the boxes on the chart say the same thing",
+                  ObjectGetString(pk, "SSRS_eptg", OBJPROP_TEXT) == "12.5" &&
+                  ObjectGetString(pk, "SSRS_epdl", OBJPROP_TEXT) == "3.5" &&
+                  ObjectGetString(pk, "SSRS_eptl", OBJPROP_TEXT) == "7.5",
+                  StringFormat("[%s] [%s] [%s]",
+                               ObjectGetString(pk, "SSRS_eptg", OBJPROP_TEXT),
+                               ObjectGetString(pk, "SSRS_epdl", OBJPROP_TEXT),
+                               ObjectGetString(pk, "SSRS_eptl", OBJPROP_TEXT)));
+
+            ObjectSetInteger(pk, "SSRS_bpre", OBJPROP_STATE, true);
+            sp.Poll();
+            sp.Values(a);
+            Check("and the cycle comes home to what the user had",
+                  a.prop_on == d.prop_on &&
+                  MathAbs(a.prop_target - d.prop_target) < 0.01 &&
+                  MathAbs(a.prop_daily  - d.prop_daily)  < 0.01 &&
+                  MathAbs(a.prop_total  - d.prop_total)  < 0.01,
+                  StringFormat("%s %.1f/%.1f/%.1f - slot 0 is always My last",
+                               (a.prop_on ? "on" : "off"), a.prop_target,
+                               a.prop_daily, a.prop_total));
+            sp.Destroy();
+           }
+
+         //--- 21c. A FILE THAT PARSES TO NOTHING IS AN EDIT SOMEBODY GOT
+         //--- WRONG. Overwriting it would delete their work to fix a
+         //--- problem they can see and this program cannot.
+         FileDelete(SSR_PRESET_FILE);
+           {
+            CSSRSessionFile pf;
+            if(pf.Create(SSR_PRESET_FILE))
+              {
+               pf.Section("presets");
+               pf.Set("p", "nonsense");
+               pf.Close();
+              }
+
+            SSRSetupValues d;
+            d.Init();
+            CSSRSetupPanel sp;
+            sp.Create(pk, d);
+            sp.Destroy();
+
+            CSSRSessionFile rf;
+            string still = "";
+            if(rf.Load(SSR_PRESET_FILE) && rf.Select("presets"))
+               still = rf.GetNth("p", 0);
+            Check("an unreadable preset file is left exactly as it is",
+                  still == "nonsense",
+                  StringFormat("[%s] still in the file", still));
+           }
+
+         ChartClose(pk);
+        }
+
+      FileDelete(SSR_PRESET_FILE);
+      Unstash(SSR_PRESET_FILE);
+   }
+
    ctrl.Release();
    Cleanup(rsym);
    Done();

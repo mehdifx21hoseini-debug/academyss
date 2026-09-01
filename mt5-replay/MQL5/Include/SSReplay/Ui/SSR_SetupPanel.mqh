@@ -45,6 +45,56 @@
 #define SSR_SETUP_ROW      24
 #define SSR_SETUP_FIELD_W  84
 
+//--- where the presets live. A FILE, not a table baked into the code:
+//--- these are somebody else's business terms, they change without
+//--- telling us, and the person who knows the right numbers is the one
+//--- holding the account. Editable, one line each.
+#define SSR_PRESET_FILE "SSReplay\\presets.ini"
+
+//+------------------------------------------------------------------+
+//| One row of the Preset button.                                    |
+//|                                                                  |
+//| It fills the three evaluation numbers and the on/off, and NOTHING |
+//| else. A preset that also set values the panel does not show would |
+//| change the session in ways the user cannot see - which is a worse |
+//| failure than making them type three numbers.                      |
+//+------------------------------------------------------------------+
+struct SSRPropPreset
+  {
+   string            name;
+   bool              on;
+   double            target;
+   double            daily;
+   double            total;
+
+   void              Set(const string n, const bool o, const double tg,
+                         const double dl, const double tl)
+     { name = n; on = o; target = tg; daily = dl; total = tl; }
+  };
+
+//+------------------------------------------------------------------+
+//| WHAT SHIPS, AND WHY IT IS NAMED BY SHAPE.                        |
+//|                                                                  |
+//| Every one of these is a starting point, not a contract. Firms     |
+//| publish their own numbers and change them; naming a preset after  |
+//| a company would put a claim about that company's current terms    |
+//| into a tool that has no way to check it, and would be wrong the   |
+//| first time they moved a limit.                                    |
+//|                                                                  |
+//| So the built-ins are named after the SHAPE of the challenge, and  |
+//| the file they are written to is there to be renamed and corrected |
+//| by the person who can actually see their own dashboard.           |
+//+------------------------------------------------------------------+
+int SSRDefaultPresets(SSRPropPreset &out[])
+  {
+   ArrayResize(out, 4);
+   out[0].Set("Practice",  false, 8.0,  5.0, 10.0);
+   out[1].Set("2-step P1", true,  8.0,  5.0, 10.0);
+   out[2].Set("2-step P2", true,  5.0,  5.0, 10.0);
+   out[3].Set("1-step",    true, 10.0,  5.0,  6.0);
+   return ArraySize(out);
+  }
+
 //+------------------------------------------------------------------+
 //| Everything the panel can set. Filled from the inputs, edited by   |
 //| the user, read back at Start.                                     |
@@ -115,14 +165,40 @@ private:
    //--- the two values a button cycles rather than a box accepts
    int               m_tf_i;
 
+   //--- the preset list, and which one the button is showing. Slot 0 is
+   //--- always "My last", so the cycle always has a way home.
+   SSRPropPreset     m_presets[];
+   int               m_preset_i;
+
+   //--- forces the three evaluation boxes to be rewritten for one paint.
+   //--- Only those three: forcing every box would delete whatever the
+   //--- user was halfway through typing in the ones a preset does not
+   //--- touch, which is the classic way a settings form loses an answer.
+   bool              m_force_prop;
+
+   //+------------------------------------------------------------------+
+   //| WHERE THE START LINE'S CAPTION GOES - computed once, in Render,  |
+   //| and remembered.                                                  |
+   //|                                                                  |
+   //| SetStartText used to work this out for itself, from a row count  |
+   //| written into the expression by hand. Render walks the rows and    |
+   //| gets a different answer, so the two disagreed by fifty pixels     |
+   //| and the caption jumped between the buttons and its proper place   |
+   //| depending on which one had run last. Adding the Preset row made   |
+   //| the gap seventy-four. Two lists drift; one does not.              |
+   //+------------------------------------------------------------------+
+   int               m_start_y;
+
    void              Row(const string id, const int r, const string label,
-                         const string value, const bool boxed)
+                         const string value, const bool boxed,
+                         const bool force = false)
      {
       int ry = m_y + 30 + r * SSR_SETUP_ROW;
       m_w.Label("l" + id, m_x + 12, ry + 5, label, SSR_C_TEXT, SSR_FS_BODY);
       if(boxed)
          m_w.Edit("e" + id, m_x + SSR_SETUP_W - SSR_SETUP_FIELD_W - 12, ry,
-                  SSR_SETUP_FIELD_W, SSR_SETUP_ROW - 4, value, m_first_paint);
+                  SSR_SETUP_FIELD_W, SSR_SETUP_ROW - 4, value,
+                  m_first_paint || force);
       else
          m_w.Button("b" + id, m_x + SSR_SETUP_W - SSR_SETUP_FIELD_W - 12, ry,
                     SSR_SETUP_FIELD_W, SSR_SETUP_ROW - 4, value);
@@ -156,10 +232,135 @@ private:
       return t;
      }
 
+
+   //+------------------------------------------------------------------+
+   //| THE PRESETS, loaded once when the panel opens.                   |
+   //|                                                                  |
+   //| Slot 0 is always "My last" - whatever this panel was handed, so  |
+   //| cycling all the way round gets the user back to what they had    |
+   //| rather than stranding them on somebody else's numbers.           |
+   //+------------------------------------------------------------------+
+   void              LoadPresets(void)
+     {
+      ArrayResize(m_presets, 1);
+      m_presets[0].Set("My last", m_v.prop_on, m_v.prop_target,
+                       m_v.prop_daily, m_v.prop_total);
+      m_preset_i = 0;
+
+      SSRPropPreset from_file[];
+      int  n = 0;
+      bool had_file = FileIsExist(SSR_PRESET_FILE);
+
+      CSSRSessionFile f;
+      if(had_file && f.Load(SSR_PRESET_FILE) && f.Select("presets"))
+        {
+         int rows = f.Count("p");
+         ArrayResize(from_file, rows);
+         for(int i = 0; i < rows; i++)
+           {
+            string c[];
+            if(SSRUnpack(f.GetNth("p", i), c) < 5)
+               continue;
+            //--- a preset with no name is a button with no label, and a
+            //--- target of zero is an evaluation that passes instantly
+            string nm = SSRField(c, 0, "");
+            double tg = SSRFieldDouble(c, 2, 0.0);
+            if(nm == "" || (SSRFieldLong(c, 1, 0) != 0 && tg <= 0.0))
+               continue;
+            from_file[n].Set(nm, SSRFieldLong(c, 1, 0) != 0, tg,
+                             SSRFieldDouble(c, 3, 5.0),
+                             SSRFieldDouble(c, 4, 10.0));
+            n++;
+           }
+        }
+
+      //--- FIRST RUN WRITES THE FILE, so the very first thing a user
+      //--- who wants their own firm's numbers finds is a file with the
+      //--- right shape already in it, not a blank page and a guess.
+      if(n == 0)
+        {
+         n = SSRDefaultPresets(from_file);
+         //--- WRITTEN ONLY IF THERE WAS NO FILE. A file that exists and
+         //--- parses to nothing is an edit somebody made and got wrong,
+         //--- and overwriting it would delete their work to fix a
+         //--- problem they can see and I cannot.
+         if(!had_file)
+            SavePresets(from_file, n);
+         else
+            Print("[setup] presets.ini has no readable rows - using the "
+                  "built-in list. Your file has been left exactly as it is; "
+                  "each line is name|on|target|daily|drawdown.");
+        }
+
+      ArrayResize(m_presets, 1 + n);
+      for(int i = 0; i < n; i++)
+         m_presets[1 + i] = from_file[i];
+     }
+
+   static bool       SavePresets(SSRPropPreset &p[], const int n)
+     {
+      FolderCreate("SSReplay");
+      CSSRSessionFile f;
+      if(!f.Create(SSR_PRESET_FILE))
+         return false;
+      f.Section("presets");
+      f.Comment("One preset per line:  name|on|target%|daily loss%|max "
+                "drawdown%");
+      f.Comment("These are STARTING POINTS, not anybody's contract. Firms "
+                "publish their own numbers and change them - put yours here,");
+      f.Comment("renamed to whatever you call it. Keep names short: the "
+                "button is narrow. Delete this file to get the defaults back.");
+      for(int i = 0; i < n; i++)
+        {
+         string row = "";
+         row = SSRPackAdd(row, p[i].name);
+         row = SSRPackAdd(row, (p[i].on ? "1" : "0"));
+         row = SSRPackAdd(row, DoubleToString(p[i].target, 2));
+         row = SSRPackAdd(row, DoubleToString(p[i].daily,  2));
+         row = SSRPackAdd(row, DoubleToString(p[i].total,  2));
+         f.Set("p", row);
+        }
+      f.Close();
+      return true;
+     }
+
+   //--- step to the next preset and PUT ITS NUMBERS IN THE BOXES. The
+   //--- three rows below the button are the only proof the user gets
+   //--- that the click did anything, so they are forced to repaint.
+   void              CyclePreset(void)
+     {
+      int n = ArraySize(m_presets);
+      if(n <= 1)
+         return;
+      m_preset_i = (m_preset_i + 1) % n;
+
+      m_v.prop_on     = m_presets[m_preset_i].on;
+      m_v.prop_target = m_presets[m_preset_i].target;
+      m_v.prop_daily  = m_presets[m_preset_i].daily;
+      m_v.prop_total  = m_presets[m_preset_i].total;
+
+      PrintFormat("[setup] preset %s -> %s target %.1f%%  daily %.1f%%  "
+                  "drawdown %.1f%%", m_presets[m_preset_i].name,
+                  (m_v.prop_on ? "on" : "off"), m_v.prop_target,
+                  m_v.prop_daily, m_v.prop_total);
+
+      m_force_prop = true;
+      Render();
+      m_force_prop = false;
+     }
+
+   string            PresetName(void)
+     {
+      if(m_preset_i < 0 || m_preset_i >= ArraySize(m_presets))
+         return "-";
+      return m_presets[m_preset_i].name;
+     }
+
 public:
                      CSSRSetupPanel(void)
      : m_chart(0), m_open(false), m_x(14), m_y(28),
-       m_start_text(""), m_tf_i(1), m_first_paint(true)
+       m_start_text(""), m_tf_i(1), m_preset_i(0), m_force_prop(false),
+       m_start_y(0), m_first_paint(true)
      { m_v.Init(); }
 
                     ~CSSRSetupPanel(void) { Destroy(); }
@@ -181,6 +382,17 @@ public:
          if(SSR_SETUP_TFS[i] == m_v.chart_tf)
             m_tf_i = i;
 
+      LoadPresets();
+
+      //--- A PANEL TALLER THAN THE CHART IS A PANEL WITH ITS START
+      //--- BUTTON OFF THE BOTTOM, and nothing on screen says why.
+      int need = 28 + 30 + 17 * SSR_SETUP_ROW + 84 + 16;
+      int have = (int)ChartGetInteger(chart_id, CHART_HEIGHT_IN_PIXELS);
+      if(have > 0 && have < need)
+         PrintFormat("[setup] this chart is %d pixels tall and the setup "
+                     "panel needs %d - the START button is below the bottom "
+                     "edge. Press Ctrl+T to close the Toolbox.", have, need);
+
       m_open = true;
       Render();
       m_first_paint = false;
@@ -191,9 +403,10 @@ public:
       if(t == m_start_text)
          return;
       m_start_text = t;
-      if(m_open)
-         m_w.Label("startlbl", m_x + 12, m_y + 30 + 15 * SSR_SETUP_ROW + 40,
-                   t, SSR_C_HOLD, SSR_FS_SMALL);
+      //--- before the first paint there is no layout to put it in, and
+      //--- the paint that follows draws it anyway
+      if(m_open && m_start_y > 0)
+         m_w.Label("startlbl", m_x + 12, m_start_y, t, SSR_C_HOLD, SSR_FS_SMALL);
      }
 
    void              Destroy(void)
@@ -214,8 +427,10 @@ public:
       if(!m_open || m_chart == 0)
          return;
 
-      int rows = 16;
-      int h    = 30 + rows * SSR_SETUP_ROW + 76;
+      int rows = 17;
+      //--- 76 left the start caption two pixels outside the frame it is
+      //--- printed in, at every row count this panel has ever had
+      int h    = 30 + rows * SSR_SETUP_ROW + 84;
       m_w.Rect("frame", m_x, m_y, SSR_SETUP_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
       m_w.Label("title", m_x + 12, m_y + 9, "SS REPLAY  -  SETUP",
                 SSR_C_TEXT, SSR_FS_BODY);
@@ -236,10 +451,16 @@ public:
 
       m_w.Label("h3", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5, "EVALUATION",
                 SSR_C_TEXT_DIM, SSR_FS_SMALL); r++;
+      //--- ONE CLICK INSTEAD OF THREE NUMBERS. Nobody remembers what a
+      //--- given firm's daily loss limit is, and nobody should have to.
+      Row("pre",  r++, "Preset",           PresetName(),                        false);
       Row("pon",  r++, "Prop evaluation",  m_v.prop_on ? "on" : "off",          false);
-      Row("ptg",  r++, "Profit target %",  DoubleToString(m_v.prop_target, 1),  true);
-      Row("pdl",  r++, "Max daily loss %", DoubleToString(m_v.prop_daily, 1),   true);
-      Row("ptl",  r++, "Max drawdown %",   DoubleToString(m_v.prop_total, 1),   true);
+      Row("ptg",  r++, "Profit target %",  DoubleToString(m_v.prop_target, 1),  true,
+          m_force_prop);
+      Row("pdl",  r++, "Max daily loss %", DoubleToString(m_v.prop_daily, 1),   true,
+          m_force_prop);
+      Row("ptl",  r++, "Max drawdown %",   DoubleToString(m_v.prop_total, 1),   true,
+          m_force_prop);
 
       m_w.Label("h4", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5, "SESSION",
                 SSR_C_TEXT_DIM, SSR_FS_SMALL); r++;
@@ -252,7 +473,8 @@ public:
                   SSR_C_DEAL_TEXT, SSR_FS_BODY);
       m_w.Button("here", m_x + 12, by + 30, SSR_SETUP_W - 24, 22,
                  "Bring the line to this view");
-      m_w.Label("startlbl", m_x + 12, by + 58,
+      m_start_y = by + 58;
+      m_w.Label("startlbl", m_x + 12, m_start_y,
                 (m_start_text == "" ? "Drag the orange line" : m_start_text),
                 SSR_C_HOLD, SSR_FS_SMALL);
      }
@@ -285,6 +507,8 @@ public:
          else                                     m_v.blind = SSR_BLIND_OFF;
          Render();
         }
+      if(m_w.Pressed("bpre"))
+         CyclePreset();
       if(m_w.Pressed("bpon"))
         {
          m_v.prop_on = !m_v.prop_on;
