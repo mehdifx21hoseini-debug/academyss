@@ -804,6 +804,31 @@ void LoadCalendar(const string origin, const long win_start, const long win_end)
 bool BuildSession(string origin, const bool on_replay,
                   const bool one_chart_ok)
   {
+   //+------------------------------------------------------------------+
+   //| BLIND MODE IS DECIDED HERE, AND ONLY HERE.                       |
+   //|                                                                  |
+   //| It used to be decided in OnInit, before the setup panel existed - |
+   //| and the panel's Start button calls this function DIRECTLY rather  |
+   //| than going back through OnInit, so a blind mode chosen on the     |
+   //| panel never reached the sink on pass one.                         |
+   //|                                                                  |
+   //| The cost was not cosmetic. The name of the replay symbol depends  |
+   //| on this flag: EURUSD@.SSR1 when it is off, Chart.SSR1 when it is  |
+   //| on. Pass one built EURUSD@.SSR1 with a stale "off"; pass two      |
+   //| restored the setup from the file, read "full", and went looking   |
+   //| for Chart.SSR1 - which is not what the chart was showing. The     |
+   //| handover failed with SINK_FAILED and the user lost the session.   |
+   //|                                                                  |
+   //| One decision point, on the one path both callers share.           |
+   //+------------------------------------------------------------------+
+   SSRBlindPolicy blind;
+   blind.Apply(CfgBlind());
+   g_blind.SetPolicy(blind);
+   g_sink.SetAnonymous(blind.anonymous_symbol);
+   PrintFormat("[host] blind %s - the replay symbol will be %s",
+               SSRSetupBlindName(CfgBlind()),
+               SSRReplaySymbolNameFor(origin, InpSlot, blind.anonymous_symbol));
+
    SSRDataRange range;
    range.Init();
    g_src.RangeInto(range);
@@ -1722,19 +1747,20 @@ int OnInit()
          Print("[host] carrying the setup across the handover");
      }
 
+   //+------------------------------------------------------------------+
+   //| AND PASS TWO ADOPTS WHAT IS IN FRONT OF IT.                      |
+   //|                                                                  |
+   //| Recomputing the name on the second pass means two passes have to  |
+   //| agree about every input that feeds it. They did not, once, and    |
+   //| the session died. On the replay chart the answer needs no          |
+   //| computing at all: _Symbol IS the replay symbol.                    |
+   //+------------------------------------------------------------------+
    g_sink.SetAdoptExisting(on_replay);
+   g_sink.SetAdoptName(on_replay ? _Symbol : "");
    for(int i = 0; i < SSR_EXTRA_STREAMS; i++)
       g_sink2[i].SetAdoptExisting(false);
    g_ssr_log.SetTag("host");
    g_ssr_log.SetLevel(SSR_LOG_INFO);
-
-   //--- BLIND MODE IS DECIDED FIRST. The replay symbol's name is fixed
-   //--- when the symbol is created, so anonymising it later is not an
-   //--- option - and the name is the one leak no chart property closes.
-   SSRBlindPolicy blind;
-   blind.Apply(CfgBlind());
-   g_blind.SetPolicy(blind);
-   g_sink.SetAnonymous(blind.anonymous_symbol);
 
    if(!g_src.Open(origin))
      {

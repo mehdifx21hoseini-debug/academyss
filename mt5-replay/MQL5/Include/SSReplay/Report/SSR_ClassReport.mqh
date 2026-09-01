@@ -190,6 +190,19 @@ public:
 
          if(StringGetCharacter(line, 0) == '#')
            {
+            //+------------------------------------------------------------------+
+            //| THE MARKER LINE HAS NO COMMA, and that rejected every file.      |
+            //|                                                                  |
+            //| `# SS Replay journal` is one field. The comma test below dropped |
+            //| it before anything could notice it, so header_seen was never set |
+            //| and four perfectly good exports came back as "no SS Replay        |
+            //| header - is this a journal CSV?". The smoke test found it on its  |
+            //| first run, which is the entire reason it round-trips a real file  |
+            //| instead of parsing one I typed by hand.                           |
+            //+------------------------------------------------------------------+
+            if(StringFind(line, "# SS Replay journal") == 0)
+              { header_seen = true; continue; }
+
             string f[];
             if(Split(line, f) < 2)
                continue;
@@ -201,7 +214,6 @@ public:
             for(int e = 2; e < ArraySize(f); e++)
                v += "," + Trim(f[e]);
 
-            if(k == "SS Replay journal") { header_seen = true; continue; }
             if(k == "session")        out.session       = v;
             else if(k == "symbol")    out.symbol        = v;
             else if(k == "session_key") out.key         = v;

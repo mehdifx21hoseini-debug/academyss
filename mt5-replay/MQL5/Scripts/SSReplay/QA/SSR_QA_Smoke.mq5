@@ -197,12 +197,41 @@ void OnStart()
       ctrl.Pump(1000);
 
    long after_msc  = ctrl.Now();
-   int  after_bars = Bars(rsym, PERIOD_M1);
+
+   //+------------------------------------------------------------------+
+   //| Bars() ANSWERS FROM A CACHE, and a custom symbol just written to  |
+   //| has not necessarily rebuilt it.                                   |
+   //|                                                                   |
+   //| This read it once and reported "200 -> 200 bars" - while the very  |
+   //| next stage, which opens a chart on that symbol, counted 263. The   |
+   //| candles were there; the count was stale, and the stage was         |
+   //| measuring the terminal's cache rather than the engine.             |
+   //|                                                                   |
+   //| CopyRates pokes the series into building. A second is far longer   |
+   //| than it has ever needed and short enough that a genuinely dead     |
+   //| engine still fails here rather than hanging.                        |
+   //+------------------------------------------------------------------+
+   int  after_bars = before_bars;
+   int  waited_ms  = 0;
+   for(int w = 0; w < 20 && after_bars <= before_bars; w++)
+     {
+      MqlRates poke[];
+      CopyRates(rsym, PERIOD_M1, 0, 1, poke);
+      after_bars = Bars(rsym, PERIOD_M1);
+      if(after_bars > before_bars)
+         break;
+      Sleep(50);
+      waited_ms += 50;
+     }
 
    Check("the replay CLOCK advanced", after_msc > before_msc,
          StringFormat("%s -> %s", SSRFormatMsc(before_msc), SSRFormatMsc(after_msc)));
    Check("new CANDLES appeared", after_bars > before_bars,
-         StringFormat("%d -> %d bars in %s", before_bars, after_bars, rsym));
+         StringFormat("%d -> %d bars in %s%s", before_bars, after_bars, rsym,
+                      (waited_ms > 0
+                       ? StringFormat(" (the series took %d ms to rebuild)",
+                                      waited_ms)
+                       : "")));
 
    //+------------------------------------------------------------------+
    //| 7. THE CHART FOLLOWS.                                            |
@@ -523,8 +552,17 @@ void OnStart()
             ObjectGetInteger(lchart, "SSR_LINE_TP", OBJPROP_SELECTED),
             "both selected - no click needed before the drag");
 
+      //+------------------------------------------------------------------+
+      //| OFFSETS IN POINTS, NOT IN WHOLE UNITS.                           |
+      //|                                                                  |
+      //| This said `lpx - 5.0`. On gold at 4438 that is a stop below the   |
+      //| entry; on EURUSD at 1.15965 it is MINUS 3.84, and a level at a    |
+      //| negative price is correctly refused - so three stages failed and  |
+      //| named the product, when what was wrong was the test's idea of how |
+      //| big a price is. The same rule the product follows: ask the symbol.|
+      //+------------------------------------------------------------------+
       lines.BeginPositions();
-      lines.DrawPosition(4242, lpx, lpx - 5.0, lpx + 10.0, true, 0.10);
+      lines.DrawPosition(4242, lpx, lpx - 500 * pt, lpx + 1000 * pt, true, 0.10);
       lines.EndPositions();
       Check("an open trade draws its own levels",
             ObjectFind(lchart, "SSR_POS_4242_E") >= 0 &&

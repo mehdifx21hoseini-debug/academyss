@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v78 2026-09-02  it-compiles"
+#define SSR_BUILD           "v79 2026-09-02  it-ran"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

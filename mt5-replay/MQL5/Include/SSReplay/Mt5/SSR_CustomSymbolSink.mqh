@@ -38,6 +38,10 @@ private:
    CSSRSeedCache           m_cache;
    int                     m_slot;
    bool                    m_anonymous;
+
+   //--- the exact symbol to adopt, when the caller already knows it.
+   //--- Empty means "work it out from the origin and the slot".
+   string                  m_adopt_name;
    long                    m_warmup_from_msc;   // range the cache is asked about
    long                    m_warmup_to_msc;
    bool                    m_reused_seed;
@@ -55,7 +59,8 @@ private:
 
 public:
                      CSSRCustomSymbolSink(void)
-     : m_slot(1), m_anonymous(false), m_warmup_from_msc(SSR_INVALID_TIME),
+     : m_slot(1), m_anonymous(false), m_adopt_name(""),
+       m_warmup_from_msc(SSR_INVALID_TIME),
        m_warmup_to_msc(SSR_INVALID_TIME), m_reused_seed(false),
        m_prepared(false), m_adopt_existing(false), m_own_symbol(true),
        m_emit_calls(0), m_emit_ticks(0), m_seed_bars(0), m_truncates(0),
@@ -105,6 +110,19 @@ public:
    //| about whether recreation is POSSIBLE. Two different questions.   |
    //+------------------------------------------------------------------+
    void              SetAdoptExisting(const bool on) { m_adopt_existing = on; }
+
+   //+------------------------------------------------------------------+
+   //| ADOPT THIS EXACT SYMBOL, because the caller can see it.          |
+   //|                                                                  |
+   //| The second pass of the one-window handover runs ON the replay     |
+   //| chart, so _Symbol already IS the replay symbol - and recomputing  |
+   //| the name instead means two passes have to agree about every input |
+   //| that feeds the calculation. They disagreed once, over blind mode, |
+   //| and the session died with SINK_FAILED on a symbol that had never  |
+   //| existed. A name that is READ cannot disagree with one that is     |
+   //| read; only two that are computed can.                             |
+   //+------------------------------------------------------------------+
+   void              SetAdoptName(const string name) { m_adopt_name = name; }
    bool              ReusedSeed(void)               { return m_reused_seed; }
    string            CacheReason(void)              { return m_cache.LastReason(); }
    CSSRSeedCache    *Cache(void)                    { return GetPointer(m_cache); }
@@ -126,6 +144,20 @@ public:
       //--- symbol and with it the very bars we might have reused.
       m_reused_seed = false;
       string replay_name = SSRReplaySymbolNameFor(symbol, m_slot, m_anonymous);
+
+      //--- and when the caller handed us the real one, say so loudly if
+      //--- it is not what we would have computed. That difference is a
+      //--- bug somewhere upstream, and it used to surface as a dead
+      //--- session rather than as a sentence.
+      if(m_adopt_existing && m_adopt_name != "" && SSRIsReplaySymbol(m_adopt_name))
+        {
+         if(m_adopt_name != replay_name)
+            PrintFormat("[sink] the chart is showing %s but this pass would "
+                        "have computed %s - adopting what is actually there. "
+                        "Something upstream disagrees about blind mode or the "
+                        "slot.", m_adopt_name, replay_name);
+         replay_name = m_adopt_name;
+        }
       if(m_warmup_from_msc > 0 && m_warmup_to_msc > m_warmup_from_msc)
          m_reused_seed = m_cache.CanReuse(symbol, replay_name,
                                           m_warmup_from_msc, m_warmup_to_msc);
