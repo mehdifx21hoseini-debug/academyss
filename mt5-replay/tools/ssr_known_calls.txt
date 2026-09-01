@@ -33,6 +33,7 @@ ChartNext
 ChartOpen
 ChartPeriod
 ChartRedraw
+ChartScreenShot
 ChartSetInteger
 ChartSetSymbolPeriod
 ChartSymbol
@@ -69,6 +70,7 @@ FileSeek
 FileSize
 FileWriteString
 FolderCreate
+FolderDelete
 GetLastError
 GetMicrosecondCount
 GetPointer

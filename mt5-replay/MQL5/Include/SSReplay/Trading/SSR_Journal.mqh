@@ -17,6 +17,7 @@
 #include "SSR_TradingEngine.mqh"
 #include "SSR_Statistics.mqh"
 #include "SSR_PropEvaluation.mqh"
+#include "SSR_ShotBook.mqh"
 
 #define SSR_JOURNAL_DIR   "SSReplay\\journal"
 
@@ -29,6 +30,7 @@ private:
    string             m_last_error;
    string             m_last_path;
    CSSRPropEvaluation *m_prop;      // not owned; may be NULL
+   CSSRShotBook       *m_shots;     // not owned; may be NULL
 
    string             Csv(const string s)
      {
@@ -74,11 +76,16 @@ private:
 public:
                      CSSRJournal(void)
      : m_acct(NULL), m_stats(NULL), m_last_error(""), m_last_path(""),
-       m_prop(NULL) {}
+       m_prop(NULL), m_shots(NULL) {}
 
    //--- the evaluation's verdict belongs in the document, not only on a
    //--- panel that closes with the terminal
    void              AttachProp(CSSRPropEvaluation *p) { m_prop = p; }
+
+   //--- the pictures, if anyone was taking them. Without this the Chart
+   //--- column is simply absent rather than empty, which is the honest
+   //--- shape for a feature that was switched off.
+   void              AttachShots(CSSRShotBook *s)      { m_shots = s; }
 
    void              Attach(CSSRTradingEngine *a, CSSRStatsEngine *s = NULL)
      { m_acct = a; m_stats = s; }
@@ -309,11 +316,23 @@ public:
          FileWriteString(h, "</table></div>\r\n");
         }
 
+      //+------------------------------------------------------------------+
+      //| THE CHART COLUMN APPEARS ONLY IF THERE ARE PICTURES.             |
+      //|                                                                  |
+      //| Asked once, before the header is written, rather than per row -   |
+      //| a header promising a column that every row leaves blank is a      |
+      //| worse document than one that never mentions it.                   |
+      //+------------------------------------------------------------------+
+      bool shots = HasAnyShot();
+
       FileWriteString(h, "<h2>Trades</h2>\r\n<div class=\"scroll\">\r\n");
       FileWriteString(h,
          "<table><tr><th>#</th><th>Type</th><th>Tag</th><th class=\"n\">Volume</th>"
          "<th>Opened</th><th class=\"n\">Price</th><th>Closed</th><th class=\"n\">Price</th>"
-         "<th>Reason</th><th class=\"n\">R</th><th class=\"n\">Profit</th></tr>\r\n");
+         "<th>Reason</th><th class=\"n\">R</th><th class=\"n\">Profit</th>");
+      if(shots)
+         FileWriteString(h, "<th>Chart</th>");
+      FileWriteString(h, "</tr>\r\n");
 
       int total = m_acct.Total();
       for(int i = 0; i < total; i++)
@@ -326,7 +345,7 @@ public:
             "<tr><td>%d</td><td>%s</td><td>%s</td><td class=\"n\">%s</td>"
             "<td>%s</td><td class=\"n\">%s</td><td>%s</td><td class=\"n\">%s</td>"
             "<td>%s%s</td><td class=\"n\">%s</td>"
-            "<td class=\"n\"><span class=\"%s\">%.2f</span></td></tr>\r\n",
+            "<td class=\"n\"><span class=\"%s\">%.2f</span></td>",
             (int)p.ticket,
             (SSRIsLong(p.type) ? "BUY" : "SELL"),
             Html(p.tag),
@@ -349,6 +368,10 @@ public:
             (p.ambiguous ? " <span class=\"amb\">(assumed)</span>" : ""),
             (p.HasR() ? DoubleToString(p.RMultiple(), 2) : "-"),
             (net >= 0 ? "g" : "r"), net));
+
+         if(shots)
+            WriteShotCell(h, p.ticket);
+         FileWriteString(h, "</tr>\r\n");
         }
 
       FileWriteString(h, "</table></div>\r\n");
@@ -360,6 +383,53 @@ public:
       FileWriteString(h, "</body></html>\r\n");
       FileClose(h);
       return true;
+     }
+
+   //--- is there a single picture to show? Walked once, and it stops at
+   //--- the first hit rather than counting them all
+   bool              HasAnyShot(void)
+     {
+      if(m_shots == NULL || m_acct == NULL)
+         return false;
+      int total = m_acct.Total();
+      for(int i = 0; i < total; i++)
+        {
+         SSRVirtualPosition p;
+         if(!m_acct.At(i, p) || !p.IsClosed())
+            continue;
+         if(m_shots.RelPath(p.ticket, true) != "" ||
+            m_shots.RelPath(p.ticket, false) != "")
+            return true;
+        }
+      return false;
+     }
+
+   //+------------------------------------------------------------------+
+   //| ONE CELL, TWO THUMBNAILS - entry and exit, each a link to the    |
+   //| full-size PNG beside this file.                                  |
+   //|                                                                  |
+   //| A missing shot renders as nothing at all. It must never render   |
+   //| as a broken-image icon: this is a document a student hands in.   |
+   //+------------------------------------------------------------------+
+   void              WriteShotCell(const int h, const long ticket)
+     {
+      string in  = (m_shots != NULL ? m_shots.RelPath(ticket, true)  : "");
+      string out = (m_shots != NULL ? m_shots.RelPath(ticket, false) : "");
+      if(in == "" && out == "")
+        {
+         FileWriteString(h, "<td class=\"dim\">-</td>");
+         return;
+        }
+      FileWriteString(h, "<td class=\"shot\"><div>");
+      if(in != "")
+         FileWriteString(h, "<a href=\"" + in + "\" target=\"_blank\">"
+                            "<img src=\"" + in + "\" alt=\"chart at entry\" "
+                            "title=\"at entry - click for full size\"></a>");
+      if(out != "")
+         FileWriteString(h, "<a href=\"" + out + "\" target=\"_blank\">"
+                            "<img src=\"" + out + "\" alt=\"chart at exit\" "
+                            "title=\"at exit - click for full size\"></a>");
+      FileWriteString(h, "</div></td>");
      }
 
    //+------------------------------------------------------------------+
@@ -522,6 +592,15 @@ public:
          "background:var(--muted);opacity:.35}\r\n"
          ".bf{position:absolute;top:5px;bottom:5px;border-radius:3px}\r\n"
          ".bf.g{background:var(--gain)} .bf.r{background:var(--loss)}\r\n"
+         //--- the flex box is a DIV inside the cell, never the cell
+         //--- itself: display:flex on a <td> takes it out of the table
+         //--- box model and the column stops lining up with its header
+         "td.shot{padding:5px 9px}\r\n"
+         "td.shot div{display:flex;gap:4px}\r\n"
+         "td.shot img{display:block;width:78px;height:auto;"
+         "border:1px solid var(--line);border-radius:2px}\r\n"
+         "td.shot a:focus-visible img{outline:2px solid var(--equity);"
+         "outline-offset:1px}\r\n"
          "@media print{body{background:#fff}.thm{display:none}}\r\n"
          "</style></head><body><div class=\"w\">\r\n");
      }

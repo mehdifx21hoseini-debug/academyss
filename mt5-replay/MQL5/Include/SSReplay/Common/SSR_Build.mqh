@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD           "v71 2026-09-01  it-stays-where-you-put-it"
+#define SSR_BUILD           "v72 2026-09-01  a-picture-of-every-trade"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

@@ -46,6 +46,7 @@
 #include <SSReplay/Trading/SSR_Statistics.mqh>
 #include <SSReplay/Trading/SSR_Journal.mqh>
 #include <SSReplay/Trading/SSR_AutoPause.mqh>
+#include <SSReplay/Trading/SSR_ShotBook.mqh>
 #include <SSReplay/Trading/SSR_PropEvaluation.mqh>
 #include <SSReplay/Core/SSR_MasterClock.mqh>
 #include <SSReplay/Ui/SSR_GroupPort.mqh>
@@ -128,6 +129,13 @@ input bool            InpVitals      = true;                 // Print one diagno
 input bool            InpFlightRec   = true;                 // Record a black box file to MQL5/Files (send it when reporting a fault)
 input bool            InpTradeHistory = true;                // Leave closed trades drawn on the chart
 
+//--- A PICTURE OF EVERY TRADE. On by default: a statement whose rows
+//--- carry the chart the trade was taken on is the difference between
+//--- a number a student reports and a decision a coach can read. It
+//--- writes PNGs to MQL5\Files\SSReplay\journal\shots, sized from the
+//--- replay chart and capped, and this is the switch that stops it.
+input bool            InpShots       = true;                 // Screenshot the chart at each entry and exit
+
 //--- PROP FIRM EVALUATION -------------------------------------------
 //--- The four numbers every firm publishes. Left off by default,
 //--- because a replay that silently judges you is not a replay.
@@ -156,6 +164,7 @@ CSSRBlindMode        g_blind;
 CSSRRandomPicker     g_picker;
 CSSRSessionWatcher   g_session;
 CSSRTradeAutoPause   g_autopause;
+CSSRShotBook         g_shots;
 CSSRPropEvaluation   g_prop;
 CSSRSetupPanel       g_setup_ui;
 
@@ -923,6 +932,12 @@ bool BuildSession(string origin, const bool on_replay,
    g_autopause.Enable(SSR_PAUSE_ON_STOPOUT, InpPauseSL);
    g_ctrl.AddObserver(GetPointer(g_autopause));
 
+   //--- after the account for the same reason auto-pause is: by the time
+   //--- this looks, the engine has filled the order and hit the stop
+   g_shots.Attach(GetPointer(g_acct));
+   g_shots.Enable(InpShots);
+   g_ctrl.AddObserver(GetPointer(g_shots));
+
    //--- what counts as a new session is READ from the instrument, not
    //--- assumed from the clock
    g_session.SetMode(InpPauseSession);
@@ -974,6 +989,18 @@ bool BuildSession(string origin, const bool on_replay,
    //+------------------------------------------------------------------+
    g_replay_chart = (g_on_replay_chart ? ChartID()
                      : (one_chart_ok ? 0 : g_charts.OpenChart(CfgChartTf())));
+
+   //--- the pictures are of the REPLAY chart, not of whichever chart
+   //--- this program happens to be attached to
+   g_shots.SetChart(g_replay_chart);
+   if(InpShots && g_replay_chart != 0)
+      PrintFormat("[shots] on - a PNG of the chart at every entry and exit, "
+                  "into MQL5\\Files\\%s. Turn it off with InpShots.",
+                  SSR_SHOT_DIR);
+   else
+      if(InpShots)
+         Print("[shots] asked for, but there is no replay chart yet on this "
+               "pass - they start after the handover.");
 
    //--- the stop and target belong on the chart the user is watching,
    //--- not in a stepper. They are armed later, once a price exists.
@@ -1028,6 +1055,7 @@ bool BuildSession(string origin, const bool on_replay,
    g_gport.AttachAccount(GetPointer(g_acct));
    g_gport.AttachProp(GetPointer(g_prop));
    g_journal.AttachProp(GetPointer(g_prop));
+   g_journal.AttachShots(GetPointer(g_shots));
    g_gport.AttachStats(GetPointer(g_stats));
    g_gport.AttachStrategies(GetPointer(g_strategies));
    g_gport.AttachSessions(GetPointer(g_session_mgr));
@@ -2108,6 +2136,21 @@ void OnTimer()
       FlightGuard("g_ready is false - the session never finished building");
       return;
      }
+
+   //+------------------------------------------------------------------+
+   //| THE PICTURES OWED FROM LAST PASS, BEFORE THIS PASS PUMPS.        |
+   //|                                                                  |
+   //| The shot has to be taken AFTER MetaTrader has repainted the bar  |
+   //| the trade happened on, and the repaint is asynchronous. Taking   |
+   //| it inside the tick that opened the trade would produce a picture |
+   //| of the bar BEFORE the entry - which is worse than no picture,    |
+   //| because it looks correct.                                        |
+   //|                                                                  |
+   //| Here, a whole timer interval and the redraw inside it have gone  |
+   //| by since the transition was queued. It costs nothing on the      |
+   //| passes where nothing was queued, which is nearly all of them.    |
+   //+------------------------------------------------------------------+
+   g_shots.Flush();
 
    ulong now   = GetMicrosecondCount();
    ulong delta = (now - g_last_pump_us) / 1000;

@@ -31,6 +31,7 @@
 #include <SSReplay/Common/SSR_FlightRecorder.mqh>
 #include <SSReplay/Trading/SSR_TradingEngine.mqh>
 #include <SSReplay/Trading/SSR_Journal.mqh>
+#include <SSReplay/Trading/SSR_ShotBook.mqh>
 #include <SSReplay/Chart/SSR_TradeLines.mqh>
 #include <SSReplay/Chart/SSR_BlindMode.mqh>
 #include <SSReplay/Session/SSR_SessionManager.mqh>
@@ -1256,6 +1257,109 @@ void OnStart()
    }
 
    Unstash(SSR_PANEL_FILE);
+
+   //+------------------------------------------------------------------+
+   //| 20. A PICTURE OF EVERY TRADE.                                    |
+   //|                                                                  |
+   //| Driven through the real transitions - an account opens a position |
+   //| and the book is shown the same tick the controller would show it. |
+   //| What is asserted is a FILE WITH BYTES IN IT, not a call that      |
+   //| returned true: ChartScreenShot can answer true and write nothing  |
+   //| a browser will display, and the whole point of this feature is    |
+   //| that the picture reaches a document someone else opens.            |
+   //+------------------------------------------------------------------+
+   {
+      long sc = ChartOpen(rsym, PERIOD_M1);
+      if(Check("a chart for the screenshot test", sc != 0, rsym))
+        {
+         CSSRTradingEngine sa;
+         SSRExecutionModel sx;
+         sx.Init();
+         sa.SetExecution(sx);
+         sa.OnSessionStart("SMOKE", 5, 0.00001, 0);
+         sa.SetBalance(10000.0);
+
+         MqlTick sk[1];
+         sk[0].time     = (datetime)0;
+         sk[0].time_msc = 0;
+         sk[0].bid      = 1000.0;
+         sk[0].ask      = 1000.0;
+         sk[0].last     = 1000.0;
+         sk[0].volume   = 1;
+         sk[0].flags    = 0;
+         sa.OnTicks(sk, 1);
+
+         CSSRShotBook sb;
+         sb.Attach(GetPointer(sa));
+         sb.SetChart(sc);
+         sb.Enable(true);
+         sb.NewRun();
+         sb.Reseed();
+
+         //--- the entry
+         long tk = sa.Open(SSR_ORDER_BUY, 0.10);
+         sb.OnTicks(sk, 1);
+         Check("an entry is queued, not shot where it happened",
+               sb.Pending() == 1 && sb.Taken() == 0,
+               "the repaint that puts the new bar on screen has not run yet - "
+               "a shot taken here would picture the bar before the entry");
+
+         int took = sb.Flush();
+         string in_rel = sb.RelPath(tk, true);
+         Check("and the flush writes the entry picture",
+               took == 1 && in_rel != "",
+               (in_rel != "" ? in_rel : "nothing written - " + sb.LastError()));
+
+         //--- A FILE THAT EXISTS IS NOT A FILE WITH A PICTURE IN IT.
+         string in_path = SSR_SHOT_DIR + "\\" + sb.Run() + "\\"
+                          + SSRShotFile(tk, true);
+         int ph = FileOpen(in_path, FILE_READ | FILE_BIN);
+         int pbytes = 0;
+         if(ph != INVALID_HANDLE)
+           { pbytes = (int)FileSize(ph); FileClose(ph); }
+         Check("and there is really a PNG in it",
+               pbytes > 1000,
+               StringFormat("%d bytes - an empty file would pass a test that "
+                            "only asked whether it exists", pbytes));
+
+         //--- the exit
+         sa.Close(tk);
+         sb.OnTicks(sk, 1);
+         sb.Flush();
+         Check("the exit gets its own picture", sb.RelPath(tk, false) != "",
+               sb.RelPath(tk, false));
+
+         //+------------------------------------------------------------------+
+         //| OPENED AND CLOSED BETWEEN TWO LOOKS still owes both pictures.    |
+         //|                                                                  |
+         //| Not exotic: it is a scalp, and at 50x it is most stops. The      |
+         //| auto-pause watcher lost a release to exactly this case.           |
+         //+------------------------------------------------------------------+
+         long tk2 = sa.Open(SSR_ORDER_SELL, 0.10);
+         sa.Close(tk2);
+         sb.OnTicks(sk, 1);
+         Check("a trade that opened and closed unseen owes both pictures",
+               sb.Pending() == 2,
+               StringFormat("%d queued for one round trip", sb.Pending()));
+         sb.Flush();
+         Check("and gets them",
+               sb.RelPath(tk2, true) != "" && sb.RelPath(tk2, false) != "",
+               StringFormat("%d taken, %d refused", sb.Taken(), sb.Failed()));
+
+         Check("a ticket that was never photographed answers empty",
+               sb.RelPath(999999, true) == "",
+               "the statement prints no <img> rather than a broken one");
+
+         //--- and take the disk back
+         string run = SSR_SHOT_DIR + "\\" + sb.Run();
+         FileDelete(run + "\\" + SSRShotFile(tk,  true));
+         FileDelete(run + "\\" + SSRShotFile(tk,  false));
+         FileDelete(run + "\\" + SSRShotFile(tk2, true));
+         FileDelete(run + "\\" + SSRShotFile(tk2, false));
+         FolderDelete(run);
+         ChartClose(sc);
+        }
+   }
 
    ctrl.Release();
    Cleanup(rsym);
