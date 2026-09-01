@@ -1139,6 +1139,18 @@ bool BuildSession(string origin, const bool on_replay,
    g_gport.AttachProp(GetPointer(g_prop));
    g_journal.AttachProp(GetPointer(g_prop));
    g_journal.AttachShots(GetPointer(g_shots));
+
+   //--- WHAT SESSION THIS IS A REPORT ON. Only the host knows all four:
+   //--- the window belongs to the controller and the seed to the
+   //--- randomiser, and a report should not be reaching into either.
+   //--- Without it, a coach comparing twenty students cannot tell the
+   //--- one who ran a different window from the one who traded badly.
+   //--- the seed identifies the session only when the session WAS
+   //--- chosen by seed. Writing the picker's idle value on a hand-picked
+   //--- window would make two different sessions look like one.
+   g_journal.SetSession(CfgSession(), origin, win_start, win_end,
+                        (InpRandom ? IntegerToString((long)g_picker.Seed())
+                                   : ""));
    g_gport.AttachStats(GetPointer(g_stats));
    g_gport.AttachStrategies(GetPointer(g_strategies));
    g_gport.AttachSessions(GetPointer(g_session_mgr));

@@ -33,6 +33,7 @@
 #include <SSReplay/Trading/SSR_Journal.mqh>
 #include <SSReplay/Trading/SSR_ShotBook.mqh>
 #include <SSReplay/Ui/SSR_FirstRun.mqh>
+#include <SSReplay/Report/SSR_ClassReport.mqh>
 #include <SSReplay/Data/SSR_Calendar.mqh>
 #include <SSReplay/Chart/SSR_CalendarLines.mqh>
 #include <SSReplay/Chart/SSR_TradeLines.mqh>
@@ -1742,6 +1743,139 @@ void OnStart()
 
       FileDelete(SSR_SEEN_FILE);
       Unstash(SSR_SEEN_FILE);
+   }
+
+   //+------------------------------------------------------------------+
+   //| 24. THE CLASS REPORT.                                            |
+   //|                                                                  |
+   //| Round trip, not a fixture. The journal WRITES a CSV and the class |
+   //| report READS it - so the two halves are tested against each other |
+   //| rather than against a hand-typed sample that would still parse    |
+   //| perfectly on the day the writer changed a column.                 |
+   //+------------------------------------------------------------------+
+   {
+      FolderCreate(SSR_CLASS_DIR);
+
+      //--- its own statistics engine: the one stage 17 built went out of
+      //--- scope with the block it was declared in, and reaching for a
+      //--- name that is no longer there is how a file stops compiling
+      //--- between one stage and the next
+      CSSRStatsEngine cls_stats;
+      cls_stats.Attach(GetPointer(acct));
+      SSRStatistics cls_all;
+      cls_all.Init();
+      cls_stats.Compute(cls_all);
+
+      //--- two students who ran the same session, one who did not, and
+      //--- one file that is not a journal at all
+      CSSRJournal cj;
+      cj.Attach(GetPointer(acct), GetPointer(cls_stats));
+      cj.SetSession("smoke-class", "EURUSD", 1700000000000, 1700003600000, "42");
+
+      string a_name = "class-alice", b_name = "class-bob", c_name = "class-carol";
+      bool wrote = cj.ExportCsv(a_name, 5);
+      string a_src = cj.LastPath();
+
+      Check("a journal csv carries the session it reports on", wrote,
+            a_src + (cj.LastError() == "" ? "" : "  " + cj.LastError()));
+
+      //--- MOVED, not copied: FileCopy is one more built-in to trust,
+      //--- and the export can simply be run again for the next student
+      FileMove(a_src, 0, SSR_CLASS_DIR + "\\" + a_name + ".csv", FILE_REWRITE);
+      cj.ExportCsv(b_name, 5);
+      FileMove(cj.LastPath(), 0, SSR_CLASS_DIR + "\\" + b_name + ".csv",
+               FILE_REWRITE);
+
+      //--- carol ran a different window. Same code, one field apart.
+      cj.SetSession("smoke-class", "EURUSD", 1600000000000, 1600003600000, "7");
+      cj.ExportCsv(c_name, 5);
+      FileMove(cj.LastPath(), 0, SSR_CLASS_DIR + "\\" + c_name + ".csv",
+               FILE_REWRITE);
+
+      string junk = SSR_CLASS_DIR + "\\class-notajournal.csv";
+      int jh = FileOpen(junk, FILE_WRITE | FILE_TXT | FILE_ANSI);
+      if(jh != INVALID_HANDLE)
+        {
+         FileWriteString(jh, "date,amount\r\n2026.01.01,12.50\r\n");
+         FileClose(jh);
+        }
+
+      CSSRClassReport rep;
+      int n = rep.Scan(SSR_CLASS_DIR);
+      Check("the folder is read", n >= 4,
+            StringFormat("%d file(s)%s", n,
+                         (rep.LastError() == "" ? "" : "  " + rep.LastError())));
+
+      //--- what the coach is actually asking: who ran the same thing
+      Check("two of them ran the same session and one did not",
+            rep.Agreeing() == 2 && rep.Key() != "",
+            StringFormat("%d agree on [%s]", rep.Agreeing(), rep.Key()));
+
+      int readable = 0, unreadable = 0;
+      bool alice_ok = false;
+      for(int i = 0; i < n; i++)
+        {
+         SSRStudent st;
+         if(!rep.At(i, st))
+            continue;
+         if(st.parsed)
+           {
+            readable++;
+            if(st.name == a_name)
+              {
+               alice_ok = (st.symbol == "EURUSD" &&
+                           st.win_start == 1700000000000 &&
+                           st.trades == cls_all.trades &&
+                           MathAbs(st.net_profit - cls_all.net_profit) < 0.02);
+               //--- every trade of hers, back off the disk
+               Check("and her trades come back with their entry times",
+                     st.n_entries == cls_all.trades && st.n_entries > 0,
+                     StringFormat("%d entries read for %d closed trades",
+                                  st.n_entries, cls_all.trades));
+              }
+           }
+         else
+            unreadable++;
+        }
+
+      Check("the numbers survive the round trip", alice_ok,
+            "symbol, window, trade count and net profit all match what "
+            "the engine held");
+
+      //--- A FILE THAT IS NOT A JOURNAL IS NAMED, NOT DROPPED. A name
+      //--- missing from a report is a student who gets forgotten.
+      Check("a file that is not a journal is reported, not skipped",
+            unreadable == 1 && readable == 3,
+            StringFormat("%d readable, %d rejected by name", readable,
+                         unreadable));
+
+      string out = "SSReplay\\class-smoke.html";
+      if(Check("the page is written", rep.Write(out),
+               out + (rep.LastError() == "" ? "" : "  " + rep.LastError())))
+        {
+         string body = "";
+         int ph = FileOpen(out, FILE_READ | FILE_TXT | FILE_ANSI);
+         if(ph != INVALID_HANDLE)
+           {
+            while(!FileIsEnding(ph))
+               body += FileReadString(ph);
+            FileClose(ph);
+           }
+         //--- the warning has to be IN the document, not only in the log
+         Check("and it warns about the odd one out on the page itself",
+               StringFind(body, "different session") >= 0 &&
+               StringFind(body, "could not be read") >= 0 &&
+               StringFind(body, "smark") >= 0,
+               StringFormat("%d chars, both warnings and the entry strip "
+                            "present", StringLen(body)));
+         FileDelete(out);
+        }
+
+      FileDelete(SSR_CLASS_DIR + "\\" + a_name + ".csv");
+      FileDelete(SSR_CLASS_DIR + "\\" + b_name + ".csv");
+      FileDelete(SSR_CLASS_DIR + "\\" + c_name + ".csv");
+      FileDelete(junk);
+      FolderDelete(SSR_CLASS_DIR);
    }
 
    ctrl.Release();
