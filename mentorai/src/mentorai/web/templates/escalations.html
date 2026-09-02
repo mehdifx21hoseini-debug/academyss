@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% set active = 'escalations' %}
+{% block title %}ارجاع‌ها{% endblock %}
+{% block content %}
+<h1>در انتظار منتور</h1>
+<p class="muted">
+  این پیام‌ها در تلگرام خوانده‌نشده مانده‌اند تا خودتان جوابشان بدهید. بستن ارجاع
+  اینجا فقط شمارنده را پاک می‌کند و دستیار را برمی‌گرداند؛ چیزی برای دانشجو فرستاده
+  نمی‌شود.
+</p>
+{% if not rows %}
+<p class="muted">چیزی در انتظار نیست.</p>
+{% else %}
+<table>
+  <thead>
+    <tr>
+      <th>دانشجو</th>
+      <th>دلیل</th>
+      <th>مدت انتظار</th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for esc, conversation, student_name in rows %}
+    <tr>
+      <td><a href="/conversations/{{ conversation.id }}">{{ student_name or 'بدون نام' }}</a></td>
+      <td>{{ silence_reason(esc.reason) }}</td>
+      <td class="num-cell">{{ duration_label(now - esc.created_at) }}</td>
+      <td>
+        <form method="post" action="/conversations/{{ conversation.id }}/resolve">
+          <input type="hidden" name="{{ csrf_field }}" value="{{ viewer.csrf_token }}">
+          <button type="submit" class="link">جواب دادم</button>
+        </form>
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

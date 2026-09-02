@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% set active = 'conversations' %}
+{% block title %}{{ student.display_name or 'مکالمه' }}{% endblock %}
+{% block content %}
+<h1>{{ student.display_name or 'بدون نام' }}</h1>
+<p class="muted">
+  وضعیت: {{ conversation_status(conversation.status) }} ·
+  دستیار: {{ 'روشن' if conversation.assistant_enabled else 'خاموش' }}
+</p>
+
+<form method="post" action="/conversations/{{ conversation.id }}/assistant" class="inline">
+  <input type="hidden" name="{{ csrf_field }}" value="{{ viewer.csrf_token }}">
+  <input type="hidden" name="enabled" value="{{ 'off' if conversation.assistant_enabled else 'on' }}">
+  <button type="submit">{{ 'خاموش کردن دستیار' if conversation.assistant_enabled else 'روشن کردن دستیار' }}</button>
+</form>
+
+<h2>پیام‌ها</h2>
+{% if not timeline %}
+<p class="muted">پیامی ثبت نشده است.</p>
+{% else %}
+<ol class="thread">
+{% for message, run in timeline %}
+  <li class="msg {{ message.sender }}">
+    <div class="msg-head">
+      <span class="who-tag">{{ sender_label(message.sender) }}</span>
+      <span class="muted stamp">{{ datetime_label(message.sent_at) }}</span>
+    </div>
+    {% if message.text %}
+      <p class="body">{{ message.text }}</p>
+    {% else %}
+      <p class="body muted">[{{ message.media_type or 'بدون متن' }}]</p>
+    {% endif %}
+
+    {% if run %}
+      {% if run.outcome == 'silence' %}
+        <div class="why silent">
+          <strong>دستیار جواب نداد.</strong>
+          {{ silence_reason(run.reason) }}
+          {% if run.confidence is not none %}
+            (اطمینان: {{ percent_label(run.confidence) }})
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="why answered">
+          <strong>دستیار جواب داد.</strong>
+          {% if run.confidence is not none %}اطمینان: {{ percent_label(run.confidence) }}{% endif %}
+          {% if run.retrieved %}
+            <ul class="sources">
+              {% for hit in run.retrieved %}
+                <li>{{ hit.get('title') or hit.get('document_id') }}</li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <span class="muted">بدون منبع بازیابی‌شده</span>
+          {% endif %}
+        </div>
+      {% endif %}
+    {% endif %}
+  </li>
+{% endfor %}
+</ol>
+{% endif %}
+{% endblock %}

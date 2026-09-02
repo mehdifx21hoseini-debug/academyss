@@ -1,0 +1,251 @@
+/* شیوه‌نامه‌ی پنل.
+ *
+ * قلم از سیستم می‌آید و دانلود نمی‌شود. سیاست محتوا هیچ دامنه‌ی بیرونی را مجاز
+ * نمی‌کند، و پنل روی سروری بیرون از ایران است که ممکن است دسترسی به سرویس قلم
+ * از هر طرف کند باشد؛ قلم سیستمی هیچ‌کدام از این دو مسئله را ندارد.
+ */
+
+:root {
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --ink: #16181d;
+  --muted: #6b7280;
+  --line: #e3e6eb;
+  --accent: #1f6feb;
+  --warn: #b45309;
+  --warn-bg: #fff7ed;
+  --ok: #15803d;
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: system-ui, "Segoe UI", Tahoma, "Noto Sans Arabic", sans-serif;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 20px 64px;
+}
+
+h1 { font-size: 22px; margin: 0 0 4px; }
+h2 { font-size: 17px; margin: 32px 0 12px; font-weight: 600; }
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+.muted { color: var(--muted); font-size: 13px; }
+
+/* نوار بالا */
+.bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 10px 20px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--line);
+}
+.bar nav { display: flex; gap: 18px; }
+.bar nav a { color: var(--ink); font-size: 14px; padding: 4px 0; }
+.bar nav a.on { color: var(--accent); border-bottom: 2px solid var(--accent); }
+.who { display: flex; align-items: center; gap: 10px; font-size: 13px; }
+.who form { display: inline; }
+
+.tag {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 1px 9px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.warn-tag { color: var(--warn); background: var(--warn-bg); border-color: #fed7aa; }
+
+/* کاشی‌های شاخص */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+.tile {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.tile.warn { border-color: #fed7aa; background: var(--warn-bg); }
+.tile .num { font-size: 28px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.tile .lbl { font-size: 13px; color: var(--muted); }
+
+/* نوار نسبت */
+.meter {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-top: 12px;
+}
+.meter-head { display: flex; justify-content: space-between; align-items: baseline; }
+.meter .pct { font-size: 20px; font-weight: 600; font-variant-numeric: tabular-nums; }
+/* نام این کلاس عمداً «bar» نیست: نوار بالای صفحه هم همان نام را داشت و قاعده‌های
+ * آن (چیدمان انعطاف‌پذیر و حاشیه‌ی درونی) اینجا هم اعمال می‌شد و ارتفاع پرشدگی را
+ * صفر می‌کرد. نوار پر بود ولی دیده نمی‌شد. */
+.meter .track {
+  display: block;
+  height: 8px;
+  background: var(--bg);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 10px 0 8px;
+}
+.meter .track span { display: block; height: 100%; background: var(--accent); }
+
+/* عرض نوار از کلاس می‌آید و نه از ویژگی style: سیاست محتوا سبک درون‌خطی را
+ * مسدود می‌کند، و نوار با style بی‌صدا خالی می‌ماند. پله‌ها پنج درصدی‌اند. */
+.meter .track span.p0 { width: 0%; }
+.meter .track span.p5 { width: 5%; }
+.meter .track span.p10 { width: 10%; }
+.meter .track span.p15 { width: 15%; }
+.meter .track span.p20 { width: 20%; }
+.meter .track span.p25 { width: 25%; }
+.meter .track span.p30 { width: 30%; }
+.meter .track span.p35 { width: 35%; }
+.meter .track span.p40 { width: 40%; }
+.meter .track span.p45 { width: 45%; }
+.meter .track span.p50 { width: 50%; }
+.meter .track span.p55 { width: 55%; }
+.meter .track span.p60 { width: 60%; }
+.meter .track span.p65 { width: 65%; }
+.meter .track span.p70 { width: 70%; }
+.meter .track span.p75 { width: 75%; }
+.meter .track span.p80 { width: 80%; }
+.meter .track span.p85 { width: 85%; }
+.meter .track span.p90 { width: 90%; }
+.meter .track span.p95 { width: 95%; }
+.meter .track span.p100 { width: 100%; }
+.meter p { margin: 0; }
+
+.alarm {
+  background: var(--warn-bg);
+  border: 1px solid #fed7aa;
+  color: var(--warn);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin: 12px 0 20px;
+}
+
+/* جدول‌ها */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+th, td { text-align: right; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+th { font-size: 13px; color: var(--muted); font-weight: 600; background: #fbfcfd; }
+tbody tr:last-child td { border-bottom: none; }
+/* تاریخ و ساعت باید چپ‌به‌راست بمانند، وگرنه دوسویگی متن ترتیبشان را جابه‌جا
+ * می‌کند و ساعت پیش از تاریخ می‌نشیند. */
+.num-cell { font-variant-numeric: tabular-nums; direction: ltr; text-align: right; }
+.stamp { font-variant-numeric: tabular-nums; direction: ltr; display: inline-block; }
+tr.stale td { background: var(--warn-bg); }
+
+/* رشته‌ی پیام‌ها */
+.thread { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.msg {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+}
+.msg.assistant { border-right: 3px solid var(--accent); }
+.msg.mentor { border-right: 3px solid var(--ok); }
+.msg-head { display: flex; gap: 10px; align-items: baseline; margin-bottom: 4px; }
+.who-tag { font-size: 13px; font-weight: 600; }
+.msg .body { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.why {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  background: var(--bg);
+}
+.why.silent { background: var(--warn-bg); color: var(--warn); }
+.why.answered { color: var(--muted); }
+.why strong { color: inherit; }
+.sources { margin: 6px 0 0; padding-right: 18px; }
+
+/* فرم‌ها */
+button {
+  font: inherit;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+}
+button:hover { filter: brightness(0.94); }
+button.link {
+  background: none;
+  color: var(--accent);
+  padding: 0;
+  font-size: 13px;
+}
+form.inline { display: inline-block; margin: 8px 0 0; }
+
+.login {
+  max-width: 340px;
+  margin: 12vh auto 0;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+}
+.login h1 { margin-bottom: 0; }
+.login form { display: flex; flex-direction: column; gap: 14px; margin-top: 20px; }
+.login label { display: flex; flex-direction: column; gap: 5px; font-size: 13px; color: var(--muted); }
+.login input {
+  font: inherit;
+  color: var(--ink);
+  padding: 9px 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+}
+.login input:focus { outline: 2px solid var(--accent); outline-offset: -1px; }
+
+.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  margin-top: 16px;
+}
+
+code {
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 1px 5px;
+  font-size: 13px;
+  direction: ltr;
+  display: inline-block;
+}

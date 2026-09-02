@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% set active = 'dashboard' %}
+{% block title %}خلاصه{% endblock %}
+{% block content %}
+<h1>خلاصه</h1>
+
+{% if kpis.open_escalations %}
+<p class="alarm">
+  {{ digits(kpis.open_escalations) }} پیام در انتظار پاسخ منتور است{% if kpis.oldest_open_hours %}؛
+  قدیمی‌ترینشان {{ digits(kpis.oldest_open_hours) }} ساعت است{% endif %}.
+  <a href="/escalations">دیدن فهرست</a>
+</p>
+{% endif %}
+
+<section class="tiles">
+  <div class="tile">
+    <span class="num">{{ digits(kpis.students) }}</span>
+    <span class="lbl">دانشجو</span>
+  </div>
+  <div class="tile">
+    <span class="num">{{ digits(kpis.conversations) }}</span>
+    <span class="lbl">مکالمه</span>
+  </div>
+  <div class="tile {{ 'warn' if kpis.open_escalations }}">
+    <span class="num">{{ digits(kpis.open_escalations) }}</span>
+    <span class="lbl">ارجاع باز</span>
+  </div>
+  <div class="tile">
+    <span class="num">{{ digits(kpis.knowledge_documents) }}</span>
+    <span class="lbl">سند فعال در پایگاه دانش</span>
+  </div>
+</section>
+
+<h2>هفت روز گذشته</h2>
+<section class="tiles">
+  <div class="tile">
+    <span class="num">{{ digits(kpis.answered_7d) }}</span>
+    <span class="lbl">پیام پاسخ‌داده‌شده</span>
+  </div>
+  <div class="tile">
+    <span class="num">{{ digits(kpis.silent_7d) }}</span>
+    <span class="lbl">پیام واگذارشده به منتور</span>
+  </div>
+</section>
+
+{% if kpis.runs_7d %}
+<div class="meter">
+  <div class="meter-head">
+    <span>سهم پیام‌هایی که دستیار خودش جواب داد</span>
+    <span class="pct">{{ percent_label(kpis.answer_rate) }}</span>
+  </div>
+  <div class="track"><span class="{{ bar_class(kpis.answer_rate) }}"></span></div>
+  <p class="muted">
+    {{ digits(kpis.answered_7d) }} از {{ digits(kpis.runs_7d) }} پیام.
+    عدد پایین لزوماً بد نیست: سکوت وقتی مطمئن نیست، همان چیزی است که خواسته شده.
+  </p>
+</div>
+{% endif %}
+
+<h2>حالت پیش‌نویس</h2>
+{% if kpis.drafts_pending or kpis.drafts_approved or kpis.drafts_edited %}
+<div class="meter">
+  <div class="meter-head">
+    <span>تأیید بدون ویرایش</span>
+    <span class="pct">{{ percent_label(kpis.untouched_approval_rate) }}</span>
+  </div>
+  <div class="track"><span class="{{ bar_class(kpis.untouched_approval_rate) }}"></span></div>
+  <p class="muted">
+    {{ digits(kpis.drafts_approved) }} تأیید بدون تغییر، {{ digits(kpis.drafts_edited) }} تأیید با ویرایش،
+    {{ digits(kpis.drafts_pending) }} در انتظار تصمیم.
+    همین عدد تصمیم می‌گیرد کِی یک حساب از حالت پیش‌نویس بیرون بیاید (ADR-010).
+  </p>
+</div>
+{% else %}
+<p class="muted">هنوز پیش‌نویسی ثبت نشده است.</p>
+{% endif %}
+{% endblock %}

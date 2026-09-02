@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import csv
+import getpass
 import sys
 from pathlib import Path
 
@@ -19,7 +20,13 @@ from telethon.sessions import StringSession
 
 from mentorai.config import get_settings
 from mentorai.db.crypto import encrypt_session
-from mentorai.db.models import AuditLog, ExcludedChat, KnowledgeDocument, MentorAccount
+from mentorai.db.models import (
+    AuditLog,
+    ExcludedChat,
+    KnowledgeDocument,
+    MentorAccount,
+    PanelUser,
+)
 from mentorai.db.session import session_scope
 from mentorai.knowledge.embeddings import HashingEmbedder
 from mentorai.knowledge.evaluate import EvalCase, evaluate
@@ -115,6 +122,57 @@ async def cmd_pause(args: argparse.Namespace) -> int:
             )
         )
     print(f"حساب {args.slug} {'فعال' if args.resume else 'متوقف'} شد.")
+    return 0
+
+
+async def cmd_panel_user(args: argparse.Namespace) -> int:
+    """ساخت کاربر پنل.
+
+    رمز از ورودی تعاملی گرفته می‌شود و نه از آرگومان خط فرمان: آرگومان در تاریخچه‌ی
+    پوسته و در فهرست فرایندهای در حال اجرا دیده می‌شود.
+    """
+    from mentorai.web.security import hash_password
+
+    role = args.role
+    async with session_scope() as session:
+        account_id: int | None = None
+        if role == "mentor":
+            if not args.slug:
+                print("نقش منتور به --slug نیاز دارد", file=sys.stderr)
+                return 1
+            account = (
+                await session.execute(select(MentorAccount).where(MentorAccount.slug == args.slug))
+            ).scalar_one_or_none()
+            if account is None:
+                print(f"حسابی با slug={args.slug} پیدا نشد", file=sys.stderr)
+                return 1
+            account_id = account.id
+        elif args.slug:
+            print("نقش مدیر حساب ندارد؛ --slug را بردارید", file=sys.stderr)
+            return 1
+
+        password = getpass.getpass("رمز: ")
+        if password != getpass.getpass("تکرار رمز: "):
+            print("دو رمز یکی نیستند", file=sys.stderr)
+            return 1
+        try:
+            password_hash = hash_password(password)
+        except ValueError as exc:
+            print(str(exc), file=sys.stderr)
+            return 1
+
+        session.add(
+            PanelUser(
+                username=args.username,
+                display_name=args.display_name,
+                password_hash=password_hash,
+                role=role,
+                account_id=account_id,
+            )
+        )
+        session.add(AuditLog(actor="cli", action="create_panel_user", target=args.username))
+
+    print(f"کاربر پنل {args.username} ساخته شد.")
     return 0
 
 
@@ -340,6 +398,13 @@ def main() -> int:
     kb_eval.add_argument("--cases", required=True)
     kb_eval.add_argument("--k", type=int, default=5)
     kb_eval.set_defaults(func=cmd_kb_eval)
+
+    panel_user = sub.add_parser("panel-user", help="ساخت کاربر پنل مدیریت")
+    panel_user.add_argument("--username", required=True)
+    panel_user.add_argument("--display-name", required=True)
+    panel_user.add_argument("--role", choices=("mentor", "admin"), required=True)
+    panel_user.add_argument("--slug", default=None, help="حساب منتور؛ فقط برای نقش منتور")
+    panel_user.set_defaults(func=cmd_panel_user)
 
     run = sub.add_parser("run-gateway", help="اجرای دروازه برای همه حساب‌های فعال")
     run.set_defaults(func=cmd_run_gateway)

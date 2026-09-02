@@ -521,3 +521,62 @@ class MemoryRejection(Base):
     reason: Mapped[str] = mapped_column(String(32), nullable=False)
     detail: Mapped[str | None] = mapped_column(String(64))
     created_at: Mapped[datetime] = _created_at()
+
+
+class PanelRole(enum.StrEnum):
+    mentor = "mentor"
+    admin = "admin"
+
+
+class PanelUser(Base):
+    """کاربر پنل مدیریت.
+
+    هیچ ستون رمز متن ساده‌ای اینجا نیست و هرگز نباید اضافه شود.
+    """
+
+    __tablename__ = "panel_users"
+    __table_args__ = (
+        CheckConstraint("role in ('mentor', 'admin')", name="ck_panel_user_role"),
+        CheckConstraint(
+            "(role = 'admin' and account_id is null) or "
+            "(role = 'mentor' and account_id is not null)",
+            name="ck_panel_user_account_matches_role",
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    username: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    display_name: Mapped[str] = mapped_column(String(200), nullable=False)
+    password_hash: Mapped[str] = mapped_column(Text, nullable=False)
+    role: Mapped[str] = mapped_column(String(16), nullable=False)
+    account_id: Mapped[int | None] = mapped_column(
+        ForeignKey("mentor_accounts.id", ondelete="RESTRICT")
+    )
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
+    created_at: Mapped[datetime] = _created_at()
+    last_login_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+
+
+class PanelSession(Base):
+    """نشست پنل. فقط هش توکن ذخیره می‌شود، نه خود توکن."""
+
+    __tablename__ = "panel_sessions"
+    # فقط نشست‌های باطل‌نشده. نشست‌های باطل‌شده برای بازبینی می‌مانند ولی در
+    # نمایه‌ی جست‌وجو جایی ندارند.
+    __table_args__ = (
+        Index(
+            "ix_panel_sessions_live",
+            "user_id",
+            postgresql_where=text("revoked_at is null"),
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    token_hash: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("panel_users.id", ondelete="CASCADE"), nullable=False
+    )
+    created_at: Mapped[datetime] = _created_at()
+    expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    source_ip: Mapped[str | None] = mapped_column(String(64))

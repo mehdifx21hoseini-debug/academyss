@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% set active = 'knowledge' %}
+{% block title %}پایگاه دانش{% endblock %}
+{% block content %}
+<h1>پایگاه دانش</h1>
+<p class="muted">
+  ویرایش از همین‌جا انجام نمی‌شود. منبع حقیقت فایل CSV است و ورودش با دستور
+  <code>mentorai kb-import</code>؛ این‌طور هر تغییر در پایگاه دانش تاریخچه‌ی نسخه دارد.
+</p>
+{% if not rows %}
+<p class="muted">هنوز سندی وارد نشده است.</p>
+{% else %}
+<table>
+  <thead>
+    <tr>
+      <th>عنوان</th>
+      <th>دسته</th>
+      <th>منبع</th>
+      <th>اعتبار</th>
+      <th>تا تاریخ</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for doc in rows %}
+    <tr class="{{ 'stale' if doc.valid_until and doc.valid_until < today }}">
+      <td>{{ doc.title }}</td>
+      <td>{{ doc.category or '—' }}</td>
+      <td>{{ source_class(doc.source_class) }}</td>
+      <td>{{ authority(doc.authority) }}</td>
+      <td class="num-cell">
+        {% if doc.valid_until %}
+          {{ date_label(doc.valid_until) }}{% if doc.valid_until < today %} <span class="tag warn-tag">منقضی</span>{% endif %}
+        {% else %}—{% endif %}
+      </td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

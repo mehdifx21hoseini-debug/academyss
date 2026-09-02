@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}پنل MENTORAI{% endblock %}</title>
+  <link rel="stylesheet" href="/static/panel.css">
+</head>
+<body>
+{% if viewer %}
+<header class="bar">
+  <nav>
+    <a href="/" class="{{ 'on' if active == 'dashboard' }}">خلاصه</a>
+    <a href="/conversations" class="{{ 'on' if active == 'conversations' }}">مکالمه‌ها</a>
+    <a href="/escalations" class="{{ 'on' if active == 'escalations' }}">ارجاع‌ها</a>
+    <a href="/knowledge" class="{{ 'on' if active == 'knowledge' }}">پایگاه دانش</a>
+  </nav>
+  <div class="who">
+    <span>{{ viewer.user.display_name }}</span>
+    <span class="tag">{{ 'مدیر' if viewer.is_admin else 'منتور' }}</span>
+    <form method="post" action="/logout">
+      <input type="hidden" name="{{ csrf_field }}" value="{{ viewer.csrf_token }}">
+      <button type="submit" class="link">خروج</button>
+    </form>
+  </div>
+</header>
+{% endif %}
+<main>
+{% block content %}{% endblock %}
+</main>
+</body>
+</html>
