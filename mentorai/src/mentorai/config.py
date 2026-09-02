@@ -22,6 +22,9 @@ class Settings(BaseSettings):
     telegram_api_id: int
     telegram_api_hash: SecretStr
 
+    # ربات کنترل منتورها. جدا از حساب‌های کاربری و بدون ریسک مسدودی.
+    control_bot_token: SecretStr | None = None
+
     quiet_hours_start: int = Field(default=23, ge=0, le=23)
     quiet_hours_end: int = Field(default=8, ge=0, le=23)
     timezone: str = "Asia/Tehran"

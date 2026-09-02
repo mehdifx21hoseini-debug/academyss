@@ -84,6 +84,10 @@ class MentorAccount(Base):
     session_encrypted: Mapped[bytes | None] = mapped_column()
 
     enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
+    # پیش‌نویس یا ارسال مستقیم. سوییچ یک تنظیم است، نه بازنویسی کد (ADR-010).
+    reply_mode: Mapped[str] = mapped_column(String(16), nullable=False, server_default="draft")
+    # جایی که ربات کنترل با این منتور حرف می‌زند.
+    control_chat_id: Mapped[int | None] = mapped_column(BigInteger)
     # کلید قطع دستی. یک حساب بدون توقف بقیه از مدار خارج می‌شود.
     send_paused: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("false"))
     paused_reason: Mapped[str | None] = mapped_column(Text)

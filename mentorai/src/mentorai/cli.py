@@ -195,6 +195,85 @@ async def cmd_kb_eval(args: argparse.Namespace) -> int:
     return 0
 
 
+async def _load_accounts() -> list[MentorAccount]:
+    async with session_scope() as session:
+        return list(
+            (
+                await session.execute(
+                    select(MentorAccount).where(
+                        MentorAccount.enabled.is_(True),
+                        MentorAccount.session_encrypted.isnot(None),
+                    )
+                )
+            ).scalars()
+        )
+
+
+async def cmd_run_worker(_: argparse.Namespace) -> int:
+    """کارگر و ربات کنترل را با هم اجرا کن.
+
+    کارگر برای ارسال به حساب هر منتور وصل می‌شود، ولی هیچ گوش‌دهنده‌ای ثبت نمی‌کند؛
+    دریافت کار دروازه است.
+    """
+    from mentorai.ai.client import AnthropicClient
+    from mentorai.control.bot import ControlBot
+    from mentorai.knowledge.embeddings import HashingEmbedder
+    from mentorai.telegram.channel import TelethonChannel
+    from mentorai.telegram.safety import AccountGate, TokenBucket
+    from mentorai.worker import run_forever
+
+    settings = get_settings()
+    accounts = await _load_accounts()
+    if not accounts:
+        print("هیچ حساب فعال و واردشده‌ای وجود ندارد", file=sys.stderr)
+        return 1
+
+    gateways = [AccountGateway(a) for a in accounts]
+    for gateway in gateways:
+        await gateway.start()
+
+    channels = {g.slug: TelethonChannel(g.client) for g in gateways}
+    gates = {
+        account.slug: AccountGate(
+            slug=account.slug,
+            bucket=TokenBucket(
+                rate_per_minute=settings.send_rate_per_minute, burst=settings.send_burst
+            ),
+            quiet_start=settings.quiet_hours_start,
+            quiet_end=settings.quiet_hours_end,
+            send_paused=account.send_paused,
+        )
+        for account in accounts
+    }
+
+    bot: ControlBot | None = None
+    if settings.control_bot_token is not None:
+        bot = ControlBot(channels=channels, gates=gates)
+        await bot.start()
+    else:
+        print("هشدار: CONTROL_BOT_TOKEN تنظیم نشده؛ پیش‌نویس‌ها فقط ذخیره می‌شوند", file=sys.stderr)
+
+    tasks = [
+        run_forever(
+            worker_id="worker-1",
+            model_client=AnthropicClient(),
+            embedder=HashingEmbedder(),
+            channels=channels,
+            gates=gates,
+            notifier=bot,
+        )
+    ]
+    if bot is not None:
+        tasks.append(bot.run_until_disconnected())
+
+    try:
+        await asyncio.gather(*tasks)
+    finally:
+        for gateway in gateways:
+            await gateway.stop()
+    return 0
+
+
 async def cmd_run_gateway(_: argparse.Namespace) -> int:
     async with session_scope() as session:
         accounts = list(
@@ -264,6 +343,9 @@ def main() -> int:
 
     run = sub.add_parser("run-gateway", help="اجرای دروازه برای همه حساب‌های فعال")
     run.set_defaults(func=cmd_run_gateway)
+
+    worker = sub.add_parser("run-worker", help="اجرای کارگر و ربات کنترل")
+    worker.set_defaults(func=cmd_run_worker)
 
     args = parser.parse_args()
     exit_code: int = asyncio.run(args.func(args))

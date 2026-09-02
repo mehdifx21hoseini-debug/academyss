@@ -53,6 +53,14 @@ class AccountGateway:
         )
         self._offline_task: asyncio.Task[None] | None = None
 
+    @property
+    def client(self) -> TelegramClient:
+        """کلاینت زیرین، برای ساخت کانال خروجی.
+
+        مسیر ارسال عمداً در ماژول جدایی است؛ این فقط اتصال را در اختیار می‌گذارد.
+        """
+        return self._client
+
     async def start(self) -> None:
         await self._client.connect()
         if not await self._client.is_user_authorized():
