@@ -16,7 +16,7 @@ from typing import Protocol
 import structlog
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from mentorai import drafts
+from mentorai import drafts, escalation
 from mentorai.ai.client import ModelClient
 from mentorai.ai.runtime import handle_message
 from mentorai.conversation import assistant_may_answer
@@ -79,12 +79,23 @@ async def process_message(
 
     # وضعیت ممکن است از زمان صف شدن عوض شده باشد: منتور مکالمه را به دست گرفته یا
     # دستیار روی این گفتگو خاموش شده. دوباره بررسی می‌شود.
-    if not assistant_may_answer(conversation):
+    may_answer = assistant_may_answer(conversation)
+    if not may_answer:
+        # شاید مداخله‌ی انسانی تمام شده باشد. اگر از آخرین پیام منتور به‌قدر کافی
+        # گذشته، دستیار برمی‌گردد؛ وگرنه ساکت می‌ماند.
+        may_answer = await escalation.maybe_resume(session, conversation)
+    if not may_answer:
         return JobOutcome("assistant_disabled")
 
     result = await handle_message(session, message, model_client=model_client, embedder=embedder)
     if result.outcome is Outcome.silence or result.answer_text is None:
         # سکوت کامل: پیام خوانده‌نشده می‌ماند و منتور در تلگرام خودش می‌بیندش.
+        #
+        # ولی همه‌ی سکوت‌ها یکی نیستند. اگر دلیل از آن‌هایی است که اصلاً کار دستیار
+        # نیست — پول، شکایت، حساب، درخواست منتور — پیام بعدی هم کار دستیار نیست و
+        # کل مکالمه سپرده می‌شود. سکوت موردی مکالمه را فعال می‌گذارد.
+        if escalation.is_handoff(result.reason):
+            await escalation.hand_off(session, conversation, reason=result.reason)
         return JobOutcome("silence", result.reason)
 
     if account.reply_mode == ReplyMode.draft.value:

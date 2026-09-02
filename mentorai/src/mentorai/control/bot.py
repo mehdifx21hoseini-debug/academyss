@@ -11,11 +11,13 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from datetime import UTC, datetime
 
 import structlog
+from sqlalchemy import select
 from telethon import Button, TelegramClient, events
 
-from mentorai import drafts
+from mentorai import drafts, escalation
 from mentorai.config import get_settings
 from mentorai.control.auth import (
     ControlNotPermitted,
@@ -24,7 +26,7 @@ from mentorai.control.auth import (
     authorise_draft_by_control_message,
     is_operator,
 )
-from mentorai.db.models import AuditLog, Draft, MentorAccount
+from mentorai.db.models import AuditLog, Conversation, Draft, MentorAccount
 from mentorai.db.session import session_scope
 from mentorai.telegram.safety import AccountGate
 from mentorai.telegram.sender import OutboundChannel
@@ -70,6 +72,8 @@ class ControlBot:
         await self._client.start(bot_token=self._token)
         self._client.add_event_handler(self._on_link, events.NewMessage(pattern=r"^/link"))
         self._client.add_event_handler(self._on_unlink, events.NewMessage(pattern=r"^/unlink"))
+        self._client.add_event_handler(self._on_pending, events.NewMessage(pattern=r"^/pending"))
+        self._client.add_event_handler(self._on_resume, events.NewMessage(pattern=r"^/resume"))
         self._client.add_event_handler(self._on_reply, events.NewMessage(func=lambda e: e.is_reply))
         self._client.add_event_handler(self._on_callback, events.CallbackQuery())
         log.info("control_bot_started")
@@ -174,6 +178,73 @@ class ControlBot:
                 )
             )
         await event.reply(f"اتصال حساب {slug} قطع شد.")
+
+    async def _linked_account(self, event: events.NewMessage.Event) -> MentorAccount | None:
+        """حسابی که این گفتگو به آن وصل است، اگر فرستنده مجاز باشد."""
+        if not is_operator(event.sender_id):
+            return None
+        async with session_scope() as session:
+            return (
+                await session.execute(
+                    select(MentorAccount).where(MentorAccount.control_chat_id == int(event.chat_id))
+                )
+            ).scalar_one_or_none()
+
+    async def _on_pending(self, event: events.NewMessage.Event) -> None:
+        """پیام‌هایی که منتظر پاسخ منتور مانده‌اند.
+
+        چون ارجاع برای دانشجو نامرئی است، بدون یک فهرست صریح ممکن است پیامی روزها
+        بماند و کسی متوجه نشود.
+        """
+        account = await self._linked_account(event)
+        if account is None:
+            await event.reply(_LINK_REFUSED)
+            return
+
+        now = datetime.now(UTC)
+        async with session_scope() as session:
+            rows = await escalation.open_escalations(session, account_id=account.id)
+
+        if not rows:
+            await event.reply("هیچ پیام بی‌پاسخی در انتظار نیست.")
+            return
+
+        lines = ["پیام‌های در انتظار پاسخ شما، قدیمی‌ترین اول:"]
+        for item, conversation in rows:
+            hours = int((now - item.created_at).total_seconds() // 3600)
+            lines.append(
+                f"• گفتگوی {conversation.telegram_chat_id} — {item.reason} — {hours} ساعت پیش"
+            )
+        await event.reply("\n".join(lines))
+
+    async def _on_resume(self, event: events.NewMessage.Event) -> None:
+        """بازگرداندن صریح دستیار روی یک گفتگو، بدون انتظار."""
+        parts = (event.raw_text or "").split()
+        account = await self._linked_account(event)
+        if account is None or len(parts) != 2 or not parts[1].lstrip("-").isdigit():
+            await event.reply("برای بازگرداندن دستیار: /resume <شناسه گفتگو>")
+            return
+
+        async with session_scope() as session:
+            conversation = (
+                await session.execute(
+                    select(Conversation).where(
+                        Conversation.account_id == account.id,
+                        Conversation.telegram_chat_id == int(parts[1]),
+                    )
+                )
+            ).scalar_one_or_none()
+            if conversation is None:
+                await event.reply(_LINK_REFUSED)
+                return
+            resumed = await escalation.resume_now(
+                session, conversation, by=f"control:{event.sender_id}"
+            )
+        await event.reply(
+            "دستیار روی این گفتگو دوباره فعال شد."
+            if resumed
+            else "این گفتگو در حالت سپرده‌شده نبود."
+        )
 
     async def _on_callback(self, event: events.CallbackQuery.Event) -> None:
         raw = (event.data or b"").decode()

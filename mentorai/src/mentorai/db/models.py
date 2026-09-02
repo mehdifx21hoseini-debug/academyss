@@ -463,3 +463,4 @@ class Escalation(Base):
     reason: Mapped[str] = mapped_column(String(64), nullable=False)
     created_at: Mapped[datetime] = _created_at()
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    resolved_by: Mapped[str | None] = mapped_column(String(120))

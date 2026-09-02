@@ -18,6 +18,7 @@ from telethon import TelegramClient, events
 from telethon.sessions import StringSession
 from telethon.tl.functions.account import UpdateStatusRequest
 
+from mentorai import escalation
 from mentorai.config import get_settings
 from mentorai.conversation import assistant_may_answer
 from mentorai.db.crypto import decrypt_session
@@ -130,6 +131,11 @@ class AccountGateway:
 
             # وضعیت مکالمه هم دخیل است، نه فقط کلید روشن و خاموش: مکالمه‌ای که به
             # منتور ارجاع شده، تا فعال‌سازی صریح هیچ کاری تولید نمی‌کند.
+            if sender is Sender.mentor:
+                # روشن‌ترین نشانه‌ی در دست گرفتن مکالمه. دستیار کنار می‌رود و
+                # ارجاع‌های باز بسته می‌شوند.
+                await escalation.on_mentor_message(session, result.conversation)
+
             if sender is Sender.student and assistant_may_answer(result.conversation):
                 await queue.enqueue(
                     session,
