@@ -1,7 +1,21 @@
 # MENTORAI — Claude Code Skill Stack (Assessment)
 
 تاریخ: 2026-09-02 — نسخه Claude Code بررسی‌شده: 2.1.258
-وضعیت: **پیشنهاد؛ هیچ Skill/Plugin نصب نشده است.**
+وضعیت: **Phase A اجرا شد.** Phase B و C هنوز منتظر تصمیم‌های معماری‌اند.
+
+## وضعیت اجرا
+
+| مورد | وضعیت |
+|---|---|
+| security-guidance | در `.claude/settings.json` اعلام شد (Project scope، منتقل‌شونده به Cloud) |
+| `.claude/claude-security-guidance.md` | نوشته شد — Threat model اختصاصی MENTORAI |
+| `.claude/security-patterns.json` | نوشته شد — ۶ قانون Pattern (JSON نه YAML، چون PyYAML تضمینی نیست) |
+| supabase-postgres-best-practices | کپی شد در `.claude/skills/` — ۳۶ فایل مارک‌داون، ۱۶۸KB، بدون اسکریپت |
+| mentorai-architecture | ساخته شد |
+| mentorai-security | ساخته شد |
+| mentorai-testing | ساخته شد |
+| mentorai-review | ساخته شد |
+| context7 | **نصب نشد.** `mcp.context7.com` توسط Proxy محیط بلاک است (403 CONNECT). به Phase C منتقل شد. |
 
 ## 0. مفروضات
 
@@ -68,7 +82,7 @@
 
 ## 4. Installation Plan
 
-- **Phase A (قبل از توسعه):** security-guidance، supabase-postgres-best-practices، context7 (در صورت دسترسی شبکه)، Custom: mentorai-architecture، mentorai-security، mentorai-testing، mentorai-review.
+- **Phase A (انجام شد):** security-guidance، supabase-postgres-best-practices، Custom: mentorai-architecture، mentorai-security، mentorai-testing، mentorai-review. context7 به‌دلیل بلاک بودن شبکه انجام نشد.
 - **Phase B (حین توسعه):** webapp-testing، frontend-design، pr-review-toolkit، langfuse، promptfoo-evals، LSP مناسب زبان، Vercel skills (اگر Next.js)، redis-development (اگر Redis)، بقیه Custom Skills.
 - **Phase C (آینده):** playwright MCP، claude-security، hookify، claude-md-management، sentry/semgrep/qdrant/pydantic-ai/logfire به‌شرط انتخاب سرویس.
 
@@ -81,25 +95,20 @@
 ```json
 {
   "enabledPlugins": {
-    "security-guidance@claude-plugins-official": true,
-    "context7@claude-plugins-official": true
+    "security-guidance@claude-plugins-official": true
   }
 }
 ```
 
-معادل ترمینال (Local):
+این فایل نوشته شده است. `context7` عمداً حذف شد: در این محیط Cloud، دامنه‌ی `mcp.context7.com`
+توسط Proxy بلاک است و اعلام آن در ریپو باعث خطای MCP در هر Session می‌شود. اگر مالک پروژه
+آن دامنه را در Network policy محیط Allow کند، یک خط به همین فایل اضافه می‌شود.
+
+معادل ترمینال روی ماشین Local، جایی که context7 احتمالاً در دسترس است:
 
 ```text
-/plugin install security-guidance@claude-plugins-official
 /plugin install context7@claude-plugins-official
 /reload-plugins
-```
-
-Non-interactive:
-
-```bash
-claude plugin install security-guidance@claude-plugins-official --scope project
-claude plugin install context7@claude-plugins-official --scope project
 ```
 
 Phase B (به همان روش): `pr-review-toolkit`، `frontend-design`، `langfuse`، `pyright-lsp` یا `typescript-lsp`، `redis-development`.
@@ -108,7 +117,10 @@ Phase C: `playwright`، `claude-security`، `hookify`، `claude-md-management`.
 ### 5.2 Skills کپی‌شده داخل ریپو (Pinned در Git)
 
 ```bash
-npx skills add supabase/agent-skills --skill supabase-postgres-best-practices -a claude-code --copy
+# انجام شد:
+npx skills add supabase/agent-skills --skill supabase-postgres-best-practices -a claude-code --copy -y
+
+# Phase B:
 npx skills add anthropics/skills --skill webapp-testing -a claude-code --copy
 npx skills add vercel-labs/agent-skills --skill react-best-practices -a claude-code --copy
 npx skills add vercel-labs/agent-skills --skill web-design-guidelines -a claude-code --copy
