@@ -7,6 +7,7 @@
 # Regenerate with tools/ssr_known_calls.py, and only when the
 # tree compiles.
 AccountInfoString
+ArrayCopy
 ArrayInitialize
 ArrayResize
 ArraySetAsSeries
@@ -23,6 +24,8 @@ CSSRStrategyContext
 CSSRTickObserver
 CSSRTickProvider
 CTestObserver
+CalendarEventById
+CalendarValueHistory
 ChartClose
 ChartFirst
 ChartGetInteger
@@ -33,8 +36,6 @@ ChartNext
 ChartOpen
 ChartPeriod
 ChartRedraw
-CalendarEventById
-CalendarValueHistory
 ChartScreenShot
 ChartSetInteger
 ChartSetSymbolPeriod

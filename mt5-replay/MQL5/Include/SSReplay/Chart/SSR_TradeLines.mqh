@@ -320,6 +320,9 @@ public:
      {
       if(!m_armed || price <= 0.0 || m_sl_price <= 0.0)
          return 0.0;
+      if(m_point <= 0.0)
+         return 0.0;              // not attached yet; a distance in
+                                  // points is meaningless without one
       return MathAbs(price - m_sl_price) / m_point;
      }
 

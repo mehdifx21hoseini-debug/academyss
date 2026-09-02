@@ -2072,6 +2072,190 @@ void OnStart()
         }
    }
 
+   //+------------------------------------------------------------------+
+   //| 26. EXECUTION HONESTY.                                           |
+   //|                                                                  |
+   //| Every one of these passed before the behaviour it checks existed,|
+   //| because a stop that always filled at its own level and a bar      |
+   //| context that belonged to a different minute both look like a      |
+   //| working replay from outside. Driven straight through the engine   |
+   //| with hand-made ticks: no chart, no data, nothing to be flaky.     |
+   //+------------------------------------------------------------------+
+   {
+      int    dg = (int)SymbolInfoInteger(origin, SYMBOL_DIGITS);
+      double pt = SymbolInfoDouble(origin, SYMBOL_POINT);
+      if(pt <= 0.0) pt = 0.00001;
+
+      //--- 26a. A STOP IS A MARKET ORDER ONCE IT IS TOUCHED.
+      {
+         CSSRTradingEngine ex;
+         ex.SetBalance(10000.0);
+         ex.OnSessionStart(origin, dg, pt, 0);
+
+         MqlTick t[1];
+         t[0].bid = 1.10000; t[0].ask = 1.10010; t[0].time_msc = 1000;
+         ex.OnTicks(t, 1);
+
+         double sl = 1.09900;
+         long tk = ex.Open(SSR_ORDER_BUY, 0.10, sl, 0.0);
+         Check("26a a position to gap through", tk > 0, ex.LastError());
+
+         //--- the gap: the next tick is far below the stop, which is
+         //--- exactly what a weekend open or a release looks like
+         t[0].bid = 1.09500; t[0].ask = 1.09510; t[0].time_msc = 2000;
+         ex.OnTicks(t, 1);
+
+         SSRVirtualPosition gp;
+         bool found = false;
+         for(int i = 0; i < ex.Total(); i++)
+            if(ex.At(i, gp) && gp.ticket == tk) { found = true; break; }
+
+         Check("26a the gap closed it", found && gp.IsClosed(),
+               "a stop below the price must not survive the tick");
+         Check("26a and NOT at the stop price",
+               found && gp.close_price < sl - pt * 0.5,
+               StringFormat("filled %s, stop was %s - a stop that always fills "
+                            "at its own level flatters every loss",
+                            DoubleToString(gp.close_price, dg),
+                            DoubleToString(sl, dg)));
+         Check("26a it filled where the price actually was",
+               found && MathAbs(gp.close_price - 1.09500) < pt,
+               DoubleToString(found ? gp.close_price : 0.0, dg));
+      }
+
+      //--- 26b. SLIPPAGE REACHES AN EXIT, not just an entry.
+      {
+         CSSRTradingEngine ex;
+         SSRExecutionModel em;
+         em.Init();
+         em.slippage_points = 20;
+         ex.SetBalance(10000.0);
+         ex.SetExecution(em);
+         ex.OnSessionStart(origin, dg, pt, 0);
+
+         MqlTick t[1];
+         t[0].bid = 1.10000; t[0].ask = 1.10010; t[0].time_msc = 1000;
+         ex.OnTicks(t, 1);
+
+         double sl = 1.09900;
+         long tk = ex.Open(SSR_ORDER_BUY, 0.10, sl, 0.0);
+
+         //--- touched exactly, no gap: the difference can only be slippage
+         t[0].bid = sl; t[0].ask = sl + 0.00010; t[0].time_msc = 2000;
+         ex.OnTicks(t, 1);
+
+         SSRVirtualPosition sp;
+         bool found = false;
+         for(int i = 0; i < ex.Total(); i++)
+            if(ex.At(i, sp) && sp.ticket == tk) { found = true; break; }
+
+         Check("26b slippage is applied to the exit",
+               found && sp.IsClosed() && sp.close_price < sl - pt * 10.0,
+               StringFormat("filled %s against a stop of %s with 20 points set",
+                            DoubleToString(found ? sp.close_price : 0.0, dg),
+                            DoubleToString(sl, dg)));
+      }
+
+      //--- 26c. A BAR CONTEXT FROM ANOTHER MINUTE IS NOT EVIDENCE.
+      {
+         CSSRTradingEngine ex;
+         ex.SetBalance(10000.0);
+         ex.OnSessionStart(origin, dg, pt, 0);
+
+         //--- a bar from an hour ago whose range holds both levels
+         MqlRates stale;
+         stale.time  = (datetime)0;
+         stale.open  = 1.10000; stale.high = 1.10500;
+         stale.low   = 1.09000; stale.close = 1.10000;
+         stale.tick_volume = 1; stale.spread = 1; stale.real_volume = 0;
+         ex.OnBarContext(stale, true);
+
+         MqlTick t[1];
+         t[0].bid = 1.10000; t[0].ask = 1.10010;
+         t[0].time_msc = SSR_MSC_PER_HOUR;          // an hour past that bar
+         ex.OnTicks(t, 1);
+
+         long tk = ex.Open(SSR_ORDER_BUY, 0.10, 1.09800, 1.10200);
+
+         //--- the target, and only the target, is reached
+         t[0].bid = 1.10200; t[0].ask = 1.10210;
+         t[0].time_msc = SSR_MSC_PER_HOUR + 1000;
+         ex.OnTicks(t, 1);
+
+         SSRVirtualPosition cp;
+         bool found = false;
+         for(int i = 0; i < ex.Total(); i++)
+            if(ex.At(i, cp) && cp.ticket == tk) { found = true; break; }
+
+         Check("26c a target hit is booked as a target",
+               found && cp.IsClosed() && cp.reason == SSR_CLOSE_TP,
+               "a bar from an hour earlier must not turn a win into a loss");
+         Check("26c and is not labelled assumed",
+               found && !cp.ambiguous && ex.AmbiguousCount() == 0,
+               StringFormat("%d marked assumed", (int)ex.AmbiguousCount()));
+      }
+
+      //--- 26d. EVERY OBSERVER THE HOST REGISTERS GETS A SLOT.
+      {
+         CSSRReplayController oc;
+         CSSRTickObserver     obs[SSR_MAX_OBSERVERS];
+         int taken = 0;
+         for(int i = 0; i < SSR_MAX_OBSERVERS; i++)
+            if(oc.AddObserver(GetPointer(obs[i])))
+               taken++;
+         Check("26d the controller holds every observer it advertises",
+               taken == SSR_MAX_OBSERVERS && oc.ObserverCount() == SSR_MAX_OBSERVERS,
+               StringFormat("%d of %d accepted", taken, SSR_MAX_OBSERVERS));
+         Check("26d and the host's nine fit inside that",
+               SSR_MAX_OBSERVERS >= 9,
+               StringFormat("host registers 9 with an evaluation running, "
+                            "%d slots exist", SSR_MAX_OBSERVERS));
+         CSSRTickObserver  over;
+         Check("26d one too many is refused, with a reason",
+               !oc.AddObserver(GetPointer(over)) && oc.LastErrorText() != "",
+               oc.LastErrorText());
+      }
+
+      //--- 26e. THE DISCIPLINE MEASURES ARE COMPUTED, not defaulted.
+      {
+         CSSRTradingEngine ex;
+         ex.SetBalance(10000.0);
+         ex.OnSessionStart(origin, dg, pt, 0);
+
+         CSSRStatistics dst;
+         dst.Attach(GetPointer(ex));
+
+         MqlTick t[1];
+         t[0].bid = 1.10000; t[0].ask = 1.10010; t[0].time_msc = 1000;
+         ex.OnTicks(t, 1);
+
+         //--- one loser, then a second trade opened seconds later
+         long a = ex.Open(SSR_ORDER_BUY, 0.10, 1.09900, 0.0);
+         t[0].bid = 1.09890; t[0].ask = 1.09900; t[0].time_msc = 61000;
+         ex.OnTicks(t, 1);
+
+         long b = ex.Open(SSR_ORDER_BUY, 0.50, 1.09800, 0.0);
+         t[0].bid = 1.09790; t[0].ask = 1.09800; t[0].time_msc = 121000;
+         ex.OnTicks(t, 1);
+
+         SSRStatistics ds;
+         dst.ComputeFor("", ds);
+
+         Check("26e holding time is measured",
+               ds.trades == 2 && ds.avg_hold_sec > 0.0,
+               StringFormat("%d trades, average %.1fs", ds.trades, ds.avg_hold_sec));
+         Check("26e going straight back in after a loss is counted",
+               ds.revenge_trades >= 1,
+               StringFormat("%d of %d trades", ds.revenge_trades, ds.trades));
+         Check("26e uneven risk is visible",
+               ds.risk_samples == 2 && ds.risk_spread_pct > 0.0,
+               StringFormat("%.0f%% spread over %d trades",
+                            ds.risk_spread_pct, ds.risk_samples));
+         if(a == 0 || b == 0)
+            No("26e both trades opened", ex.LastError());
+      }
+   }
+
    ctrl.Release();
    Cleanup(rsym);
    Done();

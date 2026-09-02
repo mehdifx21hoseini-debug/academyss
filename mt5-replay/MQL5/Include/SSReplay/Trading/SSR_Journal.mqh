@@ -1146,6 +1146,39 @@ public:
               "maximum favourable excursion: how far it went the right way. Much "
               "larger than the average win means profit was given back");
 
+      //+------------------------------------------------------------------+
+      //| HOW IT WAS TRADED, not how it turned out.                        |
+      //|                                                                  |
+      //| A student can act on every line in this block tomorrow. None of  |
+      //| them needs the session to have been profitable to be worth       |
+      //| reading, and two of them - risk spread and revenge - are the     |
+      //| ones that explain a good system losing money.                    |
+      //+------------------------------------------------------------------+
+      MeasureHead(h, "How it was traded");
+      Measure(h, "Average time in a trade", HoldText(st.avg_hold_sec),
+              "replay time from entry to exit, averaged over closed trades");
+      Measure(h, "Time in the market",
+              DoubleToString(st.time_in_market_pct, 1) + "&#37;",
+              "of the span from the first entry to the last exit. Over 100&#37; "
+              "means positions overlapped");
+      Measure(h, "Recovery factor", DoubleToString(st.recovery_factor, 2),
+              "net profit per unit of the worst drawdown. Below 1 means the "
+              "session never made back what it sat through",
+              (st.recovery_factor > 0.0 && st.recovery_factor < 1.0 ? "amb" : ""));
+      Measure(h, "Risk spread",
+              (st.risk_samples > 1
+               ? DoubleToString(st.risk_spread_pct, 0) + "&#37; over " +
+                 IntegerToString(st.risk_samples) + " trades"
+               : "not enough trades with a stop"),
+              "how much the money risked varied from trade to trade. Zero is "
+              "identical risk every time; above 50&#37; the win rate and the "
+              "expectancy are describing different-sized bets",
+              (st.risk_spread_pct > 50.0 ? "r" : ""));
+      Measure(h, "Straight back in after a loss", IntegerToString(st.revenge_trades),
+              "trades opened within two replay minutes of the previous trade "
+              "closing at a loss",
+              (st.revenge_trades > 0 ? "amb" : ""));
+
       MeasureHead(h, "Can these numbers be trusted");
       Measure(h, "Assumed tick order",
               IntegerToString(st.ambiguous_trades) + " (" +
@@ -1156,6 +1189,21 @@ public:
               "with margin off, a position size that a real account would have "
               "refused was allowed here");
       FileWriteString(h, "</table></div>\r\n");
+     }
+
+   //--- "4m 12s" reads; "252.0" needs the reader to do the division
+   string            HoldText(const double sec)
+     {
+      if(sec <= 0.0)
+         return "-";
+      long t = (long)(sec + 0.5);
+      if(t < 60)
+         return IntegerToString((int)t) + "s";
+      if(t < 3600)
+         return IntegerToString((int)(t / 60)) + "m " +
+                IntegerToString((int)(t % 60)) + "s";
+      return IntegerToString((int)(t / 3600)) + "h " +
+             IntegerToString((int)((t % 3600) / 60)) + "m";
      }
 
    //--- HTML has five characters that must never arrive raw, or a tag

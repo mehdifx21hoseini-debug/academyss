@@ -101,6 +101,8 @@ private:
 
    int               m_tab;
    string            m_tag_sent;    // the last text handed to the port
+   bool              m_tag_focus;   // the tag box has the keyboard
+   int               m_tag_x, m_tag_y, m_tag_w, m_tag_h;  // where it is
    bool              m_place_loaded; // the file has been read at least once
 
    SSRUiState        m_state;
@@ -182,7 +184,8 @@ public:
        m_drag_dx(0), m_drag_dy(0),
        m_track_drag(false), m_track_x(0), m_track_y(0), m_track_w(0),
        m_last_drag_paint(0), m_corner(0),
-       m_tab(SSR_TAB_TRADE), m_tag_sent(""), m_place_loaded(false),
+       m_tab(SSR_TAB_TRADE), m_tag_sent(""), m_tag_focus(false),
+       m_tag_x(0), m_tag_y(0), m_tag_w(0), m_tag_h(0), m_place_loaded(false),
        m_renders(0), m_writes(0)
      { m_state.Init(); ClearCache(); }
 
@@ -808,7 +811,8 @@ private:
       //| rule the setup panel follows, for the same reason.                |
       //+------------------------------------------------------------------+
       m_w.Label("taglbl", x + 8, y + 46, "Setup", SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      m_w.Edit("tagbox", x + 48, y + 42, w - 56, 18, m_state.trade_tag, false);
+      m_tag_x = x + 48; m_tag_y = y + 42; m_tag_w = w - 56; m_tag_h = 18;
+      m_w.Edit("tagbox", m_tag_x, m_tag_y, m_tag_w, m_tag_h, m_state.trade_tag, false);
       m_w.Hide("tagbox", false);
 
       //+------------------------------------------------------------------+
@@ -1522,8 +1526,16 @@ public:
         {
          int was = m_tab;
          m_tab = (int)StringToInteger(StringSubstr(what, 3));
+         //--- the Setup box is not on this sheet any more, so it is not
+         //--- holding the keyboard. Cleared HERE and not in HideSheets:
+         //--- that runs at the top of every repaint, twenty-five times a
+         //--- second, and would drop the flag between the keystroke and
+         //--- the frame that was meant to honour it.
          if(m_tab != was)
+           {
+            m_tag_focus = false;
             SavePlace();
+           }
          return SSR_CMD_NONE;
         }
 
@@ -1682,6 +1694,44 @@ public:
    bool              OnEvent(const int id, const long &lparam,
                              const double &dparam, const string &sparam)
      {
+      //+------------------------------------------------------------------+
+      //| A KEY TYPED INTO THE SETUP BOX IS A LETTER, NOT A COMMAND.       |
+      //|                                                                  |
+      //| The hotkeys are single letters and the Setup box is where the    |
+      //| user names their setup. Typing "reset" into it pressed R and     |
+      //| RESTARTED THE SESSION - four candles into a trade, with the      |
+      //| trade gone. "breakout" pressed B, then R, then S: a bookmark,    |
+      //| a reset and the sessions dialog, from one word.                  |
+      //|                                                                  |
+      //| Whether MetaTrader forwards keystrokes to the chart while an     |
+      //| edit object holds focus is a question about a build, not about   |
+      //| this product, and the answer must not be the thing that decides  |
+      //| whether somebody loses a session. So the box is asked instead:   |
+      //| while it has the keyboard, this panel is not listening for       |
+      //| commands. Every hotkey comes back the moment focus leaves.       |
+      //|                                                                  |
+      //| Escape leaves the box, so there is always a way out that does    |
+      //| not require finding somewhere safe to click.                     |
+      //+------------------------------------------------------------------+
+      if(id == CHARTEVENT_KEYDOWN && m_tag_focus)
+        {
+         if((int)lparam == SSR_VK_ESCAPE || (int)lparam == SSR_VK_ENTER)
+           {
+            ReadTag();
+            m_tag_focus = false;
+            Render();
+           }
+         return true;                 // claimed, and deliberately unused
+        }
+
+      //--- the box reports what it holds the moment editing ends
+      if(id == CHARTEVENT_OBJECT_ENDEDIT && sparam == m_prefix + "tagbox")
+        {
+         ReadTag();
+         m_tag_focus = false;
+         return true;
+        }
+
       if(id == CHARTEVENT_KEYDOWN)
         {
          ENUM_SSR_CMD c = SSRKeyToCommand(lparam);
@@ -1721,6 +1771,25 @@ public:
          //--- bare non-zero test starts a drag whenever Shift is held.
          //--- Bit 1 is the left button; nothing else counts.
          bool down = ((StringToInteger(sparam) & 1) != 0);
+
+         //--- FOCUS FOLLOWS THE CLICK. MetaTrader gives an edit object
+         //--- no "editing started" event, so the only honest signal is
+         //--- the press that landed on it - and the next press that
+         //--- did not.
+         if(down && !m_track_drag && !m_dragging)
+           {
+            bool on_tag = (m_tag_w > 0 && !m_collapsed && m_tab == (int)SSR_TAB_TRADE &&
+                           mx >= m_tag_x && mx <= m_tag_x + m_tag_w &&
+                           my >= m_tag_y && my <= m_tag_y + m_tag_h);
+            if(on_tag != m_tag_focus)
+              {
+               if(!on_tag)
+                  ReadTag();          // leaving the box banks what was typed
+               m_tag_focus = on_tag;
+              }
+            if(on_tag)
+               return true;           // the box owns this press
+           }
 
          //--- the trackbar first: it sits inside the panel body, so the
          //--- caption test below must not get the chance to claim it

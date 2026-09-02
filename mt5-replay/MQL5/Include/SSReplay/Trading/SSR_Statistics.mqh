@@ -33,6 +33,12 @@
 #define SSR_EQUITY_SAMPLES        4096
 #define SSR_EQUITY_INTERVAL_MSC   60000
 
+//--- how soon after a loss a new trade counts as a reaction to it.
+//--- Two replay minutes: long enough that a planned re-entry at the
+//--- level that just stopped out still qualifies, short enough that a
+//--- setup genuinely waited for does not.
+#define SSR_REVENGE_WINDOW_MSC    ((long)120000)
+
 //+------------------------------------------------------------------+
 struct SSRStatistics
   {
@@ -78,6 +84,21 @@ struct SSRStatistics
    double            avg_mae;
    double            avg_mfe;
 
+   //+------------------------------------------------------------------+
+   //| DISCIPLINE. What a coach reads before the profit.                |
+   //|                                                                  |
+   //| Every measure above answers "did this session make money", and a |
+   //| session can make money badly. These answer "was it traded the    |
+   //| way it was meant to be" - the part a student can fix, and the    |
+   //| part that decides whether the profit repeats.                    |
+   //+------------------------------------------------------------------+
+   double            avg_hold_sec;        // average time in a trade
+   double            time_in_market_pct;  // of the span from first entry to last exit
+   double            recovery_factor;     // net profit per unit of worst drawdown
+   double            risk_spread_pct;     // how much risk per trade varied; 0 = identical
+   int               risk_samples;        // trades that number came from
+   int               revenge_trades;      // opened straight after a loss
+
    //--- DATA QUALITY. Not decoration: these decide whether the numbers
    //--- above may be quoted on their own.
    int               ambiguous_trades;
@@ -97,6 +118,8 @@ struct SSRStatistics
       max_drawdown = 0.0; max_drawdown_pct = 0.0; max_drawdown_closed = 0.0;
       win_streak = 0; loss_streak = 0; stopouts = 0;
       avg_mae = 0.0; avg_mfe = 0.0;
+      avg_hold_sec = 0.0; time_in_market_pct = 0.0; recovery_factor = 0.0;
+      risk_spread_pct = 0.0; risk_samples = 0; revenge_trades = 0;
       ambiguous_trades = 0; ambiguous_pct = 0.0;
       margin_modelled = false; trades_without_stop = 0;
      }
@@ -360,6 +383,15 @@ public:
       double mae_sum = 0.0, mfe_sum = 0.0;
       int    exc_n = 0;
 
+      //--- discipline, gathered in the same single pass
+      long   hold_sum_msc  = 0;
+      long   first_open    = SSR_INVALID_TIME;
+      long   last_close    = SSR_INVALID_TIME;
+      double risk_sum      = 0.0;
+      double risk_sq_sum   = 0.0;
+      long   prev_close    = SSR_INVALID_TIME;   // of the trade before, in open order
+      bool   prev_was_loss = false;
+
       int total = m_acct.Total();
       for(int i = 0; i < total; i++)
         {
@@ -424,6 +456,41 @@ public:
          mae_sum += p.mae;
          mfe_sum += p.mfe;
          exc_n++;
+
+         //--- DISCIPLINE ------------------------------------------------
+         if(p.open_msc > 0 && p.close_msc > p.open_msc)
+           {
+            hold_sum_msc += (p.close_msc - p.open_msc);
+            if(first_open == SSR_INVALID_TIME || p.open_msc < first_open)
+               first_open = p.open_msc;
+            if(last_close == SSR_INVALID_TIME || p.close_msc > last_close)
+               last_close = p.close_msc;
+           }
+
+         //--- risk taken, where the trade declared one
+         if(p.risk_at_entry > 0.0)
+           {
+            risk_sum    += p.risk_at_entry;
+            risk_sq_sum += p.risk_at_entry * p.risk_at_entry;
+            out.risk_samples++;
+           }
+
+         //+------------------------------------------------------------------+
+         //| REVENGE, defined narrowly enough to be checkable.                |
+         //|                                                                  |
+         //| Not "traded a lot after a bad run" - that is a judgement. This   |
+         //| is one fact: the trade before this one closed at a loss, and     |
+         //| this one was opened inside two replay minutes of it. Anyone can  |
+         //| verify it against the trade list, which is the only kind of      |
+         //| coaching number worth printing.                                  |
+         //+------------------------------------------------------------------+
+         if(prev_was_loss && prev_close != SSR_INVALID_TIME &&
+            p.open_msc >= prev_close &&
+            (p.open_msc - prev_close) <= SSR_REVENGE_WINDOW_MSC)
+            out.revenge_trades++;
+
+         prev_close    = p.close_msc;
+         prev_was_loss = (net < 0.0);
         }
 
       if(out.trades == 0)
@@ -457,7 +524,37 @@ public:
 
       out.ambiguous_pct = 100.0 * (double)out.ambiguous_trades / (double)out.trades;
 
+      //--- DISCIPLINE, finished ---------------------------------------
+      out.avg_hold_sec = (double)hold_sum_msc / (double)out.trades / 1000.0;
+
+      if(first_open != SSR_INVALID_TIME && last_close > first_open)
+        {
+         //--- OVERLAPPING TRADES CAN PUSH THIS PAST 100%, and it is left
+         //--- that way on purpose: two positions held for the whole
+         //--- session IS two hundred percent of the session's exposure,
+         //--- and flattening it to 100 would hide the one thing the
+         //--- measure exists to show.
+         double span = (double)(last_close - first_open);
+         out.time_in_market_pct = 100.0 * (double)hold_sum_msc / span;
+        }
+
+      if(out.risk_samples > 1)
+        {
+         double mean = risk_sum / (double)out.risk_samples;
+         double var  = risk_sq_sum / (double)out.risk_samples - mean * mean;
+         if(var < 0.0)                    // rounding, not a negative variance
+            var = 0.0;
+         if(mean > 0.0)
+            out.risk_spread_pct = 100.0 * MathSqrt(var) / mean;
+        }
+
       EquityDrawdown(out.max_drawdown, out.max_drawdown_pct);
+
+      //--- profit measured against the worst hole it had to climb out
+      //--- of. Undefined without a drawdown, and left at zero rather
+      //--- than reported as infinity.
+      if(out.max_drawdown > 0.0)
+         out.recovery_factor = out.net_profit / out.max_drawdown;
       out.max_drawdown_closed = ClosedDrawdownFor(tag);
      }
 

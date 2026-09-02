@@ -752,6 +752,55 @@ int FailInit(void)
 //--- to follow it. The extraction that created this signature made it
 //--- const without reading what the body does with it.
 //+------------------------------------------------------------------+
+//| Register an observer AND SAY SO IF IT IS REFUSED.                |
+//|                                                                  |
+//| Every one of these calls threw its answer away. When the         |
+//| controller ran out of slots the feature behind the refused       |
+//| observer simply stopped existing - no error, no log line, just a |
+//| strategy that never traded or an evaluation that never judged.   |
+//| A refusal is now impossible to miss and impossible to mistake    |
+//| for a bug in the feature itself.                                 |
+//+------------------------------------------------------------------+
+int g_watch_wanted = 0;
+
+bool Watch(CSSRTickObserver *o)
+  {
+   g_watch_wanted++;
+   if(g_ctrl.AddObserver(o))
+      return true;
+   PrintFormat("[host] OBSERVER REFUSED: '%s' will not see this replay - %s",
+               (o == NULL ? "(null)" : o.Name()), g_ctrl.LastErrorText());
+   return false;
+  }
+
+//+------------------------------------------------------------------+
+//| COUNT WHAT WAS ASKED FOR AGAINST WHAT ARRIVED.                   |
+//|                                                                  |
+//| No audit over the source could have found the bug this exists    |
+//| for. The controller held eight observers, every guard in it      |
+//| agreed that the number was eight, and the host quietly asked for |
+//| nine. Nothing in either file is inconsistent with itself - the   |
+//| mismatch only exists between them, and only at run time, and     |
+//| only in the configurations that turn enough features on.         |
+//|                                                                  |
+//| So it is checked at run time, once, right after wiring. It costs |
+//| one comparison and it will keep catching this the next time a    |
+//| feature is added, which is exactly when it will happen again.    |
+//+------------------------------------------------------------------+
+void CheckObservers(void)
+  {
+   int got = g_ctrl.ObserverCount();
+   if(got == g_watch_wanted)
+     {
+      PrintFormat("[host] %d observers watching this replay", got);
+      return;
+     }
+   PrintFormat("[host] *** %d of %d OBSERVERS WERE REFUSED. Features are "
+               "wired but will not run. Raise SSR_MAX_OBSERVERS. ***",
+               g_watch_wanted - got, g_watch_wanted);
+  }
+
+//+------------------------------------------------------------------+
 //| THE NEWS THAT WAS SCHEDULED WHILE THESE CANDLES FORMED.          |
 //|                                                                  |
 //| Loaded once, drawn once. The lines do not move, so nothing here   |
@@ -995,8 +1044,9 @@ bool BuildSession(string origin, const bool on_replay,
    //--- the statistics sample the equity it produces, and the auto
    //--- pause must look at the account only after the account has
    //--- acted on that same tick.
-   g_ctrl.AddObserver(GetPointer(g_acct));
-   g_ctrl.AddObserver(GetPointer(g_stats));
+   g_watch_wanted = 0;
+   Watch(GetPointer(g_acct));
+   Watch(GetPointer(g_stats));
 
    //+------------------------------------------------------------------+
    //| THE EVALUATION IS AN OBSERVER, like everything else that watches |
@@ -1019,7 +1069,7 @@ bool BuildSession(string origin, const bool on_replay,
    g_prop.Reset();
    if(CfgProp())
      {
-      g_ctrl.AddObserver(GetPointer(g_prop));
+      Watch(GetPointer(g_prop));
       Print("[host] EVALUATION: ", prop.ToString());
       Print("[host] a rewind voids the run - that is deliberate. Reset "
             "restarts it on the same rules.");
@@ -1031,30 +1081,30 @@ bool BuildSession(string origin, const bool on_replay,
    g_autopause.Enable(SSR_PAUSE_ON_SL,      InpPauseSL);
    g_autopause.Enable(SSR_PAUSE_ON_TP,      InpPauseTP);
    g_autopause.Enable(SSR_PAUSE_ON_STOPOUT, InpPauseSL);
-   g_ctrl.AddObserver(GetPointer(g_autopause));
+   Watch(GetPointer(g_autopause));
 
    //--- after the account for the same reason auto-pause is: by the time
    //--- this looks, the engine has filled the order and hit the stop
    g_shots.Attach(GetPointer(g_acct));
    g_shots.Enable(InpShots);
-   g_ctrl.AddObserver(GetPointer(g_shots));
+   Watch(GetPointer(g_shots));
 
    //--- the calendar answers "are we about to walk into a release", so
    //--- it is an observer like the auto-pause beside it
    g_cal.SetShiftMinutes(InpNewsShift);
    g_cal.SetPauseMinutes(InpNewsPause);
-   g_ctrl.AddObserver(GetPointer(g_cal));
+   Watch(GetPointer(g_cal));
 
    //--- what counts as a new session is READ from the instrument, not
    //--- assumed from the clock
    g_session.SetMode(InpPauseSession);
    g_session.LearnFrom(origin);
-   g_ctrl.AddObserver(GetPointer(g_session));
+   Watch(GetPointer(g_session));
 
    //--- THE VIEW BEFORE THE STRATEGIES. By the time a strategy is
    //--- asked what it thinks about a bar, the view must already hold
    //--- it - and it must hold nothing beyond it.
-   g_ctrl.AddObserver(GetPointer(g_view));
+   Watch(GetPointer(g_view));
    g_strategies.Attach(GetPointer(g_view), GetPointer(g_acct));
    g_strategies.SetSeed(InpRandom ? g_picker.Seed() : 1);
    if(InpRefStrategy)
@@ -1066,7 +1116,8 @@ bool BuildSession(string origin, const bool on_replay,
       else
          Print("[host] strategy refused: ", g_strategies.LastError());
      }
-   g_ctrl.AddObserver(GetPointer(g_strategies));
+   Watch(GetPointer(g_strategies));
+   CheckObservers();
    g_stats.Attach(GetPointer(g_acct));
    g_journal.Attach(GetPointer(g_acct), GetPointer(g_stats));
 

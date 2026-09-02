@@ -134,6 +134,21 @@ private:
      {
       if(!m_bar_valid || !m_bar_synthetic)
          return false;                     // real ticks carry real order
+
+      //+------------------------------------------------------------------+
+      //| THE CACHED BAR MUST BE THE ONE THIS TICK LIVES IN.               |
+      //|                                                                  |
+      //| Nothing clears the cache. A window served from real ticks        |
+      //| publishes no bar at all, and fidelity is decided per window, so  |
+      //| a full-tick window that follows a synthetic one would be judged  |
+      //| against a minute that ended long ago. Checking that the tick     |
+      //| falls inside the cached bar costs one comparison and makes the   |
+      //| cache self-invalidating.                                         |
+      //+------------------------------------------------------------------+
+      long bar_open = SSRToMsc(m_bar.time);
+      if(m_now_msc < bar_open || m_now_msc >= bar_open + SSR_MSC_PER_MIN)
+         return false;
+
       if(p.sl <= 0.0 || p.tp <= 0.0)
          return false;                     // needs both to be ambiguous
 
@@ -329,6 +344,34 @@ private:
                              MathAbs(m_pos[i].open_price - m_pos[i].sl));
          m_pos[i].commission += m_exec.commission_per_lot * m_pos[i].volume;
          m_balance           -= m_exec.commission_per_lot * m_pos[i].volume;
+
+         //+------------------------------------------------------------------+
+         //| A FILL AND A STOP IN THE SAME INVENTED MINUTE IS A GUESS.        |
+         //|                                                                  |
+         //| An order that triggers on a synthesised tick did so in an order  |
+         //| of prices this program invented. When that same minute's range   |
+         //| also reaches the stop, whether the trade filled and then stopped |
+         //| out, or the price simply passed through and never filled at all, |
+         //| is not something the M1 bar can answer.                          |
+         //|                                                                  |
+         //| Marked, not hidden. The statement already reports what fraction  |
+         //| of a session rests on assumed tick order, and an entry taken on  |
+         //| an assumption belongs in that number exactly as much as an exit. |
+         //+------------------------------------------------------------------+
+         if(m_bar_valid && m_bar_synthetic && m_pos[i].sl > 0.0 &&
+            !m_pos[i].ambiguous)
+           {
+            long b_open = SSRToMsc(m_bar.time);
+            bool same_bar = (m_now_msc >= b_open &&
+                             m_now_msc <  b_open + SSR_MSC_PER_MIN);
+            bool sl_in    = (is_long ? m_bar.low  <= m_pos[i].sl
+                                     : m_bar.high >= m_pos[i].sl);
+            if(same_bar && sl_in)
+              {
+               m_pos[i].ambiguous = true;
+               m_ambiguous_count++;
+              }
+           }
         }
      }
 
@@ -416,6 +459,47 @@ private:
         }
      }
 
+   //+------------------------------------------------------------------+
+   //| WHAT A STOP ACTUALLY FILLS AT.                                   |
+   //|                                                                  |
+   //| Not at the stop price. A stop is a MARKET order that arms when   |
+   //| the level is touched, so when price gaps through it - a weekend  |
+   //| open, a release, a spike - the fill is on the far side of the    |
+   //| gap and the loss is bigger than the one that was planned.        |
+   //|                                                                  |
+   //| Closing every stop exactly at its own level flatters every       |
+   //| losing trade in the session, and it flatters them precisely      |
+   //| where real accounts are hurt worst. It also made the execution   |
+   //| model's own comment - "slippage: applied adversely, always" -    |
+   //| untrue, because no exit ever went through it.                    |
+   //|                                                                  |
+   //| A TARGET is the opposite case and is deliberately NOT treated    |
+   //| this way: a take profit is a LIMIT order, it fills at its price  |
+   //| or better, and a gap through it does not improve the fill any    |
+   //| more than it worsens it. Modelling the two the same way would    |
+   //| be symmetrical and wrong.                                        |
+   //+------------------------------------------------------------------+
+   double            StopFill(const int i)
+     {
+      bool   is_long = m_pos[i].IsLong();
+      double px      = (is_long ? m_bid : m_ask);
+      double slip    = m_exec.slippage_points * m_point;
+
+      //--- the worse of the level and the price that touched it
+      double fill = m_pos[i].sl;
+      if(is_long)
+        {
+         if(px < fill) fill = px;
+         fill -= slip;
+        }
+      else
+        {
+         if(px > fill) fill = px;
+         fill += slip;
+        }
+      return Norm(fill);
+     }
+
    void              CheckStops(void)
      {
       for(int i = 0; i < m_count; i++)
@@ -442,11 +526,11 @@ private:
          //--- came first - so we take the loss and label the result.
          if(BarIsAmbiguousFor(m_pos[i]))
            {
-            ClosePosition(i, m_pos[i].sl, SSR_CLOSE_SL, true);
+            ClosePosition(i, StopFill(i), SSR_CLOSE_SL, true);
             continue;
            }
 
-         if(sl_hit) ClosePosition(i, m_pos[i].sl, SSR_CLOSE_SL);
+         if(sl_hit) ClosePosition(i, StopFill(i), SSR_CLOSE_SL);
          else       ClosePosition(i, m_pos[i].tp, SSR_CLOSE_TP);
         }
      }
@@ -583,6 +667,16 @@ public:
             m_pos[i].trail_peak    = 0.0;
             m_pos[i].mae           = 0.0;
             m_pos[i].mfe           = 0.0;
+
+            //--- the entry itself was an assumption; un-filling it takes
+            //--- that assumption back out of the session's honesty count.
+            //--- The legs are already unwound above, so whatever is left
+            //--- on this flag was set by the fill and by nothing else.
+            if(m_pos[i].ambiguous)
+              {
+               m_pos[i].ambiguous = false;
+               m_ambiguous_count--;
+              }
            }
 
          if(keep != i)

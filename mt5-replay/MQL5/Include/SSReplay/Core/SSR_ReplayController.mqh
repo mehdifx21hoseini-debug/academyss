@@ -42,6 +42,18 @@
 #define SSR_BAR_READ_CEILING    8192
 
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| How many things may watch one replay.                            |
+//|                                                                  |
+//| Eight was the number when the host registered six. It registers  |
+//| NINE with an evaluation running - account, statistics,           |
+//| evaluation, auto pause, screenshots, calendar, session, market   |
+//| view, strategies - so the strategy host was refused and the      |
+//| reference strategy silently did nothing, in exactly the          |
+//| configuration a prop trader would choose.                        |
+//+------------------------------------------------------------------+
+#define SSR_MAX_OBSERVERS   16
+
 class CSSRReplayController
   {
 private:
@@ -59,7 +71,7 @@ private:
 
    //--- whoever is watching the stream. Core knows only that they are
    //--- observers - not that one of them keeps a trading account.
-   CSSRTickObserver   *m_obs[8];
+   CSSRTickObserver   *m_obs[SSR_MAX_OBSERVERS];
    int                 m_obs_count;
 
    CSSRDataSource     *m_source;      // not owned
@@ -69,6 +81,7 @@ private:
    //--- reusable buffers; never reallocated inside the pump loop
    MqlRates            m_bars[];
    MqlTick             m_ticks[];
+   MqlTick             m_seg[];      // one bar's ticks, for the interleaved publish
 
    int                 m_digits;
    double              m_point;
@@ -189,6 +202,34 @@ private:
             m_obs[i].OnTicks(ticks, count);
      }
 
+   //+------------------------------------------------------------------+
+   //| Publish ONE BAR'S OWN TICKS, straight after that bar's context.  |
+   //|                                                                  |
+   //| The contract says a bar reaches observers before the ticks made  |
+   //| from it. Publishing every bar of a pump and then every tick of   |
+   //| the pump honours the letter of that and breaks its meaning: at   |
+   //| a hundred times real time a single pump spans an hour, so by the |
+   //| time the first minute's ticks arrive the cached bar context is   |
+   //| the LAST bar of the hour. Every stop-versus-target decision in   |
+   //| that pump is then judged against a range that had not happened   |
+   //| yet.                                                             |
+   //|                                                                  |
+   //| MQL5 has no array slice, so the segment is copied out. It is at  |
+   //| most ticks-per-bar elements - eight by default - and it buys the |
+   //| ordering the whole observer contract rests on.                   |
+   //+------------------------------------------------------------------+
+   bool                PublishSegment(const int from, const int count)
+     {
+      if(count <= 0)
+         return true;
+      if(ArraySize(m_seg) < count && ArrayResize(m_seg, count) < count)
+         return false;
+      if(ArrayCopy(m_seg, m_ticks, 0, from, count) != count)
+         return false;
+      PublishTicks(m_seg, count);
+      return true;
+     }
+
    void                PublishRewind(const long msc)
      {
       for(int i = 0; i < m_obs_count; i++)
@@ -197,28 +238,75 @@ private:
      }
 
    //+------------------------------------------------------------------+
-   //| Keep only ticks inside [lo, hi].                                 |
+   //| A BAR THAT HAS NOT FINISHED MUST NOT SHOW ITS ENDING.            |
    //|                                                                  |
-   //| The upper bound is the guard's job, but the LOWER bound is just  |
-   //| as load-bearing: a synthesised bar always spans its whole minute,|
-   //| so when a pump ends mid-bar the next pump re-synthesises the same|
-   //| bar from its open. Without this trim those early ticks would be  |
-   //| emitted twice and MetaTrader would rebuild a corrupt candle.     |
+   //| A pump usually stops in the middle of a minute. The M1 bar that  |
+   //| minute belongs to is read whole - it has to be, it is the only   |
+   //| unit the data layer has - and its high, low and close are all    |
+   //| facts about seconds the replay has not reached yet.              |
+   //|                                                                  |
+   //| Handing that bar to an observer is a leak with teeth. The        |
+   //| trading engine uses the bar's range to decide, when a stop and a |
+   //| target are both inside it, that the order of the two is an       |
+   //| assumption and the loss must be taken. Given the unfinished      |
+   //| bar's FULL range it will do that to a position whose target has  |
+   //| already been hit in elapsed time and whose stop is still in the  |
+   //| future - turning a win into a loss out of data that had not      |
+   //| happened.                                                        |
+   //|                                                                  |
+   //| So a partial bar is rebuilt from its own synthesised ticks, up   |
+   //| to the window's end and no further: open, high, low and close of |
+   //| the part that has happened. The open TIME is untouched, which is |
+   //| what lets an observer recognise it as the same bar growing       |
+   //| rather than a new one, and correct itself on the next pump.      |
+   //|                                                                  |
+   //| `count` is the bar's FULL synthesised tick count, before the     |
+   //| window trim. That is not an oversight: a second pump into the    |
+   //| same minute must not re-emit the first pump's ticks, but those   |
+   //| ticks did happen and their high and low are part of the bar the  |
+   //| user is looking at.                                              |
    //+------------------------------------------------------------------+
-   int                 TrimWindow(MqlTick &ticks[], const int count,
-                                  const long lo, const long hi)
+   MqlRates            ClipBar(const MqlRates &bar, const int base,
+                               const int count, const long hi)
      {
-      int keep = 0;
-      for(int i = 0; i < count; i++)
+      MqlRates out = bar;
+      if(count <= 0)
+         return out;
+
+      //--- the bar is whole: nothing to rebuild, and the read values
+      //--- are better than anything synthesised ticks could restate
+      if(hi >= SSRToMsc(bar.time) + SSR_MSC_PER_MIN - 1)
+         return out;
+
+      //--- every tick of this minute that has already happened, from the
+      //--- bar's own open. The window's LOWER bound is deliberately not
+      //--- applied: the first half of a minute a previous pump already
+      //--- emitted is still part of the bar the user is looking at.
+      double o = 0.0, h = 0.0, l = 0.0, c = 0.0;
+      int    n = 0;
+      for(int k = 0; k < count; k++)
         {
-         if(ticks[i].time_msc >= lo && ticks[i].time_msc <= hi)
+         if(m_ticks[base + k].time_msc > hi)
+            break;                        // synthesised ticks are in order
+         double b = m_ticks[base + k].bid;
+         if(n == 0)
+           { o = b; h = b; l = b; }
+         else
            {
-            if(keep != i)
-               ticks[keep] = ticks[i];
-            keep++;
+            if(b > h) h = b;
+            if(b < l) l = b;
            }
+         c = b;
+         n++;
         }
-      return keep;
+      if(n == 0)
+         return out;                      // nothing of it has happened yet
+
+      out.open  = o;
+      out.high  = h;
+      out.low   = l;
+      out.close = c;
+      return out;
      }
 
    //+------------------------------------------------------------------+
@@ -335,28 +423,72 @@ private:
 
       int written = 0;
       int bars_used = 0;
+      int seg_at[];                        // where each bar's ticks start
+      int seg_len[];                       // how many survived the window
+      MqlRates seg_bar[];                  // the bar as it may honestly be shown
+      if(ArrayResize(seg_at, nb) < nb || ArrayResize(seg_len, nb) < nb ||
+         ArrayResize(seg_bar, nb) < nb)
+        {
+         SetError(SSR_ERR_INTERNAL, "segment buffer allocation failed");
+         return -1;
+        }
+      int segs = 0;
+
       for(int i = first; i < nb; i++)
         {
-         //--- the bar reaches observers BEFORE the ticks made from it.
-         //--- With synthesised ticks the order of prices inside the bar
-         //--- is our assumption, so an observer must be able to see the
-         //--- whole range before acting on any single tick.
-         PublishBar(m_bars[i], fid != SSR_FIDELITY_FULL_TICK);
-
+         int base = written;
          int w = (fid == SSR_FIDELITY_BAR)
-                 ? m_synth.SynthesizeClose(m_bars[i], m_ticks, written)
-                 : m_synth.Synthesize(m_bars[i], m_ticks, written);
+                 ? m_synth.SynthesizeClose(m_bars[i], m_ticks, base)
+                 : m_synth.Synthesize(m_bars[i], m_ticks, base);
          if(w <= 0)
             break;
-         written += w;
+
+         //+------------------------------------------------------------------+
+         //| THE BAR IS CLIPPED BEFORE THE TICKS ARE TRIMMED, and the two    |
+         //| use different rules on purpose.                                  |
+         //|                                                                  |
+         //| The bar shown is everything in this minute UP TO the window's    |
+         //| end - including the part an earlier pump already emitted,        |
+         //| because that part happened and belongs in the forming bar's      |
+         //| high and low.                                                    |
+         //|                                                                  |
+         //| The ticks emitted are only what falls INSIDE the window, or the  |
+         //| second pump into one minute would re-send the first pump's       |
+         //| ticks and MetaTrader would rebuild a corrupt candle.             |
+         //+------------------------------------------------------------------+
+         MqlRates shown = ClipBar(m_bars[i], base, w, hi);
+
+         int keep = 0;
+         for(int k = 0; k < w; k++)
+           {
+            long t = m_ticks[base + k].time_msc;
+            if(t < lo || t > hi)
+               continue;
+            if(keep != k)
+               m_ticks[base + keep] = m_ticks[base + k];
+            keep++;
+           }
+
          bars_used++;
          m_cursor.NoteBar(SSRToMsc(m_bars[i].time));
+
+         if(keep > 0)
+           {
+            seg_at[segs]  = base;
+            seg_len[segs] = keep;
+            seg_bar[segs] = shown;
+            segs++;
+            written += keep;
+           }
         }
 
-      //--- trim to the window on BOTH ends: the guard would only remove
-      //--- the future tail, and the head is where duplicates come from
-      written = TrimWindow(m_ticks, written, lo, hi);
-      written = m_guard.FilterTicks(m_ticks, written);
+      //--- second layer, kept on purpose. lo/hi are already inside the
+      //--- horizon, so this cannot fire - and if it ever does, the
+      //--- indices above are stale and the interleaved publish is
+      //--- abandoned rather than made to lie about which bar is which.
+      int checked = m_guard.FilterTicks(m_ticks, written);
+      bool segments_valid = (checked == written);
+      written = checked;
 
       ulong t_emit = GetMicrosecondCount();
       if(written > 0 && !m_sink.EmitTicks(m_ticks, written))
@@ -365,7 +497,21 @@ private:
          return -1;
         }
       m_pump_emit_us += (double)(GetMicrosecondCount() - t_emit);
-      if(written > 0)
+
+      //--- observers now, each bar immediately followed by its own ticks
+      if(segments_valid)
+        {
+         for(int sgi = 0; sgi < segs; sgi++)
+           {
+            PublishBar(seg_bar[sgi], fid != SSR_FIDELITY_FULL_TICK);
+            if(!PublishSegment(seg_at[sgi], seg_len[sgi]))
+              {
+               SetError(SSR_ERR_INTERNAL, "segment publish allocation failed");
+               return -1;
+              }
+           }
+        }
+      else if(written > 0)
          PublishTicks(m_ticks, written);
 
       emitted = written;
@@ -401,7 +547,7 @@ public:
       ArrayResize(m_ticks, 8192);
       m_budget.Attach(GetPointer(m_metrics));
       m_obs_count = 0;
-      for(int i = 0; i < 8; i++)
+      for(int i = 0; i < SSR_MAX_OBSERVERS; i++)
          m_obs[i] = NULL;
      }
 
@@ -436,8 +582,22 @@ public:
    //+------------------------------------------------------------------+
    bool              AddObserver(CSSRTickObserver *o)
      {
-      if(o == NULL || m_obs_count >= 8)
+      if(o == NULL)
          return false;
+      if(m_obs_count >= SSR_MAX_OBSERVERS)
+        {
+         //--- SILENTLY DROPPING AN OBSERVER IS THE WORST FAILURE THIS
+         //--- CLASS CAN HAVE. Whatever was refused simply never sees
+         //--- the replay: a strategy that never trades, statistics
+         //--- that never fill in, an evaluation that never judges -
+         //--- each of which looks like a bug in the feature itself.
+         if(m_log != NULL)
+            m_log.Error(StringFormat("observer '%s' REFUSED: all %d slots are taken",
+                                     o.Name(), SSR_MAX_OBSERVERS));
+         SetError(SSR_ERR_INTERNAL,
+                  "no observer slot left for '" + o.Name() + "'");
+         return false;
+        }
       for(int i = 0; i < m_obs_count; i++)
          if(m_obs[i] == o)
             return true;
@@ -447,7 +607,7 @@ public:
 
    void              ClearObservers(void)
      {
-      for(int i = 0; i < 8; i++)
+      for(int i = 0; i < SSR_MAX_OBSERVERS; i++)
          m_obs[i] = NULL;
       m_obs_count = 0;
      }
