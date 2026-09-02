@@ -18,10 +18,13 @@ from mentorai.telegram.normalize import InboundMessage
 
 @dataclass(frozen=True)
 class RecordResult:
-    conversation_id: int
+    conversation: Conversation
     message_id: int | None
     is_duplicate: bool
-    assistant_enabled: bool
+
+    @property
+    def conversation_id(self) -> int:
+        return self.conversation.id
 
 
 async def _resolve_student(session: AsyncSession, message: InboundMessage) -> Student:
@@ -136,19 +139,9 @@ async def record_inbound(
                 "message_id": message.message_id,
             },
         )
-        return RecordResult(
-            conversation_id=conversation.id,
-            message_id=None,
-            is_duplicate=True,
-            assistant_enabled=conversation.assistant_enabled,
-        )
+        return RecordResult(conversation=conversation, message_id=None, is_duplicate=True)
 
-    return RecordResult(
-        conversation_id=conversation.id,
-        message_id=int(new_id),
-        is_duplicate=False,
-        assistant_enabled=conversation.assistant_enabled,
-    )
+    return RecordResult(conversation=conversation, message_id=int(new_id), is_duplicate=False)
 
 
 async def excluded_peer_ids(session: AsyncSession, account_id: int) -> frozenset[int]:

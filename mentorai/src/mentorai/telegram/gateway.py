@@ -19,6 +19,7 @@ from telethon.sessions import StringSession
 from telethon.tl.functions.account import UpdateStatusRequest
 
 from mentorai.config import get_settings
+from mentorai.conversation import assistant_may_answer
 from mentorai.db.crypto import decrypt_session
 from mentorai.db.models import MentorAccount, Sender
 from mentorai.db.session import session_scope
@@ -119,7 +120,9 @@ class AccountGateway:
                 log.info("duplicate_delivery", account=self.slug, chat_id=inbound.chat_id)
                 return
 
-            if sender is Sender.student and result.assistant_enabled:
+            # وضعیت مکالمه هم دخیل است، نه فقط کلید روشن و خاموش: مکالمه‌ای که به
+            # منتور ارجاع شده، تا فعال‌سازی صریح هیچ کاری تولید نمی‌کند.
+            if sender is Sender.student and assistant_may_answer(result.conversation):
                 await queue.enqueue(
                     session,
                     "answer_message",
