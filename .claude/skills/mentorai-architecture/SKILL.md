@@ -10,29 +10,48 @@ license: MIT
 
 MENTORAI is a production AI mentoring platform for Sobhan Samadi Academy. Students reach it
 through Telegram. An AI answers what it can answer confidently and escalates everything else
-to a human mentor. A management panel gives staff visibility into leads, conversations,
-mentors, the knowledge base, AI runs and KPIs.
+to a human mentor. A management panel gives staff visibility into students,
+conversations, mentors, the knowledge base, AI runs and KPIs.
 
 The audience is Persian-speaking. Right-to-left layout, Persian typography, Persian text
 normalization and Persian retrieval quality are architectural requirements, not a later
 localization pass.
 
-## Current state, and what it means for you
+## Scope: what MENTORAI is not
 
-The repository today holds a static marketing and podcast site: `index.html`, `admin.html`,
-`css/`, `js/`, `assets/`. The admin panel authenticates in the browser against a password
-in `js/admin.js` and stores content in `localStorage`. There is no backend, no database, no
-Telegram integration, no AI and no test suite.
+The academy also runs a separate Telegram bot and a sales CRM, built as n8n workflows over
+n8n data tables. **That system is a different project.** It is not MENTORAI's past, not its
+foundation, and nothing migrates from it. `docs/AUDIT.md` records what it is and what is
+wrong with it, for that project's own benefit; do not treat anything in it as a constraint
+here. If a request is about leads, the sales funnel, the economic calendar, or those n8n
+workflows, it is not this project.
 
-Two consequences:
+The repository also carries `legacy-site/`, an archived static podcast site. Also not
+MENTORAI, also not a foundation.
 
-1. **Nothing about the MENTORAI stack is decided yet.** Backend language, framework,
-   database, vector store, queue, hosting and messaging approach are all open. Do not write
-   code, scaffolding or configuration that assumes an answer. If a task needs one, say which
-   decision is missing and ask.
-2. **The existing admin panel is not a foundation.** Its authentication is client-side and
-   its data lives in the visitor's browser. Treat it as a prototype to be replaced, not as
-   the CRM to extend. Do not copy its patterns into new code.
+## The defining constraint
+
+Students are answered **from inside Telegram itself, through a real Telegram account, not
+through a bot.** A student writes to the academy's account the way they write to a person,
+and the reply arrives in that same private chat. This is the product requirement, and it
+decides most of the architecture: the channel is MTProto, not the Bot API.
+
+Two consequences follow, and both are permanent:
+
+- The account credential is not a bot token that can be revoked and reissued cheaply. It is
+  a session that carries the full authority of a real account, including its private message
+  history. Treat it as the highest-value secret in the system.
+- Automation on a user account carries a standing risk of rate limiting or account
+  restriction from Telegram. Design every send path to respect flood limits, back off on
+  the platform's own signals, and stay recoverable if the account is limited.
+
+## Current state of the code
+
+`mentorai/` is empty. Everything is to be built. Nothing about the internals is decided
+except what the constraint above forces, and what `docs/ARCHITECTURE.md` records as agreed.
+Before writing code that assumes a framework, a database, or a deployment target, check that
+`docs/ARCHITECTURE_DECISIONS.md` actually contains that decision. If it does not, say which
+decision is missing and ask.
 
 ## Decision priority
 
