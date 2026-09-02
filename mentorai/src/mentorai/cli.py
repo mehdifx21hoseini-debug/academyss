@@ -8,7 +8,9 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import csv
 import sys
+from pathlib import Path
 
 import structlog
 from sqlalchemy import select
@@ -17,8 +19,11 @@ from telethon.sessions import StringSession
 
 from mentorai.config import get_settings
 from mentorai.db.crypto import encrypt_session
-from mentorai.db.models import AuditLog, ExcludedChat, MentorAccount
+from mentorai.db.models import AuditLog, ExcludedChat, KnowledgeDocument, MentorAccount
 from mentorai.db.session import session_scope
+from mentorai.knowledge.embeddings import HashingEmbedder
+from mentorai.knowledge.evaluate import EvalCase, evaluate
+from mentorai.knowledge.ingest import ingest_csv
 from mentorai.telegram.gateway import AccountGateway
 
 log = structlog.get_logger(__name__)
@@ -113,6 +118,83 @@ async def cmd_pause(args: argparse.Namespace) -> int:
     return 0
 
 
+def _embedder() -> HashingEmbedder:
+    """ارائه‌دهنده‌ی بردار.
+
+    فعلاً فقط بردارساز آزمایشی موجود است. مدل واقعی هنوز انتخاب نشده و انتخابش باید با
+    اندازه‌گیری روی همان مجموعه‌ی ارزیابی انجام شود، نه پیش از آن.
+    """
+    return HashingEmbedder()
+
+
+async def cmd_kb_import(args: argparse.Namespace) -> int:
+    path = Path(args.file)
+    if not path.exists():
+        print(f"فایل پیدا نشد: {path}", file=sys.stderr)
+        return 1
+
+    async with session_scope() as session:
+        report = await ingest_csv(session, path, embedder=_embedder())
+        session.add(AuditLog(actor="cli", action="kb_import", target=str(path)))
+
+    print(f"ساخته شد: {report.created} | به‌روز شد: {report.updated}")
+    if report.skipped:
+        print(f"\nکنار گذاشته شد ({len(report.skipped)}):", file=sys.stderr)
+        for line in report.skipped:
+            print(f"  {line}", file=sys.stderr)
+    return 0
+
+
+async def cmd_kb_eval(args: argparse.Namespace) -> int:
+    """کیفیت بازیابی را روی مجموعه‌ی ارزیابی اندازه بگیر.
+
+    قالب فایل: دو ستون question و expected_question. ستون دوم باید دقیقاً عنوان سندی
+    باشد که انتظار داریم پیدا شود.
+    """
+    path = Path(args.cases)
+    if not path.exists():
+        print(f"فایل پیدا نشد: {path}", file=sys.stderr)
+        return 1
+
+    async with session_scope() as session:
+        titles = {
+            title: doc_id
+            for doc_id, title in (
+                await session.execute(select(KnowledgeDocument.id, KnowledgeDocument.title))
+            ).all()
+        }
+
+        cases: list[EvalCase] = []
+        unknown: list[str] = []
+        with path.open(encoding="utf-8-sig", newline="") as handle:
+            for row in csv.DictReader(handle):
+                expected = (row.get("expected_question") or "").strip()
+                question = (row.get("question") or "").strip()
+                if not question:
+                    continue
+                if expected not in titles:
+                    unknown.append(expected)
+                    continue
+                cases.append(
+                    EvalCase(question=question, expected_document_ids=frozenset({titles[expected]}))
+                )
+
+        if unknown:
+            print(f"این عنوان‌ها در پایگاه دانش نیستند: {unknown}", file=sys.stderr)
+        if not cases:
+            print("هیچ مورد قابل ارزیابی‌ای پیدا نشد", file=sys.stderr)
+            return 1
+
+        metrics = await evaluate(session, cases, embedder=_embedder(), k=args.k)
+
+    print(metrics.summary())
+    if metrics.misses:
+        print("\nپرسش‌هایی که سند درست را پیدا نکردند:")
+        for miss in metrics.misses:
+            print(f"  {miss}")
+    return 0
+
+
 async def cmd_run_gateway(_: argparse.Namespace) -> int:
     async with session_scope() as session:
         accounts = list(
@@ -170,6 +252,15 @@ def main() -> int:
     pause.add_argument("--reason", default=None)
     pause.add_argument("--resume", action="store_true")
     pause.set_defaults(func=cmd_pause)
+
+    kb_import = sub.add_parser("kb-import", help="وارد کردن پایگاه دانش از فایل CSV")
+    kb_import.add_argument("--file", required=True)
+    kb_import.set_defaults(func=cmd_kb_import)
+
+    kb_eval = sub.add_parser("kb-eval", help="اندازه‌گیری کیفیت بازیابی")
+    kb_eval.add_argument("--cases", required=True)
+    kb_eval.add_argument("--k", type=int, default=5)
+    kb_eval.set_defaults(func=cmd_kb_eval)
 
     run = sub.add_parser("run-gateway", help="اجرای دروازه برای همه حساب‌های فعال")
     run.set_defaults(func=cmd_run_gateway)

@@ -34,10 +34,14 @@ async def _schema() -> AsyncIterator[None]:
     """
     engine = get_engine()
     async with engine.begin() as conn:
-        # کل شمای عمومی پاک می‌شود، از جمله جدول نسخه‌ی alembic. اگر فقط جدول‌های
-        # مدل پاک شوند، alembic فکر می‌کند مهاجرت قبلاً اجرا شده و هیچ‌چیز نمی‌سازد.
-        await conn.execute(text("drop schema public cascade"))
-        await conn.execute(text("create schema public"))
+        # همه‌ی جدول‌ها پاک می‌شوند، از جمله جدول نسخه‌ی alembic؛ وگرنه alembic فکر
+        # می‌کند مهاجرت قبلاً اجرا شده و هیچ‌چیز نمی‌سازد. شما پاک نمی‌شود چون
+        # افزونه‌ها داخل آن نصب‌اند و نقش برنامه اجازه‌ی ساخت دوباره‌شان را ندارد.
+        tables = (
+            await conn.execute(text("select tablename from pg_tables where schemaname = 'public'"))
+        ).scalars()
+        for table in list(tables):
+            await conn.execute(text(f'drop table if exists "{table}" cascade'))
 
     root = pathlib.Path(__file__).resolve().parent.parent
     result = subprocess.run(

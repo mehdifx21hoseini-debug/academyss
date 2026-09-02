@@ -10,12 +10,14 @@
 from __future__ import annotations
 
 import enum
-from datetime import datetime
+from datetime import date, datetime
 
+from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     BigInteger,
     Boolean,
     CheckConstraint,
+    Date,
     DateTime,
     ForeignKey,
     Index,
@@ -278,4 +280,70 @@ class AuditLog(Base):
     action: Mapped[str] = mapped_column(String(64), nullable=False)
     target: Mapped[str | None] = mapped_column(String(200))
     detail: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = _created_at()
+
+
+# بعد بردار. تغییرش نیاز به مهاجرت و ساخت دوباره‌ی همه‌ی بردارها دارد.
+EMBEDDING_DIM = 1024
+
+
+class SourceClass(enum.StrEnum):
+    """تفکیک ساختاری منبع.
+
+    محتوای رسمی آکادمی می‌تواند به‌عنوان واقعیت بیان شود. پاسخ تجربی منتور برای لحن و
+    موضوعات آموزشی به کار می‌رود، ولی هرگز مرجع قیمت و قانون و شرط نیست.
+    """
+
+    official = "official"
+    mentor = "mentor"
+
+
+class Authority(enum.StrEnum):
+    fact = "fact"
+    policy = "policy"
+    guidance = "guidance"
+
+
+class KnowledgeDocument(Base):
+    __tablename__ = "knowledge_documents"
+    __table_args__ = (
+        CheckConstraint("source_class in ('official', 'mentor')", name="ck_doc_source_class"),
+        CheckConstraint("authority in ('fact', 'policy', 'guidance')", name="ck_doc_authority"),
+        Index("ix_knowledge_documents_active", "active"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    external_key: Mapped[str] = mapped_column(String(64), unique=True, nullable=False)
+    source_class: Mapped[str] = mapped_column(String(16), nullable=False)
+    authority: Mapped[str] = mapped_column(String(16), nullable=False)
+    category: Mapped[str | None] = mapped_column(String(120))
+    title: Mapped[str] = mapped_column(Text, nullable=False)
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    # تاریخ انقضا برای چیزهایی مثل قیمت. سند منقضی از بازیابی کنار می‌رود.
+    valid_until: Mapped[date | None] = mapped_column(Date)
+    owner: Mapped[str | None] = mapped_column(String(120))
+    notes: Mapped[str | None] = mapped_column(Text)
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
+    created_at: Mapped[datetime] = _created_at()
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False
+    )
+
+
+class KnowledgeChunk(Base):
+    __tablename__ = "knowledge_chunks"
+    __table_args__ = (
+        UniqueConstraint("document_id", "ordinal", name="uq_chunk_document_ordinal"),
+        Index("ix_knowledge_chunks_document_id", "document_id"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    document_id: Mapped[int] = mapped_column(
+        ForeignKey("knowledge_documents.id", ondelete="CASCADE"), nullable=False
+    )
+    ordinal: Mapped[int] = mapped_column(Integer, nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    search_text: Mapped[str] = mapped_column(Text, nullable=False)
+    embedding: Mapped[list[float] | None] = mapped_column(Vector(EMBEDDING_DIM))
+    embedding_model: Mapped[str | None] = mapped_column(String(120))
     created_at: Mapped[datetime] = _created_at()
