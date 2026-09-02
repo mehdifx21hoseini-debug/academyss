@@ -38,9 +38,13 @@ decides most of the architecture: the channel is MTProto, not the Bot API.
 
 Two consequences follow, and both are permanent:
 
+- The channel is three dedicated academy accounts, one per mentor - not the mentors' own
+  personal accounts. Every private chat on them is a student or a prospect, so the
+  assistant processes private one-to-one chats by default, never groups or channels, with
+  an exclusion list for the people who are not students (ADR-008).
 - The account credential is not a bot token that can be revoked and reissued cheaply. It is
-  a session that carries the full authority of a real account, including its private message
-  history. Treat it as the highest-value secret in the system.
+  a session that carries the full authority of a real account. Treat it as the highest-value
+  secret in the system.
 - Automation on a user account carries a standing risk of rate limiting or account
   restriction from Telegram. Design every send path to respect flood limits, back off on
   the platform's own signals, and stay recoverable if the account is limited.
