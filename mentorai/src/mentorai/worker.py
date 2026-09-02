@@ -32,12 +32,14 @@ from mentorai.db.models import (
 from mentorai.db.session import session_scope
 from mentorai.jobs import queue
 from mentorai.knowledge.embeddings import EmbeddingProvider
+from mentorai.memory import job as memory_job
 from mentorai.telegram.safety import AccountGate
 from mentorai.telegram.sender import OutboundChannel, SendStatus, deliver_answer
 
 log = structlog.get_logger(__name__)
 
 JOB_KIND = "answer_message"
+HANDLED_KINDS = [JOB_KIND, memory_job.JOB_KIND]
 IDLE_SLEEP_SECONDS = 2.0
 STALE_LOCK_AFTER = timedelta(minutes=10)
 
@@ -183,7 +185,7 @@ async def run_forever(
     last_sweep = datetime.now(UTC)
     while True:
         async with session_scope() as session:
-            job = await queue.claim(session, worker_id=worker_id, kinds=[JOB_KIND])
+            job = await queue.claim(session, worker_id=worker_id, kinds=HANDLED_KINDS)
 
         if job is None:
             if datetime.now(UTC) - last_sweep > STALE_LOCK_AFTER:
@@ -197,15 +199,24 @@ async def run_forever(
 
         try:
             async with session_scope() as session:
-                outcome = await process_message(
-                    session,
-                    int(job.payload["message_id"]),
-                    model_client=model_client,
-                    embedder=embedder,
-                    channels=channels,
-                    gates=gates,
-                    notifier=notifier,
-                )
+                if job.kind == memory_job.JOB_KIND:
+                    report = await memory_job.run(
+                        session,
+                        int(job.payload["conversation_id"]),
+                        model_client=model_client,
+                    )
+                    detail = f"stored={len(report.stored)} rejected={len(report.rejected)}"
+                    outcome = JobOutcome("memory_extracted", detail)
+                else:
+                    outcome = await process_message(
+                        session,
+                        int(job.payload["message_id"]),
+                        model_client=model_client,
+                        embedder=embedder,
+                        channels=channels,
+                        gates=gates,
+                        notifier=notifier,
+                    )
                 await queue.complete(session, job.id)
             log.info("job_done", job_id=job.id, outcome=outcome.outcome, detail=outcome.detail)
         except Exception as exc:  # noqa: BLE001 - یک کار خراب نباید کارگر را بکشد

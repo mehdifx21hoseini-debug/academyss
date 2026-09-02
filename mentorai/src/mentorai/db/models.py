@@ -464,3 +464,60 @@ class Escalation(Base):
     created_at: Mapped[datetime] = _created_at()
     resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     resolved_by: Mapped[str | None] = mapped_column(String(120))
+
+
+class MemorySource(enum.StrEnum):
+    extracted = "extracted"
+    mentor = "mentor"
+
+
+class StudentMemory(Base):
+    """حافظه‌ی بلندمدت دانشجو.
+
+    فقط چیزهایی که از سیاست حافظه رد شده‌اند اینجا می‌آیند. حذف دانشجو این‌ها را هم
+    می‌برد؛ همان قاعده‌ای که در راهنمای امنیت آمده.
+    """
+
+    __tablename__ = "student_memories"
+    __table_args__ = (
+        CheckConstraint(
+            "category in ('course', 'learning_stage', 'interest', 'goal', 'constraint', 'note')",
+            name="ck_memory_category",
+        ),
+        CheckConstraint("source in ('extracted', 'mentor')", name="ck_memory_source"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    student_id: Mapped[int] = mapped_column(
+        ForeignKey("students.id", ondelete="CASCADE"), nullable=False
+    )
+    account_id: Mapped[int | None] = mapped_column(
+        ForeignKey("mentor_accounts.id", ondelete="SET NULL")
+    )
+    category: Mapped[str] = mapped_column(String(32), nullable=False)
+    content: Mapped[str] = mapped_column(Text, nullable=False)
+    content_key: Mapped[str] = mapped_column(String(200), nullable=False)
+    confidence: Mapped[float] = mapped_column(Float, nullable=False)
+    source: Mapped[str] = mapped_column(String(16), nullable=False)
+    source_message_id: Mapped[int | None] = mapped_column(
+        ForeignKey("messages.id", ondelete="SET NULL")
+    )
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
+    superseded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = _created_at()
+
+
+class MemoryRejection(Base):
+    """یافته‌ای که سیاست ردش کرد. محتوای ردشده عمداً ذخیره نمی‌شود."""
+
+    __tablename__ = "memory_rejections"
+    __table_args__ = (Index("ix_memory_rejections_created_at", "created_at"),)
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    student_id: Mapped[int] = mapped_column(
+        ForeignKey("students.id", ondelete="CASCADE"), nullable=False
+    )
+    category: Mapped[str | None] = mapped_column(String(32))
+    reason: Mapped[str] = mapped_column(String(32), nullable=False)
+    detail: Mapped[str | None] = mapped_column(String(64))
+    created_at: Mapped[datetime] = _created_at()

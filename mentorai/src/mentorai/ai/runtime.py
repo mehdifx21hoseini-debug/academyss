@@ -17,9 +17,10 @@ from mentorai.ai.client import ModelCall, ModelClient
 from mentorai.ai.decision import deterministic_trigger
 from mentorai.ai.prompt import SYSTEM_PROMPT, build_user_content
 from mentorai.ai.schema import PROMPT_VERSION
-from mentorai.db.models import AiRun, Escalation, Message, Outcome, Sender
+from mentorai.db.models import AiRun, Conversation, Escalation, Message, Outcome, Sender
 from mentorai.knowledge.embeddings import EmbeddingProvider
 from mentorai.knowledge.retrieval import Hit, search
+from mentorai.memory import store as memory_store
 
 # زیر این آستانه، پاسخ ارسال نمی‌شود. عدد اولیه محافظه‌کارانه انتخاب شده؛ کالیبره
 # کردنش کار داده است نه سلیقه، و برای همین confidence در هر اجرا ثبت می‌شود.
@@ -170,9 +171,11 @@ async def handle_message(
         )
 
     history = await _recent_history(session, message.conversation_id, message.id)
+    conversation = await session.get_one(Conversation, message.conversation_id)
+    memories = memory_store.render(await memory_store.load_active(session, conversation.student_id))
     call = await model_client.complete(
         system=SYSTEM_PROMPT,
-        user=build_user_content(question=question, hits=hits, history=history),
+        user=build_user_content(question=question, hits=hits, history=history, memories=memories),
     )
 
     if call.answer is None:

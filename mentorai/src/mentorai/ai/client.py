@@ -29,6 +29,24 @@ DEFAULT_MAX_TOKENS = 2048
 
 
 @dataclass(frozen=True)
+class RawCall:
+    """یک فراخوانی، پیش از آنکه معنی خروجی تفسیر شود.
+
+    هر مصرف‌کننده شکل خودش را دارد — پاسخ گفتگو، یافته‌های حافظه — ولی همه به همان
+    اندازه‌گیری‌ها نیاز دارند. جدا کردن این لایه از فشردن یک شکل داخل شکل دیگر
+    جلوگیری می‌کند.
+    """
+
+    text: str | None
+    model: str
+    latency_ms: int
+    input_tokens: int = 0
+    output_tokens: int = 0
+    cache_read_tokens: int = 0
+    error: str | None = None
+
+
+@dataclass(frozen=True)
 class ModelCall:
     answer: ModelAnswer | None
     model: str
@@ -38,10 +56,26 @@ class ModelCall:
     cache_read_tokens: int = 0
     error: str | None = None
 
+    @classmethod
+    def from_raw(
+        cls, raw: RawCall, answer: ModelAnswer | None, *, error: str | None = None
+    ) -> ModelCall:
+        return cls(
+            answer=answer,
+            model=raw.model,
+            latency_ms=raw.latency_ms,
+            input_tokens=raw.input_tokens,
+            output_tokens=raw.output_tokens,
+            cache_read_tokens=raw.cache_read_tokens,
+            error=error or raw.error,
+        )
+
 
 class ModelClient(Protocol):
     model: str
     effort: Effort
+
+    async def raw(self, *, system: str, user: str, schema: dict[str, object]) -> RawCall: ...
 
     async def complete(self, *, system: str, user: str) -> ModelCall: ...
 
@@ -68,7 +102,8 @@ class AnthropicClient:
         self._max_tokens = max_tokens
         self._client = AsyncAnthropic(timeout=timeout)
 
-    async def complete(self, *, system: str, user: str) -> ModelCall:
+    async def raw(self, *, system: str, user: str, schema: dict[str, object]) -> RawCall:
+        """یک فراخوانی با خروجی ساختاریافته. هرگز استثنا پرتاب نمی‌کند."""
         started = time.monotonic()
         try:
             response = await self._client.messages.create(
@@ -82,8 +117,8 @@ class AnthropicClient:
                 },
             )
         except Exception as exc:  # noqa: BLE001 - هر شکستی به سکوت ختم می‌شود
-            return ModelCall(
-                answer=None,
+            return RawCall(
+                text=None,
                 model=self.model,
                 latency_ms=int((time.monotonic() - started) * 1000),
                 error=f"{type(exc).__name__}: {exc}",
@@ -95,39 +130,28 @@ class AnthropicClient:
         output_tokens = int(getattr(usage, "output_tokens", 0) or 0)
         cache_read_tokens = int(getattr(usage, "cache_read_input_tokens", 0) or 0)
 
-        text = next((b.text for b in response.content if b.type == "text"), None)
-        if text is None:
-            return ModelCall(
-                answer=None,
-                model=self.model,
-                latency_ms=latency_ms,
-                error="پاسخ مدل هیچ بلوک متنی نداشت",
-                input_tokens=input_tokens,
-                output_tokens=output_tokens,
-                cache_read_tokens=cache_read_tokens,
-            )
-
-        try:
-            answer = ModelAnswer.model_validate(json.loads(text))
-        except (json.JSONDecodeError, ValidationError) as exc:
-            return ModelCall(
-                answer=None,
-                model=self.model,
-                latency_ms=latency_ms,
-                error=f"خروجی مدل با شکل مورد انتظار نخواند: {exc}",
-                input_tokens=input_tokens,
-                output_tokens=output_tokens,
-                cache_read_tokens=cache_read_tokens,
-            )
-
-        return ModelCall(
-            answer=answer,
+        body = next((b.text for b in response.content if b.type == "text"), None)
+        return RawCall(
+            text=body,
             model=self.model,
             latency_ms=latency_ms,
             input_tokens=input_tokens,
             output_tokens=output_tokens,
             cache_read_tokens=cache_read_tokens,
+            error=None if body is not None else "پاسخ مدل هیچ بلوک متنی نداشت",
         )
+
+    async def complete(self, *, system: str, user: str) -> ModelCall:
+        raw = await self.raw(system=system, user=user, schema=JSON_SCHEMA)
+        if raw.text is None:
+            return ModelCall.from_raw(raw, None)
+        try:
+            answer = ModelAnswer.model_validate(json.loads(raw.text))
+        except (json.JSONDecodeError, ValidationError) as exc:
+            return ModelCall.from_raw(
+                raw, None, error=f"خروجی مدل با شکل مورد انتظار نخواند: {exc}"
+            )
+        return ModelCall.from_raw(raw, answer)
 
 
 class ScriptedClient:
@@ -138,6 +162,7 @@ class ScriptedClient:
         answer: ModelAnswer | None = None,
         *,
         error: str | None = None,
+        raw_text: str | None = None,
         model: str = "scripted-test-only",
         effort: Effort = "low",
     ) -> None:
@@ -145,7 +170,19 @@ class ScriptedClient:
         self.effort = effort
         self._answer = answer
         self._error = error
+        self._raw_text = raw_text
         self.calls: list[tuple[str, str]] = []
+
+    async def raw(self, *, system: str, user: str, schema: dict[str, object]) -> RawCall:
+        self.calls.append((system, user))
+        return RawCall(
+            text=self._raw_text,
+            model=self.model,
+            latency_ms=1,
+            input_tokens=10,
+            output_tokens=5,
+            error=self._error,
+        )
 
     async def complete(self, *, system: str, user: str) -> ModelCall:
         self.calls.append((system, user))

@@ -38,6 +38,37 @@ def test_ordinary_questions_are_not_escalated_by_rule(message: str) -> None:
     assert deterministic_trigger(message) is None
 
 
+@pytest.mark.parametrize(
+    "message",
+    [
+        "درباره رمزارز هم آموزش دارید؟",
+        "به هدفم رسیدم",
+        "این تحلیل به نتیجه رسیده",
+    ],
+)
+def test_words_that_merely_contain_a_rule_phrase_do_not_escalate(message: str) -> None:
+    """«رمز» زیررشته‌ی «رمزارز» است و «رسید» زیررشته‌ی «رسیده».
+
+    در یک آکادمی معامله‌گری هر دو واژه‌ی پرکاربردی‌اند؛ تطبیق زیررشته‌ای هر سؤال
+    درباره‌ی رمزارز را به مشکل حساب کاربری تبدیل می‌کرد.
+    """
+    assert deterministic_trigger(message) is None
+
+
+@pytest.mark.parametrize(
+    "message",
+    [
+        "پرداختم انجام شد",
+        "رمزم رو فراموش کردم",
+        "پرداختش رو کجا ببینم",
+        "حساب کاربری‌ام مشکل داره",
+    ],
+)
+def test_attached_persian_possessive_suffixes_still_match(message: str) -> None:
+    """فارسی ضمیر ملکی را می‌چسباند؛ مرز واژه‌ی سخت این‌ها را از دست می‌داد."""
+    assert deterministic_trigger(message) is not None
+
+
 def test_rules_match_across_persian_spelling_variants() -> None:
     """قواعد روی متن نرمال‌شده اجرا می‌شوند، پس نگارش عربی هم می‌گیرد."""
     assert deterministic_trigger("مي خواهم با منتور حرف بزنم") is (

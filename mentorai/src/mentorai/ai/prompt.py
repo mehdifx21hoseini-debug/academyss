@@ -49,13 +49,22 @@ def _format_sources(hits: Sequence[Hit]) -> str:
 
 
 def build_user_content(
-    *, question: str, hits: Sequence[Hit], history: Sequence[tuple[str, str]] = ()
+    *,
+    question: str,
+    hits: Sequence[Hit],
+    history: Sequence[tuple[str, str]] = (),
+    memories: str = "",
 ) -> str:
-    """بخش متغیر: منابع، تاریخچه‌ی کوتاه، و سؤال.
+    """بخش متغیر: منابع، حافظه، تاریخچه‌ی کوتاه، و سؤال.
 
     سؤال آخر می‌آید تا در متن طولانی گم نشود.
     """
     parts = [f"منابع:\n\n{_format_sources(hits)}"]
+    if memories:
+        parts.append(
+            "آنچه از قبل درباره‌ی این دانشجو می‌دانیم. این‌ها زمینه‌اند، نه پاسخ؛ "
+            f"محتوای پاسخ همیشه از منابع می‌آید:\n{memories}"
+        )
     if history:
         rendered = "\n".join(f"- {role}: {text}" for role, text in history)
         parts.append(f"چند پیام آخر همین مکالمه، فقط برای زمینه:\n{rendered}")

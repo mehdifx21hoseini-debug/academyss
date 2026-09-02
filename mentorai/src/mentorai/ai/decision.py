@@ -10,11 +10,9 @@
 from __future__ import annotations
 
 import enum
-import re
 
 from mentorai.text import normalize_for_search
-
-_SPACES = re.compile(r"\s+")
+from mentorai.text.matching import contains_phrase
 
 
 class EscalationTrigger(enum.StrEnum):
@@ -41,7 +39,13 @@ RULES: dict[EscalationTrigger, tuple[str, ...]] = {
         "پرداخت",
         "واریز",
         "کارت به کارت",
-        "رسید",
+        # «رسید» تنها نمی‌آید: هم رسید پرداخت است هم صرف فعل رسیدن، و «به هدفم رسیدم»
+        # نباید ارجاع مالی شود. شکل چندواژه‌ای این ابهام را ندارد.
+        "رسید واریز",
+        "رسید پرداخت",
+        "رسید بانکی",
+        "فیش واریز",
+        "فیش پرداخت",
         "فاکتور",
         "بازگشت وجه",
         "عودت",
@@ -76,27 +80,18 @@ RULES: dict[EscalationTrigger, tuple[str, ...]] = {
 }
 
 
-def _joined(value: str) -> str:
-    """شکل کاملاً چسبیده، بدون هیچ فاصله‌ای.
-
-    نرمال‌سازی جستجو نیم‌فاصله را حذف می‌کند ولی فاصله‌ی کامل را نگه می‌دارد. پس
-    «حساب‌کاربری» به «حسابکاربری» تبدیل می‌شود در حالی که عبارت قاعده «حساب کاربری»
-    است و دیگر نمی‌خواند. مقایسه روی شکل چسبیده هر دو را یکی می‌بیند.
-    """
-    return _SPACES.sub("", value)
-
-
 def deterministic_trigger(message_text: str) -> EscalationTrigger | None:
     """اگر پیام یکی از موضوعات همیشه-انسانی را لمس کند، همان را برگردان.
+
+    تطبیق روی مرز واژه انجام می‌شود، نه زیررشته. «رمز» زیررشته‌ی «رمزارز» است و
+    دانشجویی که درباره‌ی رمزارز می‌پرسد نباید به‌عنوان مشکل حساب کاربری ارجاع شود.
 
     ترتیب بررسی ثابت است تا نتیجه قطعی بماند: یک پیام همیشه همان دلیل را می‌دهد.
     """
     normalized = normalize_for_search(message_text)
     if not normalized:
         return None
-    joined = _joined(normalized)
     for trigger in EscalationTrigger:
-        for phrase in RULES[trigger]:
-            if phrase in normalized or _joined(phrase) in joined:
-                return trigger
+        if any(contains_phrase(normalized, phrase) for phrase in RULES[trigger]):
+            return trigger
     return None
