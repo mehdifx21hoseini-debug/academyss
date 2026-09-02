@@ -27,7 +27,9 @@
       <td>{{ doc.category or '—' }}</td>
       <td>{{ source_class(doc.source_class) }}</td>
       <td>{{ authority(doc.authority) }}</td>
-      <td class="num-cell">
+      {# تاریخ با نام ماه متن است نه عدد، پس نباید چپ‌به‌راست شود؛ آن‌طور روزِ ماه از
+         بقیه‌ی تاریخ جدا می‌افتد. #}
+      <td>
         {% if doc.valid_until %}
           {{ date_label(doc.valid_until) }}{% if doc.valid_until < today %} <span class="tag warn-tag">منقضی</span>{% endif %}
         {% else %}—{% endif %}

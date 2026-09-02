@@ -4,15 +4,18 @@
 
 ۱. زمان‌ها در پایگاه داده UTC هستند. منتور در تهران است و «۰۳:۲۸» برایش یعنی
    ساعت اشتباه. تبدیل اینجا انجام می‌شود، نه در پرس‌وجو، تا داده همان UTC بماند.
-۲. رقم‌ها فارسی می‌شوند. کل رابط فارسی است و رقم لاتین وسطش وصله می‌زند.
+۲. تاریخ‌ها شمسی نمایش داده می‌شوند و رقم‌ها فارسی. ذخیره‌سازی همچنان میلادی و UTC
+   است؛ تقویم یک موضوع نمایشی است و هرگز نباید به پایگاه داده نشت کند، وگرنه هر
+   مقایسه و مرتب‌سازی باید از تبدیل بگذرد.
 ۳. عرض نوار نسبت با کلاس داده می‌شود و نه با ویژگی style، چون سیاست محتوا سبک درون‌خطی
    را مسدود می‌کند و نوار بی‌صدا خالی می‌ماند.
 """
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, date, datetime, timedelta
 
+from mentorai import jalali
 from mentorai.config import get_settings
 
 _DIGITS = str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹")
@@ -39,11 +42,18 @@ def local(moment: datetime) -> datetime:
 
 
 def datetime_label(moment: datetime) -> str:
-    return digits(local(moment).strftime("%Y-%m-%d %H:%M"))
+    """تاریخ شمسی و ساعت محلی، مثل ۱۴۰۵/۰۶/۱۱ ۱۰:۳۴."""
+    at = local(moment)
+    return digits(f"{jalali.format_date(at.date())} {at:%H:%M}")
 
 
-def date_label(moment: object) -> str:
-    return digits(moment)
+def date_label(value: date) -> str:
+    """تاریخ شمسی با نام ماه.
+
+    برای تاریخ تنها — مثل انقضای سند — نام ماه خواناتر از عدد است و ابهام «ماه یا
+    روز؟» را هم ندارد.
+    """
+    return digits(jalali.format_date_long(value))
 
 
 def duration_label(delta: timedelta) -> str:

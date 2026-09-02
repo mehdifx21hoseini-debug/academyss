@@ -19,6 +19,7 @@ from httpx import ASGITransport, AsyncClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from mentorai import jalali
 from mentorai.config import get_settings
 from mentorai.db.models import (
     AiRun,
@@ -471,10 +472,10 @@ async def test_ratio_bar_width_comes_from_a_class_not_an_inline_style(
     assert "style=" not in html
 
 
-async def test_times_are_shown_in_the_configured_timezone(
+async def test_times_are_shown_in_tehran_time_and_the_persian_calendar(
     client: AsyncClient, session: AsyncSession, with_activity
 ) -> None:  # type: ignore[no-untyped-def]
-    """پیام‌ها UTC ذخیره می‌شوند ولی منتور در تهران است."""
+    """پیام‌ها میلادی و UTC ذخیره می‌شوند ولی منتور در تهران است و تقویمش شمسی."""
     message = (
         (
             await session.execute(
@@ -487,9 +488,21 @@ async def test_times_are_shown_in_the_configured_timezone(
     await _login(client, "mentor_a", PASSWORD)
     html = (await client.get(f"/conversations/{with_activity['conv_a']}")).text
 
-    expected = fmt.digits(message.sent_at.astimezone(get_settings().tz).strftime("%Y-%m-%d %H:%M"))
-    assert expected in html
-    assert fmt.digits(message.sent_at.strftime("%Y-%m-%d %H:%M")) not in html
+    at = message.sent_at.astimezone(get_settings().tz)
+    assert fmt.digits(f"{jalali.format_date(at.date())} {at:%H:%M}") in html
+    # نه ساعت UTC و نه تاریخ میلادی نباید جایی دیده شود.
+    assert fmt.digits(message.sent_at.strftime("%H:%M")) not in html
+    assert fmt.digits(at.strftime("%Y-%m-%d")) not in html
+
+
+async def test_document_expiry_is_shown_in_the_persian_calendar(
+    client: AsyncClient, with_activity
+) -> None:  # type: ignore[no-untyped-def]
+    await _login(client, "mentor_a", PASSWORD)
+    html = (await client.get("/knowledge")).text
+    # ۱۳۹۸/۱۰/۱۱ برابر با ۲۰۲۰-۰۱-۰۱ است.
+    assert "۱۱ دی ۱۳۹۸" in html
+    assert "2020-01-01" not in html
 
 
 def test_the_meter_track_class_is_not_reused_elsewhere() -> None:
