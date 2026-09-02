@@ -13,11 +13,17 @@ from __future__ import annotations
 from collections.abc import Mapping
 
 import structlog
-from sqlalchemy import select
 from telethon import Button, TelegramClient, events
 
 from mentorai import drafts
 from mentorai.config import get_settings
+from mentorai.control.auth import (
+    ControlNotPermitted,
+    account_for_slug,
+    authorise_draft,
+    authorise_draft_by_control_message,
+    is_operator,
+)
 from mentorai.db.models import AuditLog, Draft, MentorAccount
 from mentorai.db.session import session_scope
 from mentorai.telegram.safety import AccountGate
@@ -26,7 +32,9 @@ from mentorai.worker import send_approved_draft
 
 log = structlog.get_logger(__name__)
 
-_LINK_USAGE = "برای اتصال این گفتگو به یک حساب: /link <slug>"
+_LINK_USAGE = "برای اتصال این گفتگو به یک حساب: /link <slug>\nبرای قطع اتصال: /unlink <slug>"
+# پاسخ یکسان برای «پیدا نشد» و «اجازه نداری»، تا نشود با آن slugهای موجود را شمرد.
+_LINK_REFUSED = "انجام نشد."
 
 
 def _render(question: str, proposed: str) -> str:
@@ -61,6 +69,7 @@ class ControlBot:
     async def start(self) -> None:
         await self._client.start(bot_token=self._token)
         self._client.add_event_handler(self._on_link, events.NewMessage(pattern=r"^/link"))
+        self._client.add_event_handler(self._on_unlink, events.NewMessage(pattern=r"^/unlink"))
         self._client.add_event_handler(self._on_reply, events.NewMessage(func=lambda e: e.is_reply))
         self._client.add_event_handler(self._on_callback, events.CallbackQuery())
         log.info("control_bot_started")
@@ -90,25 +99,81 @@ class ControlBot:
         return int(message.id)
 
     async def _on_link(self, event: events.NewMessage.Event) -> None:
+        """اتصال یک گفتگو به یک حساب.
+
+        بدون فهرست سفید، هر کسی که ربات را پیدا کند می‌تواند گفتگوی خودش را به یک
+        حساب وصل کند و از آن لحظه پیام‌های واقعی دانشجوها را ببیند و از طرف منتور
+        پاسخ بفرستد. برای همین این دستور فقط برای اپراتورهای تعریف‌شده کار می‌کند.
+        """
         parts = (event.raw_text or "").split()
         if len(parts) != 2:
             await event.reply(_LINK_USAGE)
             return
+
+        actor = f"control:{event.sender_id}"
+        if not is_operator(event.sender_id):
+            async with session_scope() as session:
+                session.add(
+                    AuditLog(
+                        actor=actor,
+                        action="link_denied",
+                        target=parts[1],
+                        detail=f"chat={event.chat_id}",
+                    )
+                )
+            await event.reply(_LINK_REFUSED)
+            return
+
         slug = parts[1]
         async with session_scope() as session:
-            account = (
-                await session.execute(select(MentorAccount).where(MentorAccount.slug == slug))
-            ).scalar_one_or_none()
+            account = await account_for_slug(session, slug)
             if account is None:
-                await event.reply(f"حسابی با slug={slug} پیدا نشد")
+                await event.reply(_LINK_REFUSED)
+                return
+            # اتصال موجود بی‌صدا جابه‌جا نمی‌شود. برای تغییر، اول باید قطع شود؛ وگرنه
+            # یک دستور می‌تواند جریان پیش‌نویس‌ها را به گفتگوی دیگری منحرف کند.
+            if account.control_chat_id is not None and int(account.control_chat_id) != int(
+                event.chat_id
+            ):
+                session.add(
+                    AuditLog(
+                        actor=actor,
+                        action="link_conflict",
+                        target=slug,
+                        detail=f"chat={event.chat_id}",
+                    )
+                )
+                await event.reply(
+                    "این حساب قبلاً به گفتگوی دیگری وصل است. اول از همان‌جا /unlink بزنید."
+                )
                 return
             account.control_chat_id = int(event.chat_id)
+            session.add(AuditLog(actor=actor, action="link_control_chat", target=slug))
+        await event.reply(f"این گفتگو به حساب {slug} وصل شد.")
+
+    async def _on_unlink(self, event: events.NewMessage.Event) -> None:
+        """قطع اتصال، فقط توسط اپراتور و فقط از همان گفتگویی که وصل است."""
+        parts = (event.raw_text or "").split()
+        if len(parts) != 2 or not is_operator(event.sender_id):
+            await event.reply(_LINK_REFUSED)
+            return
+        slug = parts[1]
+        async with session_scope() as session:
+            account = await account_for_slug(session, slug)
+            if (
+                account is None
+                or account.control_chat_id is None
+                or int(account.control_chat_id) != int(event.chat_id)
+            ):
+                await event.reply(_LINK_REFUSED)
+                return
+            account.control_chat_id = None
             session.add(
                 AuditLog(
-                    actor=f"control:{event.sender_id}", action="link_control_chat", target=slug
+                    actor=f"control:{event.sender_id}", action="unlink_control_chat", target=slug
                 )
             )
-        await event.reply(f"این گفتگو به حساب {slug} وصل شد.")
+        await event.reply(f"اتصال حساب {slug} قطع شد.")
 
     async def _on_callback(self, event: events.CallbackQuery.Event) -> None:
         raw = (event.data or b"").decode()
@@ -119,6 +184,18 @@ class ControlBot:
         actor = f"control:{event.sender_id}"
 
         async with session_scope() as session:
+            # داده‌ی دکمه از سمت کاربر می‌آید و شناسه‌ها پشت‌سرهم‌اند، پس تعلق
+            # پیش‌نویس به همین گفتگو و اجازه‌ی فرستنده باید صریح بررسی شود.
+            try:
+                await authorise_draft(
+                    session, draft_id, chat_id=int(event.chat_id), sender_id=event.sender_id
+                )
+            except ControlNotPermitted as exc:
+                session.add(
+                    AuditLog(actor=actor, action="draft_action_denied", target=str(draft_id))
+                )
+                await event.answer(str(exc), alert=True)
+                return
             try:
                 if action == "reject":
                     await drafts.reject(session, draft_id, by=actor)
@@ -151,12 +228,16 @@ class ControlBot:
             return
 
         async with session_scope() as session:
-            draft = (
-                await session.execute(
-                    select(Draft).where(Draft.control_message_id == int(replied.id))
+            # جستجو از ابتدا به همین گفتگو محدود است: شناسه‌ی پیام در تلگرام فقط
+            # داخل یک گفتگو یکتاست و بین گفتگوها می‌تواند تکرار شود.
+            try:
+                draft, _ = await authorise_draft_by_control_message(
+                    session,
+                    int(replied.id),
+                    chat_id=int(event.chat_id),
+                    sender_id=event.sender_id,
                 )
-            ).scalar_one_or_none()
-            if draft is None:
+            except ControlNotPermitted:
                 return
             try:
                 await drafts.edit(session, draft.id, by=f"control:{event.sender_id}", body=body)

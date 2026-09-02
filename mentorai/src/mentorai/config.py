@@ -24,6 +24,9 @@ class Settings(BaseSettings):
 
     # ربات کنترل منتورها. جدا از حساب‌های کاربری و بدون ریسک مسدودی.
     control_bot_token: SecretStr | None = None
+    # شناسه‌ی تلگرام کسانی که اجازه‌ی کار با ربات کنترل را دارند، با کاما جدا شده.
+    # خالی یعنی هیچ‌کس. فهرست سفید است، نه سیاه: ناشناخته یعنی بدون دسترسی.
+    control_operator_ids: str = ""
 
     quiet_hours_start: int = Field(default=23, ge=0, le=23)
     quiet_hours_end: int = Field(default=8, ge=0, le=23)
@@ -43,6 +46,12 @@ class Settings(BaseSettings):
     @property
     def tz(self) -> ZoneInfo:
         return ZoneInfo(self.timezone)
+
+    @property
+    def operator_ids(self) -> frozenset[int]:
+        return frozenset(
+            int(part) for part in self.control_operator_ids.replace(" ", "").split(",") if part
+        )
 
 
 @lru_cache(maxsize=1)

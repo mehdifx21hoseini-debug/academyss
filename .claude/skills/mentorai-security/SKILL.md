@@ -102,6 +102,28 @@ Record who did what, separately from application logs, append-only:
 
 Each entry: actor, action, target, timestamp, source address. No message content.
 
+## The mentor control bot
+
+The bot that shows drafts to mentors is a second front door, and it is easy to forget
+because it faces staff rather than students. It carries the same data: real student
+messages, and the ability to send from a mentor's account.
+
+Three conditions must all hold before any draft action, and each is checked before the
+first read:
+
+- the sender's Telegram id is in the configured operator allowlist, which is a whitelist
+  and denies everyone when unset
+- the request arrives in the chat that account is actually linked to
+- the draft belongs to that same account
+
+Two specific traps this closes. A `/link` command with no authentication lets anyone who
+finds the bot redirect a mentor's drafts to their own chat. And a Telegram message id is
+unique only within one chat, so a lookup by control message id alone can be satisfied
+from a different chat entirely; scope that query by chat from the start.
+
+Re-linking an account that is already linked is refused rather than silently moved, and
+both the refusal and the attempt are audited.
+
 ## Sessions and transport
 
 - HTTPS everywhere. No exceptions, no disabled certificate verification.
