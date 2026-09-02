@@ -19,6 +19,7 @@ from sqlalchemy import (
     CheckConstraint,
     Date,
     DateTime,
+    Float,
     ForeignKey,
     Index,
     Integer,
@@ -28,6 +29,7 @@ from sqlalchemy import (
     func,
     text,
 )
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -347,3 +349,113 @@ class KnowledgeChunk(Base):
     embedding: Mapped[list[float] | None] = mapped_column(Vector(EMBEDDING_DIM))
     embedding_model: Mapped[str | None] = mapped_column(String(120))
     created_at: Mapped[datetime] = _created_at()
+
+
+class ReplyMode(enum.StrEnum):
+    draft = "draft"
+    auto = "auto"
+
+
+class Outcome(enum.StrEnum):
+    answer = "answer"
+    silence = "silence"
+
+
+class DraftStatus(enum.StrEnum):
+    pending = "pending"
+    approved = "approved"
+    edited = "edited"
+    rejected = "rejected"
+    sent = "sent"
+    failed = "failed"
+
+
+class AiRun(Base):
+    """هر فراخوانی و هر تصمیم، با همه‌ی چیزی که برای بازخوانی لازم است.
+
+    این جدول پاسخ پرسش «چرا سیستم این‌طور رفتار کرد» است. یک اجرا به‌ازای هر پیام، تا
+    تلاش دوباره‌ی یک کار رکورد دوم نسازد.
+    """
+
+    __tablename__ = "ai_runs"
+    __table_args__ = (
+        CheckConstraint("outcome in ('answer', 'silence')", name="ck_ai_run_outcome"),
+        UniqueConstraint("message_id", name="uq_ai_run_message"),
+        Index("ix_ai_runs_conversation", "conversation_id", "created_at"),
+        Index("ix_ai_runs_created_at", "created_at"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    conversation_id: Mapped[int] = mapped_column(
+        ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False
+    )
+    message_id: Mapped[int] = mapped_column(
+        ForeignKey("messages.id", ondelete="CASCADE"), nullable=False
+    )
+    outcome: Mapped[str] = mapped_column(String(16), nullable=False)
+    reason: Mapped[str] = mapped_column(String(64), nullable=False)
+    confidence: Mapped[float | None] = mapped_column(Float)
+    model: Mapped[str | None] = mapped_column(String(120))
+    prompt_version: Mapped[str] = mapped_column(String(32), nullable=False)
+    effort: Mapped[str | None] = mapped_column(String(16))
+    latency_ms: Mapped[int | None] = mapped_column(Integer)
+    input_tokens: Mapped[int | None] = mapped_column(Integer)
+    output_tokens: Mapped[int | None] = mapped_column(Integer)
+    cache_read_tokens: Mapped[int | None] = mapped_column(Integer)
+    retrieved: Mapped[list[dict[str, object]]] = mapped_column(
+        JSONB, nullable=False, server_default="[]"
+    )
+    response_text: Mapped[str | None] = mapped_column(Text)
+    error: Mapped[str | None] = mapped_column(Text)
+    created_at: Mapped[datetime] = _created_at()
+
+
+class Draft(Base):
+    """پاسخ پیشنهادی که منتظر تأیید منتور است."""
+
+    __tablename__ = "drafts"
+    __table_args__ = (
+        CheckConstraint(
+            "status in ('pending', 'approved', 'edited', 'rejected', 'sent', 'failed')",
+            name="ck_draft_status",
+        ),
+        UniqueConstraint("ai_run_id", name="uq_draft_ai_run"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    ai_run_id: Mapped[int] = mapped_column(
+        ForeignKey("ai_runs.id", ondelete="CASCADE"), nullable=False
+    )
+    conversation_id: Mapped[int] = mapped_column(
+        ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False
+    )
+    proposed_text: Mapped[str] = mapped_column(Text, nullable=False)
+    final_text: Mapped[str | None] = mapped_column(Text)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, server_default="pending")
+    decided_by: Mapped[str | None] = mapped_column(String(120))
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    control_message_id: Mapped[int | None] = mapped_column(BigInteger)
+    created_at: Mapped[datetime] = _created_at()
+
+
+class Escalation(Base):
+    """پیامی که به منتور سپرده شده.
+
+    برای دانشجو نامرئی است (ADR-009)، پس بدون این ثبت هیچ راهی برای فهمیدن اینکه چند
+    پیام بی‌پاسخ مانده و چقدر منتظرند وجود ندارد.
+    """
+
+    __tablename__ = "escalations"
+    __table_args__ = (UniqueConstraint("message_id", name="uq_escalation_message"),)
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    conversation_id: Mapped[int] = mapped_column(
+        ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False
+    )
+    message_id: Mapped[int] = mapped_column(
+        ForeignKey("messages.id", ondelete="CASCADE"), nullable=False
+    )
+    ai_run_id: Mapped[int | None] = mapped_column(ForeignKey("ai_runs.id", ondelete="SET NULL"))
+    reason: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = _created_at()
+    resolved_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
