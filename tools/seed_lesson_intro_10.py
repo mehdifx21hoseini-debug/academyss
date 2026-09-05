@@ -5,13 +5,9 @@ Source quality: USABLE (100% speech ratio, 447 unique words, no artifacts).
 
 Handled carefully:
 
-1. The RoboForex sentence is garbled in the transcript ("بعضی از بروکرها به ما
-   ایرانی‌ها دیگه خدمات نمی‌دن. روبوفارکس و حالا تو پارت چهارم بهش پرداختم").
-   It is not decidable from the text whether RoboForex is named as a broker that
-   stopped serving Iranian clients or as something else; the broker introduced in
-   lesson 4 is a different one (BRK-FACT-0001). Students may act financially on
-   this, so it is recorded at low confidence, REVIEW_REQUIRED, with the ambiguity
-   stated and RQ-0018 opened. Nothing is inferred.
+1. The RoboForex sentence was garbled and its meaning undecidable from the text.
+   The owner ruled it be removed entirely (D-0008), so no knowledge object is
+   built from it; the sentence survives only in the raw transcript.
 2. The 100% margin-level threshold is recorded as the instructor states it, with
    the standing broker-dependency caveat already in the KB (GEN-DEF-0008,
    MT-CONC-0007): margin call and stop out thresholds are set by the broker.
@@ -79,29 +75,6 @@ OBJECTS = [
         related_concepts=["ACA-INT-0099", "MT4-PROC-0002", "ACA-INT-0113"],
         related_questions=["چرا US30 رو ندارم؟", "اسم داوجونز تو متاتریدر چیه؟",
                            "نماد مورد نظرم تو لیست نیست"]),
-
-    obj("ACA-INT-0163", "OPERATIONAL_FACT", "اشاره‌ی مدرس به بروکرهایی که به ایرانی‌ها خدمات نمی‌دهند",
-        "مدرس در پاسخ به پرسش‌های دانشجویان یادآوری می‌کند که بعضی بروکرها دیگر به ایرانی‌ها خدمات "
-        "نمی‌دهند و در همین جمله نام «روبوفارکس» را می‌آورد و به جلسه‌ی چهارم ارجاع می‌دهد. ⚠️ متن این "
-        "جمله ناقص است و از روی آن نمی‌توان تشخیص داد روبوفارکس به‌عنوان نمونه‌ی بروکری نام برده شده "
-        "که سرویس‌دهی را قطع کرده یا به دلیل دیگری. بروکری که در جلسه‌ی چهارم معرفی شده، بروکر "
-        "دیگری است (BRK-FACT-0001). تا تعیین تکلیف، مربی نباید درباره‌ی وضعیت روبوفارکس اظهارنظر کند "
-        "و باید به پشتیبانی انسانی ارجاع دهد.",
-        "بخش «نکته مهم درباره نمادها»",
-        "بعضی از بروکرها به ما ایرانی‌ها دیگه خدمات نمی‌دن. روبوفارکس و حالا تو پارت چهارم بهش پرداختم.",
-        0.5, scope="BROKER_SPECIFIC", platform_scope="BROKER_DEPENDENT",
-        validity={"time_bound": True, "as_of": "زمان ضبط دوره",
-                  "note": "وضعیت سرویس‌دهی بروکرها به کاربران ایرانی در طول زمان تغییر می‌کند."},
-        warnings=[
-            "جمله‌ی منبع ناقص است؛ نقش روبوفارکس در آن قطعی نیست (RQ-0018).",
-            "این اطلاعات زمان‌مند است و ممکن است امروز معتبر نباشد.",
-            "مربی نباید بر مبنای این رکورد بروکری را تأیید یا رد کند؛ ارجاع به پشتیبانی انسانی.",
-        ],
-        review_priority="P1",
-        review_reason="ادعای مالی درباره‌ی یک بروکر مشخص، با متن مبهم. پیش از هر استفاده باید تأیید شود.",
-        keywords=["روبوفارکس", "بروکر", "ایران", "خدمات"],
-        related_concepts=["BRK-FACT-0001", "ACA-INT-0066", "ACA-RULE-0003"],
-        related_questions=["روبوفارکس به ایرانی‌ها خدمات می‌ده؟", "کدوم بروکرها به ایرانی‌ها سرویس نمی‌دن؟"]),
 
     obj("ACA-INT-0164", "CONCEPT", "پنجره‌ی ترمینال و پنج سنجه‌ی حساب",
         "با کلیک روی Terminal، بخشی در پایین صفحه باز می‌شود که وضعیت مالی حساب را نشان می‌دهد. پنج "
@@ -291,7 +264,7 @@ changed = K.write_collection(K.KB_DIR + "/academy/intro/lesson_10.json", {
     "version": "v001", "generated_at": NOW, "pipeline_stage": "STRUCTURED",
     "source_files": [RAW, "raw_sources/academy/intro/intro_lesson_10.ingest.json"],
     "notes": [
-        "جمله‌ی مربوط به روبوفارکس در متن ناقص است و تأیید نشده ثبت شد (RQ-0018).",
+        "جمله‌ی مربوط به روبوفارکس به تصمیم مالک پروژه (D-0008) به‌کلی حذف شد؛ فقط در ترنسکریپت خام باقی است.",
         "آستانه‌ی ۱۰۰٪ مارجین لیول با هشدار وابستگی به بروکر ثبت شد.",
         "اعداد ۴۸٬۰۰۰ و ۱۰٬۰۰۰ دلار آموزشی‌اند و داده‌ی حساب یا بازار نیستند.",
     ],

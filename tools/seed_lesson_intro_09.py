@@ -13,10 +13,10 @@ Two things are handled carefully:
    lesson 5 (ACA-INT-0097) — that is cross-lesson corroboration, not a conflict.
    Lesson 9 adds one new detail lesson 5 did not give: the drag direction
    ("from entry to stop loss"). Whether that direction, combined with
-   "Level 0 = Entry", places TP1/TP2 in profit territory depends on how the tool
-   is anchored on the chart, and the transcript does not show it. The naming is
-   recorded verbatim as the instructor's convention; the drag direction is
-   flagged for confirmation (RQ-0017) instead of being reasoned out here.
+   "Level 0 = Entry", places TP1/TP2 in profit territory was not decidable from the
+   transcript alone, so it was flagged rather than reasoned out. The owner has
+   since confirmed the direction (entry to stop loss, D-0007) and the record is
+   no longer flagged.
 """
 import sys
 
@@ -277,23 +277,19 @@ OBJECTS = [
         "نام سطوح را چنین تنظیم کنید: Level 0 = Entry، Level 1 = -SL، Level 2 = TP1 (هدف اول، یک "
         "برابر ریسک) و Level 3 = TP2 (هدف دوم، دو برابر ریسک). نام‌گذاری سطوح دقیقاً همان چیزی است "
         "که در جلسه‌ی ۵ گفته شده بود (ACA-INT-0097) — یعنی دو جلسه یکدیگر را تأیید می‌کنند. آنچه "
-        "جلسه‌ی ۹ اضافه می‌کند، جهت رسم و معنی هر هدف بر حسب ضریب ریسک است.",
+        "جلسه‌ی ۹ اضافه می‌کند، جهت رسم و معنی هر هدف بر حسب ضریب ریسک است. جهت رسم "
+        "(از نقطه‌ی ورود تا حد ضرر) با تصمیم مالک پروژه تأیید شد (D-0007).",
         "بخش ۸",
         "۱. ابزار Fibonacci Retracement را انتخاب کنید ۲. از نقطه ورود تا حد ضرر بکشید ۳. تنظیمات "
         "سطح‌ها را تغییر دهید: ۰ Entry / ۱ -SL / ۲ TP1 (هدف اول، ۱ برابر ریسک) / ۳ TP2 (هدف دوم، ۲ "
         "برابر ریسک)",
-        0.7, scope="PLATFORM_OPERATION", platform_scope="BOTH",
+        0.9, scope="PLATFORM_OPERATION", platform_scope="BOTH",
         steps=[
             "ابزار Fibonacci Retracement را انتخاب کنید.",
             "آن را از نقطه‌ی ورود تا حد ضرر بکشید.",
             "در تنظیمات سطوح، ۰ را Entry و ۱ را -SL نام‌گذاری کنید.",
             "سطح ۲ را TP1 (یک برابر ریسک) و سطح ۳ را TP2 (دو برابر ریسک) نام‌گذاری کنید.",
         ],
-        review_priority="P1",
-        review_reason=("جهت رسم ابزار روی چارت تعیین می‌کند اهداف در ناحیه‌ی سود بیفتند یا نه، و متن "
-                       "درس این را نشان نمی‌دهد. تا تأیید مدرس، مربی نباید جهت رسم را به‌عنوان "
-                       "دستورالعمل قطعی بدهد (RQ-0017)."),
-        warnings=["نام‌گذاری سطوح تأییدشده است؛ جهت رسم روی چارت نیازمند تأیید مدرس است."],
         keywords=["فیبوناچی", "ریسک به ریوارد", "TP1", "TP2", "retracement"],
         related_concepts=["ACA-INT-0097", "ACA-INT-0098", "ACA-INT-0159"],
         related_questions=["فیبوناچی رو برای ریسک به ریوارد چطور تنظیم کنم؟",
@@ -322,7 +318,7 @@ changed = K.write_collection(K.KB_DIR + "/academy/intro/lesson_09.json", {
     "source_files": [RAW, "raw_sources/academy/intro/intro_lesson_09.ingest.json"],
     "notes": [
         "اعداد مثال داوجونز مربوط به لحظه‌ی ضبط‌اند و به‌عنوان داده‌ی بازار ثبت نشده‌اند.",
-        "نام‌گذاری سطوح فیبوناچی با جلسه‌ی ۵ (ACA-INT-0097) یکسان است؛ جهت رسم تازه است و تأیید نشده (RQ-0017).",
+        "نام‌گذاری سطوح و جهت رسم فیبوناچی با تصمیم مالک پروژه تأیید شدند (D-0007).",
         "قسمت دوم جلسه ۸ (پین‌بار) هنوز دریافت نشده است.",
     ],
     "objects": OBJECTS,

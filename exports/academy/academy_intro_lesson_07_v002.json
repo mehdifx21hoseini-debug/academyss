@@ -4,7 +4,7 @@
   "title": "دوره مقدماتی — جلسه ۷: پیپ، پیپت، لات و لوریج",
   "description": "واحدهای اندازه‌گیری بازار و محاسبه‌ی سود و زیان: پیپ و پیپت، تشخیص آن‌ها در جفت‌ارزهای مختلف، انواع لات، ارزش هر پیپ، و مفهوم لوریج.",
   "version": "v001",
-  "generated_at": "2026-09-05T19:12:19Z",
+  "generated_at": "2026-09-05T19:11:22Z",
   "pipeline_stage": "STRUCTURED",
   "source_files": [
     "raw_sources/academy/intro/intro_lesson_07.md",
@@ -41,8 +41,8 @@
       "verification_required": false,
       "confidence": 0.9,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "definition": "پیپ: واحد استاندارد اندازه‌گیری تغییر قیمت در بازار فارکس.",
       "keywords": [
         "پیپ",
@@ -83,8 +83,8 @@
       "verification_required": false,
       "confidence": 0.9,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "definition": "پیپت: یک دهم پیپ.",
       "keywords": [
         "پیپت",
@@ -126,8 +126,8 @@
       "verification_required": false,
       "confidence": 0.9,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "rule": "جفت‌ارزهای معمولی: پیپ = رقم چهارم اعشار. جفت‌ارزهای ین: پیپ = رقم دوم اعشار.",
       "keywords": [
         "پیپ",
@@ -169,8 +169,8 @@
       "verification_required": false,
       "confidence": 0.9,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "examples": [
         "EUR/USD: ۱.۱۰۵۰ → ۱.۱۰۷۰ = ۲۰ پیپ",
         "EUR/USD: ۱.۱۰۵۰ → ۱.۲۰۵۰ = ۱۰۰۰ پیپ",
@@ -213,8 +213,8 @@
       "verification_required": false,
       "confidence": 0.85,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "keywords": [
         "پیپ",
         "ریسک",
@@ -253,8 +253,8 @@
       "verification_required": false,
       "confidence": 0.9,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "definition": "لات: واحد حجم معامله؛ یک لات استاندارد = ۱۰۰٬۰۰۰ واحد ارز پایه.",
       "keywords": [
         "لات",
@@ -271,55 +271,6 @@
         "لات یعنی چی؟",
         "۰.۰۱ لات یعنی چند واحد؟",
         "مینی لات چیه؟"
-      ]
-    },
-    {
-      "id": "ACA-INT-0126",
-      "object_type": "RULE",
-      "domain": "academy",
-      "title": "ارزش هر پیپ در یک لات استاندارد",
-      "language": "fa",
-      "chunk_text": "قاعده‌ی عملی درس: در اکثر نمادها، هر یک پیپ تغییر در یک لات استاندارد برابر حدود ۱۰ دلار سود یا زیان است. مثال کامل: حرکت ۲۰ پیپی در EUR/USD روی یک لات استاندارد یعنی ۲۰۰ دلار؛ روی ۰.۱ لات یعنی ۲۰ دلار؛ و روی ۰.۰۱ لات یعنی ۲ دلار. این همان محاسبه‌ای است که مبنای برآورد سود و زیان قرار می‌گیرد.",
-      "source": {
-        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
-        "source_ref": "raw_sources/academy/intro/intro_lesson_07.md",
-        "source_location": "بخش ۶",
-        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
-        "lesson": "۷",
-        "section": "بخش ۶",
-        "author": "سبحان صمدی",
-        "verbatim_quote": "در اکثر نمادها، هر یک پیپ تغییر در یک لات استاندارد = ۱۰ دلار سود یا ضرر … ۲۰ پیپ × ۱۰ دلار = ۲۰۰ دلار … برای مینی لات: ۲۰۰ ÷ ۱۰ = ۲۰ دلار … میکرو لات: ۲۰۰ ÷ ۱۰۰ = ۲ دلار"
-      },
-      "authority_level": "ACADEMY_PRIMARY",
-      "methodology_scope": "GENERAL_TRADING",
-      "platform_scope": "NOT_APPLICABLE",
-      "approval_status": "PENDING_REVIEW",
-      "lifecycle_status": "PENDING_REVIEW",
-      "verification_required": false,
-      "confidence": 0.9,
-      "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
-      "rule": "در اکثر نمادها هر پیپ در یک لات استاندارد ≈ ۱۰ دلار؛ در ۰.۱ لات ≈ ۱ دلار و در ۰.۰۱ لات ≈ ۰.۱ دلار.",
-      "examples": [
-        "۲۰ پیپ در ۱ لات = ۲۰۰ دلار",
-        "۲۰ پیپ در ۰.۱ لات = ۲۰ دلار",
-        "۲۰ پیپ در ۰.۰۱ لات = ۲ دلار"
-      ],
-      "keywords": [
-        "ارزش پیپ",
-        "سود",
-        "ضرر",
-        "لات"
-      ],
-      "related_concepts": [
-        "GEN-CONC-0007",
-        "MT-CONC-0004"
-      ],
-      "related_questions": [
-        "هر پیپ چند دلاره؟",
-        "با ۰.۰۱ لات چقدر سود می‌کنم؟",
-        "۵۰ پیپ ضرر یعنی چقدر دلار؟"
       ]
     },
     {
@@ -347,8 +298,8 @@
       "verification_required": true,
       "confidence": 0.6,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
       "review_priority": "P1",
       "review_reason": "اعداد ذکرشده وابسته به نرخ روز و اندازه‌ی قرارداد بروکرند و به‌عنوان ثابت قابل ارائه نیستند.",
@@ -400,8 +351,8 @@
       "verification_required": false,
       "confidence": 0.85,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "definition": "لوریج: اهرم بروکر که قدرت باز کردن حجم بیشتر با سرمایه‌ی کمتر را می‌دهد.",
       "keywords": [
         "لوریج",
@@ -445,8 +396,8 @@
       "verification_required": false,
       "confidence": 0.9,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "rule": "ریسک واقعی را حجم معامله و فاصله‌ی حد ضرر تعیین می‌کند، نه عدد اهرم.",
       "summary": "لوریج ریسک را تعیین نمی‌کند؛ حجم معامله می‌کند.",
       "keywords": [
@@ -490,8 +441,8 @@
       "verification_required": false,
       "confidence": 0.85,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "warnings": [
         "اهرم بالا با حجم کنترل‌نشده، سریع‌ترین راه از دست دادن حساب است."
       ],
@@ -534,8 +485,8 @@
       "verification_required": false,
       "confidence": 0.85,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "keywords": [
         "مهارت",
         "پروسه",

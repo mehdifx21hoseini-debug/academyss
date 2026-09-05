@@ -1,26 +1,26 @@
 {
   "manifest_type": "mentorai_knowledge_base",
-  "version": "v030",
-  "generated_at": "2026-09-05T19:12:20Z",
+  "version": "v029",
+  "generated_at": "2026-09-05T19:11:35Z",
   "generator": "tools/kb_build_manifest.py",
   "schema_versions": {
     "enums": "1.0.0"
   },
   "totals": {
-    "objects": 496,
+    "objects": 494,
     "by_domain": {
       "brokers": 3,
       "psychology": 27,
       "metatrader": 102,
       "general_trading": 49,
-      "academy": 308,
+      "academy": 306,
       "mentor_qa": 1,
       "meta": 6
     },
     "by_object_type": {
       "BROKER_RULE": 1,
       "PSYCHOLOGY_PATTERN": 24,
-      "RULE": 53,
+      "RULE": 52,
       "METATRADER_PROCEDURE": 48,
       "DEFINITION": 32,
       "CONCEPT": 159,
@@ -31,12 +31,12 @@
       "REVIEW_ITEM": 23,
       "CATALOG_ITEM": 14,
       "OPERATIONAL_FACT": 19,
-      "PROCEDURE": 44,
+      "PROCEDURE": 43,
       "EXAMPLE": 12,
       "COMMON_MISTAKE": 9
     },
     "by_authority": {
-      "ACADEMY_PRIMARY": 268,
+      "ACADEMY_PRIMARY": 266,
       "GENERAL_KNOWLEDGE": 166,
       "EXTERNAL_METHODOLOGY": 7,
       "<unset>": 27,
@@ -46,25 +46,25 @@
       "REVIEW_REQUIRED": 9,
       "PENDING_VERIFICATION": 172,
       "<unset>": 27,
-      "PENDING_REVIEW": 275,
+      "PENDING_REVIEW": 273,
       "APPROVED": 13
     },
     "by_lifecycle": {
-      "PENDING_REVIEW": 456,
+      "PENDING_REVIEW": 454,
       "<unset>": 27,
       "ACTIVE": 13
     },
     "by_platform_scope": {
       "MT4_ONLY": 41,
-      "NOT_APPLICABLE": 297,
+      "NOT_APPLICABLE": 296,
       "BOTH": 56,
-      "BROKER_DEPENDENT": 14,
+      "BROKER_DEPENDENT": 13,
       "VERSION_DEPENDENT": 15,
       "MT5_ONLY": 25,
       "<unset>": 48
     },
     "by_source_type": {
-      "ACADEMY_COURSE_TRANSCRIPT": 268,
+      "ACADEMY_COURSE_TRANSCRIPT": 266,
       "MODEL_DRAFT": 173,
       "<unset>": 27,
       "ACADEMY_APP_DATA": 12,
@@ -419,7 +419,7 @@
       "version": "v001",
       "pipeline_stage": "STRUCTURED",
       "file": "knowledge_base/academy/intro/lesson_07.json",
-      "object_count": 12,
+      "object_count": 11,
       "source_files": [
         "raw_sources/academy/intro/intro_lesson_07.md",
         "raw_sources/academy/intro/intro_lesson_07.ingest.json"
@@ -461,7 +461,7 @@
       "version": "v001",
       "pipeline_stage": "STRUCTURED",
       "file": "knowledge_base/academy/intro/lesson_10.json",
-      "object_count": 14,
+      "object_count": 13,
       "source_files": [
         "raw_sources/academy/intro/intro_lesson_10.md",
         "raw_sources/academy/intro/intro_lesson_10.ingest.json"

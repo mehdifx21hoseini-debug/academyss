@@ -4,7 +4,7 @@
   "title": "دوره مقدماتی — جلسه ۱۰: بالانس، اکویتی، مارجین و مدیریت ریسک",
   "description": "سنجه‌های حساب در ترمینال (بالانس، اکویتی، مارجین، فری مارجین، مارجین لیول)، سود شناور در برابر سود واقعی، قانون ۲٪ ریسک و هشدار قمار.",
   "version": "v001",
-  "generated_at": "2026-09-05T19:12:19Z",
+  "generated_at": "2026-09-05T19:11:22Z",
   "pipeline_stage": "STRUCTURED",
   "source_files": [
     "raw_sources/academy/intro/intro_lesson_10.md",
@@ -16,58 +16,6 @@
     "اعداد ۴۸٬۰۰۰ و ۱۰٬۰۰۰ دلار آموزشی‌اند و داده‌ی حساب یا بازار نیستند."
   ],
   "objects": [
-    {
-      "id": "ACA-INT-0162",
-      "object_type": "PROCEDURE",
-      "domain": "academy",
-      "title": "نام نمادها بین بروکرها فرق می‌کند",
-      "language": "fa",
-      "chunk_text": "نام یک نماد در بروکرهای مختلف یکسان نیست. مثال درس: شاخص داوجونز در بروکر مدرس با نام US30 نمایش داده می‌شود، اما ممکن است در بروکر شما DJI یا نام دیگری باشد. برای دیدن همه‌ی نمادها در Market Watch راست‌کلیک کنید و Show All را بزنید؛ اگر باز هم نماد را پیدا نکردید، از خود بروکر بپرسید آن شاخص با چه نامی ارائه می‌شود. پس اگر نمادی را در ویدیو دیدید و در پلتفرم خودتان ندارید، اشکال از شما نیست — نام‌گذاری بروکر فرق دارد.",
-      "source": {
-        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
-        "source_ref": "raw_sources/academy/intro/intro_lesson_10.md",
-        "source_location": "بخش «نکته مهم درباره نمادها»",
-        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
-        "lesson": "۱۰",
-        "section": "بخش «نکته مهم درباره نمادها»",
-        "author": "سبحان صمدی",
-        "verbatim_quote": "تو بروکری که من دارم کار می‌کنم، شاخص داو جونز به اسم US30 داره نمایش داده می‌شه … کافیه بیایی داخل مارکت واتش، راست کلیک بکنی، Show All رو بزنی … شاید به اسم DJI یا چیز دیگه‌ای باشه … برو با بروکرت صحبت کن."
-      },
-      "authority_level": "ACADEMY_PRIMARY",
-      "methodology_scope": "PLATFORM_OPERATION",
-      "platform_scope": "BROKER_DEPENDENT",
-      "approval_status": "PENDING_REVIEW",
-      "lifecycle_status": "PENDING_REVIEW",
-      "verification_required": false,
-      "confidence": 0.95,
-      "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
-      "steps": [
-        "در پنجره‌ی Market Watch راست‌کلیک کنید.",
-        "گزینه‌ی Show All را بزنید تا همه‌ی نمادهای بروکر نمایش داده شود.",
-        "نماد موردنظر را در فهرست جست‌وجو کنید (نام ممکن است متفاوت باشد).",
-        "اگر پیدا نشد، از پشتیبانی بروکر بپرسید آن نماد با چه نامی ارائه می‌شود."
-      ],
-      "keywords": [
-        "US30",
-        "DJI",
-        "داوجونز",
-        "show all",
-        "market watch",
-        "نام نماد"
-      ],
-      "related_concepts": [
-        "ACA-INT-0099",
-        "MT4-PROC-0002",
-        "ACA-INT-0113"
-      ],
-      "related_questions": [
-        "چرا US30 رو ندارم؟",
-        "اسم داوجونز تو متاتریدر چیه؟",
-        "نماد مورد نظرم تو لیست نیست"
-      ]
-    },
     {
       "id": "ACA-INT-0164",
       "object_type": "CONCEPT",
@@ -93,8 +41,8 @@
       "verification_required": false,
       "confidence": 0.95,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "summary": "پنج سنجه‌ی ترمینال: Balance، Equity، Margin، Free Margin، Margin Level.",
       "keywords": [
         "terminal",
@@ -138,8 +86,8 @@
       "verification_required": false,
       "confidence": 0.95,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "definition": "بالانس: موجودی حساب بدون احتساب سود و زیان معاملات باز.",
       "validity": {
         "illustrative_numbers": true,
@@ -185,8 +133,8 @@
       "verification_required": false,
       "confidence": 0.95,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "definition": "اکویتی = بالانس + سود/زیان شناور معاملات باز.",
       "keywords": [
         "اکویتی",
@@ -228,8 +176,8 @@
       "verification_required": false,
       "confidence": 0.95,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "definition": "مارجین: وثیقه‌ی مسدودشده برای نگه داشتن معاملات باز.",
       "keywords": [
         "مارجین",
@@ -273,8 +221,8 @@
       "verification_required": false,
       "confidence": 0.95,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "definition": "فری مارجین = اکویتی − مارجین مسدودشده.",
       "keywords": [
         "فری مارجین",
@@ -316,8 +264,8 @@
       "verification_required": false,
       "confidence": 0.95,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "definition": "مارجین لیول = (اکویتی ÷ مارجین) × ۱۰۰، بر حسب درصد.",
       "keywords": [
         "مارجین لیول",
@@ -358,8 +306,8 @@
       "verification_required": true,
       "confidence": 0.8,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
       "warnings": [
         "آستانه‌ی مارجین کال و استاپ اوت وابسته به بروکر است؛ مربی باید کاربر را به شرایط بروکر خودش ارجاع دهد."
@@ -405,8 +353,8 @@
       "verification_required": false,
       "confidence": 0.95,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "summary": "سود شناور محقق نشده است؛ فقط سود بسته‌شده واقعی است.",
       "keywords": [
         "سود شناور",
@@ -449,8 +397,8 @@
       "verification_required": false,
       "confidence": 0.95,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "rule": "در هر معامله حداکثر ۲٪ از کل سرمایه ریسک شود.",
       "keywords": [
         "قانون ۲ درصد",
@@ -493,8 +441,8 @@
       "verification_required": false,
       "confidence": 0.9,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "validity": {
         "illustrative_numbers": true,
         "note": "اعداد برای آموزش روش‌اند؛ ارزش پیپ هر نماد متفاوت است و باید جداگانه محاسبه شود."
@@ -540,8 +488,8 @@
       "verification_required": false,
       "confidence": 0.9,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "summary": "۲٪ ریسک + نسبت ۱:۲ = هدف سود ۴٪.",
       "keywords": [
         "ریسک به ریوارد",
@@ -583,8 +531,8 @@
       "verification_required": false,
       "confidence": 0.95,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "common_mistakes": [
         "ریسک کردن ۲۰٪ یا ۱۰۰٪ سرمایه در یک معامله",
         "ورود به معامله بدون برنامه و استراتژی مشخص",
@@ -631,8 +579,8 @@
       "verification_required": false,
       "confidence": 0.95,
       "version": "v001",
-      "created_at": "2026-09-05T19:12:19Z",
-      "updated_at": "2026-09-05T19:12:19Z",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
       "rule": "سقف ریسک ۲٪ در هر معامله، نسبت ریسک به ریوارد حداقل ۱:۲، کنترل دائمی مارجین لیول، و پرهیز از استفاده‌ی بیش از حد از لوریج.",
       "keywords": [
         "جمع‌بندی",

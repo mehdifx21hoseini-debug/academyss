@@ -49,6 +49,79 @@ OBJECTS = [{
     "related_questions": ["برای ترید فیلترشکن لازمه؟", "سایت بروکر باز نمی‌شه چیکار کنم؟",
                           "IP ثابت لازمه؟", "با فیلترشکن معامله کنم مشکلی پیش میاد؟"],
     "created_at": NOW, "updated_at": NOW,
+}, {
+    "id": "ACA-CLR-0002",
+    "object_type": "CONCEPT",
+    "domain": "academy",
+    "category": "رفع ابهام",
+    "title": "«سه اصل بازار» در متدولوژی آکادمی چیست",
+    "language": "fa",
+    "summary": "سه اصل / سه چرخه‌ی بازار: اسپایک، کانال قیمتی، تریدینگ رنج.",
+    "chunk_text": (
+        "پاسخ رسمی و واحد: «سه اصل بازار» یا «سه چرخه‌ی بازار» در متدولوژی آکادمی عبارت‌اند از "
+        "**اسپایک (Spike)، کانال قیمتی (Channel) و تریدینگ رنج (Trading Range)**. این سه مدام در "
+        "بازار تکرار می‌شوند و ترتیبشان چنین است: اسپایک شروع‌کننده‌ی روند است، کانال پس از اولین "
+        "اصلاح شکل می‌گیرد و تریدینگ رنج چرخه‌ی آخر است؛ سپس دوباره از اسپایک آغاز می‌شود. "
+        "روش معامله در هرکدام فرق می‌کند: در اسپایک فقط یک‌طرفه، در کانال دوطرفه اما مایل به جهت "
+        "کانال، و در رنج خرید در کف و فروش در سقف. "
+        "در جلسه‌ی اول دوره فهرست دیگری هم بیان شده بود (کانال قیمتی، نقدینگی، خرید و فروش در "
+        "سایکل)؛ آن فهرست سه محور نگاه مدرس به بازار است و «سه اصل بازار» نیست."
+    ),
+    "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "MENTORAI_KB_DECISIONS.md",
+        "source_location": "D-0005",
+        "author": "مالک پروژه",
+    },
+    "authority_level": "ACADEMY_DERIVED",
+    "methodology_scope": "ACADEMY_METHODOLOGY",
+    "platform_scope": "NOT_APPLICABLE",
+    "approval_status": "APPROVED",
+    "lifecycle_status": "ACTIVE",
+    "confidence": 1.0,
+    "version": "v001",
+    "keywords": ["سه اصل بازار", "سه چرخه", "اسپایک", "کانال قیمتی", "تریدینگ رنج"],
+    "related_concepts": ["ACA-INT-0006", "ACA-INT-0007", "ACA-INT-0191", "ACA-INT-0202"],
+    "conflicts": ["CONF-0002"],
+    "related_questions": ["سه اصل بازار از نظر آکادمی چیه؟", "سه چرخه‌ی بازار چیه؟",
+                          "اسپایک و کانال و رنج به چه ترتیبی میان؟"],
+    "created_at": NOW, "updated_at": NOW,
+}, {
+    "id": "ACA-CLR-0003",
+    "object_type": "CONCEPT",
+    "domain": "academy",
+    "category": "رفع ابهام",
+    "title": "بریک‌ایون و الگوی V در کدام سطح آموزش داده می‌شوند",
+    "language": "fa",
+    "summary": "هر دو در دوره‌ی پیشرفته تخصصی‌تر آموزش داده می‌شوند؛ مربی در سطح مقدماتی تعریف قطعی نمی‌دهد.",
+    "chunk_text": (
+        "«بریک‌ایون» و «الگوی V» در دوره‌ی مقدماتی فقط معرفی شده‌اند و آموزش تخصصی‌تر آن‌ها در "
+        "مجموعه‌ی آموزشی پیشرفته انجام می‌شود. "
+        "بنابراین مربی در سطح مقدماتی تعریف قطعی و کامل ارائه نمی‌دهد؛ آنچه می‌گوید همان چیزی است "
+        "که در جلسه‌ی ۱۴ آمده — الگوی V یعنی بازگشت کامل قیمت به نقطه‌ی شروع همان حرکت — و "
+        "بلافاصله اضافه می‌کند که شرح کامل این دو مفهوم در دوره‌ی پیشرفته است. "
+        "همچنین توجه داشته باشید که واژه‌ی «بریک‌ایون» در ادبیات عمومی معامله‌گری به نقطه‌ی سربه‌سر "
+        "معامله (سود و زیان صفر) گفته می‌شود؛ مربی این دو کاربرد را از هم جدا نگه می‌دارد و هیچ‌کدام "
+        "را به‌جای دیگری معرفی نمی‌کند."
+    ),
+    "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "MENTORAI_KB_DECISIONS.md",
+        "source_location": "D-0009",
+        "author": "مالک پروژه",
+    },
+    "authority_level": "ACADEMY_DERIVED",
+    "methodology_scope": "ACADEMY_METHODOLOGY",
+    "platform_scope": "NOT_APPLICABLE",
+    "approval_status": "APPROVED",
+    "lifecycle_status": "ACTIVE",
+    "confidence": 1.0,
+    "version": "v001",
+    "keywords": ["بریک ایون", "break even", "الگوی V", "دوره پیشرفته"],
+    "related_concepts": ["ACA-INT-0219", "ACA-INT-0244", "ACA-INT-0211"],
+    "related_questions": ["بریک ایون یعنی چی؟", "الگوی V چیه؟",
+                          "اینا رو کجا کامل یاد می‌گیرم؟"],
+    "created_at": NOW, "updated_at": NOW,
 }]
 
 changed = K.write_collection(K.KB_DIR + "/academy/operations/clarifications.json", {
