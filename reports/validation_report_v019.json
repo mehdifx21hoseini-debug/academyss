@@ -1,7 +1,7 @@
 {
   "report_type": "validation",
-  "version": "v020",
-  "generated_at": "2026-09-05T15:30:45Z",
+  "version": "v019",
+  "generated_at": "2026-09-05T15:30:34Z",
   "stats": {
     "files": 20,
     "objects": 300,
@@ -26,7 +26,18 @@
       "APPROVED": 9
     }
   },
-  "errors": 0,
+  "errors": 2,
   "warnings": 0,
-  "findings": []
+  "findings": [
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/intro/lesson_03.json :: ACA-INT-0060",
+      "message": "object_type DEFINITION requires non-empty 'definition'"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/intro/lesson_03.json :: ACA-INT-0062",
+      "message": "object_type DEFINITION requires non-empty 'definition'"
+    }
+  ]
 }

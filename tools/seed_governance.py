@@ -117,9 +117,11 @@ for i, (name, desc, kw) in enumerate(EXTERNAL):
         "language": "fa-en",
         "summary": desc,
         "definition": desc,
-        "chunk_text": ("%s: %s ⚠️ این روش جزو متدولوژی آکادمی سبحان صمدی نیست. این توضیح فقط برای "
-                       "شناخت نام و مفهوم کلی نگهداری می‌شود و نباید مبنای تحلیل، قاعده یا پاسخ آموزشی "
-                       "آکادمی قرار بگیرد؛ پاسخ باید دانشجو را به چارچوب آموزشی آکادمی برگرداند." % (name, desc)),
+        "chunk_text": ("%s: %s ⚠️ این روش جزو متدولوژی آکادمی سبحان صمدی نیست. موضع رسمی آکادمی در "
+                       "رکورد ACA-INT-0063 ثبت شده است: مدرس این سیستم‌ها را رد یا تحقیر نمی‌کند و "
+                       "می‌گوید می‌توان با آن‌ها سود کرد، اما مسیر آکادمی پرایس اکشن مبتنی بر عرضه و "
+                       "تقاضاست. این توضیح فقط برای شناخت نام و مفهوم کلی نگهداری می‌شود و مبنای تحلیل "
+                       "یا پاسخ آموزشی آکادمی نیست." % (name, desc)),
         "warnings": ["خارج از متدولوژی آکادمی — فقط برای شناسایی و توضیح کوتاه."],
         "source": {"source_type": "MODEL_DRAFT", "source_ref": "tools/seed_governance.py",
                    "source_location": "EXTERNAL[%d]" % i},
@@ -133,7 +135,7 @@ for i, (name, desc, kw) in enumerate(EXTERNAL):
         "confidence": 0.7,
         "version": "v001",
         "keywords": kw,
-        "related_concepts": ["MET-RULE-0002"],
+        "related_concepts": ["MET-RULE-0002", "ACA-INT-0063", "ACA-INT-0064"],
         "related_questions": ["نظر آکادمی درباره‌ی %s چیه؟" % name, "%s رو آموزش می‌دید؟" % name],
         "created_at": NOW, "updated_at": NOW,
     })

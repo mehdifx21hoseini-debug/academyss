@@ -18,6 +18,7 @@ python3 tools/seed_psychology.py
 python3 tools/seed_psychology_safety.py
 python3 tools/seed_lesson_intro_01.py
 python3 tools/seed_lesson_intro_02.py
+python3 tools/seed_lesson_intro_03.py
 python3 tools/seed_lesson_psychology_p01.py
 python3 tools/seed_academy_policies.py
 python3 tools/seed_governance.py

@@ -181,6 +181,12 @@
       "sha": "472020b0351a0014",
       "file": "exports/general_trading/external_methodologies_quarantine_v001.md",
       "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "552182face148331",
+      "file": "exports/general_trading/external_methodologies_quarantine_v002.md",
+      "generated_at": "2026-09-05T15:31:16Z"
     }
   ],
   "external_methodologies_quarantine.json": [
@@ -189,6 +195,12 @@
       "sha": "4c94a7a1c92303fd",
       "file": "exports/general_trading/external_methodologies_quarantine_v001.json",
       "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "dede718dd0cae890",
+      "file": "exports/general_trading/external_methodologies_quarantine_v002.json",
+      "generated_at": "2026-09-05T15:31:16Z"
     }
   ],
   "general_trading_glossary.md": [
@@ -433,6 +445,12 @@
       "sha": "47ec78ec09f8530a",
       "file": "exports/reports/kb_index_v011.csv",
       "generated_at": "2026-09-05T15:14:23Z"
+    },
+    {
+      "version": "v012",
+      "sha": "533383708f27cfb0",
+      "file": "exports/reports/kb_index_v012.csv",
+      "generated_at": "2026-09-05T15:31:16Z"
     }
   ],
   "glossary.csv": [
@@ -453,6 +471,12 @@
       "sha": "6d2f442115c15d81",
       "file": "exports/glossary/glossary_v003.csv",
       "generated_at": "2026-09-05T15:14:23Z"
+    },
+    {
+      "version": "v004",
+      "sha": "88deca0f69ff538e",
+      "file": "exports/glossary/glossary_v004.csv",
+      "generated_at": "2026-09-05T15:31:16Z"
     }
   ],
   "metatrader_common_procedures.md": [
@@ -599,6 +623,22 @@
       "sha": "20e12b07346f7953",
       "file": "exports/academy/academy_intro_lesson_02_v001.json",
       "generated_at": "2026-09-05T15:14:23Z"
+    }
+  ],
+  "academy_intro_lesson_03.md": [
+    {
+      "version": "v001",
+      "sha": "24fe9ad1c2d8a369",
+      "file": "exports/academy/academy_intro_lesson_03_v001.md",
+      "generated_at": "2026-09-05T15:31:16Z"
+    }
+  ],
+  "academy_intro_lesson_03.json": [
+    {
+      "version": "v001",
+      "sha": "72c60112a6a056aa",
+      "file": "exports/academy/academy_intro_lesson_03_v001.json",
+      "generated_at": "2026-09-05T15:31:16Z"
     }
   ]
 }
