@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "mentorai/collection.schema.json",
+  "title": "MENTORAI Knowledge Collection File",
+  "description": "Every *.json file under knowledge_base/ is a collection: a versioned container of knowledge objects sharing one topic.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["collection_id", "domain", "title", "version", "generated_at", "pipeline_stage", "objects"],
+  "properties": {
+    "collection_id": { "type": "string", "pattern": "^[a-z0-9_]+$" },
+    "domain": { "type": "string", "enum_ref": "domain" },
+    "title": { "type": "string" },
+    "description": { "type": "string" },
+    "version": { "type": "string", "pattern": "^v[0-9]{3}$" },
+    "generated_at": { "type": "string" },
+    "pipeline_stage": {
+      "type": "string",
+      "enum": ["RAW", "CLEANED", "STRUCTURED", "VALIDATED", "EXPORTED"]
+    },
+    "source_files": { "type": "array", "items": { "type": "string" } },
+    "notes": { "type": "array", "items": { "type": "string" } },
+    "objects": { "type": "array", "items": { "type": "object" }, "minItems": 1 }
+  }
+}

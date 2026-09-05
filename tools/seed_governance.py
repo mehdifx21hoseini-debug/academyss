@@ -1,0 +1,265 @@
+#!/usr/bin/env python3
+"""Seed the governance layer: methodology-protection rules, the external
+methodology quarantine, the conflict registry and the review queue.
+
+These records are what keeps the Academy methodology clean once real course
+material arrives, so they are created before any mass processing.
+"""
+import sys
+
+sys.path.insert(0, __file__.rsplit("/", 1)[0])
+import kb_lib as K  # noqa: E402
+
+NOW = K.now_iso()
+
+# ------------------------------------------------------------------ KB policy rules
+def rule(oid, title, rule_text, chunk, **kw):
+    o = {
+        "id": oid, "object_type": "RULE", "domain": "meta",
+        "category": "سیاست پایگاه دانش", "title": title, "language": "fa",
+        "rule": rule_text, "chunk_text": chunk,
+        "source": {"source_type": "ACADEMY_DOCUMENT", "source_ref": "MENTORAI_KB_CHARTER.md",
+                   "source_location": kw.pop("location", "")},
+        "authority_level": "ACADEMY_DERIVED",
+        "methodology_scope": "ACADEMY_OPERATIONS",
+        "approval_status": "APPROVED", "lifecycle_status": "ACTIVE",
+        "confidence": 1.0, "version": "v001",
+        "created_at": NOW, "updated_at": NOW,
+    }
+    o.update(kw)
+    return o
+
+
+policy = [
+    rule("MET-RULE-0001", "متدولوژی آکادمی مرجع نهایی است",
+         "برای هر پرسش مربوط به روش معاملاتی، منبع تصمیم فقط محتوای رسمی آکادمی است؛ "
+         "دانش عمومی یا منابع بیرونی هرگز جایگزین آن نمی‌شوند.",
+         "در پاسخ به سؤال‌های روشی، اولویت بازیابی با اشیائی است که authority_level آن‌ها "
+         "ACADEMY_PRIMARY است. اگر چنین دانشی وجود نداشته باشد، پاسخ نباید از دانش عمومی ساخته و "
+         "به‌عنوان روش آکادمی ارائه شود؛ باید صراحتاً گفته شود که این موضوع در محتوای آکادمی موجود نیست.",
+         location="بخش ۳ و ۴",
+         keywords=["متدولوژی", "مرجعیت", "authority"],
+         related_questions=["روش آکادمی برای ورود به معامله چیه؟"]),
+    rule("MET-RULE-0002", "قرنطینه‌ی روش‌های بیرونی",
+         "روش‌های معاملاتی بیرونی فقط برای شناخت و توضیح کوتاه نگهداری می‌شوند و هرگز به‌عنوان "
+         "بخشی از متدولوژی آکادمی ارائه نمی‌شوند.",
+         "اشیاء دارای methodology_scope = EXTERNAL_METHODOLOGY_QUARANTINE فقط زمانی بازیابی می‌شوند که "
+         "دانشجو مستقیماً درباره‌ی همان روش پرسیده باشد. پاسخ باید کوتاه توضیح دهد که این روش جزو "
+         "متدولوژی آکادمی نیست و سپس دانشجو را به چارچوب آکادمی برگرداند.",
+         location="بخش ۴",
+         keywords=["قرنطینه", "SMC", "ICT", "روش بیرونی"],
+         related_questions=["نظرتون درباره اسمارت مانی چیه؟"]),
+    rule("MET-RULE-0003", "ممنوعیت ساختن دانش بدون منبع",
+         "هیچ قاعده، عدد یا شرطی بدون منبع قابل ردیابی وارد پایگاه دانش نمی‌شود.",
+         "هر شیء دانش باید source_ref و source_location داشته باشد. محتوای نوشته‌شده بدون منبع بیرونی "
+         "با source_type = MODEL_DRAFT و verification_required = true ثبت می‌شود و تا تأیید انسانی "
+         "هرگز به APPROVED تغییر نمی‌کند.",
+         location="بخش ۵",
+         keywords=["منبع", "provenance", "توهم دانش"]),
+    rule("MET-RULE-0004", "پاسخ منتور به‌تنهایی قانون رسمی نمی‌شود",
+         "پاسخ منتور دارایی ارزشمندی است اما تا تطبیق با محتوای رسمی آکادمی، به قانون رسمی ارتقا نمی‌یابد.",
+         "رکوردهای mentor_qa حداکثر MENTOR_VERIFIED می‌شوند و هرگز ACADEMY_PRIMARY نیستند. "
+         "در صورت تعارض با محتوای رسمی، رکورد REVIEW_REQUIRED می‌شود و یک CONFLICT_RECORD ساخته می‌شود.",
+         location="بخش ۳",
+         keywords=["منتور", "اعتبارسنجی", "تعارض"]),
+    rule("MET-RULE-0005", "تفکیک دانش پلتفرم و دانش بروکر",
+         "هیچ رویه‌ی متاتریدری بدون تعیین دامنه‌ی پلتفرم و هیچ شرط بروکری بدون نام بروکر و زمان اعتبار ثبت نمی‌شود.",
+         "هر شیء دامنه‌ی metatrader باید platform_scope داشته باشد (MT4_ONLY، MT5_ONLY، BOTH، "
+         "BROKER_DEPENDENT یا VERSION_DEPENDENT) و هر شیء دامنه‌ی brokers باید broker و validity داشته باشد. "
+         "اطلاعات یک بروکر هرگز به بروکر دیگر تعمیم داده نمی‌شود.",
+         location="بخش ۶",
+         keywords=["MT4", "MT5", "بروکر", "دامنه"]),
+    rule("MET-RULE-0006", "جدایی دانش از حافظه‌ی دانشجو",
+         "اطلاعات شخصی و تاریخچه‌ی گفت‌وگوی دانشجو وارد پایگاه دانش عمومی نمی‌شود.",
+         "پایگاه دانش فقط دانش پایدار دامنه را نگه می‌دارد. اطلاعات فردی دانشجو در پروژه‌ی CORE نگهداری "
+         "می‌شود. رکوردهای استخراج‌شده از گفت‌وگوها باید pii_removed = true داشته باشند.",
+         location="بخش ۶",
+         keywords=["حریم خصوصی", "PII", "حافظه"]),
+]
+
+changed = K.write_collection(K.KB_DIR + "/academy/methodology/kb_policy_rules_v001.json", {
+    "collection_id": "kb_policy_rules", "domain": "meta",
+    "title": "قواعد حاکم بر پایگاه دانش و حفاظت از متدولوژی",
+    "description": "قواعد عملیاتی برگرفته از منشور پروژه که رفتار بازیابی و اعتبارسنجی را تعیین می‌کنند.",
+    "version": "v001", "generated_at": NOW, "pipeline_stage": "VALIDATED",
+    "source_files": ["MENTORAI_KB_CHARTER.md"],
+    "notes": ["این مجموعه تنها مجموعه‌ای است که وضعیت APPROVED دارد، چون منبع آن سند رسمی پروژه است."],
+    "objects": policy,
+})
+print("%s kb_policy_rules_v001.json objects: %d" % ("wrote" if changed else "unchanged", len(policy)))
+
+# --------------------------------------------------- external methodology quarantine
+EXTERNAL = [
+    ("Smart Money Concepts (SMC)", "رویکردی که بر ردپای پول هوشمند، نقدینگی، بلوک سفارش و شکست ساختار تمرکز دارد.",
+     ["اسمارت مانی", "SMC", "order block", "liquidity"]),
+    ("ICT", "مجموعه‌ای از مفاهیم منتسب به Inner Circle Trader شامل شکاف ارزش منصفانه و مدل‌های زمانی.",
+     ["ICT", "fair value gap", "FVG"]),
+    ("ایچیموکو", "سیستم اندیکاتوری ژاپنی شامل ابر کومو و خطوط تنکان و کیجون.",
+     ["ایچیموکو", "ichimoku", "کومو"]),
+    ("امواج الیوت", "نظریه‌ای که حرکات بازار را در قالب الگوهای موجی پنج‌تایی و سه‌تایی توصیف می‌کند.",
+     ["الیوت", "elliott wave", "موج"]),
+    ("وایکاف", "روشی مبتنی بر مراحل انباشت و توزیع و رابطه‌ی قیمت و حجم.",
+     ["وایکاف", "wyckoff", "انباشت"]),
+    ("الگوهای هارمونیک", "الگوهای هندسی مبتنی بر نسبت‌های فیبوناچی مانند گارتلی و پروانه.",
+     ["هارمونیک", "گارتلی", "harmonic"]),
+    ("اردر فلو و ولوم پروفایل", "تحلیل جریان سفارش‌ها و توزیع حجم در سطوح قیمتی.",
+     ["order flow", "volume profile", "فوت پرینت"]),
+]
+
+quarantine = []
+for i, (name, desc, kw) in enumerate(EXTERNAL):
+    quarantine.append({
+        "id": "EXT-CONC-%04d" % (i + 1),
+        "object_type": "CONCEPT",
+        "domain": "general_trading",
+        "category": "روش‌های بیرونی (قرنطینه)",
+        "title": name,
+        "language": "fa-en",
+        "summary": desc,
+        "definition": desc,
+        "chunk_text": ("%s: %s ⚠️ این روش جزو متدولوژی آکادمی سبحان صمدی نیست. این توضیح فقط برای "
+                       "شناخت نام و مفهوم کلی نگهداری می‌شود و نباید مبنای تحلیل، قاعده یا پاسخ آموزشی "
+                       "آکادمی قرار بگیرد؛ پاسخ باید دانشجو را به چارچوب آموزشی آکادمی برگرداند." % (name, desc)),
+        "warnings": ["خارج از متدولوژی آکادمی — فقط برای شناسایی و توضیح کوتاه."],
+        "source": {"source_type": "MODEL_DRAFT", "source_ref": "tools/seed_governance.py",
+                   "source_location": "EXTERNAL[%d]" % i},
+        "authority_level": "EXTERNAL_METHODOLOGY",
+        "methodology_scope": "EXTERNAL_METHODOLOGY_QUARANTINE",
+        "platform_scope": "NOT_APPLICABLE",
+        "approval_status": "PENDING_VERIFICATION",
+        "lifecycle_status": "PENDING_REVIEW",
+        "verification_required": True,
+        "verification_note": "توضیح کوتاه شناسایی، بدون منبع بیرونی. محتوای آموزشی این روش‌ها گسترش داده نمی‌شود.",
+        "confidence": 0.7,
+        "version": "v001",
+        "keywords": kw,
+        "related_concepts": ["MET-RULE-0002"],
+        "related_questions": ["نظر آکادمی درباره‌ی %s چیه؟" % name, "%s رو آموزش می‌دید؟" % name],
+        "created_at": NOW, "updated_at": NOW,
+    })
+
+changed = K.write_collection(K.KB_DIR + "/general_trading/external_methodologies_quarantine_v001.json", {
+    "collection_id": "external_methodologies_quarantine", "domain": "general_trading",
+    "title": "قرنطینه‌ی روش‌های معاملاتی بیرونی",
+    "description": ("توضیح کوتاه روش‌هایی که جزو متدولوژی آکادمی نیستند، صرفاً برای تشخیص سؤال دانشجو "
+                    "و هدایت او به چارچوب آکادمی. این محتوا هرگز به‌عنوان آموزش آکادمی ارائه نمی‌شود."),
+    "version": "v001", "generated_at": NOW, "pipeline_stage": "STRUCTURED",
+    "source_files": ["tools/seed_governance.py", "MENTORAI_KB_CHARTER.md"],
+    "notes": ["گسترش محتوای این روش‌ها ممنوع است؛ فقط سطح شناسایی نگهداری می‌شود."],
+    "objects": quarantine,
+})
+print("%s external_methodologies_quarantine_v001.json objects: %d" % ("wrote" if changed else "unchanged", len(quarantine)))
+
+# ------------------------------------------------------------------ conflict registry
+conflicts = [{
+    "id": "CONF-0001",
+    "topic": "حجم واقعی محتوای صوتی منتشرشده‌ی آکادمی",
+    "domain": "academy",
+    "side_a": {
+        "object_id_or_source": "index.html:64 (آمار سایت)",
+        "statement": "سایت آکادمی «+۸۰ ساعت محتوا» را اعلام می‌کند.",
+        "authority_level": "ACADEMY_DERIVED",
+    },
+    "side_b": {
+        "object_id_or_source": "js/data.js (window.SSAData.podcasts[*].src و books[*].src)",
+        "statement": "هیچ‌کدام از ۶ پادکست و ۶ کتاب صوتی فایل صوتی بارگذاری‌شده ندارند (src خالی است).",
+        "authority_level": "ACADEMY_DERIVED",
+    },
+    "possible_explanation": ("محتوای فعلی سایت احتمالاً داده‌ی نمونه/دمو است و فایل‌های صوتی هنوز آپلود "
+                             "نشده‌اند، یا محتوا در جای دیگری (کانال، پنل دانشجو) منتشر می‌شود."),
+    "authority_decision": "",
+    "status": "OPEN",
+    "requires_human_review": True,
+    "review_priority": "P1",
+    "impact": ("تا روشن شدن این موضوع، مربی هوش مصنوعی نباید به دانشجو بگوید فلان پادکست در سایت قابل "
+               "پخش است و نباید آمار حجم محتوا را تأیید کند."),
+    "created_at": NOW, "updated_at": NOW,
+}]
+
+changed = K.write_collection(K.KB_DIR + "/conflicts/conflict_registry_v001.json", {
+    "collection_id": "conflict_registry", "domain": "meta",
+    "title": "دفتر ثبت تعارض‌ها",
+    "description": "تعارض‌های کشف‌شده بین منابع. هیچ تعارضی با حدس حل نمی‌شود.",
+    "version": "v001", "generated_at": NOW, "pipeline_stage": "VALIDATED",
+    "source_files": ["index.html", "js/data.js"],
+    "notes": ["تعارض‌های مربوط به متدولوژی، پس از دریافت محتوای دوره‌ها اضافه خواهند شد."],
+    "objects": conflicts,
+})
+print("%s conflict_registry_v001.json objects: %d" % ("wrote" if changed else "unchanged", len(conflicts)))
+
+# ---------------------------------------------------------------------- review queue
+def rq(num, title, domain, reason, question, options, recommendation, priority, ids=None):
+    return {
+        "id": "RQ-%04d" % num, "title": title, "domain": domain, "object_ids": ids or [],
+        "reason": reason, "question_for_human": question, "options": options,
+        "recommendation": recommendation, "priority": priority, "status": "OPEN",
+        "created_at": NOW, "updated_at": NOW,
+    }
+
+
+review = [
+    rq(1, "محتوای دوره‌های آکادمی در مخزن موجود نیست", "academy",
+       "مخزن فقط شامل وب‌سایت آکادمی است؛ هیچ ترنسکریپت، جزوه یا سند متدولوژی وجود ندارد.",
+       "محتوای دوره‌ی مقدماتی و پیشرفته را در چه قالبی و از چه مسیری در اختیار پروژه می‌گذارید؟",
+       ["آپلود فایل‌های متنی/زیرنویس در raw_sources/academy/",
+        "آپلود فایل صوتی و انجام تبدیل گفتار به متن در همین پروژه",
+        "دسترسی به پنل دانشجویی برای استخراج محتوا"],
+       "فایل‌های متنی یا زیرنویس (SRT/VTT/DOCX) در raw_sources/academy/ قرار بگیرد؛ سریع‌ترین و دقیق‌ترین مسیر است.",
+       "P0"),
+    rq(2, "دیتاست پرسش و پاسخ منتور موجود نیست", "mentor_qa",
+       "بدون گفت‌وگوهای واقعی دانشجو و منتور، لایه‌ی MENTOR_QA قابل ساخت نیست.",
+       "خروجی گفت‌وگوهای دانشجو-منتور از چه بستری و با چه قالبی قابل ارائه است؟",
+       ["خروجی JSON/CSV از تلگرام یا واتس‌اپ", "خروجی تیکت‌های پشتیبانی", "کپی دستی نمونه‌ی اولیه (۱۰۰ گفت‌وگو)"],
+       "ابتدا یک نمونه‌ی ۱۰۰ گفت‌وگویی برای اثبات خط پردازش، سپس خروجی کامل.",
+       "P0"),
+    rq(3, "دوره‌ی روان‌شناسی آکادمی دریافت نشده است", "psychology",
+       "لایه‌ی روان‌شناسی فعلاً فقط دانش عمومی است و منبع اصلی آکادمی ندارد.",
+       "دوره‌ی روان‌شناسی آکادمی موجود است؟ در چه قالبی می‌توان آن را دریافت کرد؟",
+       ["فایل دوره موجود است و ارسال می‌شود", "دوره هنوز تولید نشده است"],
+       "تا زمان دریافت، لایه‌ی عمومی به‌عنوان موقت و PENDING_VERIFICATION باقی می‌ماند.",
+       "P1"),
+    rq(4, "بروکر یا بروکرهای مورد استفاده مشخص نیستند", "brokers",
+       "دانش بروکر بدون نام بروکر و مستندات رسمی آن قابل تولید نیست و هرگز تعمیم داده نمی‌شود.",
+       "دانشجویان آکادمی عمدتاً با کدام بروکر(ها) کار می‌کنند و مستندات رسمی آن‌ها کجاست؟",
+       ["فهرست بروکرهای پیشنهادی آکادمی ارائه شود", "فقط دانش عمومی پلتفرم پوشش داده شود"],
+       "فهرست بروکرها + لینک یا فایل مشخصات نمادها؛ بدون آن، سؤال‌های «اسپرد چقدره؟» بی‌پاسخ می‌مانند.",
+       "P1"),
+    rq(5, "احتمال نمونه/دمو بودن محتوای سایت", "academy",
+       "هیچ فایل صوتی بارگذاری نشده و آمار بازدید و مدت‌زمان‌ها گرد و تأییدنشده‌اند.",
+       "آیا فهرست فعلی پادکست‌ها و کتاب‌ها واقعی است یا داده‌ی نمونه برای طراحی سایت؟",
+       ["واقعی است و فایل‌ها بعداً آپلود می‌شوند", "داده‌ی نمونه است و باید از پایگاه دانش حذف شود"],
+       "تا تعیین تکلیف، این رکوردها PENDING_REVIEW می‌مانند و مربی نباید آن‌ها را قطعی اعلام کند.",
+       "P1", ["ACA-CAT-0001", "CONF-0001"]),
+    rq(6, "شرایط و قیمت منتورینگ مشخص نیست", "academy",
+       "سایت فقط سرفصل خدمات منتورینگ را دارد؛ قیمت، مدت و شرایط ثبت‌نام موجود نیست.",
+       "قیمت، مدت دوره، ظرفیت و شرایط ثبت‌نام منتورینگ چیست؟",
+       ["اطلاعات ارائه شود تا وارد دانش عملیاتی شود",
+        "مربی این سؤال‌ها را به پشتیبانی انسانی ارجاع دهد"],
+       "اگر قیمت متغیر است، بهتر است مربی همیشه به پشتیبانی انسانی ارجاع دهد.",
+       "P1", ["ACA-OPS-0002"]),
+    rq(7, "دانش متاتریدر بدون تأیید منبع رسمی", "metatrader",
+       "محیط پردازش دسترسی شبکه ندارد و مستندات رسمی متاکوتس قابل واکشی نبود.",
+       "کدام مسیر برای تأیید دانش متاتریدر ترجیح داده می‌شود؟",
+       ["بازبینی انسانی توسط منتور", "قرار دادن نسخه‌ی آفلاین راهنمای متاکوتس در raw_sources/platform/",
+        "فعال کردن دسترسی شبکه برای دامنه‌ی metaquotes در محیط پردازش"],
+       "قرار دادن راهنمای آفلاین در raw_sources/platform/؛ هم قابل ردیابی است و هم تکرارپذیر.",
+       "P1"),
+    rq(8, "متدولوژی رسمی آکادمی تعریف نشده است", "academy",
+       "عنوان پادکست‌ها به «پرایس اکشن» و «تحلیل تکنیکال» اشاره دارد، اما هیچ سند رسمی متدولوژی وجود ندارد؛ "
+       "بدون آن، مرز «آکادمی» و «دانش عمومی» قابل اجرا نیست.",
+       "متدولوژی رسمی آکادمی چیست و چه چیزهایی صراحتاً بیرون از آن است؟",
+       ["سند متدولوژی ارائه شود", "متدولوژی از دل ترنسکریپت دوره‌ها استخراج و برای تأیید ارسال شود"],
+       "استخراج پیش‌نویس متدولوژی از ترنسکریپت‌ها و تأیید نهایی توسط سبحان صمدی.",
+       "P0"),
+]
+
+changed = K.write_collection(K.KB_DIR + "/review_queue/open_items_v001.json", {
+    "collection_id": "review_queue_open_items", "domain": "meta",
+    "title": "صف بازبینی انسانی",
+    "description": "مواردی که برای ادامه‌ی کار به تصمیم یا داده‌ی انسانی نیاز دارند.",
+    "version": "v001", "generated_at": NOW, "pipeline_stage": "VALIDATED",
+    "source_files": ["MENTORAI_KB_AUDIT.md"],
+    "notes": ["اولویت P0 یعنی کار بدون آن متوقف می‌شود."],
+    "objects": review,
+})
+print("%s open_items_v001.json objects: %d" % ("wrote" if changed else "unchanged", len(review)))

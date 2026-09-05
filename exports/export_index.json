@@ -1,0 +1,194 @@
+{
+  "psychology_patterns.md": [
+    {
+      "version": "v001",
+      "sha": "cb592feceab6b53e",
+      "file": "exports/psychology/psychology_patterns_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "psychology_patterns.json": [
+    {
+      "version": "v001",
+      "sha": "815bef625974a084",
+      "file": "exports/psychology/psychology_patterns_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "metatrader_troubleshooting.md": [
+    {
+      "version": "v001",
+      "sha": "8b7290c297cf33f4",
+      "file": "exports/metatrader/metatrader_troubleshooting_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "metatrader_troubleshooting.json": [
+    {
+      "version": "v001",
+      "sha": "4dd95068cf0462fe",
+      "file": "exports/metatrader/metatrader_troubleshooting_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "metatrader_mt4_vs_mt5.md": [
+    {
+      "version": "v001",
+      "sha": "e0b11bfdc72ef6ef",
+      "file": "exports/metatrader/metatrader_mt4_vs_mt5_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "metatrader_mt4_vs_mt5.json": [
+    {
+      "version": "v001",
+      "sha": "01c4ae025f252e4e",
+      "file": "exports/metatrader/metatrader_mt4_vs_mt5_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "metatrader_mt4_core.md": [
+    {
+      "version": "v001",
+      "sha": "b1440b56b41cc439",
+      "file": "exports/metatrader/mt4/metatrader_mt4_core_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "metatrader_mt4_core.json": [
+    {
+      "version": "v001",
+      "sha": "b4cdd1858e6a0e17",
+      "file": "exports/metatrader/mt4/metatrader_mt4_core_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "metatrader_mt5_core.md": [
+    {
+      "version": "v001",
+      "sha": "c033409314ba1e77",
+      "file": "exports/metatrader/mt5/metatrader_mt5_core_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "metatrader_mt5_core.json": [
+    {
+      "version": "v001",
+      "sha": "d7ce2570a70503ba",
+      "file": "exports/metatrader/mt5/metatrader_mt5_core_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "external_methodologies_quarantine.md": [
+    {
+      "version": "v001",
+      "sha": "472020b0351a0014",
+      "file": "exports/general_trading/external_methodologies_quarantine_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "external_methodologies_quarantine.json": [
+    {
+      "version": "v001",
+      "sha": "4c94a7a1c92303fd",
+      "file": "exports/general_trading/external_methodologies_quarantine_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "general_trading_glossary.md": [
+    {
+      "version": "v001",
+      "sha": "1030dba20eea7848",
+      "file": "exports/general_trading/general_trading_glossary_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "general_trading_glossary.json": [
+    {
+      "version": "v001",
+      "sha": "32b2e2ad60a62fb8",
+      "file": "exports/general_trading/general_trading_glossary_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "conflict_registry.md": [
+    {
+      "version": "v001",
+      "sha": "4b3d01e2c205819a",
+      "file": "exports/conflicts/conflict_registry_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "conflict_registry.json": [
+    {
+      "version": "v001",
+      "sha": "cb3470020c253d1e",
+      "file": "exports/conflicts/conflict_registry_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "review_queue_open_items.md": [
+    {
+      "version": "v001",
+      "sha": "37009992318ded06",
+      "file": "exports/reports/review_queue_open_items_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "review_queue_open_items.json": [
+    {
+      "version": "v001",
+      "sha": "75cae950b62ef33a",
+      "file": "exports/reports/review_queue_open_items_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "academy_site_catalog.md": [
+    {
+      "version": "v001",
+      "sha": "455e4e9aa1c53c95",
+      "file": "exports/academy/academy_site_catalog_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "academy_site_catalog.json": [
+    {
+      "version": "v001",
+      "sha": "bc00a2dea1cf48a1",
+      "file": "exports/academy/academy_site_catalog_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "kb_policy_rules.md": [
+    {
+      "version": "v001",
+      "sha": "6970c707ba4ef2a7",
+      "file": "exports/reports/kb_policy_rules_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "kb_policy_rules.json": [
+    {
+      "version": "v001",
+      "sha": "ef298f34fcb480aa",
+      "file": "exports/reports/kb_policy_rules_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "kb_index.csv": [
+    {
+      "version": "v001",
+      "sha": "53cfb1cec7d2f81c",
+      "file": "exports/reports/kb_index_v001.csv",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "glossary.csv": [
+    {
+      "version": "v001",
+      "sha": "65fb13d4e76f58a5",
+      "file": "exports/glossary/glossary_v001.csv",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "mentorai/conflict_record.schema.json",
+  "title": "MENTORAI Conflict Record",
+  "description": "Two or more sources that disagree. Conflicts are recorded, never silently resolved.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "topic", "side_a", "side_b", "status", "requires_human_review", "created_at", "updated_at"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^CONF-[0-9]{4}$" },
+    "topic": { "type": "string" },
+    "domain": { "type": "string", "enum_ref": "domain" },
+    "side_a": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["object_id_or_source", "statement", "authority_level"],
+      "properties": {
+        "object_id_or_source": { "type": "string" },
+        "statement": { "type": "string" },
+        "authority_level": { "type": "string", "enum_ref": "authority_level" }
+      }
+    },
+    "side_b": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["object_id_or_source", "statement", "authority_level"],
+      "properties": {
+        "object_id_or_source": { "type": "string" },
+        "statement": { "type": "string" },
+        "authority_level": { "type": "string", "enum_ref": "authority_level" }
+      }
+    },
+    "possible_explanation": { "type": "string" },
+    "authority_decision": { "type": "string", "description": "Which side wins, once a human has decided. Empty until then." },
+    "status": { "type": "string", "enum": ["OPEN", "EXPLAINED", "RESOLVED", "WONT_FIX"] },
+    "requires_human_review": { "type": "boolean" },
+    "review_priority": { "type": "string", "enum_ref": "review_priority" },
+    "impact": { "type": "string" },
+    "created_at": { "type": "string" },
+    "updated_at": { "type": "string" }
+  }
+}

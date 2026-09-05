@@ -1,0 +1,66 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "mentorai/mentor_qa.schema.json",
+  "title": "MENTORAI Mentor Q&A Record",
+  "description": "Structured form of one student question + mentor answer. Raw conversations are never stored here; they stay in raw_sources/mentor_qa/.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id", "question_raw", "question_normalized", "intent", "topic",
+    "answer_raw", "answer_structured", "source", "authority_level",
+    "approval_status", "lifecycle_status", "confidence", "version",
+    "created_at", "updated_at"
+  ],
+  "properties": {
+    "id": { "type": "string", "pattern": "^MQA-[0-9]{5}$" },
+    "question_raw": { "type": "string", "description": "Student wording, preserved exactly." },
+    "question_normalized": { "type": "string", "description": "Cleaned, de-personalised, canonical phrasing." },
+    "question_variants": { "type": "array", "items": { "type": "string" } },
+    "intent": { "type": "string" },
+    "topic": { "type": "string" },
+    "subtopic": { "type": "string" },
+    "domain": { "type": "string", "enum_ref": "domain" },
+    "answer_raw": { "type": "string", "description": "Mentor wording, preserved exactly." },
+    "answer_structured": { "type": "string", "description": "Cleaned, reusable answer with student-specific details removed." },
+    "reasoning": { "type": "string" },
+    "rule_used": { "type": "array", "items": { "type": "string" }, "description": "IDs of RULE objects the answer relies on." },
+    "conditions": { "type": "array", "items": { "type": "string" } },
+    "exceptions": { "type": "array", "items": { "type": "string" } },
+    "misconception": { "type": "string" },
+    "correction": { "type": "string" },
+    "example": { "type": "string" },
+    "pii_removed": { "type": "boolean", "description": "Student-identifying content must be stripped before this record leaves raw_sources/." },
+    "duplicate_of": { "type": "string" },
+    "cluster_id": { "type": "string", "description": "Group id for repeated questions sharing one underlying concept." },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source_type", "source_ref"],
+      "properties": {
+        "source_type": { "type": "string", "enum_ref": "source_type" },
+        "source_ref": { "type": "string" },
+        "source_location": { "type": "string" },
+        "mentor": { "type": "string" },
+        "captured_at": { "type": "string" }
+      }
+    },
+    "authority_level": { "type": "string", "enum_ref": "authority_level" },
+    "methodology_scope": { "type": "string", "enum_ref": "methodology_scope" },
+    "platform_scope": { "type": "string", "enum_ref": "platform_scope" },
+    "approval_status": { "type": "string", "enum_ref": "approval_status" },
+    "lifecycle_status": { "type": "string", "enum_ref": "lifecycle_status" },
+    "review_priority": { "type": "string", "enum_ref": "review_priority" },
+    "review_reason": { "type": "string" },
+    "conflicts": { "type": "array", "items": { "type": "string" } },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "version": { "type": "string", "pattern": "^v[0-9]{3}$" },
+    "keywords": { "type": "array", "items": { "type": "string" } },
+    "created_at": { "type": "string" },
+    "updated_at": { "type": "string" }
+  },
+  "x-invariants": [
+    "A mentor answer is never promoted to authority_level=ACADEMY_PRIMARY.",
+    "pii_removed must be true for every record outside raw_sources/.",
+    "An answer that conflicts with Academy material must set approval_status=REVIEW_REQUIRED and reference a CONFLICT_RECORD."
+  ]
+}

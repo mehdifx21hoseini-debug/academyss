@@ -1,0 +1,637 @@
+{
+  "collection_id": "academy_site_catalog",
+  "domain": "academy",
+  "title": "کاتالوگ و اطلاعات عملیاتی آکادمی سبحان صمدی",
+  "description": "محتوای اعلام‌شده در سایت آکادمی (پادکست‌ها، کتاب‌های صوتی، خدمات منتورینگ و پشتیبانی سایت). این مجموعه دانشِ «متدولوژی آکادمی» نیست و نباید به‌عنوان منبع آموزشی استفاده شود.",
+  "version": "v001",
+  "generated_at": "2026-09-05T12:13:09Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "js/data.js",
+    "index.html",
+    "README.md",
+    "raw_sources/academy/site_data_v001.json"
+  ],
+  "notes": [
+    "ساخته‌شده به‌صورت خودکار توسط tools/build_academy_catalog.py — دستی ویرایش نشود.",
+    "هیچ فایل صوتی‌ای در سایت بارگذاری نشده است (src خالی)؛ آمار بازدید و مدت‌زمان‌ها تأییدنشده‌اند.",
+    "نظرات کاربران (testimonials) عمداً وارد پایگاه دانش نشده‌اند: محتوای تبلیغاتی‌اند، نه دانش."
+  ],
+  "objects": [
+    {
+      "id": "ACA-CAT-0001",
+      "object_type": "CATALOG_ITEM",
+      "domain": "academy",
+      "title": "پادکست: روانشناسی معامله‌گری موفق",
+      "language": "fa",
+      "chunk_text": "پادکست «روانشناسی معامله‌گری موفق» از آکادمی سبحان صمدی. موضوع: چگونه ذهنیت یک معامله‌گر حرفه‌ای داشته باشیم و احساسات را کنترل کنیم. دسته‌بندی: روانشناسی. مدرس/گوینده: سبحان صمدی. مدت اعلام‌شده: ۴۵:۳۰. وضعیت فایل صوتی در سایت: بارگذاری نشده.",
+      "source": {
+        "source_type": "ACADEMY_APP_DATA",
+        "source_ref": "js/data.js",
+        "source_location": "window.SSAData.podcasts[0] (id=p1)",
+        "author": "سبحان صمدی"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "برگرفته از داده‌های سایت آکادمی. صحت عنوان‌ها، مدت‌زمان‌ها و آمار باید توسط تیم آکادمی تأیید شود (احتمال محتوای نمونه/دمو).",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "پادکست",
+      "subcategory": "روانشناسی",
+      "summary": "پادکست آکادمی درباره‌ی: چگونه ذهنیت یک معامله‌گر حرفه‌ای داشته باشیم و احساسات را کنترل کنیم",
+      "keywords": [
+        "پادکست",
+        "روانشناسی",
+        "روانشناسی معامله‌گری موفق"
+      ],
+      "related_questions": [
+        "آکادمی درباره‌ی روانشناسی معامله‌گری موفق پادکست داره؟",
+        "پادکست روانشناسی معامله‌گری موفق چند دقیقه‌ست؟",
+        "کجا می‌تونم پادکست روانشناسی معامله‌گری موفق رو گوش بدم؟"
+      ],
+      "validity": {
+        "audio_available": false,
+        "declared_duration": "۴۵:۳۰",
+        "declared_views": "۱۲.۳K",
+        "site_category": "psychology"
+      }
+    },
+    {
+      "id": "ACA-CAT-0002",
+      "object_type": "CATALOG_ITEM",
+      "domain": "academy",
+      "title": "پادکست: تحلیل تکنیکال پیشرفته",
+      "language": "fa",
+      "chunk_text": "پادکست «تحلیل تکنیکال پیشرفته» از آکادمی سبحان صمدی. موضوع: بررسی الگوهای پیشرفته نمودار و روش‌های تشخیص روند. دسته‌بندی: تحلیل. مدرس/گوینده: سبحان صمدی. مدت اعلام‌شده: ۵۸:۱۵. وضعیت فایل صوتی در سایت: بارگذاری نشده.",
+      "source": {
+        "source_type": "ACADEMY_APP_DATA",
+        "source_ref": "js/data.js",
+        "source_location": "window.SSAData.podcasts[1] (id=p2)",
+        "author": "سبحان صمدی"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "برگرفته از داده‌های سایت آکادمی. صحت عنوان‌ها، مدت‌زمان‌ها و آمار باید توسط تیم آکادمی تأیید شود (احتمال محتوای نمونه/دمو).",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "پادکست",
+      "subcategory": "تحلیل",
+      "summary": "پادکست آکادمی درباره‌ی: بررسی الگوهای پیشرفته نمودار و روش‌های تشخیص روند",
+      "keywords": [
+        "پادکست",
+        "تحلیل",
+        "تحلیل تکنیکال پیشرفته"
+      ],
+      "related_questions": [
+        "آکادمی درباره‌ی تحلیل تکنیکال پیشرفته پادکست داره؟",
+        "پادکست تحلیل تکنیکال پیشرفته چند دقیقه‌ست؟",
+        "کجا می‌تونم پادکست تحلیل تکنیکال پیشرفته رو گوش بدم؟"
+      ],
+      "validity": {
+        "audio_available": false,
+        "declared_duration": "۵۸:۱۵",
+        "declared_views": "۸.۷K",
+        "site_category": "analysis"
+      }
+    },
+    {
+      "id": "ACA-CAT-0003",
+      "object_type": "CATALOG_ITEM",
+      "domain": "academy",
+      "title": "پادکست: مدیریت سرمایه و ریسک",
+      "language": "fa",
+      "chunk_text": "پادکست «مدیریت سرمایه و ریسک» از آکادمی سبحان صمدی. موضوع: اصول طلایی مدیریت سرمایه برای معامله‌گران بلندمدت. دسته‌بندی: معامله‌گری. مدرس/گوینده: سبحان صمدی. مدت اعلام‌شده: ۳۸:۴۵. وضعیت فایل صوتی در سایت: بارگذاری نشده.",
+      "source": {
+        "source_type": "ACADEMY_APP_DATA",
+        "source_ref": "js/data.js",
+        "source_location": "window.SSAData.podcasts[2] (id=p3)",
+        "author": "سبحان صمدی"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "برگرفته از داده‌های سایت آکادمی. صحت عنوان‌ها، مدت‌زمان‌ها و آمار باید توسط تیم آکادمی تأیید شود (احتمال محتوای نمونه/دمو).",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "پادکست",
+      "subcategory": "معامله‌گری",
+      "summary": "پادکست آکادمی درباره‌ی: اصول طلایی مدیریت سرمایه برای معامله‌گران بلندمدت",
+      "keywords": [
+        "پادکست",
+        "معامله‌گری",
+        "مدیریت سرمایه و ریسک"
+      ],
+      "related_questions": [
+        "آکادمی درباره‌ی مدیریت سرمایه و ریسک پادکست داره؟",
+        "پادکست مدیریت سرمایه و ریسک چند دقیقه‌ست؟",
+        "کجا می‌تونم پادکست مدیریت سرمایه و ریسک رو گوش بدم؟"
+      ],
+      "validity": {
+        "audio_available": false,
+        "declared_duration": "۳۸:۴۵",
+        "declared_views": "۱۵.۲K",
+        "site_category": "trading"
+      }
+    },
+    {
+      "id": "ACA-CAT-0004",
+      "object_type": "CATALOG_ITEM",
+      "domain": "academy",
+      "title": "پادکست: اشتباهات رایج معامله‌گران",
+      "language": "fa",
+      "chunk_text": "پادکست «اشتباهات رایج معامله‌گران» از آکادمی سبحان صمدی. موضوع: بررسی ۱۰ اشتباه کشنده که باید از آنها دوری کنید. دسته‌بندی: معامله‌گری. مدرس/گوینده: سبحان صمدی. مدت اعلام‌شده: ۴۲:۰۰. وضعیت فایل صوتی در سایت: بارگذاری نشده.",
+      "source": {
+        "source_type": "ACADEMY_APP_DATA",
+        "source_ref": "js/data.js",
+        "source_location": "window.SSAData.podcasts[3] (id=p4)",
+        "author": "سبحان صمدی"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "برگرفته از داده‌های سایت آکادمی. صحت عنوان‌ها، مدت‌زمان‌ها و آمار باید توسط تیم آکادمی تأیید شود (احتمال محتوای نمونه/دمو).",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "پادکست",
+      "subcategory": "معامله‌گری",
+      "summary": "پادکست آکادمی درباره‌ی: بررسی ۱۰ اشتباه کشنده که باید از آنها دوری کنید",
+      "keywords": [
+        "پادکست",
+        "معامله‌گری",
+        "اشتباهات رایج معامله‌گران"
+      ],
+      "related_questions": [
+        "آکادمی درباره‌ی اشتباهات رایج معامله‌گران پادکست داره؟",
+        "پادکست اشتباهات رایج معامله‌گران چند دقیقه‌ست؟",
+        "کجا می‌تونم پادکست اشتباهات رایج معامله‌گران رو گوش بدم؟"
+      ],
+      "validity": {
+        "audio_available": false,
+        "declared_duration": "۴۲:۰۰",
+        "declared_views": "۲۱.۵K",
+        "site_category": "trading"
+      }
+    },
+    {
+      "id": "ACA-CAT-0005",
+      "object_type": "CATALOG_ITEM",
+      "domain": "academy",
+      "title": "پادکست: استراتژی پرایس اکشن",
+      "language": "fa",
+      "chunk_text": "پادکست «استراتژی پرایس اکشن» از آکادمی سبحان صمدی. موضوع: آموزش کامل پرایس اکشن از مقدماتی تا پیشرفته. دسته‌بندی: تحلیل. مدرس/گوینده: سبحان صمدی. مدت اعلام‌شده: ۱:۱۲:۳۰. وضعیت فایل صوتی در سایت: بارگذاری نشده.",
+      "source": {
+        "source_type": "ACADEMY_APP_DATA",
+        "source_ref": "js/data.js",
+        "source_location": "window.SSAData.podcasts[4] (id=p5)",
+        "author": "سبحان صمدی"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "برگرفته از داده‌های سایت آکادمی. صحت عنوان‌ها، مدت‌زمان‌ها و آمار باید توسط تیم آکادمی تأیید شود (احتمال محتوای نمونه/دمو).",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "پادکست",
+      "subcategory": "تحلیل",
+      "summary": "پادکست آکادمی درباره‌ی: آموزش کامل پرایس اکشن از مقدماتی تا پیشرفته",
+      "keywords": [
+        "پادکست",
+        "تحلیل",
+        "استراتژی پرایس اکشن"
+      ],
+      "related_questions": [
+        "آکادمی درباره‌ی استراتژی پرایس اکشن پادکست داره؟",
+        "پادکست استراتژی پرایس اکشن چند دقیقه‌ست؟",
+        "کجا می‌تونم پادکست استراتژی پرایس اکشن رو گوش بدم؟"
+      ],
+      "validity": {
+        "audio_available": false,
+        "declared_duration": "۱:۱۲:۳۰",
+        "declared_views": "۱۸.۹K",
+        "site_category": "analysis"
+      }
+    },
+    {
+      "id": "ACA-CAT-0006",
+      "object_type": "CATALOG_ITEM",
+      "domain": "academy",
+      "title": "پادکست: فارکس یا کریپتو؟",
+      "language": "fa",
+      "chunk_text": "پادکست «فارکس یا کریپتو؟» از آکادمی سبحان صمدی. موضوع: مقایسه جامع بازارهای فارکس و رمزارز برای معامله‌گران ایرانی. دسته‌بندی: معامله‌گری. مدرس/گوینده: سبحان صمدی. مدت اعلام‌شده: ۵۱:۲۰. وضعیت فایل صوتی در سایت: بارگذاری نشده.",
+      "source": {
+        "source_type": "ACADEMY_APP_DATA",
+        "source_ref": "js/data.js",
+        "source_location": "window.SSAData.podcasts[5] (id=p6)",
+        "author": "سبحان صمدی"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "برگرفته از داده‌های سایت آکادمی. صحت عنوان‌ها، مدت‌زمان‌ها و آمار باید توسط تیم آکادمی تأیید شود (احتمال محتوای نمونه/دمو).",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "پادکست",
+      "subcategory": "معامله‌گری",
+      "summary": "پادکست آکادمی درباره‌ی: مقایسه جامع بازارهای فارکس و رمزارز برای معامله‌گران ایرانی",
+      "keywords": [
+        "پادکست",
+        "معامله‌گری",
+        "فارکس یا کریپتو؟"
+      ],
+      "related_questions": [
+        "آکادمی درباره‌ی فارکس یا کریپتو؟ پادکست داره؟",
+        "پادکست فارکس یا کریپتو؟ چند دقیقه‌ست؟",
+        "کجا می‌تونم پادکست فارکس یا کریپتو؟ رو گوش بدم؟"
+      ],
+      "validity": {
+        "audio_available": false,
+        "declared_duration": "۵۱:۲۰",
+        "declared_views": "۱۱.۱K",
+        "site_category": "trading"
+      }
+    },
+    {
+      "id": "ACA-CAT-0101",
+      "object_type": "CATALOG_ITEM",
+      "domain": "academy",
+      "title": "کتاب صوتی: معامله‌گر منضبط",
+      "language": "fa",
+      "chunk_text": "کتاب صوتی «معامله‌گر منضبط» نوشته‌ی مارک داگلاس در کتابخانه‌ی آکادمی سبحان صمدی موجود است. مدت اعلام‌شده: ۶ ساعت. وضعیت فایل صوتی در سایت: بارگذاری نشده.",
+      "source": {
+        "source_type": "ACADEMY_APP_DATA",
+        "source_ref": "js/data.js",
+        "source_location": "window.SSAData.books[0] (id=b1)",
+        "author": "سبحان صمدی"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "برگرفته از داده‌های سایت آکادمی. صحت عنوان‌ها، مدت‌زمان‌ها و آمار باید توسط تیم آکادمی تأیید شود (احتمال محتوای نمونه/دمو).",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "کتاب صوتی",
+      "summary": "کتاب صوتی «معامله‌گر منضبط» از مارک داگلاس در کتابخانه‌ی آکادمی.",
+      "keywords": [
+        "کتاب صوتی",
+        "معامله‌گر منضبط",
+        "مارک داگلاس"
+      ],
+      "related_questions": [
+        "کتاب معامله‌گر منضبط رو دارید؟",
+        "چه کتاب‌هایی از مارک داگلاس توی آکادمی هست؟"
+      ],
+      "validity": {
+        "audio_available": false,
+        "declared_duration": "۶ ساعت"
+      }
+    },
+    {
+      "id": "ACA-CAT-0102",
+      "object_type": "CATALOG_ITEM",
+      "domain": "academy",
+      "title": "کتاب صوتی: جادوگران بازار",
+      "language": "fa",
+      "chunk_text": "کتاب صوتی «جادوگران بازار» نوشته‌ی جک شواگر در کتابخانه‌ی آکادمی سبحان صمدی موجود است. مدت اعلام‌شده: ۸ ساعت. وضعیت فایل صوتی در سایت: بارگذاری نشده.",
+      "source": {
+        "source_type": "ACADEMY_APP_DATA",
+        "source_ref": "js/data.js",
+        "source_location": "window.SSAData.books[1] (id=b2)",
+        "author": "سبحان صمدی"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "برگرفته از داده‌های سایت آکادمی. صحت عنوان‌ها، مدت‌زمان‌ها و آمار باید توسط تیم آکادمی تأیید شود (احتمال محتوای نمونه/دمو).",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "کتاب صوتی",
+      "summary": "کتاب صوتی «جادوگران بازار» از جک شواگر در کتابخانه‌ی آکادمی.",
+      "keywords": [
+        "کتاب صوتی",
+        "جادوگران بازار",
+        "جک شواگر"
+      ],
+      "related_questions": [
+        "کتاب جادوگران بازار رو دارید؟",
+        "چه کتاب‌هایی از جک شواگر توی آکادمی هست؟"
+      ],
+      "validity": {
+        "audio_available": false,
+        "declared_duration": "۸ ساعت"
+      }
+    },
+    {
+      "id": "ACA-CAT-0103",
+      "object_type": "CATALOG_ITEM",
+      "domain": "academy",
+      "title": "کتاب صوتی: تحلیل تکنیکال",
+      "language": "fa",
+      "chunk_text": "کتاب صوتی «تحلیل تکنیکال» نوشته‌ی جان مورفی در کتابخانه‌ی آکادمی سبحان صمدی موجود است. مدت اعلام‌شده: ۱۲ ساعت. وضعیت فایل صوتی در سایت: بارگذاری نشده.",
+      "source": {
+        "source_type": "ACADEMY_APP_DATA",
+        "source_ref": "js/data.js",
+        "source_location": "window.SSAData.books[2] (id=b3)",
+        "author": "سبحان صمدی"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "برگرفته از داده‌های سایت آکادمی. صحت عنوان‌ها، مدت‌زمان‌ها و آمار باید توسط تیم آکادمی تأیید شود (احتمال محتوای نمونه/دمو).",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "کتاب صوتی",
+      "summary": "کتاب صوتی «تحلیل تکنیکال» از جان مورفی در کتابخانه‌ی آکادمی.",
+      "keywords": [
+        "کتاب صوتی",
+        "تحلیل تکنیکال",
+        "جان مورفی"
+      ],
+      "related_questions": [
+        "کتاب تحلیل تکنیکال رو دارید؟",
+        "چه کتاب‌هایی از جان مورفی توی آکادمی هست؟"
+      ],
+      "validity": {
+        "audio_available": false,
+        "declared_duration": "۱۲ ساعت"
+      }
+    },
+    {
+      "id": "ACA-CAT-0104",
+      "object_type": "CATALOG_ITEM",
+      "domain": "academy",
+      "title": "کتاب صوتی: ذهن پول‌ساز",
+      "language": "fa",
+      "chunk_text": "کتاب صوتی «ذهن پول‌ساز» نوشته‌ی ناپلئون هیل در کتابخانه‌ی آکادمی سبحان صمدی موجود است. مدت اعلام‌شده: ۵ ساعت. وضعیت فایل صوتی در سایت: بارگذاری نشده.",
+      "source": {
+        "source_type": "ACADEMY_APP_DATA",
+        "source_ref": "js/data.js",
+        "source_location": "window.SSAData.books[3] (id=b4)",
+        "author": "سبحان صمدی"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "برگرفته از داده‌های سایت آکادمی. صحت عنوان‌ها، مدت‌زمان‌ها و آمار باید توسط تیم آکادمی تأیید شود (احتمال محتوای نمونه/دمو).",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "کتاب صوتی",
+      "summary": "کتاب صوتی «ذهن پول‌ساز» از ناپلئون هیل در کتابخانه‌ی آکادمی.",
+      "keywords": [
+        "کتاب صوتی",
+        "ذهن پول‌ساز",
+        "ناپلئون هیل"
+      ],
+      "related_questions": [
+        "کتاب ذهن پول‌ساز رو دارید؟",
+        "چه کتاب‌هایی از ناپلئون هیل توی آکادمی هست؟"
+      ],
+      "validity": {
+        "audio_available": false,
+        "declared_duration": "۵ ساعت"
+      }
+    },
+    {
+      "id": "ACA-CAT-0105",
+      "object_type": "CATALOG_ITEM",
+      "domain": "academy",
+      "title": "کتاب صوتی: سرمایه‌گذار هوشمند",
+      "language": "fa",
+      "chunk_text": "کتاب صوتی «سرمایه‌گذار هوشمند» نوشته‌ی بنجامین گراهام در کتابخانه‌ی آکادمی سبحان صمدی موجود است. مدت اعلام‌شده: ۱۰ ساعت. وضعیت فایل صوتی در سایت: بارگذاری نشده.",
+      "source": {
+        "source_type": "ACADEMY_APP_DATA",
+        "source_ref": "js/data.js",
+        "source_location": "window.SSAData.books[4] (id=b5)",
+        "author": "سبحان صمدی"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "برگرفته از داده‌های سایت آکادمی. صحت عنوان‌ها، مدت‌زمان‌ها و آمار باید توسط تیم آکادمی تأیید شود (احتمال محتوای نمونه/دمو).",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "کتاب صوتی",
+      "summary": "کتاب صوتی «سرمایه‌گذار هوشمند» از بنجامین گراهام در کتابخانه‌ی آکادمی.",
+      "keywords": [
+        "کتاب صوتی",
+        "سرمایه‌گذار هوشمند",
+        "بنجامین گراهام"
+      ],
+      "related_questions": [
+        "کتاب سرمایه‌گذار هوشمند رو دارید؟",
+        "چه کتاب‌هایی از بنجامین گراهام توی آکادمی هست؟"
+      ],
+      "validity": {
+        "audio_available": false,
+        "declared_duration": "۱۰ ساعت"
+      }
+    },
+    {
+      "id": "ACA-CAT-0106",
+      "object_type": "CATALOG_ITEM",
+      "domain": "academy",
+      "title": "کتاب صوتی: بازی برتر",
+      "language": "fa",
+      "chunk_text": "کتاب صوتی «بازی برتر» نوشته‌ی سبحان صمدی در کتابخانه‌ی آکادمی سبحان صمدی موجود است. مدت اعلام‌شده: ۴ ساعت. وضعیت فایل صوتی در سایت: بارگذاری نشده.",
+      "source": {
+        "source_type": "ACADEMY_APP_DATA",
+        "source_ref": "js/data.js",
+        "source_location": "window.SSAData.books[5] (id=b6)",
+        "author": "سبحان صمدی"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "برگرفته از داده‌های سایت آکادمی. صحت عنوان‌ها، مدت‌زمان‌ها و آمار باید توسط تیم آکادمی تأیید شود (احتمال محتوای نمونه/دمو).",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "کتاب صوتی",
+      "summary": "کتاب صوتی «بازی برتر» از سبحان صمدی در کتابخانه‌ی آکادمی.",
+      "keywords": [
+        "کتاب صوتی",
+        "بازی برتر",
+        "سبحان صمدی"
+      ],
+      "related_questions": [
+        "کتاب بازی برتر رو دارید؟",
+        "چه کتاب‌هایی از سبحان صمدی توی آکادمی هست؟"
+      ],
+      "validity": {
+        "audio_available": false,
+        "declared_duration": "۴ ساعت"
+      }
+    },
+    {
+      "id": "ACA-OPS-0001",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "title": "معرفی آکادمی سبحان صمدی",
+      "language": "fa",
+      "chunk_text": "آکادمی سبحان صمدی یک آکادمی تخصصی آموزش معامله‌گری در بازارهای مالی بین‌المللی است. خدمات اعلام‌شده در سایت: پادکست‌های آموزشی، کتاب‌های صوتی و منتورینگ اختصاصی. آمار اعلام‌شده در سایت: بیش از ۵۰۰ دانشجوی فعال، بیش از ۸۰ ساعت محتوا، امتیاز کاربران ۴.۹ و بیش از ۱۰ سال تجربه‌ی سبحان صمدی به‌عنوان منتور و تحلیل‌گر ارشد.",
+      "source": {
+        "source_type": "ACADEMY_WEBSITE",
+        "source_ref": "index.html",
+        "source_location": "index.html:57-70,200-212",
+        "author": "سبحان صمدی"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "برگرفته از داده‌های سایت آکادمی. صحت عنوان‌ها، مدت‌زمان‌ها و آمار باید توسط تیم آکادمی تأیید شود (احتمال محتوای نمونه/دمو).",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "معرفی آکادمی",
+      "summary": "آکادمی سبحان صمدی: آموزش معامله‌گری با پادکست، کتاب صوتی و منتورینگ اختصاصی.",
+      "keywords": [
+        "آکادمی",
+        "سبحان صمدی",
+        "معرفی",
+        "خدمات"
+      ],
+      "related_questions": [
+        "آکادمی سبحان صمدی چیه؟",
+        "چه خدماتی ارائه می‌دید؟",
+        "سبحان صمدی کیه؟"
+      ]
+    },
+    {
+      "id": "ACA-OPS-0002",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "title": "منتورینگ اختصاصی آکادمی",
+      "language": "fa",
+      "chunk_text": "منتورینگ اختصاصی آکادمی به‌صورت یک‌به‌یک با سبحان صمدی برگزار می‌شود و طبق سایت شامل این موارد است: جلسات آنلاین اختصاصی، بررسی معاملات و پورتفولیو، دسترسی به محتوای ویژه VIP، پشتیبانی در گروه اختصاصی، و برنامه‌ی آموزشی شخصی‌سازی‌شده. وضعیت اعلام‌شده در سایت: پذیرش دانشجو فعال است. ثبت‌نام از طریق فرم تماس سایت انجام می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_WEBSITE",
+        "source_ref": "index.html",
+        "source_location": "index.html:187-212",
+        "author": "سبحان صمدی"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "برگرفته از داده‌های سایت آکادمی. صحت عنوان‌ها، مدت‌زمان‌ها و آمار باید توسط تیم آکادمی تأیید شود (احتمال محتوای نمونه/دمو).",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "خدمات",
+      "subcategory": "منتورینگ",
+      "summary": "منتورینگ یک‌به‌یک با ۵ سرویس اعلام‌شده و پذیرش فعال.",
+      "keywords": [
+        "منتورینگ",
+        "ثبت‌نام",
+        "VIP",
+        "جلسه خصوصی"
+      ],
+      "related_questions": [
+        "منتورینگ شامل چی می‌شه؟",
+        "چطور توی منتورینگ ثبت‌نام کنم؟",
+        "الان دانشجو می‌پذیرید؟",
+        "هزینه‌ی منتورینگ چقدره؟"
+      ],
+      "review_reason": "قیمت، مدت دوره و شرایط ثبت‌نام در منابع موجود وجود ندارد و باید از آکادمی گرفته شود.",
+      "review_priority": "P1"
+    },
+    {
+      "id": "ACA-OPS-0003",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "کار با پخش‌کننده‌ی صوتی سایت آکادمی",
+      "language": "fa",
+      "chunk_text": "پخش‌کننده‌ی سایت آکادمی این امکانات را دارد: پخش/توقف، جابه‌جایی با کلیک روی نوار پیشرفت، تغییر سرعت پخش بین ۰.۷۵ تا ۲ برابر، تکرار (Loop) یک فایل، تنظیم صدا، جلو/عقب بردن ۱۵ ثانیه‌ای و پخش‌کننده‌ی شناور در پایین صفحه.",
+      "source": {
+        "source_type": "ACADEMY_WEBSITE",
+        "source_ref": "README.md",
+        "source_location": "README.md:امکانات پلیر",
+        "author": "سبحان صمدی"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "برگرفته از داده‌های سایت آکادمی. صحت عنوان‌ها، مدت‌زمان‌ها و آمار باید توسط تیم آکادمی تأیید شود (احتمال محتوای نمونه/دمو).",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "پشتیبانی سایت",
+      "steps": [
+        "روی پادکست یا کتاب صوتی موردنظر کلیک کنید تا در پخش‌کننده بارگذاری شود.",
+        "برای پخش یا توقف از دکمه‌ی مرکزی استفاده کنید.",
+        "برای جابه‌جایی در فایل، روی نوار پیشرفت کلیک کنید.",
+        "برای تغییر سرعت، روی دکمه‌ی سرعت بزنید (۰.۷۵× تا ۲×).",
+        "برای تکرار یک فایل، دکمه‌ی 🔁 تکرار را فعال کنید.",
+        "برای جلو/عقب بردن، از دکمه‌های ±۱۵ ثانیه استفاده کنید."
+      ],
+      "summary": "راهنمای استفاده از پخش‌کننده‌ی صوتی سایت آکادمی.",
+      "keywords": [
+        "پلیر",
+        "پخش",
+        "سرعت پخش",
+        "تکرار"
+      ],
+      "related_questions": [
+        "چطور سرعت پخش رو زیاد کنم؟",
+        "چرا صدا پخش نمی‌شه؟",
+        "چطور پادکست رو از اول گوش بدم؟"
+      ]
+    }
+  ]
+}

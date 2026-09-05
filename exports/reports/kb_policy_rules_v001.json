@@ -1,0 +1,193 @@
+{
+  "collection_id": "kb_policy_rules",
+  "domain": "meta",
+  "title": "قواعد حاکم بر پایگاه دانش و حفاظت از متدولوژی",
+  "description": "قواعد عملیاتی برگرفته از منشور پروژه که رفتار بازیابی و اعتبارسنجی را تعیین می‌کنند.",
+  "version": "v001",
+  "generated_at": "2026-09-05T12:13:09Z",
+  "pipeline_stage": "VALIDATED",
+  "source_files": [
+    "MENTORAI_KB_CHARTER.md"
+  ],
+  "notes": [
+    "این مجموعه تنها مجموعه‌ای است که وضعیت APPROVED دارد، چون منبع آن سند رسمی پروژه است."
+  ],
+  "objects": [
+    {
+      "id": "MET-RULE-0001",
+      "object_type": "RULE",
+      "domain": "meta",
+      "category": "سیاست پایگاه دانش",
+      "title": "متدولوژی آکادمی مرجع نهایی است",
+      "language": "fa",
+      "rule": "برای هر پرسش مربوط به روش معاملاتی، منبع تصمیم فقط محتوای رسمی آکادمی است؛ دانش عمومی یا منابع بیرونی هرگز جایگزین آن نمی‌شوند.",
+      "chunk_text": "در پاسخ به سؤال‌های روشی، اولویت بازیابی با اشیائی است که authority_level آن‌ها ACADEMY_PRIMARY است. اگر چنین دانشی وجود نداشته باشد، پاسخ نباید از دانش عمومی ساخته و به‌عنوان روش آکادمی ارائه شود؛ باید صراحتاً گفته شود که این موضوع در محتوای آکادمی موجود نیست.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "MENTORAI_KB_CHARTER.md",
+        "source_location": "بخش ۳ و ۴"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "keywords": [
+        "متدولوژی",
+        "مرجعیت",
+        "authority"
+      ],
+      "related_questions": [
+        "روش آکادمی برای ورود به معامله چیه؟"
+      ]
+    },
+    {
+      "id": "MET-RULE-0002",
+      "object_type": "RULE",
+      "domain": "meta",
+      "category": "سیاست پایگاه دانش",
+      "title": "قرنطینه‌ی روش‌های بیرونی",
+      "language": "fa",
+      "rule": "روش‌های معاملاتی بیرونی فقط برای شناخت و توضیح کوتاه نگهداری می‌شوند و هرگز به‌عنوان بخشی از متدولوژی آکادمی ارائه نمی‌شوند.",
+      "chunk_text": "اشیاء دارای methodology_scope = EXTERNAL_METHODOLOGY_QUARANTINE فقط زمانی بازیابی می‌شوند که دانشجو مستقیماً درباره‌ی همان روش پرسیده باشد. پاسخ باید کوتاه توضیح دهد که این روش جزو متدولوژی آکادمی نیست و سپس دانشجو را به چارچوب آکادمی برگرداند.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "MENTORAI_KB_CHARTER.md",
+        "source_location": "بخش ۴"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "keywords": [
+        "قرنطینه",
+        "SMC",
+        "ICT",
+        "روش بیرونی"
+      ],
+      "related_questions": [
+        "نظرتون درباره اسمارت مانی چیه؟"
+      ]
+    },
+    {
+      "id": "MET-RULE-0003",
+      "object_type": "RULE",
+      "domain": "meta",
+      "category": "سیاست پایگاه دانش",
+      "title": "ممنوعیت ساختن دانش بدون منبع",
+      "language": "fa",
+      "rule": "هیچ قاعده، عدد یا شرطی بدون منبع قابل ردیابی وارد پایگاه دانش نمی‌شود.",
+      "chunk_text": "هر شیء دانش باید source_ref و source_location داشته باشد. محتوای نوشته‌شده بدون منبع بیرونی با source_type = MODEL_DRAFT و verification_required = true ثبت می‌شود و تا تأیید انسانی هرگز به APPROVED تغییر نمی‌کند.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "MENTORAI_KB_CHARTER.md",
+        "source_location": "بخش ۵"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "keywords": [
+        "منبع",
+        "provenance",
+        "توهم دانش"
+      ]
+    },
+    {
+      "id": "MET-RULE-0004",
+      "object_type": "RULE",
+      "domain": "meta",
+      "category": "سیاست پایگاه دانش",
+      "title": "پاسخ منتور به‌تنهایی قانون رسمی نمی‌شود",
+      "language": "fa",
+      "rule": "پاسخ منتور دارایی ارزشمندی است اما تا تطبیق با محتوای رسمی آکادمی، به قانون رسمی ارتقا نمی‌یابد.",
+      "chunk_text": "رکوردهای mentor_qa حداکثر MENTOR_VERIFIED می‌شوند و هرگز ACADEMY_PRIMARY نیستند. در صورت تعارض با محتوای رسمی، رکورد REVIEW_REQUIRED می‌شود و یک CONFLICT_RECORD ساخته می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "MENTORAI_KB_CHARTER.md",
+        "source_location": "بخش ۳"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "keywords": [
+        "منتور",
+        "اعتبارسنجی",
+        "تعارض"
+      ]
+    },
+    {
+      "id": "MET-RULE-0005",
+      "object_type": "RULE",
+      "domain": "meta",
+      "category": "سیاست پایگاه دانش",
+      "title": "تفکیک دانش پلتفرم و دانش بروکر",
+      "language": "fa",
+      "rule": "هیچ رویه‌ی متاتریدری بدون تعیین دامنه‌ی پلتفرم و هیچ شرط بروکری بدون نام بروکر و زمان اعتبار ثبت نمی‌شود.",
+      "chunk_text": "هر شیء دامنه‌ی metatrader باید platform_scope داشته باشد (MT4_ONLY، MT5_ONLY، BOTH، BROKER_DEPENDENT یا VERSION_DEPENDENT) و هر شیء دامنه‌ی brokers باید broker و validity داشته باشد. اطلاعات یک بروکر هرگز به بروکر دیگر تعمیم داده نمی‌شود.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "MENTORAI_KB_CHARTER.md",
+        "source_location": "بخش ۶"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "keywords": [
+        "MT4",
+        "MT5",
+        "بروکر",
+        "دامنه"
+      ]
+    },
+    {
+      "id": "MET-RULE-0006",
+      "object_type": "RULE",
+      "domain": "meta",
+      "category": "سیاست پایگاه دانش",
+      "title": "جدایی دانش از حافظه‌ی دانشجو",
+      "language": "fa",
+      "rule": "اطلاعات شخصی و تاریخچه‌ی گفت‌وگوی دانشجو وارد پایگاه دانش عمومی نمی‌شود.",
+      "chunk_text": "پایگاه دانش فقط دانش پایدار دامنه را نگه می‌دارد. اطلاعات فردی دانشجو در پروژه‌ی CORE نگهداری می‌شود. رکوردهای استخراج‌شده از گفت‌وگوها باید pii_removed = true داشته باشند.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "MENTORAI_KB_CHARTER.md",
+        "source_location": "بخش ۶"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "keywords": [
+        "حریم خصوصی",
+        "PII",
+        "حافظه"
+      ]
+    }
+  ]
+}

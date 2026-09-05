@@ -1,0 +1,893 @@
+{
+  "collection_id": "general_trading_glossary",
+  "domain": "general_trading",
+  "title": "واژه‌نامه‌ی دانش عمومی معامله‌گری",
+  "description": "لایه‌ی دانش عمومی معامله‌گری. این لایه هرگز جایگزین یا بالاتر از متدولوژی آکادمی نیست و فقط برای توضیح مفاهیم پایه به دانشجو استفاده می‌شود.",
+  "version": "v001",
+  "generated_at": "2026-09-05T12:13:09Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "tools/seed_general_trading.py"
+  ],
+  "notes": [
+    "نمونه‌ی اول (sample-first) — پیش از تولید انبوه باید ساختار تأیید شود.",
+    "همه‌ی رکوردها PENDING_VERIFICATION هستند؛ هیچ‌کدام هنوز پاسخ رسمی آکادمی نیستند."
+  ],
+  "objects": [
+    {
+      "id": "GEN-DEF-0001",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "پیپ (Pip)",
+      "title_en": "Pip",
+      "language": "fa-en",
+      "summary": "کوچک‌ترین واحد متعارف تغییر قیمت در جفت‌ارزها.",
+      "definition": "کوچک‌ترین واحد متعارف تغییر قیمت در جفت‌ارزها. در اغلب جفت‌ارزها پیپ برابر رقم چهارم اعشار (۰.۰۰۰۱) است و در جفت‌ارزهای دارای ین ژاپن برابر رقم دوم اعشار (۰.۰۱).",
+      "chunk_text": "پیپ (Pip) (Pip): کوچک‌ترین واحد متعارف تغییر قیمت در جفت‌ارزها. در اغلب جفت‌ارزها پیپ برابر رقم چهارم اعشار (۰.۰۰۰۱) است و در جفت‌ارزهای دارای ین ژاپن برابر رقم دوم اعشار (۰.۰۱). اگر EURUSD از ۱.۰۸۵۰ به ۱.۰۸۶۰ برود، ۱۰ پیپ حرکت کرده است.",
+      "warnings": [
+        "اگر EURUSD از ۱.۰۸۵۰ به ۱.۰۸۶۰ برود، ۱۰ پیپ حرکت کرده است."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[0]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.9,
+      "version": "v001",
+      "keywords": [
+        "پیپ",
+        "pip",
+        "واحد قیمت"
+      ],
+      "related_questions": [
+        "پیپ یعنی چی؟",
+        "یک پیپ چند دلاره؟",
+        "فرق پیپ و پوینت چیه؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0002",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "پوینت (Point)",
+      "title_en": "Point",
+      "language": "fa-en",
+      "summary": "کوچک‌ترین تغییر ممکن در قیمت بر اساس تعداد ارقام اعشار نماد.",
+      "definition": "کوچک‌ترین تغییر ممکن در قیمت بر اساس تعداد ارقام اعشار نماد. در حساب‌های ۵ رقمی، هر پیپ برابر ۱۰ پوینت است.",
+      "chunk_text": "پوینت (Point) (Point): کوچک‌ترین تغییر ممکن در قیمت بر اساس تعداد ارقام اعشار نماد. در حساب‌های ۵ رقمی، هر پیپ برابر ۱۰ پوینت است. در نماد ۵ رقمی EURUSD، حرکت از ۱.۰۸۵۰۰ به ۱.۰۸۵۰۱ یک پوینت است.",
+      "warnings": [
+        "در نماد ۵ رقمی EURUSD، حرکت از ۱.۰۸۵۰۰ به ۱.۰۸۵۰۱ یک پوینت است."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[1]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.9,
+      "version": "v001",
+      "keywords": [
+        "پوینت",
+        "point",
+        "دیجیت"
+      ],
+      "related_questions": [
+        "پوینت چیه؟",
+        "چرا بروکر من ۵ رقمیه؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0003",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "اسپرد (Spread)",
+      "title_en": "Spread",
+      "language": "fa-en",
+      "summary": "اختلاف قیمت خرید (Ask) و قیمت فروش (Bid) یک نماد.",
+      "definition": "اختلاف قیمت خرید (Ask) و قیمت فروش (Bid) یک نماد. اسپرد هزینه‌ی ورود به معامله است و بسته به نماد، زمان بازار و بروکر تغییر می‌کند.",
+      "chunk_text": "اسپرد (Spread) (Spread): اختلاف قیمت خرید (Ask) و قیمت فروش (Bid) یک نماد. اسپرد هزینه‌ی ورود به معامله است و بسته به نماد، زمان بازار و بروکر تغییر می‌کند. معامله بلافاصله پس از باز شدن، به اندازه‌ی اسپرد در ضرر نمایش داده می‌شود؛ این طبیعی است.",
+      "warnings": [
+        "معامله بلافاصله پس از باز شدن، به اندازه‌ی اسپرد در ضرر نمایش داده می‌شود؛ این طبیعی است."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[2]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.9,
+      "version": "v001",
+      "keywords": [
+        "اسپرد",
+        "spread",
+        "bid",
+        "ask"
+      ],
+      "related_questions": [
+        "اسپرد چیه؟",
+        "چرا معامله‌م از اول توی ضرره؟",
+        "چرا اسپرد زیاد شد؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0004",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "لات (Lot)",
+      "title_en": "Lot",
+      "language": "fa-en",
+      "summary": "واحد اندازه‌ی معامله.",
+      "definition": "واحد اندازه‌ی معامله. در فارکس یک لات استاندارد معمولاً ۱۰۰٫۰۰۰ واحد ارز پایه است؛ مینی‌لات ۰.۱ و میکرولات ۰.۰۱ لات. اندازه‌ی قرارداد برای هر نماد را بروکر تعیین می‌کند.",
+      "chunk_text": "لات (Lot) (Lot): واحد اندازه‌ی معامله. در فارکس یک لات استاندارد معمولاً ۱۰۰٫۰۰۰ واحد ارز پایه است؛ مینی‌لات ۰.۱ و میکرولات ۰.۰۱ لات. اندازه‌ی قرارداد برای هر نماد را بروکر تعیین می‌کند. برای طلا و شاخص‌ها اندازه‌ی قرارداد با فارکس فرق دارد و باید در مشخصات نماد بررسی شود.",
+      "warnings": [
+        "برای طلا و شاخص‌ها اندازه‌ی قرارداد با فارکس فرق دارد و باید در مشخصات نماد بررسی شود."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[3]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "keywords": [
+        "لات",
+        "lot",
+        "حجم معامله",
+        "volume"
+      ],
+      "related_questions": [
+        "لات یعنی چی؟",
+        "۰.۰۱ لات چقدره؟",
+        "حجم معامله رو چطور انتخاب کنم؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0005",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "اندازه‌ی قرارداد (Contract Size)",
+      "title_en": "Contract Size",
+      "language": "fa-en",
+      "summary": "تعداد واحدهای دارایی پایه در یک لات از یک نماد مشخص.",
+      "definition": "تعداد واحدهای دارایی پایه در یک لات از یک نماد مشخص. مقدار آن در مشخصات نماد (Symbol Specification) در پلتفرم قابل مشاهده است و بین بروکرها می‌تواند متفاوت باشد.",
+      "chunk_text": "اندازه‌ی قرارداد (Contract Size) (Contract Size): تعداد واحدهای دارایی پایه در یک لات از یک نماد مشخص. مقدار آن در مشخصات نماد (Symbol Specification) در پلتفرم قابل مشاهده است و بین بروکرها می‌تواند متفاوت باشد.",
+      "warnings": [],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[4]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "keywords": [
+        "contract size",
+        "اندازه قرارداد",
+        "مشخصات نماد"
+      ],
+      "related_questions": [
+        "اندازه قرارداد رو کجا ببینم؟",
+        "یک لات طلا چند اونسه؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0006",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "اهرم (Leverage)",
+      "title_en": "Leverage",
+      "language": "fa-en",
+      "summary": "نسبتی که به معامله‌گر اجازه می‌دهد با سرمایه‌ی کمتر، حجم بزرگ‌تری معامله کند.",
+      "definition": "نسبتی که به معامله‌گر اجازه می‌دهد با سرمایه‌ی کمتر، حجم بزرگ‌تری معامله کند. اهرم مقدار مارجین موردنیاز را تعیین می‌کند؛ اهرم سود و زیان را به یک اندازه بزرگ می‌کند.",
+      "chunk_text": "اهرم (Leverage) (Leverage): نسبتی که به معامله‌گر اجازه می‌دهد با سرمایه‌ی کمتر، حجم بزرگ‌تری معامله کند. اهرم مقدار مارجین موردنیاز را تعیین می‌کند؛ اهرم سود و زیان را به یک اندازه بزرگ می‌کند. اهرم به‌تنهایی ریسک را تعیین نمی‌کند؛ آنچه ریسک را تعیین می‌کند حجم معامله و فاصله‌ی حد ضرر است.",
+      "warnings": [
+        "اهرم به‌تنهایی ریسک را تعیین نمی‌کند؛ آنچه ریسک را تعیین می‌کند حجم معامله و فاصله‌ی حد ضرر است."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[5]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "keywords": [
+        "اهرم",
+        "leverage",
+        "مارجین"
+      ],
+      "related_questions": [
+        "اهرم چیه؟",
+        "اهرم بالا خطرناکه؟",
+        "چه اهرمی انتخاب کنم؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0007",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "مارجین (Margin)",
+      "title_en": "Margin",
+      "language": "fa-en",
+      "summary": "بخشی از موجودی حساب که هنگام باز کردن معامله به‌عنوان وثیقه قفل می‌شود.",
+      "definition": "بخشی از موجودی حساب که هنگام باز کردن معامله به‌عنوان وثیقه قفل می‌شود. مقدار آن به حجم معامله، اهرم و اندازه‌ی قرارداد بستگی دارد.",
+      "chunk_text": "مارجین (Margin) (Margin): بخشی از موجودی حساب که هنگام باز کردن معامله به‌عنوان وثیقه قفل می‌شود. مقدار آن به حجم معامله، اهرم و اندازه‌ی قرارداد بستگی دارد.",
+      "warnings": [],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[6]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.9,
+      "version": "v001",
+      "keywords": [
+        "مارجین",
+        "margin",
+        "وثیقه"
+      ],
+      "related_questions": [
+        "مارجین چیه؟",
+        "چرا پول حسابم قفل شده؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0008",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "مارجین آزاد و سطح مارجین",
+      "title_en": "Free Margin / Margin Level",
+      "language": "fa-en",
+      "summary": "مارجین آزاد یعنی پولی که برای باز کردن معامله‌ی جدید در دسترس است (اکوئیتی منهای مارجین استفاده‌شده).",
+      "definition": "مارجین آزاد یعنی پولی که برای باز کردن معامله‌ی جدید در دسترس است (اکوئیتی منهای مارجین استفاده‌شده). سطح مارجین نسبت اکوئیتی به مارجین استفاده‌شده بر حسب درصد است و مبنای هشدار مارجین کال و استاپ‌اوت قرار می‌گیرد.",
+      "chunk_text": "مارجین آزاد و سطح مارجین (Free Margin / Margin Level): مارجین آزاد یعنی پولی که برای باز کردن معامله‌ی جدید در دسترس است (اکوئیتی منهای مارجین استفاده‌شده). سطح مارجین نسبت اکوئیتی به مارجین استفاده‌شده بر حسب درصد است و مبنای هشدار مارجین کال و استاپ‌اوت قرار می‌گیرد. آستانه‌های دقیق مارجین کال و استاپ‌اوت وابسته به بروکر است و باید از بروکر گرفته شود.",
+      "warnings": [
+        "آستانه‌های دقیق مارجین کال و استاپ‌اوت وابسته به بروکر است و باید از بروکر گرفته شود."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[7]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "keywords": [
+        "free margin",
+        "margin level",
+        "margin call",
+        "stop out",
+        "استاپ اوت"
+      ],
+      "related_questions": [
+        "مارجین کال یعنی چی؟",
+        "چرا معامله‌م بسته شد؟",
+        "سطح مارجین چقدر باید باشه؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0009",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "بالانس، اکوئیتی و شناور",
+      "title_en": "Balance / Equity / Floating P&L",
+      "language": "fa-en",
+      "summary": "بالانس موجودی حساب بدون احتساب معاملات باز است.",
+      "definition": "بالانس موجودی حساب بدون احتساب معاملات باز است. اکوئیتی برابر بالانس به‌علاوه‌ی سود یا زیان شناور معاملات باز است. با بسته شدن معامله، سود/زیان شناور وارد بالانس می‌شود.",
+      "chunk_text": "بالانس، اکوئیتی و شناور (Balance / Equity / Floating P&L): بالانس موجودی حساب بدون احتساب معاملات باز است. اکوئیتی برابر بالانس به‌علاوه‌ی سود یا زیان شناور معاملات باز است. با بسته شدن معامله، سود/زیان شناور وارد بالانس می‌شود.",
+      "warnings": [],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[8]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.9,
+      "version": "v001",
+      "keywords": [
+        "بالانس",
+        "اکوئیتی",
+        "equity",
+        "balance",
+        "شناور"
+      ],
+      "related_questions": [
+        "فرق بالانس و اکوئیتی چیه؟",
+        "چرا موجودی حسابم با اکوئیتی فرق داره؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0010",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "افت سرمایه (Drawdown)",
+      "title_en": "Drawdown",
+      "language": "fa-en",
+      "summary": "میزان کاهش سرمایه از بالاترین نقطه‌ی رسیده تا پایین‌ترین نقطه‌ی بعدی، معمولاً بر حسب درصد.",
+      "definition": "میزان کاهش سرمایه از بالاترین نقطه‌ی رسیده تا پایین‌ترین نقطه‌ی بعدی، معمولاً بر حسب درصد. معیار اصلی سنجش ریسک یک روش معاملاتی است.",
+      "chunk_text": "افت سرمایه (Drawdown) (Drawdown): میزان کاهش سرمایه از بالاترین نقطه‌ی رسیده تا پایین‌ترین نقطه‌ی بعدی، معمولاً بر حسب درصد. معیار اصلی سنجش ریسک یک روش معاملاتی است.",
+      "warnings": [],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[9]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "keywords": [
+        "drawdown",
+        "افت سرمایه",
+        "ریسک"
+      ],
+      "related_questions": [
+        "دراوداون چیه؟",
+        "چقدر افت سرمایه طبیعیه؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0011",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "سواپ (Swap)",
+      "title_en": "Swap",
+      "language": "fa-en",
+      "summary": "بهره‌ی شبانه‌ای که بابت نگه‌داشتن معامله پس از پایان روز معاملاتی به حساب اضافه یا از آن کسر می‌شود.",
+      "definition": "بهره‌ی شبانه‌ای که بابت نگه‌داشتن معامله پس از پایان روز معاملاتی به حساب اضافه یا از آن کسر می‌شود. مقدار و زمان محاسبه‌ی آن به بروکر و نماد بستگی دارد و معمولاً در شب چهارشنبه سه‌برابر محاسبه می‌شود.",
+      "chunk_text": "سواپ (Swap) (Swap): بهره‌ی شبانه‌ای که بابت نگه‌داشتن معامله پس از پایان روز معاملاتی به حساب اضافه یا از آن کسر می‌شود. مقدار و زمان محاسبه‌ی آن به بروکر و نماد بستگی دارد و معمولاً در شب چهارشنبه سه‌برابر محاسبه می‌شود. نرخ دقیق سواپ در مشخصات نماد هر بروکر متفاوت است.",
+      "warnings": [
+        "نرخ دقیق سواپ در مشخصات نماد هر بروکر متفاوت است."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[10]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "keywords": [
+        "سواپ",
+        "swap",
+        "بهره شبانه",
+        "rollover"
+      ],
+      "related_questions": [
+        "سواپ چیه؟",
+        "چرا شبانه از حسابم کم شد؟",
+        "حساب بدون سواپ چیه؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0012",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "کمیسیون (Commission)",
+      "title_en": "Commission",
+      "language": "fa-en",
+      "summary": "هزینه‌ای که بروکر بابت اجرای معامله دریافت می‌کند، معمولاً در حساب‌های با اسپرد پایین.",
+      "definition": "هزینه‌ای که بروکر بابت اجرای معامله دریافت می‌کند، معمولاً در حساب‌های با اسپرد پایین. کمیسیون جدا از اسپرد محاسبه می‌شود.",
+      "chunk_text": "کمیسیون (Commission) (Commission): هزینه‌ای که بروکر بابت اجرای معامله دریافت می‌کند، معمولاً در حساب‌های با اسپرد پایین. کمیسیون جدا از اسپرد محاسبه می‌شود.",
+      "warnings": [],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[11]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "keywords": [
+        "کمیسیون",
+        "commission",
+        "هزینه معامله"
+      ],
+      "related_questions": [
+        "کمیسیون چقدره؟",
+        "فرق حساب استاندارد و ECN چیه؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0013",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "لغزش قیمت (Slippage)",
+      "title_en": "Slippage",
+      "language": "fa-en",
+      "summary": "اختلاف بین قیمت درخواستی و قیمت اجراشده‌ی معامله.",
+      "definition": "اختلاف بین قیمت درخواستی و قیمت اجراشده‌ی معامله. در زمان اخبار مهم، نقدشوندگی پایین یا بازگشایی بازار بیشتر رخ می‌دهد و می‌تواند به نفع یا ضرر معامله‌گر باشد.",
+      "chunk_text": "لغزش قیمت (Slippage) (Slippage): اختلاف بین قیمت درخواستی و قیمت اجراشده‌ی معامله. در زمان اخبار مهم، نقدشوندگی پایین یا بازگشایی بازار بیشتر رخ می‌دهد و می‌تواند به نفع یا ضرر معامله‌گر باشد.",
+      "warnings": [],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[12]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "keywords": [
+        "slippage",
+        "لغزش",
+        "اجرای سفارش"
+      ],
+      "related_questions": [
+        "چرا معامله‌م با قیمت دیگه‌ای باز شد؟",
+        "اسلیپیج چیه؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0014",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "نقدشوندگی (Liquidity)",
+      "title_en": "Liquidity",
+      "language": "fa-en",
+      "summary": "توانایی بازار برای جذب سفارش بدون تغییر شدید قیمت.",
+      "definition": "توانایی بازار برای جذب سفارش بدون تغییر شدید قیمت. نقدشوندگی در ساعات همپوشانی سشن‌های بزرگ بیشتر و در ساعات پایانی هفته و تعطیلات کمتر است.",
+      "chunk_text": "نقدشوندگی (Liquidity) (Liquidity): توانایی بازار برای جذب سفارش بدون تغییر شدید قیمت. نقدشوندگی در ساعات همپوشانی سشن‌های بزرگ بیشتر و در ساعات پایانی هفته و تعطیلات کمتر است.",
+      "warnings": [],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[13]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "keywords": [
+        "نقدشوندگی",
+        "liquidity"
+      ],
+      "related_questions": [
+        "نقدشوندگی یعنی چی؟",
+        "چه ساعتی بازار بهتره؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0015",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "نوسان (Volatility)",
+      "title_en": "Volatility",
+      "language": "fa-en",
+      "summary": "میزان و سرعت تغییرات قیمت در یک بازه‌ی زمانی.",
+      "definition": "میزان و سرعت تغییرات قیمت در یک بازه‌ی زمانی. نوسان بالا هم فرصت و هم ریسک را افزایش می‌دهد و بر فاصله‌ی مناسب حد ضرر اثر می‌گذارد.",
+      "chunk_text": "نوسان (Volatility) (Volatility): میزان و سرعت تغییرات قیمت در یک بازه‌ی زمانی. نوسان بالا هم فرصت و هم ریسک را افزایش می‌دهد و بر فاصله‌ی مناسب حد ضرر اثر می‌گذارد.",
+      "warnings": [],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[14]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "keywords": [
+        "نوسان",
+        "volatility",
+        "ATR"
+      ],
+      "related_questions": [
+        "نوسان بازار چیه؟",
+        "چرا امروز بازار انقدر تنده؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0016",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "نسبت ریسک به ریوارد",
+      "title_en": "Risk/Reward Ratio",
+      "language": "fa-en",
+      "summary": "نسبت میزان ریسک یک معامله (فاصله تا حد ضرر) به میزان سود هدف (فاصله تا حد سود).",
+      "definition": "نسبت میزان ریسک یک معامله (فاصله تا حد ضرر) به میزان سود هدف (فاصله تا حد سود). این نسبت در کنار درصد برد، سودآوری بلندمدت یک روش را تعیین می‌کند.",
+      "chunk_text": "نسبت ریسک به ریوارد (Risk/Reward Ratio): نسبت میزان ریسک یک معامله (فاصله تا حد ضرر) به میزان سود هدف (فاصله تا حد سود). این نسبت در کنار درصد برد، سودآوری بلندمدت یک روش را تعیین می‌کند. نسبت ریسک به ریوارد به‌تنهایی معنا ندارد و باید همراه با نرخ برد سنجیده شود.",
+      "warnings": [
+        "نسبت ریسک به ریوارد به‌تنهایی معنا ندارد و باید همراه با نرخ برد سنجیده شود."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[15]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "keywords": [
+        "risk reward",
+        "R:R",
+        "ریسک به ریوارد"
+      ],
+      "related_questions": [
+        "ریسک به ریوارد چیه؟",
+        "حداقل R:R چقدر باشه؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0017",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "تعیین حجم معامله (Position Sizing)",
+      "title_en": "Position Sizing",
+      "language": "fa-en",
+      "summary": "محاسبه‌ی حجم معامله بر اساس درصد ریسک مجاز از سرمایه و فاصله‌ی حد ضرر، به‌طوری که زیان یک معامله از مقدار ازپیش‌تعیین‌شده بیشتر نشود.",
+      "definition": "محاسبه‌ی حجم معامله بر اساس درصد ریسک مجاز از سرمایه و فاصله‌ی حد ضرر، به‌طوری که زیان یک معامله از مقدار ازپیش‌تعیین‌شده بیشتر نشود.",
+      "chunk_text": "تعیین حجم معامله (Position Sizing) (Position Sizing): محاسبه‌ی حجم معامله بر اساس درصد ریسک مجاز از سرمایه و فاصله‌ی حد ضرر، به‌طوری که زیان یک معامله از مقدار ازپیش‌تعیین‌شده بیشتر نشود. قاعده‌ی درصد ریسک مجاز در هر معامله باید از متدولوژی آکادمی گرفته شود، نه از منابع عمومی.",
+      "warnings": [
+        "قاعده‌ی درصد ریسک مجاز در هر معامله باید از متدولوژی آکادمی گرفته شود، نه از منابع عمومی."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[16]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "keywords": [
+        "position sizing",
+        "حجم معامله",
+        "مدیریت ریسک"
+      ],
+      "related_questions": [
+        "حجم معامله رو چطور حساب کنم؟",
+        "چند درصد سرمایه ریسک کنم؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0018",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "حد ضرر (Stop Loss)",
+      "title_en": "Stop Loss",
+      "language": "fa-en",
+      "summary": "سفارشی که معامله را در قیمت مشخصی می‌بندد تا زیان محدود شود.",
+      "definition": "سفارشی که معامله را در قیمت مشخصی می‌بندد تا زیان محدود شود. حد ضرر بخش جدانشدنی مدیریت ریسک است و باید پیش از ورود مشخص شود.",
+      "chunk_text": "حد ضرر (Stop Loss) (Stop Loss): سفارشی که معامله را در قیمت مشخصی می‌بندد تا زیان محدود شود. حد ضرر بخش جدانشدنی مدیریت ریسک است و باید پیش از ورود مشخص شود. جابه‌جا کردن حد ضرر در جهت افزایش زیان، یکی از رایج‌ترین خطاهای رفتاری معامله‌گران است.",
+      "warnings": [
+        "جابه‌جا کردن حد ضرر در جهت افزایش زیان، یکی از رایج‌ترین خطاهای رفتاری معامله‌گران است."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[17]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "keywords": [
+        "stop loss",
+        "حد ضرر",
+        "SL"
+      ],
+      "related_questions": [
+        "حد ضرر رو کجا بذارم؟",
+        "چرا حد ضرر لازمه؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0019",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "حد سود (Take Profit)",
+      "title_en": "Take Profit",
+      "language": "fa-en",
+      "summary": "سفارشی که معامله را در قیمت هدف می‌بندد و سود را قطعی می‌کند.",
+      "definition": "سفارشی که معامله را در قیمت هدف می‌بندد و سود را قطعی می‌کند.",
+      "chunk_text": "حد سود (Take Profit) (Take Profit): سفارشی که معامله را در قیمت هدف می‌بندد و سود را قطعی می‌کند.",
+      "warnings": [],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[18]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "keywords": [
+        "take profit",
+        "حد سود",
+        "TP"
+      ],
+      "related_questions": [
+        "حد سود چیه؟",
+        "کی از معامله خارج بشم؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0020",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "سفارش بازار و سفارش معلق",
+      "title_en": "Market Order / Pending Order",
+      "language": "fa-en",
+      "summary": "سفارش بازار بلافاصله با بهترین قیمت موجود اجرا می‌شود.",
+      "definition": "سفارش بازار بلافاصله با بهترین قیمت موجود اجرا می‌شود. سفارش معلق (Buy/Sell Limit و Buy/Sell Stop) در قیمت ازپیش‌تعیین‌شده فعال می‌شود: Limit برای ورود در قیمت بهتر از قیمت فعلی و Stop برای ورود پس از عبور قیمت از یک سطح.",
+      "chunk_text": "سفارش بازار و سفارش معلق (Market Order / Pending Order): سفارش بازار بلافاصله با بهترین قیمت موجود اجرا می‌شود. سفارش معلق (Buy/Sell Limit و Buy/Sell Stop) در قیمت ازپیش‌تعیین‌شده فعال می‌شود: Limit برای ورود در قیمت بهتر از قیمت فعلی و Stop برای ورود پس از عبور قیمت از یک سطح.",
+      "warnings": [],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[19]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "keywords": [
+        "market order",
+        "pending order",
+        "limit",
+        "stop",
+        "سفارش معلق"
+      ],
+      "related_questions": [
+        "فرق limit و stop چیه؟",
+        "سفارش معلق چطور بذارم؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0021",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "سشن‌های معاملاتی",
+      "title_en": "Trading Sessions",
+      "language": "fa-en",
+      "summary": "بازار فارکس در سه سشن اصلی آسیا، لندن و نیویورک فعال است.",
+      "definition": "بازار فارکس در سه سشن اصلی آسیا، لندن و نیویورک فعال است. بیشترین حجم و نوسان معمولاً در همپوشانی لندن و نیویورک رخ می‌دهد. ساعت‌ها بر اساس منطقه‌ی زمانی سرور بروکر نمایش داده می‌شوند.",
+      "chunk_text": "سشن‌های معاملاتی (Trading Sessions): بازار فارکس در سه سشن اصلی آسیا، لندن و نیویورک فعال است. بیشترین حجم و نوسان معمولاً در همپوشانی لندن و نیویورک رخ می‌دهد. ساعت‌ها بر اساس منطقه‌ی زمانی سرور بروکر نمایش داده می‌شوند. ساعت دقیق سشن‌ها به وقت ایران به تغییرات ساعت تابستانی وابسته است.",
+      "warnings": [
+        "ساعت دقیق سشن‌ها به وقت ایران به تغییرات ساعت تابستانی وابسته است."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[20]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "keywords": [
+        "سشن",
+        "session",
+        "ساعت بازار"
+      ],
+      "related_questions": [
+        "بهترین ساعت معامله کیه؟",
+        "بازار کی باز می‌شه؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    },
+    {
+      "id": "GEN-DEF-0022",
+      "object_type": "GLOSSARY",
+      "domain": "general_trading",
+      "category": "واژه‌نامه معامله‌گری",
+      "title": "تقویم اقتصادی و اخبار",
+      "title_en": "Economic Calendar / News",
+      "language": "fa-en",
+      "summary": "تقویم اقتصادی زمان انتشار داده‌های مهم اقتصادی را نشان می‌دهد.",
+      "definition": "تقویم اقتصادی زمان انتشار داده‌های مهم اقتصادی را نشان می‌دهد. در زمان اخبار پرتأثیر، اسپرد افزایش و نقدشوندگی کاهش می‌یابد و احتمال لغزش قیمت بیشتر می‌شود.",
+      "chunk_text": "تقویم اقتصادی و اخبار (Economic Calendar / News): تقویم اقتصادی زمان انتشار داده‌های مهم اقتصادی را نشان می‌دهد. در زمان اخبار پرتأثیر، اسپرد افزایش و نقدشوندگی کاهش می‌یابد و احتمال لغزش قیمت بیشتر می‌شود. قاعده‌ی معامله یا عدم معامله در زمان اخبار باید از متدولوژی آکادمی گرفته شود.",
+      "warnings": [
+        "قاعده‌ی معامله یا عدم معامله در زمان اخبار باید از متدولوژی آکادمی گرفته شود."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_trading.py",
+        "source_location": "TERMS[21]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "تعریف استاندارد صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی، باید با منابع رسمی و متدولوژی آکادمی تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "keywords": [
+        "اخبار",
+        "news",
+        "تقویم اقتصادی",
+        "NFP"
+      ],
+      "related_questions": [
+        "موقع خبر معامله کنم؟",
+        "چرا موقع خبر اسپرد زیاد می‌شه؟"
+      ],
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z"
+    }
+  ]
+}
