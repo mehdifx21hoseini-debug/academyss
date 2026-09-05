@@ -309,6 +309,12 @@
       "sha": "8e2d7d95bc8c51b6",
       "file": "exports/conflicts/conflict_registry_v013.md",
       "generated_at": "2026-09-05T20:32:24Z"
+    },
+    {
+      "version": "v014",
+      "sha": "74c7ad2885bb2140",
+      "file": "exports/conflicts/conflict_registry_v014.md",
+      "generated_at": "2026-09-05T20:40:39Z"
     }
   ],
   "conflict_registry.json": [
@@ -389,6 +395,12 @@
       "sha": "8e8ec9db17a686e2",
       "file": "exports/conflicts/conflict_registry_v013.json",
       "generated_at": "2026-09-05T20:32:24Z"
+    },
+    {
+      "version": "v014",
+      "sha": "c40917feacc209c2",
+      "file": "exports/conflicts/conflict_registry_v014.json",
+      "generated_at": "2026-09-05T20:40:39Z"
     }
   ],
   "review_queue_open_items.md": [
@@ -517,6 +529,12 @@
       "sha": "f44a347842838a69",
       "file": "exports/reports/review_queue_open_items_v021.md",
       "generated_at": "2026-09-05T20:32:24Z"
+    },
+    {
+      "version": "v022",
+      "sha": "25726ea5566b4ef6",
+      "file": "exports/reports/review_queue_open_items_v022.md",
+      "generated_at": "2026-09-05T20:40:39Z"
     }
   ],
   "review_queue_open_items.json": [
@@ -645,6 +663,12 @@
       "sha": "5bbf313ac2efd31a",
       "file": "exports/reports/review_queue_open_items_v021.json",
       "generated_at": "2026-09-05T20:32:24Z"
+    },
+    {
+      "version": "v022",
+      "sha": "d7e308772c398c6c",
+      "file": "exports/reports/review_queue_open_items_v022.json",
+      "generated_at": "2026-09-05T20:40:39Z"
     }
   ],
   "academy_site_catalog.md": [
@@ -871,6 +895,12 @@
       "sha": "94d4fb28533e8a5f",
       "file": "exports/reports/kb_index_v032.csv",
       "generated_at": "2026-09-05T20:32:24Z"
+    },
+    {
+      "version": "v033",
+      "sha": "5f0921f3ce2bfa13",
+      "file": "exports/reports/kb_index_v033.csv",
+      "generated_at": "2026-09-05T20:40:39Z"
     }
   ],
   "glossary.csv": [
@@ -1619,6 +1649,38 @@
       "sha": "de6933ea8b34a77c",
       "file": "exports/mentor_qa/mentor_qa_pack_03_v001.json",
       "generated_at": "2026-09-05T20:32:24Z"
+    }
+  ],
+  "mentor_qa_pack_04.md": [
+    {
+      "version": "v001",
+      "sha": "4b6d9d9c96fe6e48",
+      "file": "exports/mentor_qa/mentor_qa_pack_04_v001.md",
+      "generated_at": "2026-09-05T20:40:39Z"
+    }
+  ],
+  "mentor_qa_pack_04.json": [
+    {
+      "version": "v001",
+      "sha": "bf83b025a56c89a6",
+      "file": "exports/mentor_qa/mentor_qa_pack_04_v001.json",
+      "generated_at": "2026-09-05T20:40:39Z"
+    }
+  ],
+  "academy_tools.md": [
+    {
+      "version": "v001",
+      "sha": "c9c4eeee64eb068d",
+      "file": "exports/academy/academy_tools_v001.md",
+      "generated_at": "2026-09-05T20:40:39Z"
+    }
+  ],
+  "academy_tools.json": [
+    {
+      "version": "v001",
+      "sha": "d655362f7ca06d86",
+      "file": "exports/academy/academy_tools_v001.json",
+      "generated_at": "2026-09-05T20:40:39Z"
     }
   ]
 }
