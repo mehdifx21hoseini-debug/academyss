@@ -1,10 +1,10 @@
 {
   "report_type": "validation",
-  "version": "v059",
-  "generated_at": "2026-09-05T22:18:44Z",
+  "version": "v058",
+  "generated_at": "2026-09-05T22:18:00Z",
   "stats": {
     "files": 46,
-    "objects": 691,
+    "objects": 688,
     "by_kind": {
       "knowledge_object": 40,
       "mentor_qa": 4,
@@ -17,7 +17,7 @@
       "metatrader": 102,
       "general_trading": 49,
       "mentor_qa": 80,
-      "academy": 424,
+      "academy": 421,
       "meta": 6
     },
     "by_approval": {

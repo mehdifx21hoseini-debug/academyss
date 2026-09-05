@@ -607,6 +607,12 @@
       "sha": "4853291d1c06e98e",
       "file": "exports/reports/review_queue_open_items_v026.md",
       "generated_at": "2026-09-05T22:01:27Z"
+    },
+    {
+      "version": "v027",
+      "sha": "4fd256ee9743f017",
+      "file": "exports/reports/review_queue_open_items_v027.md",
+      "generated_at": "2026-09-05T22:18:44Z"
     }
   ],
   "review_queue_open_items.json": [
@@ -765,6 +771,12 @@
       "sha": "46866b02eec0d177",
       "file": "exports/reports/review_queue_open_items_v026.json",
       "generated_at": "2026-09-05T22:01:27Z"
+    },
+    {
+      "version": "v027",
+      "sha": "b1c3f1730e23a73c",
+      "file": "exports/reports/review_queue_open_items_v027.json",
+      "generated_at": "2026-09-05T22:18:44Z"
     }
   ],
   "academy_site_catalog.md": [
@@ -1033,6 +1045,12 @@
       "sha": "aad0b325f8495678",
       "file": "exports/reports/kb_index_v039.csv",
       "generated_at": "2026-09-05T22:01:27Z"
+    },
+    {
+      "version": "v040",
+      "sha": "232c95e1ac5a53af",
+      "file": "exports/reports/kb_index_v040.csv",
+      "generated_at": "2026-09-05T22:18:44Z"
     }
   ],
   "glossary.csv": [
@@ -1125,6 +1143,12 @@
       "sha": "86af0b30e27ecd67",
       "file": "exports/glossary/glossary_v015.csv",
       "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v016",
+      "sha": "0324cb4c9b0d773f",
+      "file": "exports/glossary/glossary_v016.csv",
+      "generated_at": "2026-09-05T22:18:44Z"
     }
   ],
   "metatrader_common_procedures.md": [
@@ -1987,6 +2011,22 @@
       "sha": "59d9f9831ae2891a",
       "file": "exports/academy/academy_ssprox_faq_v002.json",
       "generated_at": "2026-09-05T22:01:27Z"
+    }
+  ],
+  "academy_eq_lesson_01.md": [
+    {
+      "version": "v001",
+      "sha": "c46e70741b0eb083",
+      "file": "exports/academy/academy_eq_lesson_01_v001.md",
+      "generated_at": "2026-09-05T22:18:44Z"
+    }
+  ],
+  "academy_eq_lesson_01.json": [
+    {
+      "version": "v001",
+      "sha": "e25176c03f3677ed",
+      "file": "exports/academy/academy_eq_lesson_01_v001.json",
+      "generated_at": "2026-09-05T22:18:44Z"
     }
   ]
 }

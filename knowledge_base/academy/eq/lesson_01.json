@@ -1,0 +1,789 @@
+{
+  "collection_id": "academy_eq_lesson_01",
+  "domain": "academy",
+  "title": "دوره‌ی رایگان هوش هیجانی (EQ) — بخش اول از چهار بخش",
+  "description": "تعریف هوش هیجانی، قابل بهبود بودن آن، مغز احساسی در برابر منطقی، آزمایش مارشمالو، تکانه و مهار نفس، IQ در برابر EQ، و خودشناسی به‌عنوان نیمی از مسیر بهبود.",
+  "version": "v001",
+  "generated_at": "2026-09-05T22:18:00Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "raw_sources/academy/eq/eq_lesson_1.md",
+    "raw_sources/academy/eq/eq_lesson_1.ingest.json"
+  ],
+  "notes": [
+    "این دوره رایگان و چهاربخشی است؛ سه بخش دیگر هنوز دریافت نشده (RQ-0035).",
+    "دو عدد درصدی (۸۰٪ استعدادیابی و ۸۰٪ موفقیت) به‌عنوان ادعای مدرس ثبت شدند، نه آمار قطعی.",
+    "انتساب آزمایش مارشمالو به «آقای بارون» علامت‌گذاری شد و مربی نام پژوهشگر را نمی‌برد.",
+    "محتوای آکادمی بر لایه‌ی عمومی روان‌شناسی (PSY-PAT-*) اولویت دارد."
+  ],
+  "objects": [
+    {
+      "id": "ACA-EQ-0001",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "جایگاه دوره‌ی هوش هیجانی در مسیر آموزشی آکادمی",
+      "language": "fa",
+      "chunk_text": "دوره‌ی هوش هیجانی یک مینی‌دوره‌ی **رایگان در چهار بخش** است و عمداً نه تکنیکال است نه فاندامنتال. مدرس تفکیک را صریح می‌گوید: آموزش تخصصی صفر تا صد بازار جای خودش است (بیش از ۴۵ ساعت) و این دوره چیز دیگری را هدف گرفته — ساختن معامله‌گر، نه یاد دادن تحلیل.\nمدرس از دانشجو می‌خواهد «سفیر این آموزش» باشد و آن را با دوستان و فرزندانش هم به اشتراک بگذارد، چون موضوعش فقط معامله‌گری نیست و به زندگی هم مربوط است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "مقدمه و «چرا این آموزش مهم است؟»",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "مقدمه و «چرا این آموزش مهم است؟»",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "من داخل این محتوای آموزشی نه با من بحث تکنیکال کار دارم، نه فاندامنتال … چون من یک معامله‌گر می‌سازم."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "keywords": [
+        "هوش هیجانی",
+        "EQ",
+        "دوره رایگان",
+        "چهار بخش",
+        "سفیر"
+      ],
+      "related_concepts": [
+        "ACA-SUP-0008",
+        "ACA-SUP-0004"
+      ],
+      "related_questions": [
+        "دوره هوش هیجانی چیه؟",
+        "دوره EQ چند قسمته؟",
+        "دوره رایگان دارید؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0002",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "چرا هوش هیجانی نقطه‌ی شروع است: نتیجه = تصمیم، تصمیم = احساس",
+      "language": "fa",
+      "chunk_text": "استدلال بنیادی دوره در سه گام است:\n۱) زندگی ما و نتیجه‌هایمان حاصل **تصمیمات** ماست.\n۲) تصمیمات ما در اولویت، بر اساس **ذهن احساسی** گرفته می‌شود، نه ذهن منطقی.\n۳) پس اگر روی این موضوع **آگاه** باشی، می‌توانی همان تصمیم را با ذهن منطقی نگاه کنی.\nمدرس می‌گوید ریشه‌ی عمده‌ی مشکلات — و یکی از ویژگی‌های مشترک افراد موفق، چه در معامله‌گری چه در زندگی — به هوش هیجانی برمی‌گردد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "چرا این آموزش مهم است؟",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "چرا این آموزش مهم است؟",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "زندگی ما نتیجه‌هایمان، حاصل تصمیمات ماست. و تصمیمات ما بر اساس اولویت ذهن‌ها، بر اساس ذهن احساسی است تا این که بر اساس منطق باشد."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "keywords": [
+        "تصمیم",
+        "ذهن احساسی",
+        "آگاهی",
+        "ریشه مشکلات"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0003",
+        "ACA-EQ-0009",
+        "ACA-EQ-0015"
+      ],
+      "related_questions": [
+        "چرا هوش هیجانی مهمه؟",
+        "چه ربطی به ترید داره؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0003",
+      "object_type": "DEFINITION",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "تعریف هوش هیجانی در آکادمی",
+      "language": "fa",
+      "chunk_text": "**هوش هیجانی = توانایی کنترل و مدیریت احساسات در لحظات بحرانی.**\nنکته‌ی کلیدی در همین تعریف است: معیار، لحظات بحرانی است نه شرایط عادی. مدرس این را با شعار خودش جمع می‌کند: «همه چیز وقتی خوبه، کنترل ذهن که هنر نیست. هنر در لحظات سخت است.»",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "هوش هیجانی چیست؟",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "هوش هیجانی چیست؟",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "هوش هیجانی = توانایی کنترل و مدیریت احساسات در لحظات بحرانی"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "definition": "توانایی کنترل و مدیریت احساسات در لحظات بحرانی — نه در شرایط عادی.",
+      "keywords": [
+        "تعریف",
+        "هوش هیجانی",
+        "لحظات بحرانی",
+        "کنترل احساسات"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0004",
+        "ACA-EQ-0005",
+        "ACA-EQ-0009"
+      ],
+      "related_questions": [
+        "هوش هیجانی یعنی چی؟",
+        "EQ چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0004",
+      "object_type": "EXAMPLE",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "مثال هواپیما: هوش هیجانی بالا در برابر پایین",
+      "language": "fa",
+      "chunk_text": "مدرس تعریف را با یک صحنه‌ی ملموس روشن می‌کند — همان موقعیت، دو واکنش متفاوت:\n• **هوش هیجانی پایین:** گریه می‌کند، کنترلش از دست خارج می‌شود.\n• **هوش هیجانی بالا:** موزیک گوش می‌دهد، روزنامه می‌خواند.\nنکته این است که شرایط بیرونی برای هر دو یکی است؛ آنچه فرق می‌کند واکنش درونی است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "هوش هیجانی چیست؟ — مثال داخل هواپیما",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "هوش هیجانی چیست؟ — مثال داخل هواپیما",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "یک نفر: گریه می‌کند، کنترل از دستش خارج می‌شود … نفر دیگر: موزیک گوش می‌دهد، روزنامه می‌خواند"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "examples": [
+        "همان پرواز، همان تلاطم — یکی از کنترل خارج می‌شود، دیگری روزنامه می‌خواند."
+      ],
+      "keywords": [
+        "مثال هواپیما",
+        "واکنش",
+        "شرایط یکسان"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0003"
+      ],
+      "related_questions": [
+        "یه مثال از هوش هیجانی بزن"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0005",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "هوش هیجانی قابل بهبود است — و قابل کاهش",
+      "language": "fa",
+      "chunk_text": "این مهم‌ترین پیام امیدبخش درس است و دو طرف دارد:\n• هوش هیجانی **کاملاً قابل بهبود است**؛ کسی با EQ پایین محکوم نیست.\n• اما اگر کسی EQ بالایی داشته باشد و روی خودش کار نکند، **ممکن است کاهش پیدا کند**.\nیعنی این یک ویژگی ثابت و مادرزادی نیست؛ یک مهارت است که با تمرین بالا و با بی‌توجهی پایین می‌رود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "هوش هیجانی چیست؟ — نکته مهم",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "هوش هیجانی چیست؟ — نکته مهم",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "هوش هیجانی کاملاً قابل بهبود است. و حتی اگر کسی هوش هیجانی بالایی داشته باشد، اگر روی خودش کار نکند، ممکن است کاهش پیدا کند."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "keywords": [
+        "قابل بهبود",
+        "کاهش",
+        "مهارت",
+        "تمرین"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0003",
+        "ACA-EQ-0015",
+        "ACA-EQ-0016"
+      ],
+      "related_questions": [
+        "هوش هیجانی ذاتیه؟",
+        "می‌شه بالاش برد؟",
+        "من EQ پایینی دارم، کاریش می‌شه کرد؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0006",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "ادعای مدرس: ۸۰٪ حذف‌شدگان استعدادیابی به‌خاطر یک روز اشتباه",
+      "language": "fa",
+      "chunk_text": "مدرس این عدد را با تصریح به منبعش می‌آورد: **«طبق آماری که به دست آورده‌ام»** — یعنی شمارش شخصی خودش، نه یک پژوهش منتشرشده.\nادعا: ۸۰ درصد افرادی که از استعدادیابی حذف شده‌اند، به خاطر **یک روز** اشتباه ضرر کردن بوده است — نه به‌خاطر ضعف تدریجی. در یک روز دراودان مجاز را تاچ کرده‌اند و طبق قانون کنار گذاشته شده‌اند.\nعلتی که مدرس می‌گوید: نتوانستند ذهنشان را کنترل کنند.\n⚠️ **قاعده‌ی پاسخ:** مربی این عدد را به‌عنوان آمار قطعی اعلام نمی‌کند؛ آن را به‌صورت «تجربه و مشاهده‌ی مدرس» نقل می‌کند. پیام اصلی — که یک روز بی‌کنترل می‌تواند همه‌چیز را از بین ببرد — مستقل از عدد معتبر است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "آمار تلخ در استعدادیابی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "آمار تلخ در استعدادیابی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "طبق آماری که به دست آورده‌ام: ۸۰ درصد افرادی که از استعدادیابی حذف شده‌اند، به خاطر یک روز اشتباه ضرر کردن بوده است."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "validity": {
+        "time_bound": true,
+        "note": "شمارش شخصی مدرس در زمان ضبط دوره؛ منبع پژوهشی ندارد."
+      },
+      "warnings": [
+        "مربی این عدد را به‌عنوان آمار رسمی یا پژوهش اعلام نمی‌کند."
+      ],
+      "keywords": [
+        "استعدادیابی",
+        "۸۰ درصد",
+        "یک روز",
+        "دراودان",
+        "حذف"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0007",
+        "ACA-EXP-0030",
+        "PSY-PAT-0015"
+      ],
+      "related_questions": [
+        "چرا از استعدادیابی حذف می‌شن؟",
+        "دراودان چرا مهمه؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0007",
+      "object_type": "COMPARISON",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "مبتدی در برابر حرفه‌ای در روزی که بازار سود را پس می‌گیرد",
+      "language": "fa",
+      "chunk_text": "مدرس تفاوت را در یک موقعیت مشخص نشان می‌دهد: آن یکی دو روزی که بازار می‌خواهد سودش را پس بگیرد. همان بازار، همان شرایط — دو رفتار کاملاً متفاوت.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "تفاوت مبتدی و حرفه‌ای",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "تفاوت مبتدی و حرفه‌ای",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "مبتدی می‌خواهد به جنگ برود … حرفه‌ای نهایت ضرر روزانه را می‌گیرد و می‌شود"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "comparison": {
+        "موقعیت": "روزی که بازار سودش را پس می‌گیرد",
+        "مبتدی": [
+          "می‌خواهد به جنگ بازار برود",
+          "حس انتقام دارد",
+          "اورترید می‌کند",
+          "یک ماه سود را در یک روز از دست می‌دهد"
+        ],
+        "حرفه‌ای": [
+          "مدیریت می‌کند",
+          "ضرر را می‌پذیرد",
+          "حد ضرر می‌زند",
+          "نهایت ضرر روزانه را می‌گیرد و روز را می‌بندد"
+        ],
+        "تفاوت اصلی": "پذیرش ضرر در برابر جنگیدن با بازار"
+      },
+      "keywords": [
+        "مبتدی",
+        "حرفه‌ای",
+        "انتقام",
+        "اورترید",
+        "پذیرش ضرر"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0008",
+        "PSY-PAT-0002",
+        "PSY-PAT-0003",
+        "ACA-EXP-0030"
+      ],
+      "related_questions": [
+        "فرق مبتدی و حرفه‌ای چیه؟",
+        "روز ضرر چیکار کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0008",
+      "object_type": "PSYCHOLOGY_PATTERN",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "لحظه‌ی «انگار در این دنیا نیستی» — سازوکار اوورترید",
+      "language": "fa",
+      "chunk_text": "مدرس اوورترید را نه یک تصمیم بد، بلکه یک **حالت ذهنی موقت** توصیف می‌کند: پنج دقیقه که انگار در این دنیا نیستی، و بعد که تمام می‌شود می‌گویی «چرا من اینجا ترید کردم؟»\nاو تصریح می‌کند که خودش این احساسات را گذرانده است — یعنی این را به‌عنوان ضعف شخصیتی دانشجو مطرح نمی‌کند.\nاین حالت به هوش هیجانی پایین برمی‌گردد، و راه‌حلش شناختن همان لحظه است پیش از اینکه اتفاق بیفتد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "چرا اوورترید می‌کنیم؟",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "چرا اوورترید می‌کنیم؟",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "پنج دقیقه انگار تو این دنیا نیستی. بعدش که تمام می‌شه می‌گی چرا من اینجا ترید کردم؟"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "symptoms": [
+        "حس بیرون بودن از لحظه هنگام معامله کردن",
+        "پشیمانی بلافاصله پس از بسته شدن آن پنجره‌ی زمانی",
+        "ناتوانی در توضیح اینکه چرا آن معامله باز شد",
+        "پشت سر هم باز کردن معامله بدون رجوع به پلن"
+      ],
+      "keywords": [
+        "اوورترید",
+        "لحظه ناهشیاری",
+        "پشیمانی",
+        "کنترل"
+      ],
+      "related_concepts": [
+        "PSY-PAT-0003",
+        "PSY-PAT-0017",
+        "PSY-PAT-0013",
+        "ACA-EQ-0011",
+        "ACA-EXP-0030"
+      ],
+      "related_questions": [
+        "چرا اوورترید می‌کنم؟",
+        "چرا بعدش پشیمون می‌شم؟",
+        "نمی‌فهمم چرا اون معامله رو باز کردم"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0009",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "مغز احساسی در برابر مغز منطقی",
+      "language": "fa",
+      "chunk_text": "توضیح مدرس درباره‌ی چرایی غلبه‌ی احساس بر منطق:\n• انسان‌های اولیه مغز کوچکی داشتند و فقط **ذهن هیجانی** — که برای بقا کار می‌کرد.\n• در طول زمان **نیوکورتکس** (بخش منطقی) اضافه شد.\n• اما هنوز در لحظات سخت تصمیم‌گیری، احساسات بر منطق چیره می‌شود.\nنتیجه‌ای که مدرس می‌گیرد همان شعار اوست: **«همه چیز وقتی خوبه، کنترل ذهن که هنر نیست. هنر در لحظات سخت است.»**",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "مغز احساسی در مقابل مغز منطقی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "مغز احساسی در مقابل مغز منطقی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "انسان‌های اولیه: مغز کوچک، فقط ذهن هیجانی (برای بقا) … در طول زمان: نیوکورتکس اضافه شد"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "verification_note": "توضیح ساده‌شده‌ی تاریخچه‌ی مغز برای مقصود آموزشی؛ به‌عنوان مدل ذهنی درس ثبت شده، نه ادعای علوم اعصاب.",
+      "keywords": [
+        "مغز احساسی",
+        "نیوکورتکس",
+        "بقا",
+        "منطق"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0002",
+        "ACA-EQ-0003",
+        "ACA-EQ-0011"
+      ],
+      "related_questions": [
+        "چرا احساسات غلبه می‌کنه؟",
+        "نیوکورتکس چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0010",
+      "object_type": "EXAMPLE",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "آزمایش مارشمالو: صبر امروز، نتیجه‌ی ده سال بعد",
+      "language": "fa",
+      "chunk_text": "**آزمایش:** کودکان در اتاقی با یک مارشمالو. به آن‌ها گفته شد اگر ۱۵ دقیقه صبر کنند، دو مارشمالو می‌گیرند.\n**نتیجه‌ی لحظه:** از هر ۵ نفر، فقط ۱ نفر توانست صبر کند.\n**نتیجه‌ی ده سال بعد:** همان کودکان بررسی شدند — کسانی که صبر کرده بودند نمرات بالاتر و موفقیت بیشتری داشتند.\n**پیام درس:** صبر = هوش هیجانی بالا = موفقیت بیشتر.\n⚠️ در متن درس این آزمایش به «آقای بارون» نسبت داده شده است. خودِ آزمایش درست شرح داده شده، اما نام پژوهشگر با منابعی که در اختیار دارم قابل تأیید نیست؛ نام تا تأیید مدرس علامت‌گذاری شده (`RQ-0034`) و مربی نام پژوهشگر را نمی‌برد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "آزمایش معروف مارشمالو",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "آزمایش معروف مارشمالو",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "از هر ۵ نفر، فقط ۱ نفر توانست صبر کند … ۱۰ سال بعد: کسانی که صبر کرده بودند = نمرات بالاتر، موفقیت بیشتر"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "examples": [
+        "یک مارشمالو حالا، یا دو مارشمالو بعد از ۱۵ دقیقه صبر."
+      ],
+      "warnings": [
+        "مربی نام پژوهشگر را ذکر نمی‌کند تا انتساب تأیید شود (RQ-0034)."
+      ],
+      "review_reason": "انتساب آزمایش به «آقای بارون» نیازمند تأیید مدرس است.",
+      "keywords": [
+        "مارشمالو",
+        "صبر",
+        "تأخیر در لذت",
+        "آزمایش"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0011",
+        "ACA-EQ-0012",
+        "ACA-EQ-0013"
+      ],
+      "related_questions": [
+        "آزمایش مارشمالو چیه؟",
+        "صبر چه ربطی به موفقیت داره؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0011",
+      "object_type": "DEFINITION",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "تکانه و مهار نفس — نبرد همیشگی انسان",
+      "language": "fa",
+      "chunk_text": "دو مفهوم کلیدی این بخش:\n• **تکانه (Impulse):** واکنش لحظه‌ای، از کوره در رفتن، عمل کردن بر اساس خواسته‌ی فعلی.\n• **مهار نفس (Self-Control):** توانایی کنترل خود در لحظات بحرانی، عمل کردن بر اساس هدف بلندمدت.\nمدرس این را «نبرد همیشگی انسان» می‌نامد: **تکانه در برابر مهار نفس** — نبردی که تمام نمی‌شود و هر بار باید دوباره برده شود.\nتعریف او از افراد موفق: کسانی که برای رسیدن به اهدافشان، از خواسته‌های فعلی خود صرف‌نظر می‌کنند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "تکانه و مهار نفس",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "تکانه و مهار نفس",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "نبرد همیشگی انسان: تکانه در مقابل مهار نفس. افراد موفق کسانی هستند که برای رسیدن به اهدافشان، از خواسته‌های فعلی خود صرف‌نظر می‌کنند."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "definition": "تکانه = واکنش لحظه‌ای بر اساس خواسته‌ی فعلی؛ مهار نفس = کنترل خود در لحظه‌ی بحرانی بر اساس هدف بلندمدت.",
+      "keywords": [
+        "تکانه",
+        "مهار نفس",
+        "Impulse",
+        "Self-Control",
+        "خواسته فعلی"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0008",
+        "ACA-EQ-0010",
+        "ACA-EQ-0012",
+        "PSY-PAT-0017"
+      ],
+      "related_questions": [
+        "تکانه یعنی چی؟",
+        "مهار نفس چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0012",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "پرسش کلیدی درس: حاضری خواسته‌ی امروزت را عقب بیندازی؟",
+      "language": "fa",
+      "chunk_text": "مدرس درس را به یک پرسش شخصی می‌رساند و از دانشجو می‌خواهد صادقانه جواب بدهد:\n**«آیا شما حاضر هستید برای رسیدن به اهدافتان، خواسته‌های فعلی‌تان را به تأخیر بیندازید؟»**\nو بلافاصله دو قید می‌گذارد: **«منطقی جواب بده. خودت رو گول نزن.»**\nاین پرسش کارکرد سنجش دارد، نه انگیزشی — جوابش تعیین می‌کند دانشجو کجای مسیر ایستاده است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "سوال کلیدی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "سوال کلیدی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "آیا شما حاضر هستید برای رسیدن به اهدافتان، خواسته‌های فعلی‌تان را به تأخیر بیندازید؟ منطقی جواب بده. خودت رو گول نزن."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "keywords": [
+        "سوال کلیدی",
+        "تأخیر در خواسته",
+        "صداقت با خود"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0011",
+        "ACA-EQ-0015"
+      ],
+      "related_questions": [
+        "چطور بفهمم آماده‌ام؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0013",
+      "object_type": "COMPARISON",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "IQ در برابر EQ در موفقیت",
+      "language": "fa",
+      "chunk_text": "مدرس جایگاه دو شاخص را تاریخی توضیح می‌دهد و نتیجه‌ی عملی می‌گیرد.\n⚠️ عدد «۸۰ درصد موفقیت مربوط به هوش هیجانی است» در درس بدون ذکر منبع آمده و یک ادعای پرتکرار در ادبیات عمومی است؛ مربی آن را به‌عنوان پژوهش قطعی اعلام نمی‌کند (`RQ-0033`).",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "نقش هوش هیجانی در موفقیت",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "نقش هوش هیجانی در موفقیت",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "IQ در اوایل قرن بیست مهم بود … EQ از اواخر قرن بیست و یکم، معرف بهتری برای موفقیت است … نیازی به IQ برتر نیست"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "comparison": {
+        "IQ (بهره هوشی)": "در اوایل قرن بیستم به‌عنوان معرف موفقیت مطرح بود.",
+        "EQ (هوش هیجانی)": "بعدها به‌عنوان معرف بهتری برای موفقیت مطرح شد.",
+        "نتیجه‌ی عملی برای معامله‌گری": "برای معامله‌گری نیازی به IQ برتر نیست. مدرس می‌گوید افرادی با IQ بالا را می‌شناسد که نتیجه‌ی عالی نگرفته‌اند، و برعکس.",
+        "عدد ۸۰٪": "ادعای درس بدون ذکر منبع؛ به‌عنوان قطعی نقل نمی‌شود (RQ-0033)."
+      },
+      "warnings": [
+        "مربی عدد ۸۰٪ را به‌عنوان نتیجه‌ی پژوهش قطعی اعلام نمی‌کند."
+      ],
+      "keywords": [
+        "IQ",
+        "EQ",
+        "بهره هوشی",
+        "موفقیت",
+        "۸۰ درصد"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0003",
+        "ACA-EQ-0014"
+      ],
+      "related_questions": [
+        "برای ترید باید باهوش باشم؟",
+        "IQ مهمه یا EQ؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0014",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "پیام آرامش‌بخش: معامله‌گری به IQ برتر نیاز ندارد",
+      "language": "fa",
+      "chunk_text": "یکی از پیام‌های صریح و کاربردی درس، برداشتن یک باور بازدارنده است: **برای معامله‌گری نیازی به IQ برتر نیست.**\nمدرس شاهد تجربی می‌آورد: افرادی با IQ بالا که نتیجه‌ی عالی نگرفته‌اند، و افرادی بدون IQ برجسته که موفق شده‌اند.\nاین برای دانشجویی که فکر می‌کند «من به اندازه‌ی کافی باهوش نیستم» پاسخ مستقیم دوره است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "نقش هوش هیجانی در موفقیت — نکته مهم",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "نقش هوش هیجانی در موفقیت — نکته مهم",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "برای معامله‌گری نیازی به IQ برتر نیست. افرادی را می‌شناسیم که IQ بالایی دارند ولی نتیجه عالی نگرفته‌اند، و برعکس."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "keywords": [
+        "IQ",
+        "باور غلط",
+        "هوش",
+        "معامله‌گری"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0013",
+        "ACA-EQ-0005",
+        "ACA-INT-0186"
+      ],
+      "related_questions": [
+        "من باهوش نیستم، می‌تونم تریدر بشم؟",
+        "برای ترید باید نابغه باشی؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0015",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "۵۰ درصد راه بهبود هوش هیجانی، فقط آگاهی و خودشناسی است",
+      "language": "fa",
+      "chunk_text": "مدرس عدد را دو بار در درس تکرار می‌کند چون هسته‌ی پیام عملی اوست: **نیمی از راه افزایش هوش هیجانی، صرفاً آگاه بودن نسبت به آن است** — یعنی خودت را کامل بشناسی.\nمعنایش این است که دانشجو لازم نیست پیش از شروع، تکنیک پیچیده‌ای یاد بگیرد؛ شناختن الگوهای خودش نیمی از کار را انجام می‌دهد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "هوش هیجانی چیست؟ و بخش تمرین و بهبود",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "هوش هیجانی چیست؟ و بخش تمرین و بهبود",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "فقط ۵۰ درصد راه افزایش دادنش، همین آگاهی است که باید داشته باشد، یعنی خودش رو کامل بشناسد."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "rule": "نقطه‌ی شروع بهبود هوش هیجانی، خودشناسی و آگاهی از الگوهای احساسی خود است — نیمی از مسیر همین است.",
+      "keywords": [
+        "خودشناسی",
+        "آگاهی",
+        "۵۰ درصد",
+        "بهبود"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0005",
+        "ACA-EQ-0016",
+        "PSY-PAT-0010"
+      ],
+      "related_questions": [
+        "از کجا شروع کنم؟",
+        "چطور هوش هیجانیم رو بالا ببرم؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0016",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "تست هوش هیجانی را هر سه ماه یک بار تکرار کنید",
+      "language": "fa",
+      "chunk_text": "روش سنجش پیشرفتی که آکادمی توصیه می‌کند: تست هوش هیجانی هر **۳ ماه یک بار** تکرار شود و نمره با دفعه‌ی قبل مقایسه گردد تا مشخص شود افزایش پیدا کرده یا نه.\nاین با ساختار دوره هم‌خوان است: آکادمی پس از پایان چهار جلسه، امکان انجام تست هوش هیجانی را در اختیار کاربر می‌گذارد (`ACA-SUP-0008`).",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_1.md",
+        "source_location": "تمرین و بهبود",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۱",
+        "section": "تمرین و بهبود",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "تست هوش هیجانی را هر ۳ ماه یک بار تکرار کنید. ببینید نمره شما افزایش پیدا کرده یا نه."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:18:00Z",
+      "updated_at": "2026-09-05T22:18:00Z",
+      "steps": [
+        "پس از پایان چهار بخش دوره، تست هوش هیجانی را انجام دهید.",
+        "نمره را یادداشت کنید.",
+        "سه ماه بعد همان تست را دوباره بدهید.",
+        "دو نمره را مقایسه کنید و روند را ببینید، نه فقط عدد را."
+      ],
+      "keywords": [
+        "تست هوش هیجانی",
+        "سه ماه",
+        "نمره",
+        "پیشرفت"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0015",
+        "ACA-SUP-0008",
+        "PSY-PAT-0010"
+      ],
+      "related_questions": [
+        "تست هوش هیجانی کجاست؟",
+        "چند وقت یه بار تست بدم؟"
+      ]
+    }
+  ]
+}
