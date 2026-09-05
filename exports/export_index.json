@@ -213,6 +213,12 @@
       "sha": "4b3d01e2c205819a",
       "file": "exports/conflicts/conflict_registry_v001.md",
       "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "f95d8fb7cacc40a6",
+      "file": "exports/conflicts/conflict_registry_v002.md",
+      "generated_at": "2026-09-05T14:55:26Z"
     }
   ],
   "conflict_registry.json": [
@@ -221,6 +227,12 @@
       "sha": "cb3470020c253d1e",
       "file": "exports/conflicts/conflict_registry_v001.json",
       "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "605750eea53dfea7",
+      "file": "exports/conflicts/conflict_registry_v002.json",
+      "generated_at": "2026-09-05T14:55:26Z"
     }
   ],
   "review_queue_open_items.md": [
@@ -259,6 +271,12 @@
       "sha": "7f6174691de5e718",
       "file": "exports/reports/review_queue_open_items_v006.md",
       "generated_at": "2026-09-05T14:00:46Z"
+    },
+    {
+      "version": "v007",
+      "sha": "80e1c9951f1ce614",
+      "file": "exports/reports/review_queue_open_items_v007.md",
+      "generated_at": "2026-09-05T14:54:57Z"
     }
   ],
   "review_queue_open_items.json": [
@@ -297,6 +315,12 @@
       "sha": "a0395e847588a35f",
       "file": "exports/reports/review_queue_open_items_v006.json",
       "generated_at": "2026-09-05T14:00:46Z"
+    },
+    {
+      "version": "v007",
+      "sha": "3dfd6ba8b25bcf73",
+      "file": "exports/reports/review_queue_open_items_v007.json",
+      "generated_at": "2026-09-05T14:54:57Z"
     }
   ],
   "academy_site_catalog.md": [
@@ -379,6 +403,18 @@
       "sha": "ce95fe8d6450aca7",
       "file": "exports/reports/kb_index_v008.csv",
       "generated_at": "2026-09-05T14:00:46Z"
+    },
+    {
+      "version": "v009",
+      "sha": "f2e6c8d84b50426d",
+      "file": "exports/reports/kb_index_v009.csv",
+      "generated_at": "2026-09-05T14:54:57Z"
+    },
+    {
+      "version": "v010",
+      "sha": "b7dd3280dfc767fe",
+      "file": "exports/reports/kb_index_v010.csv",
+      "generated_at": "2026-09-05T14:55:26Z"
     }
   ],
   "glossary.csv": [
@@ -507,6 +543,22 @@
       "sha": "04ee7928488a4528",
       "file": "exports/academy/academy_psychology_lesson_p01_v001.json",
       "generated_at": "2026-09-05T14:00:46Z"
+    }
+  ],
+  "academy_intro_lesson_01.md": [
+    {
+      "version": "v001",
+      "sha": "face781412a82bf7",
+      "file": "exports/academy/academy_intro_lesson_01_v001.md",
+      "generated_at": "2026-09-05T14:54:57Z"
+    }
+  ],
+  "academy_intro_lesson_01.json": [
+    {
+      "version": "v001",
+      "sha": "903ae9bfb55c7e09",
+      "file": "exports/academy/academy_intro_lesson_01_v001.json",
+      "generated_at": "2026-09-05T14:54:57Z"
     }
   ]
 }

@@ -1,18 +1,18 @@
 {
   "manifest_type": "mentorai_knowledge_base",
-  "version": "v010",
-  "generated_at": "2026-09-05T14:55:26Z",
+  "version": "v009",
+  "generated_at": "2026-09-05T14:54:57Z",
   "generator": "tools/kb_build_manifest.py",
   "schema_versions": {
     "enums": "1.0.0"
   },
   "totals": {
-    "objects": 250,
+    "objects": 249,
     "by_domain": {
       "psychology": 27,
       "metatrader": 103,
       "general_trading": 49,
-      "academy": 63,
+      "academy": 62,
       "mentor_qa": 1,
       "brokers": 1,
       "meta": 6
@@ -26,7 +26,7 @@
       "TROUBLESHOOTING": 17,
       "COMPARISON": 12,
       "GLOSSARY": 22,
-      "CONFLICT_RECORD": 2,
+      "CONFLICT_RECORD": 1,
       "REVIEW_ITEM": 15,
       "CATALOG_ITEM": 13,
       "OPERATIONAL_FACT": 3,
@@ -37,20 +37,20 @@
     "by_authority": {
       "GENERAL_KNOWLEDGE": 167,
       "EXTERNAL_METHODOLOGY": 7,
-      "<unset>": 17,
+      "<unset>": 16,
       "ACADEMY_DERIVED": 24,
       "ACADEMY_PRIMARY": 35
     },
     "by_approval": {
       "PENDING_VERIFICATION": 173,
       "REVIEW_REQUIRED": 7,
-      "<unset>": 17,
+      "<unset>": 16,
       "PENDING_REVIEW": 44,
       "APPROVED": 9
     },
     "by_lifecycle": {
       "PENDING_REVIEW": 224,
-      "<unset>": 17,
+      "<unset>": 16,
       "ACTIVE": 9
     },
     "by_platform_scope": {
@@ -60,11 +60,11 @@
       "MT4_ONLY": 15,
       "VERSION_DEPENDENT": 12,
       "MT5_ONLY": 18,
-      "<unset>": 38
+      "<unset>": 37
     },
     "by_source_type": {
       "MODEL_DRAFT": 174,
-      "<unset>": 17,
+      "<unset>": 16,
       "ACADEMY_APP_DATA": 12,
       "ACADEMY_WEBSITE": 3,
       "ACADEMY_DOCUMENT": 9,
@@ -225,7 +225,7 @@
       "version": "v001",
       "pipeline_stage": "VALIDATED",
       "file": "knowledge_base/conflicts/conflict_registry.json",
-      "object_count": 2,
+      "object_count": 1,
       "source_files": [
         "index.html",
         "js/data.js"
@@ -319,11 +319,6 @@
     {
       "id": "CONF-0001",
       "topic": "حجم واقعی محتوای صوتی منتشرشده‌ی آکادمی",
-      "priority": "P1"
-    },
-    {
-      "id": "CONF-0002",
-      "topic": "دو فهرست متفاوت از «سه اصل بازار» در جلسه‌ی اول دوره‌ی مقدماتی",
       "priority": "P1"
     }
   ],

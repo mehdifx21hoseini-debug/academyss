@@ -1,0 +1,802 @@
+{
+  "collection_id": "academy_intro_lesson_01",
+  "domain": "academy",
+  "title": "دوره مقدماتی — جلسه ۱: معاملگری حرکات قیمت",
+  "description": "دانش استخراج‌شده از جلسه‌ی اول دوره‌ی مقدماتی: چارچوب دوره، سبک آموزشی، سرفصل‌ها و اصول ذهنی. کیفیت منبع USABLE بود.",
+  "version": "v001",
+  "generated_at": "2026-09-05T14:54:17Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "raw_sources/academy/intro/intro_lesson_01.md",
+    "raw_sources/academy/intro/intro_lesson_01.ingest.json"
+  ],
+  "notes": [
+    "محتوای تبلیغاتی و اعتبارسنجی مدرس (نتایج شاگردان، انتقال کیف‌پول، مقایسه با دیگران) عمداً وارد پایگاه دانش نشد؛ دانش آموزشی نیست.",
+    "دو فهرست متفاوت از «سه اصل بازار» در همین جلسه بیان شده است؛ هر دو حفظ و در CONF-0002 ثبت شدند.",
+    "مفاهیمی که فقط نام برده شده‌اند (دسته پنجم، چهار اصل استراتژی‌نویسی) ناقص ثبت شده‌اند و حدس زده نشدند."
+  ],
+  "objects": [
+    {
+      "id": "ACA-INT-0001",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "title": "دوره‌ی مقدماتی رایگان است و هدیه‌ی آکادمی است",
+      "language": "fa",
+      "chunk_text": "مدرس دو بار تأکید می‌کند که آموزش مقدماتی کاملاً هدیه است و هزینه‌ای ندارد. او اشاره می‌کند که برخی افراد سال گذشته همین آموزش‌ها را به دیگران فروخته و از آن‌ها هزینه گرفته‌اند. پس اگر کسی برای دوره‌ی مقدماتی هزینه می‌گیرد، آن فروش از سوی آکادمی نیست.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۱ و ۶",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۱ و ۶",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "آموزش مقدماتی کاملاً هدیه است. همین اول کار بهت بگم، چون خیلی‌ها اومدن این آموزش‌ها رو در کنارشون قرار دادن و از شما عزیزان هزینه دریافت کردن. نه، این هدیه است."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "summary": "آموزش مقدماتی آکادمی رایگان است.",
+      "warnings": [
+        "فروش دوره‌ی مقدماتی توسط اشخاص دیگر، مورد تأیید آکادمی نیست."
+      ],
+      "keywords": [
+        "دوره مقدماتی",
+        "رایگان",
+        "هدیه",
+        "هزینه"
+      ],
+      "related_questions": [
+        "دوره مقدماتی چقدره؟",
+        "برای آموزش مقدماتی باید پول بدم؟",
+        "یکی داره این دوره رو می‌فروشه، درسته؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0002",
+      "object_type": "CATALOG_ITEM",
+      "domain": "academy",
+      "title": "سرفصل‌های دوره‌ی مقدماتی",
+      "language": "fa",
+      "chunk_text": "دوره‌ی مقدماتی به ترتیب این موضوعات را پوشش می‌دهد: ویدیوی ۱ مقدمه و مسیر پیش رو؛ سپس فارکس چیست، بروکر، نحوه‌ی واریز و برداشت، ثبت‌نام در بروکر و اتصال آن به متاتریدر، آموزش متاتریدر، لوریج، آموزش کندل‌شناسی و روانشناسی کندل‌ها، اردرگذاری (لیمیت و استاپ) و نحوه‌ی باز کردن معامله، مفاهیم حساب شامل مارجین و فری مارجین، و پرایس اکشن چیست. از ویدیوی ۱۰ به بعد کار اصلی شروع می‌شود: ویدیوی ۱۱ آموزش پین‌بار، سپس آموزش ترند، و ویدیوی ۱۴ ترکیب این سه محتوا روی چارت. یک ویدیوی رودمپ هم مسیر و اقدامات پیشِ رو را توضیح می‌دهد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۱۳ تا ۲۰",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۱۳ تا ۲۰",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "داخل دوره مقدماتی، ویدیوی اول … مقدمه و مسیر پیش رو … بعد می‌ریم سراغ این که اصلاً فارکس چیه، بروکر، نحوه واریز و برداشت. … از ویدیوی ۱۰ به بعد، دیگه کار ما استارت می‌خوره. … توی ویدیوی ۱۱ در مورد آموزش پین‌بار صحبت می‌کنم. … توی ویدیوی ۱۴ … کامل می‌ریم روی چارت."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "summary": "ترتیب و سرفصل ویدیوهای دوره‌ی مقدماتی.",
+      "keywords": [
+        "سرفصل",
+        "ویدیو",
+        "دوره مقدماتی",
+        "پین بار",
+        "ترند"
+      ],
+      "related_questions": [
+        "دوره مقدماتی چی داره؟",
+        "پین‌بار توی کدوم ویدیوئه؟",
+        "چند تا ویدیو داره این دوره؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0003",
+      "object_type": "RULE",
+      "domain": "academy",
+      "title": "مسیر پیشنهادی تماشای دوره بر اساس سطح دانشجو",
+      "language": "fa",
+      "chunk_text": "اگر دانشجو هیچ اطلاعاتی از بازار مالی ندارد، باید از ویدیوی اول شروع کند. اگر مفاهیم پایه (فارکس، بروکر، متاتریدر) را می‌داند و با سبک‌های دیگر مثل الیوت کار کرده است، مدرس الزاماً تماشای ویدیوی ۱۰ به بعد را توصیه می‌کند. با این حال ترجیح او این است که همه از ابتدا ببینند تا ذهن مرتب چیده شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۱۳",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۱۳",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "اگر هیچ اطلاعاتی در بازار مالی نداری، یقیناً بهت پیشنهاد می‌کنم از ویدیوی اول مشاهده کنی. … اگر اطلاعاتی … داری و با سبک‌های دیگه مثل الیوت … کار می‌کنی، بهت واقعاً پیشنهاد می‌کنم — یعنی الزاماً — ویدیوی ده به بعد رو مشاهده کنی. در کل از اول مشاهده بشه، مرتب ذهنت چیده می‌شه."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "rule": "تازه‌کار از ویدیوی ۱؛ کسی که مفاهیم پایه را می‌داند حتماً از ویدیوی ۱۰ به بعد.",
+      "keywords": [
+        "از کجا شروع کنم",
+        "ترتیب ویدیو",
+        "سطح دانشجو"
+      ],
+      "related_questions": [
+        "از کجا شروع کنم؟",
+        "مفاهیم پایه رو بلدم، از کجا ببینم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0004",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "هدف آکادمی: ساختن تریدر، نه تحلیلگر",
+      "language": "fa",
+      "chunk_text": "مدرس دو بار می‌گوید هدف این آموزش ساختن یک تریدر است، نه یک تحلیلگر؛ یعنی کسی که در بازارهای مالی کسب سود می‌کند. به گفته‌ی او هنر معامله‌گری و درک درست از قیمت با آنچه در کتاب‌ها یا بسیاری از آموزش‌های دیگر گفته می‌شود متفاوت است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۵ و ۶",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۵ و ۶",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "هدف من از این آموزش اینه که یک تریدر بسازم، نه تحلیلگر. … توان تو در بازارهای مالی یک تریدره که داره کسب سود می‌کنه."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "summary": "خروجی دوره باید تریدر سودده باشد، نه تحلیلگر.",
+      "keywords": [
+        "تریدر",
+        "تحلیلگر",
+        "هدف دوره"
+      ],
+      "related_questions": [
+        "فرق تریدر و تحلیلگر چیه؟",
+        "هدف این دوره چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0005",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "سبک آکادمی: پرایس اکشن تکنیکال (معامله‌گری حرکات قیمت)",
+      "language": "fa",
+      "chunk_text": "مدرس سبک آموزشی خود را «معاملگری پرایس اکشن تکنیکال» یا «معاملگری حرکات قیمت» معرفی می‌کند. نام رسمی دوره هم «آموزش مقدماتی — معاملگری حرکات قیمت» است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۵ و ۶",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۵ و ۶",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "من مسیر رفتم و آموزش صحیح معاملگری پرایس اکشن تکنیکال رو به شما می‌دم."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "definition": "سبک آموزشی آکادمی: پرایس اکشن تکنیکال / معامله‌گری حرکات قیمت.",
+      "keywords": [
+        "پرایس اکشن",
+        "سبک",
+        "متدولوژی"
+      ],
+      "related_concepts": [
+        "MET-RULE-0002"
+      ],
+      "related_questions": [
+        "سبک آکادمی چیه؟",
+        "پرایس اکشن کار می‌کنید؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0006",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "سه اصل ساختار بازار: اسپایک، کانال قیمتی، تریدینگ رنج",
+      "language": "fa",
+      "chunk_text": "مدرس در بحث مارکت سایکل می‌گوید بازار مالی را بر سه اصل می‌شناسد: اسپایک، کانال قیمتی و تریدینگ رنج. او تأکید می‌کند که در این جلسه فقط نگاه کلی خودش به بازار را بیان می‌کند و تعریف هرکدام در ادامه‌ی دوره می‌آید.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۲۱",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۲۱",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "ما بازار مالی رو بر سه تا اصل می‌دونیم: یک اسپایک، کانال قیمتی، تریدینگ رنج. … من صرفاً می‌خوام خیلی کلی باهات صحبت کنم که نحوه تفکر من نسبت به این مارکت چیه."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "summary": "ساختار بازار از نگاه آکادمی: اسپایک، کانال قیمتی، تریدینگ رنج.",
+      "keywords": [
+        "اسپایک",
+        "کانال قیمتی",
+        "تریدینگ رنج",
+        "مارکت سایکل"
+      ],
+      "related_concepts": [
+        "ACA-INT-0007"
+      ],
+      "conflicts": [
+        "CONF-0002"
+      ],
+      "related_questions": [
+        "ساختار بازار از نظر آکادمی چیه؟",
+        "اسپایک چیه؟",
+        "تریدینگ رنج یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0007",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "سه اصل نگاه به بازار (بیان دوم در همین جلسه)",
+      "language": "fa",
+      "chunk_text": "مدرس در ابتدای بحث، فهرست دیگری از «سه اصل مهم» می‌دهد: کانال قیمتی (بازار مدام در حال تکرار است)، نحوه‌ی نقدینگی‌ها و انتشار نقدینگی، و خرید و فروش در سایکل. این فهرست با فهرست سه‌اصلی بخش ۲۱ یکسان نیست و تفاوت آن‌ها در سند تعارض ثبت شده است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۷",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۷",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "من بازار رو بر سه اصل مهم می‌دونم: ۱. کانال قیمتی - بازار مدام در حال تکراره ۲. نحوه نقدینگی‌ها - انتشار نقدینگی ۳. خرید و فروش در سایکل - که کاملاً متفاوته"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "REVIEW_REQUIRED",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "review_priority": "P1",
+      "review_reason": "دو فهرست متفاوت از «سه اصل» در یک جلسه؛ نیازمند تعیین تکلیف مدرس.",
+      "keywords": [
+        "سه اصل",
+        "نقدینگی",
+        "سایکل"
+      ],
+      "related_concepts": [
+        "ACA-INT-0006"
+      ],
+      "conflicts": [
+        "CONF-0002"
+      ],
+      "related_questions": [
+        "سه اصل بازار از نظر آکادمی چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0008",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "علت حرکت قیمت: همه‌چیز از خود قیمت و نقدینگی",
+      "language": "fa",
+      "chunk_text": "مدرس پرسش «چه می‌شود که قیمت از نقطه A به B می‌رود؟» را مطرح می‌کند و پاسخ کلی‌اش این است که همه‌چیز از خود قیمت می‌آید و نقدینگی نقش تعیین‌کننده دارد. تفصیل این موضوع در ادامه‌ی دوره می‌آید.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۱۵",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۱۵",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "علت حرکت قیمت - اصلاً چی می‌شه که قیمت از A به B می‌ره؟ بچه‌ها همه چیز از خود قیمته. انقدر این مهمه، انقدر نقدینگی مهمه."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "keywords": [
+        "علت حرکت قیمت",
+        "نقدینگی"
+      ],
+      "related_questions": [
+        "چرا قیمت حرکت می‌کنه؟",
+        "نقدینگی چه نقشی داره؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0009",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "«دسته پنجم»: همسو شدن با نقدینگی و پول‌های سنگین",
+      "language": "fa",
+      "chunk_text": "مدرس می‌گوید «ما دسته پنجم هستیم» و هدف را این می‌داند که سوار نقدینگی و معاملات کسانی شویم که بازار را از نقطه A به B می‌برند و همسو با آن‌ها معامله کنیم. دسته‌های اول تا چهارم در این جلسه تعریف نشده‌اند، بنابراین این مفهوم ناقص ثبت شده است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۸",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۸",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "ببین ما دسته پنجم هستیم. بازار رو از نقطه A به B می‌بره و هدف ما اینه که سوار نقدینگی و سوار معاملاتی که این افراد شدن، بشیم و همسوی اونها ترید کنیم."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "REVIEW_REQUIRED",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "review_priority": "P1",
+      "review_reason": "دسته‌های ۱ تا ۴ در این جلسه تعریف نشده‌اند؛ تعریف کامل در جلسات بعدی لازم است.",
+      "keywords": [
+        "دسته پنجم",
+        "نقدینگی",
+        "پول هوشمند"
+      ],
+      "related_questions": [
+        "دسته پنجم یعنی چی؟",
+        "همسو با نقدینگی یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0010",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "رفتار متفاوت پول‌های سنگین در تریدینگ رنج",
+      "language": "fa",
+      "chunk_text": "مدرس اشاره می‌کند که پول‌های سنگین در شرایط مختلف بازار رفتار یکسانی ندارند و رفتارشان در تریدینگ رنج متفاوت است. جمله در متن ناقص است و شرح کامل آن در جلسات بعدی می‌آید.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۷",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۷",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "ارزش و تقاضا دوباره پول‌های سنگین یک جور رفتار می‌کنن و تو تریدینگ رنج، پول‌های سنگین رفتار دیگری دارن."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "REVIEW_REQUIRED",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.55,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "review_priority": "P1",
+      "review_reason": "جمله در ترنسکریپت ناقص است؛ برداشت دقیق نیازمند تأیید مدرس.",
+      "keywords": [
+        "پول سنگین",
+        "تریدینگ رنج",
+        "ارزش و تقاضا"
+      ],
+      "related_questions": [
+        "پول‌های سنگین چطور رفتار می‌کنن؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0011",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "استراتژی‌نویسی بر پایه‌ی چهار اصل",
+      "language": "fa",
+      "chunk_text": "مدرس می‌گوید استراتژی‌نویسی چهار اصل دارد و همین چهار اصل در کنار هم یک معامله‌گر می‌سازند. به گفته‌ی او این بخش به‌تنهایی دست‌کم یک ماه زمان می‌برد. خود این چهار اصل در این جلسه نام برده نشده‌اند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۲۳",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۲۳",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "استراتژی‌نویسی - چهار تا اصل. این چهار تا اصل در کنار همه، یک معامله‌گر می‌سازه. خود این بخش حداقل نیاز به یک ماه زمان داره."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "keywords": [
+        "استراتژی‌نویسی",
+        "چهار اصل"
+      ],
+      "review_reason": "عنوان چهار اصل در این جلسه ذکر نشده و باید از جلسات بعدی تکمیل شود.",
+      "related_questions": [
+        "چهار اصل استراتژی چیه؟",
+        "استراتژی‌نویسی چقدر طول می‌کشه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0012",
+      "object_type": "RULE",
+      "domain": "academy",
+      "title": "مدیریت سرمایه و ریسک، یعنی بقا",
+      "language": "fa",
+      "chunk_text": "مدرس مدیریت سرمایه و ریسک را کلیت بقای معامله‌گر می‌داند و می‌گوید در دوره یاد می‌دهد چطور در بازار بقا داشته باشید. در کنار آن، درک درست از قیمت، مارکت سایکل، اثر اخبار و تسلط بر روان را لازم می‌شمارد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۲۲",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۲۲",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "تو بحث مدیریت سرمایه و ریسک که کلیت بقای شما از این بحث هست، دارم یاد می‌دم چطور بقا داشته باشید."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "rule": "مدیریت سرمایه و ریسک، شرط بقا در بازار است.",
+      "keywords": [
+        "مدیریت سرمایه",
+        "ریسک",
+        "بقا"
+      ],
+      "related_questions": [
+        "مدیریت سرمایه چقدر مهمه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0013",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "لوریج در فارکس با لوریج در کریپتو یکی نیست",
+      "language": "fa",
+      "chunk_text": "مدرس می‌گوید بسیاری از کسانی که از بازار کریپتو آمده‌اند، لوریج را در فارکس اشتباه می‌فهمند: لوریج آن چیزی نیست که در کریپتو یاد گرفته‌اند و نباید همان برداشت را در فارکس پیاده کنند. توضیح کامل آن در ویدیوی مربوط به لوریج می‌آید.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۱۷",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۱۷",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "من دیدم خیلی از کریپتوکارها در بازار مالی فارکس دارن اشتباه می‌دوننش. یعنی لوریج اون چیزی نیست که شما تو کریپتو یاد گرفتی و می‌خوای تو بازار فارکس پیاده‌اش کنی."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "keywords": [
+        "لوریج",
+        "کریپتو",
+        "فارکس"
+      ],
+      "related_concepts": [
+        "GEN-DEF-0006",
+        "MT-CONC-0006"
+      ],
+      "related_questions": [
+        "لوریج فارکس با کریپتو فرق داره؟",
+        "چه اهرمی بذارم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0014",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "چرا با وجود آموزش دیدن، به سود نمی‌رسند",
+      "language": "fa",
+      "chunk_text": "به گفته‌ی مدرس، از بیش از دو هزار نفری که با آن‌ها صحبت کرده، بیش از ۶۰ درصد قبلاً آموزش دیده بودند — تکنیکال، مدیریت سرمایه و روانشناسی — اما به سود نرسیده بودند. دلایلی که او نام می‌برد: نداشتن پلن، نداشتن تسلط بر خودشناسی، و از همه مهم‌تر اشتباه بودن مسیر تکنیکالی که از ابتدا آموخته‌اند. مثال او: اگر بخواهی از تهران به مشهد بروی ولی مسیر را جاده‌ی شمال بیندازی، با سرعت سیصد کیلومتر هم هیچ‌وقت به مشهد نمی‌رسی؛ انگیزه و اشتیاق جای مسیر درست را نمی‌گیرد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۱۶",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۱۶",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "چون پلن نداری. … یا اصلاً از همون اول تکنیکالی که یاد گرفتی - مثل این بوده که من بخوام از مسیر تهران برم مشهد، بعد اصلاً مسیر رو بندازم جاده شمال … من با سرعت سیصد کیلومتر بر ساعت هم حرکت کنم، به هیچ عنوان قرار نیست هیچ روزی به مشهد برسم."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "summary": "نداشتن پلن، نبود خودشناسی و مسیر تکنیکال اشتباه، سه دلیل نرسیدن به سود.",
+      "examples": [
+        "مثال تهران–مشهد: سرعت زیاد در مسیر اشتباه، هرگز به مقصد نمی‌رسد."
+      ],
+      "common_mistakes": [
+        "آموزش دیدن بدون داشتن پلن مکتوب.",
+        "ادامه دادن مسیر تکنیکال اشتباه با انگیزه‌ی بیشتر به‌جای اصلاح مسیر."
+      ],
+      "keywords": [
+        "پلن",
+        "خودشناسی",
+        "مسیر اشتباه",
+        "آموزش"
+      ],
+      "related_concepts": [
+        "ACA-INT-0015",
+        "ACA-PSY-0003"
+      ],
+      "related_questions": [
+        "چرا با اینکه آموزش دیدم سود نمی‌کنم؟",
+        "مشکل من کجاست؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0015",
+      "object_type": "RULE",
+      "domain": "academy",
+      "title": "چارچوب مشخص و استراتژی مکتوب",
+      "language": "fa",
+      "chunk_text": "تمرکز مدرس بر این است که یاد بدهد چطور یک چارچوب مشخص و یک استراتژی مکتوب داشته باشید. استراتژی باید نوشته شود، نه اینکه فقط در ذهن باشد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۹",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۹",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "داشتن یک چارچوب، فوکوس‌گذاری من اینه که یاد بدم چطور یک چارچوب مشخص و یک استراتژی مکتوب داشته باشی."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "rule": "هر معامله‌گر باید چارچوب مشخص و استراتژی مکتوب داشته باشد.",
+      "keywords": [
+        "چارچوب",
+        "استراتژی مکتوب",
+        "پلن"
+      ],
+      "related_concepts": [
+        "ACA-PSY-0001",
+        "ACA-PSY-0003",
+        "ACA-INT-0011"
+      ],
+      "related_questions": [
+        "استراتژی رو باید بنویسم؟",
+        "چارچوب یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0016",
+      "object_type": "COMMON_MISTAKE",
+      "domain": "academy",
+      "title": "لوپ اشتباه: هم سود و هم ضرر روان را به هم می‌ریزد",
+      "language": "fa",
+      "chunk_text": "مدرس می‌گوید بسیاری سودهای کلان می‌کنند، یک لحظه سرخوش می‌شوند و همان سود کلان باعث ضررشان می‌شود؛ و بسیاری دیگر با دو معامله‌ی ضررده روانشان به هم می‌ریزد. نتیجه‌گیری او: چه ضرر و چه سود، فرد را در یک لوپ و چرخه‌ی اشتباه می‌اندازد. به همین دلیل کنترل ترس و استرس و خودشناسی بخشی از دوره است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۹",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۹",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "خیلی‌ها سودهای کلان می‌کنن، یک آن سرخوش می‌شن، همون سود کلان باعث می‌شه متضرر بشن. خیلی‌ها با دو تا دونه معامله ضرر می‌کنن و دوباره روانشون به هم می‌ریزه. چه ضرر، چه سود، فرد رو می‌ندازه توی یک لوپ و یک چرخه اشتباه."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "common_mistakes": [
+        "سرخوشی پس از سود کلان و ضرر دادن بلافاصله بعد از آن.",
+        "به‌هم‌ریختن روان پس از دو معامله‌ی ضررده."
+      ],
+      "keywords": [
+        "سرخوشی",
+        "لوپ",
+        "کنترل روان",
+        "ترس و استرس"
+      ],
+      "related_concepts": [
+        "ACA-PSY-0012",
+        "ACA-PSY-0013",
+        "PSY-PAT-0003"
+      ],
+      "related_questions": [
+        "بعد از سود بزرگ چرا ضرر می‌کنم؟",
+        "بعد از دو ضرر چیکار کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0017",
+      "object_type": "RULE",
+      "domain": "academy",
+      "title": "ظرف دانش ذهن را خالی کن و روی چارت خودت پیاده کن",
+      "language": "fa",
+      "chunk_text": "مدرس از دانشجو می‌خواهد «ظرف دانش ذهنش را خالی کند»: بسیاری به دلایل مختلف نسبت به آموزش گارد می‌گیرند و اجازه نمی‌دهند اطلاعات جدید وارد شود. درخواست او این است که از ویدیوی ۱۰ به بعد، آنچه گفته می‌شود را روی چارت خود پیاده کند. سپس اضافه می‌کند: اگر نتیجه‌اش را ندیدی، حرف مرا نپذیر.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۱۴",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۱۴",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "ازت می‌خوام ظرف دانش ذهنت رو خالی کنیم. از ویدیوی ده به بعد، ازت می‌خوام بپذیری صحبت‌هایی که بهت می‌گم رو بری روی نمودار خودت پیاده کنی. ایمان دارم نتیجه‌ش رو می‌بینی. اگر نتیجه‌ش رو ندیدی، پس حق من رو نپذیر."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "rule": "مطالب را با ذهن باز بپذیر، روی چارت خودت پیاده کن و بر اساس نتیجه قضاوت کن.",
+      "keywords": [
+        "ظرف دانش",
+        "گارد",
+        "پیاده‌سازی روی چارت"
+      ],
+      "related_questions": [
+        "من قبلاً سبک دیگه‌ای کار کردم، چیکار کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0018",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "باز کردن حساب ریل هنر نیست؛ هنر رشد دادن حساب است",
+      "language": "fa",
+      "chunk_text": "مدرس تأکید می‌کند که باز کردن حساب واقعی — با هر مبلغی، از یک دلار و سی دلار تا صدها هزار دلار — هنر نیست؛ هنر، رشد دادن همان حساب است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۲۰",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۲۰",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "حساب ریل باز کردن هنر نیست. … حالا چه با یک دلار، دقیقاً سی دلار، چه با صدها هزار دلار. هنر رشد دادن حسابه."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "summary": "ارزش در رشد دادن حساب است، نه در باز کردن حساب واقعی.",
+      "keywords": [
+        "حساب ریل",
+        "رشد حساب",
+        "سرمایه"
+      ],
+      "related_questions": [
+        "با چقدر پول حساب باز کنم؟",
+        "کی برم روی حساب ریل؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0019",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "معامله‌گری یک مسیر است، نه مقصد",
+      "language": "fa",
+      "chunk_text": "مدرس معامله‌گری را یک مسیر می‌داند که در آن باید صبر و تعهد آموخت و می‌گوید این مسیر مقصد ندارد؛ هرچه بیشتر روی آن کار کنی، بیشتر می‌بینی که تازه اول راه هستی. تنها درخواست او از دانشجو ثابت‌قدم بودن است و تأکید می‌کند این پروسه یک‌روزه نیست.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_01.md",
+        "source_location": "بخش ۴ و ۲۴",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱",
+        "section": "بخش ۴ و ۲۴",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "معامله‌گری یک مسیر است. توی این مسیر باید صبر رو یاد بگیری، باید تعهد رو یاد بگیری. و مقصد نداره بچه‌ها. … موفقیت ما مقصد نداره، یک مسیره. … امسال پروسه یک روز و یک شب نیست. تو فقط ثابت‌قدم باش."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T14:54:17Z",
+      "updated_at": "2026-09-05T14:54:17Z",
+      "keywords": [
+        "مسیر",
+        "صبر",
+        "تعهد",
+        "ثابت‌قدمی"
+      ],
+      "related_concepts": [
+        "PSY-PAT-0020",
+        "PSY-PAT-0024"
+      ],
+      "related_questions": [
+        "چقدر طول می‌کشه تا سودده بشم؟",
+        "کی به نتیجه می‌رسم؟"
+      ]
+    }
+  ]
+}
