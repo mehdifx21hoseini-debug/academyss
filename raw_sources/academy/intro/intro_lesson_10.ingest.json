@@ -1,0 +1,782 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "intro_lesson_10",
+  "course": "intro",
+  "lesson": "10",
+  "title": "بالانس، اکویتی، مارجین و مدیریت ریسک",
+  "original_filename": "intro_lesson_10.md",
+  "raw_file": "raw_sources/academy/intro/intro_lesson_10.md",
+  "ingested_at": "2026-09-05T16:56:49Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 122,
+    "filler_cues": 0,
+    "speech_cues": 122,
+    "speech_ratio": 1.0,
+    "words": 1231,
+    "unique_words": 447,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "عنوان درس: آموزش مقدماتی - مفاهیم بالانس، اکویتی، مارجین و مدیریت ریسک (بخش دهم)",
+        "count": 2
+      },
+      {
+        "text": "اینگاد ویتراست، سلام به شما عزیزان. خیلی خوشحالم که رسیدیم به این محتوای آموزشی.",
+        "count": 2
+      },
+      {
+        "text": "| مفهوم | توضیح |",
+        "count": 2
+      },
+      {
+        "text": "|---|---|",
+        "count": 2
+      },
+      {
+        "text": "| Balance | موجودی اولیه حساب |",
+        "count": 2
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "cues": [
+    {
+      "index": 1,
+      "start": null,
+      "end": null,
+      "text": "# TRANSCRIPT — آموزش مقدماتی، بخش دهم"
+    },
+    {
+      "index": 2,
+      "start": null,
+      "end": null,
+      "text": "عنوان درس: آموزش مقدماتی - مفاهیم بالانس، اکویتی، مارجین و مدیریت ریسک (بخش دهم)"
+    },
+    {
+      "index": 3,
+      "start": null,
+      "end": null,
+      "text": "منبع: متن پاک‌سازی‌شده و ساختاریافته‌ی ارسالی مالک پروژه (۲۰۲۶-۰۹-۰۵)"
+    },
+    {
+      "index": 5,
+      "start": null,
+      "end": null,
+      "text": "## متن پاک‌سازی‌شده"
+    },
+    {
+      "index": 7,
+      "start": null,
+      "end": null,
+      "text": "اینگاد ویتراست، سلام به شما عزیزان. خیلی خوشحالم که رسیدیم به این محتوای آموزشی."
+    },
+    {
+      "index": 9,
+      "start": null,
+      "end": null,
+      "text": "تا الان یاد گرفتی که چطور یک پوزیشن خرید یا فروش باز کنی، اصلاً کندل چیست و رفتارشناسی کندل. حالا کور و حس اصلی تازه از ویدیو ده به بعد شروع می‌شه. بریم روی نمودار که من می‌خوام کامل در خصوص پوزیشنی که داری باز می‌کنی، حالا مواردی که درگیر می‌شه و برای یک تریدر خیلی مهمه، مخصوصاً تو لایو مارکت، صحبت بکنم. تمام تمرکزت رو بده به من."
+    },
+    {
+      "index": 11,
+      "start": null,
+      "end": null,
+      "text": "### نکته مهم درباره نمادها"
+    },
+    {
+      "index": 13,
+      "start": null,
+      "end": null,
+      "text": "یک حساب آزمایشی که با هم دیگه باز کردیم. بچه‌ها خیلی پرسیده بودید، من اینو بهتون بگم. بعضی از بروکرها به ما ایرانی‌ها دیگه خدمات نمی‌دن. روبوفارکس و حالا تو پارت چهارم بهش پرداختم."
+    },
+    {
+      "index": 15,
+      "start": null,
+      "end": null,
+      "text": "هر نمادی - مثلاً دارم بهت بگم تو بروکری که من دارم کار می‌کنم، شاخص داو جونز به اسم US30 داره نمایش داده می‌شه. شاید تو بروکر شما شاخص داو جونز با اسم دیگه‌ای باشه. کافیه بیایی داخل مارکت واتش، راست کلیک بکنی، Show All رو بزنی، تمامی نمادها بهت نمایش داده می‌شه. شاید در بروکری که داری کار می‌کنی، به اسم DJI یا چیز دیگه‌ای باشه. پس اگر دیدی که US30 رو من دارم و شاید تو نداری، برو با بروکرت صحبت کن ببین شاخص داو جونز با چه اسمی ارائه می‌شه تا بتونی پیداش کنی."
+    },
+    {
+      "index": 17,
+      "start": null,
+      "end": null,
+      "text": "### ترمینال و مفاهیم کلیدی"
+    },
+    {
+      "index": 19,
+      "start": null,
+      "end": null,
+      "text": "بالای صفحه، گزینه Terminal رو داری مشاهده می‌کنی. زمانی که روی Terminal کلیک کنم، یک قسمت پایین صفحه باز می‌شه."
+    },
+    {
+      "index": 21,
+      "start": null,
+      "end": null,
+      "text": "در این قسمت، مفاهیم زیر را داریم:"
+    },
+    {
+      "index": 23,
+      "start": null,
+      "end": null,
+      "text": "| مفهوم | توضیح |"
+    },
+    {
+      "index": 24,
+      "start": null,
+      "end": null,
+      "text": "|---|---|"
+    },
+    {
+      "index": 25,
+      "start": null,
+      "end": null,
+      "text": "| Balance | موجودی اولیه حساب |"
+    },
+    {
+      "index": 26,
+      "start": null,
+      "end": null,
+      "text": "| Equity | Balance + سود/ضرر شناور |"
+    },
+    {
+      "index": 27,
+      "start": null,
+      "end": null,
+      "text": "| Margin | پولی که بروکر به عنوان وثیقه از شما گرفته |"
+    },
+    {
+      "index": 28,
+      "start": null,
+      "end": null,
+      "text": "| Free Margin | پول آزاد قابل استفاده برای معاملات جدید |"
+    },
+    {
+      "index": 29,
+      "start": null,
+      "end": null,
+      "text": "| Margin Level | نسبت Equity به Margin (به درصد) |"
+    },
+    {
+      "index": 31,
+      "start": null,
+      "end": null,
+      "text": "### بالانس (Balance)"
+    },
+    {
+      "index": 33,
+      "start": null,
+      "end": null,
+      "text": "موجودی‌ای که در بروکر داری. مثلاً ۴۸,۰۰۰ دلار."
+    },
+    {
+      "index": 35,
+      "start": null,
+      "end": null,
+      "text": "### اکویتی (Equity)"
+    },
+    {
+      "index": 37,
+      "start": null,
+      "end": null,
+      "text": "مجموع بالانس به اضافه یا منهای سود یا ضرر شناور معاملات باز."
+    },
+    {
+      "index": 39,
+      "start": null,
+      "end": null,
+      "text": "فرمول: Equity = Balance + سود/ضرر شناور"
+    },
+    {
+      "index": 41,
+      "start": null,
+      "end": null,
+      "text": "نکته مهم: تا زمانی که معامله بسته نشده، سود یا ضرر واقعی نیست و فقط روی کاغذ است."
+    },
+    {
+      "index": 43,
+      "start": null,
+      "end": null,
+      "text": "### مارجین (Margin)"
+    },
+    {
+      "index": 45,
+      "start": null,
+      "end": null,
+      "text": "پولی که بروکر از شما به عنوان وثیقه برای معاملات باز می‌گیرد. این پول مسدود می‌شود و تا بسته شدن معامله قابل استفاده نیست."
+    },
+    {
+      "index": 47,
+      "start": null,
+      "end": null,
+      "text": "نکته: هرچه حجم معاملات بیشتر باشد، مارجین بیشتری مسدود می‌شود."
+    },
+    {
+      "index": 49,
+      "start": null,
+      "end": null,
+      "text": "### فری مارجین (Free Margin)"
+    },
+    {
+      "index": 51,
+      "start": null,
+      "end": null,
+      "text": "پولی که آزاد است و می‌توانید با آن معاملات جدید باز کنید."
+    },
+    {
+      "index": 53,
+      "start": null,
+      "end": null,
+      "text": "فرمول: Free Margin = Equity - Margin"
+    },
+    {
+      "index": 55,
+      "start": null,
+      "end": null,
+      "text": "### مارجین لیول (Margin Level)"
+    },
+    {
+      "index": 57,
+      "start": null,
+      "end": null,
+      "text": "نسبت Equity به Margin که به درصد نمایش داده می‌شود."
+    },
+    {
+      "index": 59,
+      "start": null,
+      "end": null,
+      "text": "فرمول: Margin Level = (Equity ÷ Margin) × 100"
+    },
+    {
+      "index": 61,
+      "start": null,
+      "end": null,
+      "text": "اهمیت: اگر Margin Level به ۱۰۰٪ برسد، دیگر اجازه باز کردن معامله جدید ندارید و اگر بیشتر کاهش یابد، بروکر ممکن است معاملات شما را به اجبار ببندد (Stop Out)."
+    },
+    {
+      "index": 63,
+      "start": null,
+      "end": null,
+      "text": "### تفاوت سود شناور با سود واقعی"
+    },
+    {
+      "index": 65,
+      "start": null,
+      "end": null,
+      "text": "سود شناور: سودی که در معامله باز وجود دارد اما هنوز محقق نشده است."
+    },
+    {
+      "index": 67,
+      "start": null,
+      "end": null,
+      "text": "سود واقعی: سودی که پس از بستن معامله در حساب شما ثبت می‌شود."
+    },
+    {
+      "index": 69,
+      "start": null,
+      "end": null,
+      "text": "نکته کلیدی: تا زمانی که معامله را نبندید، سود یا ضرر واقعی نیست و ممکن است تغییر کند."
+    },
+    {
+      "index": 71,
+      "start": null,
+      "end": null,
+      "text": "### مدیریت ریسک - قانون ۲٪"
+    },
+    {
+      "index": 73,
+      "start": null,
+      "end": null,
+      "text": "قانون طلایی مدیریت ریسک: در هر معامله حداکثر ۲٪ از کل سرمایه خود را ریسک کنید."
+    },
+    {
+      "index": 75,
+      "start": null,
+      "end": null,
+      "text": "مثال با حساب ۱۰,۰۰۰ دلاری:"
+    },
+    {
+      "index": 77,
+      "start": null,
+      "end": null,
+      "text": "- ۲٪ ریسک = ۲۰۰ دلار"
+    },
+    {
+      "index": 78,
+      "start": null,
+      "end": null,
+      "text": "- اگر حد ضرر شما ۵۰ پیپ باشد، حجم معامله را طوری تنظیم کنید که با ۵۰ پیپ ضرر، ۲۰۰ دلار بیشتر از دست ندهید"
+    },
+    {
+      "index": 80,
+      "start": null,
+      "end": null,
+      "text": "نسبت ریسک به ریوارد: حداقل ۱:۲"
+    },
+    {
+      "index": 82,
+      "start": null,
+      "end": null,
+      "text": "- ریسک ۲٪ از سرمایه"
+    },
+    {
+      "index": 83,
+      "start": null,
+      "end": null,
+      "text": "- هدف سود ۴٪ از سرمایه"
+    },
+    {
+      "index": 85,
+      "start": null,
+      "end": null,
+      "text": "### هشدار مهم"
+    },
+    {
+      "index": 87,
+      "start": null,
+      "end": null,
+      "text": "کسانی که ۲۰٪ یا ۱۰۰٪ از سرمایه خود را در یک معامله ریسک می‌کنند، در واقع قمار می‌کنند، نه معامله‌گری حرفه‌ای."
+    },
+    {
+      "index": 89,
+      "start": null,
+      "end": null,
+      "text": "قمار = اول و آخرش ضرر است."
+    },
+    {
+      "index": 91,
+      "start": null,
+      "end": null,
+      "text": "### نکات پایانی"
+    },
+    {
+      "index": 93,
+      "start": null,
+      "end": null,
+      "text": "- همیشه ۲٪ ریسک کنید، نه بیشتر"
+    },
+    {
+      "index": 94,
+      "start": null,
+      "end": null,
+      "text": "- نسبت ریسک به ریوارد حداقل ۱:۲ داشته باشید"
+    },
+    {
+      "index": 95,
+      "start": null,
+      "end": null,
+      "text": "- تا زمانی که معامله بسته نشده، سود یا ضرر واقعی نیست"
+    },
+    {
+      "index": 96,
+      "start": null,
+      "end": null,
+      "text": "- مارجین لیول را همیشه کنترل کنید"
+    },
+    {
+      "index": 97,
+      "start": null,
+      "end": null,
+      "text": "- هیچ‌وقت بیش از حد از لوریج استفاده نکنید"
+    },
+    {
+      "index": 99,
+      "start": null,
+      "end": null,
+      "text": "## موارد نیازمند بررسی (طبق متن ارسالی)"
+    },
+    {
+      "index": 101,
+      "start": null,
+      "end": null,
+      "text": "موردی برای بررسی پیدا نشد."
+    },
+    {
+      "index": 103,
+      "start": null,
+      "end": null,
+      "text": "## متن ساختاریافته (STRUCTURED TRANSCRIPT)"
+    },
+    {
+      "index": 105,
+      "start": null,
+      "end": null,
+      "text": "عنوان درس: آموزش مقدماتی - مفاهیم بالانس، اکویتی، مارجین و مدیریت ریسک (بخش دهم)"
+    },
+    {
+      "index": 107,
+      "start": null,
+      "end": null,
+      "text": "### ۱. مقدمه"
+    },
+    {
+      "index": 109,
+      "start": null,
+      "end": null,
+      "text": "اینگاد ویتراست، سلام به شما عزیزان. خیلی خوشحالم که رسیدیم به این محتوای آموزشی."
+    },
+    {
+      "index": 111,
+      "start": null,
+      "end": null,
+      "text": "تا الان یاد گرفتی که چطور یک پوزیشن خرید یا فروش باز کنی، اصلاً کندل چیست و رفتارشناسی کندل. حالا کور و حس اصلی تازه از ویدیو ده به بعد شروع می‌شه."
+    },
+    {
+      "index": 113,
+      "start": null,
+      "end": null,
+      "text": "### ۲. ترمینال و مفاهیم اصلی"
+    },
+    {
+      "index": 115,
+      "start": null,
+      "end": null,
+      "text": "ترمینال (Terminal) در پایین صفحه متاتریدر نمایش داده می‌شه و شامل اطلاعات زیر است:"
+    },
+    {
+      "index": 117,
+      "start": null,
+      "end": null,
+      "text": "| مفهوم | توضیح |"
+    },
+    {
+      "index": 118,
+      "start": null,
+      "end": null,
+      "text": "|---|---|"
+    },
+    {
+      "index": 119,
+      "start": null,
+      "end": null,
+      "text": "| Balance | موجودی اولیه حساب |"
+    },
+    {
+      "index": 120,
+      "start": null,
+      "end": null,
+      "text": "| Equity | Balance + سود/ضرر شناور |"
+    },
+    {
+      "index": 121,
+      "start": null,
+      "end": null,
+      "text": "| Margin | پول مسدود شده به عنوان وثیقه |"
+    },
+    {
+      "index": 122,
+      "start": null,
+      "end": null,
+      "text": "| Free Margin | پول آزاد برای معاملات جدید |"
+    },
+    {
+      "index": 123,
+      "start": null,
+      "end": null,
+      "text": "| Margin Level | (Equity ÷ Margin) × ۱۰۰ |"
+    },
+    {
+      "index": 125,
+      "start": null,
+      "end": null,
+      "text": "### ۳. بالانس (Balance)"
+    },
+    {
+      "index": 127,
+      "start": null,
+      "end": null,
+      "text": "موجودی واقعی حساب شماست که پس از بستن معاملات به‌روز می‌شود."
+    },
+    {
+      "index": 129,
+      "start": null,
+      "end": null,
+      "text": "### ۴. اکویتی (Equity)"
+    },
+    {
+      "index": 131,
+      "start": null,
+      "end": null,
+      "text": "مجموع بالانس به علاوه سود یا ضرر شناور معاملات باز."
+    },
+    {
+      "index": 133,
+      "start": null,
+      "end": null,
+      "text": "فرمول: Equity = Balance + Floating P/L"
+    },
+    {
+      "index": 135,
+      "start": null,
+      "end": null,
+      "text": "نکته مهم: تا زمانی که معامله بسته نشده، سود یا ضرر واقعی محسوب نمی‌شود."
+    },
+    {
+      "index": 137,
+      "start": null,
+      "end": null,
+      "text": "### ۵. مارجین (Margin)"
+    },
+    {
+      "index": 139,
+      "start": null,
+      "end": null,
+      "text": "پولی که بروکر به عنوان وثیقه از حساب شما مسدود می‌کند."
+    },
+    {
+      "index": 141,
+      "start": null,
+      "end": null,
+      "text": "عوامل مؤثر بر مارجین:"
+    },
+    {
+      "index": 143,
+      "start": null,
+      "end": null,
+      "text": "- حجم معامله (لات)"
+    },
+    {
+      "index": 144,
+      "start": null,
+      "end": null,
+      "text": "- لوریج"
+    },
+    {
+      "index": 145,
+      "start": null,
+      "end": null,
+      "text": "- قیمت نماد معاملاتی"
+    },
+    {
+      "index": 147,
+      "start": null,
+      "end": null,
+      "text": "### ۶. فری مارجین (Free Margin)"
+    },
+    {
+      "index": 149,
+      "start": null,
+      "end": null,
+      "text": "پولی که آزاد است و می‌توانید از آن برای باز کردن معاملات جدید استفاده کنید."
+    },
+    {
+      "index": 151,
+      "start": null,
+      "end": null,
+      "text": "فرمول: Free Margin = Equity - Margin"
+    },
+    {
+      "index": 153,
+      "start": null,
+      "end": null,
+      "text": "### ۷. مارجین لیول (Margin Level)"
+    },
+    {
+      "index": 155,
+      "start": null,
+      "end": null,
+      "text": "نسبت اکویتی به مارجین که به درصد نمایش داده می‌شود."
+    },
+    {
+      "index": 157,
+      "start": null,
+      "end": null,
+      "text": "فرمول: Margin Level = (Equity ÷ Margin) × ۱۰۰"
+    },
+    {
+      "index": 159,
+      "start": null,
+      "end": null,
+      "text": "سطوح بحرانی:"
+    },
+    {
+      "index": 161,
+      "start": null,
+      "end": null,
+      "text": "- ۱۰۰٪: دیگر نمی‌توانید معامله جدید باز کنید"
+    },
+    {
+      "index": 162,
+      "start": null,
+      "end": null,
+      "text": "- زیر ۱۰۰٪: در معرض Stop Out (بستن اجباری معاملات) هستید"
+    },
+    {
+      "index": 164,
+      "start": null,
+      "end": null,
+      "text": "### ۸. سود شناور در مقابل سود واقعی"
+    },
+    {
+      "index": 166,
+      "start": null,
+      "end": null,
+      "text": "سود شناور: سود فعلی معامله باز که هنوز محقق نشده است"
+    },
+    {
+      "index": 168,
+      "start": null,
+      "end": null,
+      "text": "سود واقعی: سودی که پس از بستن معامله به حساب اضافه می‌شود"
+    },
+    {
+      "index": 170,
+      "start": null,
+      "end": null,
+      "text": "قانون طلایی: تا زمانی که معامله را نبندید، آن سود متعلق به شما نیست."
+    },
+    {
+      "index": 172,
+      "start": null,
+      "end": null,
+      "text": "### ۹. مدیریت ریسک - قانون ۲ درصد"
+    },
+    {
+      "index": 174,
+      "start": null,
+      "end": null,
+      "text": "قانون اساسی مدیریت ریسک: در هر معامله، حداکثر ۲٪ از کل سرمایه خود را ریسک کنید."
+    },
+    {
+      "index": 176,
+      "start": null,
+      "end": null,
+      "text": "مثال:"
+    },
+    {
+      "index": 178,
+      "start": null,
+      "end": null,
+      "text": "- سرمایه: ۱۰,۰۰۰ دلار"
+    },
+    {
+      "index": 179,
+      "start": null,
+      "end": null,
+      "text": "- ۲٪ ریسک: ۲۰۰ دلار"
+    },
+    {
+      "index": 180,
+      "start": null,
+      "end": null,
+      "text": "- حد ضرر: ۵۰ پیپ"
+    },
+    {
+      "index": 181,
+      "start": null,
+      "end": null,
+      "text": "- حجم معاملاتی مناسب: باید طوری باشد که ۵۰ پیپ ضرر برابر با ۲۰۰ دلار باشد"
+    },
+    {
+      "index": 183,
+      "start": null,
+      "end": null,
+      "text": "نسبت ریسک به ریوارد (Risk/Reward):"
+    },
+    {
+      "index": 185,
+      "start": null,
+      "end": null,
+      "text": "- حداقل نسبت: ۱:۲"
+    },
+    {
+      "index": 186,
+      "start": null,
+      "end": null,
+      "text": "- یعنی به ازای ۲٪ ریسک، ۴٪ سود هدف بگیرید"
+    },
+    {
+      "index": 188,
+      "start": null,
+      "end": null,
+      "text": "### ۱۰. هشدار درباره ریسک‌های بالا"
+    },
+    {
+      "index": 190,
+      "start": null,
+      "end": null,
+      "text": "ریسک ۲۰٪ یا ۱۰۰٪ از سرمایه = قمار است"
+    },
+    {
+      "index": 192,
+      "start": null,
+      "end": null,
+      "text": "ویژگی‌های قمار:"
+    },
+    {
+      "index": 194,
+      "start": null,
+      "end": null,
+      "text": "- اول و آخرش ضرر است"
+    },
+    {
+      "index": 195,
+      "start": null,
+      "end": null,
+      "text": "- هیچ برنامه و استراتژی مشخصی ندارد"
+    },
+    {
+      "index": 196,
+      "start": null,
+      "end": null,
+      "text": "- فقط به شانس متکی است"
+    },
+    {
+      "index": 198,
+      "start": null,
+      "end": null,
+      "text": "توصیه: هیچ‌وقت بیشتر از ۲٪ ریسک نکنید."
+    },
+    {
+      "index": 200,
+      "start": null,
+      "end": null,
+      "text": "### ۱۱. جمع‌بندی نهایی"
+    },
+    {
+      "index": 202,
+      "start": null,
+      "end": null,
+      "text": "۱. Balance: موجودی حساب"
+    },
+    {
+      "index": 203,
+      "start": null,
+      "end": null,
+      "text": "۲. Equity: Balance + سود/ضرر شناور"
+    },
+    {
+      "index": 204,
+      "start": null,
+      "end": null,
+      "text": "۳. Margin: پول مسدود شده به عنوان وثیقه"
+    },
+    {
+      "index": 205,
+      "start": null,
+      "end": null,
+      "text": "۴. Free Margin: پول آزاد برای معاملات جدید"
+    },
+    {
+      "index": 206,
+      "start": null,
+      "end": null,
+      "text": "۵. Margin Level: نسبت Equity به Margin"
+    },
+    {
+      "index": 207,
+      "start": null,
+      "end": null,
+      "text": "۶. حداکثر ریسک: ۲٪ از سرمایه در هر معامله"
+    },
+    {
+      "index": 208,
+      "start": null,
+      "end": null,
+      "text": "۷. نسبت ریسک به ریوارد: حداقل ۱:۲"
+    }
+  ]
+}

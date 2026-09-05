@@ -1,0 +1,50 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "intro_lesson_10",
+  "course": "intro",
+  "lesson": "10",
+  "title": "بالانس، اکویتی، مارجین و مدیریت ریسک",
+  "original_filename": "intro_lesson_10.md",
+  "raw_file": "raw_sources/academy/intro/intro_lesson_10_01.md",
+  "ingested_at": "2026-09-05T16:56:49Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 122,
+    "filler_cues": 0,
+    "speech_cues": 122,
+    "speech_ratio": 1.0,
+    "words": 1231,
+    "unique_words": 447,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "عنوان درس: آموزش مقدماتی - مفاهیم بالانس، اکویتی، مارجین و مدیریت ریسک (بخش دهم)",
+        "count": 2
+      },
+      {
+        "text": "اینگاد ویتراست، سلام به شما عزیزان. خیلی خوشحالم که رسیدیم به این محتوای آموزشی.",
+        "count": 2
+      },
+      {
+        "text": "| مفهوم | توضیح |",
+        "count": 2
+      },
+      {
+        "text": "|---|---|",
+        "count": 2
+      },
+      {
+        "text": "| Balance | موجودی اولیه حساب |",
+        "count": 2
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "report_type": "transcript_quality",
+  "version": "v001"
+}
