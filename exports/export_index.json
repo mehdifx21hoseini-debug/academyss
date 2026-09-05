@@ -577,6 +577,12 @@
       "sha": "3b79287c19b4e069",
       "file": "exports/reports/kb_index_v017.csv",
       "generated_at": "2026-09-05T16:16:58Z"
+    },
+    {
+      "version": "v018",
+      "sha": "5f3c7b0a4717e1dd",
+      "file": "exports/reports/kb_index_v018.csv",
+      "generated_at": "2026-09-05T16:21:51Z"
     }
   ],
   "glossary.csv": [
@@ -865,6 +871,22 @@
       "sha": "bd3b3fcebd2fc1dc",
       "file": "exports/academy/academy_intro_lesson_05_v002.json",
       "generated_at": "2026-09-05T16:04:40Z"
+    }
+  ],
+  "academy_intro_lesson_06.md": [
+    {
+      "version": "v001",
+      "sha": "af9ed487a54120eb",
+      "file": "exports/academy/academy_intro_lesson_06_v001.md",
+      "generated_at": "2026-09-05T16:21:51Z"
+    }
+  ],
+  "academy_intro_lesson_06.json": [
+    {
+      "version": "v001",
+      "sha": "072fd6a97e8b0bc5",
+      "file": "exports/academy/academy_intro_lesson_06_v001.json",
+      "generated_at": "2026-09-05T16:21:51Z"
     }
   ]
 }
