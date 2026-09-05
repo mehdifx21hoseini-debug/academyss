@@ -43,6 +43,7 @@ python3 tools/seed_mentor_qa_04.py
 python3 tools/seed_mentor_style.py
 python3 tools/seed_lesson_eq_01.py
 python3 tools/seed_lesson_eq_02.py
+python3 tools/seed_lesson_eq_03.py
 python3 tools/seed_ssprox_faq.py
 python3 tools/seed_support_policy.py
 python3 tools/seed_support_style.py
