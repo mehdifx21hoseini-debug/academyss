@@ -113,6 +113,12 @@
       "sha": "76659da52fda4b66",
       "file": "exports/metatrader/mt4/metatrader_mt4_core_v003.md",
       "generated_at": "2026-09-05T13:17:49Z"
+    },
+    {
+      "version": "v004",
+      "sha": "2839eccbcb38fd66",
+      "file": "exports/metatrader/mt4/metatrader_mt4_core_v004.md",
+      "generated_at": "2026-09-05T16:16:58Z"
     }
   ],
   "metatrader_mt4_core.json": [
@@ -133,6 +139,12 @@
       "sha": "2f33ef93e14f9e44",
       "file": "exports/metatrader/mt4/metatrader_mt4_core_v003.json",
       "generated_at": "2026-09-05T13:17:49Z"
+    },
+    {
+      "version": "v004",
+      "sha": "e0ef43d0d9fdbd84",
+      "file": "exports/metatrader/mt4/metatrader_mt4_core_v004.json",
+      "generated_at": "2026-09-05T16:16:58Z"
     }
   ],
   "metatrader_mt5_core.md": [
@@ -255,6 +267,12 @@
       "sha": "c18e76249b831164",
       "file": "exports/conflicts/conflict_registry_v006.md",
       "generated_at": "2026-09-05T16:04:40Z"
+    },
+    {
+      "version": "v007",
+      "sha": "f00b138374c5cf76",
+      "file": "exports/conflicts/conflict_registry_v007.md",
+      "generated_at": "2026-09-05T16:16:58Z"
     }
   ],
   "conflict_registry.json": [
@@ -293,6 +311,12 @@
       "sha": "2bf13a54cb1b3a44",
       "file": "exports/conflicts/conflict_registry_v006.json",
       "generated_at": "2026-09-05T16:04:40Z"
+    },
+    {
+      "version": "v007",
+      "sha": "4f04bd932a10c916",
+      "file": "exports/conflicts/conflict_registry_v007.json",
+      "generated_at": "2026-09-05T16:16:58Z"
     }
   ],
   "review_queue_open_items.md": [
@@ -547,6 +571,12 @@
       "sha": "14d711917b0028ca",
       "file": "exports/reports/kb_index_v016.csv",
       "generated_at": "2026-09-05T16:04:40Z"
+    },
+    {
+      "version": "v017",
+      "sha": "3b79287c19b4e069",
+      "file": "exports/reports/kb_index_v017.csv",
+      "generated_at": "2026-09-05T16:16:58Z"
     }
   ],
   "glossary.csv": [
