@@ -188,13 +188,17 @@ changed = K.write_collection(K.KB_DIR + "/conflicts/conflict_registry.json", {
 print("%s conflict_registry.json objects: %d" % ("wrote" if changed else "unchanged", len(conflicts)))
 
 # ---------------------------------------------------------------------- review queue
-def rq(num, title, domain, reason, question, options, recommendation, priority, ids=None):
-    return {
+def rq(num, title, domain, reason, question, options, recommendation, priority, ids=None,
+       status="OPEN", answer=None):
+    item = {
         "id": "RQ-%04d" % num, "title": title, "domain": domain, "object_ids": ids or [],
         "reason": reason, "question_for_human": question, "options": options,
-        "recommendation": recommendation, "priority": priority, "status": "OPEN",
+        "recommendation": recommendation, "priority": priority, "status": status,
         "created_at": NOW, "updated_at": NOW,
     }
+    if answer:
+        item["answer"] = answer
+    return item
 
 
 review = [
@@ -259,7 +263,9 @@ review = [
        "دانشجویان آکادمی بیشتر از متاتریدر ۴ استفاده می‌کنند یا ۵؟",
        ["عمدتاً متاتریدر ۵", "عمدتاً متاتریدر ۴", "هر دو تقریباً برابر؛ مربی همیشه بپرسد"],
        "اگر یکی غالب است، همان پلتفرم پیش‌فرض شود و تفاوت‌ها فقط هنگام نیاز مطرح شوند.",
-       "P2"),
+       "P2", ["ACA-RULE-0001"], status="CLOSED",
+       answer="هر دو پلتفرم استفاده می‌شوند و هیچ‌کدام پیش‌فرض نیست. مربی باید ابتدا بپرسد "
+              "متاتریدر ۴ یا ۵ و سپس پاسخ همان پلتفرم را بدهد. ثبت‌شده در تصمیم D-0001 و قاعده‌ی ACA-RULE-0001."),
     rq(10, "سیاست آکادمی درباره‌ی اکسپرت و کپی‌تریدینگ مشخص نیست", "metatrader",
        "سؤال‌های «کدوم اکسپرت رو بخرم؟» و «کپی‌تریدینگ خوبه؟» پرتکرارند، اما موضع آکادمی درباره‌ی "
        "MetaTrader Market، Signals و معامله‌ی خودکار مشخص نیست.",
@@ -267,7 +273,10 @@ review = [
        ["توضیح فنی بدهد اما توصیه نکند", "به‌کلی منع کند و به روش آکادمی برگرداند",
         "به پشتیبانی انسانی ارجاع دهد"],
        "توضیح فنی بدون توصیه‌ی خرید، به‌همراه هشدار ریسک و بازگرداندن به چارچوب آکادمی.",
-       "P2"),
+       "P2", ["ACA-RULE-0002", "ACA-RULE-0003"], status="CLOSED",
+       answer="آکادمی هیچ اکسپرت، سیگنال یا کپی‌تریدینگی پیشنهاد نمی‌کند و این پرسش‌ها به پشتیبانی "
+              "انسانی ارجاع داده می‌شوند. توضیح فنی نصب و اجرای اکسپرت همچنان مجاز است. "
+              "ثبت‌شده در تصمیم D-0002 و قواعد ACA-RULE-0002 و ACA-RULE-0003."),
 ]
 
 changed = K.write_collection(K.KB_DIR + "/review_queue/open_items.json", {

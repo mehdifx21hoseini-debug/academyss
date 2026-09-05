@@ -210,6 +210,15 @@ MT5 = [
       keywords=["stop limit", "buy stop limit", "سفارش معلق"],
       related_concepts=["MT5-PROC-0003", "MT-CMP-0001"],
       related_questions=["Buy Stop Limit چطور کار می‌کنه؟", "فرق stop و stop limit چیه؟"]),
+    o("MT5-CONC-0004", "CONCEPT", "شناسه‌ها در متاتریدر ۵: Order، Position ID و Magic Number",
+      "در متاتریدر ۵ هر سفارش شناسه‌ی خود را دارد و هر پوزیشن یک Position ID جدا. معامله‌های مربوط به یک "
+      "پوزیشن با همین شناسه به هم متصل می‌شوند، بنابراین برخلاف متاتریدر ۴ با بستن جزئی، شناسه‌ی پوزیشن "
+      "عوض نمی‌شود. Magic Number همان نقش متاتریدر ۴ را دارد و اکسپرت‌ها با آن معاملات خودشان را تشخیص می‌دهند.",
+      S, 0.75, category="مفاهیم پایه",
+      definition="Order ID: شناسه‌ی سفارش. Position ID: شناسه‌ی پوزیشن. Magic Number: شناسه‌ی اکسپرت.",
+      keywords=["position id", "order id", "magic number"],
+      related_concepts=["MT5-CONC-0002", "MT4-CONC-0002", "MT-CMP-0009"],
+      related_questions=["شماره‌ی پوزیشن رو کجا ببینم؟", "Magic Number توی متاتریدر ۵ چیه؟"]),
 ]
 
 M.write(K.KB_DIR + "/metatrader/mt5/mt5_core.json", "metatrader_mt5_core",

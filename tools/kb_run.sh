@@ -14,6 +14,7 @@ python3 tools/seed_mt4.py
 python3 tools/seed_mt_troubleshooting.py
 python3 tools/seed_mt_comparison.py
 python3 tools/seed_psychology.py
+python3 tools/seed_academy_policies.py
 python3 tools/seed_governance.py
 
 echo "== 2/5 validate =="

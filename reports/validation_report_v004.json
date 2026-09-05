@@ -1,10 +1,10 @@
 {
   "report_type": "validation",
-  "version": "v005",
-  "generated_at": "2026-09-05T13:16:20Z",
+  "version": "v004",
+  "generated_at": "2026-09-05T13:14:54Z",
   "stats": {
     "files": 14,
-    "objects": 174,
+    "objects": 167,
     "by_kind": {
       "knowledge_object": 12,
       "conflict_record": 1,
@@ -12,7 +12,7 @@
     },
     "by_domain": {
       "psychology": 11,
-      "metatrader": 103,
+      "metatrader": 96,
       "general_trading": 29,
       "academy": 23,
       "mentor_qa": 1,
@@ -20,7 +20,7 @@
       "meta": 6
     },
     "by_approval": {
-      "PENDING_VERIFICATION": 139,
+      "PENDING_VERIFICATION": 132,
       "PENDING_REVIEW": 15,
       "APPROVED": 9
     }

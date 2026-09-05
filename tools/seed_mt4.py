@@ -138,6 +138,32 @@ MT4 = [
       definition="Ticket: شناسه‌ی معامله. Comment: توضیح متنی. Magic Number: شناسه‌ی اکسپرت.",
       keywords=["ticket", "magic number", "comment"],
       related_questions=["Magic Number چیه؟", "چرا کنار معامله‌م نوشته cancelled by dealer؟"]),
+    o("MT4-PROC-0011", P, "مشاهده‌ی مشخصات نماد در متاتریدر ۴",
+      "در متاتریدر ۴ مشخصات هر نماد از پنجره‌ی Symbols و گزینه‌ی Properties دیده می‌شود: اندازه‌ی قرارداد، "
+      "ارقام اعشار، حداقل حجم، گام حجم، سطح استاپ، نرخ سواپ، نوع اجرا و ساعات معاملاتی. "
+      "مسیر آن با متاتریدر ۵ فرق دارد؛ در متاتریدر ۵ همین اطلاعات با راست‌کلیک روی نماد و گزینه‌ی "
+      "Specification باز می‌شود.",
+      S, 0.75, category="نمادها",
+      steps=["روی پنجره‌ی Market Watch راست‌کلیک کنید و Symbols را بزنید.",
+             "نماد موردنظر را در درخت گروه‌ها پیدا و انتخاب کنید.",
+             "دکمه‌ی Properties را بزنید.",
+             "مقادیر Contract size، Digits، Stops level، Swap و Trade sessions را بخوانید."],
+      keywords=["symbol properties", "specification", "مشخصات نماد"],
+      related_concepts=["MT-CONC-0005", "MT-CONC-0009", "MT5-PROC-0005"],
+      related_questions=["اندازه قرارداد رو توی متاتریدر ۴ کجا ببینم؟", "حداقل حجم نماد چقدره؟"]),
+    o("MT4-PROC-0012", P, "تنظیم حداکثر انحراف مجاز قیمت در متاتریدر ۴",
+      "در حساب‌های Instant Execution، پنجره‌ی سفارش متاتریدر ۴ گزینه‌ی «Enable maximum deviation from "
+      "quoted price» دارد. با فعال کردن آن و تعیین مقدار بر حسب پیپ، اگر قیمت تا آن حد تغییر کند سفارش "
+      "به‌جای نمایش ریکوت، اجرا می‌شود. در حساب‌های Market Execution این گزینه کاربرد ندارد.",
+      S, 0.75, category="معامله",
+      steps=["پنجره‌ی سفارش را باز کنید (F9).",
+             "گزینه‌ی Enable maximum deviation from quoted price را تیک بزنید.",
+             "مقدار انحراف مجاز را بر حسب پیپ وارد کنید.",
+             "سفارش را ثبت کنید."],
+      warnings=["انحراف بسیار بزرگ یعنی پذیرش اجرای سفارش با قیمتی به‌مراتب بدتر از قیمت دیده‌شده."],
+      keywords=["deviation", "requote", "انحراف مجاز"],
+      related_concepts=["MT-CONC-0010", "MT-TRBL-0006", "MT-CMP-0010"],
+      related_questions=["چرا مدام ریکوت می‌گیرم؟", "انحراف مجاز رو کجا تنظیم کنم؟"]),
 ]
 
 M.write(K.KB_DIR + "/metatrader/mt4/mt4_core.json", "metatrader_mt4_core",
