@@ -15,9 +15,9 @@ Two things it does NOT change:
   trading recommendation is fenced by the source's own disclaimer
   (ACA-EXP-0009, ACA-EXP-0043).
 
-One discrepancy is logged rather than resolved: §5 Q17 of this document says
-MetaTrader experts run only on desktop, while the owner said the expert works
-on iOS (CONF-0010).
+The one discrepancy this file raised (§5 Q17, "desktop only") was settled by the
+owner in D-0019: the expert runs on Windows and macOS only — not Android, not
+iOS. That is not the same platform list as the course player (ACA-SUP-0007).
 """
 import sys
 
@@ -592,18 +592,23 @@ OBJECTS = [
         related_concepts=["ACA-EXP-0028", "ACA-EXP-0030"],
         related_questions=["روی چند جفت‌ارز هم‌زمان بذارم؟"]),
 
-    rec("ACA-EXP-0041", "OPERATIONAL_FACT", "اکسپرت فقط روی نسخه‌ی دسکتاپ متاتریدر اجرا می‌شود",
-        "طبق این سند، اکسپرت‌های متاتریدر **فقط روی نسخه‌ی دسکتاپ** متاتریدر اجرا می‌شوند و "
-        "روی موبایل قابل استفاده نیستند.\n"
-        "⚠️ این جمله با گفته‌ی مالک آکادمی («اکسپرت روی iOS کار می‌کند») اختلاف دارد و تا تعیین "
-        "تکلیف، مربی این مورد را قطعی اعلام نمی‌کند (`CONF-0010`).",
-        "بخش پنجم — پرسش ۱۷", scope="NOT_APPLICABLE", approved=False, conf=0.85,
-        conflicts=["CONF-0010"],
-        verification_note="سند رسمی محصول و گفته‌ی مالک درباره‌ی اجرای اکسپرت روی موبایل/iOS یکسان نیست.",
-        warnings=["تا رفع اختلاف، مربی کاربر موبایل را به پشتیبانی ارجاع می‌دهد و پاسخ قطعی نمی‌دهد."],
-        keywords=["موبایل", "iOS", "اندروید", "دسکتاپ"],
-        related_concepts=["ACA-SUP-0007", "ACA-SUP-0001"],
-        related_questions=["روی گوشی کار می‌کنه؟", "روی آیفون نصب می‌شه؟"]),
+    rec("ACA-EXP-0041", "OPERATIONAL_FACT", "اکسپرت فقط روی ویندوز و مک اجرا می‌شود",
+        "اکسپرت‌های متاتریدر **فقط روی نسخه‌ی دسکتاپ** متاتریدر اجرا می‌شوند.\n"
+        "✅ **تأییدشده توسط مالک آکادمی (`D-0019`):**\n"
+        "• **ویندوز** — کار می‌کند\n"
+        "• **مک (مکینتاش)** — کار می‌کند\n"
+        "• **اندروید** — کار **نمی‌کند**\n"
+        "• **iOS (آیفون و آیپد)** — کار **نمی‌کند**\n"
+        "اگر کاربر می‌خواهد اکسپرت همیشه فعال باشد بدون اینکه کامپیوترش روشن بماند، راهکار "
+        "**VPS** است، نه موبایل (`ACA-EXP-0042`).\n"
+        "⚠️ این موضوع با پلتفرم‌های پخش‌کننده‌ی دوره فرق دارد: اسپات پلیر روی اندروید هم کار "
+        "می‌کند ولی روی iOS نه (`ACA-SUP-0007`).",
+        "بخش پنجم — پرسش ۱۷", scope="NOT_APPLICABLE",
+        warnings=["کاربر موبایل باید پیش از برنامه‌ریزی بداند اکسپرت روی گوشی اجرا نمی‌شود."],
+        keywords=["موبایل", "iOS", "اندروید", "ویندوز", "مک", "دسکتاپ"],
+        related_concepts=["ACA-EXP-0042", "ACA-SUP-0007", "ACA-SUP-0001"],
+        related_questions=["روی گوشی کار می‌کنه؟", "روی آیفون نصب می‌شه؟",
+                           "روی مک کار می‌کنه؟", "روی اندروید چی؟"]),
 
     rec("ACA-EXP-0042", "OPERATIONAL_FACT", "با خاموش شدن کامپیوتر، اکسپرت متوقف می‌شود",
         "برای فعال ماندن اکسپرت، متاتریدر باید باز و به اینترنت متصل باشد؛ با خاموش شدن "
@@ -641,7 +646,7 @@ changed = K.write_collection(K.KB_DIR + "/academy/tools/ssprox_faq.json", {
     "notes": [
         "SSProX ابزار خود آکادمی است (ACA-OPS-0004) و طبق D-0014 از قاعده‌ی منع اکسپرت مستثناست.",
         "سلب مسئولیت رسمی سند در ACA-EXP-0009 و ACA-EXP-0043 نگهداری می‌شود.",
-        "ACA-EXP-0041 به‌دلیل اختلاف با گفته‌ی مالک درباره‌ی iOS، PENDING_REVIEW است (CONF-0010).",
+        "ACA-EXP-0041 با تصمیم D-0019 تأیید شد: اکسپرت فقط ویندوز و مک (CONF-0010 حل شد).",
         "اعداد نسخه‌ای (تلرانس ۱۵٪) با فیلد validity زمان‌مند علامت خورده‌اند.",
     ],
     "objects": OBJECTS,

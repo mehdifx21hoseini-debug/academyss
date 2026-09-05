@@ -333,6 +333,12 @@
       "sha": "5f451f7eae70c361",
       "file": "exports/conflicts/conflict_registry_v017.md",
       "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v018",
+      "sha": "4a25bfb71ef7bb81",
+      "file": "exports/conflicts/conflict_registry_v018.md",
+      "generated_at": "2026-09-05T22:01:27Z"
     }
   ],
   "conflict_registry.json": [
@@ -437,6 +443,12 @@
       "sha": "92868df550cea21b",
       "file": "exports/conflicts/conflict_registry_v017.json",
       "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v018",
+      "sha": "e468032e9700f745",
+      "file": "exports/conflicts/conflict_registry_v018.json",
+      "generated_at": "2026-09-05T22:01:27Z"
     }
   ],
   "review_queue_open_items.md": [
@@ -589,6 +601,12 @@
       "sha": "23adab4f72797756",
       "file": "exports/reports/review_queue_open_items_v025.md",
       "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v026",
+      "sha": "4853291d1c06e98e",
+      "file": "exports/reports/review_queue_open_items_v026.md",
+      "generated_at": "2026-09-05T22:01:27Z"
     }
   ],
   "review_queue_open_items.json": [
@@ -741,6 +759,12 @@
       "sha": "5435b5d9dd01caa8",
       "file": "exports/reports/review_queue_open_items_v025.json",
       "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v026",
+      "sha": "46866b02eec0d177",
+      "file": "exports/reports/review_queue_open_items_v026.json",
+      "generated_at": "2026-09-05T22:01:27Z"
     }
   ],
   "academy_site_catalog.md": [
@@ -1003,6 +1027,12 @@
       "sha": "c64ccb77d2bfa69c",
       "file": "exports/reports/kb_index_v038.csv",
       "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v039",
+      "sha": "aad0b325f8495678",
+      "file": "exports/reports/kb_index_v039.csv",
+      "generated_at": "2026-09-05T22:01:27Z"
     }
   ],
   "glossary.csv": [
@@ -1937,6 +1967,12 @@
       "sha": "69e6fb539b2019e7",
       "file": "exports/academy/academy_ssprox_faq_v001.md",
       "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v002",
+      "sha": "8d4ca8da9e2982ab",
+      "file": "exports/academy/academy_ssprox_faq_v002.md",
+      "generated_at": "2026-09-05T22:01:27Z"
     }
   ],
   "academy_ssprox_faq.json": [
@@ -1945,6 +1981,12 @@
       "sha": "2c59dd286917ad01",
       "file": "exports/academy/academy_ssprox_faq_v001.json",
       "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v002",
+      "sha": "59d9f9831ae2891a",
+      "file": "exports/academy/academy_ssprox_faq_v002.json",
+      "generated_at": "2026-09-05T22:01:27Z"
     }
   ]
 }
