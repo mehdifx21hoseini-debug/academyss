@@ -1,0 +1,50 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "intro_lesson_07",
+  "course": "intro",
+  "lesson": "07",
+  "title": "پیپ، پیپت، لات و لوریج",
+  "original_filename": "intro_lesson_07.md (متن ارسالی مالک پروژه در گفت‌وگو)",
+  "raw_file": "raw_sources/academy/intro/intro_lesson_07.md",
+  "ingested_at": "2026-09-05T16:32:12Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 72,
+    "filler_cues": 0,
+    "speech_cues": 72,
+    "speech_ratio": 1.0,
+    "words": 967,
+    "unique_words": 394,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "# TRANSCRIPT — آموزش مقدماتی، بخش هفتم",
+        "count": 1
+      },
+      {
+        "text": "عنوان درس: آموزش مقدماتی - مفهوم پیپ، پیپت، لات و لوریج در بازار فارکس (بخش هفتم)",
+        "count": 1
+      },
+      {
+        "text": "منبع: متن پاک‌سازی‌شده و ساختاریافته‌ی ارسالی مالک پروژه (۲۰۲۶-۰۹-۰۵)",
+        "count": 1
+      },
+      {
+        "text": "## متن پاک‌سازی‌شده",
+        "count": 1
+      },
+      {
+        "text": "دوست عزیزم، سلام. In God We Trust. رسیدیم به مفهوم لات در بازار مالی فارکس. اصلاً واحد اندازه‌گیری در این مارکت چیه؟ پیپ و پیپت چیه؟ نحوه سود و زیان، ما چطوری در بازار مالی بیاییم مشخص کنیم؟ چند دلار سود کردیم؟ چند دلار ضرر کردیم؟ و لوریج؟",
+        "count": 1
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "report_type": "transcript_quality",
+  "version": "v001"
+}
