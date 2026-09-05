@@ -1,10 +1,10 @@
 {
   "report_type": "validation",
-  "version": "v025",
-  "generated_at": "2026-09-05T15:58:30Z",
+  "version": "v024",
+  "generated_at": "2026-09-05T15:58:00Z",
   "stats": {
     "files": 24,
-    "objects": 345,
+    "objects": 344,
     "by_kind": {
       "knowledge_object": 22,
       "conflict_record": 1,
@@ -15,7 +15,7 @@
       "psychology": 27,
       "metatrader": 103,
       "general_trading": 49,
-      "academy": 157,
+      "academy": 156,
       "mentor_qa": 1,
       "meta": 6
     },
@@ -27,6 +27,12 @@
     }
   },
   "errors": 0,
-  "warnings": 0,
-  "findings": []
+  "warnings": 1,
+  "findings": [
+    {
+      "level": "WARNING",
+      "where": "knowledge_base/academy/intro/lesson_05.json :: ACA-INT-0109",
+      "message": "conflicts references unknown id CONF-0004"
+    }
+  ]
 }
