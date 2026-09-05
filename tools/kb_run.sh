@@ -41,6 +41,8 @@ python3 tools/seed_mentor_qa_02.py
 python3 tools/seed_mentor_qa_03.py
 python3 tools/seed_mentor_qa_04.py
 python3 tools/seed_mentor_style.py
+python3 tools/seed_support_policy.py
+python3 tools/seed_support_style.py
 python3 tools/seed_governance.py
 
 echo "== 2/5 validate =="

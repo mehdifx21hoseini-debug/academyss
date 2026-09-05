@@ -1,26 +1,26 @@
 {
   "manifest_type": "mentorai_knowledge_base",
-  "version": "v037",
-  "generated_at": "2026-09-05T21:06:19Z",
+  "version": "v035",
+  "generated_at": "2026-09-05T21:03:28Z",
   "generator": "tools/kb_build_manifest.py",
   "schema_versions": {
     "enums": "1.0.0"
   },
   "totals": {
-    "objects": 627,
+    "objects": 612,
     "by_domain": {
       "brokers": 3,
       "psychology": 27,
       "metatrader": 102,
       "general_trading": 49,
       "mentor_qa": 80,
-      "academy": 360,
+      "academy": 345,
       "meta": 6
     },
     "by_object_type": {
       "BROKER_RULE": 1,
       "PSYCHOLOGY_PATTERN": 24,
-      "RULE": 81,
+      "RULE": 72,
       "METATRADER_PROCEDURE": 48,
       "DEFINITION": 32,
       "CONCEPT": 159,
@@ -28,8 +28,8 @@
       "COMPARISON": 14,
       "GLOSSARY": 22,
       "MENTOR_QA": 79,
-      "CONFLICT_RECORD": 9,
-      "REVIEW_ITEM": 31,
+      "CONFLICT_RECORD": 6,
+      "REVIEW_ITEM": 28,
       "CATALOG_ITEM": 16,
       "OPERATIONAL_FACT": 26,
       "PROCEDURE": 46,
@@ -37,42 +37,42 @@
       "COMMON_MISTAKE": 9
     },
     "by_authority": {
-      "ACADEMY_PRIMARY": 295,
+      "ACADEMY_PRIMARY": 286,
       "GENERAL_KNOWLEDGE": 166,
       "EXTERNAL_METHODOLOGY": 7,
       "MENTOR_VERIFIED": 79,
-      "<unset>": 40,
+      "<unset>": 34,
       "ACADEMY_DERIVED": 40
     },
     "by_approval": {
       "REVIEW_REQUIRED": 9,
       "PENDING_VERIFICATION": 172,
       "PENDING_REVIEW": 368,
-      "<unset>": 40,
-      "APPROVED": 38
+      "<unset>": 34,
+      "APPROVED": 29
     },
     "by_lifecycle": {
       "PENDING_REVIEW": 549,
-      "<unset>": 40,
-      "ACTIVE": 38
+      "<unset>": 34,
+      "ACTIVE": 29
     },
     "by_platform_scope": {
       "MT4_ONLY": 41,
-      "NOT_APPLICABLE": 407,
+      "NOT_APPLICABLE": 398,
       "BOTH": 58,
       "BROKER_DEPENDENT": 20,
       "VERSION_DEPENDENT": 15,
       "MT5_ONLY": 25,
-      "<unset>": 61
+      "<unset>": 55
     },
     "by_source_type": {
       "ACADEMY_COURSE_TRANSCRIPT": 268,
       "MODEL_DRAFT": 173,
       "MENTOR_CONVERSATION": 89,
-      "<unset>": 40,
+      "<unset>": 34,
       "ACADEMY_APP_DATA": 12,
       "ACADEMY_WEBSITE": 3,
-      "ACADEMY_DOCUMENT": 42
+      "ACADEMY_DOCUMENT": 33
     }
   },
   "verification_pending": 260,
@@ -298,7 +298,7 @@
       "version": "v001",
       "pipeline_stage": "VALIDATED",
       "file": "knowledge_base/conflicts/conflict_registry.json",
-      "object_count": 9,
+      "object_count": 6,
       "source_files": [
         "index.html",
         "js/data.js"
@@ -312,7 +312,7 @@
       "version": "v001",
       "pipeline_stage": "VALIDATED",
       "file": "knowledge_base/review_queue/open_items.json",
-      "object_count": 31,
+      "object_count": 28,
       "source_files": [
         "MENTORAI_KB_AUDIT.md"
       ]
@@ -425,20 +425,6 @@
       "source_files": [
         "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
         "raw_sources/mentor_qa/mentor_qa_2026_07_29.ingest.json"
-      ]
-    },
-    {
-      "collection_id": "academy_support_bot_style",
-      "title": "لحن رسمی ربات پشتیبانی آکادمی",
-      "domain": "academy",
-      "record_kind": "knowledge_object",
-      "version": "v001",
-      "pipeline_stage": "VALIDATED",
-      "file": "knowledge_base/academy/operations/support_bot_style.json",
-      "object_count": 9,
-      "source_files": [
-        "raw_sources/academy/support_bot_kb_v1.md",
-        "raw_sources/academy/support_bot_kb_v1.ingest.json"
       ]
     },
     {
@@ -685,21 +671,6 @@
       "id": "CONF-0001",
       "topic": "حجم واقعی محتوای صوتی منتشرشده‌ی آکادمی",
       "priority": "P1"
-    },
-    {
-      "id": "CONF-0007",
-      "topic": "تعداد جلسات دوره‌ی مقدماتی: ۱۵ جلسه یا ۱۷ جلسه",
-      "priority": "P2"
-    },
-    {
-      "id": "CONF-0008",
-      "topic": "آستانه‌ی پروفیت فکتور برای طرح سرمایه‌گذاری: ۱.۳ یا ۱.۵",
-      "priority": "P1"
-    },
-    {
-      "id": "CONF-0009",
-      "topic": "پشتیبانی پخش‌کننده‌ی دوره از iOS",
-      "priority": "P2"
     }
   ],
   "open_review_items": [
@@ -776,6 +747,12 @@
       "domain": "academy"
     },
     {
+      "id": "RQ-0016",
+      "title": "نشانی حساب‌های رسمی آکادمی ثبت نشده است",
+      "priority": "P1",
+      "domain": "academy"
+    },
+    {
       "id": "RQ-0019",
       "title": "معادل‌سازی کندل پوشاننده با «پین‌بار قوی» نیازمند عبارت دقیق است",
       "priority": "P2",
@@ -791,24 +768,6 @@
       "id": "RQ-0025",
       "title": "تأیید پروفایل لحن منتور برای استفاده‌ی مربی",
       "priority": "P1",
-      "domain": "academy"
-    },
-    {
-      "id": "RQ-0029",
-      "title": "آستانه‌ی پروفیت فکتور طرح سرمایه‌گذاری: ۱.۳ یا ۱.۵؟",
-      "priority": "P1",
-      "domain": "academy"
-    },
-    {
-      "id": "RQ-0030",
-      "title": "تعداد رسمی جلسات دوره‌ی مقدماتی مشخص نیست",
-      "priority": "P2",
-      "domain": "academy"
-    },
-    {
-      "id": "RQ-0031",
-      "title": "پخش‌کننده‌ی دوره روی iOS کار می‌کند یا نه؟",
-      "priority": "P2",
       "domain": "academy"
     }
   ],

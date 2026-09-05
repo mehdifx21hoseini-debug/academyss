@@ -1,12 +1,12 @@
 {
   "report_type": "validation",
-  "version": "v053",
-  "generated_at": "2026-09-05T21:06:19Z",
+  "version": "v052",
+  "generated_at": "2026-09-05T21:04:35Z",
   "stats": {
-    "files": 44,
-    "objects": 627,
+    "files": 43,
+    "objects": 618,
     "by_kind": {
-      "knowledge_object": 38,
+      "knowledge_object": 37,
       "mentor_qa": 4,
       "conflict_record": 1,
       "review_item": 1
@@ -17,14 +17,14 @@
       "metatrader": 102,
       "general_trading": 49,
       "mentor_qa": 80,
-      "academy": 360,
+      "academy": 351,
       "meta": 6
     },
     "by_approval": {
       "REVIEW_REQUIRED": 9,
       "PENDING_VERIFICATION": 172,
       "PENDING_REVIEW": 368,
-      "APPROVED": 38
+      "APPROVED": 29
     }
   },
   "errors": 0,
