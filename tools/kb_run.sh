@@ -32,6 +32,7 @@ python3 tools/seed_lesson_intro_13.py
 python3 tools/seed_lesson_intro_14.py
 python3 tools/seed_lesson_intro_15.py
 python3 tools/seed_lesson_intro_16.py
+python3 tools/seed_lesson_intro_17.py
 python3 tools/seed_lesson_psychology_p01.py
 python3 tools/seed_academy_policies.py
 python3 tools/seed_academy_clarifications.py
