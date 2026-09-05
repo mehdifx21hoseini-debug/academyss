@@ -1,0 +1,932 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "eq_lesson_4",
+  "course": "eq",
+  "lesson": "4",
+  "title": "هوش هیجانی (EQ) — بخش چهارم: مدیریت استرس",
+  "original_filename": "eq_04.md",
+  "raw_file": "raw_sources/academy/eq/eq_lesson_4.md",
+  "ingested_at": "2026-09-05T22:34:11Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 147,
+    "filler_cues": 0,
+    "speech_cues": 147,
+    "speech_ratio": 1.0,
+    "words": 982,
+    "unique_words": 457,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "عنوان درس",
+        "count": 2
+      },
+      {
+        "text": "هوش هیجانی (EQ) در معامله‌گری و زندگی (بخش چهارم - مدیریت استرس)",
+        "count": 2
+      },
+      {
+        "text": "رسیدیم به آخرین بخش و مؤلفه هوش هیجانی: مدیریت استرس. و برای یک معامله‌گر، خودتون می‌دونید چقدر این مبحث مهم است.",
+        "count": 2
+      },
+      {
+        "text": "مؤلفه\tتوضیح",
+        "count": 2
+      },
+      {
+        "text": "خوش‌بینی\tنگاه مثبت به اتفاقات",
+        "count": 2
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "cues": [
+    {
+      "index": 1,
+      "start": null,
+      "end": null,
+      "text": "عنوان درس"
+    },
+    {
+      "index": 3,
+      "start": null,
+      "end": null,
+      "text": "هوش هیجانی (EQ) در معامله‌گری و زندگی (بخش چهارم - مدیریت استرس)"
+    },
+    {
+      "index": 4,
+      "start": null,
+      "end": null,
+      "text": "متن پاک‌سازی‌شده"
+    },
+    {
+      "index": 6,
+      "start": null,
+      "end": null,
+      "text": "رسیدیم به آخرین بخش و مؤلفه هوش هیجانی: مدیریت استرس. و برای یک معامله‌گر، خودتون می‌دونید چقدر این مبحث مهم است."
+    },
+    {
+      "index": 7,
+      "start": null,
+      "end": null,
+      "text": "تاثیر استرس بر معامله‌گری"
+    },
+    {
+      "index": 9,
+      "start": null,
+      "end": null,
+      "text": "طبق پژوهش‌های انجام شده، کسی که همواره دچار ترس و استرس است، ضرر و زیانش برابری می‌کند با کسی که پشت سر هم سیگار مصرف می‌کند."
+    },
+    {
+      "index": 11,
+      "start": null,
+      "end": null,
+      "text": "پس ببین، خیلی به خودت آسیب می‌زنی اگر همواره کسی هستی که دچار استرسی."
+    },
+    {
+      "index": 12,
+      "start": null,
+      "end": null,
+      "text": "ترس و استرس بد نیستند!"
+    },
+    {
+      "index": 14,
+      "start": null,
+      "end": null,
+      "text": "نکته کلیدی: ترس و استرس بد نیستند، بلکه مفید هستند تا زمانی که به شما آسیب نزنند و دخالت نکنند."
+    },
+    {
+      "index": 16,
+      "start": null,
+      "end": null,
+      "text": "مثبت‌های ترس و استرس:"
+    },
+    {
+      "index": 18,
+      "start": null,
+      "end": null,
+      "text": "اگر ترس از دست دادن جان نباشد، سر پیچ سرعت را کم نمی‌کنی"
+    },
+    {
+      "index": 20,
+      "start": null,
+      "end": null,
+      "text": "اگر استرس امتحان نباشد، درس نمی‌خوانی"
+    },
+    {
+      "index": 22,
+      "start": null,
+      "end": null,
+      "text": "اگر استرس از دست دادن سرمایه نباشد، مدیریت سرمایه و ریسک را رعایت نمی‌کنی"
+    },
+    {
+      "index": 24,
+      "start": null,
+      "end": null,
+      "text": "اصل: ترس و طمع همیشه هستند. نمی‌توان گفت نیستند، اما می‌توان روی آنها تسلط داشت. به قدری کنترل می‌شوند که نمی‌توانند روی تصمیمات دخالت کنند."
+    },
+    {
+      "index": 26,
+      "start": null,
+      "end": null,
+      "text": "«ترس و طمع همیشه هستند، اما تو وقتی روی آنها تسلط داشته باشی، به قدری کمرنگ می‌شوند که شاید اصلاً به چشمت نیایند.»"
+    },
+    {
+      "index": 28,
+      "start": null,
+      "end": null,
+      "text": "مدیریت استرس (Stress Management)"
+    },
+    {
+      "index": 30,
+      "start": null,
+      "end": null,
+      "text": "مدیریت استرس شامل سه مؤلفه است:"
+    },
+    {
+      "index": 31,
+      "start": null,
+      "end": null,
+      "text": "مؤلفه\tتوضیح"
+    },
+    {
+      "index": 32,
+      "start": null,
+      "end": null,
+      "text": "انعطاف‌پذیری\tتوانایی سازگاری با شرایط فعلی"
+    },
+    {
+      "index": 33,
+      "start": null,
+      "end": null,
+      "text": "تحمل فشار روانی\tمیزان مقاومت در برابر مشکلات"
+    },
+    {
+      "index": 34,
+      "start": null,
+      "end": null,
+      "text": "خوش‌بینی\tنگاه مثبت به اتفاقات"
+    },
+    {
+      "index": 35,
+      "start": null,
+      "end": null,
+      "text": "انعطاف‌پذیری"
+    },
+    {
+      "index": 37,
+      "start": null,
+      "end": null,
+      "text": "توانایی وفق پیدا کردن با شرایط فعلی و سازگار شدن با محیط."
+    },
+    {
+      "index": 39,
+      "start": null,
+      "end": null,
+      "text": "مثال: در زمان کرونا یا تغییرات اقتصادی، افرادی که انعطاف‌پذیری بالایی دارند، خود را با شرایط جدید وفق می‌دهند."
+    },
+    {
+      "index": 40,
+      "start": null,
+      "end": null,
+      "text": "تحمل فشار روانی"
+    },
+    {
+      "index": 42,
+      "start": null,
+      "end": null,
+      "text": "سوال: نمره فشار روانی شما چقدر است؟ (بالای ۲۰-۲۸ = خوب)"
+    },
+    {
+      "index": 43,
+      "start": null,
+      "end": null,
+      "text": "تحمل پایین\tتحمل بالا"
+    },
+    {
+      "index": 44,
+      "start": null,
+      "end": null,
+      "text": "با کوچکترین چیزی به هم می‌ریزد\tدر شرایط بحرانی کنترل دارد"
+    },
+    {
+      "index": 45,
+      "start": null,
+      "end": null,
+      "text": "سریع دچار استرس می‌شود\tمی‌پذیرد، مدیریت می‌کند"
+    },
+    {
+      "index": 46,
+      "start": null,
+      "end": null,
+      "text": "واکنش شدید نشان می‌دهد\tهندل می‌کند"
+    },
+    {
+      "index": 48,
+      "start": null,
+      "end": null,
+      "text": "مثال تصادف:"
+    },
+    {
+      "index": 50,
+      "start": null,
+      "end": null,
+      "text": "فرد با تحمل پایین: دعوا می‌کند، از کوره در می‌رود"
+    },
+    {
+      "index": 52,
+      "start": null,
+      "end": null,
+      "text": "فرد با تحمل بالا: می‌پذیرد، مدیریت می‌کند"
+    },
+    {
+      "index": 54,
+      "start": null,
+      "end": null,
+      "text": "خوش‌بینی"
+    },
+    {
+      "index": 56,
+      "start": null,
+      "end": null,
+      "text": "اصل: عینک خود را انتخاب کن. اگر عینک کدر باشد، همه چیز را کدر می‌بینی."
+    },
+    {
+      "index": 58,
+      "start": null,
+      "end": null,
+      "text": "نگاه خوش‌بینانه: اگر لاستیک ماشین پنچر شد، شاید این ۱۰ دقیقه توقف تو را از یک اتفاق بدتر نجات داده است."
+    },
+    {
+      "index": 60,
+      "start": null,
+      "end": null,
+      "text": "«نمی‌خواهیم غیرواقعی‌بینانه نگاه کنیم، اما خوش‌بینی به ما انرژی می‌دهد.»"
+    },
+    {
+      "index": 62,
+      "start": null,
+      "end": null,
+      "text": "جمع‌بندی مؤلفه‌های هوش هیجانی"
+    },
+    {
+      "index": 63,
+      "start": null,
+      "end": null,
+      "text": "مؤلفه\tکلیدواژه‌ها"
+    },
+    {
+      "index": 64,
+      "start": null,
+      "end": null,
+      "text": "تصمیم‌گیری\tانتخاب منطقی"
+    },
+    {
+      "index": 65,
+      "start": null,
+      "end": null,
+      "text": "مسئولیت‌پذیری\tپذیرش"
+    },
+    {
+      "index": 66,
+      "start": null,
+      "end": null,
+      "text": "همدلی\tدرک دیگران"
+    },
+    {
+      "index": 67,
+      "start": null,
+      "end": null,
+      "text": "مهارت ارتباطی\tروابط بین فردی"
+    },
+    {
+      "index": 68,
+      "start": null,
+      "end": null,
+      "text": "حل مسئله\tتحلیل و اقدام"
+    },
+    {
+      "index": 69,
+      "start": null,
+      "end": null,
+      "text": "ابراز احساسات\tبیان درست"
+    },
+    {
+      "index": 70,
+      "start": null,
+      "end": null,
+      "text": "صراحت و قاطعیت\tقطعیت در بیان"
+    },
+    {
+      "index": 71,
+      "start": null,
+      "end": null,
+      "text": "خودشکوفایی\tشناخت هدف"
+    },
+    {
+      "index": 72,
+      "start": null,
+      "end": null,
+      "text": "خوش‌بینی\tنگاه مثبت"
+    },
+    {
+      "index": 73,
+      "start": null,
+      "end": null,
+      "text": "تحمل استرس\tمقاومت"
+    },
+    {
+      "index": 74,
+      "start": null,
+      "end": null,
+      "text": "نمره هوش هیجانی"
+    },
+    {
+      "index": 75,
+      "start": null,
+      "end": null,
+      "text": "محدوده نمره\tسطح"
+    },
+    {
+      "index": 76,
+      "start": null,
+      "end": null,
+      "text": "۹۰ تا ۱۶۰\tخیلی کم"
+    },
+    {
+      "index": 77,
+      "start": null,
+      "end": null,
+      "text": "۱۶۳ تا ۲۳۴\tکم"
+    },
+    {
+      "index": 78,
+      "start": null,
+      "end": null,
+      "text": "۲۳۵ تا ۳۰۶\tمتوسط"
+    },
+    {
+      "index": 79,
+      "start": null,
+      "end": null,
+      "text": "۳۰۷ تا ۳۷۸\tزیاد"
+    },
+    {
+      "index": 80,
+      "start": null,
+      "end": null,
+      "text": "۳۷۹ تا ۴۵۰\tخیلی زیاد"
+    },
+    {
+      "index": 82,
+      "start": null,
+      "end": null,
+      "text": "هر عددی که هستی، باید تلاش کنی روی افزایشش. اگر هم نمره بالایی داری، باید روی حفظ و بهبود آن کار کنی."
+    },
+    {
+      "index": 84,
+      "start": null,
+      "end": null,
+      "text": "«اگر یک بدنساز ۱۰ ساله بدنسازی رفته، نمی‌تواند بگوید یک سال نرم، هیکلم همان می‌ماند. همواره باید روی خودش کار کند.»"
+    },
+    {
+      "index": 86,
+      "start": null,
+      "end": null,
+      "text": "سه عامل اصلی موفقیت از دید دانیل گلمن"
+    },
+    {
+      "index": 87,
+      "start": null,
+      "end": null,
+      "text": "#\tعامل"
+    },
+    {
+      "index": 88,
+      "start": null,
+      "end": null,
+      "text": "۱\tمدیریت احساسات (کنترل خود)"
+    },
+    {
+      "index": 89,
+      "start": null,
+      "end": null,
+      "text": "۲\tقدرت تصمیم‌گیری (انتخاب درست)"
+    },
+    {
+      "index": 90,
+      "start": null,
+      "end": null,
+      "text": "۳\tبه تأخیر انداختن خواسته‌های لذت برای رسیدن به اهداف"
+    },
+    {
+      "index": 91,
+      "start": null,
+      "end": null,
+      "text": "پنج مؤلفه اصلی هوش هیجانی (مرور نهایی)"
+    },
+    {
+      "index": 92,
+      "start": null,
+      "end": null,
+      "text": "#\tمؤلفه\tتوضیح"
+    },
+    {
+      "index": 93,
+      "start": null,
+      "end": null,
+      "text": "۱\tخودآگاهی\tشناخت کامل خود"
+    },
+    {
+      "index": 94,
+      "start": null,
+      "end": null,
+      "text": "۲\tخودتنظیمی\tمدیریت تکانش‌ها و احساسات"
+    },
+    {
+      "index": 95,
+      "start": null,
+      "end": null,
+      "text": "۳\tانگیزش\tقائم به ذات بودن"
+    },
+    {
+      "index": 96,
+      "start": null,
+      "end": null,
+      "text": "۴\tهمدلی\tدرک و ارتباط با دیگران"
+    },
+    {
+      "index": 97,
+      "start": null,
+      "end": null,
+      "text": "۵\tمهارت‌های اجتماعی\tروابط بین فردی"
+    },
+    {
+      "index": 98,
+      "start": null,
+      "end": null,
+      "text": "نکات کلیدی برای معامله‌گران"
+    },
+    {
+      "index": 100,
+      "start": null,
+      "end": null,
+      "text": "۱. خودآگاهی: بدان چه احساسی داری و چرا"
+    },
+    {
+      "index": 101,
+      "start": null,
+      "end": null,
+      "text": "۲. عزت نفس: خودت را باور داشته باش، لیاقت موفقیت را داری"
+    },
+    {
+      "index": 102,
+      "start": null,
+      "end": null,
+      "text": "۳. مدیریت تکانش: واکنش‌های لحظه‌ای را کنترل کن"
+    },
+    {
+      "index": 103,
+      "start": null,
+      "end": null,
+      "text": "۴. قبول ضرر: مسئولیت‌پذیر باش، «من ضرر کردم» نه «بازار به من ضرر زد»"
+    },
+    {
+      "index": 104,
+      "start": null,
+      "end": null,
+      "text": "۵. خوش‌بینی: از هر اتفاقی یک نکته مثبت پیدا کن"
+    },
+    {
+      "index": 105,
+      "start": null,
+      "end": null,
+      "text": "۶. صبر: برای رسیدن به اهداف، خواسته‌های فعلی را به تأخیر بینداز"
+    },
+    {
+      "index": 106,
+      "start": null,
+      "end": null,
+      "text": "تمرین نهایی"
+    },
+    {
+      "index": 108,
+      "start": null,
+      "end": null,
+      "text": "قار تنهایی خود را پیدا کن."
+    },
+    {
+      "index": 110,
+      "start": null,
+      "end": null,
+      "text": "هر روز چند دقیقه (حتی ۵ دقیقه) در خلوت خودت باش"
+    },
+    {
+      "index": 112,
+      "start": null,
+      "end": null,
+      "text": "گوشی را کنار بگذار"
+    },
+    {
+      "index": 114,
+      "start": null,
+      "end": null,
+      "text": "فقط فکر کن، خودت را بشناس"
+    },
+    {
+      "index": 116,
+      "start": null,
+      "end": null,
+      "text": "نقاط قوت و ضعف خود را مرور کن"
+    },
+    {
+      "index": 118,
+      "start": null,
+      "end": null,
+      "text": "«هر آدم موفق در جهان، در بره‌ای از زندگی تنها بوده و با خودش خلوت کرده است.»"
+    },
+    {
+      "index": 120,
+      "start": null,
+      "end": null,
+      "text": "جمع‌بندی نهایی"
+    },
+    {
+      "index": 122,
+      "start": null,
+      "end": null,
+      "text": "هوش هیجانی قابل بهبود است"
+    },
+    {
+      "index": 124,
+      "start": null,
+      "end": null,
+      "text": "۵۰ درصد راه بهبود = شناخت مؤلفه‌ها"
+    },
+    {
+      "index": 126,
+      "start": null,
+      "end": null,
+      "text": "ترس و طمع همیشه هستند، اما قابل کنترل هستند"
+    },
+    {
+      "index": 128,
+      "start": null,
+      "end": null,
+      "text": "مسئولیت‌پذیر باش"
+    },
+    {
+      "index": 130,
+      "start": null,
+      "end": null,
+      "text": "از مسیر لذت ببر، نه فقط از مقصد"
+    },
+    {
+      "index": 132,
+      "start": null,
+      "end": null,
+      "text": "ثابت‌قدم باش"
+    },
+    {
+      "index": 134,
+      "start": null,
+      "end": null,
+      "text": "تنها درخواست من از شما: ثابت‌قدم باشید. قدم بردارید، حتی شده روزی سی دقیقه."
+    },
+    {
+      "index": 136,
+      "start": null,
+      "end": null,
+      "text": "[www.sobhan7.com](https://www.sobhan7.com)"
+    },
+    {
+      "index": 138,
+      "start": null,
+      "end": null,
+      "text": "هر کجای این جهان هستید، بدرخشید."
+    },
+    {
+      "index": 139,
+      "start": null,
+      "end": null,
+      "text": "موارد نیازمند بررسی"
+    },
+    {
+      "index": 141,
+      "start": null,
+      "end": null,
+      "text": "موردی برای بررسی پیدا نشد."
+    },
+    {
+      "index": 143,
+      "start": null,
+      "end": null,
+      "text": "============================================================="
+    },
+    {
+      "index": 144,
+      "start": null,
+      "end": null,
+      "text": "STRUCTURED TRANSCRIPT"
+    },
+    {
+      "index": 145,
+      "start": null,
+      "end": null,
+      "text": "============================================================="
+    },
+    {
+      "index": 146,
+      "start": null,
+      "end": null,
+      "text": "عنوان درس"
+    },
+    {
+      "index": 148,
+      "start": null,
+      "end": null,
+      "text": "هوش هیجانی (EQ) در معامله‌گری و زندگی (بخش چهارم - مدیریت استرس)"
+    },
+    {
+      "index": 149,
+      "start": null,
+      "end": null,
+      "text": "۱. مقدمه"
+    },
+    {
+      "index": 151,
+      "start": null,
+      "end": null,
+      "text": "رسیدیم به آخرین بخش و مؤلفه هوش هیجانی: مدیریت استرس. و برای یک معامله‌گر، خودتون می‌دونید چقدر این مبحث مهم است."
+    },
+    {
+      "index": 152,
+      "start": null,
+      "end": null,
+      "text": "۲. تأثیر استرس بر معامله‌گری"
+    },
+    {
+      "index": 154,
+      "start": null,
+      "end": null,
+      "text": "آمار مهم: کسی که همواره دچار ترس و استرس است، ضرر و زیانش برابری می‌کند با کسی که پشت سر هم سیگار مصرف می‌کند."
+    },
+    {
+      "index": 155,
+      "start": null,
+      "end": null,
+      "text": "۳. ترس و استرس = مفید تا حدی"
+    },
+    {
+      "index": 156,
+      "start": null,
+      "end": null,
+      "text": "نکته مثبت\tتوضیح"
+    },
+    {
+      "index": 157,
+      "start": null,
+      "end": null,
+      "text": "ترس از دست دادن جان\tباعث减速 در پیچ‌ها می‌شود"
+    },
+    {
+      "index": 158,
+      "start": null,
+      "end": null,
+      "text": "استرس امتحان\tباعث درس خواندن می‌شود"
+    },
+    {
+      "index": 159,
+      "start": null,
+      "end": null,
+      "text": "استرس از دست دادن سرمایه\tباعث رعایت مدیریت ریسک می‌شود"
+    },
+    {
+      "index": 161,
+      "start": null,
+      "end": null,
+      "text": "اصل: وجود ترس و طمع طبیعی است، اما باید روی آنها تسلط داشت."
+    },
+    {
+      "index": 162,
+      "start": null,
+      "end": null,
+      "text": "۴. مدیریت استرس (سه مؤلفه)"
+    },
+    {
+      "index": 163,
+      "start": null,
+      "end": null,
+      "text": "مؤلفه\tتوضیح"
+    },
+    {
+      "index": 164,
+      "start": null,
+      "end": null,
+      "text": "انعطاف‌پذیری\tسازگاری با شرایط فعلی"
+    },
+    {
+      "index": 165,
+      "start": null,
+      "end": null,
+      "text": "تحمل فشار روانی\tمقاومت در برابر مشکلات"
+    },
+    {
+      "index": 166,
+      "start": null,
+      "end": null,
+      "text": "خوش‌بینی\tنگاه مثبت به اتفاقات"
+    },
+    {
+      "index": 167,
+      "start": null,
+      "end": null,
+      "text": "۵. نمره هوش هیجانی"
+    },
+    {
+      "index": 168,
+      "start": null,
+      "end": null,
+      "text": "محدوده\tسطح"
+    },
+    {
+      "index": 169,
+      "start": null,
+      "end": null,
+      "text": "۹۰-۱۶۰\tخیلی کم"
+    },
+    {
+      "index": 170,
+      "start": null,
+      "end": null,
+      "text": "۱۶۳-۲۳۴\tکم"
+    },
+    {
+      "index": 171,
+      "start": null,
+      "end": null,
+      "text": "۲۳۵-۳۰۶\tمتوسط"
+    },
+    {
+      "index": 172,
+      "start": null,
+      "end": null,
+      "text": "۳۰۷-۳۷۸\tزیاد"
+    },
+    {
+      "index": 173,
+      "start": null,
+      "end": null,
+      "text": "۳۷۹-۴۵۰\tخیلی زیاد"
+    },
+    {
+      "index": 174,
+      "start": null,
+      "end": null,
+      "text": "۶. سه عامل اصلی موفقیت (دانیل گلمن)"
+    },
+    {
+      "index": 176,
+      "start": null,
+      "end": null,
+      "text": "۱. مدیریت احساسات"
+    },
+    {
+      "index": 177,
+      "start": null,
+      "end": null,
+      "text": "۲. قدرت تصمیم‌گیری"
+    },
+    {
+      "index": 178,
+      "start": null,
+      "end": null,
+      "text": "۳. به تأخیر انداختن خواسته‌های لذت"
+    },
+    {
+      "index": 179,
+      "start": null,
+      "end": null,
+      "text": "۷. پنج مؤلفه اصلی هوش هیجانی"
+    },
+    {
+      "index": 180,
+      "start": null,
+      "end": null,
+      "text": "#\tمؤلفه"
+    },
+    {
+      "index": 181,
+      "start": null,
+      "end": null,
+      "text": "۱\tخودآگاهی"
+    },
+    {
+      "index": 182,
+      "start": null,
+      "end": null,
+      "text": "۲\tخودتنظیمی"
+    },
+    {
+      "index": 183,
+      "start": null,
+      "end": null,
+      "text": "۳\tانگیزش"
+    },
+    {
+      "index": 184,
+      "start": null,
+      "end": null,
+      "text": "۴\tهمدلی"
+    },
+    {
+      "index": 185,
+      "start": null,
+      "end": null,
+      "text": "۵\tمهارت‌های اجتماعی"
+    },
+    {
+      "index": 186,
+      "start": null,
+      "end": null,
+      "text": "۸. تمرین نهایی"
+    },
+    {
+      "index": 188,
+      "start": null,
+      "end": null,
+      "text": "قار تنهایی خود را پیدا کن:"
+    },
+    {
+      "index": 190,
+      "start": null,
+      "end": null,
+      "text": "روزی ۵ دقیقه خلوت کن"
+    },
+    {
+      "index": 192,
+      "start": null,
+      "end": null,
+      "text": "گوشی را کنار بگذار"
+    },
+    {
+      "index": 194,
+      "start": null,
+      "end": null,
+      "text": "فقط فکر کن"
+    },
+    {
+      "index": 196,
+      "start": null,
+      "end": null,
+      "text": "خودت را بشناس"
+    },
+    {
+      "index": 198,
+      "start": null,
+      "end": null,
+      "text": "۹. جمع‌بندی نهایی"
+    },
+    {
+      "index": 200,
+      "start": null,
+      "end": null,
+      "text": "هوش هیجانی قابل بهبود است"
+    },
+    {
+      "index": 202,
+      "start": null,
+      "end": null,
+      "text": "۵۰٪ راه = شناخت مؤلفه‌ها"
+    },
+    {
+      "index": 204,
+      "start": null,
+      "end": null,
+      "text": "ترس و طمع قابل کنترل هستند"
+    },
+    {
+      "index": 206,
+      "start": null,
+      "end": null,
+      "text": "مسئولیت‌پذیر باش"
+    },
+    {
+      "index": 208,
+      "start": null,
+      "end": null,
+      "text": "از مسیر لذت ببر"
+    },
+    {
+      "index": 210,
+      "start": null,
+      "end": null,
+      "text": "ثابت‌قدم باش"
+    }
+  ]
+}
