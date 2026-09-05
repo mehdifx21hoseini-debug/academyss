@@ -279,6 +279,12 @@
       "sha": "7685df5d770f3098",
       "file": "exports/conflicts/conflict_registry_v008.md",
       "generated_at": "2026-09-05T17:07:03Z"
+    },
+    {
+      "version": "v009",
+      "sha": "a9bc9764fe19ca82",
+      "file": "exports/conflicts/conflict_registry_v009.md",
+      "generated_at": "2026-09-05T17:33:17Z"
     }
   ],
   "conflict_registry.json": [
@@ -329,6 +335,12 @@
       "sha": "cad63be1ab48448a",
       "file": "exports/conflicts/conflict_registry_v008.json",
       "generated_at": "2026-09-05T17:07:03Z"
+    },
+    {
+      "version": "v009",
+      "sha": "64c1d4644a89faae",
+      "file": "exports/conflicts/conflict_registry_v009.json",
+      "generated_at": "2026-09-05T17:33:17Z"
     }
   ],
   "review_queue_open_items.md": [
@@ -409,6 +421,12 @@
       "sha": "96dbe66df0c09b31",
       "file": "exports/reports/review_queue_open_items_v013.md",
       "generated_at": "2026-09-05T17:07:03Z"
+    },
+    {
+      "version": "v014",
+      "sha": "45faaf667e19b893",
+      "file": "exports/reports/review_queue_open_items_v014.md",
+      "generated_at": "2026-09-05T17:33:17Z"
     }
   ],
   "review_queue_open_items.json": [
@@ -489,6 +507,12 @@
       "sha": "5a312eed36b6cac3",
       "file": "exports/reports/review_queue_open_items_v013.json",
       "generated_at": "2026-09-05T17:07:03Z"
+    },
+    {
+      "version": "v014",
+      "sha": "9d85a18caf79f6e7",
+      "file": "exports/reports/review_queue_open_items_v014.json",
+      "generated_at": "2026-09-05T17:33:17Z"
     }
   ],
   "academy_site_catalog.md": [
@@ -661,6 +685,12 @@
       "sha": "02c4a942243effac",
       "file": "exports/reports/kb_index_v023.csv",
       "generated_at": "2026-09-05T17:07:03Z"
+    },
+    {
+      "version": "v024",
+      "sha": "8f96e8030d8fe2d1",
+      "file": "exports/reports/kb_index_v024.csv",
+      "generated_at": "2026-09-05T17:33:17Z"
     }
   ],
   "glossary.csv": [
@@ -729,6 +759,12 @@
       "sha": "dccddb7c5f8791a2",
       "file": "exports/glossary/glossary_v011.csv",
       "generated_at": "2026-09-05T17:07:03Z"
+    },
+    {
+      "version": "v012",
+      "sha": "e186c5be23873a8a",
+      "file": "exports/glossary/glossary_v012.csv",
+      "generated_at": "2026-09-05T17:33:17Z"
     }
   ],
   "metatrader_common_procedures.md": [
@@ -1019,6 +1055,12 @@
       "sha": "8855b42b15d5ea41",
       "file": "exports/academy/academy_intro_lesson_08a_v001.md",
       "generated_at": "2026-09-05T16:39:10Z"
+    },
+    {
+      "version": "v002",
+      "sha": "1c44de4b2819b48f",
+      "file": "exports/academy/academy_intro_lesson_08a_v002.md",
+      "generated_at": "2026-09-05T17:33:17Z"
     }
   ],
   "academy_intro_lesson_08a.json": [
@@ -1027,6 +1069,12 @@
       "sha": "4f8248129e3c3e77",
       "file": "exports/academy/academy_intro_lesson_08a_v001.json",
       "generated_at": "2026-09-05T16:39:10Z"
+    },
+    {
+      "version": "v002",
+      "sha": "761cdf503e4e4388",
+      "file": "exports/academy/academy_intro_lesson_08a_v002.json",
+      "generated_at": "2026-09-05T17:33:17Z"
     }
   ],
   "academy_intro_lesson_09.md": [
@@ -1075,6 +1123,22 @@
       "sha": "be19e9aa57f89401",
       "file": "exports/academy/academy_intro_lesson_11_v001.json",
       "generated_at": "2026-09-05T17:07:03Z"
+    }
+  ],
+  "academy_intro_lesson_12.md": [
+    {
+      "version": "v001",
+      "sha": "b3ed9be02ec5abcd",
+      "file": "exports/academy/academy_intro_lesson_12_v001.md",
+      "generated_at": "2026-09-05T17:33:17Z"
+    }
+  ],
+  "academy_intro_lesson_12.json": [
+    {
+      "version": "v001",
+      "sha": "ce0f43afa0d5565d",
+      "file": "exports/academy/academy_intro_lesson_12_v001.json",
+      "generated_at": "2026-09-05T17:33:17Z"
     }
   ]
 }

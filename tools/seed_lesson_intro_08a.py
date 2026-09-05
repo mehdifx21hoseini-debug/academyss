@@ -213,7 +213,7 @@ changed = K.write_collection(K.KB_DIR + "/academy/intro/lesson_08a.json", {
     "version": "v001", "generated_at": NOW, "pipeline_stage": "STRUCTURED",
     "source_files": [RAW, "raw_sources/academy/intro/intro_lesson_08a.ingest.json"],
     "notes": [
-        "قسمت دوم این جلسه (پین‌بار) هنوز دریافت نشده است.",
+        "مبحث پین‌بار که در این جلسه وعده داده شده بود، در جلسه‌ی ۱۲ ارائه شد (ACA-INT-0194 به بعد).",
         "اعداد مثال طلا گرد و آموزشی‌اند و به‌عنوان داده‌ی تاریخی بازار ثبت نشدند.",
     ],
     "objects": OBJECTS,
