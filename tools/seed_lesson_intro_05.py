@@ -11,10 +11,10 @@ Two things are handled with care:
     here Fibonacci retracement is used as a measuring tool for risk/reward.
     That is not a contradiction, and a dedicated record says so explicitly so
     students are not confused.
-  * "Open Offline: برای وقتی نت قطع هست". That is not what MT4 offline charts
-    are for, and it disagrees with MT4-PROC-0009. Recorded as stated, flagged
-    REVIEW_REQUIRED, and paired with CONF-0004 rather than silently corrected
-    or silently propagated.
+  * "Open Offline: برای وقتی نت قطع هست" was extracted, flagged as conflicting
+    with the platform's real behaviour (CONF-0004), and then dropped on the
+    owner's instruction (decision D-0004). The sentence stays in the raw
+    transcript; it simply produces no knowledge object.
 """
 import sys
 
@@ -403,20 +403,6 @@ OBJECTS = [
         keywords=["شورت کات", "کلید میانبر", "F9", "F8", "Ctrl+M"],
         related_concepts=["MT-CONC-0014"],
         related_questions=["کلیدهای میانبر متاتریدر چیه؟"]),
-    obj("ACA-INT-0109", "CONCEPT", "توضیح درس درباره‌ی Open Offline (نیازمند بررسی)",
-        "در مرور منوی File، گزینه‌ی Open Offline چنین توصیف شده است: «باز کردن نمودار آفلاین، برای "
-        "وقتی نت قطع هست». این توصیف با کارکرد شناخته‌شده‌ی چارت آفلاین در متاتریدر ۴ هم‌خوان نیست؛ "
-        "چارت آفلاین معمولاً برای نمایش تایم‌فریم‌های غیراستاندارد یا نمودارهایی است که توسط اسکریپت "
-        "یا اکسپرت ساخته و تغذیه می‌شوند، نه برای ادامه‌ی کار هنگام قطع اینترنت. این مورد به‌صورت "
-        "تعارض ثبت شد و تا تعیین تکلیف، مربی نباید آن را به دانشجو آموزش بدهد.",
-        "بخش ۱۶",
-        "Open Offline: باز کردن نمودار آفلاین (برای وقتی نت قطع هست)",
-        0.4, review_reason="ناسازگاری با کارکرد شناخته‌شده‌ی چارت آفلاین متاتریدر ۴ (رکورد MT4-PROC-0009).",
-        warnings=["تا تأیید مدرس، این توضیح نباید به‌عنوان آموزش ارائه شود."],
-        conflicts=["CONF-0004"],
-        keywords=["open offline", "چارت آفلاین"],
-        related_concepts=["MT4-PROC-0009"],
-        related_questions=["چارت آفلاین چیه؟", "اگه نتم قطع بشه می‌تونم ترید کنم؟"]),
 ]
 
 changed = K.write_collection(K.KB_DIR + "/academy/intro/lesson_05.json", {
@@ -431,7 +417,7 @@ changed = K.write_collection(K.KB_DIR + "/academy/intro/lesson_05.json", {
     "notes": [
         "این جلسه بسیاری از رکوردهای دامنه‌ی metatrader را که تا امروز MODEL_DRAFT بودند تأیید متقاطع می‌کند (RQ-0007).",
         "استفاده از فیبوناچی به‌عنوان ابزار، ناقض موضع جلسه‌ی سوم نیست؛ رکورد ACA-INT-0098 این تفکیک را روشن می‌کند.",
-        "توضیح Open Offline با کارکرد واقعی پلتفرم هم‌خوان نیست و به‌صورت CONF-0004 ثبت شد.",
+        "جمله‌ی مربوط به Open Offline طبق تصمیم مالک پروژه (D-0004) حذف شد و هیچ رکوردی از آن ساخته نمی‌شود.",
         "اعداد سواپ در این جلسه وابسته به نماد و بروکر است و به‌عنوان نرخ عمومی ثبت نشد.",
     ],
     "objects": OBJECTS,
