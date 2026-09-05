@@ -237,6 +237,12 @@
       "sha": "163d97c29d64095a",
       "file": "exports/conflicts/conflict_registry_v003.md",
       "generated_at": "2026-09-05T15:45:00Z"
+    },
+    {
+      "version": "v004",
+      "sha": "f06dd0ca73a9b8c9",
+      "file": "exports/conflicts/conflict_registry_v004.md",
+      "generated_at": "2026-09-05T15:48:44Z"
     }
   ],
   "conflict_registry.json": [
@@ -257,6 +263,12 @@
       "sha": "912d49f707e5554a",
       "file": "exports/conflicts/conflict_registry_v003.json",
       "generated_at": "2026-09-05T15:45:00Z"
+    },
+    {
+      "version": "v004",
+      "sha": "13dc0ef6dac6aefc",
+      "file": "exports/conflicts/conflict_registry_v004.json",
+      "generated_at": "2026-09-05T15:48:44Z"
     }
   ],
   "review_queue_open_items.md": [
@@ -481,6 +493,12 @@
       "sha": "75bb9bfbc02da44b",
       "file": "exports/reports/kb_index_v013.csv",
       "generated_at": "2026-09-05T15:45:00Z"
+    },
+    {
+      "version": "v014",
+      "sha": "64f39fa63a96486d",
+      "file": "exports/reports/kb_index_v014.csv",
+      "generated_at": "2026-09-05T15:48:44Z"
     }
   ],
   "glossary.csv": [
@@ -699,6 +717,12 @@
       "sha": "c338d07b0c2718b4",
       "file": "exports/academy/academy_intro_lesson_04_v001.md",
       "generated_at": "2026-09-05T15:45:00Z"
+    },
+    {
+      "version": "v002",
+      "sha": "3a14f854161c7d93",
+      "file": "exports/academy/academy_intro_lesson_04_v002.md",
+      "generated_at": "2026-09-05T15:48:44Z"
     }
   ],
   "academy_intro_lesson_04.json": [
@@ -707,6 +731,28 @@
       "sha": "0413919ac8354641",
       "file": "exports/academy/academy_intro_lesson_04_v001.json",
       "generated_at": "2026-09-05T15:45:00Z"
+    },
+    {
+      "version": "v002",
+      "sha": "115796ebd5e90c80",
+      "file": "exports/academy/academy_intro_lesson_04_v002.json",
+      "generated_at": "2026-09-05T15:48:44Z"
+    }
+  ],
+  "academy_clarifications.md": [
+    {
+      "version": "v001",
+      "sha": "9eb3727659fdf2fc",
+      "file": "exports/academy/academy_clarifications_v001.md",
+      "generated_at": "2026-09-05T15:48:44Z"
+    }
+  ],
+  "academy_clarifications.json": [
+    {
+      "version": "v001",
+      "sha": "fdee3403f53c4598",
+      "file": "exports/academy/academy_clarifications_v001.json",
+      "generated_at": "2026-09-05T15:48:44Z"
     }
   ]
 }

@@ -1,0 +1,65 @@
+{
+  "collection_id": "academy_clarifications",
+  "domain": "academy",
+  "title": "رفع ابهام‌های تأییدشده",
+  "description": "پاسخ‌های یکپارچه به مواردی که در جلسات مختلف متفاوت بیان شده‌اند و مالک پروژه درباره‌شان تصمیم گرفته است. این رکوردها بر نقل‌قول‌های جلسات اولویت دارند.",
+  "version": "v001",
+  "generated_at": "2026-09-05T15:48:44Z",
+  "pipeline_stage": "VALIDATED",
+  "source_files": [
+    "MENTORAI_KB_DECISIONS.md"
+  ],
+  "notes": [
+    "هر رکورد اینجا باید به یک تصمیم ثبت‌شده در دفتر تصمیم‌ها و یک CONFLICT_RECORD وصل باشد."
+  ],
+  "objects": [
+    {
+      "id": "ACA-CLR-0001",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "category": "رفع ابهام",
+      "title": "آیا برای کار در فارکس فیلترشکن لازم است؟",
+      "language": "fa",
+      "summary": "برای سایت بروکر ممکن است لازم باشد؛ برای اتصال متاتریدر و انجام معامله لازم نیست.",
+      "chunk_text": "پاسخ به این پرسش دو بخش دارد و نباید با هم قاطی شود. ۱) برای باز کردن وب‌سایت و کابین معاملاتی بروکر، ممکن است به فیلترشکن نیاز داشته باشید. نوع فیلترشکن اهمیتی ندارد و لازم نیست IP ثابت باشد — برخلاف چیزی که کاربران ارز دیجیتال به آن عادت دارند. ۲) برای اتصال پلتفرم متاتریدر به سرور بروکر و انجام معامله، فیلترشکن لازم نیست. بنابراین جمله‌ی «برای ترید کردن باید فیلترشکن روشن باشد» درست نیست.",
+      "conditions": [
+        "دسترسی به سایت بروکر به شرایط شبکه‌ی کاربر بستگی دارد و ممکن است تغییر کند."
+      ],
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "MENTORAI_KB_DECISIONS.md",
+        "source_location": "D-0003",
+        "author": "مالک پروژه"
+      },
+      "authority_level": "ACADEMY_DERIVED",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "confidence": 1.0,
+      "version": "v001",
+      "keywords": [
+        "فیلترشکن",
+        "VPN",
+        "سایت بروکر",
+        "اتصال متاتریدر",
+        "IP ثابت"
+      ],
+      "related_concepts": [
+        "ACA-INT-0039",
+        "ACA-INT-0078"
+      ],
+      "conflicts": [
+        "CONF-0003"
+      ],
+      "related_questions": [
+        "برای ترید فیلترشکن لازمه؟",
+        "سایت بروکر باز نمی‌شه چیکار کنم؟",
+        "IP ثابت لازمه؟",
+        "با فیلترشکن معامله کنم مشکلی پیش میاد؟"
+      ],
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z"
+    }
+  ]
+}
