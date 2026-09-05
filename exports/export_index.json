@@ -379,6 +379,12 @@
       "sha": "7aa3e580de7d7c18",
       "file": "exports/reports/review_queue_open_items_v010.md",
       "generated_at": "2026-09-05T15:58:30Z"
+    },
+    {
+      "version": "v011",
+      "sha": "1d3e5be61c8ca583",
+      "file": "exports/reports/review_queue_open_items_v011.md",
+      "generated_at": "2026-09-05T16:52:14Z"
     }
   ],
   "review_queue_open_items.json": [
@@ -441,6 +447,12 @@
       "sha": "d1a413f25ca10508",
       "file": "exports/reports/review_queue_open_items_v010.json",
       "generated_at": "2026-09-05T15:58:30Z"
+    },
+    {
+      "version": "v011",
+      "sha": "1821da1caa03baf5",
+      "file": "exports/reports/review_queue_open_items_v011.json",
+      "generated_at": "2026-09-05T16:52:14Z"
     }
   ],
   "academy_site_catalog.md": [
@@ -595,6 +607,12 @@
       "sha": "cb01e16eee6652ac",
       "file": "exports/reports/kb_index_v020.csv",
       "generated_at": "2026-09-05T16:39:10Z"
+    },
+    {
+      "version": "v021",
+      "sha": "340b9e9a288319a9",
+      "file": "exports/reports/kb_index_v021.csv",
+      "generated_at": "2026-09-05T16:52:14Z"
     }
   ],
   "glossary.csv": [
@@ -645,6 +663,12 @@
       "sha": "8de7b115c30d3cf9",
       "file": "exports/glossary/glossary_v008.csv",
       "generated_at": "2026-09-05T16:39:10Z"
+    },
+    {
+      "version": "v009",
+      "sha": "3c614ddbe89b250e",
+      "file": "exports/glossary/glossary_v009.csv",
+      "generated_at": "2026-09-05T16:52:14Z"
     }
   ],
   "metatrader_common_procedures.md": [
@@ -943,6 +967,22 @@
       "sha": "4f8248129e3c3e77",
       "file": "exports/academy/academy_intro_lesson_08a_v001.json",
       "generated_at": "2026-09-05T16:39:10Z"
+    }
+  ],
+  "academy_intro_lesson_09.md": [
+    {
+      "version": "v001",
+      "sha": "e2123d3515def395",
+      "file": "exports/academy/academy_intro_lesson_09_v001.md",
+      "generated_at": "2026-09-05T16:52:14Z"
+    }
+  ],
+  "academy_intro_lesson_09.json": [
+    {
+      "version": "v001",
+      "sha": "2ff05237c2f3a722",
+      "file": "exports/academy/academy_intro_lesson_09_v001.json",
+      "generated_at": "2026-09-05T16:52:14Z"
     }
   ]
 }

@@ -1,0 +1,53 @@
+{
+  "report_type": "validation",
+  "version": "v031",
+  "generated_at": "2026-09-05T16:51:50Z",
+  "stats": {
+    "files": 28,
+    "objects": 396,
+    "by_kind": {
+      "knowledge_object": 26,
+      "conflict_record": 1,
+      "review_item": 1
+    },
+    "by_domain": {
+      "brokers": 2,
+      "psychology": 27,
+      "metatrader": 102,
+      "general_trading": 49,
+      "academy": 209,
+      "mentor_qa": 1,
+      "meta": 6
+    },
+    "by_approval": {
+      "REVIEW_REQUIRED": 11,
+      "PENDING_VERIFICATION": 172,
+      "PENDING_REVIEW": 182,
+      "APPROVED": 10
+    }
+  },
+  "errors": 4,
+  "warnings": 0,
+  "findings": [
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/intro/lesson_09.json :: ACA-INT-0150",
+      "message": "object_type COMPARISON requires non-empty 'comparison'"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/intro/lesson_09.json :: ACA-INT-0151",
+      "message": "unknown field 'notes'"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/intro/lesson_09.json :: ACA-INT-0158",
+      "message": "object_type RULE requires non-empty 'rule'"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/intro/lesson_09.json :: ACA-INT-0161",
+      "message": "object_type RULE requires non-empty 'rule'"
+    }
+  ]
+}
