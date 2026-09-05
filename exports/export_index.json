@@ -315,6 +315,12 @@
       "sha": "74c7ad2885bb2140",
       "file": "exports/conflicts/conflict_registry_v014.md",
       "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v015",
+      "sha": "28c6bcf99e285b97",
+      "file": "exports/conflicts/conflict_registry_v015.md",
+      "generated_at": "2026-09-05T20:50:22Z"
     }
   ],
   "conflict_registry.json": [
@@ -401,6 +407,12 @@
       "sha": "c40917feacc209c2",
       "file": "exports/conflicts/conflict_registry_v014.json",
       "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v015",
+      "sha": "840713aca0c1ec6b",
+      "file": "exports/conflicts/conflict_registry_v015.json",
+      "generated_at": "2026-09-05T20:50:22Z"
     }
   ],
   "review_queue_open_items.md": [
@@ -535,6 +547,12 @@
       "sha": "25726ea5566b4ef6",
       "file": "exports/reports/review_queue_open_items_v022.md",
       "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v023",
+      "sha": "0237014256c3bf5a",
+      "file": "exports/reports/review_queue_open_items_v023.md",
+      "generated_at": "2026-09-05T20:50:22Z"
     }
   ],
   "review_queue_open_items.json": [
@@ -669,6 +687,12 @@
       "sha": "d7e308772c398c6c",
       "file": "exports/reports/review_queue_open_items_v022.json",
       "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v023",
+      "sha": "31afc6cb5c7a4a65",
+      "file": "exports/reports/review_queue_open_items_v023.json",
+      "generated_at": "2026-09-05T20:50:22Z"
     }
   ],
   "academy_site_catalog.md": [
@@ -901,6 +925,12 @@
       "sha": "5f0921f3ce2bfa13",
       "file": "exports/reports/kb_index_v033.csv",
       "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v034",
+      "sha": "d6c6be8198220774",
+      "file": "exports/reports/kb_index_v034.csv",
+      "generated_at": "2026-09-05T20:50:22Z"
     }
   ],
   "glossary.csv": [
@@ -1051,6 +1081,12 @@
       "sha": "27936814b89826b9",
       "file": "exports/academy/academy_response_policies_v003.md",
       "generated_at": "2026-09-05T20:32:24Z"
+    },
+    {
+      "version": "v004",
+      "sha": "ae8305a2c92deae3",
+      "file": "exports/academy/academy_response_policies_v004.md",
+      "generated_at": "2026-09-05T20:50:22Z"
     }
   ],
   "academy_response_policies.json": [
@@ -1071,6 +1107,12 @@
       "sha": "c0925765622030f9",
       "file": "exports/academy/academy_response_policies_v003.json",
       "generated_at": "2026-09-05T20:32:24Z"
+    },
+    {
+      "version": "v004",
+      "sha": "72ec84a1bc67b2aa",
+      "file": "exports/academy/academy_response_policies_v004.json",
+      "generated_at": "2026-09-05T20:50:22Z"
     }
   ],
   "psychology_safety_policy.md": [
@@ -1243,6 +1285,12 @@
       "sha": "fffe724bb134b28f",
       "file": "exports/academy/academy_clarifications_v002.md",
       "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "f6ddedb46a1c7a5d",
+      "file": "exports/academy/academy_clarifications_v003.md",
+      "generated_at": "2026-09-05T20:50:22Z"
     }
   ],
   "academy_clarifications.json": [
@@ -1257,6 +1305,12 @@
       "sha": "39a74630a9888331",
       "file": "exports/academy/academy_clarifications_v002.json",
       "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "e8d770a3eb1de7d8",
+      "file": "exports/academy/academy_clarifications_v003.json",
+      "generated_at": "2026-09-05T20:50:22Z"
     }
   ],
   "academy_intro_lesson_05.md": [
@@ -1581,6 +1635,12 @@
       "sha": "45a8e9fa6b31c9df",
       "file": "exports/mentor_qa/mentor_qa_pack_01_v001.md",
       "generated_at": "2026-09-05T19:40:31Z"
+    },
+    {
+      "version": "v002",
+      "sha": "3cba7fb415f7158b",
+      "file": "exports/mentor_qa/mentor_qa_pack_01_v002.md",
+      "generated_at": "2026-09-05T20:50:22Z"
     }
   ],
   "mentor_qa_pack_01.json": [
@@ -1589,6 +1649,12 @@
       "sha": "4144603b98933d99",
       "file": "exports/mentor_qa/mentor_qa_pack_01_v001.json",
       "generated_at": "2026-09-05T19:40:31Z"
+    },
+    {
+      "version": "v002",
+      "sha": "562b449017de5798",
+      "file": "exports/mentor_qa/mentor_qa_pack_01_v002.json",
+      "generated_at": "2026-09-05T20:50:22Z"
     }
   ],
   "mentor_qa_pack_02.md": [
@@ -1657,6 +1723,12 @@
       "sha": "4b6d9d9c96fe6e48",
       "file": "exports/mentor_qa/mentor_qa_pack_04_v001.md",
       "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v002",
+      "sha": "660f247107303caa",
+      "file": "exports/mentor_qa/mentor_qa_pack_04_v002.md",
+      "generated_at": "2026-09-05T20:50:22Z"
     }
   ],
   "mentor_qa_pack_04.json": [
@@ -1665,6 +1737,12 @@
       "sha": "bf83b025a56c89a6",
       "file": "exports/mentor_qa/mentor_qa_pack_04_v001.json",
       "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v002",
+      "sha": "c1dfa0da960545a7",
+      "file": "exports/mentor_qa/mentor_qa_pack_04_v002.json",
+      "generated_at": "2026-09-05T20:50:22Z"
     }
   ],
   "academy_tools.md": [
@@ -1673,6 +1751,12 @@
       "sha": "c9c4eeee64eb068d",
       "file": "exports/academy/academy_tools_v001.md",
       "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v002",
+      "sha": "ca065ae4605d29d7",
+      "file": "exports/academy/academy_tools_v002.md",
+      "generated_at": "2026-09-05T20:50:22Z"
     }
   ],
   "academy_tools.json": [
@@ -1681,6 +1765,12 @@
       "sha": "d655362f7ca06d86",
       "file": "exports/academy/academy_tools_v001.json",
       "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v002",
+      "sha": "e3c82242180bb27e",
+      "file": "exports/academy/academy_tools_v002.json",
+      "generated_at": "2026-09-05T20:50:22Z"
     }
   ]
 }
