@@ -131,7 +131,7 @@ for i, (fa, en, definition, symptoms, remedies, kw, questions) in enumerate(PATT
         "updated_at": NOW,
     })
 
-changed = K.write_collection(K.KB_DIR + "/psychology/psychology_patterns_v001.json", {
+changed = K.write_collection(K.KB_DIR + "/psychology/psychology_patterns.json", {
     "collection_id": "psychology_patterns",
     "domain": "psychology",
     "title": "الگوهای روان‌شناسی معامله‌گری",
@@ -145,4 +145,4 @@ changed = K.write_collection(K.KB_DIR + "/psychology/psychology_patterns_v001.js
               "محتوا آموزشی است و هیچ تشخیص یا توصیه‌ی درمانی ارائه نمی‌کند."],
     "objects": objects,
 })
-print("%s knowledge_base/psychology/psychology_patterns_v001.json objects: %d" % ("wrote" if changed else "unchanged", len(objects)))
+print("%s knowledge_base/psychology/psychology_patterns.json objects: %d" % ("wrote" if changed else "unchanged", len(objects)))

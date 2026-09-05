@@ -1,16 +1,16 @@
 {
   "manifest_type": "mentorai_knowledge_base",
-  "version": "v004",
-  "generated_at": "2026-09-05T12:38:06Z",
+  "version": "v002",
+  "generated_at": "2026-09-05T12:21:37Z",
   "generator": "tools/kb_build_manifest.py",
   "schema_versions": {
     "enums": "1.0.0"
   },
   "totals": {
-    "objects": 164,
+    "objects": 94,
     "by_domain": {
       "psychology": 11,
-      "metatrader": 96,
+      "metatrader": 26,
       "general_trading": 29,
       "academy": 20,
       "mentor_qa": 1,
@@ -19,54 +19,52 @@
     },
     "by_object_type": {
       "PSYCHOLOGY_PATTERN": 10,
-      "METATRADER_PROCEDURE": 44,
-      "DEFINITION": 5,
-      "CONCEPT": 23,
-      "TROUBLESHOOTING": 17,
-      "COMPARISON": 11,
+      "TROUBLESHOOTING": 5,
+      "COMPARISON": 6,
+      "METATRADER_PROCEDURE": 12,
+      "CONCEPT": 9,
       "GLOSSARY": 22,
       "CONFLICT_RECORD": 1,
-      "REVIEW_ITEM": 10,
+      "REVIEW_ITEM": 8,
       "CATALOG_ITEM": 12,
       "OPERATIONAL_FACT": 2,
       "PROCEDURE": 1,
       "RULE": 6
     },
     "by_authority": {
-      "GENERAL_KNOWLEDGE": 125,
+      "GENERAL_KNOWLEDGE": 57,
       "EXTERNAL_METHODOLOGY": 7,
-      "<unset>": 11,
+      "<unset>": 9,
       "ACADEMY_DERIVED": 21
     },
     "by_approval": {
-      "PENDING_VERIFICATION": 132,
-      "<unset>": 11,
+      "PENDING_VERIFICATION": 64,
+      "<unset>": 9,
       "PENDING_REVIEW": 15,
       "APPROVED": 6
     },
     "by_lifecycle": {
-      "PENDING_REVIEW": 147,
-      "<unset>": 11,
+      "PENDING_REVIEW": 79,
+      "<unset>": 9,
       "ACTIVE": 6
     },
     "by_platform_scope": {
       "NOT_APPLICABLE": 39,
-      "BOTH": 45,
-      "BROKER_DEPENDENT": 7,
-      "MT4_ONLY": 13,
-      "VERSION_DEPENDENT": 11,
-      "MT5_ONLY": 17,
-      "<unset>": 32
+      "BOTH": 5,
+      "VERSION_DEPENDENT": 6,
+      "MT4_ONLY": 6,
+      "MT5_ONLY": 8,
+      "<unset>": 30
     },
     "by_source_type": {
-      "MODEL_DRAFT": 132,
-      "<unset>": 11,
+      "MODEL_DRAFT": 64,
+      "<unset>": 9,
       "ACADEMY_APP_DATA": 12,
       "ACADEMY_WEBSITE": 3,
       "ACADEMY_DOCUMENT": 6
     }
   },
-  "verification_pending": 147,
+  "verification_pending": 79,
   "collections": [
     {
       "collection_id": "psychology_patterns",
@@ -82,32 +80,6 @@
       ]
     },
     {
-      "collection_id": "metatrader_common_procedures",
-      "title": "رویه‌های مشترک متاتریدر ۴ و ۵",
-      "domain": "metatrader",
-      "record_kind": "knowledge_object",
-      "version": "v001",
-      "pipeline_stage": "STRUCTURED",
-      "file": "knowledge_base/metatrader/mt_common_procedures.json",
-      "object_count": 20,
-      "source_files": [
-        "tools/seed_mt_common.py"
-      ]
-    },
-    {
-      "collection_id": "metatrader_concepts",
-      "title": "مفاهیم پایه‌ی متاتریدر",
-      "domain": "metatrader",
-      "record_kind": "knowledge_object",
-      "version": "v001",
-      "pipeline_stage": "STRUCTURED",
-      "file": "knowledge_base/metatrader/mt_concepts.json",
-      "object_count": 16,
-      "source_files": [
-        "tools/seed_mt_concepts.py"
-      ]
-    },
-    {
       "collection_id": "metatrader_troubleshooting",
       "title": "عیب‌یابی خطاهای رایج متاتریدر",
       "domain": "metatrader",
@@ -115,9 +87,9 @@
       "version": "v001",
       "pipeline_stage": "STRUCTURED",
       "file": "knowledge_base/metatrader/mt_troubleshooting.json",
-      "object_count": 17,
+      "object_count": 5,
       "source_files": [
-        "tools/seed_mt_troubleshooting.py"
+        "tools/seed_metatrader.py"
       ]
     },
     {
@@ -128,9 +100,9 @@
       "version": "v001",
       "pipeline_stage": "STRUCTURED",
       "file": "knowledge_base/metatrader/comparison/mt4_vs_mt5.json",
-      "object_count": 11,
+      "object_count": 6,
       "source_files": [
-        "tools/seed_mt_comparison.py"
+        "tools/seed_metatrader.py"
       ]
     },
     {
@@ -141,9 +113,9 @@
       "version": "v001",
       "pipeline_stage": "STRUCTURED",
       "file": "knowledge_base/metatrader/mt4/mt4_core.json",
-      "object_count": 12,
+      "object_count": 6,
       "source_files": [
-        "tools/seed_mt4.py"
+        "tools/seed_metatrader.py"
       ]
     },
     {
@@ -154,9 +126,9 @@
       "version": "v001",
       "pipeline_stage": "STRUCTURED",
       "file": "knowledge_base/metatrader/mt5/mt5_core.json",
-      "object_count": 17,
+      "object_count": 8,
       "source_files": [
-        "tools/seed_mt5.py"
+        "tools/seed_metatrader.py"
       ]
     },
     {
@@ -208,7 +180,7 @@
       "version": "v001",
       "pipeline_stage": "VALIDATED",
       "file": "knowledge_base/review_queue/open_items.json",
-      "object_count": 10,
+      "object_count": 8,
       "source_files": [
         "MENTORAI_KB_AUDIT.md"
       ]
@@ -289,7 +261,7 @@
     },
     {
       "id": "RQ-0007",
-      "title": "دانش متاتریدر ساخته شد اما تأیید نشده است",
+      "title": "دانش متاتریدر بدون تأیید منبع رسمی",
       "priority": "P1",
       "domain": "metatrader"
     },
@@ -298,18 +270,6 @@
       "title": "متدولوژی رسمی آکادمی تعریف نشده است",
       "priority": "P0",
       "domain": "academy"
-    },
-    {
-      "id": "RQ-0009",
-      "title": "پلتفرم اصلی دانشجویان مشخص نیست",
-      "priority": "P2",
-      "domain": "metatrader"
-    },
-    {
-      "id": "RQ-0010",
-      "title": "سیاست آکادمی درباره‌ی اکسپرت و کپی‌تریدینگ مشخص نیست",
-      "priority": "P2",
-      "domain": "metatrader"
     }
   ],
   "source_coverage": {

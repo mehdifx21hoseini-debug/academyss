@@ -77,7 +77,7 @@ policy = [
          keywords=["حریم خصوصی", "PII", "حافظه"]),
 ]
 
-changed = K.write_collection(K.KB_DIR + "/academy/methodology/kb_policy_rules_v001.json", {
+changed = K.write_collection(K.KB_DIR + "/academy/methodology/kb_policy_rules.json", {
     "collection_id": "kb_policy_rules", "domain": "meta",
     "title": "قواعد حاکم بر پایگاه دانش و حفاظت از متدولوژی",
     "description": "قواعد عملیاتی برگرفته از منشور پروژه که رفتار بازیابی و اعتبارسنجی را تعیین می‌کنند.",
@@ -86,7 +86,7 @@ changed = K.write_collection(K.KB_DIR + "/academy/methodology/kb_policy_rules_v0
     "notes": ["این مجموعه تنها مجموعه‌ای است که وضعیت APPROVED دارد، چون منبع آن سند رسمی پروژه است."],
     "objects": policy,
 })
-print("%s kb_policy_rules_v001.json objects: %d" % ("wrote" if changed else "unchanged", len(policy)))
+print("%s kb_policy_rules.json objects: %d" % ("wrote" if changed else "unchanged", len(policy)))
 
 # --------------------------------------------------- external methodology quarantine
 EXTERNAL = [
@@ -138,7 +138,7 @@ for i, (name, desc, kw) in enumerate(EXTERNAL):
         "created_at": NOW, "updated_at": NOW,
     })
 
-changed = K.write_collection(K.KB_DIR + "/general_trading/external_methodologies_quarantine_v001.json", {
+changed = K.write_collection(K.KB_DIR + "/general_trading/external_methodologies_quarantine.json", {
     "collection_id": "external_methodologies_quarantine", "domain": "general_trading",
     "title": "قرنطینه‌ی روش‌های معاملاتی بیرونی",
     "description": ("توضیح کوتاه روش‌هایی که جزو متدولوژی آکادمی نیستند، صرفاً برای تشخیص سؤال دانشجو "
@@ -148,7 +148,7 @@ changed = K.write_collection(K.KB_DIR + "/general_trading/external_methodologies
     "notes": ["گسترش محتوای این روش‌ها ممنوع است؛ فقط سطح شناسایی نگهداری می‌شود."],
     "objects": quarantine,
 })
-print("%s external_methodologies_quarantine_v001.json objects: %d" % ("wrote" if changed else "unchanged", len(quarantine)))
+print("%s external_methodologies_quarantine.json objects: %d" % ("wrote" if changed else "unchanged", len(quarantine)))
 
 # ------------------------------------------------------------------ conflict registry
 conflicts = [{
@@ -176,7 +176,7 @@ conflicts = [{
     "created_at": NOW, "updated_at": NOW,
 }]
 
-changed = K.write_collection(K.KB_DIR + "/conflicts/conflict_registry_v001.json", {
+changed = K.write_collection(K.KB_DIR + "/conflicts/conflict_registry.json", {
     "collection_id": "conflict_registry", "domain": "meta",
     "title": "دفتر ثبت تعارض‌ها",
     "description": "تعارض‌های کشف‌شده بین منابع. هیچ تعارضی با حدس حل نمی‌شود.",
@@ -185,7 +185,7 @@ changed = K.write_collection(K.KB_DIR + "/conflicts/conflict_registry_v001.json"
     "notes": ["تعارض‌های مربوط به متدولوژی، پس از دریافت محتوای دوره‌ها اضافه خواهند شد."],
     "objects": conflicts,
 })
-print("%s conflict_registry_v001.json objects: %d" % ("wrote" if changed else "unchanged", len(conflicts)))
+print("%s conflict_registry.json objects: %d" % ("wrote" if changed else "unchanged", len(conflicts)))
 
 # ---------------------------------------------------------------------- review queue
 def rq(num, title, domain, reason, question, options, recommendation, priority, ids=None):
@@ -237,12 +237,14 @@ review = [
         "مربی این سؤال‌ها را به پشتیبانی انسانی ارجاع دهد"],
        "اگر قیمت متغیر است، بهتر است مربی همیشه به پشتیبانی انسانی ارجاع دهد.",
        "P1", ["ACA-OPS-0002"]),
-    rq(7, "دانش متاتریدر بدون تأیید منبع رسمی", "metatrader",
-       "محیط پردازش دسترسی شبکه ندارد و مستندات رسمی متاکوتس قابل واکشی نبود.",
+    rq(7, "دانش متاتریدر ساخته شد اما تأیید نشده است", "metatrader",
+       "دامنه‌ی متاتریدر با ۹۳ رکورد و پوشش ۴۶ موضوع تکمیل شد، اما محیط پردازش دسترسی شبکه ندارد و "
+       "مستندات رسمی متاکوتس قابل واکشی نبود؛ بنابراین هیچ رکوردی وضعیت APPROVED ندارد.",
        "کدام مسیر برای تأیید دانش متاتریدر ترجیح داده می‌شود؟",
-       ["بازبینی انسانی توسط منتور", "قرار دادن نسخه‌ی آفلاین راهنمای متاکوتس در raw_sources/platform/",
+       ["بازبینی انسانی توسط منتور بر اساس گزارش پوشش (exports/metatrader/mt_coverage_*.md)",
+        "قرار دادن نسخه‌ی آفلاین راهنمای متاکوتس در raw_sources/platform/",
         "فعال کردن دسترسی شبکه برای دامنه‌ی metaquotes در محیط پردازش"],
-       "قرار دادن راهنمای آفلاین در raw_sources/platform/؛ هم قابل ردیابی است و هم تکرارپذیر.",
+       "بازبینی منتور روی ۲۰ رکورد پرکاربرد (ورود، سفارش، حد ضرر، خطاهای رایج) و سپس تأیید تدریجی بقیه.",
        "P1"),
     rq(8, "متدولوژی رسمی آکادمی تعریف نشده است", "academy",
        "عنوان پادکست‌ها به «پرایس اکشن» و «تحلیل تکنیکال» اشاره دارد، اما هیچ سند رسمی متدولوژی وجود ندارد؛ "
@@ -251,9 +253,24 @@ review = [
        ["سند متدولوژی ارائه شود", "متدولوژی از دل ترنسکریپت دوره‌ها استخراج و برای تأیید ارسال شود"],
        "استخراج پیش‌نویس متدولوژی از ترنسکریپت‌ها و تأیید نهایی توسط سبحان صمدی.",
        "P0"),
+    rq(9, "پلتفرم اصلی دانشجویان مشخص نیست", "metatrader",
+       "دانش متاتریدر ۴ و ۵ به‌صورت جدا نگهداری می‌شود و مربی باید بداند پاسخ پیش‌فرض را بر مبنای کدام "
+       "پلتفرم بدهد، وگرنه باید در هر پاسخ از دانشجو بپرسد.",
+       "دانشجویان آکادمی بیشتر از متاتریدر ۴ استفاده می‌کنند یا ۵؟",
+       ["عمدتاً متاتریدر ۵", "عمدتاً متاتریدر ۴", "هر دو تقریباً برابر؛ مربی همیشه بپرسد"],
+       "اگر یکی غالب است، همان پلتفرم پیش‌فرض شود و تفاوت‌ها فقط هنگام نیاز مطرح شوند.",
+       "P2"),
+    rq(10, "سیاست آکادمی درباره‌ی اکسپرت و کپی‌تریدینگ مشخص نیست", "metatrader",
+       "سؤال‌های «کدوم اکسپرت رو بخرم؟» و «کپی‌تریدینگ خوبه؟» پرتکرارند، اما موضع آکادمی درباره‌ی "
+       "MetaTrader Market، Signals و معامله‌ی خودکار مشخص نیست.",
+       "مربی در برابر سؤال درباره‌ی خرید اکسپرت یا کپی‌تریدینگ چه پاسخی بدهد؟",
+       ["توضیح فنی بدهد اما توصیه نکند", "به‌کلی منع کند و به روش آکادمی برگرداند",
+        "به پشتیبانی انسانی ارجاع دهد"],
+       "توضیح فنی بدون توصیه‌ی خرید، به‌همراه هشدار ریسک و بازگرداندن به چارچوب آکادمی.",
+       "P2"),
 ]
 
-changed = K.write_collection(K.KB_DIR + "/review_queue/open_items_v001.json", {
+changed = K.write_collection(K.KB_DIR + "/review_queue/open_items.json", {
     "collection_id": "review_queue_open_items", "domain": "meta",
     "title": "صف بازبینی انسانی",
     "description": "مواردی که برای ادامه‌ی کار به تصمیم یا داده‌ی انسانی نیاز دارند.",
@@ -262,4 +279,4 @@ changed = K.write_collection(K.KB_DIR + "/review_queue/open_items_v001.json", {
     "notes": ["اولویت P0 یعنی کار بدون آن متوقف می‌شود."],
     "objects": review,
 })
-print("%s open_items_v001.json objects: %d" % ("wrote" if changed else "unchanged", len(review)))
+print("%s open_items.json objects: %d" % ("wrote" if changed else "unchanged", len(review)))

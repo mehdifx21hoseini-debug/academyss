@@ -1,0 +1,865 @@
+{
+  "collection_id": "metatrader_common_procedures",
+  "domain": "metatrader",
+  "title": "رویه‌های مشترک متاتریدر ۴ و ۵",
+  "description": "رویه‌هایی که در هر دو پلتفرم یکسان انجام می‌شوند. هر تفاوتی بین دو پلتفرم در مجموعه‌ی «موتور تفاوت» یا در مجموعه‌های اختصاصی هر پلتفرم ثبت شده است.",
+  "version": "v001",
+  "generated_at": "2026-09-05T12:26:59Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "tools/seed_mt_common.py"
+  ],
+  "notes": [
+    "ساخته‌شده به‌صورت خودکار توسط ابزارهای tools/seed_mt_*.py — دستی ویرایش نشود.",
+    "همه‌ی رکوردها PENDING_VERIFICATION هستند و باید با مستندات رسمی MetaQuotes تطبیق داده شوند."
+  ],
+  "objects": [
+    {
+      "id": "MT-PROC-0001",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "نصب پلتفرم و اجرای چند نسخه به‌صورت همزمان",
+      "language": "fa-en",
+      "chunk_text": "نصب متاتریدر باید از نصاب رسمی بروکر خودتان انجام شود تا سرور بروکر از قبل در فهرست باشد. برای داشتن چند حساب از چند بروکر می‌توان پلتفرم را چند بار در مسیرهای جداگانه نصب کرد؛ هر نصب پوشه‌ی داده‌ی مستقل خود را دارد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0001"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "نصب و راه‌اندازی",
+      "steps": [
+        "نصاب پلتفرم را از سایت رسمی بروکر خود دانلود کنید.",
+        "برای نصب دوم، در مرحله‌ی Settings مسیر نصب متفاوتی انتخاب کنید.",
+        "پس از نصب، از File > Open Data Folder مطمئن شوید هر نسخه پوشه‌ی داده‌ی جدا دارد."
+      ],
+      "warnings": [
+        "دانلود پلتفرم از منابع غیررسمی ریسک امنیتی جدی دارد؛ همیشه از سایت بروکر یا متاکوتس استفاده کنید."
+      ],
+      "keywords": [
+        "نصب",
+        "install",
+        "چند حساب"
+      ],
+      "related_concepts": [
+        "MT-CONC-0015"
+      ],
+      "related_questions": [
+        "چطور دو تا متاتریدر همزمان داشته باشم؟",
+        "پلتفرم رو از کجا دانلود کنم؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0002",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "ساخت حساب دمو از داخل پلتفرم",
+      "language": "fa-en",
+      "chunk_text": "برای تمرین بدون ریسک می‌توان مستقیماً از داخل پلتفرم یک حساب دمو ساخت. حساب دمو شرایط اجرای واقعی را کاملاً شبیه‌سازی نمی‌کند، اما برای یادگیری کار با پلتفرم و آزمایش اکسپرت مناسب است.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0002"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "نصب و راه‌اندازی",
+      "steps": [
+        "منوی File و سپس Open an Account را انتخاب کنید.",
+        "سرور بروکر خود را از فهرست انتخاب کنید.",
+        "نوع حساب دمو، ارز، مبلغ اولیه و اهرم را مشخص کنید.",
+        "اطلاعات حساب ساخته‌شده را ذخیره کنید؛ همان اطلاعات برای ورود مجدد لازم است."
+      ],
+      "keywords": [
+        "demo",
+        "حساب آزمایشی"
+      ],
+      "related_questions": [
+        "چطور حساب دمو بسازم؟",
+        "دمو با ریل فرق داره؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0003",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "تغییر رمز عبور حساب معاملاتی",
+      "language": "fa-en",
+      "chunk_text": "رمز حساب از داخل پلتفرم قابل تغییر است. هر حساب دو رمز دارد: رمز اصلی (Master) برای معامله و رمز سرمایه‌گذار (Investor) که فقط اجازه‌ی مشاهده می‌دهد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0003"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "نصب و راه‌اندازی",
+      "steps": [
+        "منوی Tools > Options و سپس تب Server را باز کنید (یا در Navigator روی حساب راست‌کلیک کنید).",
+        "گزینه‌ی Change Password را بزنید.",
+        "برای تغییر رمز اصلی، گزینه‌ی Change master password و برای رمز مشاهده، Change investor password را انتخاب کنید.",
+        "رمز فعلی و رمز جدید را وارد و تأیید کنید."
+      ],
+      "warnings": [
+        "اگر با رمز Investor وارد شوید، دکمه‌های معامله غیرفعال‌اند و پیام Trade is disabled می‌گیرید."
+      ],
+      "keywords": [
+        "password",
+        "investor",
+        "رمز عبور"
+      ],
+      "related_concepts": [
+        "MT-TRBL-0004"
+      ],
+      "related_questions": [
+        "رمز حسابم رو چطور عوض کنم؟",
+        "رمز اینوستور چیه؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0004",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "افزودن، تنظیم و حذف اندیکاتور روی چارت",
+      "language": "fa-en",
+      "chunk_text": "اندیکاتورها از پنجره‌ی Navigator یا منوی Insert > Indicators به چارت اضافه می‌شوند. برای تغییر تنظیمات یا حذف، از فهرست اندیکاتورهای همان چارت استفاده می‌شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0004"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "چارت و ابزارها",
+      "steps": [
+        "در Navigator بخش Indicators را باز کنید یا از منوی Insert > Indicators استفاده کنید.",
+        "اندیکاتور را روی چارت بکشید و پارامترها و رنگ‌ها را تنظیم کنید.",
+        "برای ویرایش یا حذف، روی چارت راست‌کلیک و Indicators List را باز کنید (Ctrl+I).",
+        "اندیکاتور را انتخاب و Edit یا Delete را بزنید."
+      ],
+      "keywords": [
+        "indicator",
+        "اندیکاتور",
+        "Ctrl+I"
+      ],
+      "related_concepts": [
+        "MT-CONC-0015",
+        "MT-TRBL-0008"
+      ],
+      "related_questions": [
+        "اندیکاتور رو چطور اضافه کنم؟",
+        "چطور اندیکاتور رو پاک کنم؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0005",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "تنظیم نمایش چارت: نوع نمودار، تایم‌فریم، زوم و پیمایش",
+      "language": "fa-en",
+      "chunk_text": "نوع نمودار (میله‌ای، شمعی، خطی)، تایم‌فریم، بزرگ‌نمایی و نحوه‌ی پیمایش از نوار ابزار چارت کنترل می‌شوند. دو گزینه‌ی مهم: Auto Scroll که چارت را همیشه روی آخرین کندل نگه می‌دارد و Chart Shift که فضایی در سمت راست آخرین کندل باز می‌کند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0005"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "چارت و ابزارها",
+      "steps": [
+        "نوع نمودار را از نوار ابزار انتخاب کنید (Bar، Candlestick یا Line).",
+        "تایم‌فریم را از نوار ابزار Timeframes انتخاب کنید.",
+        "با کلیدهای + و − یا اسکرول ماوس بزرگ‌نمایی را تغییر دهید.",
+        "در صورت نیاز Auto Scroll و Chart Shift را از نوار ابزار فعال یا غیرفعال کنید.",
+        "برای تغییر رنگ‌ها و شبکه، کلید F8 (Chart Properties) را بزنید."
+      ],
+      "keywords": [
+        "chart",
+        "timeframe",
+        "auto scroll",
+        "F8"
+      ],
+      "related_concepts": [
+        "MT-CONC-0012"
+      ],
+      "related_questions": [
+        "چطور رنگ چارت رو عوض کنم؟",
+        "چرا چارت خودش جلو نمی‌ره؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0006",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "ذخیره و اعمال Template (قالب چارت)",
+      "language": "fa-en",
+      "chunk_text": "تمپلیت مجموعه‌ی تنظیمات ظاهری، اندیکاتورها و اشیاء یک چارت را ذخیره می‌کند تا روی چارت‌های دیگر به‌سرعت اعمال شود. تمپلیتی با نام default به‌صورت خودکار روی چارت‌های جدید اعمال می‌شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0006"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "چارت و ابزارها",
+      "steps": [
+        "روی چارت راست‌کلیک کنید و Template > Save Template را بزنید.",
+        "نامی برای تمپلیت انتخاب کنید.",
+        "روی چارت دیگر راست‌کلیک و Template > Load Template را بزنید.",
+        "برای اعمال خودکار روی چارت‌های جدید، تمپلیت را با نام default ذخیره کنید."
+      ],
+      "keywords": [
+        "template",
+        "قالب",
+        "default"
+      ],
+      "related_questions": [
+        "چطور تنظیمات چارتم رو روی همه چارت‌ها بذارم؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0007",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "پروفایل: ذخیره‌ی چیدمان چند چارت",
+      "language": "fa-en",
+      "chunk_text": "پروفایل، مجموعه‌ی چارت‌های باز به‌همراه چیدمان آن‌ها را ذخیره می‌کند. با تعویض پروفایل، همه‌ی چارت‌ها و تنظیماتشان یک‌جا عوض می‌شوند؛ مناسب برای جدا کردن فضای کاری فارکس، طلا و شاخص‌ها.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0007"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "چارت و ابزارها",
+      "steps": [
+        "چارت‌ها را به چیدمان دلخواه مرتب کنید.",
+        "منوی File > Profiles > Save As را بزنید و نامی انتخاب کنید.",
+        "برای بازگشت، همان پروفایل را از File > Profiles انتخاب کنید."
+      ],
+      "keywords": [
+        "profile",
+        "workspace",
+        "چیدمان"
+      ],
+      "related_questions": [
+        "چطور چند چارت رو با هم ذخیره کنم؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0008",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "رسم اشیاء گرافیکی و مدیریت آن‌ها",
+      "language": "fa-en",
+      "chunk_text": "خط روند، خط افقی، کانال، فیبوناچی و سایر ابزارها از منوی Insert یا نوار ابزار در دسترس‌اند. برای ویرایش دقیق مختصات یا حذف گروهی، از فهرست اشیاء (Object List) استفاده می‌شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0008"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "چارت و ابزارها",
+      "steps": [
+        "ابزار موردنظر را از منوی Insert یا نوار ابزار انتخاب کنید.",
+        "روی چارت کلیک کنید تا شیء رسم شود.",
+        "برای ویرایش، روی شیء دوبار کلیک و سپس راست‌کلیک > Properties را بزنید.",
+        "برای مدیریت همه‌ی اشیاء، Ctrl+B (Object List) را باز کنید."
+      ],
+      "keywords": [
+        "trendline",
+        "fibonacci",
+        "object list",
+        "Ctrl+B"
+      ],
+      "related_questions": [
+        "چطور خط روند بکشم؟",
+        "چطور همه خط‌ها رو پاک کنم؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0009",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "فعال‌سازی معامله‌ی یک‌کلیکی (One Click Trading)",
+      "language": "fa-en",
+      "chunk_text": "با فعال کردن معامله‌ی یک‌کلیکی، پنل خرید و فروش در گوشه‌ی چارت ظاهر می‌شود و سفارش بدون پنجره‌ی تأیید ثبت می‌شود. پیش از فعال شدن باید توافق‌نامه‌ی مربوط پذیرفته شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0009"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "معامله",
+      "steps": [
+        "منوی Tools > Options و تب Trade را باز کنید.",
+        "گزینه‌ی One Click Trading را فعال و توافق‌نامه را بپذیرید.",
+        "روی چارت راست‌کلیک کنید و One Click Trading را بزنید تا پنل نمایش داده شود."
+      ],
+      "warnings": [
+        "در این حالت هیچ پنجره‌ی تأییدی نمایش داده نمی‌شود؛ یک کلیک اشتباه بلافاصله معامله باز می‌کند."
+      ],
+      "keywords": [
+        "one click trading",
+        "یک کلیکی"
+      ],
+      "related_questions": [
+        "معامله یک‌کلیکی رو چطور فعال کنم؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0010",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "بستن معامله: کامل، جزئی و بستن متقابل",
+      "language": "fa-en",
+      "chunk_text": "برای بستن کامل، از تب Trade روی معامله راست‌کلیک و گزینه‌ی بستن را انتخاب کنید. برای بستن جزئی، در پنجره‌ی بستن حجمی کمتر از حجم فعلی وارد کنید. اگر دو معامله‌ی خرید و فروش روی یک نماد باز باشد، می‌توان آن‌ها را با گزینه‌ی Close By در برابر هم بست.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0010"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "معامله",
+      "steps": [
+        "Toolbox/Terminal را باز کنید و به تب Trade بروید.",
+        "روی معامله راست‌کلیک کنید.",
+        "برای بستن کامل، گزینه‌ی Close را بزنید.",
+        "برای بستن جزئی، حجم کمتر را وارد و سپس بستن را تأیید کنید.",
+        "برای بستن متقابل، Close By را انتخاب و معامله‌ی مقابل را مشخص کنید."
+      ],
+      "warnings": [
+        "گزینه‌ی Close By فقط در حالت Hedging معنا دارد و در حساب‌های Netting متاتریدر ۵ وجود ندارد."
+      ],
+      "keywords": [
+        "close",
+        "partial close",
+        "close by",
+        "بستن معامله"
+      ],
+      "related_concepts": [
+        "MT5-CONC-0001",
+        "MT4-CONC-0001"
+      ],
+      "related_questions": [
+        "چطور نصف معامله رو ببندم؟",
+        "چطور معامله رو ببندم؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0011",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "تنظیم Trailing Stop",
+      "language": "fa-en",
+      "chunk_text": "تریلینگ استاپ حد ضرر را با حرکت قیمت به‌نفع معامله جابه‌جا می‌کند. در متاتریدر این قابلیت سمت ترمینال اجرا می‌شود، نه سمت سرور؛ بنابراین با بستن پلتفرم یا قطع اینترنت متوقف می‌شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0011"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "مدیریت معامله",
+      "steps": [
+        "در تب Trade روی معامله راست‌کلیک کنید.",
+        "گزینه‌ی Trailing Stop را باز کنید.",
+        "فاصله‌ی موردنظر بر حسب پوینت را انتخاب کنید (یا Custom را بزنید).",
+        "برای غیرفعال کردن، همان منو و گزینه‌ی None را انتخاب کنید."
+      ],
+      "warnings": [
+        "با بسته شدن ترمینال، تریلینگ استاپ کار نمی‌کند؛ برای اجرای دائمی به VPS نیاز دارید."
+      ],
+      "keywords": [
+        "trailing stop",
+        "تریلینگ"
+      ],
+      "related_concepts": [
+        "MT-PROC-0016"
+      ],
+      "related_questions": [
+        "تریلینگ استاپ چطور کار می‌کنه؟",
+        "اگه کامپیوترم خاموش بشه چی؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0012",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "ساخت هشدار قیمتی (Alert)",
+      "language": "fa-en",
+      "chunk_text": "با Alert می‌توان هنگام رسیدن قیمت به سطح مشخص، صدا یا پیام دریافت کرد. هشدارها در تب Alerts در Toolbox/Terminal مدیریت می‌شوند و تا زمانی که پلتفرم باز باشد فعال‌اند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0012"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "هشدار و اعلان",
+      "steps": [
+        "Toolbox/Terminal را باز کنید و به تب Alerts بروید.",
+        "روی فهرست راست‌کلیک و Create را بزنید.",
+        "نماد، شرط (Bid/Ask بیشتر یا کمتر از) و مقدار قیمت را وارد کنید.",
+        "نوع اقدام (پخش صدا، ارسال ایمیل یا اعلان) را انتخاب و OK بزنید."
+      ],
+      "keywords": [
+        "alert",
+        "هشدار قیمت"
+      ],
+      "related_concepts": [
+        "MT-PROC-0013"
+      ],
+      "related_questions": [
+        "چطور برای یه قیمت هشدار بذارم؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0013",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "فعال‌سازی اعلان پوش روی موبایل (MetaQuotes ID)",
+      "language": "fa-en",
+      "chunk_text": "پلتفرم دسکتاپ می‌تواند اعلان‌ها را به اپلیکیشن موبایل متاتریدر ارسال کند. برای این کار، شناسه‌ی MetaQuotes ID از اپلیکیشن موبایل برداشته و در تنظیمات دسکتاپ وارد می‌شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0013"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "هشدار و اعلان",
+      "steps": [
+        "در اپلیکیشن موبایل متاتریدر، بخش تنظیمات و سپس Messages را باز کنید و MetaQuotes ID را کپی کنید.",
+        "در نسخه‌ی دسکتاپ، Tools > Options و تب Notifications را باز کنید.",
+        "گزینه‌ی Enable Push Notifications را فعال و MetaQuotes ID را وارد کنید.",
+        "با دکمه‌ی Test صحت اتصال را بررسی کنید."
+      ],
+      "keywords": [
+        "push notification",
+        "metaquotes id",
+        "اعلان موبایل"
+      ],
+      "related_questions": [
+        "چطور روی گوشی نوتیفیکیشن بگیرم؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0014",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "کار با ترمینال موبایل",
+      "language": "fa-en",
+      "chunk_text": "اپلیکیشن موبایل متاتریدر امکان ورود به همان حساب، مشاهده‌ی چارت، ثبت سفارش و مدیریت معاملات را می‌دهد. معاملات باز روی سرور ثبت می‌شوند، بنابراین معامله‌ای که در موبایل باز شود در دسکتاپ هم دیده می‌شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0014"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "نسخه‌های دیگر",
+      "steps": [
+        "اپلیکیشن رسمی متاتریدر ۴ یا ۵ را نصب کنید.",
+        "گزینه‌ی Login to an existing account را انتخاب کنید.",
+        "نام سرور بروکر را جست‌وجو و انتخاب کنید.",
+        "شماره حساب و رمز عبور را وارد کنید."
+      ],
+      "warnings": [
+        "اکسپرت و اندیکاتور سفارشی روی نسخه‌ی موبایل اجرا نمی‌شوند."
+      ],
+      "keywords": [
+        "mobile",
+        "موبایل",
+        "اندروید",
+        "iOS"
+      ],
+      "related_questions": [
+        "روی گوشی چطور وارد بشم؟",
+        "اکسپرت روی موبایل اجرا می‌شه؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0015",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "کار با وب‌ترمینال",
+      "language": "fa-en",
+      "chunk_text": "وب‌ترمینال نسخه‌ی مرورگری متاتریدر است و بدون نصب، امکان معامله و مشاهده‌ی چارت را می‌دهد. امکانات آن محدودتر از نسخه‌ی دسکتاپ است و اکسپرت و اندیکاتور سفارشی در آن اجرا نمی‌شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0015"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "نسخه‌های دیگر",
+      "steps": [
+        "آدرس وب‌ترمینال را از سایت بروکر خود باز کنید.",
+        "سرور، شماره حساب و رمز عبور را وارد کنید.",
+        "برای معامله از پنجره‌ی New Order استفاده کنید."
+      ],
+      "keywords": [
+        "web terminal",
+        "وب ترمینال"
+      ],
+      "related_questions": [
+        "بدون نصب می‌شه معامله کرد؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0016",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "استفاده از VPS یا Virtual Hosting",
+      "language": "fa-en",
+      "chunk_text": "برای اجرای دائمی اکسپرت یا تریلینگ استاپ، پلتفرم باید همیشه روشن و متصل باشد. متاتریدر سرویس Virtual Hosting داخلی دارد که محیط ترمینال را روی سرور مجازی نزدیک به سرور بروکر منتقل می‌کند؛ جایگزین آن، اجاره‌ی VPS مستقل و نصب پلتفرم روی آن است.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0016"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "اجرای دائمی",
+      "steps": [
+        "در Navigator روی حساب راست‌کلیک کنید.",
+        "گزینه‌ی Register a Virtual Server را بزنید.",
+        "مراحل انتخاب پلن و پرداخت را دنبال کنید.",
+        "پس از فعال شدن، تنظیمات و اکسپرت‌ها را با گزینه‌ی Migrate به سرور مجازی منتقل کنید."
+      ],
+      "warnings": [
+        "سرویس میزبانی مجازی هزینه‌ی جداگانه دارد و در دسترس بودن آن به بروکر و شرایط پرداخت وابسته است."
+      ],
+      "keywords": [
+        "VPS",
+        "virtual hosting",
+        "سرور مجازی"
+      ],
+      "related_concepts": [
+        "MT-PROC-0011"
+      ],
+      "related_questions": [
+        "برای اکسپرت حتماً VPS لازمه؟",
+        "اگه کامپیوترم خاموش باشه اکسپرت کار می‌کنه؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0017",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "تنظیمات پلتفرم (پنجره‌ی Options)",
+      "language": "fa-en",
+      "chunk_text": "پنجره‌ی Options با Ctrl+O باز می‌شود و تب‌های اصلی آن عبارت‌اند از: Server (اتصال و پروکسی)، Charts (تعداد کندل‌های ذخیره‌شده و نمایش خط Ask)، Trade (حجم پیش‌فرض، انحراف مجاز و معامله‌ی یک‌کلیکی)، Expert Advisors (اجازه‌ی معامله‌ی خودکار)، Notifications و Email.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0017"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "تنظیمات",
+      "steps": [
+        "کلید Ctrl+O را بزنید یا Tools > Options را باز کنید.",
+        "تب مربوط به تنظیم موردنظر را انتخاب کنید.",
+        "تغییرات را اعمال و OK بزنید."
+      ],
+      "keywords": [
+        "options",
+        "settings",
+        "تنظیمات"
+      ],
+      "related_questions": [
+        "حجم پیش‌فرض رو کجا عوض کنم؟",
+        "تنظیمات متاتریدر کجاست؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0018",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "کار با MetaEditor و کامپایل فایل‌های سورس",
+      "language": "fa-en",
+      "chunk_text": "MetaEditor محیط برنامه‌نویسی متاتریدر است و با کلید F4 باز می‌شود. فایل‌های سورس (mq4 یا mq5) پیش از استفاده باید کامپایل شوند تا فایل اجرایی (ex4 یا ex5) ساخته شود. خطاهای کامپایل در پنجره‌ی Errors نمایش داده می‌شوند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0018"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "برنامه‌نویسی",
+      "steps": [
+        "کلید F4 را بزنید تا MetaEditor باز شود.",
+        "فایل سورس را از پوشه‌ی Experts یا Indicators باز کنید.",
+        "دکمه‌ی Compile را بزنید.",
+        "در صورت نبود خطا، در Navigator ترمینال Refresh بزنید تا فایل جدید دیده شود."
+      ],
+      "warnings": [
+        "فایل mq4 روی متاتریدر ۵ و mq5 روی متاتریدر ۴ کامپایل نمی‌شود."
+      ],
+      "keywords": [
+        "metaeditor",
+        "compile",
+        "mq4",
+        "mq5"
+      ],
+      "related_concepts": [
+        "MT-CMP-0004"
+      ],
+      "related_questions": [
+        "فایل mq4 رو چطور اجرا کنم؟",
+        "خطای کامپایل یعنی چی؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0019",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "اجرای اسکریپت روی چارت",
+      "language": "fa-en",
+      "chunk_text": "اسکریپت‌ها برخلاف اکسپرت‌ها فقط یک بار اجرا می‌شوند و برای کارهای تک‌مرحله‌ای مثل بستن همه‌ی معاملات یا ثبت سریع سفارش استفاده می‌شوند. اسکریپت‌ها در پوشه‌ی Scripts پوشه‌ی داده قرار می‌گیرند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0019"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "برنامه‌نویسی",
+      "steps": [
+        "فایل اسکریپت را در پوشه‌ی MQL4/Scripts یا MQL5/Scripts قرار دهید.",
+        "در Navigator روی Scripts راست‌کلیک و Refresh بزنید.",
+        "اسکریپت را روی چارت بکشید و در صورت نیاز اجازه‌ی معامله را تأیید کنید."
+      ],
+      "keywords": [
+        "script",
+        "اسکریپت"
+      ],
+      "related_concepts": [
+        "MT-CONC-0015"
+      ],
+      "related_questions": [
+        "اسکریپت چیه؟",
+        "فرق اسکریپت و اکسپرت چیه؟"
+      ]
+    },
+    {
+      "id": "MT-PROC-0020",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "پشتیبان‌گیری از تنظیمات، تمپلیت‌ها و اکسپرت‌ها",
+      "language": "fa-en",
+      "chunk_text": "همه‌ی تنظیمات شخصی در پوشه‌ی داده ذخیره می‌شوند. با کپی گرفتن از این پوشه می‌توان پیش از نصب مجدد یا انتقال به کامپیوتر دیگر، تمپلیت‌ها، پروفایل‌ها، اندیکاتورها و اکسپرت‌ها را حفظ کرد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_common.py",
+        "source_location": "MT-PROC-0020"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T12:26:59Z",
+      "updated_at": "2026-09-05T12:26:59Z",
+      "category": "نصب و راه‌اندازی",
+      "steps": [
+        "از File > Open Data Folder پوشه‌ی داده را باز کنید.",
+        "از پوشه‌های MQL4/MQL5، templates و profiles نسخه‌ی پشتیبان بگیرید.",
+        "پس از نصب جدید، همان پوشه‌ها را در پوشه‌ی داده‌ی جدید جای‌گذاری کنید.",
+        "پلتفرم را ببندید و باز کنید تا تغییرات شناسایی شوند."
+      ],
+      "keywords": [
+        "backup",
+        "پشتیبان",
+        "data folder"
+      ],
+      "related_concepts": [
+        "MT-CONC-0015"
+      ],
+      "related_questions": [
+        "چطور تنظیماتم رو منتقل کنم؟"
+      ]
+    }
+  ]
+}

@@ -178,6 +178,6 @@ collection = {
     "objects": objects,
 }
 
-dest = K.KB_DIR + "/academy/catalog/academy_site_catalog_v001.json"
+dest = K.KB_DIR + "/academy/catalog/academy_site_catalog.json"
 changed = K.write_collection(dest, collection)
 print("%s %s objects: %d" % ("wrote" if changed else "unchanged", K.rel(dest), len(objects)))

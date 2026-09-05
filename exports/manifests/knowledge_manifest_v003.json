@@ -1,16 +1,16 @@
 {
   "manifest_type": "mentorai_knowledge_base",
-  "version": "v004",
-  "generated_at": "2026-09-05T12:38:06Z",
+  "version": "v003",
+  "generated_at": "2026-09-05T12:36:34Z",
   "generator": "tools/kb_build_manifest.py",
   "schema_versions": {
     "enums": "1.0.0"
   },
   "totals": {
-    "objects": 164,
+    "objects": 162,
     "by_domain": {
       "psychology": 11,
-      "metatrader": 96,
+      "metatrader": 94,
       "general_trading": 29,
       "academy": 20,
       "mentor_qa": 1,
@@ -26,7 +26,7 @@
       "COMPARISON": 11,
       "GLOSSARY": 22,
       "CONFLICT_RECORD": 1,
-      "REVIEW_ITEM": 10,
+      "REVIEW_ITEM": 8,
       "CATALOG_ITEM": 12,
       "OPERATIONAL_FACT": 2,
       "PROCEDURE": 1,
@@ -35,18 +35,18 @@
     "by_authority": {
       "GENERAL_KNOWLEDGE": 125,
       "EXTERNAL_METHODOLOGY": 7,
-      "<unset>": 11,
+      "<unset>": 9,
       "ACADEMY_DERIVED": 21
     },
     "by_approval": {
       "PENDING_VERIFICATION": 132,
-      "<unset>": 11,
+      "<unset>": 9,
       "PENDING_REVIEW": 15,
       "APPROVED": 6
     },
     "by_lifecycle": {
       "PENDING_REVIEW": 147,
-      "<unset>": 11,
+      "<unset>": 9,
       "ACTIVE": 6
     },
     "by_platform_scope": {
@@ -56,11 +56,11 @@
       "MT4_ONLY": 13,
       "VERSION_DEPENDENT": 11,
       "MT5_ONLY": 17,
-      "<unset>": 32
+      "<unset>": 30
     },
     "by_source_type": {
       "MODEL_DRAFT": 132,
-      "<unset>": 11,
+      "<unset>": 9,
       "ACADEMY_APP_DATA": 12,
       "ACADEMY_WEBSITE": 3,
       "ACADEMY_DOCUMENT": 6
@@ -208,7 +208,7 @@
       "version": "v001",
       "pipeline_stage": "VALIDATED",
       "file": "knowledge_base/review_queue/open_items.json",
-      "object_count": 10,
+      "object_count": 8,
       "source_files": [
         "MENTORAI_KB_AUDIT.md"
       ]
@@ -289,7 +289,7 @@
     },
     {
       "id": "RQ-0007",
-      "title": "دانش متاتریدر ساخته شد اما تأیید نشده است",
+      "title": "دانش متاتریدر بدون تأیید منبع رسمی",
       "priority": "P1",
       "domain": "metatrader"
     },
@@ -298,18 +298,6 @@
       "title": "متدولوژی رسمی آکادمی تعریف نشده است",
       "priority": "P0",
       "domain": "academy"
-    },
-    {
-      "id": "RQ-0009",
-      "title": "پلتفرم اصلی دانشجویان مشخص نیست",
-      "priority": "P2",
-      "domain": "metatrader"
-    },
-    {
-      "id": "RQ-0010",
-      "title": "سیاست آکادمی درباره‌ی اکسپرت و کپی‌تریدینگ مشخص نیست",
-      "priority": "P2",
-      "domain": "metatrader"
     }
   ],
   "source_coverage": {

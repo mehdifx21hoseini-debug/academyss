@@ -1,0 +1,467 @@
+{
+  "collection_id": "metatrader_mt4_vs_mt5",
+  "domain": "metatrader",
+  "title": "موتور تفاوت متاتریدر ۴ و ۵",
+  "description": "تفاوت‌های تأییدشدنی بین دو پلتفرم. هیچ رویه‌ای نباید بدون تعیین دامنه‌ی پلتفرم پاسخ داده شود.",
+  "version": "v001",
+  "generated_at": "2026-09-05T12:34:29Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "tools/seed_mt_comparison.py"
+  ],
+  "notes": [
+    "ساخته‌شده به‌صورت خودکار توسط ابزارهای tools/seed_mt_*.py — دستی ویرایش نشود.",
+    "همه‌ی رکوردها PENDING_VERIFICATION هستند و باید با مستندات رسمی MetaQuotes تطبیق داده شوند."
+  ],
+  "objects": [
+    {
+      "id": "MT-CMP-0001",
+      "object_type": "COMPARISON",
+      "domain": "metatrader",
+      "title": "تفاوت انواع سفارش معلق در متاتریدر ۴ و ۵",
+      "language": "fa-en",
+      "chunk_text": "متاتریدر ۴ چهار نوع سفارش معلق دارد و متاتریدر ۵ شش نوع؛ دو نوع Stop Limit فقط در متاتریدر ۵ موجود است.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_comparison.py",
+        "source_location": "MT-CMP-0001"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "VERSION_DEPENDENT",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T12:34:29Z",
+      "updated_at": "2026-09-05T12:34:29Z",
+      "category": "تفاوت متاتریدر ۴ و ۵",
+      "comparison": {
+        "mt4": "Buy Limit, Sell Limit, Buy Stop, Sell Stop (۴ نوع)",
+        "mt5": "Buy Limit, Sell Limit, Buy Stop, Sell Stop, Buy Stop Limit, Sell Stop Limit (۶ نوع)"
+      },
+      "keywords": [
+        "pending order",
+        "stop limit",
+        "تفاوت"
+      ],
+      "related_concepts": [
+        "MT5-CONC-0003",
+        "MT4-PROC-0003"
+      ],
+      "related_questions": [
+        "فرق سفارش‌های متاتریدر ۴ و ۵ چیه؟",
+        "Buy Stop Limit توی متاتریدر ۴ هست؟"
+      ]
+    },
+    {
+      "id": "MT-CMP-0002",
+      "object_type": "COMPARISON",
+      "domain": "metatrader",
+      "title": "تفاوت حسابداری پوزیشن (Netting / Hedging)",
+      "language": "fa-en",
+      "chunk_text": "متاتریدر ۴ فقط Hedging است، اما متاتریدر ۵ بسته به نوع حسابی که بروکر می‌سازد می‌تواند Netting یا Hedging باشد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_comparison.py",
+        "source_location": "MT-CMP-0002"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "VERSION_DEPENDENT",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T12:34:29Z",
+      "updated_at": "2026-09-05T12:34:29Z",
+      "category": "تفاوت متاتریدر ۴ و ۵",
+      "comparison": {
+        "mt4": "فقط Hedging؛ هر سفارش یک تیکت مستقل.",
+        "mt5": "Netting یا Hedging، وابسته به نوع حساب تعیین‌شده توسط بروکر."
+      },
+      "keywords": [
+        "netting",
+        "hedging"
+      ],
+      "related_concepts": [
+        "MT5-CONC-0001",
+        "MT4-CONC-0001"
+      ],
+      "related_questions": [
+        "چرا توی متاتریدر ۵ معامله‌هام ادغام می‌شن؟"
+      ]
+    },
+    {
+      "id": "MT-CMP-0003",
+      "object_type": "COMPARISON",
+      "domain": "metatrader",
+      "title": "تفاوت تعداد تایم‌فریم‌ها",
+      "language": "fa-en",
+      "chunk_text": "متاتریدر ۵ تایم‌فریم‌های به‌مراتب بیشتری نسبت به متاتریدر ۴ ارائه می‌دهد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_comparison.py",
+        "source_location": "MT-CMP-0003"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "VERSION_DEPENDENT",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:34:29Z",
+      "updated_at": "2026-09-05T12:34:29Z",
+      "category": "تفاوت متاتریدر ۴ و ۵",
+      "comparison": {
+        "mt4": "۹ تایم‌فریم (M1, M5, M15, M30, H1, H4, D1, W1, MN1)",
+        "mt5": "۲۱ تایم‌فریم، شامل M2, M3, M4, M6, M10, M12, M20, H2, H3, H6, H8, H12"
+      },
+      "keywords": [
+        "timeframe",
+        "تایم فریم"
+      ],
+      "related_concepts": [
+        "MT-CONC-0012"
+      ],
+      "related_questions": [
+        "چرا تایم‌فریم H2 ندارم؟",
+        "متاتریدر ۵ چند تایم‌فریم داره؟"
+      ]
+    },
+    {
+      "id": "MT-CMP-0004",
+      "object_type": "COMPARISON",
+      "domain": "metatrader",
+      "title": "ناسازگاری اکسپرت‌ها و اندیکاتورها (MQL4 و MQL5)",
+      "language": "fa-en",
+      "chunk_text": "زبان برنامه‌نویسی دو پلتفرم متفاوت است و فایل‌های اکسپرت یا اندیکاتور یکی روی دیگری اجرا نمی‌شوند؛ برای هر پلتفرم باید نسخه‌ی مخصوص همان پلتفرم تهیه شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_comparison.py",
+        "source_location": "MT-CMP-0004"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "VERSION_DEPENDENT",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T12:34:29Z",
+      "updated_at": "2026-09-05T12:34:29Z",
+      "category": "تفاوت متاتریدر ۴ و ۵",
+      "comparison": {
+        "mt4": "MQL4؛ فایل‌های ex4 در پوشه‌ی MQL4.",
+        "mt5": "MQL5؛ فایل‌های ex5 در پوشه‌ی MQL5."
+      },
+      "keywords": [
+        "MQL4",
+        "MQL5",
+        "ex4",
+        "ex5"
+      ],
+      "related_concepts": [
+        "MT-PROC-0018",
+        "MT-TRBL-0008"
+      ],
+      "related_questions": [
+        "اندیکاتور متاتریدر ۴ رو توی ۵ نصب کنم؟",
+        "چرا اکسپرتم اجرا نمی‌شه؟"
+      ]
+    },
+    {
+      "id": "MT-CMP-0005",
+      "object_type": "COMPARISON",
+      "domain": "metatrader",
+      "title": "تفاوت تستر استراتژی",
+      "language": "fa-en",
+      "chunk_text": "تستر استراتژی متاتریدر ۵ چندنمادی و چندرشته‌ای است و امکان تست با تیک‌های واقعی را دارد؛ تستر متاتریدر ۴ تک‌نمادی و تک‌رشته‌ای است و کیفیت آن با شاخص Modelling quality سنجیده می‌شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_comparison.py",
+        "source_location": "MT-CMP-0005"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "VERSION_DEPENDENT",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:34:29Z",
+      "updated_at": "2026-09-05T12:34:29Z",
+      "category": "تفاوت متاتریدر ۴ و ۵",
+      "comparison": {
+        "mt4": "تست تک‌نمادی، بدون پردازش موازی، وابسته به کیفیت داده‌ی History Center.",
+        "mt5": "تست چندنمادی، پردازش موازی و بهینه‌سازی پیشرفته با امکان استفاده از تیک واقعی."
+      },
+      "keywords": [
+        "strategy tester",
+        "backtest",
+        "optimization"
+      ],
+      "related_concepts": [
+        "MT5-PROC-0011",
+        "MT4-PROC-0007"
+      ],
+      "related_questions": [
+        "بک‌تست کدوم پلتفرم بهتره؟"
+      ]
+    },
+    {
+      "id": "MT-CMP-0006",
+      "object_type": "COMPARISON",
+      "domain": "metatrader",
+      "title": "عمق بازار و تقویم اقتصادی داخلی",
+      "language": "fa-en",
+      "chunk_text": "عمق بازار (Depth of Market) و تقویم اقتصادی داخلی از قابلیت‌های متاتریدر ۵ هستند و در متاتریدر ۴ وجود ندارند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_comparison.py",
+        "source_location": "MT-CMP-0006"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "VERSION_DEPENDENT",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T12:34:29Z",
+      "updated_at": "2026-09-05T12:34:29Z",
+      "category": "تفاوت متاتریدر ۴ و ۵",
+      "comparison": {
+        "mt4": "بدون Depth of Market و بدون تقویم اقتصادی داخلی.",
+        "mt5": "دارای Depth of Market و تقویم اقتصادی داخلی (نمایش داده‌ها وابسته به بروکر است)."
+      },
+      "keywords": [
+        "depth of market",
+        "economic calendar"
+      ],
+      "related_concepts": [
+        "MT5-PROC-0009",
+        "MT5-PROC-0010"
+      ],
+      "related_questions": [
+        "تقویم اقتصادی متاتریدر کجاست؟"
+      ]
+    },
+    {
+      "id": "MT-CMP-0007",
+      "object_type": "COMPARISON",
+      "domain": "metatrader",
+      "title": "تفاوت مدیریت داده‌های تاریخی",
+      "language": "fa-en",
+      "chunk_text": "در متاتریدر ۴ داده‌ی تاریخی معمولاً باید دستی از History Center دانلود شود و کیفیت آن بر بک‌تست اثر مستقیم دارد؛ متاتریدر ۵ داده را به‌صورت خودکار از سرور می‌گیرد و امکان دریافت داده‌ی تیکی دارد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_comparison.py",
+        "source_location": "MT-CMP-0007"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "VERSION_DEPENDENT",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T12:34:29Z",
+      "updated_at": "2026-09-05T12:34:29Z",
+      "category": "تفاوت متاتریدر ۴ و ۵",
+      "comparison": {
+        "mt4": "History Center (کلید F2)، دانلود دستی، محدود به تنظیم Max bars in history.",
+        "mt5": "دریافت خودکار از سرور، به‌علاوه‌ی درخواست داده‌ی کندلی و تیکی از پنجره‌ی Symbols."
+      },
+      "keywords": [
+        "history center",
+        "داده تاریخی",
+        "ticks"
+      ],
+      "related_concepts": [
+        "MT4-PROC-0006",
+        "MT5-PROC-0014",
+        "MT-TRBL-0012"
+      ],
+      "related_questions": [
+        "چرا چارت متاتریدر ۴ داده کم داره؟"
+      ]
+    },
+    {
+      "id": "MT-CMP-0008",
+      "object_type": "COMPARISON",
+      "domain": "metatrader",
+      "title": "تفاوت مدل معامله: تیکت در برابر Order/Deal/Position",
+      "language": "fa-en",
+      "chunk_text": "متاتریدر ۴ همه‌چیز را به‌صورت «سفارش با تیکت» می‌بیند، اما متاتریدر ۵ سه موجودیت جدا دارد. همین تفاوت باعث می‌شود شمارش معاملات در تاریخچه و گزارش‌های دو پلتفرم متفاوت باشد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_comparison.py",
+        "source_location": "MT-CMP-0008"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "VERSION_DEPENDENT",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:34:29Z",
+      "updated_at": "2026-09-05T12:34:29Z",
+      "category": "تفاوت متاتریدر ۴ و ۵",
+      "comparison": {
+        "mt4": "یک موجودیت: Order/Trade با شماره‌ی تیکت.",
+        "mt5": "سه موجودیت: Order (درخواست)، Deal (اجرا) و Position (وضعیت باز)."
+      },
+      "keywords": [
+        "ticket",
+        "order",
+        "deal",
+        "position"
+      ],
+      "related_concepts": [
+        "MT5-CONC-0002",
+        "MT4-CONC-0002"
+      ],
+      "related_questions": [
+        "چرا تعداد معاملات دو پلتفرم فرق داره؟"
+      ]
+    },
+    {
+      "id": "MT-CMP-0009",
+      "object_type": "COMPARISON",
+      "domain": "metatrader",
+      "title": "تفاوت بستن جزئی معامله",
+      "language": "fa-en",
+      "chunk_text": "بستن جزئی در متاتریدر ۴ تیکت جدید می‌سازد، در حالی که در متاتریدر ۵ حجم پوزیشن کاهش می‌یابد و شناسه‌ی پوزیشن ثابت می‌ماند. در حساب Netting متاتریدر ۵ اصولاً یک پوزیشن واحد کم یا زیاد می‌شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_comparison.py",
+        "source_location": "MT-CMP-0009"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "VERSION_DEPENDENT",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T12:34:29Z",
+      "updated_at": "2026-09-05T12:34:29Z",
+      "category": "تفاوت متاتریدر ۴ و ۵",
+      "comparison": {
+        "mt4": "معامله بسته و با حجم باقی‌مانده و تیکت جدید بازسازی می‌شود.",
+        "mt5": "حجم همان پوزیشن کاهش می‌یابد؛ شناسه‌ی پوزیشن تغییر نمی‌کند."
+      },
+      "keywords": [
+        "partial close",
+        "بستن جزئی"
+      ],
+      "related_concepts": [
+        "MT4-PROC-0010",
+        "MT-PROC-0010"
+      ],
+      "related_questions": [
+        "چرا بعد از بستن نصف معامله شماره‌ش عوض شد؟"
+      ]
+    },
+    {
+      "id": "MT-CMP-0010",
+      "object_type": "COMPARISON",
+      "domain": "metatrader",
+      "title": "تفاوت تنظیمات اجرای سفارش",
+      "language": "fa-en",
+      "chunk_text": "متاتریدر ۵ علاوه بر انحراف مجاز، امکان انتخاب نوع پر شدن سفارش (Filling) را می‌دهد که در متاتریدر ۴ وجود ندارد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_comparison.py",
+        "source_location": "MT-CMP-0010"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "VERSION_DEPENDENT",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T12:34:29Z",
+      "updated_at": "2026-09-05T12:34:29Z",
+      "category": "تفاوت متاتریدر ۴ و ۵",
+      "comparison": {
+        "mt4": "فقط تنظیم انحراف مجاز (Deviation) در حساب‌های Instant Execution.",
+        "mt5": "انحراف مجاز به‌علاوه‌ی انتخاب Filling type: Fill or Kill، Immediate or Cancel یا Return."
+      },
+      "keywords": [
+        "filling",
+        "deviation",
+        "execution"
+      ],
+      "related_concepts": [
+        "MT5-PROC-0008",
+        "MT-CONC-0010"
+      ],
+      "related_questions": [
+        "Fill or Kill توی متاتریدر ۴ هست؟"
+      ]
+    },
+    {
+      "id": "MT-CMP-0011",
+      "object_type": "COMPARISON",
+      "domain": "metatrader",
+      "title": "تفاوت ابزارهای پیش‌فرض و وضعیت توسعه",
+      "language": "fa-en",
+      "chunk_text": "متاتریدر ۵ اندیکاتورها و اشیاء گرافیکی بیشتری به‌صورت پیش‌فرض دارد و توسعه‌ی فعال متاکوتس روی همین نسخه متمرکز است؛ متاتریدر ۴ عمدتاً در حالت نگهداری قرار دارد. با این حال، انتخاب پلتفرم را در عمل بروکر و ابزارهای موردنیاز معامله‌گر تعیین می‌کند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt_comparison.py",
+        "source_location": "MT-CMP-0011"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "VERSION_DEPENDENT",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.7,
+      "version": "v001",
+      "created_at": "2026-09-05T12:34:29Z",
+      "updated_at": "2026-09-05T12:34:29Z",
+      "category": "تفاوت متاتریدر ۴ و ۵",
+      "comparison": {
+        "mt4": "مجموعه‌ی پیش‌فرض کوچک‌تر؛ اکوسیستم بسیار بزرگ اندیکاتورها و اکسپرت‌های قدیمی.",
+        "mt5": "مجموعه‌ی پیش‌فرض بزرگ‌تر؛ تمرکز توسعه و امکانات جدید روی این نسخه."
+      },
+      "keywords": [
+        "اندیکاتور پیش‌فرض",
+        "پشتیبانی",
+        "انتخاب پلتفرم"
+      ],
+      "related_questions": [
+        "کدوم پلتفرم بهتره؟",
+        "متاتریدر ۴ منسوخ شده؟"
+      ]
+    }
+  ]
+}

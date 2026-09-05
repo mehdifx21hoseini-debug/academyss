@@ -3,19 +3,27 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-echo "== 1/4 rebuild structured collections =="
+echo "== 1/5 rebuild structured collections =="
 node tools/extract_site_data.js
 python3 tools/build_academy_catalog.py
 python3 tools/seed_general_trading.py
-python3 tools/seed_metatrader.py
+python3 tools/seed_mt_concepts.py
+python3 tools/seed_mt_common.py
+python3 tools/seed_mt5.py
+python3 tools/seed_mt4.py
+python3 tools/seed_mt_troubleshooting.py
+python3 tools/seed_mt_comparison.py
 python3 tools/seed_psychology.py
 python3 tools/seed_governance.py
 
-echo "== 2/4 validate =="
+echo "== 2/5 validate =="
 python3 tools/kb_validate.py
 
-echo "== 3/4 manifest =="
+echo "== 3/5 manifest =="
 python3 tools/kb_build_manifest.py
 
-echo "== 4/4 export =="
+echo "== 4/5 export =="
 python3 tools/kb_export.py
+
+echo "== 5/5 coverage report =="
+python3 tools/mt_coverage_report.py
