@@ -589,6 +589,12 @@
       "sha": "8ae94fd28ca37986",
       "file": "exports/reports/kb_index_v019.csv",
       "generated_at": "2026-09-05T16:34:20Z"
+    },
+    {
+      "version": "v020",
+      "sha": "cb01e16eee6652ac",
+      "file": "exports/reports/kb_index_v020.csv",
+      "generated_at": "2026-09-05T16:39:10Z"
     }
   ],
   "glossary.csv": [
@@ -633,6 +639,12 @@
       "sha": "0241bbd35ddf6c8a",
       "file": "exports/glossary/glossary_v007.csv",
       "generated_at": "2026-09-05T16:34:20Z"
+    },
+    {
+      "version": "v008",
+      "sha": "8de7b115c30d3cf9",
+      "file": "exports/glossary/glossary_v008.csv",
+      "generated_at": "2026-09-05T16:39:10Z"
     }
   ],
   "metatrader_common_procedures.md": [
@@ -915,6 +927,22 @@
       "sha": "dda4fba677420a35",
       "file": "exports/academy/academy_intro_lesson_07_v001.json",
       "generated_at": "2026-09-05T16:34:20Z"
+    }
+  ],
+  "academy_intro_lesson_08a.md": [
+    {
+      "version": "v001",
+      "sha": "8855b42b15d5ea41",
+      "file": "exports/academy/academy_intro_lesson_08a_v001.md",
+      "generated_at": "2026-09-05T16:39:10Z"
+    }
+  ],
+  "academy_intro_lesson_08a.json": [
+    {
+      "version": "v001",
+      "sha": "4f8248129e3c3e77",
+      "file": "exports/academy/academy_intro_lesson_08a_v001.json",
+      "generated_at": "2026-09-05T16:39:10Z"
     }
   ]
 }
