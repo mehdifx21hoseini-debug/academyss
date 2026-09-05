@@ -451,6 +451,12 @@
       "sha": "49aaa022a9094646",
       "file": "exports/reports/review_queue_open_items_v016.md",
       "generated_at": "2026-09-05T17:56:27Z"
+    },
+    {
+      "version": "v017",
+      "sha": "020cbf6bad889381",
+      "file": "exports/reports/review_queue_open_items_v017.md",
+      "generated_at": "2026-09-05T18:06:26Z"
     }
   ],
   "review_queue_open_items.json": [
@@ -549,6 +555,12 @@
       "sha": "4b25e63fa9a231a6",
       "file": "exports/reports/review_queue_open_items_v016.json",
       "generated_at": "2026-09-05T17:56:27Z"
+    },
+    {
+      "version": "v017",
+      "sha": "15614b964b77308f",
+      "file": "exports/reports/review_queue_open_items_v017.json",
+      "generated_at": "2026-09-05T18:06:26Z"
     }
   ],
   "academy_site_catalog.md": [
@@ -739,6 +751,12 @@
       "sha": "f43d94f46c52477e",
       "file": "exports/reports/kb_index_v026.csv",
       "generated_at": "2026-09-05T17:56:27Z"
+    },
+    {
+      "version": "v027",
+      "sha": "1aaf806482de9611",
+      "file": "exports/reports/kb_index_v027.csv",
+      "generated_at": "2026-09-05T18:06:26Z"
     }
   ],
   "glossary.csv": [
@@ -819,6 +837,12 @@
       "sha": "7dbd8995774e5471",
       "file": "exports/glossary/glossary_v013.csv",
       "generated_at": "2026-09-05T17:56:27Z"
+    },
+    {
+      "version": "v014",
+      "sha": "8dbcbde9d55db70e",
+      "file": "exports/glossary/glossary_v014.csv",
+      "generated_at": "2026-09-05T18:06:26Z"
     }
   ],
   "metatrader_common_procedures.md": [
@@ -1225,6 +1249,38 @@
       "sha": "abd036bedd342df0",
       "file": "exports/academy/academy_intro_lesson_14_v001.json",
       "generated_at": "2026-09-05T17:56:27Z"
+    }
+  ],
+  "academy_intro_lesson_15.md": [
+    {
+      "version": "v001",
+      "sha": "acb831fec68ec22a",
+      "file": "exports/academy/academy_intro_lesson_15_v001.md",
+      "generated_at": "2026-09-05T18:06:26Z"
+    }
+  ],
+  "academy_intro_lesson_15.json": [
+    {
+      "version": "v001",
+      "sha": "2f7286fa60c89f42",
+      "file": "exports/academy/academy_intro_lesson_15_v001.json",
+      "generated_at": "2026-09-05T18:06:26Z"
+    }
+  ],
+  "academy_intro_lesson_16.md": [
+    {
+      "version": "v001",
+      "sha": "8d71b629ea0ba6ea",
+      "file": "exports/academy/academy_intro_lesson_16_v001.md",
+      "generated_at": "2026-09-05T18:06:26Z"
+    }
+  ],
+  "academy_intro_lesson_16.json": [
+    {
+      "version": "v001",
+      "sha": "97dc67320d878620",
+      "file": "exports/academy/academy_intro_lesson_16_v001.json",
+      "generated_at": "2026-09-05T18:06:26Z"
     }
   ]
 }

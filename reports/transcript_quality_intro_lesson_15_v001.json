@@ -1,0 +1,50 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "intro_lesson_15",
+  "course": "intro",
+  "lesson": "15",
+  "title": "واریز و برداشت با تتر (بخش 15)",
+  "original_filename": "intro_lesson_15.md",
+  "raw_file": "raw_sources/academy/intro/intro_lesson_15_01.md",
+  "ingested_at": "2026-09-05T18:01:30Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 145,
+    "filler_cues": 0,
+    "speech_cues": 145,
+    "speech_ratio": 1.0,
+    "words": 1074,
+    "unique_words": 404,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "|---|---|",
+        "count": 3
+      },
+      {
+        "text": "عنوان درس: آموزش واریز و برداشت از طریق تتر (بخش پانزدهم)",
+        "count": 2
+      },
+      {
+        "text": "مراحل:",
+        "count": 2
+      },
+      {
+        "text": "# TRANSCRIPT — آموزش مقدماتی، بخش پانزدهم",
+        "count": 1
+      },
+      {
+        "text": "منبع: متن پاک‌سازی‌شده و ساختاریافته‌ی ارسالی مالک پروژه (۲۰۲۶-۰۹-۰۵)",
+        "count": 1
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "report_type": "transcript_quality",
+  "version": "v001"
+}

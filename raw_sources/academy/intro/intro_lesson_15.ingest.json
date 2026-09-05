@@ -1,0 +1,920 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "intro_lesson_15",
+  "course": "intro",
+  "lesson": "15",
+  "title": "واریز و برداشت با تتر (بخش 15)",
+  "original_filename": "intro_lesson_15.md",
+  "raw_file": "raw_sources/academy/intro/intro_lesson_15.md",
+  "ingested_at": "2026-09-05T18:01:30Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 145,
+    "filler_cues": 0,
+    "speech_cues": 145,
+    "speech_ratio": 1.0,
+    "words": 1074,
+    "unique_words": 404,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "|---|---|",
+        "count": 3
+      },
+      {
+        "text": "عنوان درس: آموزش واریز و برداشت از طریق تتر (بخش پانزدهم)",
+        "count": 2
+      },
+      {
+        "text": "مراحل:",
+        "count": 2
+      },
+      {
+        "text": "# TRANSCRIPT — آموزش مقدماتی، بخش پانزدهم",
+        "count": 1
+      },
+      {
+        "text": "منبع: متن پاک‌سازی‌شده و ساختاریافته‌ی ارسالی مالک پروژه (۲۰۲۶-۰۹-۰۵)",
+        "count": 1
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "cues": [
+    {
+      "index": 1,
+      "start": null,
+      "end": null,
+      "text": "# TRANSCRIPT — آموزش مقدماتی، بخش پانزدهم"
+    },
+    {
+      "index": 2,
+      "start": null,
+      "end": null,
+      "text": "عنوان درس: آموزش واریز و برداشت از طریق تتر (بخش پانزدهم)"
+    },
+    {
+      "index": 3,
+      "start": null,
+      "end": null,
+      "text": "منبع: متن پاک‌سازی‌شده و ساختاریافته‌ی ارسالی مالک پروژه (۲۰۲۶-۰۹-۰۵)"
+    },
+    {
+      "index": 5,
+      "start": null,
+      "end": null,
+      "text": "## متن پاک‌سازی‌شده"
+    },
+    {
+      "index": 7,
+      "start": null,
+      "end": null,
+      "text": "سلام به شما عزیزان. آموزش واریز و برداشت از طریق روش تتر رو می‌خواهم به شما عزیزان آموزش بدم."
+    },
+    {
+      "index": 9,
+      "start": null,
+      "end": null,
+      "text": "قبل از این که بریم سر اصل مطلب، لازم می‌دونم در مورد ۴ تا مبحث صحبت کنم:"
+    },
+    {
+      "index": 11,
+      "start": null,
+      "end": null,
+      "text": "۱. نحوه ارتباط با بروکر - چه روش‌هایی وجود داره؟"
+    },
+    {
+      "index": 12,
+      "start": null,
+      "end": null,
+      "text": "۲. انواع روش‌های واریز و برداشت"
+    },
+    {
+      "index": 13,
+      "start": null,
+      "end": null,
+      "text": "۳. تتر - که تخصصی می‌خواهیم با هم دیگه باز بکنیم"
+    },
+    {
+      "index": 15,
+      "start": null,
+      "end": null,
+      "text": "تمام تمرکزتون رو بدید به من."
+    },
+    {
+      "index": 17,
+      "start": null,
+      "end": null,
+      "text": "### ۱. نحوه ارتباط با بروکر"
+    },
+    {
+      "index": 19,
+      "start": null,
+      "end": null,
+      "text": "دو تا راه وجود داره:"
+    },
+    {
+      "index": 21,
+      "start": null,
+      "end": null,
+      "text": "راه اول: ارسال تیکت از کابین معاملاتی"
+    },
+    {
+      "index": 23,
+      "start": null,
+      "end": null,
+      "text": "- وارد کابین معاملاتی بشید"
+    },
+    {
+      "index": 24,
+      "start": null,
+      "end": null,
+      "text": "- قسمت پایین، گزینه پشتیبانی رو بزنید"
+    },
+    {
+      "index": 25,
+      "start": null,
+      "end": null,
+      "text": "- باز کردن تیکت رو بزنید"
+    },
+    {
+      "index": 26,
+      "start": null,
+      "end": null,
+      "text": "- هر سؤالی دارید بپرسید و در سریع‌ترین زمان پاسخ بگیرید"
+    },
+    {
+      "index": 28,
+      "start": null,
+      "end": null,
+      "text": "راه دوم: از طریق ایمیل"
+    },
+    {
+      "index": 30,
+      "start": null,
+      "end": null,
+      "text": "- ایمیل پشتیبانی بروکر را یادداشت کنید"
+    },
+    {
+      "index": 31,
+      "start": null,
+      "end": null,
+      "text": "- هر سوالی دارید ایمیل بزنید"
+    },
+    {
+      "index": 33,
+      "start": null,
+      "end": null,
+      "text": "ویژگی ویژه برای معرفی‌شدگان:"
+    },
+    {
+      "index": 35,
+      "start": null,
+      "end": null,
+      "text": "- اگر از طریق لینک من ثبت‌نام کنید، مدیر حساب خود من، مدیر حساب شما می‌شود"
+    },
+    {
+      "index": 36,
+      "start": null,
+      "end": null,
+      "text": "- از کشور قبرس با شما تماس می‌گیرد"
+    },
+    {
+      "index": 37,
+      "start": null,
+      "end": null,
+      "text": "- شما را کامل راهنمایی می‌کند"
+    },
+    {
+      "index": 38,
+      "start": null,
+      "end": null,
+      "text": "- هر جا به مشکل خوردید به من بگید، پیگیری می‌کنم"
+    },
+    {
+      "index": 40,
+      "start": null,
+      "end": null,
+      "text": "ساعت پاسخگویی مدیر حساب: دوشنبه تا جمعه، ۹:۳۰ صبح تا ۱۶:۳۰ عصر به وقت ایران (پشتیبانی ۲۴ ساعته نیز وجود دارد)"
+    },
+    {
+      "index": 42,
+      "start": null,
+      "end": null,
+      "text": "### ۲. انواع روش‌های واریز و برداشت"
+    },
+    {
+      "index": 44,
+      "start": null,
+      "end": null,
+      "text": "برای افراد خارج از ایران:"
+    },
+    {
+      "index": 46,
+      "start": null,
+      "end": null,
+      "text": "- کارت بانکی"
+    },
+    {
+      "index": 47,
+      "start": null,
+      "end": null,
+      "text": "- پی‌پل"
+    },
+    {
+      "index": 48,
+      "start": null,
+      "end": null,
+      "text": "- مسترکارت، ویزاکارت"
+    },
+    {
+      "index": 50,
+      "start": null,
+      "end": null,
+      "text": "برای افراد داخل ایران:"
+    },
+    {
+      "index": 52,
+      "start": null,
+      "end": null,
+      "text": "- وب‌مانی (قدیمی)"
+    },
+    {
+      "index": 53,
+      "start": null,
+      "end": null,
+      "text": "- پرفکت مانی (قدیمی)"
+    },
+    {
+      "index": 54,
+      "start": null,
+      "end": null,
+      "text": "- واریز ریالی از طریق کارگزاری بروکر (توصیه نمی‌شود)"
+    },
+    {
+      "index": 55,
+      "start": null,
+      "end": null,
+      "text": "- تتر (بهترین روش)"
+    },
+    {
+      "index": 57,
+      "start": null,
+      "end": null,
+      "text": "### ۳. تتر (USDT) چیست؟"
+    },
+    {
+      "index": 59,
+      "start": null,
+      "end": null,
+      "text": "تتر = دلار مجازی (استیبل‌کوین)"
+    },
+    {
+      "index": 61,
+      "start": null,
+      "end": null,
+      "text": "ویژگی‌ها:"
+    },
+    {
+      "index": 63,
+      "start": null,
+      "end": null,
+      "text": "- هر ۱ تتر = ۱ دلار"
+    },
+    {
+      "index": 64,
+      "start": null,
+      "end": null,
+      "text": "- ارزش ثابت دارد (نوسان ندارد)"
+    },
+    {
+      "index": 65,
+      "start": null,
+      "end": null,
+      "text": "- پایین‌ترین کارمزد را دارد"
+    },
+    {
+      "index": 66,
+      "start": null,
+      "end": null,
+      "text": "- سریع‌ترین روش جابه‌جایی"
+    },
+    {
+      "index": 67,
+      "start": null,
+      "end": null,
+      "text": "- نقدشوندگی بالا"
+    },
+    {
+      "index": 68,
+      "start": null,
+      "end": null,
+      "text": "- در همه جا پشتیبانی می‌شود"
+    },
+    {
+      "index": 70,
+      "start": null,
+      "end": null,
+      "text": "### ۴. کیف پول تتر"
+    },
+    {
+      "index": 72,
+      "start": null,
+      "end": null,
+      "text": "برای نگهداری تتر، به یک کیف پول نیاز دارید:"
+    },
+    {
+      "index": 74,
+      "start": null,
+      "end": null,
+      "text": "الف) کیف پول نرم‌افزاری (نرم‌افزار روی گوشی)"
+    },
+    {
+      "index": 76,
+      "start": null,
+      "end": null,
+      "text": "- توصیه: Trust Wallet"
+    },
+    {
+      "index": 77,
+      "start": null,
+      "end": null,
+      "text": "- نصب از اپ‌استور یا گوگل‌پلی (فقط از منابع رسمی)"
+    },
+    {
+      "index": 78,
+      "start": null,
+      "end": null,
+      "text": "- رایگان"
+    },
+    {
+      "index": 79,
+      "start": null,
+      "end": null,
+      "text": "- امنیت بالا با رعایت نکات"
+    },
+    {
+      "index": 81,
+      "start": null,
+      "end": null,
+      "text": "ب) کیف پول سخت‌افزاری"
+    },
+    {
+      "index": 83,
+      "start": null,
+      "end": null,
+      "text": "- هزینه حدود ۲۰۰ دلار"
+    },
+    {
+      "index": 84,
+      "start": null,
+      "end": null,
+      "text": "- امنیت بیشتر"
+    },
+    {
+      "index": 85,
+      "start": null,
+      "end": null,
+      "text": "- برای حجم‌های بالا مناسب‌تر"
+    },
+    {
+      "index": 87,
+      "start": null,
+      "end": null,
+      "text": "### ۵. نکات امنیتی کیف پول"
+    },
+    {
+      "index": 89,
+      "start": null,
+      "end": null,
+      "text": "بسیار مهم: هنگام ساخت کیف پول، ۱۲ کلمه بازیابی (Seed Phrase) به شما داده می‌شود."
+    },
+    {
+      "index": 91,
+      "start": null,
+      "end": null,
+      "text": "- این ۱۲ کلمه را دقیقاً به ترتیب یادداشت کنید"
+    },
+    {
+      "index": 92,
+      "start": null,
+      "end": null,
+      "text": "- در جای بسیار امن نگهداری کنید"
+    },
+    {
+      "index": 93,
+      "start": null,
+      "end": null,
+      "text": "- به هیچکس نشان ندهید"
+    },
+    {
+      "index": 94,
+      "start": null,
+      "end": null,
+      "text": "- هر کسی به این کلمات دسترسی داشته باشد، به کل دارایی شما دسترسی دارد"
+    },
+    {
+      "index": 96,
+      "start": null,
+      "end": null,
+      "text": "### ۶. نحوه خرید تتر از صرافی"
+    },
+    {
+      "index": 98,
+      "start": null,
+      "end": null,
+      "text": "صرافی‌های معتبر ایران: والکس (و صرافی‌های دیگر)"
+    },
+    {
+      "index": 100,
+      "start": null,
+      "end": null,
+      "text": "مراحل:"
+    },
+    {
+      "index": 102,
+      "start": null,
+      "end": null,
+      "text": "۱. وارد صرافی شوید"
+    },
+    {
+      "index": 103,
+      "start": null,
+      "end": null,
+      "text": "۲. احراز هویت کنید"
+    },
+    {
+      "index": 104,
+      "start": null,
+      "end": null,
+      "text": "۳. مبلغ ریالی واریز کنید"
+    },
+    {
+      "index": 105,
+      "start": null,
+      "end": null,
+      "text": "۴. تتر (USDT) بخرید"
+    },
+    {
+      "index": 106,
+      "start": null,
+      "end": null,
+      "text": "۵. شبکه TRC20 را انتخاب کنید (کارمزد پایین)"
+    },
+    {
+      "index": 107,
+      "start": null,
+      "end": null,
+      "text": "۶. تتر را به آدرس کیف پول خود انتقال دهید"
+    },
+    {
+      "index": 109,
+      "start": null,
+      "end": null,
+      "text": "### ۷. شبکه ترون (TRX) و کارمزد"
+    },
+    {
+      "index": 111,
+      "start": null,
+      "end": null,
+      "text": "نکته مهم: برای انتقال تتر روی شبکه TRC20، به مقداری ترون (TRX) برای کارمزد نیاز دارید."
+    },
+    {
+      "index": 113,
+      "start": null,
+      "end": null,
+      "text": "کارمزد تراکنش‌های تتر:"
+    },
+    {
+      "index": 115,
+      "start": null,
+      "end": null,
+      "text": "- حدود ۱ تا ۴ دلار (معادل ۳ تا ۶ ترون)"
+    },
+    {
+      "index": 116,
+      "start": null,
+      "end": null,
+      "text": "- حتی برای مبالغ بالا (تا ۱۶ میلیارد تومان)، کارمزد همان ۱ تا ۴ دلار است"
+    },
+    {
+      "index": 118,
+      "start": null,
+      "end": null,
+      "text": "پس حتماً:"
+    },
+    {
+      "index": 120,
+      "start": null,
+      "end": null,
+      "text": "- مقداری TRX در کیف پول داشته باشید"
+    },
+    {
+      "index": 121,
+      "start": null,
+      "end": null,
+      "text": "- تا هنگام انتقال تتر، لنگ نمانید"
+    },
+    {
+      "index": 123,
+      "start": null,
+      "end": null,
+      "text": "### ۸. نحوه واریز به بروکر"
+    },
+    {
+      "index": 125,
+      "start": null,
+      "end": null,
+      "text": "مراحل کامل:"
+    },
+    {
+      "index": 127,
+      "start": null,
+      "end": null,
+      "text": "۱. تتر را از صرافی به کیف پول شخصی خود (Trust Wallet) انتقال دهید"
+    },
+    {
+      "index": 128,
+      "start": null,
+      "end": null,
+      "text": "۲. از کیف پول، تتر را به آدرس بروکر ارسال کنید"
+    },
+    {
+      "index": 129,
+      "start": null,
+      "end": null,
+      "text": "۳. حتماً از شبکه TRC20 استفاده کنید"
+    },
+    {
+      "index": 130,
+      "start": null,
+      "end": null,
+      "text": "۴. بعد از ارسال، از تراکنش اسکرین‌شات بگیرید"
+    },
+    {
+      "index": 132,
+      "start": null,
+      "end": null,
+      "text": "نکته بسیار مهم: از هر طریقی واریز کنید، از همان طریق می‌توانید برداشت کنید."
+    },
+    {
+      "index": 134,
+      "start": null,
+      "end": null,
+      "text": "### ۹. اسکرین‌شات تراکنش و تأیید در بروکر"
+    },
+    {
+      "index": 136,
+      "start": null,
+      "end": null,
+      "text": "پس از ارسال تتر به بروکر:"
+    },
+    {
+      "index": 138,
+      "start": null,
+      "end": null,
+      "text": "۱. در کیف پول، روی تراکنش کلیک کنید"
+    },
+    {
+      "index": 139,
+      "start": null,
+      "end": null,
+      "text": "۲. گزینه View on Explorer را بزنید"
+    },
+    {
+      "index": 140,
+      "start": null,
+      "end": null,
+      "text": "۳. اسکرین‌شات بگیرید (آدرس مبدأ، آدرس مقصد، مبلغ و شناسه تراکنش مشخص باشد)"
+    },
+    {
+      "index": 141,
+      "start": null,
+      "end": null,
+      "text": "۴. در بروکر، اسکرین‌شات را آپلود کنید"
+    },
+    {
+      "index": 142,
+      "start": null,
+      "end": null,
+      "text": "۵. در ساعت پاسخگویی (یا ۲۴ ساعته) بررسی و تأیید می‌شود"
+    },
+    {
+      "index": 143,
+      "start": null,
+      "end": null,
+      "text": "۶. حساب شما شارژ می‌شود"
+    },
+    {
+      "index": 145,
+      "start": null,
+      "end": null,
+      "text": "### ۱۰. نحوه برداشت از بروکر"
+    },
+    {
+      "index": 147,
+      "start": null,
+      "end": null,
+      "text": "مراحل:"
+    },
+    {
+      "index": 149,
+      "start": null,
+      "end": null,
+      "text": "۱. درخواست برداشت به همان آدرسی که واریز کرده‌اید"
+    },
+    {
+      "index": 150,
+      "start": null,
+      "end": null,
+      "text": "۲. تتر به کیف پول شما واریز می‌شود"
+    },
+    {
+      "index": 151,
+      "start": null,
+      "end": null,
+      "text": "۳. از کیف پول به صرافی یا شخص دیگر انتقال دهید"
+    },
+    {
+      "index": 153,
+      "start": null,
+      "end": null,
+      "text": "نکته: فقط از همان روشی که واریز کرده‌اید، می‌توانید برداشت کنید."
+    },
+    {
+      "index": 155,
+      "start": null,
+      "end": null,
+      "text": "### ۱۱. جمع‌بندی"
+    },
+    {
+      "index": 157,
+      "start": null,
+      "end": null,
+      "text": "| مرحله | توضیح |"
+    },
+    {
+      "index": 158,
+      "start": null,
+      "end": null,
+      "text": "|---|---|"
+    },
+    {
+      "index": 159,
+      "start": null,
+      "end": null,
+      "text": "| ۱ | نصب Trust Wallet |"
+    },
+    {
+      "index": 160,
+      "start": null,
+      "end": null,
+      "text": "| ۲ | خرید تتر از صرافی (والکس و...) |"
+    },
+    {
+      "index": 161,
+      "start": null,
+      "end": null,
+      "text": "| ۳ | خرید مقداری TRX برای کارمزد |"
+    },
+    {
+      "index": 162,
+      "start": null,
+      "end": null,
+      "text": "| ۴ | انتقال تتر به کیف پول شخصی |"
+    },
+    {
+      "index": 163,
+      "start": null,
+      "end": null,
+      "text": "| ۵ | انتقال تتر از کیف پول به بروکر |"
+    },
+    {
+      "index": 164,
+      "start": null,
+      "end": null,
+      "text": "| ۶ | ارسال اسکرین‌شات به بروکر |"
+    },
+    {
+      "index": 165,
+      "start": null,
+      "end": null,
+      "text": "| ۷ | تأیید و شارژ حساب |"
+    },
+    {
+      "index": 167,
+      "start": null,
+      "end": null,
+      "text": "## موارد نیازمند بررسی (طبق متن ارسالی)"
+    },
+    {
+      "index": 169,
+      "start": null,
+      "end": null,
+      "text": "موردی برای بررسی پیدا نشد."
+    },
+    {
+      "index": 171,
+      "start": null,
+      "end": null,
+      "text": "## متن ساختاریافته (STRUCTURED TRANSCRIPT)"
+    },
+    {
+      "index": 173,
+      "start": null,
+      "end": null,
+      "text": "عنوان درس: آموزش واریز و برداشت از طریق تتر (بخش پانزدهم)"
+    },
+    {
+      "index": 175,
+      "start": null,
+      "end": null,
+      "text": "### ۲. نحوه ارتباط با بروکر"
+    },
+    {
+      "index": 177,
+      "start": null,
+      "end": null,
+      "text": "| روش | توضیح |"
+    },
+    {
+      "index": 178,
+      "start": null,
+      "end": null,
+      "text": "|---|---|"
+    },
+    {
+      "index": 179,
+      "start": null,
+      "end": null,
+      "text": "| تیکت | از طریق کابین معاملاتی → پشتیبانی → باز کردن تیکت |"
+    },
+    {
+      "index": 180,
+      "start": null,
+      "end": null,
+      "text": "| ایمیل | ارسال ایمیل به پشتیبانی بروکر |"
+    },
+    {
+      "index": 181,
+      "start": null,
+      "end": null,
+      "text": "| مدیر حساب | برای معرفی‌شدگان از طریق لینک من |"
+    },
+    {
+      "index": 183,
+      "start": null,
+      "end": null,
+      "text": "### ۳. روش‌های واریز و برداشت"
+    },
+    {
+      "index": 185,
+      "start": null,
+      "end": null,
+      "text": "| روش | مناسب برای |"
+    },
+    {
+      "index": 186,
+      "start": null,
+      "end": null,
+      "text": "|---|---|"
+    },
+    {
+      "index": 187,
+      "start": null,
+      "end": null,
+      "text": "| کارت بانکی، پی‌پل | خارج از ایران |"
+    },
+    {
+      "index": 188,
+      "start": null,
+      "end": null,
+      "text": "| وب‌مانی، پرفکت مانی | داخل ایران (قدیمی) |"
+    },
+    {
+      "index": 189,
+      "start": null,
+      "end": null,
+      "text": "| تتر (USDT) | بهترین روش برای همه |"
+    },
+    {
+      "index": 191,
+      "start": null,
+      "end": null,
+      "text": "### ۴. تتر (USDT) چیست؟"
+    },
+    {
+      "index": 193,
+      "start": null,
+      "end": null,
+      "text": "- استیبل‌کوین: هر ۱ تتر = ۱ دلار"
+    },
+    {
+      "index": 194,
+      "start": null,
+      "end": null,
+      "text": "- ارزش ثابت"
+    },
+    {
+      "index": 195,
+      "start": null,
+      "end": null,
+      "text": "- کارمزد پایین (۱ تا ۴ دلار)"
+    },
+    {
+      "index": 196,
+      "start": null,
+      "end": null,
+      "text": "- سرعت بالا"
+    },
+    {
+      "index": 197,
+      "start": null,
+      "end": null,
+      "text": "- نقدشوندگی عالی"
+    },
+    {
+      "index": 199,
+      "start": null,
+      "end": null,
+      "text": "### ۵. کیف پول تتر"
+    },
+    {
+      "index": 201,
+      "start": null,
+      "end": null,
+      "text": "کیف پول نرم‌افزاری (پیشنهادی): Trust Wallet"
+    },
+    {
+      "index": 203,
+      "start": null,
+      "end": null,
+      "text": "مراحل نصب: از اپ‌استور (iOS) یا گوگل‌پلی (Android) دانلود کنید — فقط از منابع رسمی."
+    },
+    {
+      "index": 205,
+      "start": null,
+      "end": null,
+      "text": "نکته امنیتی: ۱۲ کلمه بازیابی را در جای امن یادداشت کنید. هر کسی به آن دسترسی داشته باشد، به کل دارایی شما دسترسی دارد."
+    },
+    {
+      "index": 207,
+      "start": null,
+      "end": null,
+      "text": "### ۶. شبکه TRC20"
+    },
+    {
+      "index": 209,
+      "start": null,
+      "end": null,
+      "text": "برای انتقال تتر، از شبکه TRC20 (روی بلاکچین ترون) استفاده کنید: کارمزد بسیار پایین (۱ تا ۴ دلار)، سرعت بالا."
+    },
+    {
+      "index": 211,
+      "start": null,
+      "end": null,
+      "text": "نیاز به TRX: برای پرداخت کارمزد، مقداری ترون (TRX) در کیف پول داشته باشید."
+    },
+    {
+      "index": 213,
+      "start": null,
+      "end": null,
+      "text": "### ۹. نکات کلیدی"
+    },
+    {
+      "index": 215,
+      "start": null,
+      "end": null,
+      "text": "- از همان روشی که واریز می‌کنید، برداشت کنید"
+    },
+    {
+      "index": 216,
+      "start": null,
+      "end": null,
+      "text": "- آدرس مقصد را دقیق کپی‌پیست کنید (دستی تایپ نکنید)"
+    },
+    {
+      "index": 217,
+      "start": null,
+      "end": null,
+      "text": "- همیشه از شبکه TRC20 استفاده کنید"
+    },
+    {
+      "index": 218,
+      "start": null,
+      "end": null,
+      "text": "- اسکرین‌شات کامل با شناسه تراکنش"
+    },
+    {
+      "index": 219,
+      "start": null,
+      "end": null,
+      "text": "- پاسخگویی: دوشنبه تا جمعه، ۹:۳۰ تا ۱۶:۳۰"
+    }
+  ]
+}
