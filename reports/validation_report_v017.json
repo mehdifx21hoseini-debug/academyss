@@ -1,10 +1,10 @@
 {
   "report_type": "validation",
-  "version": "v018",
-  "generated_at": "2026-09-05T15:14:23Z",
+  "version": "v017",
+  "generated_at": "2026-09-05T15:13:49Z",
   "stats": {
     "files": 19,
-    "objects": 277,
+    "objects": 276,
     "by_kind": {
       "knowledge_object": 17,
       "conflict_record": 1,
@@ -14,7 +14,7 @@
       "psychology": 27,
       "metatrader": 103,
       "general_trading": 49,
-      "academy": 90,
+      "academy": 89,
       "mentor_qa": 1,
       "brokers": 1,
       "meta": 6
