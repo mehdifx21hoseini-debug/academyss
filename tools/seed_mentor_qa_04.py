@@ -175,7 +175,10 @@ TOOL = [{
         "✅ وضعیت سیاستی (حل‌شده): متن `ACA-RULE-0002` با تصمیم `D-0014` اصلاح شد و به محصولات "
         "**بیرونی** محدود گردید؛ ابزارهای رسمی خود آکادمی مانند SSProX از آن مستثنا هستند. "
         "مربی درباره‌ی عملکرد آن توضیح می‌دهد و نصب، راه‌اندازی و لایسنس را به پشتیبانی ارجاع "
-        "می‌دهد."
+        "می‌دهد.\n"
+        "📘 **راهنمای کامل محصول:** سند رسمی پرسش و پاسخ اکسپرت (نسخه ۱.۳) در رکوردهای "
+        "`ACA-EXP-0001..0043` ثبت شده است — نصب، محاسبه‌ی حجم، Risk Line و Pending Line، "
+        "تنظیمات، میانبرها و عیب‌یابی."
     ),
     "source": {
         "source_type": "ACADEMY_DOCUMENT",
@@ -189,17 +192,16 @@ TOOL = [{
     "authority_level": "ACADEMY_PRIMARY",
     "methodology_scope": "ACADEMY_OPERATIONS",
     "platform_scope": "BOTH",
-    "approval_status": "PENDING_REVIEW",
-    "lifecycle_status": "PENDING_REVIEW",
-    "verification_required": True,
-    "verification_note": "اعلان کانال؛ پیش از پاسخ رسمی، تأیید نسخه و شرایط انتشار لازم است.",
-    "confidence": 0.85,
-    "version": "v001",
-    "conflicts": ["CONF-0005"],
+    "approval_status": "APPROVED",
+    "lifecycle_status": "ACTIVE",
+    "verification_required": False,
+    "confidence": 1.0,
+    "version": "v002",
     "warnings": ["مربی فقط توضیح عملکردی می‌دهد و هیچ اکسپرت بیرونی را پیشنهاد نمی‌کند.",
                  "نصب و راه‌اندازی و مسائل لایسنس به پشتیبانی انسانی ارجاع می‌شود."],
     "keywords": ["SSProX", "اکسپرت", "مدیریت سرمایه", "ریسک لاین", "رایگان", "TP2"],
-    "related_concepts": ["MQA-00037", "ACA-RULE-0002", "ACA-INT-0172"],
+    "related_concepts": ["MQA-00037", "ACA-RULE-0002", "ACA-INT-0172",
+                         "ACA-EXP-0001", "ACA-EXP-0009", "ACA-EXP-0043"],
     "related_questions": ["SSProX چیه؟", "اکسپرت مدیریت سرمایه رو از کجا بگیرم؟",
                           "اکسپرت آکادمی رایگانه؟"],
     "created_at": NOW, "updated_at": NOW,

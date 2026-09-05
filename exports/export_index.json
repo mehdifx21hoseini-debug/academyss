@@ -327,6 +327,12 @@
       "sha": "3bd21fc34bb2c67a",
       "file": "exports/conflicts/conflict_registry_v016.md",
       "generated_at": "2026-09-05T21:04:35Z"
+    },
+    {
+      "version": "v017",
+      "sha": "5f451f7eae70c361",
+      "file": "exports/conflicts/conflict_registry_v017.md",
+      "generated_at": "2026-09-05T21:53:01Z"
     }
   ],
   "conflict_registry.json": [
@@ -425,6 +431,12 @@
       "sha": "00c321fe8bc885f1",
       "file": "exports/conflicts/conflict_registry_v016.json",
       "generated_at": "2026-09-05T21:04:35Z"
+    },
+    {
+      "version": "v017",
+      "sha": "92868df550cea21b",
+      "file": "exports/conflicts/conflict_registry_v017.json",
+      "generated_at": "2026-09-05T21:53:01Z"
     }
   ],
   "review_queue_open_items.md": [
@@ -571,6 +583,12 @@
       "sha": "fa778313fa1b72da",
       "file": "exports/reports/review_queue_open_items_v024.md",
       "generated_at": "2026-09-05T21:04:35Z"
+    },
+    {
+      "version": "v025",
+      "sha": "23adab4f72797756",
+      "file": "exports/reports/review_queue_open_items_v025.md",
+      "generated_at": "2026-09-05T21:53:01Z"
     }
   ],
   "review_queue_open_items.json": [
@@ -717,6 +735,12 @@
       "sha": "282e4287407fcfa4",
       "file": "exports/reports/review_queue_open_items_v024.json",
       "generated_at": "2026-09-05T21:04:35Z"
+    },
+    {
+      "version": "v025",
+      "sha": "5435b5d9dd01caa8",
+      "file": "exports/reports/review_queue_open_items_v025.json",
+      "generated_at": "2026-09-05T21:53:01Z"
     }
   ],
   "academy_site_catalog.md": [
@@ -973,6 +997,12 @@
       "sha": "1e98601f77180c31",
       "file": "exports/reports/kb_index_v037.csv",
       "generated_at": "2026-09-05T21:06:19Z"
+    },
+    {
+      "version": "v038",
+      "sha": "c64ccb77d2bfa69c",
+      "file": "exports/reports/kb_index_v038.csv",
+      "generated_at": "2026-09-05T21:53:01Z"
     }
   ],
   "glossary.csv": [
@@ -1059,6 +1089,12 @@
       "sha": "8dbcbde9d55db70e",
       "file": "exports/glossary/glossary_v014.csv",
       "generated_at": "2026-09-05T18:06:26Z"
+    },
+    {
+      "version": "v015",
+      "sha": "86af0b30e27ecd67",
+      "file": "exports/glossary/glossary_v015.csv",
+      "generated_at": "2026-09-05T21:53:01Z"
     }
   ],
   "metatrader_common_procedures.md": [
@@ -1611,6 +1647,12 @@
       "sha": "e8eacd5abee83ac5",
       "file": "exports/academy/academy_intro_lesson_15_v002.md",
       "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "e7bccd0732b028a6",
+      "file": "exports/academy/academy_intro_lesson_15_v003.md",
+      "generated_at": "2026-09-05T21:53:01Z"
     }
   ],
   "academy_intro_lesson_15.json": [
@@ -1625,6 +1667,12 @@
       "sha": "1aeac373e425da48",
       "file": "exports/academy/academy_intro_lesson_15_v002.json",
       "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "2248e05c3fa2bc0b",
+      "file": "exports/academy/academy_intro_lesson_15_v003.json",
+      "generated_at": "2026-09-05T21:53:01Z"
     }
   ],
   "academy_intro_lesson_16.md": [
@@ -1639,6 +1687,12 @@
       "sha": "dc3ecd99bc6741bc",
       "file": "exports/academy/academy_intro_lesson_16_v002.md",
       "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "448c4a79ab499604",
+      "file": "exports/academy/academy_intro_lesson_16_v003.md",
+      "generated_at": "2026-09-05T21:53:01Z"
     }
   ],
   "academy_intro_lesson_16.json": [
@@ -1653,6 +1707,12 @@
       "sha": "5afb735f42e71edb",
       "file": "exports/academy/academy_intro_lesson_16_v002.json",
       "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "8c3758e7f3796131",
+      "file": "exports/academy/academy_intro_lesson_16_v003.json",
+      "generated_at": "2026-09-05T21:53:01Z"
     }
   ],
   "academy_intro_lesson_17.md": [
@@ -1799,6 +1859,12 @@
       "sha": "ca065ae4605d29d7",
       "file": "exports/academy/academy_tools_v002.md",
       "generated_at": "2026-09-05T20:50:22Z"
+    },
+    {
+      "version": "v003",
+      "sha": "d97002bebac4028d",
+      "file": "exports/academy/academy_tools_v003.md",
+      "generated_at": "2026-09-05T21:53:01Z"
     }
   ],
   "academy_tools.json": [
@@ -1813,6 +1879,12 @@
       "sha": "e3c82242180bb27e",
       "file": "exports/academy/academy_tools_v002.json",
       "generated_at": "2026-09-05T20:50:22Z"
+    },
+    {
+      "version": "v003",
+      "sha": "f7b731f2dc6d7b4d",
+      "file": "exports/academy/academy_tools_v003.json",
+      "generated_at": "2026-09-05T21:53:01Z"
     }
   ],
   "academy_support_bot_policy.md": [
@@ -1821,6 +1893,12 @@
       "sha": "dd1ad85b54d979bd",
       "file": "exports/academy/academy_support_bot_policy_v001.md",
       "generated_at": "2026-09-05T21:03:28Z"
+    },
+    {
+      "version": "v002",
+      "sha": "5a9767daf3eba638",
+      "file": "exports/academy/academy_support_bot_policy_v002.md",
+      "generated_at": "2026-09-05T21:53:01Z"
     }
   ],
   "academy_support_bot_policy.json": [
@@ -1829,6 +1907,12 @@
       "sha": "87bc97b0d459f0b9",
       "file": "exports/academy/academy_support_bot_policy_v001.json",
       "generated_at": "2026-09-05T21:03:28Z"
+    },
+    {
+      "version": "v002",
+      "sha": "4b3502c836fab443",
+      "file": "exports/academy/academy_support_bot_policy_v002.json",
+      "generated_at": "2026-09-05T21:53:01Z"
     }
   ],
   "academy_support_bot_style.md": [
@@ -1845,6 +1929,22 @@
       "sha": "e9d29ef696ce84a2",
       "file": "exports/academy/academy_support_bot_style_v001.json",
       "generated_at": "2026-09-05T21:06:19Z"
+    }
+  ],
+  "academy_ssprox_faq.md": [
+    {
+      "version": "v001",
+      "sha": "69e6fb539b2019e7",
+      "file": "exports/academy/academy_ssprox_faq_v001.md",
+      "generated_at": "2026-09-05T21:53:01Z"
+    }
+  ],
+  "academy_ssprox_faq.json": [
+    {
+      "version": "v001",
+      "sha": "2c59dd286917ad01",
+      "file": "exports/academy/academy_ssprox_faq_v001.json",
+      "generated_at": "2026-09-05T21:53:01Z"
     }
   ]
 }

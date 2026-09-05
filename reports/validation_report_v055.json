@@ -1,0 +1,44 @@
+{
+  "report_type": "validation",
+  "version": "v055",
+  "generated_at": "2026-09-05T21:52:09Z",
+  "stats": {
+    "files": 45,
+    "objects": 672,
+    "by_kind": {
+      "knowledge_object": 39,
+      "mentor_qa": 4,
+      "conflict_record": 1,
+      "review_item": 1
+    },
+    "by_domain": {
+      "brokers": 3,
+      "psychology": 27,
+      "metatrader": 102,
+      "general_trading": 49,
+      "mentor_qa": 80,
+      "academy": 405,
+      "meta": 6
+    },
+    "by_approval": {
+      "REVIEW_REQUIRED": 9,
+      "PENDING_VERIFICATION": 172,
+      "PENDING_REVIEW": 366,
+      "APPROVED": 83
+    }
+  },
+  "errors": 0,
+  "warnings": 2,
+  "findings": [
+    {
+      "level": "WARNING",
+      "where": "knowledge_base/academy/tools/ssprox_faq.json :: ACA-EXP-0010",
+      "message": "related_concepts references unknown id GEN-CALC-0003"
+    },
+    {
+      "level": "WARNING",
+      "where": "knowledge_base/academy/tools/ssprox_faq.json :: ACA-EXP-0012",
+      "message": "related_concepts references unknown id GEN-CALC-0001"
+    }
+  ]
+}

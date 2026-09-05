@@ -36,6 +36,7 @@ def obj(oid, otype, title, chunk, section, quote, conf, scope="ACADEMY_OPERATION
     approval = "PENDING_REVIEW" if conf >= 0.7 else "REVIEW_REQUIRED"
     o = {
         "id": oid, "object_type": otype, "domain": "academy",
+        "category": "رویه‌های کار با بروکر — خارج از ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی (D-0016)",
         "title": title, "language": "fa", "chunk_text": chunk,
         "source": {
             "source_type": "ACADEMY_COURSE_TRANSCRIPT", "source_ref": RAW,
@@ -210,6 +211,7 @@ changed = K.write_collection(K.KB_DIR + "/academy/intro/lesson_16.json", {
     "version": "v001", "generated_at": NOW, "pipeline_stage": "STRUCTURED",
     "source_files": [RAW, "raw_sources/academy/intro/intro_lesson_16.ingest.json"],
     "notes": [
+        "طبق تصمیم D-0016 این محتوا جزو ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی نیست؛ قبلاً در دوره بوده و اکنون به‌عنوان رویه‌ی کار با بروکر نگهداری می‌شود.",
         "متن کامل در منبع خام دست‌نخورده است؛ توصیه‌های کیف‌پولی طبق D-0010 فقط در سطح توضیح کلی ارائه می‌شوند (ACA-INT-0236).",
         "همه‌ی ادعاهای مربوط به بروکر و وضعیت تحریمی زمان‌مند و تأییدنشده‌اند.",
         "عدد سابقه‌ی بروکر با جلسه‌ی ۴ یکی نیست؛ هر دو زمان‌مند ثبت شده‌اند.",

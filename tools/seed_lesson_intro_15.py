@@ -31,6 +31,7 @@ def obj(oid, otype, title, chunk, section, quote, conf, scope="ACADEMY_OPERATION
     approval = "PENDING_REVIEW" if conf >= 0.7 else "REVIEW_REQUIRED"
     o = {
         "id": oid, "object_type": otype, "domain": "academy",
+        "category": "رویه‌های کار با بروکر — خارج از ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی (D-0016)",
         "title": title, "language": "fa", "chunk_text": chunk,
         "source": {
             "source_type": "ACADEMY_COURSE_TRANSCRIPT", "source_ref": RAW,
@@ -279,6 +280,7 @@ changed = K.write_collection(K.KB_DIR + "/academy/intro/lesson_15.json", {
     "source_files": [RAW, "raw_sources/academy/intro/intro_lesson_15.ingest.json"],
     "notes": [
         "پرسش‌های واقعی واریز/برداشت طبق ACA-RULE-0003 به پشتیبانی انسانی ارجاع داده می‌شوند؛ این رکوردها فقط توضیح فرایندند.",
+        "طبق تصمیم D-0016 این محتوا جزو ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی نیست؛ قبلاً در دوره بوده و اکنون به‌عنوان رویه‌ی کار با بروکر نگهداری می‌شود.",
         "همه‌ی اعداد (کارمزد، قیمت کیف پول سخت‌افزاری، ساعت پاسخ‌گویی) زمان‌مند علامت خورده‌اند.",
         "مزیت مدیر حساب مربوط به ثبت‌نام از طریق لینک معرف است و شفاف ثبت شد.",
     ],
