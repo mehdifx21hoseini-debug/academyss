@@ -285,6 +285,12 @@
       "sha": "a9bc9764fe19ca82",
       "file": "exports/conflicts/conflict_registry_v009.md",
       "generated_at": "2026-09-05T17:33:17Z"
+    },
+    {
+      "version": "v010",
+      "sha": "76d8510f14cf5b62",
+      "file": "exports/conflicts/conflict_registry_v010.md",
+      "generated_at": "2026-09-05T17:37:41Z"
     }
   ],
   "conflict_registry.json": [
@@ -341,6 +347,12 @@
       "sha": "64c1d4644a89faae",
       "file": "exports/conflicts/conflict_registry_v009.json",
       "generated_at": "2026-09-05T17:33:17Z"
+    },
+    {
+      "version": "v010",
+      "sha": "e58c73878598ea24",
+      "file": "exports/conflicts/conflict_registry_v010.json",
+      "generated_at": "2026-09-05T17:37:41Z"
     }
   ],
   "review_queue_open_items.md": [
@@ -427,6 +439,12 @@
       "sha": "45faaf667e19b893",
       "file": "exports/reports/review_queue_open_items_v014.md",
       "generated_at": "2026-09-05T17:33:17Z"
+    },
+    {
+      "version": "v015",
+      "sha": "c14e1a57a42918ea",
+      "file": "exports/reports/review_queue_open_items_v015.md",
+      "generated_at": "2026-09-05T17:37:41Z"
     }
   ],
   "review_queue_open_items.json": [
@@ -513,6 +531,12 @@
       "sha": "9d85a18caf79f6e7",
       "file": "exports/reports/review_queue_open_items_v014.json",
       "generated_at": "2026-09-05T17:33:17Z"
+    },
+    {
+      "version": "v015",
+      "sha": "c8f619a5bc28eb86",
+      "file": "exports/reports/review_queue_open_items_v015.json",
+      "generated_at": "2026-09-05T17:37:41Z"
     }
   ],
   "academy_site_catalog.md": [
@@ -691,6 +715,12 @@
       "sha": "8f96e8030d8fe2d1",
       "file": "exports/reports/kb_index_v024.csv",
       "generated_at": "2026-09-05T17:33:17Z"
+    },
+    {
+      "version": "v025",
+      "sha": "1d278fe7c5fd4535",
+      "file": "exports/reports/kb_index_v025.csv",
+      "generated_at": "2026-09-05T17:37:41Z"
     }
   ],
   "glossary.csv": [
@@ -1139,6 +1169,22 @@
       "sha": "ce0f43afa0d5565d",
       "file": "exports/academy/academy_intro_lesson_12_v001.json",
       "generated_at": "2026-09-05T17:33:17Z"
+    }
+  ],
+  "academy_intro_lesson_13.md": [
+    {
+      "version": "v001",
+      "sha": "014d178d37d3b28b",
+      "file": "exports/academy/academy_intro_lesson_13_v001.md",
+      "generated_at": "2026-09-05T17:37:41Z"
+    }
+  ],
+  "academy_intro_lesson_13.json": [
+    {
+      "version": "v001",
+      "sha": "72dbc9700c0b5aaf",
+      "file": "exports/academy/academy_intro_lesson_13_v001.json",
+      "generated_at": "2026-09-05T17:37:41Z"
     }
   ]
 }

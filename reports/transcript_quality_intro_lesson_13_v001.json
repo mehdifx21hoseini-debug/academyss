@@ -1,0 +1,50 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "intro_lesson_13",
+  "course": "intro",
+  "lesson": "13",
+  "title": "روندها و نحوه شناسایی آن‌ها",
+  "original_filename": "intro_lesson_13.md",
+  "raw_file": "raw_sources/academy/intro/intro_lesson_13_01.md",
+  "ingested_at": "2026-09-05T17:35:45Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 132,
+    "filler_cues": 0,
+    "speech_cues": 132,
+    "speech_ratio": 1.0,
+    "words": 1121,
+    "unique_words": 352,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "|---|---|",
+        "count": 8
+      },
+      {
+        "text": "- حرکت کند",
+        "count": 3
+      },
+      {
+        "text": "عنوان درس: آموزش مقدماتی - روندها (ترندها) در بازار و نحوه شناسایی آنها (بخش سیزدهم)",
+        "count": 2
+      },
+      {
+        "text": "اینگاد ویتراست، سلام به شما عزیزان.",
+        "count": 2
+      },
+      {
+        "text": "- اصلاح کند",
+        "count": 2
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "report_type": "transcript_quality",
+  "version": "v001"
+}
