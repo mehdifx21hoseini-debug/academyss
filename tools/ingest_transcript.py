@@ -41,6 +41,25 @@ def is_filler(text):
     return any(r.match(t) for r in FILLER_RE)
 
 
+def repetition_artifacts(words, min_run=8):
+    """Find stuck-token runs: the same word repeated many times in a row.
+
+    Speech-to-text models loop like this on music, noise or long pauses. The
+    words are real words, so a filler check never catches them — but the run
+    carries no information and must not become knowledge.
+    """
+    runs, i = [], 0
+    while i < len(words):
+        j = i
+        while j + 1 < len(words) and words[j + 1] == words[i]:
+            j += 1
+        run = j - i + 1
+        if run >= min_run:
+            runs.append({"word": words[i], "count": run})
+        i = j + 1
+    return runs
+
+
 def to_seconds(ts):
     m = TS.match(ts)
     if not m:
@@ -127,13 +146,19 @@ def main():
     speech_cues = [c for c in cues if not is_filler(c["text"])]
     words = " ".join(c["text"] for c in speech_cues).split()
     unique_words = len(set(words))
+    runs = repetition_artifacts(words)
+    artifact_words = sum(r["count"] for r in runs)
+    artifact_ratio = (artifact_words / len(words)) if words else 0.0
     duration = max((c["end"] or 0) for c in cues) if cues and cues[-1]["end"] else 0
     speech_ratio = (speech / total) if total else 0.0
 
     if speech_ratio < 0.10 or unique_words < 20:
         verdict, reason = "UNUSABLE", "متن گفتاری قابل استفاده‌ای در فایل وجود ندارد."
-    elif speech_ratio < 0.60 or unique_words < 200:
-        verdict, reason = "PARTIAL", "بخش زیادی از فایل گفتار قابل استفاده ندارد."
+    elif artifact_ratio > 0.25:
+        verdict, reason = "UNUSABLE", "بخش عمده‌ی فایل تکرار مصنوعی مدل تبدیل گفتار به متن است."
+    elif speech_ratio < 0.60 or unique_words < 200 or artifact_ratio > 0.05:
+        verdict, reason = "PARTIAL", ("محتوای واقعی وجود دارد اما کیفیت تبدیل گفتار به متن پایین است؛ "
+                                      "استخراج باید محافظه‌کارانه و همراه با نقل‌قول اصلی انجام شود.")
     else:
         verdict, reason = "USABLE", "کیفیت برای پردازش کافی است."
 
@@ -159,6 +184,9 @@ def main():
             "speech_ratio": round(speech_ratio, 4),
             "words": len(words),
             "unique_words": unique_words,
+            "repetition_artifact_words": artifact_words,
+            "repetition_artifact_ratio": round(artifact_ratio, 4),
+            "repetition_runs": sorted(runs, key=lambda r: -r["count"])[:10],
             "duration_seconds": round(duration, 1),
             "duration_hhmm": "%02d:%02d" % (int(duration // 3600), int((duration % 3600) // 60)),
             "top_repeated_lines": [{"text": t, "count": c} for t, c in top_repeated],
@@ -184,6 +212,9 @@ def main():
     print("duration     : %s  cues: %d (گفتار %d / پرکننده %d)" %
           (record["metrics"]["duration_hhmm"], total, speech, filler))
     print("speech ratio : %.1f%%   unique words: %d" % (speech_ratio * 100, unique_words))
+    print("artifacts    : %.1f%% از کلمات، %d رشته‌ی تکراری%s" % (
+        artifact_ratio * 100, len(runs),
+        ("  بیشترین: «%s» ×%d" % (runs[0]["word"], runs[0]["count"])) if runs else ""))
     print("VERDICT      : %s — %s" % (verdict, reason))
     if verdict == "UNUSABLE":
         print("هیچ شیء دانشی از این فایل ساخته نمی‌شود.")

@@ -94,6 +94,11 @@ def md_object(o):
         out.append("|---|---|")
         for k, v in o["comparison"].items():
             out.append("| %s | %s |" % (k.upper(), v))
+    if src.get("verbatim_quote"):
+        out.append("")
+        out.append("**نقل‌قول اصلی از منبع (دست‌نخورده):**")
+        out.append("")
+        out.append("> " + src["verbatim_quote"].replace("\n", " "))
     if o.get("keywords"):
         out.append("")
         out.append("*کلیدواژه‌ها: %s*" % "، ".join(o["keywords"]))

@@ -253,6 +253,12 @@
       "sha": "d58790ad529e7c1d",
       "file": "exports/reports/review_queue_open_items_v005.md",
       "generated_at": "2026-09-05T13:45:58Z"
+    },
+    {
+      "version": "v006",
+      "sha": "7f6174691de5e718",
+      "file": "exports/reports/review_queue_open_items_v006.md",
+      "generated_at": "2026-09-05T14:00:46Z"
     }
   ],
   "review_queue_open_items.json": [
@@ -285,6 +291,12 @@
       "sha": "a4c7d8a1383c86f9",
       "file": "exports/reports/review_queue_open_items_v005.json",
       "generated_at": "2026-09-05T13:45:58Z"
+    },
+    {
+      "version": "v006",
+      "sha": "a0395e847588a35f",
+      "file": "exports/reports/review_queue_open_items_v006.json",
+      "generated_at": "2026-09-05T14:00:46Z"
     }
   ],
   "academy_site_catalog.md": [
@@ -361,6 +373,12 @@
       "sha": "2473fa32b90e273c",
       "file": "exports/reports/kb_index_v007.csv",
       "generated_at": "2026-09-05T13:45:58Z"
+    },
+    {
+      "version": "v008",
+      "sha": "ce95fe8d6450aca7",
+      "file": "exports/reports/kb_index_v008.csv",
+      "generated_at": "2026-09-05T14:00:46Z"
     }
   ],
   "glossary.csv": [
@@ -467,6 +485,28 @@
       "sha": "030c2ae043e83542",
       "file": "exports/general_trading/general_trading_mechanics_v001.json",
       "generated_at": "2026-09-05T13:27:52Z"
+    }
+  ],
+  "academy_psychology_lesson_p01.md": [
+    {
+      "version": "v001",
+      "sha": "faf46c261a100f15",
+      "file": "exports/academy/academy_psychology_lesson_p01_v001.md",
+      "generated_at": "2026-09-05T14:00:46Z"
+    },
+    {
+      "version": "v002",
+      "sha": "65dba7778ea38827",
+      "file": "exports/academy/academy_psychology_lesson_p01_v002.md",
+      "generated_at": "2026-09-05T14:01:10Z"
+    }
+  ],
+  "academy_psychology_lesson_p01.json": [
+    {
+      "version": "v001",
+      "sha": "04ee7928488a4528",
+      "file": "exports/academy/academy_psychology_lesson_p01_v001.json",
+      "generated_at": "2026-09-05T14:00:46Z"
     }
   ]
 }

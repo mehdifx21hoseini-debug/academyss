@@ -1,0 +1,67 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "psychology_lesson_p01",
+  "course": "psychology",
+  "lesson": "p01",
+  "title": null,
+  "original_filename": "19017bf0-VID_20260831_113253_982_________.txt",
+  "raw_file": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+  "ingested_at": "2026-09-05T13:57:03Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 32,
+    "filler_cues": 0,
+    "speech_cues": 32,
+    "speech_ratio": 1.0,
+    "words": 2699,
+    "unique_words": 955,
+    "repetition_artifact_words": 350,
+    "repetition_artifact_ratio": 0.1297,
+    "repetition_runs": [
+      {
+        "word": "کار",
+        "count": 110
+      },
+      {
+        "word": "کار",
+        "count": 110
+      },
+      {
+        "word": "اینکه",
+        "count": 85
+      },
+      {
+        "word": "درسته",
+        "count": 45
+      }
+    ],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "ورنه سویستِ کنید هر چیزی که میگم رو ا عمل کن 2 د گره هرچیزی که میگم رو عمل کن 3 د گره هر کتابتا عمل کن 3 ماه هر چیزی که میگم رو اعمل کن 3 ماه هرچیزی که میگم رو عمل کن 3 ماه هرنی شما تنظیم و تحرار backed فولانی چی زمین انتظار شد برادر ede ax هر چیزی بوده چی زمین انتظارو شد برادر ede ax مشacity حوشش نیست خیلی این مباحث مهمه. خیلی مهمه. من اما در درداردو چرایی که نصحبت می کنم.",
+        "count": 1
+      },
+      {
+        "text": "در درداردو چهارچوب دارم صحبت می کنم. چهارچوبی که یکی تریدر نیاز داره. چهارچوبی که نیاز داره.",
+        "count": 1
+      },
+      {
+        "text": "حالا من دیگه اینو تو ذهنم نخشیه. که دقیقایی بودم تلویزو ندیده هم. یک نره نشده دارم.",
+        "count": 1
+      },
+      {
+        "text": "من ایرانی نخورجینو برز دیگه خودم رزش بایدم. این چهارچوبه من شده. با افرادی که من دارم صحبت می شم.",
+        "count": 1
+      },
+      {
+        "text": "برای چی بخواهیم من در مورد هاشیز. اینا چهارچوبه من شده. هاشیه رو بریز دور.",
+        "count": 1
+      }
+    ]
+  },
+  "verdict": "PARTIAL",
+  "verdict_reason": "محتوای واقعی وجود دارد اما کیفیت تبدیل گفتار به متن پایین است؛ استخراج باید محافظه‌کارانه و همراه با نقل‌قول اصلی انجام شود.",
+  "report_type": "transcript_quality",
+  "version": "v001"
+}

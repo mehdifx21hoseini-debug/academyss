@@ -1,0 +1,724 @@
+{
+  "collection_id": "academy_psychology_lesson_p01",
+  "domain": "academy",
+  "title": "درس روان‌شناسی و انضباط معامله‌گری — قسمت ۱",
+  "description": "نخستین دانش ACADEMY_PRIMARY پایگاه دانش، استخراج‌شده از ترنسکریپت دوره. کیفیت ترنسکریپت پایین بوده، بنابراین همه‌ی رکوردها همراه نقل‌قول اصلی و در وضعیت بازبینی ثبت شده‌اند.",
+  "version": "v001",
+  "generated_at": "2026-09-05T14:00:28Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+    "raw_sources/academy/psychology/psychology_lesson_p01.ingest.json"
+  ],
+  "notes": [
+    "کیفیت منبع: PARTIAL — ۱۳٪ متن، تکرار مصنوعی مدل تبدیل گفتار به متن بود.",
+    "هیچ جمله‌ای تکمیل یا حدس زده نشده؛ موارد مبهم با اطمینان پایین و وضعیت REVIEW_REQUIRED ثبت شده‌اند.",
+    "نام دوره و شماره‌ی جلسه هنوز مشخص نیست (RQ-0013)."
+  ],
+  "objects": [
+    {
+      "id": "ACA-PSY-0001",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "چهارچوب، نه استراتژی: موضوع اصلی این درس",
+      "language": "fa",
+      "chunk_text": "مدرس تأکید می‌کند که موضوع صحبتش «چهارچوب» است، نه استراتژی؛ چهارچوبی که هر تریدر به آن نیاز دارد. بحث درباره‌ی اینکه کدام استراتژی خوب یا بد است را «حاشیه» می‌نامد و می‌گوید حاشیه را کنار بگذارید. این چهارچوب حاصل تجربه‌ی شخصی خود اوست.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 3، 9، 19",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "در چهارچوب دارم صحبت می کنم. چهارچوبی که یکی تریدر نیاز داره. … هاشیه رو بریز دور. … این استراتژی اون شد. بابا اینا رو بذار کنار."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "summary": "موضوع درس، چهارچوب رفتاری تریدر است نه انتخاب استراتژی.",
+      "keywords": [
+        "چهارچوب",
+        "استراتژی",
+        "حاشیه"
+      ],
+      "related_questions": [
+        "کدوم استراتژی بهتره؟",
+        "چهارچوب یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-PSY-0002",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "معامله بدون قانون، قمار است",
+      "language": "fa",
+      "chunk_text": "مدرس می‌گوید در بازار افرادی هستند که معامله‌شان هیچ پایه و مفهومی ندارد؛ بدون قاعده، هر تایم و هر استراتژی، در عمل قمار است. تعبیر او این است که در آن حالت بهتر است شخص به کازینو برود. پایان این مسیر را «یک ضربه» توصیف می‌کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 23، 25، 29",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "ما می بینیم توی مارکیت مردم برمی دارییم که هیچ پایچیز نداره. یعنی که هیچ مفهومیت نداره. هر تاینی، هر استراتژی اصلا بیاد قومار کنیم. … برای این میشه قومار. قومار آخریش چی میشه؟ یه ضربه."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "rule": "معامله‌ی بدون قاعده و چهارچوب، قمار است و پایانش یک ضربه‌ی سنگین است.",
+      "keywords": [
+        "قمار",
+        "قانون",
+        "چهارچوب"
+      ],
+      "related_concepts": [
+        "ACA-PSY-0003"
+      ],
+      "related_questions": [
+        "فرق ترید و قمار چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-PSY-0003",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "سود مستمر فقط از محدود کردن خود و ساختن قانون به دست می‌آید",
+      "language": "fa",
+      "chunk_text": "به گفته‌ی مدرس، در بازار کسی به سود مستمر می‌رسد که خودش را محدود کند و برای خودش قانون بسازد. او این را تنها راه موفقیت در معامله‌گری معرفی می‌کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 31، 33",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "اما توی مارکیت کسی صود مستمر داره که خودش رو محدود کنه. برای خودش قوانین بسازه که این شخصی که به صود مستمر میرسه. تنها راه موفقیت در معامل گریف …"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "rule": "برای رسیدن به سود مستمر باید برای خود قانون ساخت و به آن پایبند ماند.",
+      "summary": "سود مستمر = ساختن قانون شخصی + پایبندی به آن.",
+      "keywords": [
+        "سود مستمر",
+        "قانون",
+        "انضباط"
+      ],
+      "related_concepts": [
+        "ACA-PSY-0004",
+        "PSY-PAT-0020"
+      ],
+      "related_questions": [
+        "چطور به سود مستمر برسم؟",
+        "چرا قانون لازمه؟"
+      ]
+    },
+    {
+      "id": "ACA-PSY-0004",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "زیر پا گذاشتن قانون، از سودی که می‌دهد پرهزینه‌تر است",
+      "language": "fa",
+      "chunk_text": "مدرس این جمله را دو بار تکرار می‌کند: سودی که از راه زیر پا گذاشتن قوانین به دست می‌آید، می‌تواند پرهزینه‌تر از خود آن سود باشد. یعنی سودِ حاصل از قانون‌شکنی، در بلندمدت هزینه‌ی بیشتری به معامله‌گر تحمیل می‌کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 33، 59",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "صود آباری از طریق زیر پرگذاشتن قوانین، میتوانن پرهزینه تری صودی باشد که به دست میابرید. … سود آوری اصلایی رو زیر پا بوداشتن قوانین میتواند پر هزنگه تری سودی باشه"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "rule": "سودِ به‌دست‌آمده از راه شکستن قانون، پرهزینه‌تر از خود آن سود است.",
+      "keywords": [
+        "قانون‌شکنی",
+        "هزینه",
+        "سود"
+      ],
+      "related_concepts": [
+        "ACA-PSY-0003",
+        "ACA-PSY-0006",
+        "PSY-PAT-0014"
+      ],
+      "related_questions": [
+        "یه بار قانون رو بشکنم چی می‌شه؟"
+      ]
+    },
+    {
+      "id": "ACA-PSY-0005",
+      "object_type": "EXAMPLE",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "مثال اورست: یک استثنا، کل گروه را از بین می‌برد",
+      "language": "fa",
+      "chunk_text": "مدرس مثالی از فتح قله می‌زند: لیدری که سال‌ها قوانین ثابت داشته (از جمله ساعت حرکت و اینکه هرکس جا بماند مسئولیتش با خودش است). یک بار، فقط به خاطر یک نفر که جا مانده بود، قانون خودش را زیر پا می‌گذارد و گروه برمی‌گردد. برنامه به هم می‌ریزد، شب و تاریکی می‌رسد و کل گروه از بین می‌رود. نتیجه‌گیری مدرس: یک استثنا مثل دومینو عمل می‌کند و بازار هم همین است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 45–59",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "لیدر برای اولین بار توی عمرش … اون قوانین و اون چارچور رو میذاره زیر پا … فقط به خاطر یک نفر … همون مثل دومینو بسیار بازارم همینه، دومینوه … و همه اون گروه فقط به خاطر یک نفر … میمیرن"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "examples": [
+        "لیدر باتجربه، یک بار قانون ساعت حرکت را برای یک نفر می‌شکند و کل گروه از بین می‌رود."
+      ],
+      "keywords": [
+        "دومینو",
+        "استثنا",
+        "قانون",
+        "مثال"
+      ],
+      "related_concepts": [
+        "ACA-PSY-0004"
+      ],
+      "related_questions": [
+        "چرا یه استثنا انقدر مهمه؟"
+      ]
+    },
+    {
+      "id": "ACA-PSY-0006",
+      "object_type": "COMMON_MISTAKE",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "شکستن حد ضرر روزانه و سودی که عادت بد می‌سازد",
+      "language": "fa",
+      "chunk_text": "مدرس مثال می‌زند: کسی قانون گذاشته «سه معامله‌ی ضررده که زدم، دیگر ترید نمی‌کنم». یک بار این قانون را می‌شکند، معامله‌ی چهارم را می‌زند و سود می‌کند. همان یک بار، در ذهن شکل می‌گیرد که قانون‌شکنی جواب می‌دهد و کم‌کم به الگوی رفتاری تبدیل می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 59",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "من سه تا معامله پسرم زردم کردم دیگه تری نمی کنم … بیا بگی حالا بذار من چارومی … معامله میکنیم سودا رو کابل میکنیم … این آروم آروم توی ذهنت شکل میدی"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "common_mistakes": [
+        "شکستن قانون توقف روزانه به این دلیل که «این‌بار فرق می‌کند».",
+        "سود گرفتن از معامله‌ی قانون‌شکنانه و تثبیت شدن آن رفتار در ذهن."
+      ],
+      "warnings": [
+        "خطر اصلی، خودِ ضررِ آن معامله نیست؛ عادتی است که سودِ آن معامله در ذهن می‌سازد."
+      ],
+      "keywords": [
+        "حد ضرر روزانه",
+        "قانون شکنی",
+        "عادت"
+      ],
+      "related_concepts": [
+        "ACA-PSY-0004",
+        "PSY-PAT-0002",
+        "PSY-PAT-0014"
+      ],
+      "related_questions": [
+        "بعد از سه ضرر ادامه بدم؟",
+        "چرا نباید قانون توقف رو بشکنم؟"
+      ]
+    },
+    {
+      "id": "ACA-PSY-0007",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "کار عمیق و استراحت عمیق: پنج روز معامله، آخر هفته رها",
+      "language": "fa",
+      "chunk_text": "مدرس توصیه می‌کند معامله‌گر پنج روز هفته کار کند و آخر هفته را برای استراحت، طبیعت و خانواده بگذارد. تعبیر او این است که تریدر باید «جای خودش عمیق کار کند و جای خودش عمیق رها شود». او می‌گوید خودش در ابتدای کار این کار را نمی‌کرد و هر روز کار می‌کرد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 59",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "بذار پنج روز تر هفته … آخر هفته قراره فقط استماع کنیم … یه تریده ظهر باید دیگه دو جای خودش امیق کار کنه امیق تمرکز کنه دو جای خودش امیق رها بشه … اینی که دارم به هفته میگم رو من اول کار هجام نمیدادم"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.7,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "steps": [
+        "پنج روز هفته را به معامله و کار روی بازار اختصاص دهید.",
+        "آخر هفته را کامل از بازار فاصله بگیرید: طبیعت، خانواده، استراحت.",
+        "هنگام فشار در طول هفته، به همان روز استراحت پیش‌رو فکر کنید."
+      ],
+      "keywords": [
+        "استراحت",
+        "کار عمیق",
+        "آخر هفته"
+      ],
+      "related_concepts": [
+        "PSY-PAT-0019"
+      ],
+      "related_questions": [
+        "هر روز باید ترید کنم؟",
+        "استراحت لازمه؟"
+      ]
+    },
+    {
+      "id": "ACA-PSY-0008",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "حال خوب، پیش‌نیاز است نه نتیجه‌ی پول",
+      "language": "fa",
+      "chunk_text": "مدرس می‌گوید حال خوب به پول و موفقیت ربطی ندارد و باید مستقل از نتیجه‌ی بازار ساخته شود. او به تجربه‌ی سال‌های ابتدایی خودش اشاره می‌کند که با وجود نداشتن امکانات، حال خوب داشته است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 59",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "حاله خوب ذهنه … نه به پول رفتاره نه به موفقیت … من همه شیست ساله پیشم … حاله خوبه خودم رو خوب بکندم"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "REVIEW_REQUIRED",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "review_priority": "P1",
+      "review_reason": "برداشت از متن مخدوش؛ نیازمند تأیید مدرس.",
+      "summary": "حال خوب باید مستقل از نتیجه‌ی معاملات ساخته شود.",
+      "keywords": [
+        "حال خوب",
+        "ذهن",
+        "استقلال از نتیجه"
+      ],
+      "related_questions": [
+        "چطور از نتیجه‌ی بازار مستقل بشم؟"
+      ]
+    },
+    {
+      "id": "ACA-PSY-0009",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "نوشتن نقاط ضعف و قوت رفتاری",
+      "language": "fa",
+      "chunk_text": "مدرس می‌گوید هر معامله‌گر باید ویژگی‌های رفتاری خودش را بنویسد: مثلاً «زود عصبی می‌شوم»، «طمع‌کار هستم»، «بیش از حد صبورم». هرکدام از این‌ها می‌تواند هم نقطه‌ی ضعف باشد و هم نقطه‌ی قوت، و برای بالانس کردن باید ابتدا نوشته و شناخته شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 63",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "یک کسی میگه واسه من سریع عصبی میشه یک کسی میگه واسه من خیلی سابورم همه اینو میتونه زف باشه قدرت باشه … همه اینو رو باید بیاری به نبیسی"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "steps": [
+        "ویژگی‌های رفتاری خود در معامله را بنویسید (عصبانیت، طمع، صبر بیش از حد، …).",
+        "برای هرکدام مشخص کنید در کجا نقطه‌ی قوت و در کجا نقطه‌ی ضعف است.",
+        "روی بالانس کردن همان مورد کار کنید، نه حذف کامل آن."
+      ],
+      "keywords": [
+        "نقطه ضعف",
+        "خودشناسی",
+        "ژورنال"
+      ],
+      "related_concepts": [
+        "PSY-PAT-0010",
+        "PSY-PAT-0020"
+      ],
+      "related_questions": [
+        "نقطه ضعفم رو چطور پیدا کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-PSY-0010",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "نتیجه‌ی معاملات را به کسی نگویید",
+      "language": "fa",
+      "chunk_text": "یکی از تأکیدهای اصلی درس: هیچ‌کس نباید بفهمد شما سود کرده‌اید یا ضرر. مدرس می‌گوید پاسخ همیشگی به پرسش «امروز بازار چطور بود؟» باید ثابت و خنثی باشد — «خدا را شکر» — چه سود کرده باشید و چه ضرر. دلیلش این است که گفتنِ سود، در ذهن دیگران و در ذهن خودتان توقع می‌سازد و همان توقع، دفعه‌ی بعد بالانس رفتاری‌تان را به هم می‌ریزد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 59",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "یعنی هیچ کسی نباید بفهمه … که سود کردی که زرر کردی … هر روز هر روز … خدا را شکر … چون وقتی تو بیایی به رفیقیت بیایی … یه توقعی شکل میگیره که فردا هم …"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "rule": "نتیجه‌ی روزانه‌ی معاملات (سود یا ضرر) به هیچ‌کس گفته نمی‌شود؛ پاسخ ثابت و خنثی است.",
+      "summary": "سود و ضرر روزانه را با هیچ‌کس در میان نگذارید.",
+      "conditions": [
+        "این قاعده هم درباره‌ی دوستان و هم درباره‌ی خانواده مطرح شده است."
+      ],
+      "common_mistakes": [
+        "اعلام سود به دوستان و ساختن توقع برای روزهای بعد."
+      ],
+      "keywords": [
+        "سرخوشی",
+        "توقع",
+        "حریم شخصی",
+        "سود"
+      ],
+      "related_concepts": [
+        "ACA-PSY-0011",
+        "ACA-PSY-0012",
+        "PSY-PAT-0023"
+      ],
+      "related_questions": [
+        "به کسی بگم سود کردم؟",
+        "چرا نباید نتیجه‌مو بگم؟"
+      ]
+    },
+    {
+      "id": "ACA-PSY-0011",
+      "object_type": "EXAMPLE",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "تجربه‌ی شخصی: دمنوش و لو رفتن وضعیت روحی",
+      "language": "fa",
+      "chunk_text": "مدرس تجربه‌ی حدود شش سال پیش خودش را تعریف می‌کند: در دوره‌ای که ضرر می‌کرد شب‌ها خوابش نمی‌برد و از عطاری دمنوش آرام‌بخش می‌گرفت. کم‌کم اطرافیانش فهمیده بودند هر وقت آن دمنوش دم می‌شود یعنی آن روز ضرر کرده است. می‌گوید این را کنار گذاشت و وضعیت معاملاتی‌اش را از فضای خانواده جدا کرد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 59",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "توی یک مرهی من نوشته بودم ساش 6 سال پیش … من از عطاری … شبه نمیتونستم به خوابم … اگر من روزی می رفتم و اون دمنوش رو دمنی کردم یعنی اون روز من زرر کرده بودم … اترافیانم می دونستن"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.7,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "examples": [
+        "نشانه‌های رفتاری (مثل یک عادت ساده) می‌توانند وضعیت معاملاتی شما را برای اطرافیان لو بدهند."
+      ],
+      "keywords": [
+        "تجربه شخصی",
+        "خانواده",
+        "ضرر"
+      ],
+      "related_concepts": [
+        "ACA-PSY-0010"
+      ],
+      "related_questions": [
+        "چطور ضررم رو از خانواده پنهون کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-PSY-0012",
+      "object_type": "COMMON_MISTAKE",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "سرخوشی بعد از سود",
+      "language": "fa",
+      "chunk_text": "مدرس رفتار کسانی را توصیف می‌کند که بعد از یک سود خوب پشت سیستم می‌رقصند، آهنگ می‌گذارند و جشن می‌گیرند. به گفته‌ی او، کسی به سود مستمر می‌رسد که با هر سود یا هر ضرر خوشحال یا ناراحت نشود، و این را نقطه‌ی بسیار مهمی می‌داند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 63",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "مثال آدمی ایست که آمده … به اکانتش یه سودو توپولی … یکی میرقصه، یکی آهنگی میخونه … آدم ها توی این مارکل سود مسلمان ویرسن که با هر سود یا با هر ذره خوشحال یا نراحت نشن خیلی نقطه مهمیست"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "common_mistakes": [
+        "جشن گرفتن و سرخوشی بعد از سود",
+        "ناراحتی شدید بعد از ضرر"
+      ],
+      "keywords": [
+        "سرخوشی",
+        "هیجان",
+        "ثبات"
+      ],
+      "related_concepts": [
+        "ACA-PSY-0010",
+        "ACA-PSY-0013",
+        "PSY-PAT-0007"
+      ],
+      "related_questions": [
+        "بعد از سود خوب چیکار کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-PSY-0013",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "سه ماه سود مستمر، خطرناک‌ترین نقطه است",
+      "language": "fa",
+      "chunk_text": "مدرس می‌گوید سرخوشی وقتی خطرناک می‌شود که چند ماه سود مستمر پشت سرش باشد؛ آنجاست که معلوم می‌شود چه کسی واقعاً به مقصد رسیده. افراد سرخوش، سفر و جشن را جایگزین روتین می‌کنند و کارهایی را که هر روز انجام می‌دادند فراموش می‌کنند: ژورنال، پلن و بررسی روزانه.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 63",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "اونم وقتی سه ماه مستمر باشه سرخوشی سود بکنیم اونجا از مشخص میشه که کی صبح رسیده یا نه اونهایی که سرخوش میشن میگن بذار بریم … یادشون میره … چی کارتا کردی هر روز صبح بکنیم … پلن رایت میگردی … یادش میره"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.7,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "warnings": [
+        "پس از دوره‌ی سود مستمر، رها کردن روتین روزانه شایع‌ترین خطاست."
+      ],
+      "keywords": [
+        "سود مستمر",
+        "روتین",
+        "سرخوشی"
+      ],
+      "related_concepts": [
+        "ACA-PSY-0012",
+        "ACA-PSY-0014",
+        "PSY-PAT-0007"
+      ],
+      "related_questions": [
+        "بعد از چند ماه سود چی می‌شه؟"
+      ]
+    },
+    {
+      "id": "ACA-PSY-0014",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "زنجیره‌ی سرخوشی: از جشن تا انتقام",
+      "language": "fa",
+      "chunk_text": "به گفته‌ی مدرس، بعد از دوره‌ی سرخوشی، «سرخوردگی» می‌آید و افراد وارد فاز انتقام و جبران می‌شوند. یعنی همان سرخوشی، مقدمه‌ی معامله‌ی انتقامی است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 63",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "اگه چند سه ماه با سرخوشی سرخورده میشن افراد با این سر انتقام میگیرن … قسط انتقام جبران"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "REVIEW_REQUIRED",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.65,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "review_priority": "P1",
+      "review_reason": "برداشت از متن مخدوش؛ نیازمند تأیید مدرس.",
+      "keywords": [
+        "انتقام",
+        "جبران",
+        "سرخوردگی"
+      ],
+      "related_concepts": [
+        "ACA-PSY-0013",
+        "PSY-PAT-0002",
+        "PSY-PAT-0015"
+      ],
+      "related_questions": [
+        "چرا بعد از یه دوره خوب همه‌چی خراب می‌شه؟"
+      ]
+    },
+    {
+      "id": "ACA-PSY-0015",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "در برد، استراتژی را ببین؛ در ضرر، آن را دور نریز",
+      "language": "fa",
+      "chunk_text": "مدرس می‌گوید وقتی سود می‌کنید یادتان باشد این نتیجه از همان استراتژی می‌آید؛ اما همان افراد پس از چند ضرر پیاپی می‌گویند نه استراتژی به درد می‌خورد نه سیستم. توصیه‌ی او این است که پس از چند معامله‌ی ضررده، همه‌چیز را زیر سؤال نبرید، بلکه برگردید و بررسی/بک‌تست کنید که آیا واقعاً استراتژی ضرر داده است یا نه.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 63",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "این خیر و برکتی که تو اکازه از همون استراتیجیه … اگه هم چند تا معامل پوشتر هم زرار کردی همه چیزی رو زیر سؤال نبر نه برو بکیس پکی ببین تبقیه استراتیجی زرار کردی یا نه"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "rule": "پس از چند ضرر پیاپی، پیش از کنار گذاشتن استراتژی باید با بررسی و بک‌تست بررسی شود که آیا واقعاً استراتژی ضرر داده است.",
+      "steps": [
+        "نتیجه‌ی چند معامله‌ی اخیر را جدا بررسی کنید.",
+        "بررسی کنید آیا معاملات طبق قواعد استراتژی اجرا شده‌اند یا نه.",
+        "در صورت لزوم بک‌تست بگیرید، سپس درباره‌ی استراتژی تصمیم بگیرید."
+      ],
+      "common_mistakes": [
+        "زیر سؤال بردن کل استراتژی و سیستم پس از چند ضرر."
+      ],
+      "keywords": [
+        "استراتژی",
+        "بک تست",
+        "ضرر پیاپی"
+      ],
+      "related_concepts": [
+        "PSY-PAT-0011",
+        "GEN-CONC-0012"
+      ],
+      "related_questions": [
+        "استراتژیم خرابه؟",
+        "بعد از چند ضرر استراتژی رو عوض کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-PSY-0016",
+      "object_type": "COMMON_MISTAKE",
+      "domain": "academy",
+      "category": "روان‌شناسی و انضباط معامله‌گری",
+      "title": "واکنش افراطی و توقف بی‌بررسی پس از ضرر",
+      "language": "fa",
+      "chunk_text": "مدرس به رفتاری اشاره می‌کند که پس از یک اتفاق بد، معامله‌گر بدون بررسیِ اینکه چه اقداماتی به آن منجر شده، تصمیم افراطی می‌گیرد؛ مثلاً می‌گوید یک هفته یا دو هفته اصلاً معامله نمی‌کنم. تأکید او بر بررسی کردن پیش از تصمیم است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "source_location": "خط 63",
+        "course": "نامشخص — در انتظار تعیین (RQ-0013)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "این اتفاق افتاد دیگه اصلاب تا برم برسی کنم چه اقناماتی موجود همون شده باید دیگه برترفتش کنم، دیگه معامله نمی کنم مثلا یه هفته، دو هفته"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "REVIEW_REQUIRED",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "استخراج‌شده از ترنسکریپت با کیفیت پایین (تبدیل گفتار به متن ناقص). متن اصلی در فیلد verbatim_quote حفظ شده است. پیش از تأیید نهایی باید با فایل صوتی یا بازبینی مدرس تطبیق داده شود.",
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T14:00:28Z",
+      "updated_at": "2026-09-05T14:00:28Z",
+      "review_priority": "P1",
+      "review_reason": "برداشت از متن مخدوش؛ نیازمند تأیید مدرس.",
+      "common_mistakes": [
+        "تصمیم افراطی و توقف طولانی بدون بررسی علت ضرر."
+      ],
+      "keywords": [
+        "توقف",
+        "بررسی",
+        "واکنش افراطی"
+      ],
+      "related_concepts": [
+        "ACA-PSY-0015",
+        "PSY-PAT-0011"
+      ],
+      "related_questions": [
+        "بعد از ضرر بزرگ چند وقت استراحت کنم؟"
+      ]
+    }
+  ]
+}
