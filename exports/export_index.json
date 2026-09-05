@@ -5,6 +5,12 @@
       "sha": "cb592feceab6b53e",
       "file": "exports/psychology/psychology_patterns_v001.md",
       "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "a8f853851157f894",
+      "file": "exports/psychology/psychology_patterns_v002.md",
+      "generated_at": "2026-09-05T13:27:52Z"
     }
   ],
   "psychology_patterns.json": [
@@ -13,6 +19,12 @@
       "sha": "815bef625974a084",
       "file": "exports/psychology/psychology_patterns_v001.json",
       "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "d82b73fd2dcd9f49",
+      "file": "exports/psychology/psychology_patterns_v002.json",
+      "generated_at": "2026-09-05T13:27:52Z"
     }
   ],
   "metatrader_troubleshooting.md": [
@@ -229,6 +241,12 @@
       "sha": "fe0526093360fd37",
       "file": "exports/reports/review_queue_open_items_v003.md",
       "generated_at": "2026-09-05T13:17:49Z"
+    },
+    {
+      "version": "v004",
+      "sha": "1e1e10098c3860bf",
+      "file": "exports/reports/review_queue_open_items_v004.md",
+      "generated_at": "2026-09-05T13:27:52Z"
     }
   ],
   "review_queue_open_items.json": [
@@ -249,6 +267,12 @@
       "sha": "82a211b46ca95c16",
       "file": "exports/reports/review_queue_open_items_v003.json",
       "generated_at": "2026-09-05T13:17:49Z"
+    },
+    {
+      "version": "v004",
+      "sha": "495b60ba35f8b011",
+      "file": "exports/reports/review_queue_open_items_v004.json",
+      "generated_at": "2026-09-05T13:27:52Z"
     }
   ],
   "academy_site_catalog.md": [
@@ -313,6 +337,12 @@
       "sha": "698decfbdd31a6f0",
       "file": "exports/reports/kb_index_v005.csv",
       "generated_at": "2026-09-05T13:17:49Z"
+    },
+    {
+      "version": "v006",
+      "sha": "7930809514269f89",
+      "file": "exports/reports/kb_index_v006.csv",
+      "generated_at": "2026-09-05T13:27:52Z"
     }
   ],
   "glossary.csv": [
@@ -387,6 +417,38 @@
       "sha": "350f4a1431b9b4eb",
       "file": "exports/academy/academy_response_policies_v001.json",
       "generated_at": "2026-09-05T13:17:49Z"
+    }
+  ],
+  "psychology_safety_policy.md": [
+    {
+      "version": "v001",
+      "sha": "c2c1ede84a9ba340",
+      "file": "exports/psychology/psychology_safety_policy_v001.md",
+      "generated_at": "2026-09-05T13:27:52Z"
+    }
+  ],
+  "psychology_safety_policy.json": [
+    {
+      "version": "v001",
+      "sha": "59d3d2c548f985a8",
+      "file": "exports/psychology/psychology_safety_policy_v001.json",
+      "generated_at": "2026-09-05T13:27:52Z"
+    }
+  ],
+  "general_trading_mechanics.md": [
+    {
+      "version": "v001",
+      "sha": "4b014e391dbe41ac",
+      "file": "exports/general_trading/general_trading_mechanics_v001.md",
+      "generated_at": "2026-09-05T13:27:52Z"
+    }
+  ],
+  "general_trading_mechanics.json": [
+    {
+      "version": "v001",
+      "sha": "030c2ae043e83542",
+      "file": "exports/general_trading/general_trading_mechanics_v001.json",
+      "generated_at": "2026-09-05T13:27:52Z"
     }
   ]
 }

@@ -7,6 +7,7 @@ echo "== 1/5 rebuild structured collections =="
 node tools/extract_site_data.js
 python3 tools/build_academy_catalog.py
 python3 tools/seed_general_trading.py
+python3 tools/seed_general_mechanics.py
 python3 tools/seed_mt_concepts.py
 python3 tools/seed_mt_common.py
 python3 tools/seed_mt5.py
@@ -14,6 +15,7 @@ python3 tools/seed_mt4.py
 python3 tools/seed_mt_troubleshooting.py
 python3 tools/seed_mt_comparison.py
 python3 tools/seed_psychology.py
+python3 tools/seed_psychology_safety.py
 python3 tools/seed_academy_policies.py
 python3 tools/seed_governance.py
 

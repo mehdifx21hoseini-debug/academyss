@@ -1,0 +1,42 @@
+{
+  "report_type": "validation",
+  "version": "v006",
+  "generated_at": "2026-09-05T13:25:07Z",
+  "stats": {
+    "files": 15,
+    "objects": 194,
+    "by_kind": {
+      "knowledge_object": 13,
+      "conflict_record": 1,
+      "review_item": 1
+    },
+    "by_domain": {
+      "psychology": 11,
+      "metatrader": 103,
+      "general_trading": 49,
+      "academy": 23,
+      "mentor_qa": 1,
+      "brokers": 1,
+      "meta": 6
+    },
+    "by_approval": {
+      "PENDING_VERIFICATION": 159,
+      "PENDING_REVIEW": 15,
+      "APPROVED": 9
+    }
+  },
+  "errors": 0,
+  "warnings": 2,
+  "findings": [
+    {
+      "level": "WARNING",
+      "where": "knowledge_base/general_trading/market_mechanics.json :: GEN-CONC-0019",
+      "message": "related_concepts references unknown id PSY-PAT-0024"
+    },
+    {
+      "level": "WARNING",
+      "where": "knowledge_base/general_trading/market_mechanics.json :: GEN-CONC-0020",
+      "message": "related_concepts references unknown id PSY-PAT-0020"
+    }
+  ]
+}
