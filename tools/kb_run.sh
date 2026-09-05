@@ -36,6 +36,9 @@ python3 tools/seed_lesson_intro_17.py
 python3 tools/seed_lesson_psychology_p01.py
 python3 tools/seed_academy_policies.py
 python3 tools/seed_academy_clarifications.py
+python3 tools/seed_mentor_qa_01.py
+python3 tools/seed_mentor_qa_02.py
+python3 tools/seed_mentor_style.py
 python3 tools/seed_governance.py
 
 echo "== 2/5 validate =="

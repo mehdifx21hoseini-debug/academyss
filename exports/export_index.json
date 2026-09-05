@@ -297,6 +297,12 @@
       "sha": "6530735e13d87422",
       "file": "exports/conflicts/conflict_registry_v011.md",
       "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v012",
+      "sha": "eb314508a4c3b54f",
+      "file": "exports/conflicts/conflict_registry_v012.md",
+      "generated_at": "2026-09-05T19:40:31Z"
     }
   ],
   "conflict_registry.json": [
@@ -365,6 +371,12 @@
       "sha": "a411e70a04a6c739",
       "file": "exports/conflicts/conflict_registry_v011.json",
       "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v012",
+      "sha": "296ff7532e56fe83",
+      "file": "exports/conflicts/conflict_registry_v012.json",
+      "generated_at": "2026-09-05T19:40:31Z"
     }
   ],
   "review_queue_open_items.md": [
@@ -481,6 +493,12 @@
       "sha": "f35b151ac83eb7b7",
       "file": "exports/reports/review_queue_open_items_v019.md",
       "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v020",
+      "sha": "021736c591c0a0fd",
+      "file": "exports/reports/review_queue_open_items_v020.md",
+      "generated_at": "2026-09-05T19:40:31Z"
     }
   ],
   "review_queue_open_items.json": [
@@ -597,6 +615,12 @@
       "sha": "2076c392cb3084ee",
       "file": "exports/reports/review_queue_open_items_v019.json",
       "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v020",
+      "sha": "33311986be781754",
+      "file": "exports/reports/review_queue_open_items_v020.json",
+      "generated_at": "2026-09-05T19:40:31Z"
     }
   ],
   "academy_site_catalog.md": [
@@ -811,6 +835,12 @@
       "sha": "e37b4c24a0eb405b",
       "file": "exports/reports/kb_index_v030.csv",
       "generated_at": "2026-09-05T19:12:20Z"
+    },
+    {
+      "version": "v031",
+      "sha": "7a8f24bb33cf22d7",
+      "file": "exports/reports/kb_index_v031.csv",
+      "generated_at": "2026-09-05T19:40:31Z"
     }
   ],
   "glossary.csv": [
@@ -1471,6 +1501,54 @@
       "sha": "51429bd0a810efa9",
       "file": "exports/academy/academy_intro_lesson_17_v001.json",
       "generated_at": "2026-09-05T18:45:38Z"
+    }
+  ],
+  "mentor_qa_pack_01.md": [
+    {
+      "version": "v001",
+      "sha": "45a8e9fa6b31c9df",
+      "file": "exports/mentor_qa/mentor_qa_pack_01_v001.md",
+      "generated_at": "2026-09-05T19:40:31Z"
+    }
+  ],
+  "mentor_qa_pack_01.json": [
+    {
+      "version": "v001",
+      "sha": "4144603b98933d99",
+      "file": "exports/mentor_qa/mentor_qa_pack_01_v001.json",
+      "generated_at": "2026-09-05T19:40:31Z"
+    }
+  ],
+  "mentor_qa_pack_02.md": [
+    {
+      "version": "v001",
+      "sha": "c3bef95c060b6833",
+      "file": "exports/mentor_qa/mentor_qa_pack_02_v001.md",
+      "generated_at": "2026-09-05T19:40:31Z"
+    }
+  ],
+  "mentor_qa_pack_02.json": [
+    {
+      "version": "v001",
+      "sha": "447710c22f45f9c6",
+      "file": "exports/mentor_qa/mentor_qa_pack_02_v001.json",
+      "generated_at": "2026-09-05T19:40:31Z"
+    }
+  ],
+  "academy_mentor_style.md": [
+    {
+      "version": "v001",
+      "sha": "3210efa2ccf8627e",
+      "file": "exports/academy/academy_mentor_style_v001.md",
+      "generated_at": "2026-09-05T19:40:31Z"
+    }
+  ],
+  "academy_mentor_style.json": [
+    {
+      "version": "v001",
+      "sha": "bb2487274ed753ab",
+      "file": "exports/academy/academy_mentor_style_v001.json",
+      "generated_at": "2026-09-05T19:40:31Z"
     }
   ]
 }

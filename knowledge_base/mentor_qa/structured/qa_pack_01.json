@@ -1,0 +1,1108 @@
+{
+  "collection_id": "mentor_qa_pack_01",
+  "domain": "mentor_qa",
+  "title": "پرسش و پاسخ منتورینگ — بسته ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+  "description": "پاسخ‌های واقعی تیم منتورینگ به دانشجویان: اجرای معامله، انضباط پلن، بررسی حساب، بک‌تست و فوروارد تست، روان‌شناسی و روال‌های آموزشی آکادمی.",
+  "version": "v001",
+  "generated_at": "2026-09-05T19:34:25Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+    "raw_sources/mentor_qa/mentor_qa_2026_07_29.ingest.json"
+  ],
+  "notes": [
+    "نام دانشجویان پیش از آرشیو حذف و بی‌نام شد؛ نگاشت ذخیره نشده است.",
+    "پاسخ منتور MENTOR_VERIFIED است و هیچ‌وقت بالاتر از دانش دوره قرار نمی‌گیرد.",
+    "بخش دوم این بسته (مفاهیم فنی و عملیاتی) در qa_pack_02.json است."
+  ],
+  "objects": [
+    {
+      "id": "MQA-00001",
+      "question_raw": "سه معامله داشتم؛ اولی در fbo خرید که ضرر شد، دومی شکست کف فروش که ضرر شد، سومی با شکست کف روز قبل فروش که tp2 تاچ شد. راهنمایی کنید.",
+      "question_normalized": "وقتی روند نزولی است، معامله‌ی خرید چه حکمی دارد؟",
+      "intent": "trade_review",
+      "topic": "اجرای معامله",
+      "domain": "mentor_qa",
+      "answer_raw": "با توجه به سقف و کف‌های پایین‌تر، روند نزولیه و شیب تند و فشار فروش بالاست … معامله خرید خلاف جهت روند حساب میشه و ریسک بالایی داره. معامله سل هم اگه استاپ رو منطقی‌تر می‌ذاشتید استاپ تاچ نمی‌شد و همون تارگت می‌داد.",
+      "answer_structured": "وقتی ساختار بازار سقف و کف پایین‌تر می‌سازد و شیب روند تند است، معامله‌ی خرید خلاف جهت روند است و ریسک بالایی دارد. اگر در همان جهت روند وارد شدید ولی استاپ خوردید، اول جای حد ضرر را بررسی کنید — حد ضرر منطقی‌تر اغلب همان معامله را به هدف می‌رساند.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "خلاف جهت روند",
+      "reasoning": "اول سایکل و شیب روند خوانده می‌شود، بعد جهت معامله، بعد جای حد ضرر.",
+      "rule_used": [
+        "ACA-INT-0197",
+        "ACA-INT-0204",
+        "ACA-INT-0205"
+      ],
+      "question_variants": [
+        "خلاف روند معامله کنم؟",
+        "چرا بای‌هام استاپ می‌خوره؟"
+      ],
+      "keywords": [
+        "خلاف روند",
+        "استاپ منطقی",
+        "روند نزولی"
+      ]
+    },
+    {
+      "id": "MQA-00002",
+      "question_raw": "دو معامله بر اساس کانال نزولی گرفتم، هر دو با شکست کف وارد شدم و هر دو استاپ شد.",
+      "question_normalized": "چرا استاپ کوچک باعث ضرر پشت سر هم می‌شود؟",
+      "intent": "stop_placement",
+      "topic": "حد ضرر",
+      "domain": "mentor_qa",
+      "answer_raw": "معاملاتتون در جهت روند خوبه ولی استاپ رو خیلی کوچیک گذاشتید. وقتی استاپ کوچیک باشه قیمت خیلی راحت استاپ شما رو می‌زنه و در جهت تارگتتون ممکنه حرکت کنه و خود این بار روانی معامله رو بیشتر می‌کنه. سعی کنید استاپ رو منطقی‌تر بذارید.",
+      "answer_structured": "استاپ خیلی کوچک دو مشکل می‌سازد: قیمت به‌راحتی آن را می‌زند و بعد در جهت هدف شما حرکت می‌کند، و همین تکرار، بار روانی معامله‌گر را بالا می‌برد. حد ضرر باید پشت ناحیه‌ی منطقی ساختار باشد، نه نزدیک‌ترین فاصله‌ی ممکن.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "اندازه‌ی حد ضرر",
+      "misconception": "هرچه استاپ کوچک‌تر باشد ریسک کمتر است.",
+      "correction": "استاپ کوچک ریسک را کم نمی‌کند؛ احتمال استاپ خوردن و فشار روانی را زیاد می‌کند.",
+      "rule_used": [
+        "ACA-INT-0153",
+        "ACA-INT-0197"
+      ],
+      "question_variants": [
+        "استاپم رو چقدر بذارم؟",
+        "چرا همیشه استاپ می‌خورم بعد قیمت می‌ره سمت تارگتم؟"
+      ],
+      "keywords": [
+        "حد ضرر",
+        "استاپ کوچک",
+        "بار روانی"
+      ]
+    },
+    {
+      "id": "MQA-00003",
+      "question_raw": "کف روز رو شکست، فیلتر ۳ ثانیه هم داشتم، وارد فروش شدم ضرر شد؛ گفتم فیک شده دوباره وارد شدم ضرر شد؛ سومی هم ضرر شد.",
+      "question_normalized": "بعد از دو استاپ پشت سر هم چه باید کرد؟",
+      "intent": "trade_pacing",
+      "topic": "انضباط روز معاملاتی",
+      "domain": "mentor_qa",
+      "answer_raw": "توی تایم شروع بورس عجله نکن، توی ۱۵ دقیقه نباید سه تا استپ بخوری. … برای معامله سوم اصلاً عجله نکنید و صبر کنید مارکت به یک سمت خوبی حرکت کنه شفاف‌تر بشه براتون بعدش معامله سوم رو بگیرید.",
+      "answer_structured": "در دقایق ابتدایی باز شدن بورس آمریکا نباید سه استاپ پشت سر هم بخورید. بعد از دو استاپ متوالی یعنی ساختار بازار را نخوانده‌اید؛ باید صبر کنید — حتی نیم ساعت تا دو ساعت — تا بازار شفاف شود و بعد معامله‌ی سوم را بگیرید.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "عجله در ورود",
+      "conditions": [
+        "مخصوصاً در ۱۵ دقیقه‌ی ابتدایی باز شدن بورس آمریکا."
+      ],
+      "rule_used": [
+        "ACA-INT-0197",
+        "ACA-INT-0176"
+      ],
+      "question_variants": [
+        "سه تا استاپ پشت سر هم خوردم چیکار کنم؟",
+        "تو ۱۵ دقیقه اول چند معامله؟"
+      ],
+      "keywords": [
+        "عجله",
+        "سه استاپ",
+        "شروع بورس",
+        "صبر"
+      ]
+    },
+    {
+      "id": "MQA-00004",
+      "question_raw": "سه معامله طبق پلن ضرر شد، بعد معامله‌ی چهارم را خارج از پلن باز کردم.",
+      "question_normalized": "معامله‌ی خارج از پلن اگر سود بدهد چه اشکالی دارد؟",
+      "intent": "plan_discipline",
+      "topic": "انضباط پلن",
+      "domain": "mentor_qa",
+      "answer_raw": "وقتی شما سه تا موقعیت گرفتین موقعیت چهارم حتی اگر سود بشه این خیلی بدتر از اینه که ضرر بشه، چون وقتی سود میشه ذهن شما اینو عادت می‌کنه که من سه تا استاپ خوردم اینجا خارج پلن اقدام کردم سود شد پس دوباره این کار رو انجام بدم و بارها و بارها میفتید روی این چرخه‌ی ضرر.",
+      "answer_structured": "معامله‌ی خارج از پلن اگر سود بدهد **بدتر** از این است که ضرر بدهد، چون ذهن یاد می‌گیرد که خارج شدن از پلن جواب می‌دهد و همین عادت، معامله‌گر را بارها در چرخه‌ی ضرر می‌اندازد. سقف معاملات روزانه‌ی پلن، سقف است — نه پیشنهاد.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "سود خارج از پلن",
+      "misconception": "اگر معامله‌ی خارج از پلن سود بدهد، اشکالی نداشته است.",
+      "correction": "سودِ خارج از پلن، عادت غلط را تثبیت می‌کند و از ضرر خطرناک‌تر است.",
+      "rule_used": [
+        "ACA-INT-0158",
+        "PSY-PAT-0014"
+      ],
+      "question_variants": [
+        "معامله اضافه زدم ولی سود شد، مشکلیه؟"
+      ],
+      "keywords": [
+        "خارج از پلن",
+        "معامله چهارم",
+        "چرخه ضرر",
+        "عادت"
+      ]
+    },
+    {
+      "id": "MQA-00005",
+      "question_raw": "توی پلنم نوشتم روزی سه استاپ مجازم؛ خیلی روزها با سه ضرر متوالی روز را بستم.",
+      "question_normalized": "حد ضرر روزانه یعنی باید تا سقف آن معامله کرد؟",
+      "intent": "plan_discipline",
+      "topic": "انضباط پلن",
+      "domain": "mentor_qa",
+      "answer_raw": "وقتی شما توی پلنتون نوشتید که من سه تا استاپ می‌تونم ضرر کنم در طول روز، نباید به این معنا باشه که من حتماً سه تا ضرر کنم که دیگه ترید نکنم. خیلی وقتا نیازه که شما اگه یه دونه معامله هم استاپ خوردی دیدی ساختار مارکت براتون قشنگ نیست دیگه اون روز ترید نکنید. و اینطوری به مارکت نگاه نکنید که یا باید تیپی ۲ بگیرم یا تو بدترین حالت سه تا استاپ بخورم.",
+      "answer_structured": "سقف ضرر روزانه یک محدودیت است، نه سهمیه‌ای که باید مصرف شود. اگر با یک استاپ دیدید ساختار بازار شفاف نیست، همان‌جا روز را ببندید. نگاه «یا TP2 می‌گیرم یا سه استاپ می‌خورم» غلط است؛ اولین مهارت، حفظ حساب است.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "حد ضرر روزانه",
+      "misconception": "حد ضرر روزانه یعنی مجازم تا آن عدد ضرر کنم.",
+      "correction": "سقف ضرر یک مرز است؛ خروج زودتر از آن نشانه‌ی مهارت است، نه ضعف.",
+      "rule_used": [
+        "ACA-INT-0172",
+        "ACA-INT-0176"
+      ],
+      "question_variants": [
+        "با یه استاپ روزمو ببندم؟",
+        "سقف ضرر روزانه یعنی چی؟"
+      ],
+      "keywords": [
+        "حد ضرر روزانه",
+        "حفظ حساب",
+        "سقف ضرر"
+      ]
+    },
+    {
+      "id": "MQA-00006",
+      "question_raw": "استیتمنت یک‌ماهه دارم و حداکثر ضرر ماهانه‌ام ۳۰٪ تاچ شد. چه کار کنم؟",
+      "question_normalized": "وقتی دراوداون حساب به حدود ۳۰٪ رسید چه باید کرد؟",
+      "intent": "account_review",
+      "topic": "بررسی حساب",
+      "domain": "mentor_qa",
+      "answer_raw": "باید معاملات رو فعلاً متوقف کنید. دراودان اکانتتون تقریباً ۳۰ درصده و عدد بالاییه، باید دراودان اکانت ترجیحاً زیر ۱۰ درصد باشه، مطلوبش بین عدد ۵ و ۶ هست. و ریسک رو باید به گونه‌ای مدیریت کنید ترجیحاً یک درصد ریسکتون باشه. در مجموع برایند حساب هم منفی هستش و پروفیت فکتور زیر ۱ هست. باید برگردید همه معاملاتتون رو بررسی کنید … و مدتی رو دوباره باید بک تست بگیری … و دوباره فوروارد تستتون رو با یک حساب جدید شروع کنید.",
+      "answer_structured": "با دراوداون حدود ۳۰٪ معامله باید متوقف شود. مسیر بازگشت: (۱) توقف معاملات، (۲) بررسی همه‌ی معاملات برای یافتن جاهایی که خارج از پلن عمل شده، (۳) بازگشت به بک‌تست تا تسلط و اعتماد به نفس برگردد، (۴) شروع دوباره‌ی فوروارد تست روی یک حساب جدید. ریسک هر معامله ترجیحاً ۱٪.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "دراوداون بالا",
+      "conditions": [
+        "اعداد دراوداون و پروفیت فکتور معیارهای داخلی آکادمی‌اند."
+      ],
+      "rule_used": [
+        "ACA-INT-0172",
+        "ACA-INT-0170"
+      ],
+      "question_variants": [
+        "حسابم ۳۰ درصد ضرره چیکار کنم؟",
+        "دراوداونم زیاده"
+      ],
+      "keywords": [
+        "دراوداون",
+        "پروفیت فکتور",
+        "توقف معاملات",
+        "بک‌تست مجدد"
+      ]
+    },
+    {
+      "id": "MQA-00007",
+      "question_raw": "استیتمنتم را برای بررسی فرستادم.",
+      "question_normalized": "منتور استیتمنت را با چه معیارهایی بررسی می‌کند؟",
+      "intent": "account_review",
+      "topic": "معیارهای استیتمنت",
+      "domain": "mentor_qa",
+      "answer_raw": "ریسک ریواردها خوبه. دراودان حساب ۹.۳ درصد که لب مرز و باید کمتر بشه. تعداد معاملات توی یک روز زیاده، حتماً محدودیت معامله در روز داشته باشید، حد ضرر روزانه رو رعایت کنید. پروفیت فکتور ۱.۲ خوبه، باید بیاد بالای یک و نیم. دو هفته دیگه ادامه بدید و برای من بفرستید.",
+      "answer_structured": "معیارهایی که منتور روی استیتمنت نگاه می‌کند: نسبت ریسک به ریوارد، دراوداون حساب (زیر ۱۰٪ و مطلوب ۵ تا ۶٪)، تعداد معاملات در روز و رعایت حد ضرر روزانه، و پروفیت فکتور (هدف: بالای ۱.۵). بازبینی دوره‌ای است — معمولاً دو هفته بعد دوباره ارسال می‌شود.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "معیارهای بررسی",
+      "rule_used": [
+        "ACA-INT-0172"
+      ],
+      "question_variants": [
+        "استیتمنتم خوبه؟",
+        "پروفیت فکتور چقدر باشه خوبه؟",
+        "دراوداون چقدر مجازه؟"
+      ],
+      "keywords": [
+        "استیتمنت",
+        "پروفیت فکتور",
+        "دراوداون",
+        "محدودیت معامله روزانه"
+      ]
+    },
+    {
+      "id": "MQA-00008",
+      "question_raw": "شنیدم اگر استیتمنت داشته باشیم می‌توانیم برای جذب سرمایه بفرستیم.",
+      "question_normalized": "شرایط پیوستن به تیم معامله‌گری آکادمی چیست؟",
+      "intent": "academy_process",
+      "topic": "تیم معامله‌گری",
+      "domain": "mentor_qa",
+      "answer_raw": "برای بررسی و اضافه شدن به تیم معامله‌گری، بعد از گرفتن «تاییدیه حساب ریل»، ارائه‌ی یک استیتمنت معاملاتی در حساب (ریل/دمو) الزامی است. ❗️توجه: استیتمنت حساب پراپ به هیچ عنوان بررسی نمی‌شود. حداقل شرایط: • بازه زمانی ۶ ماه • دراداون کمتر از ۱۰٪ • پروفیت فکتور بالاتر از ۱.۵ • حداقل سرمایه حساب نیز مورد قبول است.",
+      "answer_structured": "پیش‌نیاز، گرفتن «تأییدیه‌ی حساب ریل» است. سپس استیتمنت حساب ریل یا دمو ارسال می‌شود با این حداقل‌ها: بازه‌ی ۶ ماه، دراوداون کمتر از ۱۰٪، پروفیت فکتور بالاتر از ۱.۵. حداقل سرمایه‌ی حساب هم پذیرفته است. استیتمنت حساب پراپ اصلاً بررسی نمی‌شود.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "شرایط پذیرش",
+      "conditions": [
+        "شرایط اعلام‌شده در زمان ثبت این گفت‌وگو؛ ممکن است تغییر کند."
+      ],
+      "rule_used": [
+        "ACA-INT-0245"
+      ],
+      "question_variants": [
+        "چطور وارد تیم معامله‌گری بشم؟",
+        "استیتمنت پراپ قبوله؟"
+      ],
+      "keywords": [
+        "تیم معامله‌گری",
+        "استیتمنت",
+        "پراپ",
+        "تأییدیه حساب ریل"
+      ]
+    },
+    {
+      "id": "MQA-00009",
+      "question_raw": "یکی از شاگردان گفت به‌جای TP2 از TP3 استفاده کن؛ عمل کردم و از ۱۰ معامله فقط یکی TP3 خورد.",
+      "question_normalized": "آیا با توصیه‌ی شخص دیگری می‌توان استراتژی را تغییر داد؟",
+      "intent": "strategy_change",
+      "topic": "استراتژی",
+      "domain": "mentor_qa",
+      "answer_raw": "شما به حرف یه شخص دیگه نباید استراتژی‌تون رو صرفاً تغییر بدید. چیزی که اهمیت داره اون بک تستی هست که شما گرفتید … زمانی اجازه دارید این کارو انجام بدید که رفته باشید اون استراتژی رو دوباره بک تست گرفته باشید و خودتون به این نتیجه رسیده باشید.",
+      "answer_structured": "تغییر استراتژی فقط با بک‌تست خودتان مجاز است، نه با توصیه‌ی شفاهی کسی. اگر برآیند فعلی‌تان مثبت است، آن را با حرف دیگران عوض نکنید؛ اول همان تغییر را بک‌تست بگیرید و اگر خودتان به نتیجه رسیدید، پلن را عوض کنید.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "منبع تغییر استراتژی",
+      "misconception": "اگر معامله‌گر موفق‌تری چیزی پیشنهاد داد، باید اجرا کرد.",
+      "correction": "مرجع تغییر، بک‌تست خودِ معامله‌گر است، نه تجربه‌ی نقل‌شده‌ی دیگران.",
+      "rule_used": [
+        "ACA-INT-0246"
+      ],
+      "question_variants": [
+        "فلانی گفت اینجوری بهتره، عوض کنم؟",
+        "TP3 بگیرم یا TP2؟"
+      ],
+      "keywords": [
+        "تغییر استراتژی",
+        "بک‌تست",
+        "توصیه دیگران"
+      ]
+    },
+    {
+      "id": "MQA-00010",
+      "question_raw": "ریوارد ۲ بگیرم یا ۳؟",
+      "question_normalized": "رابطه‌ی ریوارد بزرگ‌تر با وین‌ریت چیست؟",
+      "intent": "risk_reward",
+      "topic": "ریسک به ریوارد",
+      "domain": "mentor_qa",
+      "answer_raw": "چون ریوارد ۲ وینریت بالاتری داره فعلاً تمرکزتون رو روی گرفتن همون تی پی ۲ بزارید. هر چقدر شما انتظار ریوارد بزرگتر داشته باشید وینریت شما میاد پایین‌تر. و از اون سمت ممکنه استاپ بیشتری بخورید اما ریواردهای بزرگتری بتونید بگیرید، ولی اون استاپ‌ها روان شما را ممکنه به هم بزنه و نتونید توی معاملات بعدی اون ریوارد بزرگ رو بگیرید.",
+      "answer_structured": "هرچه ریوارد هدف بزرگ‌تر باشد، وین‌ریت پایین‌تر می‌آید. ریوارد ۲ وین‌ریت بالاتری دارد و توصیه‌ی پیش‌فرض آکادمی است. ریوارد بزرگ‌تر یعنی استاپ بیشتر، و همان استاپ‌ها روان معامله‌گر را به هم می‌زند تا جایی که دیگر نمی‌تواند به آن هدف بزرگ پایبند بماند.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "TP2 در برابر TP3",
+      "rule_used": [
+        "ACA-INT-0159",
+        "ACA-INT-0174"
+      ],
+      "question_variants": [
+        "چرا TP2؟",
+        "ریوارد بالاتر بهتر نیست؟"
+      ],
+      "keywords": [
+        "ریوارد",
+        "وین‌ریت",
+        "TP2",
+        "TP3"
+      ]
+    },
+    {
+      "id": "MQA-00011",
+      "question_raw": "مشکلی نداره به پلنم چند مورد اضافه کنم؟ فکر کنم یک فیلتر کلی اضافه کنم برایندم فرق می‌کند.",
+      "question_normalized": "آیا می‌توان تریدینگ پلن را در طول مسیر تغییر داد؟",
+      "intent": "plan_change",
+      "topic": "تریدینگ پلن",
+      "domain": "mentor_qa",
+      "answer_raw": "نه مشکلی نداره، شما در طی مسیر می‌تونید پلنتون رو با توجه به ژورنال معاملاتتون و تجربه‌هایی که تو معاملات لایو به دست میارید تغییر بدید، اما این تغییر نباید صرفاً بر اساس یک احساس باشه و باید یک دلیل و منطق درست پشت تغییر توی پلنتون باشه.",
+      "answer_structured": "بله، پلن یک سند زنده است و با تجربه‌ی لایو و ژورنال معاملاتی به‌تدریج بهبود می‌یابد. شرط: هر تغییر باید دلیل و منطق مستند داشته باشد، نه اینکه از یک حس لحظه‌ای بیاید.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "به‌روزرسانی پلن",
+      "conditions": [
+        "تغییر باید از ژورنال و تجربه‌ی مستند بیاید، نه از احساس."
+      ],
+      "rule_used": [
+        "ACA-INT-0246"
+      ],
+      "question_variants": [
+        "پلنم رو عوض کنم؟",
+        "فیلتر جدید اضافه کنم؟"
+      ],
+      "keywords": [
+        "تریدینگ پلن",
+        "ژورنال",
+        "تغییر پلن"
+      ]
+    },
+    {
+      "id": "MQA-00012",
+      "question_raw": "تارگت هفتگی‌ام تاچ شد، تا آخر هفته معامله نمی‌کنم.",
+      "question_normalized": "برنامه‌ی آخر هفته‌ی معامله‌گر چیست؟",
+      "intent": "journaling",
+      "topic": "ژورنال معاملاتی",
+      "domain": "mentor_qa",
+      "answer_raw": "شنبه و یکشنبه یک روزش رو استراحت کامل داشته باشید و یک روزش رو هم به بررسی معاملات هفتگیتون بپردازید و ژورنال معاملاتتون رو حتماً هر هفته باید بررسی کنید و اقدامات هفته جدیدتون رو هم توی همون روز مشخص کنید برای خودتون.",
+      "answer_structured": "روال هفتگی پیشنهادی: یک روز استراحت کامل، یک روز بررسی معاملات هفته و ژورنال، و در همان روز مشخص کردن اقدامات هفته‌ی بعد. ژورنال باید هر هفته بازبینی شود، نه فقط نوشته شود.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "روال هفتگی",
+      "rule_used": [
+        "ACA-INT-0210"
+      ],
+      "question_variants": [
+        "آخر هفته چیکار کنم؟",
+        "ژورنال رو کی بررسی کنم؟"
+      ],
+      "keywords": [
+        "ژورنال",
+        "بررسی هفتگی",
+        "استراحت"
+      ]
+    },
+    {
+      "id": "MQA-00013",
+      "question_raw": "دو ماه است ضرر می‌کنم یا سربه‌سرم؛ ریشه‌اش نیاز شدید مالی است و از پلن خارج شدم.",
+      "question_normalized": "نیاز مالی چه اثری بر معامله می‌گذارد و چه باید کرد؟",
+      "intent": "psychology",
+      "topic": "فشار مالی",
+      "domain": "mentor_qa",
+      "answer_raw": "وقتی شما تمرکزت روی این باشه که من بتونم از مارکت پول دربیارم و به جای اجرای درست استراتژی و پلن تمرکز صرفاً روی سود و ضرر باشه نمی‌تونید پلن رو درست اجرا کنید … فعلاً پیشنهادی که بهتون می‌کنم اینه که یک هفته از مارکت فاصله بگیرید تا ذهنتون بتونه ریکاوری بشه و بعدش بیاید معاملاتتون رو بررسی کنید. … با این شرایط مالی به هیچ عنوان با سرمایه‌ای که براتون ارزش بالایی داره وارد بازار نشید … در کنار آموزش هم اگر امکانش رو دارید حتما به دنبال یک منبع درآمد باشید.",
+      "answer_structured": "وقتی تمرکز از «اجرای درست پلن» به «باید پول دربیاورم» منتقل شود، پلن اجرا نمی‌شود. توصیه‌ی منتور: یک هفته از بازار فاصله بگیرید تا ذهن ریکاوری شود، بعد معاملات و ژورنال را بررسی کنید. و مهم‌تر: با سرمایه‌ای که برایتان حیاتی است وارد بازار نشوید و در کنار آموزش، یک منبع درآمد دیگر داشته باشید تا فشار مالی کم شود.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "سرمایه‌ی حیاتی",
+      "rule_used": [
+        "PSY-RULE-0001",
+        "ACA-INT-0172"
+      ],
+      "question_variants": [
+        "با پول قرضی ترید کنم؟",
+        "نیاز مالی دارم، چیکار کنم؟"
+      ],
+      "keywords": [
+        "نیاز مالی",
+        "فاصله از بازار",
+        "سرمایه حیاتی",
+        "منبع درآمد"
+      ]
+    },
+    {
+      "id": "MQA-00014",
+      "question_raw": "وقتی دو روز پیاپی ضرر می‌کنم روز سوم بعد از دو ضرر، کنترلم را از دست می‌دهم و اوورترید می‌کنم.",
+      "question_normalized": "بعد از چند روز ضرر متوالی چه باید کرد؟",
+      "intent": "psychology",
+      "topic": "ضررهای متوالی",
+      "domain": "mentor_qa",
+      "answer_raw": "بله موضوعی که گفتید کاملاً منطقیه، اینجور وقتا باید حداقل یک الی دو روز از مارکت فاصله بگیرید تا از اون دوره ضرر خارج بشید. … توی لایو بازار چون احساسات شما درگیر میشه تا حدودی این موضوع طبیعیه که اتفاق بیفته، نگران نباشید.",
+      "answer_structured": "شناسایی این الگو در خودتان درست و ارزشمند است. راهکار: بعد از دوره‌ی ضرر متوالی، حداقل یک تا دو روز کامل از بازار فاصله بگیرید. اینکه در لایو چنین واکنشی پیش بیاید — حتی وقتی در بک‌تست چنین توالی‌ای نبوده — طبیعی است، چون در لایو احساسات درگیر است.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "اوورترید بعد از ضرر",
+      "rule_used": [
+        "PSY-PAT-0002",
+        "PSY-PAT-0015",
+        "PSY-PAT-0013"
+      ],
+      "question_variants": [
+        "بعد از ضرر پشت سر هم چیکار کنم؟",
+        "اوورترید می‌کنم"
+      ],
+      "keywords": [
+        "ضرر متوالی",
+        "اوورترید",
+        "فاصله از بازار"
+      ]
+    },
+    {
+      "id": "MQA-00015",
+      "question_raw": "وارد فروش شدم، ترسیدم و معامله را با نیم پیپ ضرر بستم.",
+      "question_normalized": "برای جلوگیری از خروج احساسی چه کنم؟",
+      "intent": "psychology",
+      "topic": "خروج احساسی",
+      "domain": "mentor_qa",
+      "answer_raw": "سعی کنید تمرکزتون رو روی اجرای درست استراتژی و پلن بذارید و احساسی از معامله خارج نشید. و اگر فکر می‌کنید احساس و بار روانی یک معامله زیاد میشه براتون، بهتره که ست اند فورگت کنید یعنی برای معامله حد سود و حد ضرر بزارید و از پشت سیستم بلند شید، نیم ساعت دیگه برگردید ببینید برآیند معامله به چه شکلی شده.",
+      "answer_structured": "راهکار عملی منتور: «ست اند فورگت» — حد سود و حد ضرر را بگذارید و از پشت سیستم بلند شوید و نیم ساعت بعد برگردید. نشستن مداوم پای چارت باعث تصمیم‌های احساسی و دستکاری معامله می‌شود.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "ست اند فورگت",
+      "rule_used": [
+        "PSY-PAT-0005",
+        "PSY-PAT-0021"
+      ],
+      "question_variants": [
+        "می‌ترسم و زود می‌بندم",
+        "چطور پای چارت ننشینم؟"
+      ],
+      "keywords": [
+        "ست اند فورگت",
+        "خروج احساسی",
+        "دستکاری معامله"
+      ]
+    },
+    {
+      "id": "MQA-00016",
+      "question_raw": "هفته‌ها در ضررم و سر ماه سربه‌سر می‌شوم؛ هنوز برداشت نداشته‌ام و خسته شده‌ام.",
+      "question_normalized": "آیا سربه‌سر ماندن یعنی درجا زدن؟",
+      "intent": "psychology",
+      "topic": "سربه‌سر ماندن",
+      "domain": "mentor_qa",
+      "answer_raw": "شما اصلاً درجا نمی‌زنید … اینکه الان می‌گید بیشتر مواقع با پلن معامله می‌کنید، مدیریت سرمایه رو رعایت می‌کنید و آخر ماه حساب‌تون حفظ میشه، این خودش یک پیشرفت بسیار ارزشمنده. خیلی‌ها فکر می‌کنن موفقیت فقط یعنی هر ماه سود گرفتن، در حالی که اولین هدف یک معامله‌گر حرفه‌ای، حفظ سرمایه و رسیدن به ثبات رفتاریه. رشد حساب، مرحله بعد از این ثباته … اگر بعد از هر ضرر احساس کردید می‌خواید برای جبران دوباره وارد بازار بشید، همون لحظه چند دقیقه از نمودار فاصله بگیرید.",
+      "answer_structured": "سربه‌سر ماندن با رعایت پلن و مدیریت سرمایه، درجا زدن نیست — یک مرحله‌ی واقعی از پیشرفت است. ترتیب درست: اول حفظ سرمایه و ثبات رفتاری، بعد رشد حساب. دشمن این مرحله بازار نیست؛ افزایش تعداد معاملات بعد از ضرر و طمع است. عادت پیشنهادی: بعد از هر ضرر، چند دقیقه از نمودار فاصله بگیرید و معامله نکنید.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "ثبات پیش از رشد",
+      "misconception": "موفقیت یعنی هر ماه سود گرفتن.",
+      "correction": "اولین هدف حرفه‌ای، حفظ سرمایه و ثبات رفتاری است؛ رشد حساب مرحله‌ی بعد است.",
+      "rule_used": [
+        "PSY-PAT-0015",
+        "ACA-INT-0132"
+      ],
+      "question_variants": [
+        "دارم درجا می‌زنم؟",
+        "چرا هنوز برداشت نداشتم؟"
+      ],
+      "keywords": [
+        "سربه‌سر",
+        "ثبات رفتاری",
+        "حفظ سرمایه",
+        "جبران ضرر"
+      ]
+    },
+    {
+      "id": "MQA-00017",
+      "question_raw": "۷ ماه حسابم رو به رشد بود، الان ۳ ماه است نزولی است و نمی‌دانم مشکل کجاست.",
+      "question_normalized": "وقتی بعد از یک دوره‌ی خوب، عملکرد افت می‌کند چه باید بررسی کرد؟",
+      "intent": "psychology",
+      "topic": "افت عملکرد",
+      "domain": "mentor_qa",
+      "answer_raw": "اول یه نگاه بنداز به معاملات این سه ماه اخیر، ببین چی تغییر کرده. داری همون سبک و استراتژی رو اجرا می‌کنی یا ناخودآگاه یه چیزی رو عوض کردی؟ … گاهی اوقات بازار عوض میشه … یه هفته فقط بازار رو ببین، بدون معامله، فقط تحلیل کن … بعد که برگشتی، با ریسک پایین‌تر کار کن، فقط به اجرای پلن تمرکز کن، نه سود و زیان. … نکنه توی این افت، احساسی شدی و تریدهای عجله‌ای یا انتقامی زدی؟",
+      "answer_structured": "چهار چیز را به‌ترتیب بررسی کنید: (۱) آیا ناخودآگاه چیزی در اجرای استراتژی عوض شده؟ (۲) آیا شرایط بازار عوض شده (نوسان کمتر، رنج شدن) و سبک شما هنوز جواب می‌دهد؟ (۳) یک هفته فقط تحلیل بدون معامله، (۴) بازگشت با ریسک پایین‌تر و تمرکز روی اجرای پلن نه سود و زیان. و صادقانه چک کنید که معامله‌ی عجله‌ای یا انتقامی نزده باشید.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "بررسی افت",
+      "rule_used": [
+        "PSY-PAT-0002",
+        "ACA-INT-0246"
+      ],
+      "question_variants": [
+        "چرا دیگه سود نمی‌کنم؟",
+        "عملکردم افت کرده"
+      ],
+      "keywords": [
+        "افت عملکرد",
+        "تغییر بازار",
+        "معامله انتقامی",
+        "ریسک پایین‌تر"
+      ]
+    },
+    {
+      "id": "MQA-00018",
+      "question_raw": "امروز چند استاپ خوردم و روحیه‌ام خراب شد.",
+      "question_normalized": "برخورد درست با ضرر چیست؟",
+      "intent": "psychology",
+      "topic": "پذیرش ضرر",
+      "domain": "mentor_qa",
+      "answer_raw": "ضرر توی بازار همیشه هست، مهم رفتار معامله‌گر بعد ضرره که مهمه👌 … اشکالی نداره، در واقع درس‌ها از همین اشتباهات و ضررها گرفته می‌شه. دیدگاه پخته‌تر بشه تا به مرور زمان بتونی عملکرد مثبت‌تری تو لایو داشته باشی و این نیاز به زمان داره، اصلا عجله نکن پرقدرت پیش برو.",
+      "answer_structured": "ضرر جزء ثابت بازار است؛ آنچه اهمیت دارد رفتار معامله‌گر **بعد از** ضرر است. درس‌ها دقیقاً از همین ضررها گرفته می‌شود و پخته شدن دیدگاه زمان می‌برد.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "رفتار بعد از ضرر",
+      "rule_used": [
+        "ACA-INT-0252"
+      ],
+      "question_variants": [
+        "ضرر کردم ناراحتم",
+        "چرا انقدر استاپ می‌خورم؟"
+      ],
+      "keywords": [
+        "پذیرش ضرر",
+        "رفتار بعد ضرر",
+        "پرقدرت"
+      ]
+    },
+    {
+      "id": "MQA-00019",
+      "question_raw": "طبیعی است نتیجه‌ی بک‌تست و فوروارد تست کمی فرق داشته باشد؟",
+      "question_normalized": "تفاوت برآیند بک‌تست و فوروارد تست طبیعی است؟",
+      "intent": "backtest",
+      "topic": "بک‌تست",
+      "domain": "mentor_qa",
+      "answer_raw": "طبیعی هست که متفاوت باشه ولی باید دقیقاً این نکاتی که باعث می‌شود تفاوت بین برآیند بک تست با فوروارد تست ایجاد شود رو بنویسید و ازش استفاده کنید که برآیند یکی باشد.",
+      "answer_structured": "بله طبیعی است، اما تفاوت را رها نکنید: دقیقاً بنویسید چه چیزی باعث اختلاف شده و از همان یادداشت‌ها استفاده کنید تا دو برآیند به هم نزدیک شوند.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "اختلاف برآیند",
+      "rule_used": [
+        "ACA-INT-0246"
+      ],
+      "question_variants": [
+        "چرا لایو با بک‌تستم فرق داره؟"
+      ],
+      "keywords": [
+        "بک‌تست",
+        "فوروارد تست",
+        "برآیند"
+      ]
+    },
+    {
+      "id": "MQA-00020",
+      "question_raw": "در بک‌تست جواب می‌داد اما در لایو مارکت مدام استاپ می‌خورم.",
+      "question_normalized": "وقتی لایو با بک‌تست نمی‌خواند، چطور بررسی کنم؟",
+      "intent": "backtest",
+      "topic": "بک‌تست",
+      "domain": "mentor_qa",
+      "answer_raw": "برید مجدد هفته‌های قبل رو بک تست بگیرید ببینید اگر قرار بود اون روزها رو بک تست بگیرید آیا برآیندش دوباره با همون فوروارد تستی که انجام دادید یکی هست یا خیر. اینو بررسی کنید و نتیجه‌اش رو به من بگید.",
+      "answer_structured": "روش تشخیص: همان هفته‌هایی که در لایو ضرر داده‌اید را دوباره بک‌تست بگیرید. اگر برآیند بک‌تستِ همان روزها با آنچه در لایو انجام داده‌اید یکی نبود، مشکل در **اجرا**ست نه در استراتژی.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "عیب‌یابی اجرا",
+      "reasoning": "مقایسه‌ی بک‌تستِ همان بازه با عملکرد لایو، اجرا را از استراتژی جدا می‌کند.",
+      "rule_used": [
+        "ACA-INT-0246"
+      ],
+      "question_variants": [
+        "استراتژیم خرابه یا اجرام؟",
+        "تو بک‌تست خوب بود تو لایو نه"
+      ],
+      "keywords": [
+        "بک‌تست مجدد",
+        "اجرا",
+        "لایو"
+      ]
+    },
+    {
+      "id": "MQA-00021",
+      "question_raw": "سه معامله در یک روز را جداجدا ثبت کنم؟ و معنی Expectancy و Avg Win R و Avg Loss R چیست؟",
+      "question_normalized": "در فایل اکسل بک‌تست هر معامله چطور ثبت می‌شود؟",
+      "intent": "backtest",
+      "topic": "فایل بک‌تست",
+      "domain": "mentor_qa",
+      "answer_raw": "در این فایل شما برای هر معامله‌ای که در روز انجام می‌دید باید تاریخ رو وارد کنید … اگر استراتژیتون در طی یک روز سه بار موقعیت میده همون تاریخ رو سه بار تکرار کنید و کنارش موقعیت‌ها رو ثبت کنید. خود اکسل توی قسمت داشبورد در نهایت اینا رو از هم جدا می‌کنه. اَورِج وین میانگین سودهای معاملات رو نشون میده و اَورِج لاس میانگین ضررها هست که چون ضررها ثابت یک درصد یا منفی یک میشه اون عدد همیشه ثابته.",
+      "answer_structured": "هر معامله یک ردیف مستقل است؛ اگر در یک روز سه موقعیت گرفته‌اید، همان تاریخ سه بار تکرار می‌شود و داشبورد اکسل خودش تفکیک می‌کند. Avg Win R میانگین سود معاملات برنده و Avg Loss R میانگین ضررهاست — و چون ضرر هر معامله ثابت (۱٪ یا −۱) است، Avg Loss R عملاً همیشه ثابت می‌ماند.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "نحوه‌ی ثبت",
+      "question_variants": [
+        "اکسل بک‌تست رو چطور پر کنم؟",
+        "Avg Loss R یعنی چی؟"
+      ],
+      "keywords": [
+        "اکسل بک‌تست",
+        "Avg Win R",
+        "Avg Loss R",
+        "داشبورد"
+      ]
+    },
+    {
+      "id": "MQA-00022",
+      "question_raw": "فایل اکسل بک‌تست را از کجا بگیرم؟",
+      "question_normalized": "فایل‌ها و ویدیوهای مسیر از کجا دریافت می‌شوند؟",
+      "intent": "academy_process",
+      "topic": "مسیر آموزش",
+      "domain": "mentor_qa",
+      "answer_raw": "فایل اکسل رو از ویدیوی ۶۱ اسپات پلیر باید دانلود کنید عزیز … فایلش رو خدمتتون می‌فرستم ولی ویدیوی آموزشیش رو حتماً مشاهده کنید از توی اسپات پلیر. … حتماً ویدیو ۶۶ و ۶۷ رو مشاهده کنید از طریق اسپات پلیر هم می‌تونید فایل رو دانلود کنید.",
+      "answer_structured": "فایل‌های ضمیمه از داخل خودِ ویدیوهای اسپات‌پلیر دانلود می‌شوند (اکسل بک‌تست: ویدیوی ۶۱؛ فایل پلن: ویدیوهای ۶۶ و ۶۷). منتور در صورت مشکل فنی فایل را مستقیم می‌فرستد اما تأکید می‌کند ویدیوی آموزشی‌اش حتماً دیده شود.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "اسپات پلیر",
+      "conditions": [
+        "شماره‌ی ویدیوها مربوط به ساختار دوره در زمان این گفت‌وگوست."
+      ],
+      "question_variants": [
+        "فایل اکسل کجاست؟",
+        "اسپات پلیر چیه؟"
+      ],
+      "keywords": [
+        "اسپات پلیر",
+        "ویدیو ۶۱",
+        "ویدیو ۶۶",
+        "فایل اکسل"
+      ]
+    },
+    {
+      "id": "MQA-00023",
+      "question_raw": "بعد از تمام شدن تمرین‌ها مسیر بعدی چیست؟",
+      "question_normalized": "مسیر رسمی استراتژی‌نویسی و بک‌تست چیست؟",
+      "intent": "academy_process",
+      "topic": "مسیر استراتژی‌نویسی",
+      "domain": "mentor_qa",
+      "answer_raw": "۱. مشاهده و نت‌برداری از ویدیوهای استراتژی‌نویسی. ۲. تمرین عملی هم‌زمان با مرور دوباره‌ی ویدیوها. ۳. طراحی ۱۰ تا ۱۵ استراتژی و بک‌تست حداقل یک سال گذشته؛ این یک سال به سه بخش چهارماهه تقسیم می‌شود: چهار ماه نخست همه‌ی سشن‌ها بک‌تست می‌شوند و استراتژی‌های ضعیف و کم‌بازده‌ترین سشن حذف می‌شوند؛ چهار ماه دوم تمرکز روی استراتژی‌ها و سشن‌های برتر و حذف دوباره‌ی ضعیف‌ها؛ چهار ماه پایانی فقط یک سشن و استراتژی‌های موفق، با افزودن فیلترهای معاملاتی و تعیین حد ضرر. ۴. تکمیل و ارسال فایل نهایی شامل استراتژی‌ها، نتایج بک‌تست یک‌ساله و تریدینگ پلن؛ در صورت تأیید، ورود به مرحله‌ی فوروارد تست.",
+      "answer_structured": "مسیر رسمی چهار گام دارد: (۱) دیدن و نت‌برداری همه‌ی ویدیوهای استراتژی‌نویسی، (۲) مرور دوباره همراه با تمرین عملی، (۳) طراحی ۱۰ تا ۱۵ استراتژی و بک‌تست یک سال گذشته در سه بازه‌ی چهارماهه با حذف تدریجی استراتژی‌ها و سشن‌های ضعیف تا رسیدن به یک سشن و استراتژی‌های موفق و افزودن فیلترها، (۴) ارسال فایل نهایی (استراتژی‌ها + نتایج بک‌تست یک‌ساله + تریدینگ پلن) برای بررسی؛ با تأیید، فوروارد تست شروع می‌شود.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "قالب استاندارد",
+      "reasoning": "این متن یک قالب آماده است که منتورها عیناً برای دانشجویانِ رسیده به این مرحله می‌فرستند.",
+      "rule_used": [
+        "ACA-INT-0246",
+        "ACA-INT-0245"
+      ],
+      "question_variants": [
+        "بعد از ویدیوها چیکار کنم؟",
+        "مسیر بک‌تست چیه؟",
+        "چند تا استراتژی بنویسم؟"
+      ],
+      "keywords": [
+        "استراتژی‌نویسی",
+        "بک‌تست یک‌ساله",
+        "سه بازه چهارماهه",
+        "فوروارد تست"
+      ]
+    },
+    {
+      "id": "MQA-00024",
+      "question_raw": "تمرین‌های مرحله‌ی سایکل‌ها و گپ‌ها را چطور بفرستم؟",
+      "question_normalized": "روال ارسال و بررسی تمرین‌ها چیست؟",
+      "intent": "academy_process",
+      "topic": "تمرین‌ها",
+      "domain": "mentor_qa",
+      "answer_raw": "تا پارت ۳ اسپایک مشاهده کنید بعد تمارین تشخیص اسپایک کانال تریدینگ رنج را در قالب سه تا عکس انجام بدید که در هر عکس هر سه سایکل رو مشخص کرده باشید … از این ویدیو به بعد هر ویدیویی که تمرین داشت رو در قالب سه تا عکس انجام بدید ارسال بکنید تا بررسی بشه. … لطفاً ۳ نمونه از گپ‌های آموزش‌داده‌شده را روی چارت مشخص کرده و برای بررسی ارسال کنید. هر تمرین را روی یک روز معاملاتی مجزا انجام دهید … از مشخص کردن نقاط ورود، خروج، حد ضرر، حد سود و ریسک به ریوارد خودداری کنید.",
+      "answer_structured": "تمرین‌ها در قالب سه تصویر ارسال می‌شوند، هر تصویر روی یک روز معاملاتی مجزا. در تمرین سایکل‌ها باید در هر تصویر هر سه سایکل (اسپایک، کانال، تریدینگ رنج) مشخص شده باشد. در تمرین گپ‌ها نباید نقاط ورود، خروج، حد ضرر، حد سود و ریسک به ریوارد مشخص شود. پس از تأیید هر مرحله، مسیر و تمرین مرحله‌ی بعد فرستاده می‌شود.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "قالب ارسال تمرین",
+      "question_variants": [
+        "تمرینم رو چطور بفرستم؟",
+        "چند تا عکس بفرستم؟"
+      ],
+      "keywords": [
+        "تمرین",
+        "سه عکس",
+        "گپ",
+        "سایکل"
+      ]
+    },
+    {
+      "id": "MQA-00025",
+      "question_raw": "تا کجای دوره اجازه‌ی معامله داریم؟",
+      "question_normalized": "دانشجو از چه مرحله‌ای اجازه‌ی معامله دارد؟",
+      "intent": "academy_process",
+      "topic": "اجازه‌ی معامله",
+      "domain": "mentor_qa",
+      "answer_raw": "⚠️ تا قبل از رسیدن به مبحث مدیریت سرمایه، به هیچ عنوان اجازه انجام معامله را ندارید. پس از مشاهده ویدیوهای مدیریت سرمایه، فقط برای تمرین محاسبه حجم معاملات (Lot Size) و Pip Value روی نمادهای مختلف، چند معامله آزمایشی باز کنید … این معاملات به معنای تأیید شروع معامله یا ترید کردن نیست … پس از پایان این تمرین، مجدداً انجام معامله متوقف می‌شود تا در زمان مناسب و بر اساس استراتژی و تریدینگ پلن خود، وارد مرحله فوروارد تست شوید.",
+      "answer_structured": "تا رسیدن به مبحث مدیریت سرمایه، معامله ممنوع است. پس از دیدن ویدیوهای مدیریت سرمایه، فقط چند معامله‌ی آزمایشی برای تمرین محاسبه‌ی حجم (Lot Size) و ارزش پیپ مجاز است — این تأیید شروع معامله نیست. پس از آن دوباره معامله متوقف می‌شود تا نوبت فوروارد تست برسد.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "ممنوعیت معامله",
+      "rule_used": [
+        "ACA-INT-0245",
+        "ACA-INT-0161"
+      ],
+      "question_variants": [
+        "الان می‌تونم ترید کنم؟",
+        "کی اجازه معامله دارم؟"
+      ],
+      "keywords": [
+        "ممنوعیت معامله",
+        "مدیریت سرمایه",
+        "تمرین حجم",
+        "فوروارد تست"
+      ]
+    },
+    {
+      "id": "MQA-00026",
+      "question_raw": "چند بار پیام و علامت سؤال فرستادم ولی جواب نگرفتم.",
+      "question_normalized": "پیام‌ها با چه ترتیبی پاسخ داده می‌شوند؟",
+      "intent": "academy_process",
+      "topic": "صف پاسخ‌گویی",
+      "domain": "mentor_qa",
+      "answer_raw": "پیام‌ها به ترتیب پاسخ داده میشه. و اگر شما علامت سوال بذارید اکانتتون دوباره میاد اول لیست و دیرتر پاسخ داده میشه. به خاطر همین پیام که ارسال کردید منتظر باشید به ترتیب به اکانتتون برسیم پاسخ میدیم بزرگوار.",
+      "answer_structured": "پیام‌ها به ترتیب نوبت پاسخ داده می‌شوند. فرستادن پیام اضافی یا علامت سؤال، حساب شما را دوباره به ابتدای صف می‌برد و پاسخ را **دیرتر** می‌کند. بهترین کار صبر کردن تا رسیدن نوبت است.",
+      "pii_removed": true,
+      "source": {
+        "source_type": "MENTOR_CONVERSATION",
+        "source_ref": "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "source_location": "بسته‌ی ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+        "mentor": "تیم منتورینگ آکادمی سبحان صمدی",
+        "captured_at": "2026-07-29..2026-08-04"
+      },
+      "authority_level": "MENTOR_VERIFIED",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:34:25Z",
+      "updated_at": "2026-09-05T19:34:25Z",
+      "subtopic": "نوبت پاسخ",
+      "misconception": "پیام دادن دوباره پاسخ را سریع‌تر می‌کند.",
+      "correction": "پیام تکراری نوبت را عقب می‌اندازد.",
+      "question_variants": [
+        "چرا جوابم رو نمی‌دید؟",
+        "کی جواب می‌گیرم؟"
+      ],
+      "keywords": [
+        "صف پاسخ",
+        "نوبت",
+        "پشتیبانی"
+      ]
+    }
+  ]
+}
