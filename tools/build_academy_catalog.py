@@ -12,6 +12,10 @@ import kb_lib as K  # noqa: E402
 
 NOW = K.now_iso()
 RAW = K.load_json(K.ROOT + "/raw_sources/academy/site_data_v001.json")
+# The extract records which file it actually read. Taking the path from there
+# rather than hard-coding it keeps provenance true after the site moved to
+# legacy-site/.
+SITE_DATA = RAW.get("source_file") or "js/data.js"
 DATA = RAW["data"]
 
 CATEGORY_FA = {"trading": "معامله‌گری", "psychology": "روانشناسی", "analysis": "تحلیل"}
@@ -27,7 +31,7 @@ def base(oid, otype, title, chunk, location, **kw):
         "chunk_text": chunk,
         "source": {
             "source_type": "ACADEMY_APP_DATA",
-            "source_ref": "js/data.js",
+            "source_ref": SITE_DATA,
             "source_location": location,
             "author": "سبحان صمدی",
         },
@@ -168,7 +172,7 @@ collection = {
     "version": "v001",
     "generated_at": NOW,
     "pipeline_stage": "STRUCTURED",
-    "source_files": ["js/data.js", "index.html", "README.md",
+    "source_files": [SITE_DATA, "index.html", "README.md",
                      "raw_sources/academy/site_data_v001.json"],
     "notes": [
         "ساخته‌شده به‌صورت خودکار توسط tools/build_academy_catalog.py — دستی ویرایش نشود.",
