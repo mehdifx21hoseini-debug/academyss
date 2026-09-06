@@ -266,3 +266,72 @@ async def _job_kinds(session: AsyncSession) -> list[str]:
 
     rows = await session.execute(sql("select kind from jobs order by id"))
     return [r[0] for r in rows.all()]
+
+
+# ---------------------------------------------------------------------------
+# حلقه‌ی رویداد (ADR-029)
+# ---------------------------------------------------------------------------
+
+
+class _FakeFile:
+    def __init__(self, *, mime: str, name: str, size: int) -> None:
+        self.mime_type = mime
+        self.name = name
+        self.size = size
+
+
+class _FakeMessage:
+    """پیام تلگرامی، فقط با همان چیزی که `_read_attachment` واقعاً لمس می‌کند."""
+
+    def __init__(self, payload: bytes, *, mime: str, name: str) -> None:
+        self.file = _FakeFile(mime=mime, name=name, size=len(payload))
+        self._payload = payload
+
+    async def download_media(self, file: type[bytes]) -> bytes:
+        return self._payload
+
+
+async def test_reading_a_file_does_not_freeze_the_telegram_connection(
+    account: MentorAccount, gateway: AccountGateway, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """شکستی که می‌بندد: سکوت کامل یک حساب هنگام خواندن یک فایل بزرگ.
+
+    تجزیه‌ی فایل کار پردازنده و همگام است. تا وقتی روی حلقه‌ی رویداد اجرا می‌شد،
+    اتصال MTProto آن حساب در تمام مدت هیچ کاری نمی‌کرد — نه پیام تازه‌ای می‌گرفت،
+    نه ضربان می‌فرستاد.
+
+    اینجا تجزیه عمداً کند می‌شود و سنجیده می‌شود که آیا کار هم‌زمان دیگری در همان
+    مدت پیش می‌رود یا نه. اگر تجزیه دوباره روی حلقه برگردد، شمارنده صفر می‌ماند و
+    این تست شکست می‌خورد.
+    """
+    import asyncio
+    import time
+
+    from mentorai.media import extract as media_extract
+
+    def _slow_extract(data: bytes, *, filename: str | None = None, mime: str | None = None):  # type: ignore[no-untyped-def]
+        time.sleep(0.30)
+        return Extraction(kind="plan", text="خوانده شد")
+
+    monkeypatch.setattr(media_extract, "extract", _slow_extract)
+
+    ticks = 0
+
+    async def _heartbeat() -> None:
+        nonlocal ticks
+        while True:
+            await asyncio.sleep(0.01)
+            ticks += 1
+
+    beat = asyncio.create_task(_heartbeat())
+    try:
+        message = _FakeMessage(b"x" * 100, mime="application/pdf", name="plan.docx")
+        attachment = await gateway._read_attachment(message, "document")
+    finally:
+        beat.cancel()
+
+    assert attachment is not None
+    assert attachment.extraction.kind == "plan"
+    assert ticks > 5, (
+        f"در تمام مدت تجزیه فقط {ticks} تپش اجرا شد — یعنی حلقه‌ی رویداد مسدود بوده"
+    )

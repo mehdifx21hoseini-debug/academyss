@@ -187,7 +187,18 @@ class AccountGateway:
         elif media_type in ("voice", "audio", "video_note"):
             extraction = await self._read_voice(data, mime or "audio/ogg", name or "voice.ogg")
         else:
-            extraction = media_extract.extract(data, filename=name, mime=mime)
+            # خواندن فایل کار پردازنده است و همگام: باز کردن یک zip، پیمایش تا
+            # ۵۰۰۰ سطر، تجزیه‌ی HTML. اگر روی همین حلقه اجرا شود، تا پایانش اتصال
+            # MTProto این حساب هیچ کاری نمی‌کند — نه پیامی می‌گیرد، نه ضربان
+            # می‌فرستد. یک فایل ۸ مگابایتی یعنی ثانیه‌ها سکوت کامل (ADR-029).
+            #
+            # `to_thread` انتخاب شد نه فرایند جدا: کار محدود به GIL نیست تا حد
+            # زیادی — بیشترش رمزگشایی zip و کار روی رشته است — و فرایند جدا یعنی
+            # سریال کردن بایت‌ها و یک استخر برای نگهداری. ساده‌ترین چیزی که مسئله
+            # را حل می‌کند.
+            extraction = await asyncio.to_thread(
+                media_extract.extract, data, filename=name, mime=mime
+            )
 
         return _Attachment(
             extraction=extraction,
