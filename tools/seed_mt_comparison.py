@@ -123,7 +123,8 @@ COMPARE = [
             "دو بخش جدا: Positions و سپس Orders؛ سفارش معلق تا فعال نشدن پوزیشن محسوب نمی‌شود.",
             0.75, keywords=["trade tab", "positions", "orders"],
             related_concepts=["MT-PROC-0023", "MT-PROC-0022", "MT5-CONC-0002"],
-            related_questions=["چرا سفارش معلقم توی لیست پوزیشن‌ها نیست؟"]),
+            related_questions=["چرا سفارش معلقم توی لیست پوزیشن‌ها نیست؟"],
+            reviewed=True),
 ]
 
 M.write(K.KB_DIR + "/metatrader/comparison/mt4_vs_mt5.json", "metatrader_mt4_vs_mt5",

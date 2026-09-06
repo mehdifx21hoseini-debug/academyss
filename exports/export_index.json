@@ -139,6 +139,12 @@
       "sha": "e9c3b44d28596e98",
       "file": "exports/metatrader/metatrader_mt4_vs_mt5_v006.md",
       "generated_at": "2026-09-06T10:54:11Z"
+    },
+    {
+      "version": "v007",
+      "sha": "b7d29feeba8f7838",
+      "file": "exports/metatrader/metatrader_mt4_vs_mt5_v007.md",
+      "generated_at": "2026-09-06T11:01:59Z"
     }
   ],
   "metatrader_mt4_vs_mt5.json": [
@@ -177,6 +183,12 @@
       "sha": "41ebc88157b03a81",
       "file": "exports/metatrader/metatrader_mt4_vs_mt5_v006.json",
       "generated_at": "2026-09-06T10:54:11Z"
+    },
+    {
+      "version": "v007",
+      "sha": "d0f11a4770b70257",
+      "file": "exports/metatrader/metatrader_mt4_vs_mt5_v007.json",
+      "generated_at": "2026-09-06T11:02:00Z"
     }
   ],
   "metatrader_mt4_core.md": [
@@ -871,6 +883,12 @@
       "sha": "8ab12d07172a50b4",
       "file": "exports/reports/review_queue_open_items_v038.md",
       "generated_at": "2026-09-06T10:55:04Z"
+    },
+    {
+      "version": "v039",
+      "sha": "a23050141485b136",
+      "file": "exports/reports/review_queue_open_items_v039.md",
+      "generated_at": "2026-09-06T11:02:00Z"
     }
   ],
   "review_queue_open_items.json": [
@@ -1101,6 +1119,12 @@
       "sha": "f272002d22261035",
       "file": "exports/reports/review_queue_open_items_v038.json",
       "generated_at": "2026-09-06T10:55:04Z"
+    },
+    {
+      "version": "v039",
+      "sha": "e9565efd99a45f68",
+      "file": "exports/reports/review_queue_open_items_v039.json",
+      "generated_at": "2026-09-06T11:02:00Z"
     }
   ],
   "academy_site_catalog.md": [
@@ -1435,6 +1459,12 @@
       "sha": "2f6c350c6a2020ec",
       "file": "exports/reports/kb_index_v050.csv",
       "generated_at": "2026-09-06T10:54:11Z"
+    },
+    {
+      "version": "v051",
+      "sha": "fa7754b7cf8e7fbd",
+      "file": "exports/reports/kb_index_v051.csv",
+      "generated_at": "2026-09-06T11:02:00Z"
     }
   ],
   "glossary.csv": [
