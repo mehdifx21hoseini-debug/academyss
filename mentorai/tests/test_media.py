@@ -410,6 +410,52 @@ def test_xlsx_statement_is_analysed_like_any_other() -> None:
     assert result.metrics.profit_factor == pytest.approx(2.0)
 
 
+def test_an_xlsx_statement_is_read_from_its_summary() -> None:
+    """متاتریدر ۵ خروجی اکسل هم می‌دهد، با همان بخش‌ها و همان خلاصه.
+
+    آزموده‌شده روی خروجی واقعی: همان مسیر خلاصه، بدون کد جداگانه برای اکسل.
+    """
+    rows = [
+        ["Positions"],
+        ["Time", "Position", "Symbol", "Type", "Volume", "Price", "Profit"],
+        ["2026.09.01", "1", "US30", "buy", "1.00", "53000", "10.00"],
+        ["Deals"],
+        ["Time", "Deal", "Symbol", "Type", "Volume", "Price", "Profit"],
+        ["2026.09.01", "2", "US30", "sell", "1.00", "53010", "10.00"],
+        ["Results"],
+        ["Total Net Profit:", "-616.510000", "Gross Profit:", "1008.930000"],
+        ["Gross Loss:", "-1625.440000"],
+        ["Profit Factor:", "0.620712"],
+        ["Balance Drawdown Maximal:", "892.80 (44.39%)"],
+        ["Total Trades:", "106.000000"],
+        ["Profit Trades (% of total):", "21 (19.81%)"],
+        ["Loss Trades (% of total):", "85 (80.19%)"],
+    ]
+    result = extract(xlsx(rows), filename="ReportHistory.xlsx")
+
+    assert result.kind == "statement"
+    metrics = result.metrics
+    assert metrics is not None
+    assert metrics.source == "report_summary"
+    assert metrics.trades == 106
+    assert metrics.wins == 21 and metrics.losses == 85
+    # عدد اکسل شش رقم اعشار دارد و باید مثل مسیر محاسبه گرد شود.
+    assert metrics.profit_factor == pytest.approx(0.621)
+    assert metrics.max_drawdown_pct == pytest.approx(44.39)
+    assert metrics.net_profit == pytest.approx(-616.51)
+
+
+def test_a_losing_result_is_worded_not_signed() -> None:
+    """علامت منفی پیش از ارقام فارسی در متن راست‌به‌چپ جابه‌جا می‌شود."""
+    metrics = statement.StatementMetrics(
+        source="computed", trades=3, wins=1, losses=2, profit_factor=0.6, net_profit=-616.51
+    )
+    text = review.render(metrics)
+
+    assert "زیان" in text
+    assert "-۶۱۶" not in text and "-616" not in text
+
+
 def test_xlsx_that_is_a_plan_comes_back_as_text() -> None:
     rows = [["مرحله", "قانون"], ["ورود", "فقط با تأیید تایم بالاتر"]]
     result = extract(xlsx(rows), filename="plan.xlsx")
