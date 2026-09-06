@@ -15,10 +15,12 @@ Three things needed careful handling rather than pass-through:
   skills — Goleman's frame). Both are real models and both are kept, with an
   explicit record saying they are two frames and not a contradiction — but the
   reading is mine, so it is flagged for the owner (RQ-0037).
-* A NEW website domain appears at the end of the lesson which is not in the
-  approved official-channel record (ACA-SUP-0001). A wrong domain handed to a
-  student is a real risk, so it is recorded as PENDING with the mentor barred
-  from giving it out until confirmed (CONF-0011 / RQ-0038).
+* A second website domain appears at the end of the lesson, not the one in the
+  approved official-channel record. The owner confirmed sobhansamadi.com as the
+  official site (D-0020) but said nothing about the other domain, so
+  ACA-EQ-0054 is a RULE: the mentor gives out sobhansamadi.com and nothing
+  else, and neither confirms nor denies any other domain — it refers that to
+  support. A wrong domain from the mentor is a real risk.
 * The smoking-comparison claim is introduced as "طبق پژوهش‌های انجام شده" but
   no study is named — same treatment as the other unsourced figures (RQ-0033).
 
@@ -292,24 +294,30 @@ OBJECTS = [
         related_questions=["وقت ندارم چیکار کنم؟", "از کجا شروع کنم؟",
                            "خیلی عقبم، فایده داره؟"]),
 
-    obj("ACA-EQ-0054", "OPERATIONAL_FACT", "نشانی سایتی که در پایان دوره اعلام شده — نیازمند تأیید",
-        "در انتهای بخش چهارم، نشانی **www.sobhan7.com** اعلام شده است.\n"
-        "⚠️ **این نشانی در فهرست کانال‌های رسمی تأییدشده (`ACA-SUP-0001`) وجود ندارد**؛ آنجا "
-        "دامنه‌ی رسمی **sobhansamadi.com** ثبت شده است.\n"
-        "**تا تعیین تکلیف مالک، مربی این نشانی را به هیچ کاربری نمی‌دهد** و برای پرسش "
-        "«سایتتون چیه؟» فقط به فهرست تأییدشده‌ی `ACA-SUP-0001` استناد می‌کند.\n"
-        "دلیل این سخت‌گیری: دادن نشانی اشتباه به دانشجو ریسک واقعی دارد و دامنه‌های "
-        "جعلی یکی از رایج‌ترین راه‌های کلاهبرداری در این حوزه‌اند (`CONF-0011`، `RQ-0038`).",
+    obj("ACA-EQ-0054", "RULE", "سایت رسمی آکادمی sobhansamadi.com است",
+        "✅ **تأییدشده توسط مالک آکادمی (`D-0020`):** سایت اصلی و رسمی آکادمی "
+        "**sobhansamadi.com** است — همان نشانی که در فهرست کانال‌های رسمی "
+        "(`ACA-SUP-0001`) ثبت شده.\n"
+        "**قاعده‌ی پاسخ:** مربی در جواب «سایتتون چیه؟» فقط و فقط **sobhansamadi.com** را "
+        "اعلام می‌کند و هیچ نشانی دیگری را — حتی نشانی‌ای که در ویدیوی دوره دیده شده — به "
+        "کاربر نمی‌دهد.\n"
+        "**زمینه:** در انتهای بخش چهارم دوره‌ی هوش هیجانی نشانی دیگری (`www.sobhan7.com`) "
+        "نمایش داده شده است. مالک آکادمی سایت رسمی را sobhansamadi.com تأیید کرد اما "
+        "درباره‌ی وضعیت آن نشانی دوم چیزی نگفت. بنابراین اگر کاربری بپرسد «فلان نشانی هم "
+        "مال شماست؟»، مربی نه تأیید می‌کند و نه رد — او را به پشتیبانی رسمی ارجاع می‌دهد "
+        "(`ACA-SUP-0001`).\n"
+        "**چرا این‌قدر سخت‌گیرانه:** دامنه‌ی جعلی یکی از رایج‌ترین راه‌های کلاهبرداری در این "
+        "حوزه است و نشانی اشتباه از زبان مربی، اعتماد دانشجو را هزینه می‌کند.",
         "پایان درس — نشانی سایت",
         "www.sobhan7.com",
-        0.6, scope="ACADEMY_OPERATIONS",
-        conflicts=["CONF-0011"],
-        review_priority="P1",
-        review_reason="نشانی تازه‌ای که در فهرست کانال‌های رسمی تأییدشده نیست؛ تا تأیید مالک منتشر نمی‌شود.",
-        warnings=["مربی این نشانی را تا تأیید مالک به هیچ کاربری اعلام نمی‌کند."],
-        keywords=["سایت", "دامنه", "نشانی رسمی", "sobhan7"],
-        related_concepts=["ACA-SUP-0001", "ACA-SUP-0003", "ACA-SUP-0016"],
-        related_questions=["سایتتون چیه؟", "آدرس سایت رو بدید"]),
+        1.0, scope="ACADEMY_OPERATIONS",
+        rule="تنها نشانی سایتی که مربی اعلام می‌کند sobhansamadi.com است؛ هیچ دامنه‌ی دیگری تأیید یا اعلام نمی‌شود.",
+        warnings=["مربی هیچ نشانی خارج از فهرست تأییدشده‌ی ACA-SUP-0001 را اعلام نمی‌کند.",
+                  "پرسش درباره‌ی دامنه‌های دیگر نه تأیید می‌شود نه رد؛ به پشتیبانی ارجاع می‌شود."],
+        keywords=["سایت", "دامنه", "نشانی رسمی", "sobhansamadi.com", "کلاهبرداری"],
+        related_concepts=["ACA-SUP-0001", "ACA-SUP-0003", "ACA-SUP-0016", "ACA-SUP-0017"],
+        related_questions=["سایتتون چیه؟", "آدرس سایت رو بدید",
+                           "این سایت مال شماست؟", "از کجا بفهمم سایت اصلیه؟"]),
 ]
 
 changed = K.write_collection(K.KB_DIR + "/academy/eq/lesson_04.json", {
@@ -324,7 +332,7 @@ changed = K.write_collection(K.KB_DIR + "/academy/eq/lesson_04.json", {
     "notes": [
         "این بخش جای خالی RQ-0036 را پر کرد: مدیریت استرس اینجا کامل تدریس شد.",
         "دوره دو فهرست پنج‌مؤلفه‌ای دارد؛ هر دو نگهداری و تفکیک شد (RQ-0037).",
-        "نشانی تازه‌ی سایت تا تأیید مالک منتشر نمی‌شود (CONF-0011 / RQ-0038).",
+        "سایت رسمی با تصمیم D-0020 تأیید شد: فقط sobhansamadi.com (CONF-0011 حل شد).",
         "مقایسه با سیگار بدون نام بردن پژوهش است و به‌عنوان ادعای درس ثبت شد (RQ-0033).",
         "دو ایراد ترنسکریپت (فاصله‌ی ۱۶۰ تا ۱۶۳ و املای «قار تنهایی») ثبت و پنهان نشد.",
     ],
