@@ -12,8 +12,10 @@
 from __future__ import annotations
 
 import re
-from dataclasses import dataclass, field
+from collections.abc import Mapping
+from dataclasses import dataclass, field, fields
 from html.parser import HTMLParser
+from typing import Any
 
 from mentorai.media.numbers import parse_number
 
@@ -143,6 +145,21 @@ class StatementMetrics:
     @property
     def win_rate(self) -> float | None:
         return (self.wins / self.trades) if self.trades else None
+
+    @classmethod
+    def from_dict(cls, data: Mapping[str, Any]) -> StatementMetrics | None:
+        """بازسازی از ردیف ذخیره‌شده، یا None اگر ساختار با کد امروز نمی‌خواند.
+
+        ردیف قدیمی بعد از تغییر این کلاس ممکن است کلید کم یا زیاد داشته باشد. عدد
+        نیمه‌بازسازی‌شده از نبودِ عدد بدتر است، پس یا کامل درمی‌آید یا هیچ.
+        """
+        names = {f.name for f in fields(cls)}
+        if "source" not in data or not names.issuperset(data.keys()):
+            return None
+        try:
+            return cls(**dict(data))
+        except TypeError:
+            return None
 
 
 def _header_index(table: list[list[str]]) -> tuple[int, dict[str, int]] | None:

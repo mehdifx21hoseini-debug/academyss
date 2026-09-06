@@ -580,3 +580,34 @@ class PanelSession(Base):
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False)
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     source_ip: Mapped[str | None] = mapped_column(String(64))
+
+
+class MessageMedia(Base):
+    """آنچه از فایل همراه یک پیام خوانده شد.
+
+    خودِ فایل اینجا نیست و هیچ‌جای دیگری هم نیست. استیتمنت شماره‌حساب و موجودی و
+    تاریخچه‌ی معاملات دارد؛ نگه داشتنش یعنی ساختن انباری که باید محافظت و پشتیبان‌گیری
+    و در صورت درخواست حذف شود — در حالی که نسخه‌ی اصلی همیشه در چت تلگرام منتور
+    هست و هیچ‌وقت گم نمی‌شود.
+    """
+
+    __tablename__ = "message_media"
+    __table_args__ = (
+        CheckConstraint("kind in ('statement', 'plan', 'rejected')", name="ck_message_media_kind"),
+        CheckConstraint(
+            "(kind = 'rejected') = (refusal is not null)", name="ck_message_media_refusal"
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    message_id: Mapped[int] = mapped_column(
+        ForeignKey("messages.id", ondelete="CASCADE"), nullable=False, unique=True
+    )
+    kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    mime: Mapped[str | None] = mapped_column(String(128))
+    size_bytes: Mapped[int | None] = mapped_column(BigInteger)
+    sha256: Mapped[str | None] = mapped_column(String(64))
+    refusal: Mapped[str | None] = mapped_column(String(32))
+    extracted_text: Mapped[str | None] = mapped_column(Text)
+    metrics: Mapped[dict[str, object] | None] = mapped_column(JSONB)
+    created_at: Mapped[datetime] = _created_at()
