@@ -195,13 +195,14 @@ PROCS = [
     o("MT-PROC-0017", P, "تنظیمات پلتفرم (پنجره‌ی Options)",
       "پنجره‌ی Options با Ctrl+O باز می‌شود و تب‌های اصلی آن عبارت‌اند از: Server (اتصال و پروکسی)، "
       "Charts (تعداد کندل‌های ذخیره‌شده و نمایش خط Ask)، Trade (حجم پیش‌فرض، انحراف مجاز و معامله‌ی یک‌کلیکی)، "
-      "Expert Advisors (اجازه‌ی معامله‌ی خودکار)، Notifications و Email.",
+      "Experts (اجازه‌ی معامله‌ی الگوریتمی، DLL و WebRequest)، Notifications و Email. بیلدهای جدیدتر تب‌های GPU، Events، AI Assistant، MCP و Community را هم دارند.",
       "BOTH", 0.8, category="تنظیمات",
       steps=["کلید Ctrl+O را بزنید یا Tools > Options را باز کنید.",
              "تب مربوط به تنظیم موردنظر را انتخاب کنید.",
              "تغییرات را اعمال و OK بزنید."],
       keywords=["options", "settings", "تنظیمات"],
-      related_questions=["حجم پیش‌فرض رو کجا عوض کنم؟", "تنظیمات متاتریدر کجاست؟"]),
+      related_questions=["حجم پیش‌فرض رو کجا عوض کنم؟", "تنظیمات متاتریدر کجاست؟"],
+      verified="پنجره‌ی Options با تب‌های Server، Charts، Trade، Experts، GPU، Events، Notifications، Email، AI Assistant، MCP و Community دیده شد؛ نام تب «Experts» است نه Expert Advisors و اصلاح شد. میان‌بُر Ctrl+O در تصویر نبود و رفتار استاندارد پلتفرم است."),
     o("MT-PROC-0018", P, "کار با MetaEditor و کامپایل فایل‌های سورس",
       "MetaEditor محیط برنامه‌نویسی متاتریدر است و با کلید F4 باز می‌شود. فایل‌های سورس (mq4 یا mq5) پیش از "
       "استفاده باید کامپایل شوند تا فایل اجرایی (ex4 یا ex5) ساخته شود. خطاهای کامپایل در پنجره‌ی Errors "
@@ -236,17 +237,18 @@ PROCS = [
       keywords=["backup", "پشتیبان", "data folder"],
       related_concepts=["MT-CONC-0015"],
       related_questions=["چطور تنظیماتم رو منتقل کنم؟"]),
-    o("MT-PROC-0021", P, "کار با پنجره‌ی Market Watch: ستون‌ها، Tick Chart و مجموعه‌ی نمادها",
+    o("MT-PROC-0021", P, "کار با پنجره‌ی Market Watch: ستون‌ها، تب Ticks و مجموعه‌ی نمادها",
       "پنجره‌ی Market Watch علاوه بر قیمت لحظه‌ای، امکان نمایش ستون‌های اضافی (اسپرد، بیشترین، کمترین و زمان)، "
       "نمایش نمودار تیکی نماد و ذخیره‌ی مجموعه‌ی نمادهای انتخابی را دارد.",
       "BOTH", 0.75, category="رابط کاربری",
       steps=["پنجره‌ی Market Watch را باز کنید (Ctrl+M).",
              "روی فهرست راست‌کلیک کنید و ستون‌های موردنظر مثل Spread را فعال کنید.",
-             "برای دیدن نمودار تیکی، به تب Tick Chart در پایین همان پنجره بروید.",
+             "برای دیدن نمودار تیکی، به تب Ticks در پایین همان پنجره بروید.",
              "برای ذخیره‌ی فهرست نمادهای انتخابی، از گزینه‌ی Sets استفاده کنید."],
       keywords=["market watch", "tick chart", "sets", "spread"],
       related_concepts=["MT-CONC-0014", "MT-CONC-0002"],
-      related_questions=["ستون اسپرد رو چطور نشون بدم؟", "نمودار تیک کجاست؟"]),
+      related_questions=["ستون اسپرد رو چطور نشون بدم؟", "نمودار تیک کجاست؟"],
+      verified="پنجره‌ی Market Watch با ستون‌های Symbol/Bid/Ask/Daily Change و تب‌های Symbols، Details، Trading و Ticks دیده شد؛ نام تب «Ticks» است نه Tick Chart و اصلاح شد. افزودن ستون با راست‌کلیک و گزینه‌ی Sets در تصویر نبود و رفتار استاندارد پلتفرم است."),
     o("MT-PROC-0022", P, "ویرایش یا حذف سفارش معلق",
       "سفارش معلق تا زمان فعال شدن قابل ویرایش یا حذف است. قیمت فعال‌سازی، حد ضرر، حد سود و تاریخ انقضا "
       "را می‌توان تغییر داد.",
@@ -270,7 +272,8 @@ PROCS = [
              "برای هر اقدام (ویرایش، بستن، تریلینگ) روی همان ردیف راست‌کلیک کنید."],
       keywords=["trade tab", "equity", "floating", "معاملات باز"],
       related_concepts=["MT-CONC-0006", "MT-CONC-0007", "MT-CMP-0012"],
-      related_questions=["سود شناورم رو کجا ببینم؟", "مارجین آزادم چقدره؟"]),
+      related_questions=["سود شناورم رو کجا ببینم؟", "مارجین آزادم چقدره؟"],
+      verified="تب Trade با ستون‌های Symbol، Ticket، Time، Type، Volume، Price، S/L، T/P و Profit و سطر Balance/Equity/Free Margin دیده شد."),
 ]
 
 M.write(K.KB_DIR + "/metatrader/mt_common_procedures.json", "metatrader_common_procedures",

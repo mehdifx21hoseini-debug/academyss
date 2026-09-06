@@ -131,7 +131,8 @@ CONCEPTS = [
       "BROKER_DEPENDENT", 0.8, category="نمادها",
       keywords=["symbol suffix", "پسوند نماد", "XAUUSD"],
       related_concepts=["MT-TRBL-0007"],
-      related_questions=["چرا اسم طلا فرق داره؟", "EURUSD.m یعنی چی؟"]),
+      related_questions=["چرا اسم طلا فرق داره؟", "EURUSD.m یعنی چی؟"],
+      verified="در Market Watch همان بروکر، نمادها با پسوند @ (XAUUSD@، XAGUSD@) و نماد شاخص با پسوند دوره (US30.U26) دیده شد — نمونه‌ی زنده‌ی همین قاعده."),
     o("MT-CONC-0014", "CONCEPT", "پنجره‌های اصلی پلتفرم: Market Watch، Navigator و Toolbox",
       "سه پنجره‌ی اصلی متاتریدر عبارت‌اند از: Market Watch (فهرست نمادها، قیمت لحظه‌ای، اسپرد و مشخصات نماد)، "
       "Navigator (حساب‌ها، اندیکاتورها، اکسپرت‌ها و اسکریپت‌ها) و Toolbox/Terminal (تب‌های Trade، History، "
@@ -139,7 +140,8 @@ CONCEPTS = [
       "Navigator و Ctrl+T برای Toolbox/Terminal.",
       "BOTH", 0.85, category="رابط کاربری",
       keywords=["market watch", "navigator", "toolbox", "terminal"],
-      related_questions=["پنجره‌ی معاملات باز کجاست؟", "چطور پنجره‌ی بسته‌شده رو برگردونم؟"]),
+      related_questions=["پنجره‌ی معاملات باز کجاست؟", "چطور پنجره‌ی بسته‌شده رو برگردونم؟"],
+      verified="در منوی View هر سه پنجره با همان میان‌بُرها دیده شد (Ctrl+M، Ctrl+N، Ctrl+T) و تب‌های Toolbox عیناً مطابق فهرست همین رکورد بودند."),
     o("MT-CONC-0015", "CONCEPT", "پوشه‌ی داده (Data Folder) و ساختار فایل‌ها",
       "هر نصب متاتریدر یک پوشه‌ی داده‌ی مستقل دارد که از مسیر File > Open Data Folder باز می‌شود. "
       "اندیکاتورها، اکسپرت‌ها، اسکریپت‌ها، تمپلیت‌ها، پروفایل‌ها و لاگ‌ها در همین پوشه ذخیره می‌شوند. "
@@ -163,7 +165,8 @@ CONCEPTS = [
              "برای ارسال به پشتیبانی، از Open گزارش متنی همان روز را بردارید."],
       keywords=["journal", "experts log", "لاگ"],
       related_concepts=["MT-CONC-0015"],
-      related_questions=["خطای دقیق رو کجا ببینم؟", "لاگ متاتریدر کجاست؟"]),
+      related_questions=["خطای دقیق رو کجا ببینم؟", "لاگ متاتریدر کجاست؟"],
+      verified="تب‌های Journal و Experts در پایین پنجره‌ی Toolbox دیده شدند؛ میان‌بُر Ctrl+T نیز در منوی View تأیید شد."),
 ]
 
 M.write(K.KB_DIR + "/metatrader/mt_concepts.json", "metatrader_concepts",
