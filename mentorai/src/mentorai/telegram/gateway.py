@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import contextlib
+from dataclasses import dataclass
 
 import structlog
 from telethon import TelegramClient, events
@@ -25,6 +26,8 @@ from mentorai.db.crypto import decrypt_session
 from mentorai.db.models import MentorAccount, Sender
 from mentorai.db.session import session_scope
 from mentorai.jobs import queue
+from mentorai.media import extract as media_extract
+from mentorai.media import store as media_store
 from mentorai.telegram.normalize import build_inbound, detect_media_type, skip_reason
 from mentorai.telegram.store import excluded_peer_ids, record_inbound
 
@@ -33,6 +36,16 @@ log = structlog.get_logger(__name__)
 # هر چند دقیقه وضعیت آفلاین اعلام می‌شود. اتصال دائم نباید حساب را همیشه آنلاین نگه
 # دارد: هم غیرطبیعی است و هم برای تلگرام سیگنال رفتار خودکار است.
 _OFFLINE_INTERVAL_SECONDS = 240
+
+
+@dataclass(frozen=True)
+class _Attachment:
+    """فایل یک پیام، بعد از خوانده شدن. خودِ بایت‌ها نگه داشته نمی‌شوند."""
+
+    extraction: media_extract.Extraction
+    mime: str | None
+    size_bytes: int | None
+    sha256: str | None
 
 
 class AccountGateway:
@@ -82,6 +95,59 @@ class AccountGateway:
     async def run_until_disconnected(self) -> None:
         await self._client.run_until_disconnected()
 
+    async def _read_attachment(self, message: object, media_type: str | None) -> _Attachment | None:
+        """سند همراه پیام را بخوان، یا صریح ردش کن.
+
+        فقط سند: عکس و ویس هم در تلگرام سند حساب می‌شوند، ولی خواندنشان هنوز ساخته
+        نشده و طبق ADR-017 به منتور می‌روند. حجم **پیش از** دانلود بررسی می‌شود؛ بعد
+        از دانلود دیگر دیر است.
+        """
+        if media_type != "document":
+            return None
+        handle = getattr(message, "file", None)
+        if handle is None:
+            return None
+
+        mime = getattr(handle, "mime_type", None)
+        # نام فایل از فرستنده می‌آید و فقط برای تشخیص قالب استفاده می‌شود؛ هیچ‌وقت
+        # به مسیر فایل‌سیستم تبدیل نمی‌شود.
+        name = getattr(handle, "name", None)
+        size = int(getattr(handle, "size", 0) or 0)
+        if size > media_extract.MAX_BYTES:
+            return _Attachment(
+                extraction=media_extract.Extraction(
+                    kind="rejected", refused=media_extract.Refusal.too_large
+                ),
+                mime=mime,
+                size_bytes=size,
+                sha256=None,
+            )
+
+        try:
+            data = await message.download_media(file=bytes)  # type: ignore[attr-defined]
+        except Exception:
+            # شکست دانلود نباید کل پیام را از دست بدهد؛ پیام ثبت می‌شود و فایلش
+            # ردشده علامت می‌خورد تا در پنل دیده شود.
+            log.warning("media_download_failed", account=self.slug)
+            data = None
+
+        if not isinstance(data, bytes) or not data:
+            return _Attachment(
+                extraction=media_extract.Extraction(
+                    kind="rejected", refused=media_extract.Refusal.unreadable
+                ),
+                mime=mime,
+                size_bytes=size or None,
+                sha256=None,
+            )
+
+        return _Attachment(
+            extraction=media_extract.extract(data, filename=name, mime=mime),
+            mime=mime,
+            size_bytes=len(data),
+            sha256=media_store.fingerprint(data),
+        )
+
     async def _keep_offline(self) -> None:
         while True:
             with contextlib.suppress(Exception):
@@ -113,12 +179,19 @@ class AccountGateway:
 
         async with session_scope() as session:
             excluded = await excluded_peer_ids(session, self.account_id)
-            reason = skip_reason(inbound, excluded_peer_ids=excluded)
-            if reason is not None:
-                # هیچ اثری در تلگرام گذاشته نمی‌شود و محتوا ذخیره نمی‌شود.
-                log.debug("message_skipped", account=self.slug, reason=reason.value)
-                return
 
+        reason = skip_reason(inbound, excluded_peer_ids=excluded)
+        if reason is not None:
+            # هیچ اثری در تلگرام گذاشته نمی‌شود، محتوا ذخیره نمی‌شود، و فایلی هم
+            # دانلود نمی‌شود: گفتگوی استثناشده اصلاً وارد سیستم نمی‌شود.
+            log.debug("message_skipped", account=self.slug, reason=reason.value)
+            return
+
+        # دانلود و خواندن فایل بیرون از هر تراکنش انجام می‌شود. نگه داشتن یک اتصال
+        # پایگاه داده در طول یک انتقال شبکه، استخر اتصال را زیر بار واقعی خالی می‌کند.
+        attachment = await self._read_attachment(message, inbound.media_type)
+
+        async with session_scope() as session:
             account = await session.get_one(MentorAccount, self.account_id)
             # پیام خروجی، پاسخ خود منتور است. ثبتش هم تاریخچه‌ی مکالمه را کامل می‌کند
             # و هم داده‌ی واقعی پاسخ منتور را می‌سازد که برای پایگاه دانش لازم است.
@@ -128,6 +201,16 @@ class AccountGateway:
             if result.is_duplicate:
                 log.info("duplicate_delivery", account=self.slug, chat_id=inbound.chat_id)
                 return
+
+            if attachment is not None and result.message_id is not None:
+                await media_store.record(
+                    session,
+                    message_id=result.message_id,
+                    extraction=attachment.extraction,
+                    mime=attachment.mime,
+                    size_bytes=attachment.size_bytes,
+                    sha256=attachment.sha256,
+                )
 
             # وضعیت مکالمه هم دخیل است، نه فقط کلید روشن و خاموش: مکالمه‌ای که به
             # منتور ارجاع شده، تا فعال‌سازی صریح هیچ کاری تولید نمی‌کند.

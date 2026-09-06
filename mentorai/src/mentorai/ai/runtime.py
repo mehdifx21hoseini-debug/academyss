@@ -20,6 +20,9 @@ from mentorai.ai.schema import PROMPT_VERSION
 from mentorai.db.models import AiRun, Conversation, Escalation, Message, Outcome, Sender
 from mentorai.knowledge.embeddings import EmbeddingProvider
 from mentorai.knowledge.retrieval import Hit, search
+from mentorai.media import review
+from mentorai.media import store as media_store
+from mentorai.media.statement import StatementMetrics
 from mentorai.memory import store as memory_store
 
 # زیر این آستانه، پاسخ ارسال نمی‌شود. عدد اولیه محافظه‌کارانه انتخاب شده؛ کالیبره
@@ -28,6 +31,9 @@ CONFIDENCE_THRESHOLD = 0.7
 
 # چند پیام آخر مکالمه که به‌عنوان زمینه فرستاده می‌شوند.
 HISTORY_TURNS = 4
+
+# دلیل ثبت‌شده برای پاسخی که از محاسبه‌ی استیتمنت آمده، نه از مدل.
+STATEMENT_REASON = "statement_review"
 
 
 class SilenceReason(enum.StrEnum):
@@ -138,6 +144,56 @@ async def _record(
     return run
 
 
+def _statement_answer(metrics: StatementMetrics) -> str:
+    """پیش‌نویس بررسی استیتمنت.
+
+    عمداً بدون فراخوانی مدل ساخته می‌شود. اعداد اینجا محاسبه شده‌اند و قطعی‌اند؛ عبور
+    دادنشان از مدل فقط یک جای تازه برای تغییر عدد می‌سازد، بدون اینکه چیزی اضافه کند.
+    منتور در حالت پیش‌نویس متن را می‌بیند و هر جا لازم بود اصلاحش می‌کند.
+    """
+    return "اعداد استیتمنت، از روی خود سطرهای معامله:\n\n" + review.render(metrics)
+
+
+async def _handle_media(session: AsyncSession, message: Message) -> RunResult:
+    """نتیجه‌ی پیامی که فایل دارد.
+
+    فقط استیتمنتی که خوانده شده و اعدادش در آمده پاسخ می‌گیرد. پلن و هر فایل
+    خوانده‌نشده به منتور می‌رود: بررسی پلن معاملاتی قضاوت کارشناسی است، نه بازیابی.
+    """
+    row = await media_store.load(session, message.id)
+    metrics: StatementMetrics | None = None
+    if row is not None and row.kind == "statement" and row.metrics:
+        # ساختار ذخیره‌شده که با کد امروز نخواند None برمی‌گرداند، و همین پیام هم
+        # به منتور می‌رود: عدد نیمه‌خوانده بدتر از نخواندن است.
+        metrics = StatementMetrics.from_dict(row.metrics)
+
+    if metrics is None:
+        run = await _record(
+            session,
+            message=message,
+            outcome=Outcome.silence,
+            reason=SilenceReason.unsupported_media.value,
+            hits=[],
+        )
+        return RunResult(
+            outcome=Outcome.silence, reason=SilenceReason.unsupported_media.value, ai_run_id=run.id
+        )
+
+    answer = _statement_answer(metrics)
+    run = await _record(
+        session,
+        message=message,
+        outcome=Outcome.answer,
+        reason=STATEMENT_REASON,
+        hits=[],
+        confidence=1.0,
+        response_text=answer,
+    )
+    return RunResult(
+        outcome=Outcome.answer, reason=STATEMENT_REASON, ai_run_id=run.id, answer_text=answer
+    )
+
+
 async def handle_message(
     session: AsyncSession,
     message: Message,
@@ -160,19 +216,10 @@ async def handle_message(
 
     # پیامی که فایل همراه دارد — عکس، ویس، سند — از روی متنش پاسخ داده نمی‌شود.
     # کپشن معمولاً به خود فایل ارجاع می‌دهد («این ورودم درسته؟»)، پس پاسخ دادن به
-    # کپشن یعنی پاسخ دادن به سؤالی که دیده نشده است. تا وقتی خواندن فایل ساخته
-    # نشده (ADR-017)، این مسیر به منتور می‌رود.
+    # کپشن یعنی پاسخ دادن به سؤالی که دیده نشده است (ADR-017). تنها استثنا فایلی
+    # است که واقعاً خوانده شده باشد.
     if message.media_type is not None:
-        run = await _record(
-            session,
-            message=message,
-            outcome=Outcome.silence,
-            reason=SilenceReason.unsupported_media.value,
-            hits=[],
-        )
-        return RunResult(
-            outcome=Outcome.silence, reason=SilenceReason.unsupported_media.value, ai_run_id=run.id
-        )
+        return await _handle_media(session, message)
 
     hits = await search(session, question, embedder=embedder)
     if not hits:
