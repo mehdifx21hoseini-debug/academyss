@@ -57,6 +57,12 @@
       "sha": "c17e9107c9d39206",
       "file": "exports/metatrader/metatrader_troubleshooting_v005.md",
       "generated_at": "2026-09-06T10:28:26Z"
+    },
+    {
+      "version": "v006",
+      "sha": "10bc32eab7890481",
+      "file": "exports/metatrader/metatrader_troubleshooting_v006.md",
+      "generated_at": "2026-09-06T10:54:11Z"
     }
   ],
   "metatrader_troubleshooting.json": [
@@ -89,6 +95,12 @@
       "sha": "31535915bc87e1e0",
       "file": "exports/metatrader/metatrader_troubleshooting_v005.json",
       "generated_at": "2026-09-06T10:28:26Z"
+    },
+    {
+      "version": "v006",
+      "sha": "6ca960a2ebfcaecc",
+      "file": "exports/metatrader/metatrader_troubleshooting_v006.json",
+      "generated_at": "2026-09-06T10:54:11Z"
     }
   ],
   "metatrader_mt4_vs_mt5.md": [
@@ -121,6 +133,12 @@
       "sha": "0f2074e2372e7bf4",
       "file": "exports/metatrader/metatrader_mt4_vs_mt5_v005.md",
       "generated_at": "2026-09-06T10:15:59Z"
+    },
+    {
+      "version": "v006",
+      "sha": "e9c3b44d28596e98",
+      "file": "exports/metatrader/metatrader_mt4_vs_mt5_v006.md",
+      "generated_at": "2026-09-06T10:54:11Z"
     }
   ],
   "metatrader_mt4_vs_mt5.json": [
@@ -153,6 +171,12 @@
       "sha": "18da0de3d0b031d2",
       "file": "exports/metatrader/metatrader_mt4_vs_mt5_v005.json",
       "generated_at": "2026-09-06T10:15:59Z"
+    },
+    {
+      "version": "v006",
+      "sha": "41ebc88157b03a81",
+      "file": "exports/metatrader/metatrader_mt4_vs_mt5_v006.json",
+      "generated_at": "2026-09-06T10:54:11Z"
     }
   ],
   "metatrader_mt4_core.md": [
@@ -191,6 +215,12 @@
       "sha": "d6d42a9a5d3c8f1e",
       "file": "exports/metatrader/mt4/metatrader_mt4_core_v006.md",
       "generated_at": "2026-09-06T10:15:59Z"
+    },
+    {
+      "version": "v007",
+      "sha": "e3b605fc6c1fb53c",
+      "file": "exports/metatrader/mt4/metatrader_mt4_core_v007.md",
+      "generated_at": "2026-09-06T10:54:11Z"
     }
   ],
   "metatrader_mt4_core.json": [
@@ -229,6 +259,12 @@
       "sha": "b723123430726afe",
       "file": "exports/metatrader/mt4/metatrader_mt4_core_v006.json",
       "generated_at": "2026-09-06T10:15:59Z"
+    },
+    {
+      "version": "v007",
+      "sha": "d7cbc24e207bcdad",
+      "file": "exports/metatrader/mt4/metatrader_mt4_core_v007.json",
+      "generated_at": "2026-09-06T10:54:11Z"
     }
   ],
   "metatrader_mt5_core.md": [
@@ -267,6 +303,12 @@
       "sha": "f1ec6ac1454ba87e",
       "file": "exports/metatrader/mt5/metatrader_mt5_core_v006.md",
       "generated_at": "2026-09-06T10:28:26Z"
+    },
+    {
+      "version": "v007",
+      "sha": "46cc5d1e0e330128",
+      "file": "exports/metatrader/mt5/metatrader_mt5_core_v007.md",
+      "generated_at": "2026-09-06T10:54:11Z"
     }
   ],
   "metatrader_mt5_core.json": [
@@ -305,6 +347,12 @@
       "sha": "5d8dcb791ed42231",
       "file": "exports/metatrader/mt5/metatrader_mt5_core_v006.json",
       "generated_at": "2026-09-06T10:28:26Z"
+    },
+    {
+      "version": "v007",
+      "sha": "8b4359ee7ee86a47",
+      "file": "exports/metatrader/mt5/metatrader_mt5_core_v007.json",
+      "generated_at": "2026-09-06T10:54:11Z"
     }
   ],
   "external_methodologies_quarantine.md": [
@@ -811,6 +859,18 @@
       "sha": "39c3ab73f8686e77",
       "file": "exports/reports/review_queue_open_items_v036.md",
       "generated_at": "2026-09-06T10:28:56Z"
+    },
+    {
+      "version": "v037",
+      "sha": "8d7f4291334e3b72",
+      "file": "exports/reports/review_queue_open_items_v037.md",
+      "generated_at": "2026-09-06T10:54:11Z"
+    },
+    {
+      "version": "v038",
+      "sha": "8ab12d07172a50b4",
+      "file": "exports/reports/review_queue_open_items_v038.md",
+      "generated_at": "2026-09-06T10:55:04Z"
     }
   ],
   "review_queue_open_items.json": [
@@ -1029,6 +1089,18 @@
       "sha": "5998db03ca45cba3",
       "file": "exports/reports/review_queue_open_items_v036.json",
       "generated_at": "2026-09-06T10:28:56Z"
+    },
+    {
+      "version": "v037",
+      "sha": "12699df32890612f",
+      "file": "exports/reports/review_queue_open_items_v037.json",
+      "generated_at": "2026-09-06T10:54:11Z"
+    },
+    {
+      "version": "v038",
+      "sha": "f272002d22261035",
+      "file": "exports/reports/review_queue_open_items_v038.json",
+      "generated_at": "2026-09-06T10:55:04Z"
     }
   ],
   "academy_site_catalog.md": [
@@ -1357,6 +1429,12 @@
       "sha": "347438f6ed830a08",
       "file": "exports/reports/kb_index_v049.csv",
       "generated_at": "2026-09-06T10:28:26Z"
+    },
+    {
+      "version": "v050",
+      "sha": "2f6c350c6a2020ec",
+      "file": "exports/reports/kb_index_v050.csv",
+      "generated_at": "2026-09-06T10:54:11Z"
     }
   ],
   "glossary.csv": [
@@ -1473,6 +1551,12 @@
       "sha": "356e49653d60e87a",
       "file": "exports/glossary/glossary_v019.csv",
       "generated_at": "2026-09-06T10:28:26Z"
+    },
+    {
+      "version": "v020",
+      "sha": "f8b1425a2adde7a0",
+      "file": "exports/glossary/glossary_v020.csv",
+      "generated_at": "2026-09-06T10:54:11Z"
     }
   ],
   "metatrader_common_procedures.md": [
@@ -1499,6 +1583,12 @@
       "sha": "2d9ec43b9fe3788f",
       "file": "exports/metatrader/metatrader_common_procedures_v004.md",
       "generated_at": "2026-09-06T10:15:59Z"
+    },
+    {
+      "version": "v005",
+      "sha": "43db604519a9ac30",
+      "file": "exports/metatrader/metatrader_common_procedures_v005.md",
+      "generated_at": "2026-09-06T10:54:11Z"
     }
   ],
   "metatrader_common_procedures.json": [
@@ -1525,6 +1615,12 @@
       "sha": "05b423889b512ff0",
       "file": "exports/metatrader/metatrader_common_procedures_v004.json",
       "generated_at": "2026-09-06T10:15:59Z"
+    },
+    {
+      "version": "v005",
+      "sha": "c192feebc3808a81",
+      "file": "exports/metatrader/metatrader_common_procedures_v005.json",
+      "generated_at": "2026-09-06T10:54:11Z"
     }
   ],
   "metatrader_concepts.md": [
@@ -1551,6 +1647,12 @@
       "sha": "38de2b5ae24726c1",
       "file": "exports/metatrader/metatrader_concepts_v004.md",
       "generated_at": "2026-09-06T10:28:26Z"
+    },
+    {
+      "version": "v005",
+      "sha": "e4de3f0e978c2a2a",
+      "file": "exports/metatrader/metatrader_concepts_v005.md",
+      "generated_at": "2026-09-06T10:54:11Z"
     }
   ],
   "metatrader_concepts.json": [
@@ -1577,6 +1679,12 @@
       "sha": "d08eb8fe7f5a0aa7",
       "file": "exports/metatrader/metatrader_concepts_v004.json",
       "generated_at": "2026-09-06T10:28:26Z"
+    },
+    {
+      "version": "v005",
+      "sha": "2564c62e4685e13c",
+      "file": "exports/metatrader/metatrader_concepts_v005.json",
+      "generated_at": "2026-09-06T10:54:11Z"
     }
   ],
   "academy_response_policies.md": [

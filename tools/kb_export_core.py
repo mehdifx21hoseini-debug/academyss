@@ -28,10 +28,12 @@ The mapping is not mechanical. Four rules carry real weight:
 2. SOURCE CLASS IS PROVENANCE, NOT USEFULNESS. CORE has exactly two classes and
    uses them to decide what may be stated as price/rule/condition. Academy
    sources become `official`, mentor conversations become `mentor`. The general
-   trading / MetaTrader / psychology layer is neither: calling it `official`
-   would put the Academy's name on unverified content. It is excluded by
-   default; --include-general adds it as `mentor`/`guidance` with its true
-   provenance written into notes, and that choice is the owner's (RQ-0039).
+   trading / psychology layer is neither: calling it `official` would put the
+   Academy's name on content the Academy never taught.
+   The owner settled this (RQ-0039, option 1): ship it, but as `mentor` +
+   `guidance`, never as fact or policy, with its real provenance written into
+   the notes column — so the mentor can answer the question while the runtime
+   still knows this is not the Academy speaking. `--academy-only` drops it.
 
 3. THE BODY IS SPLIT. Our chunk_text is written for this project, not for a
    student: it carries ⚠️/💡 lines addressed to the mentor, cross-reference ids
@@ -320,8 +322,8 @@ def collect():
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--include-general", action="store_true",
-                    help="افزودن لایه‌ی دانش عمومی/متاتریدر/روان‌شناسی به‌عنوان mentor+guidance")
+    ap.add_argument("--academy-only", action="store_true",
+                    help="فقط منابع آکادمی؛ لایه‌ی دانش عمومی خروجی نمی‌گیرد")
     ap.add_argument("--out", default=os.path.join(K.EXPORT_DIR, "core"))
     args = ap.parse_args()
 
@@ -358,11 +360,14 @@ def main():
         elif auth_level in MENTOR_AUTHORITY:
             source_class = "mentor"
         elif auth_level in GENERAL_AUTHORITY:
-            if not args.include_general:
+            if args.academy_only:
                 skipped["general"] += 1
                 continue
             source_class = "mentor"
-            source_note = "دانش عمومی معامله‌گری — منبع آکادمی نیست و تأیید نشده است."
+            source_note = ("دانش عمومی معامله‌گری — منبع آکادمی نیست و تأیید انسانی نشده. "
+                           "طبق تصمیم مالک (RQ-0039) به‌عنوان راهنمایی آموزشی وارد شد؛ "
+                           "مربی آن را به‌عنوان قاعده یا حرف رسمی آکادمی بیان نمی‌کند و "
+                           "می‌گوید روی نسخه و بروکر خودت یک بار بررسی کن.")
         else:
             # Governance objects (conflict records, review items) have no
             # authority level because they are not answers to anything.
