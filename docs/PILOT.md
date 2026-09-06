@@ -9,6 +9,27 @@
 پاسخ تأییدنشده‌ای به دانشجوی واقعی نمی‌رسد. تغییر به ارسال خودکار یک مقدار در پایگاه
 داده است و تغییر کد لازم ندارد (ADR-006).
 
+## سروری که لازم است
+
+انتخاب نهایی با مالک است (`ADR-011` این تصمیم را باز گذاشته بود). حداقلی که این سیستم
+لازم دارد:
+
+| مورد | مقدار | چرا |
+|---|---|---|
+| پردازنده | ۲ هسته | پستگرس، دروازه، کارگر و پنل کنار هم |
+| رم | ۴ گیگابایت | پستگرس با pgvector راحت جا می‌شود |
+| دیسک | ۴۰ تا ۶۰ گیگ SSD | پایگاه داده و تاریخچه‌ی مکالمه‌ها |
+| سیستم | Ubuntu 24.04 LTS | تصویرهای داکر پروژه روی همین آزموده‌اند |
+| شبکه | IP ثابت، دسترسی مستقیم به تلگرام | ورود حساب و اتصال دائم |
+| دامنه | یکی، برای پنل | گواهی HTTPS رایگان است |
+
+⚠️ **کشور سرور را یک بار انتخاب کنید و عوض نکنید.** محل ورود حساب برای تلگرام سیگنال
+است و جابه‌جایی مکرر، بررسی امنیتی را فعال می‌کند.
+
+⚠️ اگر سرور برای رسیدن به تلگرام به واسطه نیاز داشته باشد، آن واسطه هم باید همیشه
+روشن بماند و یک نقطه‌ی خرابی تازه است. سروری که مستقیم به تلگرام وصل می‌شود ساده‌تر و
+پایدارتر است.
+
 ## آنچه پیش از روز اول لازم است
 
 | # | چه چیزی | چرا |
@@ -26,20 +47,78 @@
 گفتگوی خودش را به حساب وصل کند، پیام‌های واقعی دانشجوها را ببیند و از طرف منتور پاسخ
 بفرستد.
 
+## مرحله‌ی صفر — آزمون محلی روی ویندوز، بدون ورود به تلگرام
+
+پیش از گرفتن سرور می‌شود تقریباً همه‌چیز را روی کامپیوتر خود آزمود: پایگاه داده،
+مهاجرت‌ها، وارد کردن دانش، اندازه‌گیری بازیابی، و پنل. هیچ‌کدام به حساب تلگرام نیاز
+ندارند، پس هیچ نشستی ساخته نمی‌شود و هیچ ریسکی متوجه حساب نیست.
+
+⚠️ ورود به حساب تلگرام را برای سرور نگه دارید. هر ورود از یک مکان تازه، بررسی امنیتی
+تلگرام را فعال می‌کند؛ یک ورود روی جایی که قرار است بماند از دو ورود از دو جا امن‌تر
+است.
+
+پیش‌نیاز: Docker Desktop برای ویندوز با پشتوانه‌ی WSL2، و Git for Windows.
+
+```powershell
+git clone https://github.com/mehdifx21hoseini-debug/academyss.git
+cd academyss\mentorai
+Copy-Item .env.example .env
+```
+
+`.env` را باز کنید و اول فقط `POSTGRES_PASSWORD` را بگذارید (هر رمزی)، و همان را
+به‌جای `CHANGEME` در `DATABASE_URL` هم بنویسید. بعد کلید رمزنگاری نشست را بسازید و در
+`SESSION_ENCRYPTION_KEY` بگذارید:
+
+```powershell
+docker compose run --rm gateway python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+```
+
+برای همین مرحله `TELEGRAM_API_ID=1` و `TELEGRAM_API_HASH=x` کافی است؛ به تلگرام وصل
+نمی‌شویم. `ANTHROPIC_API_KEY` هم می‌تواند خالی بماند، چون هنوز هیچ پیامی پردازش
+نمی‌شود.
+
+```powershell
+docker compose up -d db
+docker compose run --rm gateway python -m alembic upgrade head
+docker compose run --rm gateway mentorai kb-import --file /kb/mentorai_kb_latest.csv
+```
+
+انتظار: `ساخته شد: 641`. خروجی پایگاه دانش از قبل روی `/kb` سوار شده، پس مسیردهی
+دستی لازم نیست.
+
+کیفیت بازیابی را همین‌جا اندازه بگیرید — همان عددی که در `ADR-019` آمده:
+
+```powershell
+docker compose run --rm gateway mentorai kb-eval --cases /kb/mentorai_eval_latest.csv --k 5
+```
+
+و پنل:
+
+```powershell
+docker compose run --rm -it gateway mentorai panel-user --username boss --display-name "مدیر" --role admin
+docker compose up -d panel
+```
+
+رمز از ورودی تعاملی پرسیده می‌شود و حداقل ۱۲ کاراکتر باید باشد. بعد در مرورگر
+`http://localhost:8000`. روی `localhost` کار می‌کند چون مرورگرها آن را امن حساب
+می‌کنند؛ روی هر آدرس دیگری بدون HTTPS ورود کار نخواهد کرد و این عمدی است.
+
+`gateway` و `worker` در این مرحله بالا نمی‌آیند: هر دو به حساب تلگرام نیاز دارند.
+
+توقف با `docker compose down`. داده می‌ماند؛ `docker compose down -v` داده را هم پاک
+می‌کند.
+
 ## راه‌اندازی
+
+این‌ها روی سرور اجرا می‌شوند. اگر مرحله‌ی صفر را انجام داده‌اید، همین مسیر است با
+مقادیر واقعی.
 
 ```bash
 cd mentorai
 cp .env.example .env            # مقادیر واقعی را پر کنید
 docker compose up -d db
 docker compose run --rm gateway python -m alembic upgrade head
-```
-
-پایگاه دانش را وارد کنید. فایل خروجی بیرون از تصویر داکر است، پس باید سوار شود:
-
-```bash
-docker compose run --rm -v "$PWD/../exports/core:/kb:ro" gateway \
-    mentorai kb-import --file /kb/mentorai_kb_latest.csv
+docker compose run --rm gateway mentorai kb-import --file /kb/mentorai_kb_latest.csv
 ```
 
 انتظار: `ساخته شد: 641`.

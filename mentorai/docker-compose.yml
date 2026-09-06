@@ -20,6 +20,10 @@ services:
   gateway:
     build: .
     env_file: .env
+    # خروجی پایگاه دانش فقط-خواندنی سوار می‌شود تا `kb-import` روی هر سیستم‌عاملی یک
+    # دستور ساده باشد و به مسیردهی دستی نیاز نداشته باشد.
+    volumes:
+      - ../exports/core:/kb:ro
     depends_on:
       db:
         condition: service_healthy
