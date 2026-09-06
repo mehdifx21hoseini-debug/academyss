@@ -50,17 +50,20 @@ python3 tools/seed_support_policy.py
 python3 tools/seed_support_style.py
 python3 tools/seed_governance.py
 
-echo "== 2/6 validate =="
+echo "== 2/7 validate =="
 python3 tools/kb_validate.py
 
-echo "== 3/6 manifest =="
+echo "== 3/7 manifest =="
 python3 tools/kb_build_manifest.py
 
-echo "== 4/6 export =="
+echo "== 4/7 export =="
 python3 tools/kb_export.py
 
-echo "== 5/6 coverage report =="
+echo "== 5/7 coverage report =="
 python3 tools/mt_coverage_report.py
 
-echo "== 6/6 CORE export =="
+echo "== 6/7 CORE export =="
 python3 tools/kb_export_core.py
+
+echo "== 7/7 CORE import check =="
+python3 tools/kb_check_core_export.py
