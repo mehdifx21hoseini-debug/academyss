@@ -41,7 +41,8 @@ MT5 = [
       warnings=["پسوند نماد بین بروکرها فرق می‌کند (مثلاً EURUSD.m یا XAUUSD_i)؛ همیشه نام دقیق بروکر خودتان را جست‌وجو کنید."],
       keywords=["market watch", "symbols", "نماد", "XAUUSD"],
       related_concepts=["MT-CONC-0013", "MT-TRBL-0007"],
-      related_questions=["چرا طلا توی متاتریدر نیست؟", "چطور نماد اضافه کنم؟", "لیست نمادها کجاست؟"]),
+      related_questions=["چرا طلا توی متاتریدر نیست؟", "چطور نماد اضافه کنم؟", "لیست نمادها کجاست؟"],
+      verified="میان‌بُر Ctrl+U و نام گزینه‌ی Symbols در منوی View تأیید شد."),
     o("MT5-PROC-0003", P, "باز کردن معامله و انواع سفارش در متاتریدر ۵",
       "پنجره‌ی New Order با کلید F9 یا دکمه‌ی New Order باز می‌شود. در متاتریدر ۵ نوع اجرا (Type) می‌تواند "
       "Market Execution یا Pending Order باشد و شش نوع سفارش معلق در دسترس است: Buy Limit، Sell Limit، "
@@ -88,18 +89,19 @@ MT5 = [
       keywords=["history", "report", "تاریخچه", "گزارش"],
       related_concepts=["MT5-CONC-0002", "MT5-PROC-0012"],
       related_questions=["گزارش معاملاتم رو چطور بگیرم؟", "تاریخچه معاملات کجاست؟"]),
-    o("MT5-PROC-0007", P, "فعال‌سازی AutoTrading و اجرای اکسپرت در متاتریدر ۵",
-      "برای اجرای اکسپرت (EA) باید دکمه‌ی AutoTrading در نوار ابزار فعال باشد و اکسپرت روی چارت اجرا شده باشد. "
+    o("MT5-PROC-0007", P, "فعال‌سازی Algo Trading و اجرای اکسپرت در متاتریدر ۵",
+      "برای اجرای اکسپرت (EA) باید دکمه‌ی Algo Trading در نوار ابزار فعال باشد و اکسپرت روی چارت اجرا شده باشد. "
       "اگر روی چارت به‌جای صورتک لبخند علامت توقف دیده شود، معامله‌ی خودکار غیرفعال است.",
       S, 0.8, category="اکسپرت",
       steps=["فایل اکسپرت را در پوشه‌ی MQL5/Experts قرار دهید (File > Open Data Folder).",
              "در پنجره‌ی Navigator روی Expert Advisors راست‌کلیک و Refresh بزنید.",
              "اکسپرت را روی چارت بکشید و در تب Common گزینه‌ی Allow Algo Trading را تیک بزنید.",
-             "دکمه‌ی AutoTrading در نوار ابزار را فعال کنید."],
+             "دکمه‌ی Algo Trading در نوار ابزار را فعال کنید (در متاتریدر ۴ نام همین دکمه AutoTrading است)."],
       warnings=["پیش از اجرای هر اکسپرت روی حساب واقعی، آن را روی حساب دمو آزمایش کنید."],
       keywords=["expert advisor", "autotrading", "MQL5", "ربات"],
       related_concepts=["MT-TRBL-0010", "MT-PROC-0016"],
-      related_questions=["چرا اکسپرتم معامله نمی‌کنه؟", "اکسپرت رو چطور نصب کنم؟"]),
+      related_questions=["چرا اکسپرتم معامله نمی‌کنه؟", "اکسپرت رو چطور نصب کنم؟"],
+      verified="دکمه‌ی نوار ابزار «Algo Trading» است نه AutoTrading و اصلاح شد؛ در Tools > Options > Experts گزینه‌ی «Allow algorithmic trading» و در Navigator شاخه‌ی «Expert Advisors» دیده شد."),
     o("MT5-PROC-0008", P, "تنظیم انحراف مجاز و نوع پر شدن سفارش (Deviation و Filling)",
       "در پنجره‌ی New Order متاتریدر ۵ دو تنظیم مهم وجود دارد: Deviation که حداکثر انحراف قابل قبول قیمت را "
       "مشخص می‌کند، و Filling type که تعیین می‌کند سفارش در صورت نبود حجم کافی چه رفتاری داشته باشد: "

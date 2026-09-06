@@ -1,0 +1,124 @@
+{
+  "report_type": "validation",
+  "version": "v068",
+  "generated_at": "2026-09-06T09:56:28Z",
+  "stats": {
+    "files": 49,
+    "objects": 734,
+    "by_kind": {
+      "knowledge_object": 43,
+      "mentor_qa": 4,
+      "conflict_record": 1,
+      "review_item": 1
+    },
+    "by_domain": {
+      "brokers": 3,
+      "psychology": 27,
+      "metatrader": 102,
+      "general_trading": 49,
+      "mentor_qa": 80,
+      "academy": 467,
+      "meta": 6
+    },
+    "by_approval": {
+      "REVIEW_REQUIRED": 9,
+      "PENDING_VERIFICATION": 163,
+      "APPROVED": 94,
+      "PENDING_REVIEW": 418
+    }
+  },
+  "errors": 18,
+  "warnings": 0,
+  "findings": [
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt_common_procedures.json :: MT-PROC-0017",
+      "message": "MODEL_DRAFT requires verification_required=true"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt_common_procedures.json :: MT-PROC-0017",
+      "message": "MODEL_DRAFT must not be 'APPROVED'"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt_common_procedures.json :: MT-PROC-0021",
+      "message": "MODEL_DRAFT requires verification_required=true"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt_common_procedures.json :: MT-PROC-0021",
+      "message": "MODEL_DRAFT must not be 'APPROVED'"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt_common_procedures.json :: MT-PROC-0023",
+      "message": "MODEL_DRAFT requires verification_required=true"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt_common_procedures.json :: MT-PROC-0023",
+      "message": "MODEL_DRAFT must not be 'APPROVED'"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt_concepts.json :: MT-CONC-0013",
+      "message": "MODEL_DRAFT requires verification_required=true"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt_concepts.json :: MT-CONC-0013",
+      "message": "MODEL_DRAFT must not be 'APPROVED'"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt_concepts.json :: MT-CONC-0014",
+      "message": "MODEL_DRAFT requires verification_required=true"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt_concepts.json :: MT-CONC-0014",
+      "message": "MODEL_DRAFT must not be 'APPROVED'"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt_concepts.json :: MT-CONC-0016",
+      "message": "MODEL_DRAFT requires verification_required=true"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt_concepts.json :: MT-CONC-0016",
+      "message": "MODEL_DRAFT must not be 'APPROVED'"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt_troubleshooting.json :: MT-TRBL-0010",
+      "message": "MODEL_DRAFT requires verification_required=true"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt_troubleshooting.json :: MT-TRBL-0010",
+      "message": "MODEL_DRAFT must not be 'APPROVED'"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt5/mt5_core.json :: MT5-PROC-0002",
+      "message": "MODEL_DRAFT requires verification_required=true"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt5/mt5_core.json :: MT5-PROC-0002",
+      "message": "MODEL_DRAFT must not be 'APPROVED'"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt5/mt5_core.json :: MT5-PROC-0007",
+      "message": "MODEL_DRAFT requires verification_required=true"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/metatrader/mt5/mt5_core.json :: MT5-PROC-0007",
+      "message": "MODEL_DRAFT must not be 'APPROVED'"
+    }
+  ]
+}

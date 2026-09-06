@@ -49,6 +49,7 @@
     "MENTOR_CONVERSATION",
     "VENDOR_DOCUMENTATION",
     "BROKER_DOCUMENTATION",
+    "PLATFORM_OBSERVED",
     "PUBLIC_DOMAIN_KNOWLEDGE",
     "MODEL_DRAFT"
   ],
@@ -83,7 +84,22 @@
     "ACADEMY_OPERATIONS",
     "EXTERNAL_METHODOLOGY_QUARANTINE"
   ],
-  "language": ["fa", "en", "fa-en"],
-  "review_priority": ["P0", "P1", "P2", "P3"],
-  "progress_state": ["DONE", "IN_PROGRESS", "PENDING", "REVIEW_REQUIRED", "BLOCKED"]
+  "language": [
+    "fa",
+    "en",
+    "fa-en"
+  ],
+  "review_priority": [
+    "P0",
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "progress_state": [
+    "DONE",
+    "IN_PROGRESS",
+    "PENDING",
+    "REVIEW_REQUIRED",
+    "BLOCKED"
+  ]
 }
