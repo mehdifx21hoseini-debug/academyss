@@ -34,9 +34,11 @@ NOTES = ["ساخته‌شده به‌صورت خودکار توسط ابزاره
 # attested by the Academy owner against the broker the Academy actually uses,
 # which is exactly what ACADEMY_DERIVED means, and what lets the mentor answer
 # from it instead of referring the student to support.
-SEEN = ("تأییدشده با اسکرین‌شات‌های ترمینال متاتریدر ۵ مالک آکادمی "
-        "(WM Markets Ltd، حساب دمو، ۶ سپتامبر ۲۰۲۶): منوی View، پنجره‌ی Options "
-        "(تب‌های Charts و Experts)، Properties چارت، Market Watch، Navigator و Toolbox.")
+SEEN = ("تأییدشده با ۹ اسکرین‌شات از ترمینال‌های خودِ مالک آکادمی (WM Markets Ltd، "
+        "دو حساب دمو، ۶ سپتامبر ۲۰۲۶): متاتریدر ۵ — منوهای File و View و Insert، "
+        "پنجره‌ی Options، Properties چارت، پنجره‌ی New Order، Specification نماد، "
+        "Market Watch، Navigator، Toolbox و پوشه‌ی داده؛ متاتریدر ۴ — منوهای File و "
+        "Insert، contract specification، Market Watch، نوار ابزار و پوشه‌ی داده.")
 
 
 def obj(oid, otype, title, chunk, scope, conf, **kw):

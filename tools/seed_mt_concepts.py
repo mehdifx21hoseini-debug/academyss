@@ -46,7 +46,8 @@ CONCEPTS = [
       warnings=["اشتباه گرفتن پیپ و پوینت باعث می‌شود حد ضرر ۱۰ برابر کوچک‌تر یا بزرگ‌تر از هدف ثبت شود."],
       keywords=["point", "digits", "pip", "پوینت"],
       related_concepts=["MT-CONC-0004", "GEN-DEF-0001", "GEN-DEF-0002"],
-      related_questions=["حد ضرر ۵۰ پیپ یعنی چند پوینت؟", "چرا قیمت ۵ رقمیه؟"]),
+      related_questions=["حد ضرر ۵۰ پیپ یعنی چند پوینت؟", "چرا قیمت ۵ رقمیه؟"],
+      verified="در Specification هر دو پلتفرم فیلد Digits دیده شد (EURJPY@ با ۳ رقم) و Stops level بر حسب پوینت (۱۵ و ۲۰). در Market Watch متاتریدر ۴ نماد EURUSD@ با ۵ رقم اعشار نمایش داده می‌شد — هر دو ادعای رکورد زنده تأیید شد."),
     o("MT-CONC-0004", "DEFINITION", "Tick Size و Tick Value",
       "Tick Size کوچک‌ترین تغییر ممکن قیمت یک نماد و Tick Value ارزش پولی آن تغییر برای یک لات است. "
       "این دو مقدار در پنجره‌ی Specification نماد دیده می‌شوند و مبنای محاسبه‌ی سود و زیان هر حرکت قیمت هستند. "
@@ -153,7 +154,8 @@ CONCEPTS = [
              "در Navigator راست‌کلیک و Refresh بزنید."],
       keywords=["data folder", "MQL4", "MQL5", "نصب اندیکاتور"],
       related_concepts=["MT-TRBL-0008", "MT-PROC-0001"],
-      related_questions=["اندیکاتور رو کجا کپی کنم؟", "چرا اندیکاتورم توی لیست نیست؟"]),
+      related_questions=["اندیکاتور رو کجا کپی کنم؟", "چرا اندیکاتورم توی لیست نیست؟"],
+      verified="مسیر File > Open Data Folder در هر دو پلتفرم دیده شد (در متاتریدر ۵ با میان‌بُر Ctrl+Shift+D، در متاتریدر ۴ بدون میان‌بُر). پوشه‌ی داده‌ی متاتریدر ۴ شامل MQL4، profiles، templates، history، logs و tester بود و متاتریدر ۵ شامل MQL5، profiles، bases، logs، Tester و temp."),
     o("MT-CONC-0016", "CONCEPT", "Journal و Experts: لاگ‌های پلتفرم",
       "تب Journal رویدادهای خود ترمینال را ثبت می‌کند: ورود و خروج، اتصال به سرور، خطاهای شبکه و به‌روزرسانی‌ها. "
       "تب Experts رویدادهای اکسپرت‌ها، اسکریپت‌ها و اندیکاتورها را ثبت می‌کند. برای هر عیب‌یابی جدی، "
