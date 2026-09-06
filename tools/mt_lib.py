@@ -41,6 +41,17 @@ SEEN = ("تأییدشده با ۹ اسکرین‌شات از ترمینال‌ه
         "Insert، contract specification، Market Watch، نوار ابزار و پوشه‌ی داده.")
 
 
+# Reviewed, as opposed to observed. The owner read the record's own text and
+# said it is correct — no screenshot involved. That is a different kind of
+# evidence from PLATFORM_OBSERVED and gets its own source type, so a later
+# reader can tell which records were checked against a screen and which were
+# checked against a person's knowledge of their own platform.
+REVIEWED = ("متن این رکورد را مالک آکادمی خواند و تأیید کرد "
+            "(برگه‌ی بازبینی دانش متاتریدر، ۶ سپتامبر ۲۰۲۶). "
+            "برخلاف رکوردهای PLATFORM_OBSERVED، این تأیید بر پایه‌ی دانش خود مالک از "
+            "پلتفرم است، نه تطبیق با اسکرین‌شات.")
+
+
 def obj(oid, otype, title, chunk, scope, conf, **kw):
     """One MetaTrader knowledge object with the domain's fixed provenance stance.
 
@@ -49,6 +60,7 @@ def obj(oid, otype, title, chunk, scope, conf, **kw):
     which is the honest default for a domain written without the docs.
     """
     verified = kw.pop("verified", None)
+    reviewed = kw.pop("reviewed", None)
     broker_dependent = scope == "BROKER_DEPENDENT"
     o = {
         "id": oid,
@@ -72,6 +84,21 @@ def obj(oid, otype, title, chunk, scope, conf, **kw):
         "created_at": NOW,
         "updated_at": NOW,
     }
+    if reviewed and not verified:
+        o["source"] = {
+            "source_type": "ACADEMY_REVIEWED",
+            "source_ref": "برگه‌ی بازبینی دانش متاتریدر — تأیید مالک آکادمی، ۲۰۲۶-۰۹-۰۶",
+            "source_location": oid,
+            "observed_at": "2026-09-06",
+            "drafted_from": SOURCE,
+        }
+        o["authority_level"] = "ACADEMY_DERIVED"
+        o["approval_status"] = "APPROVED"
+        o["lifecycle_status"] = "ACTIVE"
+        o["verification_required"] = False
+        o["verification_note"] = REVIEWED + ("" if reviewed is True else " " + str(reviewed))
+        o["confidence"] = 1.0
+        o["version"] = "v002"
     if verified:
         # The source changes, not just the flag. A record I drafted cannot
         # become official by relabelling — the validator is right to refuse
