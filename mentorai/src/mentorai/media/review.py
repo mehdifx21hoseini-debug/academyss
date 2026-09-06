@@ -1,132 +1,154 @@
-"""سنجش اعداد یک استیتمنت در برابر معیارهای خود آکادمی.
+"""تبدیل اعداد استیتمنت به پاسخی که یک منتور می‌نویسد.
 
-اعداد از رکورد `ACA-SUP-0012` می‌آیند، که تصمیم مالک آکادمی است (`D-0017`) و بر
-عدد ۱٫۳ سند اولیه و عدد ۱٫۵ پاسخ منتورها اولویت دارد. اینجا هیچ آستانه‌ی تازه‌ای
-ساخته نمی‌شود؛ هر عددی که در این فایل است باید در پایگاه دانش منبع داشته باشد.
+قاعده‌ی این ماژول: **عدد از کد، حرف از پایگاه دانش.** هیچ جمله‌ای اینجا از خودِ
+سیستم در نمی‌آید؛ هر معیار و هر توصیه‌ای که گفته می‌شود، رکورد تأییدشده‌ی خودش را
+در پایگاه دانش دارد و شناسه‌اش کنار همان قاعده نوشته شده.
 
-⚠️ این سنجش، نظر نیست. همان رکورد صریح می‌گوید پروفیت فکتور و دراوداون **شرط
-بررسی‌اند، نه تضمین پذیرش**، و مربی مبلغ سرمایه یا نتیجه‌ی درخواست را تضمین نمی‌کند.
-پس خروجی این ماژول هم به‌عنوان اندازه‌گیری ارائه می‌شود، نه به‌عنوان تصمیم.
+⚠️ این پاسخ، تصمیم نیست. اعداد را می‌خواند و معنی‌شان را توضیح می‌دهد و مسیر
+تأییدشده‌ی آکادمی را یادآوری می‌کند؛ قضاوت درباره‌ی مسیر دانشجو کار منتور است.
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-
 from mentorai.media.statement import StatementMetrics
 
-# آستانه‌های رسمی آکادمی — `ACA-SUP-0012`.
-MIN_PROFIT_FACTOR = 1.35
+# معیارهایی که منتور روی استیتمنت نگاه می‌کند — رکورد «منتور استیتمنت را با چه
+# معیارهایی بررسی می‌کند؟». این‌ها معیار بررسی عمومی‌اند.
+#
+# ⚠️ با اعداد طرح سرمایه‌گذاری (`ACA-SUP-0012`: پروفیت فکتور ۱٫۳۵) اشتباه نشوند.
+# آن‌ها شرط پذیرش در طرح جذب سرمایه‌اند و فقط وقتی گفته می‌شوند که دانشجو درباره‌ی
+# همان طرح پرسیده باشد.
+TARGET_PROFIT_FACTOR = 1.5
 MAX_DRAWDOWN_PCT = 10.0
 IDEAL_DRAWDOWN_RANGE = (5.0, 6.0)
 
-SOURCE_NOTE = (
-    "معیارها از سند رسمی طرح سرمایه‌گذاری آکادمی است (`ACA-SUP-0012`): "
-    "پروفیت فکتور حداقل ۱٫۳۵ و دراوداون زیر ۱۰ درصد، با مقدار مطلوب ۵ تا ۶ درصد."
+# آستانه‌ای که رکورد «وقتی دراوداون حساب به حدود ۳۰٪ رسید چه باید کرد؟» برایش
+# مسیر مشخص دارد. زیر این عدد، آن مسیر گفته نمی‌شود.
+STOP_TRADING_DRAWDOWN_PCT = 30.0
+
+GREETING = "سلام عزیز، وقتتون بخیر 🌱"
+CLOSING = (
+    "این اعداد را خودِ گزارش متاتریدر نوشته و من فقط خواندمشان. برای بررسی دقیق‌تر "
+    "مسیر و پلنتان، حتماً با منتورتان در میان بگذارید."
 )
-DECISION_NOTE = "این اعداد شرط بررسی‌اند، نه تضمین پذیرش. تصمیم نهایی با تیم آکادمی است."
-
-# از کجا آمدن اعداد صریح گفته می‌شود، و هیچ‌کدام «خطا» نیست: متاتریدر خودش این
-# اعداد را حساب و چاپ می‌کند و دانشجو هم همان‌ها را در ترمینالش می‌بیند، پس وقتی
-# خلاصه هست همان ملاک است؛ محاسبه‌ی مستقیم برای گزارشی می‌ماند که خلاصه ندارد.
-ORIGIN_NOTES = {
-    "report_summary": "این اعداد را خودِ گزارش متاتریدر نوشته است.",
-    "computed": "این اعداد از روی سطرهای معامله‌ی همین فایل محاسبه شده‌اند.",
-}
-
-
-@dataclass(frozen=True)
-class Finding:
-    level: str  # "ok" | "warn" | "fail" | "unknown"
-    text: str
 
 
 def _fa(value: float, digits: int = 2) -> str:
-    """عدد لاتین را به رقم فارسی با جداکننده‌ی اعشار فارسی برگردان."""
     text = f"{value:,.{digits}f}".replace(",", "٬").replace(".", "٫")
     return text.translate(str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹"))
 
 
-def _net(value: float) -> str:
-    """برایند خالص با واژه، نه با علامت منفی.
-
-    علامت منفیِ لاتین پیش از ارقام فارسی، در متن راست‌به‌چپ جای ثابتی ندارد و
-    ممکن است آن‌طرف عدد بیفتد — یعنی سود و زیان جابه‌جا خوانده شود. واژه این
-    ابهام را ندارد.
-    """
-    return f"{_fa(abs(value))} {'زیان' if value < 0 else 'سود'}"
+def _int(value: float) -> str:
+    return _fa(value, 0)
 
 
-def review(metrics: StatementMetrics) -> list[Finding]:
-    findings: list[Finding] = []
+def _activity(m: StatementMetrics) -> str | None:
+    """چه کاری انجام شده. عدد خام، بدون قضاوت."""
+    if not m.trades:
+        return None
+    line = f"در این بازه {_int(m.trades)} معامله انجام دادید"
+    if m.wins or m.losses:
+        line += f": {_int(m.wins)} تا سود و {_int(m.losses)} تا زیان"
+        if m.win_rate is not None:
+            line += f" — یعنی نرخ برد حدود {_int((m.win_rate) * 100)} درصد"
+    if m.net_profit:
+        outcome = "زیان" if m.net_profit < 0 else "سود"
+        line += f". برایند خالص حساب {_fa(abs(m.net_profit))} {outcome} بوده"
+    return line + "."
 
-    factor = metrics.profit_factor
+
+def _profit_factor(m: StatementMetrics) -> str | None:
+    """پروفیت فکتور، با توضیح اینکه اصلاً یعنی چه."""
+    factor = m.profit_factor
     if factor is None:
-        findings.append(
-            Finding(
-                "unknown",
-                "پروفیت فکتور محاسبه نشد. اگر هیچ معامله‌ی زیان‌ده در بازه نبوده، این "
-                "عدد تعریف ندارد و بازه‌ی طولانی‌تری لازم است.",
-            )
+        return (
+            "پروفیت فکتور در این بازه قابل محاسبه نیست — این عدد نسبت مجموع سود به "
+            "مجموع زیان است و وقتی معامله‌ی زیان‌ده وجود نداشته باشد تعریف ندارد. "
+            "بازه‌ی طولانی‌تر تصویر روشن‌تری می‌دهد."
         )
-    elif factor >= MIN_PROFIT_FACTOR:
-        findings.append(
-            Finding("ok", f"پروفیت فکتور {_fa(factor)} است و از حداقل ۱٫۳۵ آکادمی بالاتر است.")
-        )
+    line = (
+        f"پروفیت فکتور شما {_fa(factor)} است. این عدد یعنی به‌ازای هر ۱ واحد زیان، "
+        f"{_fa(factor)} واحد سود گرفته‌اید"
+    )
+    if factor < 1:
+        line += " — یعنی مجموع زیان‌ها از مجموع سودها بیشتر شده و حساب در این بازه رو به کاهش بوده"
+    elif factor < TARGET_PROFIT_FACTOR:
+        line += " — یعنی حساب رو به رشد بوده، ولی حاشیه‌اش هنوز باریک است"
     else:
-        findings.append(
-            Finding(
-                "fail",
-                f"پروفیت فکتور {_fa(factor)} است و به حداقل ۱٫۳۵ آکادمی نمی‌رسد.",
-            )
+        line += " — یعنی سودها با فاصله‌ی خوبی از زیان‌ها جلو زده‌اند"
+    return line + (
+        f". عددی که منتور روی استیتمنت دنبالش می‌گردد، بالای {_fa(TARGET_PROFIT_FACTOR, 1)} است."
+    )
+
+
+def _drawdown(m: StatementMetrics) -> str | None:
+    """دراوداون، با تعریفش و جایگاهش."""
+    percent = m.max_drawdown_pct
+    if percent is None:
+        if m.max_drawdown_abs is None:
+            return None
+        return (
+            f"بیشترین افت حساب از سقفش {_fa(m.max_drawdown_abs)} بوده، ولی چون سرمایه‌ی "
+            "اولیه در گزارش نیامده، درصدش قابل محاسبه نیست."
         )
 
-    drawdown = metrics.max_drawdown_pct
-    if drawdown is None:
-        detail = (
-            f"بیشترین افت از سقف {_fa(metrics.max_drawdown_abs)} واحد بوده، ولی چون سرمایه‌ی "
-            "اولیه در گزارش نبود، درصدش قابل محاسبه نیست."
-            if metrics.max_drawdown_abs is not None
-            else "دراوداون محاسبه نشد."
+    line = (
+        f"دراوداون حساب {_fa(percent)} درصد است. دراوداون یعنی بیشترین افت سرمایه از "
+        "بالاترین نقطه‌ای که حساب رسیده تا پایین‌ترین نقطه‌ی بعدش، و مهم‌ترین معیار "
+        "سنجش ریسک یک روش معاملاتی است"
+    )
+    if IDEAL_DRAWDOWN_RANGE[0] <= percent <= IDEAL_DRAWDOWN_RANGE[1]:
+        return line + ". این عدد دقیقاً در همان بازه‌ی مطلوب ۵ تا ۶ درصد است."
+    if percent < MAX_DRAWDOWN_PCT:
+        return line + (
+            f". سقفی که منتور می‌پذیرد {_int(MAX_DRAWDOWN_PCT)} درصد است و شما زیر آن هستید؛ "
+            "بازه‌ی مطلوب ۵ تا ۶ درصد است."
         )
-        findings.append(Finding("unknown", detail))
-    elif drawdown >= MAX_DRAWDOWN_PCT:
-        findings.append(
-            Finding("fail", f"دراوداون {_fa(drawdown)} درصد است و از سقف ۱۰ درصد آکادمی بالاتر.")
-        )
-    elif IDEAL_DRAWDOWN_RANGE[0] <= drawdown <= IDEAL_DRAWDOWN_RANGE[1]:
-        findings.append(
-            Finding("ok", f"دراوداون {_fa(drawdown)} درصد است، در همان بازه‌ی مطلوب ۵ تا ۶ درصد.")
-        )
-    else:
-        findings.append(
-            Finding("ok", f"دراوداون {_fa(drawdown)} درصد است و زیر سقف ۱۰ درصد آکادمی.")
-        )
+    return line + (
+        f". چیزی که منتور دنبالش است زیر {_int(MAX_DRAWDOWN_PCT)} درصد و مطلوبش ۵ تا ۶ درصد است."
+    )
 
-    if metrics.trades:
-        rate = metrics.win_rate
-        findings.append(
-            Finding(
-                "ok" if metrics.net_profit >= 0 else "warn",
-                f"{_fa(metrics.trades, 0)} معامله بررسی شد؛ "
-                f"{_fa(metrics.wins, 0)} سود و {_fa(metrics.losses, 0)} زیان"
-                + (f"، نرخ برد {_fa((rate or 0) * 100, 1)} درصد" if rate is not None else "")
-                + f"، برایند خالص {_net(metrics.net_profit)}.",
-            )
-        )
 
-    return findings
+def _recovery_path(m: StatementMetrics) -> str | None:
+    """مسیر تأییدشده‌ی آکادمی برای دراوداون سنگین.
+
+    فقط بالای همان آستانه‌ای گفته می‌شود که رکورد آکادمی برایش نوشته شده.
+    """
+    percent = m.max_drawdown_pct
+    if percent is None or percent < STOP_TRADING_DRAWDOWN_PCT:
+        return None
+    return (
+        f"این عدد از {_int(STOP_TRADING_DRAWDOWN_PCT)} درصد رد شده، و آکادمی برای این "
+        "حالت مسیر مشخصی دارد:\n"
+        "۱. فعلاً معامله را متوقف کنید.\n"
+        "۲. همه‌ی معامله‌ها را مرور کنید و جاهایی را که خارج از پلن عمل شده پیدا کنید.\n"
+        "۳. برگردید به بک‌تست، تا تسلط و اعتمادبه‌نفس برگردد.\n"
+        "۴. بعد دوباره فوروارد تست را شروع کنید."
+    )
+
+
+def _what_lowers_drawdown(m: StatementMetrics) -> str | None:
+    """دو عاملی که رکورد آکادمی برای پایین نگه داشتن دراوداون نام می‌برد."""
+    percent = m.max_drawdown_pct
+    if percent is None or percent < MAX_DRAWDOWN_PCT:
+        return None
+    return (
+        "دو چیز با هم دراوداون را پایین نگه می‌دارند: ریسک کمتر از ۱٪ در هر معامله، و "
+        "وین‌ریتی که واقعاً بالا باشد. دراوداون تک‌رقمی حاصل ترکیب این دو است، نه فقط "
+        "کم کردن ریسک."
+    )
 
 
 def render(metrics: StatementMetrics) -> str:
-    """گزارش متنی آماده، برای دادن به منتور یا به مدل به‌عنوان زمینه.
-
-    کار مدل نوشتن توضیح با لحن آکادمی است؛ خود اعداد اینجا قطعی شده‌اند و مدل
-    نباید دوباره حسابشان کند.
-    """
-    marks = {"ok": "✅", "warn": "⚠️", "fail": "❌", "unknown": "❔"}
-    lines = [f"{marks.get(f.level, '•')} {f.text}" for f in review(metrics)]
-
-    lines.append(ORIGIN_NOTES.get(metrics.source, ""))
-    lines.append(DECISION_NOTE)
-    return "\n".join(line for line in lines if line)
+    """پاسخ کامل، همان‌طور که به دانشجو می‌رسد."""
+    body = [
+        GREETING,
+        "استیتمنتتون رو دیدم. بذارید با هم عددها رو مرور کنیم و ببینیم چی می‌گن.",
+        _activity(metrics),
+        _profit_factor(metrics),
+        _drawdown(metrics),
+        _recovery_path(metrics),
+        _what_lowers_drawdown(metrics),
+        CLOSING,
+    ]
+    return "\n\n".join(part for part in body if part)
