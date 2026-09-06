@@ -1,0 +1,50 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "intro_lesson_11",
+  "course": "intro",
+  "lesson": "11",
+  "title": "پرایس اکشن چیست",
+  "original_filename": "intro_lesson_11.md",
+  "raw_file": "raw_sources/academy/intro/intro_lesson_11_01.md",
+  "ingested_at": "2026-09-05T17:04:21Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 122,
+    "filler_cues": 0,
+    "speech_cues": 122,
+    "speech_ratio": 1.0,
+    "words": 1252,
+    "unique_words": 478,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "|---|---|",
+        "count": 3
+      },
+      {
+        "text": "عنوان درس: آموزش مقدماتی - پرایس اکشن چیست؟ (بخش یازدهم)",
+        "count": 2
+      },
+      {
+        "text": "سلام به همه عزیزان. روزتون بخیر باشه. پرایس اکشن تریدینگ.",
+        "count": 2
+      },
+      {
+        "text": "بازار مالی، بازار احتمالات است، نه قطعیات.",
+        "count": 2
+      },
+      {
+        "text": "۱. روانشناسی (ذهنیت و شخصیت) - مهم‌ترین عامل",
+        "count": 2
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "report_type": "transcript_quality",
+  "version": "v001"
+}

@@ -1,0 +1,3 @@
+# Python bytecode from the KB toolchain
+__pycache__/
+*.pyc

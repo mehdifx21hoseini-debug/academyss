@@ -1,0 +1,477 @@
+{
+  "collection_id": "academy_intro_lesson_13",
+  "domain": "academy",
+  "title": "دوره مقدماتی — جلسه ۱۳: روندها و نحوه‌ی شناسایی آن‌ها",
+  "description": "سه نوع روند، ترتیب سه چرخه‌ی بازار، اکستنشن و اصلاح، تشخیص روند صعودی و نزولی با سقف و کف، پایان روند، مومنتوم و تمرین عملی.",
+  "version": "v001",
+  "generated_at": "2026-09-05T17:37:22Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "raw_sources/academy/intro/intro_lesson_13.md",
+    "raw_sources/academy/intro/intro_lesson_13.ingest.json"
+  ],
+  "notes": [
+    "عبارت «ضعف روند صعودی» در منبع دوپهلو است؛ خوانش ثبت‌شده از بخش «پایان روند» همین جلسه گرفته شد.",
+    "سه چرخه‌ی بازار برای سومین بار و این بار با ترتیب و نقش هرکدام بیان شد — شاهد سوم برای CONF-0002."
+  ],
+  "objects": [
+    {
+      "id": "ACA-INT-0201",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "سه نوع روند در بازار",
+      "language": "fa",
+      "chunk_text": "قیمت در هر بازاری فقط سه حالت دارد: روند صعودی (Bullish) یعنی قیمت در حال افزایش، روند نزولی (Bearish) یعنی قیمت در حال کاهش، و روند خنثی یا رنج (Range) یعنی نوسان در یک محدوده. در روند خنثی خریدار و فروشنده بی‌تصمیم‌اند و نمی‌دانند قیمت بالا می‌رود یا پایین؛ به همین دلیل رفتار معامله‌گران در این حالت با دو حالت دیگر فرق می‌کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_13.md",
+        "source_location": "بخش «انواع روندها در بازار» و بخش ۲",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۳",
+        "section": "بخش «انواع روندها در بازار» و بخش ۲",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "بازار مالی یا کلن قیمت، سه تا روند دارد … ۱. روند صعودی (Bullish) ۲. روند نزولی (Bearish) ۳. روند خنثی / رنج (Range). در روندهای خنثی، خریدار یا فروشنده بی‌تصمیم است و نمی‌داند قیمت قرار است بره بالا یا پایین."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:37:22Z",
+      "updated_at": "2026-09-05T17:37:22Z",
+      "summary": "سه روند: صعودی، نزولی، خنثی (رنج).",
+      "keywords": [
+        "روند",
+        "ترند",
+        "صعودی",
+        "نزولی",
+        "رنج",
+        "bullish",
+        "bearish"
+      ],
+      "related_concepts": [
+        "ACA-INT-0202",
+        "ACA-INT-0204",
+        "ACA-INT-0205",
+        "ACA-INT-0206"
+      ],
+      "related_questions": [
+        "چند نوع روند داریم؟",
+        "رنج یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0202",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "ترتیب و نقش سه چرخه‌ی بازار",
+      "language": "fa",
+      "chunk_text": "در نگاه حرفه‌ای‌تر، بازار سه چرخه‌ی متوالی دارد که مدام تکرار می‌شوند و هرکدام نقش مشخصی در روند دارند:\n۱) اسپایک (Spike) — حرکت سریع و شدید؛ شروع‌کننده‌ی روند.\n۲) کانال قیمتی (Channel) — بعد از اولین اصلاح شکل می‌گیرد؛ حرکت در کانال با اصلاح‌های منظم.\n۳) تریدینگ رنج (Trading Range) — چرخه‌ی آخر؛ نوسان در محدوده بدون جهت مشخص.\nسپس دوباره از اسپایک شروع می‌شود. این توضیح، همان سه چرخه‌ی جلسه‌ی ۱۲ است با افزودن ترتیب و نقش هرکدام.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_13.md",
+        "source_location": "بخش «سه چرخه اصلی بازار» و بخش ۳",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۳",
+        "section": "بخش «سه چرخه اصلی بازار» و بخش ۳",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱. اسپایک (Spike) - شروع‌کننده روند ۲. کانال قیمتی (Channel) - بعد از اولین اصلاح ۳. تریدینگ رنج (Trading Range) - چرخه آخر. این چرخه‌ها مدام در بازار تکرار می‌شوند."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T17:37:22Z",
+      "updated_at": "2026-09-05T17:37:22Z",
+      "summary": "اسپایک → کانال → تریدینگ رنج → تکرار.",
+      "keywords": [
+        "اسپایک",
+        "کانال قیمتی",
+        "تریدینگ رنج",
+        "چرخه",
+        "ترتیب"
+      ],
+      "related_concepts": [
+        "ACA-INT-0191",
+        "ACA-INT-0179",
+        "ACA-INT-0006"
+      ],
+      "related_questions": [
+        "چرخه‌های بازار به چه ترتیبی میان؟",
+        "اسپایک کجا شکل می‌گیره؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0203",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "اجزای یک روند: اکستنشن و اصلاح",
+      "language": "fa",
+      "chunk_text": "هر روند از دو جزء ساخته می‌شود: اکستنشن (Extension) یعنی گام‌های حرکتی در جهت روند، و اصلاح (Correction یا Pullback) یعنی برگشت موقت خلاف جهت روند. مدرس تأکید می‌کند قیمت هیچ‌وقت از نقطه‌ی A به B بدون اصلاح نمی‌رود؛ الگو همیشه «حرکت، اصلاح، حرکت، اصلاح، حرکت» است. قانون طلایی این بخش: اکستنشن باید بزرگ‌تر از اصلاح باشد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_13.md",
+        "source_location": "بخش «اجزای یک روند» و بخش ۴",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۳",
+        "section": "بخش «اجزای یک روند» و بخش ۴",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "اکستنشن (Extension): گام‌های حرکتی رو به بالا یا پایین. اصلاح (Correction / Pullback): برگشت موقت قیمت. … قانون: اکستنشن قیمت باید بزرگ‌تر از اصلاح باشد."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:37:22Z",
+      "updated_at": "2026-09-05T17:37:22Z",
+      "summary": "روند = اکستنشن + اصلاح، و اکستنشن باید بزرگ‌تر از اصلاح باشد.",
+      "keywords": [
+        "اکستنشن",
+        "اصلاح",
+        "پولبک",
+        "extension",
+        "correction"
+      ],
+      "related_concepts": [
+        "ACA-INT-0204",
+        "ACA-INT-0208",
+        "ACA-INT-0202"
+      ],
+      "related_questions": [
+        "اصلاح یعنی چی؟",
+        "پولبک چیه؟",
+        "اکستنشن یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0204",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "تشخیص روند صعودی: سقف بالاتر و کف بالاتر",
+      "language": "fa",
+      "chunk_text": "روند صعودی تا زمانی صعودی است که هر دو شرط برقرار باشد: سقف بالاتر (Higher High) یعنی سقف فعلی بالاتر از سقف قبلی، و کف بالاتر (Higher Low) یعنی کف فعلی بالاتر از کف قبلی. به بیان ساده: تا وقتی قیمت بتواند پی‌درپی سقف بالاتر و کف بالاتر بسازد، روند صعودی است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_13.md",
+        "source_location": "بخش «تشخیص روند صعودی» و بخش ۵",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۳",
+        "section": "بخش «تشخیص روند صعودی» و بخش ۵",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "سقف بالاتر (Higher High): سقف فعلی > سقف قبلی. کف بالاتر (Higher Low): کف فعلی > کف قبلی. … روند صعودی یعنی قیمت همواره بتواند سقف بالاتر و کف بالاتر بزند."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:37:22Z",
+      "updated_at": "2026-09-05T17:37:22Z",
+      "summary": "روند صعودی = Higher High + Higher Low.",
+      "keywords": [
+        "higher high",
+        "higher low",
+        "سقف بالاتر",
+        "کف بالاتر",
+        "روند صعودی"
+      ],
+      "related_concepts": [
+        "ACA-INT-0205",
+        "ACA-INT-0206",
+        "ACA-INT-0207"
+      ],
+      "related_questions": [
+        "از کجا بفهمم روند صعودیه؟",
+        "higher high یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0205",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "تشخیص روند نزولی: سقف پایین‌تر و کف پایین‌تر",
+      "language": "fa",
+      "chunk_text": "روند نزولی تا زمانی نزولی است که هر دو شرط برقرار باشد: سقف پایین‌تر (Lower High) یعنی سقف فعلی پایین‌تر از سقف قبلی، و کف پایین‌تر (Lower Low) یعنی کف فعلی پایین‌تر از کف قبلی.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_13.md",
+        "source_location": "بخش «تشخیص روند نزولی» و بخش ۶",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۳",
+        "section": "بخش «تشخیص روند نزولی» و بخش ۶",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "سقف پایین‌تر (Lower High): سقف فعلی < سقف قبلی. کف پایین‌تر (Lower Low): کف فعلی < کف قبلی."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:37:22Z",
+      "updated_at": "2026-09-05T17:37:22Z",
+      "summary": "روند نزولی = Lower High + Lower Low.",
+      "keywords": [
+        "lower high",
+        "lower low",
+        "سقف پایین‌تر",
+        "کف پایین‌تر",
+        "روند نزولی"
+      ],
+      "related_concepts": [
+        "ACA-INT-0204",
+        "ACA-INT-0207"
+      ],
+      "related_questions": [
+        "از کجا بفهمم روند نزولیه؟",
+        "lower low یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0206",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "روند خنثی (رنج) و شکست آن",
+      "language": "fa",
+      "chunk_text": "در روند خنثی خریدار و فروشنده هر دو بی‌تصمیم‌اند و قیمت در یک محدوده‌ی مشخص بالا و پایین می‌رود — بین یک سطح حمایت و یک سطح مقاومت. شکست هر کدام از این دو سطح، شروع یک روند جدید را نشان می‌دهد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_13.md",
+        "source_location": "بخش «روند خنثی / رنج» و بخش ۷",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۳",
+        "section": "بخش «روند خنثی / رنج» و بخش ۷",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "قیمت بین دو سطح مقاومت و حمایت در نوسان است. شکست هر کدام از این سطوح، شروع روند جدید را نشان می‌دهد."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:37:22Z",
+      "updated_at": "2026-09-05T17:37:22Z",
+      "summary": "رنج = نوسان بین حمایت و مقاومت؛ شکست سطح = شروع روند جدید.",
+      "keywords": [
+        "رنج",
+        "range",
+        "حمایت",
+        "مقاومت",
+        "شکست"
+      ],
+      "related_concepts": [
+        "ACA-INT-0201",
+        "ACA-INT-0202",
+        "ACA-INT-0059",
+        "ACA-INT-0207"
+      ],
+      "related_questions": [
+        "تو رنج چیکار کنم؟",
+        "شکست سطح یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0207",
+      "object_type": "RULE",
+      "domain": "academy",
+      "title": "پایان روند: شکست آخرین نقطه‌ی اصلاح",
+      "language": "fa",
+      "chunk_text": "نکته‌ای که مدرس آن را کلیدی می‌داند: آخرین جایی که قیمت اصلاح کرده، مهم‌ترین نقطه است.\n• در روند صعودی: اگر آخرین کف شکسته شود، روند صعودی تمام شده و همان نقطه می‌تواند شروع یک روند جدید باشد.\n• در روند نزولی: اگر آخرین سقف شکسته شود، روند نزولی تمام شده است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_13.md",
+        "source_location": "بخش «پایان روند» و بخش ۸",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۳",
+        "section": "بخش «پایان روند» و بخش ۸",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "آخرین جایی که قیمت اصلاح کرده، برای ما بسیار مهم است. … اگر آخرین کف شکسته شود، پایان روند صعودی است. می‌تواند شروع روند جدید باشد. … در روند نزولی: شکست آخرین سقف، پایان روند نزولی را نشان می‌دهد."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:37:22Z",
+      "updated_at": "2026-09-05T17:37:22Z",
+      "rule": "در روند صعودی، شکست آخرین کف پایان روند است؛ در روند نزولی، شکست آخرین سقف. آخرین نقطه‌ی اصلاح باید همیشه روی چارت مشخص باشد.",
+      "keywords": [
+        "پایان روند",
+        "آخرین کف",
+        "آخرین سقف",
+        "شکست"
+      ],
+      "related_concepts": [
+        "ACA-INT-0204",
+        "ACA-INT-0205",
+        "ACA-INT-0209"
+      ],
+      "related_questions": [
+        "از کجا بفهمم روند تموم شده؟",
+        "کی روند عوض می‌شه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0208",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "نشانه‌ی ضعف در روند صعودی",
+      "language": "fa",
+      "chunk_text": "مدرس ضعف روند صعودی را این‌طور بیان می‌کند: «وقتی که قیمت دیگر نتواند سقف بالاتر بزند یا کف پایین‌تر بزند». یعنی دو نشانه‌ی ضعف: (۱) ناتوانی در ساختن سقف بالاتر، و (۲) ساخته شدن کفی پایین‌تر از کف قبلی.\n⚠️ عبارت منبع از نظر دستوری دوپهلوست و می‌شود آن را «نتواند کف پایین‌تر بزند» هم خواند، که با بقیه‌ی درس نمی‌خواند. خودِ همین جلسه در بخش «پایان روند» تکلیف را روشن می‌کند: شکسته شدن آخرین کف پایان روند صعودی است. بنابراین خوانش درست همان مورد (۲) است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_13.md",
+        "source_location": "بخش «تشخیص روند صعودی» (در تطبیق با بخش «پایان روند»)",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۳",
+        "section": "بخش «تشخیص روند صعودی» (در تطبیق با بخش «پایان روند»)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "ضعف در روند صعودی: وقتی که قیمت دیگر نتواند سقف بالاتر بزند یا کف پایین‌تر بزند."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T17:37:22Z",
+      "updated_at": "2026-09-05T17:37:22Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "warnings": [
+        "عبارت منبع دوپهلو است؛ خوانش ثبت‌شده بر پایه‌ی بخش «پایان روند» همین جلسه است، نه حدس."
+      ],
+      "keywords": [
+        "ضعف روند",
+        "سقف بالاتر",
+        "کف پایین‌تر"
+      ],
+      "related_concepts": [
+        "ACA-INT-0204",
+        "ACA-INT-0207",
+        "ACA-INT-0209"
+      ],
+      "related_questions": [
+        "از کجا بفهمم روند داره ضعیف می‌شه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0209",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "قدرت روند (مومنتوم) و شیب",
+      "language": "fa",
+      "chunk_text": "مومنتوم یعنی سرعت و شتاب حرکت قیمت. سه حالت:\n• روند قوی — شیب تند، سرعت بالا، اصلاح کم.\n• روند متوسط — شیب ملایم‌تر، اصلاح بیشتر.\n• روند ضعیف — اصلاح عمیق و ناتوانی در ادامه‌ی حرکت.\nقاعده‌ی کلی: شیب خط روند قدرت خریداران یا فروشندگان را نشان می‌دهد؛ هرچه شیب تندتر، قدرت در آن جهت بیشتر.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_13.md",
+        "source_location": "بخش «قدرت روند (مومنتوم)» و بخش ۹",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۳",
+        "section": "بخش «قدرت روند (مومنتوم)» و بخش ۹",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "مومنتوم یعنی سرعت و شتاب حرکت قیمت. قوی: شیب تند، سرعت بالا، اصلاح کم … ضعیف: اصلاح عمیق، عدم توانایی در ادامه حرکت. … هر چه شیب تندتر باشد، قدرت بیشتری در آن جهت وجود دارد."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T17:37:22Z",
+      "updated_at": "2026-09-05T17:37:22Z",
+      "summary": "شیب تند و اصلاح کم = روند قوی؛ اصلاح عمیق = روند ضعیف.",
+      "keywords": [
+        "مومنتوم",
+        "شیب",
+        "قدرت روند",
+        "اصلاح عمیق"
+      ],
+      "related_concepts": [
+        "ACA-INT-0203",
+        "ACA-INT-0208",
+        "ACA-INT-0193"
+      ],
+      "related_questions": [
+        "مومنتوم یعنی چی؟",
+        "روند قوی رو چطور تشخیص بدم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0210",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "تمرین عملی جلسه: پنج گام روی چارت خودت",
+      "language": "fa",
+      "chunk_text": "تمرینی که مدرس برای همین جلسه می‌دهد: روی نمودار خودت سقف‌ها و کف‌ها را رسم کن، نوع روند فعلی را مشخص کن (صعودی، نزولی یا خنثی)، آخرین نقطه‌ی اصلاح را پیدا کن، ببین قیمت به کدام سمت شکسته شده، و با روند کار کن نه برخلاف آن. او همچنین از ابتدای جلسه می‌خواهد دفتر کنار دستت باشد و بدون اینکه او بگوید، خودت یادداشت‌برداری کنی.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_13.md",
+        "source_location": "بخش «نکات کلیدی برای تمرین» و بخش ۱۰",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۳",
+        "section": "بخش «نکات کلیدی برای تمرین» و بخش ۱۰",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱. روی نمودار خودت، سقف و کف‌ها را رسم کن ۲. تشخیص بده که روند فعلی صعودی است، نزولی است یا خنثی ۳. آخرین نقطه اصلاح را پیدا کن ۴. ببین قیمت به کدام سمت شکسته شده ۵. با روند کار کن، نه برخلاف آن"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:37:22Z",
+      "updated_at": "2026-09-05T17:37:22Z",
+      "steps": [
+        "روی نمودار خودت سقف‌ها و کف‌ها را رسم کن.",
+        "مشخص کن روند فعلی صعودی، نزولی یا خنثی است.",
+        "آخرین نقطه‌ی اصلاح را پیدا کن و علامت بزن.",
+        "ببین قیمت آن نقطه را به کدام سمت شکسته است.",
+        "معامله را هم‌جهت با روند بگیر، نه برخلاف آن."
+      ],
+      "keywords": [
+        "تمرین",
+        "سقف و کف",
+        "یادداشت‌برداری",
+        "با روند"
+      ],
+      "related_concepts": [
+        "ACA-INT-0207",
+        "ACA-INT-0197",
+        "ACA-INT-0017",
+        "ACA-PSY-0009"
+      ],
+      "related_questions": [
+        "برای تمرین ترند چیکار کنم؟",
+        "چطور روند رو روی چارت پیدا کنم؟"
+      ]
+    }
+  ]
+}

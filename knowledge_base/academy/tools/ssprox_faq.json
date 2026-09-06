@@ -1,0 +1,1921 @@
+{
+  "collection_id": "academy_ssprox_faq",
+  "domain": "academy",
+  "title": "راهنمای رسمی اکسپرت SSProX (نسخه ۱.۳)",
+  "description": "مستند رسمی محصول آکادمی: نصب، مدیریت سرمایه و محاسبه‌ی حجم، ابزارهای Risk Line و Pending Line، تنظیمات ورودی، میانبرهای کیبورد، عیب‌یابی و مرزهای استفاده.",
+  "version": "v001",
+  "generated_at": "2026-09-05T22:01:27Z",
+  "pipeline_stage": "VALIDATED",
+  "source_files": [
+    "raw_sources/academy/ssprox_expert_faq_v13.md",
+    "raw_sources/academy/ssprox_expert_faq_v13.ingest.json"
+  ],
+  "notes": [
+    "SSProX ابزار خود آکادمی است (ACA-OPS-0004) و طبق D-0014 از قاعده‌ی منع اکسپرت مستثناست.",
+    "سلب مسئولیت رسمی سند در ACA-EXP-0009 و ACA-EXP-0043 نگهداری می‌شود.",
+    "ACA-EXP-0041 با تصمیم D-0019 تأیید شد: اکسپرت فقط ویندوز و مک (CONF-0010 حل شد).",
+    "اعداد نسخه‌ای (تلرانس ۱۵٪) با فیلد validity زمان‌مند علامت خورده‌اند."
+  ],
+  "objects": [
+    {
+      "id": "ACA-EXP-0001",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "نصب اکسپرت SSProX روی متاتریدر",
+      "language": "fa",
+      "chunk_text": "مسیر نصب برای هر دو نسخه‌ی متاتریدر یکسان است؛ فقط نام پوشه فرق می‌کند: در متاتریدر ۴ پوشه‌ی **MQL4 > Experts** و در متاتریدر ۵ پوشه‌ی **MQL5 > Experts**.\nپس از کپی کردن فایل، متاتریدر باید یک بار Refresh یا Restart شود تا اکسپرت در پنجره‌ی Navigator دیده شود.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش اول — نصب و راه‌اندازی، پرسش ۱",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "steps": [
+        "متاتریدر را باز کنید.",
+        "از منوی File گزینه‌ی Open Data Folder را انتخاب کنید.",
+        "در متاتریدر ۴ وارد پوشه‌ی MQL4 > Experts و در متاتریدر ۵ وارد MQL5 > Experts شوید.",
+        "فایل اکسپرت را داخل همین پوشه کپی کنید.",
+        "متاتریدر را یک بار Refresh یا Restart کنید.",
+        "اکسپرت را از Navigator روی چارت بیندازید."
+      ],
+      "keywords": [
+        "نصب اکسپرت",
+        "Open Data Folder",
+        "MQL4",
+        "MQL5",
+        "Experts",
+        "Navigator"
+      ],
+      "related_concepts": [
+        "ACA-OPS-0004",
+        "ACA-EXP-0002",
+        "ACA-EXP-0004",
+        "ACA-EXP-0005"
+      ],
+      "related_questions": [
+        "اکسپرت رو کجا کپی کنم؟",
+        "چطور اکسپرت رو نصب کنم؟",
+        "Open Data Folder کجاست؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0002",
+      "object_type": "TROUBLESHOOTING",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "اکسپرت در Navigator نمایش داده نمی‌شود",
+      "language": "fa",
+      "chunk_text": "اگر فایل در پوشه‌ی درست کپی شده اما اکسپرت در Navigator دیده نمی‌شود، در بیشتر موارد با Refresh یا اجرای مجدد متاتریدر برطرف می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش اول — پرسش ۲",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "symptoms": [
+        "فایل اکسپرت در پوشه‌ی Experts هست اما در پنجره‌ی Navigator دیده نمی‌شود."
+      ],
+      "causes": [
+        "فهرست Navigator هنوز به‌روزرسانی نشده است.",
+        "متاتریدر پوشه را پس از کپی شدن فایل نخوانده است."
+      ],
+      "resolutions": [
+        "در پنجره‌ی Navigator روی Advisors کلیک راست کنید و Refresh را بزنید.",
+        "اگر برطرف نشد، متاتریدر را کاملاً ببندید و دوباره اجرا کنید.",
+        "اگر باز هم دیده نشد، از درست بودن مسیر پوشه (MQL4/MQL5 > Experts) مطمئن شوید."
+      ],
+      "keywords": [
+        "Navigator",
+        "Refresh",
+        "Advisors",
+        "دیده نمی‌شود"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0001"
+      ],
+      "related_questions": [
+        "اکسپرتم نمیاد",
+        "توی نویگیتور نیست"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0003",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "پیش از نصب نسخه‌ی جدید، نسخه‌ی قبلی حذف شود",
+      "language": "fa",
+      "chunk_text": "هنگام نصب نسخه‌ی جدید اکسپرت، بهتر است ابتدا نسخه‌ی قبلی از پوشه‌ی Experts حذف شود تا تداخل ایجاد نشود و به اشتباه نسخه‌ی قدیمی اجرا نگردد.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش اول — پرسش ۳",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "rule": "پیش از نصب نسخه‌ی جدید SSProX، نسخه‌ی قبلی از پوشه‌ی Experts حذف شود.",
+      "keywords": [
+        "نسخه جدید",
+        "حذف نسخه قبلی",
+        "تداخل"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0001",
+        "ACA-EXP-0016"
+      ],
+      "related_questions": [
+        "نسخه قبلی رو پاک کنم؟",
+        "آپدیت اکسپرت چطوریه؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0004",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "فایل جداگانه برای متاتریدر ۴ و متاتریدر ۵",
+      "language": "fa",
+      "chunk_text": "اکسپرت روی هر دو نسخه‌ی متاتریدر قابل استفاده است، اما برای هر نسخه **فایل جداگانه‌ای** ارائه شده است. باید دقیقاً فایل مخصوص همان نسخه نصب شود.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش اول — پرسش ۴",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "warnings": [
+        "فایل MT4 روی MT5 و برعکس کار نمی‌کند؛ باید فایل متناسب با نسخه نصب شود."
+      ],
+      "keywords": [
+        "متاتریدر ۴",
+        "متاتریدر ۵",
+        "فایل جداگانه"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0001",
+        "ACA-RULE-0001"
+      ],
+      "related_questions": [
+        "روی متاتریدر ۵ هم کار می‌کنه؟",
+        "کدوم فایل رو نصب کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0005",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "Algo Trading باید فعال باشد",
+      "language": "fa",
+      "chunk_text": "پس از قرار دادن اکسپرت روی چارت، گزینه‌ی **Algo Trading** (در متاتریدر ۴: Auto Trading) حتماً باید فعال باشد. اگر این دکمه خاموش یا قرمز باشد، اکسپرت هیچ معامله‌ای باز نمی‌کند. دکمه‌ی سبز/فعال یعنی اکسپرت اجازه‌ی ارسال سفارش دارد.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش اول — پرسش‌های ۵ و ۶",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "rule": "بدون فعال بودن Algo Trading، اکسپرت مجاز به ارسال هیچ سفارشی نیست.",
+      "keywords": [
+        "Algo Trading",
+        "Auto Trading",
+        "دکمه سبز",
+        "دکمه قرمز"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0006",
+        "ACA-EXP-0035",
+        "ACA-EXP-0037"
+      ],
+      "related_questions": [
+        "الگو تریدینگ چیه؟",
+        "چرا اکسپرت کار نمی‌کنه؟",
+        "از کجا بفهمم فعاله؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0006",
+      "object_type": "TROUBLESHOOTING",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "دکمه‌ی Launch زده می‌شود اما معامله باز نمی‌شود",
+      "language": "fa",
+      "chunk_text": "سند رسمی پنج علت را فهرست کرده است. اگر همه‌ی این موارد درست باشد، اکسپرت معامله را باز خواهد کرد.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش اول — پرسش ۷",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "symptoms": [
+        "دکمه‌ی Launch زده می‌شود ولی هیچ معامله‌ای باز نمی‌شود."
+      ],
+      "causes": [
+        "Algo Trading فعال نیست.",
+        "اتصال متاتریدر به سرور بروکر برقرار نیست.",
+        "حجم محاسبه‌شده خارج از حداقل یا حداکثر مجاز بروکر است.",
+        "به محدودیت حداکثر ضرر روزانه رسیده‌اید.",
+        "اسپرد از مقدار مجاز تعیین‌شده بیشتر است."
+      ],
+      "resolutions": [
+        "Algo Trading را روشن کنید.",
+        "اتصال به سرور بروکر را در گوشه‌ی پایین متاتریدر بررسی کنید.",
+        "حجم و فاصله‌ی حد ضرر را بازبینی کنید.",
+        "بررسی کنید سقف ضرر روزانه فعال نشده باشد.",
+        "منتظر بمانید اسپرد به حالت عادی برگردد یا مقدار مجاز اسپرد را بازبینی کنید."
+      ],
+      "keywords": [
+        "Launch",
+        "معامله باز نمی‌شود",
+        "اسپرد",
+        "ضرر روزانه"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0005",
+        "ACA-EXP-0030",
+        "ACA-EXP-0031",
+        "ACA-EXP-0035"
+      ],
+      "related_questions": [
+        "Launch می‌زنم اتفاقی نمی‌افته",
+        "چرا اردر ثبت نمی‌شه؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0007",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "تست روی حساب دمو پیش از استفاده روی حساب واقعی",
+      "language": "fa",
+      "chunk_text": "اگر از بروکری غیر از بروکر پیشنهادی آکادمی استفاده می‌کنید، ابتدا باید اکسپرت را روی **حساب دموی همان بروکر** تست کنید. قوانین حجم معامله، اسپرد و مشخصات نمادها بین بروکرها متفاوت است.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش اول — پرسش‌های ۸ و ۹",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BROKER_DEPENDENT",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "rule": "پیش از اجرای اکسپرت روی حساب واقعی یک بروکر جدید، حتماً روی دموی همان بروکر تست شود.",
+      "keywords": [
+        "حساب دمو",
+        "تست",
+        "بروکر دیگر",
+        "مشخصات نماد"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0008",
+        "ACA-INT-0245",
+        "BRK-FACT-0001"
+      ],
+      "related_questions": [
+        "روی بروکر خودم کار می‌کنه؟",
+        "قبلش تست کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0008",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "سازگاری اکسپرت با بروکرهای مختلف",
+      "language": "fa",
+      "chunk_text": "اکسپرت روی بروکرهای مختلف قابل استفاده است، اما رفتار آن به قوانین هر بروکر وابسته است: حداقل حجم، گام افزایش حجم، اسپرد و مشخصات نمادها. به همین دلیل عملکرد باید پیش از استفاده‌ی واقعی روی دموی همان بروکر بررسی شود.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش اول — پرسش ۹",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BROKER_DEPENDENT",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "keywords": [
+        "بروکر",
+        "حداقل حجم",
+        "گام حجم",
+        "مشخصات نماد"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0007",
+        "ACA-EXP-0010"
+      ],
+      "related_questions": [
+        "با هر بروکری کار می‌کنه؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0009",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "سلب مسئولیت رسمی آکادمی درباره‌ی استفاده از اکسپرت",
+      "language": "fa",
+      "chunk_text": "مسئولیت استفاده از اکسپرت با آکادمی **نیست**. اکسپرت فقط ابزاری برای مدیریت سرمایه و اجرای سریع‌تر معاملات است. مسئولیت نهایی مدیریت حساب، انتخاب معاملات و استفاده‌ی صحیح از اکسپرت بر عهده‌ی خود معامله‌گر است.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش اول — پرسش ۱۰",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "rule": "مربی در هر پاسخ مربوط به اکسپرت، این سلب مسئولیت را حفظ می‌کند و اکسپرت را ابزار اجرا معرفی می‌کند، نه تصمیم‌گیر.",
+      "warnings": [
+        "اکسپرت تصمیم معاملاتی نمی‌گیرد و سیگنال نمی‌دهد."
+      ],
+      "keywords": [
+        "مسئولیت",
+        "سلب مسئولیت",
+        "ابزار"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0043",
+        "ACA-RULE-0002",
+        "ACA-RULE-0003",
+        "ACA-SUP-0015"
+      ],
+      "related_questions": [
+        "اگه ضرر کردم مسئولیتش با کیه؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0010",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "چرا ریسک واقعی دقیقاً برابر ریسک تعیین‌شده نیست",
+      "language": "fa",
+      "chunk_text": "اکسپرت مقدار ریسک را کاملاً دقیق محاسبه می‌کند، اما در نهایت باید معامله را با حجمی باز کند که **بروکر اجازه‌ی آن را می‌دهد**. متاتریدر و بروکر اجازه‌ی باز کردن هر حجمی را نمی‌دهند؛ برای مثال ممکن است حجم دقیق موردنیاز ۰.۰۱۵ لات باشد ولی بروکر فقط ۰.۰۱ و ۰.۰۲ لات را بپذیرد.\nدر چنین حالتی اکسپرت مجبور است یکی از دو حجم مجاز را انتخاب کند، پس ریسک واقعی ممکن است کمی کمتر یا کمی بیشتر از مقدار تعیین‌شده شود. **این طبیعی است و به معنی اشتباه بودن محاسبات اکسپرت نیست.**",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش دوم — پرسش‌های ۱، ۲ و ۵",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BROKER_DEPENDENT",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "keywords": [
+        "گام حجم",
+        "لات",
+        "ریسک واقعی",
+        "محدودیت بروکر"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0011",
+        "ACA-EXP-0013",
+        "ACA-EXP-0017",
+        "GEN-CONC-0009"
+      ],
+      "related_questions": [
+        "چرا ریسکم دقیق نیست؟",
+        "چرا حجمی که گفته باز نمی‌شه؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0011",
+      "object_type": "EXAMPLE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "مثال: چرا به‌جای ۱۰ دلار، ۷ دلار ریسک می‌شود",
+      "language": "fa",
+      "chunk_text": "فرض کنید می‌خواهید در هر معامله ۱۰ دلار ریسک کنید. با توجه به فاصله‌ی حد ضرر، اکسپرت محاسبه می‌کند که حجم مناسب جایی **بین** ۰.۰۱ و ۰.۰۲ لات است:\n• حجم ۰.۰۱ لات ← ریسک ۷ دلار\n• حجم ۰.۰۲ لات ← ریسک ۱۴ دلار\nدر نسخه‌های قبلی، مهم‌ترین قانون اکسپرت این بود که تحت هیچ شرایطی از ریسک تعیین‌شده عبور نکند؛ پس همیشه ۷ دلار (حجم پایین‌تر) را انتخاب می‌کرد، حتی اگر فاصله‌اش با ۱۰ دلار بیشتر بود.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش دوم — پرسش‌های ۳ و ۴",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BROKER_DEPENDENT",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "examples": [
+        "ریسک هدف ۱۰ دلار → گزینه‌ها ۷ دلار یا ۱۴ دلار → نسخه‌های قبل: ۷ دلار"
+      ],
+      "validity": {
+        "time_bound": true,
+        "as_of": "نسخه ۱.۳ اکسپرت SSProX (شهریور ۱۴۰۵ / سپتامبر ۲۰۲۶)",
+        "note": "اعداد و گزینه‌ها مربوط به نسخه‌ی ۱.۳ است و در نسخه‌های بعدی ممکن است تغییر کند."
+      },
+      "keywords": [
+        "مثال",
+        "۷ دلار",
+        "۱۴ دلار",
+        "حجم پایین‌تر"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0010",
+        "ACA-EXP-0013",
+        "ACA-EXP-0016"
+      ],
+      "related_questions": [
+        "چرا کمتر از ریسکم باز کرد؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0012",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "چرا این اختلاف روی داوجونز بیشتر دیده می‌شود",
+      "language": "fa",
+      "chunk_text": "روی نمادهایی مانند داوجونز (US30) معمولاً فاصله‌ی حد ضرر بزرگ‌تر است و هر تغییر کوچک در حجم، اختلاف دلاری بیشتری ایجاد می‌کند؛ بنابراین اختلاف بین دو حجم مجاز ممکن است چند دلار شود و بیشتر به چشم بیاید.\nاین موضوع مخصوص داوجونز نیست و روی هر نمادی ممکن است رخ دهد، اما در نمادهایی که ارزش هر واحد حرکت قیمت بیشتر است محسوس‌تر است.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش دوم — پرسش‌های ۶ و ۷",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BROKER_DEPENDENT",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "keywords": [
+        "داوجونز",
+        "US30",
+        "ارزش پیپ",
+        "شاخص"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0010",
+        "ACA-EXP-0013",
+        "GEN-CONC-0007"
+      ],
+      "related_questions": [
+        "چرا روی داوجونز فرق داره؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0013",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "قابلیت «حداکثر افزایش مجاز ریسک» در نسخه ۱.۳",
+      "language": "fa",
+      "chunk_text": "در نسخه‌ی ۱.۳ گزینه‌ای اضافه شده تا ریسک واقعی به مقدار دلخواه نزدیک‌تر شود. شما تعیین می‌کنید اکسپرت حداکثر چه درصدی افزایش ریسک را مجاز بداند.\nبرای مثال با تنظیم **۱۵ درصد** و ریسک تعیین‌شده‌ی ۱۰ دلار، اکسپرت اجازه دارد تا حدود **۱۱.۵ دلار** ریسک کند. اگر حجم بعدی باعث شود ریسک از این محدوده بیشتر شود، اکسپرت آن را انتخاب نمی‌کند و همان حجم پایین‌تر را باز می‌کند.\n**مقدار پیش‌فرض: ۱۵ درصد.** اگر روی صفر گذاشته شود، اکسپرت دقیقاً مثل نسخه‌های قبلی رفتار می‌کند و هرگز از ریسک تعیین‌شده عبور نمی‌کند.\nاین قابلیت روی معاملات Pending هم اعمال می‌شود و **هیچ تغییری در استراتژی، تحلیل، حد ضرر یا حد سود ایجاد نمی‌کند** — فقط مربوط به محاسبه‌ی حجم است.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش دوم پرسش‌های ۸ تا ۱۱ و بخش ششم پرسش‌های ۱ تا ۱۰",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "validity": {
+        "time_bound": true,
+        "as_of": "نسخه ۱.۳ اکسپرت SSProX (شهریور ۱۴۰۵ / سپتامبر ۲۰۲۶)",
+        "note": "اعداد و گزینه‌ها مربوط به نسخه‌ی ۱.۳ است و در نسخه‌های بعدی ممکن است تغییر کند."
+      },
+      "conditions": [
+        "مقدار پیش‌فرض ۱۵٪ است و کاربر می‌تواند آن را تغییر دهد.",
+        "با مقدار صفر، رفتار اکسپرت به نسخه‌های پیش از ۱.۳ برمی‌گردد."
+      ],
+      "keywords": [
+        "نسخه ۱.۳",
+        "تلرانس ریسک",
+        "۱۵ درصد",
+        "افزایش مجاز ریسک"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0011",
+        "ACA-EXP-0014",
+        "ACA-EXP-0015",
+        "ACA-EXP-0016"
+      ],
+      "related_questions": [
+        "گزینه جدید نسخه ۱.۳ چیه؟",
+        "افزایش مجاز ریسک یعنی چی؟",
+        "پیش‌فرضش چنده؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0014",
+      "object_type": "EXAMPLE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "مثال کامل عملکرد تلرانس ریسک نسخه ۱.۳",
+      "language": "fa",
+      "chunk_text": "فرض کنید: موجودی حساب ۱۰۰۰ دلار، ریسک تعیین‌شده ۱ درصد (یعنی ریسک هدف ۱۰ دلار)، تلرانس افزایش ریسک ۱۵ درصد.\nاکسپرت دو گزینه دارد:\n• حجم ۰.۰۱ لات ← ریسک ۷ دلار\n• حجم ۰.۰۲ لات ← ریسک ۱۱ دلار\nچون ۱۱ دلار فقط ۱۰ درصد بیشتر از هدف است و زیر تلرانس ۱۵ درصد قرار می‌گیرد، اکسپرت **حجم دوم** را انتخاب می‌کند.\nاما اگر گزینه‌ی دوم ریسک را به ۱۴ دلار می‌رساند (۴۰ درصد بیشتر از هدف)، اکسپرت آن را انتخاب نمی‌کرد.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش ششم — پرسش ۷",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BROKER_DEPENDENT",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "validity": {
+        "time_bound": true,
+        "as_of": "نسخه ۱.۳ اکسپرت SSProX (شهریور ۱۴۰۵ / سپتامبر ۲۰۲۶)",
+        "note": "اعداد و گزینه‌ها مربوط به نسخه‌ی ۱.۳ است و در نسخه‌های بعدی ممکن است تغییر کند."
+      },
+      "examples": [
+        "۱۰۰۰ دلار، ۱٪ ریسک، تلرانس ۱۵٪ → ۱۱ دلار پذیرفته می‌شود، ۱۴ دلار رد می‌شود."
+      ],
+      "keywords": [
+        "مثال",
+        "تلرانس",
+        "۱۵ درصد",
+        "۱۱ دلار"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0013"
+      ],
+      "related_questions": [
+        "یه مثال بزن",
+        "چطور تصمیم می‌گیره؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0015",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "راهنمای انتخاب: تلرانس ریسک را فعال کنم یا نه",
+      "language": "fa",
+      "chunk_text": "سند رسمی هر دو حالت را مجاز می‌داند و انتخاب را به سبک مدیریت سرمایه‌ی معامله‌گر واگذار می‌کند:\n• اگر ترجیح می‌دهید تحت هیچ شرایطی حتی کمی بیشتر از ریسک تعیین‌شده ضرر نکنید → **غیرفعال** کنید (مقدار صفر).\n• اگر برایتان مهم‌تر است ریسک واقعی تا حد امکان به مقدار هدف نزدیک باشد → **فعال** نگه دارید.\n**توصیه‌ی سند:** برای اکثر کاربران مقدار پیش‌فرض مناسب است و نیازی به تغییر ندارد. بالا بردن بیش از حد این عدد باعث می‌شود ریسک واقعی از برنامه‌ی مدیریت سرمایه فاصله بگیرد.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش دوم پرسش‌های ۱۳ و ۱۴ و بخش ششم پرسش‌های ۵، ۶ و ۱۱",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "rule": "مقدار پیش‌فرض تلرانس بدون دلیل مشخص تغییر داده نشود؛ تغییر آن فقط با شناخت دقیق از مدیریت سرمایه‌ی خود انجام شود.",
+      "validity": {
+        "time_bound": true,
+        "as_of": "نسخه ۱.۳ اکسپرت SSProX (شهریور ۱۴۰۵ / سپتامبر ۲۰۲۶)",
+        "note": "اعداد و گزینه‌ها مربوط به نسخه‌ی ۱.۳ است و در نسخه‌های بعدی ممکن است تغییر کند."
+      },
+      "warnings": [
+        "افزایش بیش از حد این مقدار، ریسک واقعی را از پلن مدیریت سرمایه دور می‌کند."
+      ],
+      "keywords": [
+        "فعال یا غیرفعال",
+        "پیش‌فرض",
+        "توصیه"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0013",
+        "ACA-EXP-0028",
+        "ACA-INT-0175"
+      ],
+      "related_questions": [
+        "فعالش کنم یا نه؟",
+        "خطرناکه؟",
+        "چند درصد بذارم؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0016",
+      "object_type": "COMPARISON",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "تفاوت نسخه ۱.۲ و نسخه ۱.۳",
+      "language": "fa",
+      "chunk_text": "تفاوت اصلی این دو نسخه فقط در نحوه‌ی انتخاب حجم هنگام محدودیت گام حجم بروکر است.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش ششم — پرسش ۱۲",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "comparison": {
+        "محور مقایسه": "انتخاب حجم وقتی حجم دقیق موردنیاز مجاز نیست",
+        "نسخه ۱.۲": "اجازه‌ی عبور از ریسک تعیین‌شده را نمی‌داد و همیشه حجم پایین‌تر را انتخاب می‌کرد.",
+        "نسخه ۱.۳": "کاربر می‌تواند محدوده‌ی منطقی افزایش ریسک تعیین کند؛ اگر حجم بالاتر داخل آن محدوده باشد انتخاب می‌شود تا ریسک واقعی به هدف نزدیک‌تر شود.",
+        "بدون تغییر": "در هر دو نسخه محدودیت حجم بروکر و متاتریدر پابرجاست و اختلاف‌های کوچک ممکن است باقی بمانند."
+      },
+      "validity": {
+        "time_bound": true,
+        "as_of": "نسخه ۱.۳ اکسپرت SSProX (شهریور ۱۴۰۵ / سپتامبر ۲۰۲۶)",
+        "note": "اعداد و گزینه‌ها مربوط به نسخه‌ی ۱.۳ است و در نسخه‌های بعدی ممکن است تغییر کند."
+      },
+      "keywords": [
+        "نسخه ۱.۲",
+        "نسخه ۱.۳",
+        "تفاوت نسخه‌ها"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0013",
+        "ACA-EXP-0003"
+      ],
+      "related_questions": [
+        "فرق نسخه جدید با قبلی چیه؟",
+        "چرا آپدیت کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0017",
+      "object_type": "COMMON_MISTAKE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "تصور اشتباه: «اکسپرت ریسک را غلط حساب می‌کند»",
+      "language": "fa",
+      "chunk_text": "شایع‌ترین برداشت غلط درباره‌ی اکسپرت این است که اختلاف بین ریسک هدف و ریسک واقعی را به خطای محاسبه نسبت می‌دهند. سند رسمی این را رد می‌کند: محاسبه درست است و اختلاف از محدودیت حجم‌های قابل معامله در بروکر می‌آید — اختلافی که در تمام نرم‌افزارهای مدیریت سرمایه هم وجود دارد. تا وقتی اختلاف در محدوده‌ی مجاز باشد، عملکرد اکسپرت صحیح است.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش دوم — پرسش‌های ۵ و ۱۵",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "common_mistakes": [
+        "اختلاف چند دلاری ریسک را خطای اکسپرت دانستن.",
+        "انتظار اینکه با فعال کردن تلرانس، ریسک همیشه دقیقاً ۱ درصد شود.",
+        "بالا بردن بی‌دلیل تلرانس برای «دقیق‌تر شدن» ریسک."
+      ],
+      "keywords": [
+        "اشتباه رایج",
+        "محاسبه غلط",
+        "نگرانی"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0010",
+        "ACA-EXP-0013",
+        "ACA-EXP-0015"
+      ],
+      "related_questions": [
+        "اکسپرت اشتباه حساب می‌کنه؟",
+        "باید نگران باشم؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0018",
+      "object_type": "DEFINITION",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "Risk Line چیست",
+      "language": "fa",
+      "chunk_text": "Risk Line ابزاری در اکسپرت است که پیش از باز کردن معامله، محل حد ضرر را روی نمودار مشخص می‌کند. پس از تعیین محل حد ضرر، اکسپرت خودکار فاصله‌ی حد ضرر را محاسبه می‌کند و بر اساس مقدار ریسک تعیین‌شده، حجم مناسب معامله را می‌سازد.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش سوم — پرسش ۱",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "definition": "خط تعیین حد ضرر روی چارت که اکسپرت بر اساس آن فاصله‌ی حد ضرر و حجم معامله را خودکار محاسبه می‌کند.",
+      "keywords": [
+        "Risk Line",
+        "خط ریسک",
+        "حد ضرر",
+        "محاسبه حجم"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0019",
+        "ACA-EXP-0020",
+        "ACA-INT-0155"
+      ],
+      "related_questions": [
+        "ریسک لاین چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0019",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "باز کردن معامله‌ی Market با Risk Line",
+      "language": "fa",
+      "chunk_text": "با Risk Line دیگر نیازی به محاسبه‌ی دستی حجم نیست: فقط محل حد ضرر و مقدار ریسک را مشخص می‌کنید و اکسپرت بقیه‌ی محاسبات را انجام می‌دهد.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش سوم — پرسش‌های ۲ و ۳",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "steps": [
+        "روی دکمه‌ی Risk Line کلیک کنید.",
+        "خط قرمز را روی محل حد ضرر خود قرار دهید.",
+        "از درست بودن محل حد ضرر مطمئن شوید.",
+        "روی دکمه‌ی Launch کلیک کنید."
+      ],
+      "keywords": [
+        "Risk Line",
+        "Launch",
+        "معامله مارکت"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0018",
+        "ACA-EXP-0033",
+        "ACA-EXP-0006"
+      ],
+      "related_questions": [
+        "چطور با اکسپرت معامله باز کنم؟",
+        "حجم رو خودم حساب کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0020",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "جابه‌جایی حد ضرر، حجم معامله را دوباره محاسبه می‌کند",
+      "language": "fa",
+      "chunk_text": "هر بار که محل حد ضرر (یا در سفارش Pending، محل ورود) تغییر کند، اکسپرت فاصله را دوباره محاسبه و حجم معامله را متناسب با آن به‌روزرسانی می‌کند.\nپس از باز شدن معامله هم می‌توانید حد ضرر و حد سود را مانند هر معامله‌ی دیگر متاتریدر به‌صورت دستی تغییر دهید.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش سوم — پرسش‌های ۴، ۵ و ۱۰",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "keywords": [
+        "تغییر حد ضرر",
+        "محاسبه مجدد حجم"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0018",
+        "ACA-EXP-0021"
+      ],
+      "related_questions": [
+        "اگه استاپ رو جابه‌جا کنم چی می‌شه؟",
+        "بعد از باز شدن معامله می‌تونم استاپ رو عوض کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0021",
+      "object_type": "DEFINITION",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "Pending Line چیست و چرا دو خط نمایش می‌دهد",
+      "language": "fa",
+      "chunk_text": "Pending Line برای زمانی است که نمی‌خواهید معامله را در قیمت فعلی باز کنید و می‌خواهید سفارش در قیمت دلخواه ثبت شود تا با رسیدن قیمت، خودکار فعال شود.\nدر سفارش Pending دو قیمت باید مشخص شود — **محل ورود** و **محل حد ضرر** — بنابراین اکسپرت دو خط روی نمودار نمایش می‌دهد. حجم سفارش Pending هم دقیقاً مثل معاملات Market بر اساس فاصله‌ی ورود تا حد ضرر و مقدار ریسک محاسبه می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش سوم — پرسش‌های ۶، ۷ و ۹",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "definition": "ابزار ثبت سفارش شرطی در اکسپرت که با دو خط، محل ورود و محل حد ضرر را می‌گیرد و حجم را خودکار محاسبه می‌کند.",
+      "keywords": [
+        "Pending Line",
+        "سفارش شرطی",
+        "دو خط",
+        "محل ورود"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0022",
+        "ACA-EXP-0020",
+        "ACA-INT-0148"
+      ],
+      "related_questions": [
+        "پندینگ لاین چیه؟",
+        "چرا دو تا خط میاد؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0022",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "اکسپرت خودش نوع سفارش Pending را تشخیص می‌دهد",
+      "language": "fa",
+      "chunk_text": "لازم نیست خودتان Buy Stop، Buy Limit، Sell Stop یا Sell Limit را انتخاب کنید. اکسپرت فقط محل ورود را با قیمت فعلی بازار مقایسه می‌کند و سفارش مناسب را خودکار ثبت می‌کند:\n• خرید، ورود **بالاتر** از قیمت فعلی ← **Buy Stop**\n• خرید، ورود **پایین‌تر** از قیمت فعلی ← **Buy Limit**\n• فروش، ورود **پایین‌تر** از قیمت فعلی ← **Sell Stop**\n• فروش، ورود **بالاتر** از قیمت فعلی ← **Sell Limit**\nپس نیازی به حفظ کردن انواع سفارش‌های Pending نیست. اگر نوع سفارش چیزی نبود که انتظار داشتید، علتش موقعیت قیمت ورود نسبت به قیمت فعلی است.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش سوم پرسش ۸ و بخش پنجم پرسش ۱۵",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "keywords": [
+        "Buy Stop",
+        "Buy Limit",
+        "Sell Stop",
+        "Sell Limit",
+        "تشخیص خودکار"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0021",
+        "ACA-INT-0149",
+        "ACA-INT-0150"
+      ],
+      "related_questions": [
+        "چه نوع اردری ثبت می‌کنه؟",
+        "چرا بای لیمیت شد؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0023",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "دکمه‌ی Break Even در اکسپرت",
+      "language": "fa",
+      "chunk_text": "با فشردن این دکمه، حد ضرر معامله روی **نقطه‌ی ورود** قرار می‌گیرد؛ در این حالت اگر قیمت برگردد و حد ضرر فعال شود، معامله بدون سود و بدون ضرر بسته می‌شود. معمولاً وقتی استفاده می‌شود که معامله وارد سود شده و می‌خواهید از سرمایه محافظت کنید.\n⚠️ **زمان مشخص و ثابتی برای این کار وجود ندارد و به استراتژی خود شما بستگی دارد.** سند رسمی برای زمان بریک‌ایون عدد یا قاعده‌ای تعیین نمی‌کند؛ اگر قوانین استراتژی شما این زمان را مشخص کرده باشد، با یک کلیک انجام می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش سوم — پرسش‌های ۱۱ و ۱۲",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "warnings": [
+        "مربی زمان بریک‌ایون را برای کاربر تعیین نمی‌کند؛ این تصمیم متعلق به استراتژی خود اوست."
+      ],
+      "keywords": [
+        "Break Even",
+        "بریک ایون",
+        "انتقال حد ضرر",
+        "نقطه ورود"
+      ],
+      "related_concepts": [
+        "ACA-CLR-0003",
+        "ACA-RULE-0003",
+        "ACA-EXP-0009"
+      ],
+      "related_questions": [
+        "بریک ایون کجاست؟",
+        "کی بریک ایون کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0024",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "دکمه‌ی Half Close (بستن نصف معامله)",
+      "language": "fa",
+      "chunk_text": "این دکمه ۵۰ درصد حجم معامله را می‌بندد و ۵۰ درصد باقی‌مانده را باز نگه می‌دارد؛ مثلاً از حجم ۱ لات، ۰.۵ لات بسته و ۰.۵ لات باز می‌ماند.\nمی‌توان چند بار از آن استفاده کرد: هر بار **نصف حجم باقی‌مانده** بسته می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش سوم — پرسش‌های ۱۳ و ۱۴",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "examples": [
+        "۱ لات → Half Close → ۰.۵ لات باز → Half Close دوباره → ۰.۲۵ لات باز"
+      ],
+      "keywords": [
+        "Half Close",
+        "بستن نصف",
+        "خروج پله‌ای"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0025"
+      ],
+      "related_questions": [
+        "هاف کلوز چیکار می‌کنه؟",
+        "چند بار می‌تونم بزنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0025",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "دکمه‌ی Close All (بستن همه‌ی معاملات)",
+      "language": "fa",
+      "chunk_text": "با فشردن این دکمه همه‌ی معاملات باز به‌صورت هم‌زمان بسته می‌شوند — برای زمانی که می‌خواهید خیلی سریع از تمام معاملات خارج شوید.\nدرباره‌ی سفارش‌های Pending: **به تنظیمات اکسپرت بستگی دارد.** اگر گزینه‌ی مربوط به حذف سفارش‌های Pending فعال باشد آن‌ها هم حذف می‌شوند؛ در غیر این صورت فقط معاملات باز بسته می‌شوند و سفارش‌های Pending باقی می‌مانند.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش سوم — پرسش‌های ۱۵ و ۱۶",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "conditions": [
+        "رفتار نسبت به سفارش‌های Pending به تنظیمات اکسپرت بستگی دارد."
+      ],
+      "keywords": [
+        "Close All",
+        "بستن همه",
+        "خروج سریع"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0024",
+        "ACA-EXP-0033"
+      ],
+      "related_questions": [
+        "کلوز آل چیه؟",
+        "پندینگ‌ها هم پاک می‌شن؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0026",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "قابلیت TP Auto (حد سود خودکار)",
+      "language": "fa",
+      "chunk_text": "اگر TP Auto فعال باشد، اکسپرت هنگام باز کردن معامله حد سود را هم خودکار ثبت می‌کند و مقدارش بر اساس تنظیمات بخش Inputs است.\nاگر غیرفعال باشد، اکسپرت فقط معامله را باز می‌کند و حد سودی ثبت نمی‌شود؛ در این حالت باید خودتان حد سود را تعیین کنید. پس از باز شدن معامله هم مانند هر معامله‌ی دیگر متاتریدر می‌توانید حد سود را ویرایش یا حذف کنید.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش سوم — پرسش‌های ۱۷ تا ۲۰",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "keywords": [
+        "TP Auto",
+        "حد سود خودکار",
+        "Take Profit"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0032",
+        "ACA-INT-0156"
+      ],
+      "related_questions": [
+        "تی پی اتو چیه؟",
+        "حد سود خودکار می‌ذاره؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0027",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "نمایش اطلاعات معامله روی نمودار",
+      "language": "fa",
+      "chunk_text": "با فعال بودن این گزینه، هنگام جابه‌جا کردن Risk Line یا Pending Line اطلاعات معامله روی نمودار نشان داده می‌شود: **حجم معامله، مقدار ریسک دلاری، فاصله‌ی حد ضرر و مقدار ریسک بر اساس تنظیمات فعلی**.\nاین اطلاعات فقط کمک‌کننده‌ی تصمیم‌گیری‌اند و روی عملکرد اکسپرت اثری ندارند؛ با غیرفعال کردن آن، اکسپرت همه‌ی محاسبات را انجام می‌دهد ولی چیزی روی چارت نشان نمی‌دهد.\nگزینه‌ی «فاصله‌ی نمایش اطلاعات از سمت راست نمودار» فقط محل نمایش را جابه‌جا می‌کند و هیچ تأثیری روی محاسبات یا معاملات ندارد.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش چهارم — پرسش‌های ۱، ۲، ۱۷ و ۱۸",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "keywords": [
+        "نمایش اطلاعات",
+        "Inputs",
+        "فاصله از راست"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0018",
+        "ACA-EXP-0021"
+      ],
+      "related_questions": [
+        "این اعداد روی چارت چیه؟",
+        "چطور از روی چارت برش دارم؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0028",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "تنظیم «حداکثر درصد ریسک مجاز» — لایه‌ی امنیتی مدیریت سرمایه",
+      "language": "fa",
+      "chunk_text": "این گزینه سقف ریسک هر معامله را قفل می‌کند تا خطای انسانی جلوی زیان بزرگ را بگیرد.\nمثال سند: اگر هنگام باز کردن معامله به اشتباه ریسک را روی ۵ درصد بگذارید در حالی که پلن معاملاتی‌تان بیش از ۲ درصد اجازه نمی‌دهد، با تنظیم سقف روی ۲ درصد، اکسپرت اجازه‌ی باز کردن معامله با ریسک ۵ درصد را نمی‌دهد.\nاین قابلیت دقیقاً برای جلوگیری از اشتباهات انسانی طراحی شده است.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش چهارم — پرسش‌های ۳ و ۴",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "rule": "سقف درصد ریسک مجاز باید هم‌راستا با پلن معاملاتی تنظیم شود؛ اکسپرت اجازه‌ی عبور از آن را نمی‌دهد.",
+      "examples": [
+        "پلن اجازه‌ی ۲٪ می‌دهد → سقف روی ۲٪ → ورود اشتباهی ۵٪ رد می‌شود."
+      ],
+      "keywords": [
+        "حداکثر ریسک",
+        "سقف ریسک",
+        "خطای انسانی",
+        "لایه امنیتی"
+      ],
+      "related_concepts": [
+        "ACA-INT-0175",
+        "ACA-EXP-0029",
+        "ACA-EXP-0030"
+      ],
+      "related_questions": [
+        "اگه اشتباه عدد بزنم چی؟",
+        "حداکثر ریسک مجاز چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0029",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "تنظیم «حداکثر حجم مجاز»",
+      "language": "fa",
+      "chunk_text": "این گزینه مشخص می‌کند اکسپرت تحت هیچ شرایطی بیشتر از حجم تعیین‌شده معامله باز نکند؛ مثلاً با سقف ۲ لات، حتی اگر محاسبات ۳ لات را نشان دهد، معامله بیش از ۲ لات باز نمی‌شود.\nدلیل وجودش: گاهی به دلیل کوچک بودن فاصله‌ی حد ضرر یا اشتباه کاربر، حجم محاسبه‌شده بسیار بزرگ می‌شود؛ این گزینه جلوی باز شدن معامله با حجم غیرعادی را می‌گیرد.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش چهارم — پرسش‌های ۵ و ۶",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "rule": "سقف حجم مجاز تعیین شود تا حد ضرر بسیار کوچک یا خطای کاربر به حجم غیرعادی منجر نشود.",
+      "keywords": [
+        "حداکثر حجم",
+        "سقف لات",
+        "حجم غیرعادی"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0028",
+        "ACA-EXP-0036"
+      ],
+      "related_questions": [
+        "چرا حجم خیلی بزرگ شد؟",
+        "سقف حجم بذارم؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0030",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "تنظیم «حداکثر ضرر روزانه» و چرایی اهمیت آن",
+      "language": "fa",
+      "chunk_text": "شما مشخص می‌کنید در طول یک روز حداکثر چند درصد از حساب را حاضرید از دست بدهید. اگر مجموع ضررهای همان روز به این مقدار برسد، اکسپرت دیگر اجازه‌ی باز کردن معامله‌ی جدید نمی‌دهد و بهتر است معامله را به روز بعد موکول کنید. با مقدار **صفر** این محدودیت غیرفعال می‌شود.\n**چرا مهم است:** بسیاری از معامله‌گران بعد از چند معامله‌ی ناموفق از روی احساسات وارد معامله‌ی جدید می‌شوند تا ضرر را جبران کنند؛ سند رسمی این را «یکی از رایج‌ترین دلایل از دست دادن حساب معاملاتی» می‌داند. این قابلیت معاملات را متوقف می‌کند تا با آرامش شرایط بازار را دوباره بررسی کنید.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش چهارم — پرسش‌های ۷ تا ۱۰",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "rule": "سقف ضرر روزانه فعال و متناسب با پلن تنظیم شود؛ رسیدن به آن یعنی توقف معامله تا روز بعد.",
+      "keywords": [
+        "حداکثر ضرر روزانه",
+        "توقف معامله",
+        "جبران ضرر",
+        "معامله احساسی"
+      ],
+      "related_concepts": [
+        "PSY-PAT-0002",
+        "ACA-INT-0176",
+        "ACA-EXP-0006"
+      ],
+      "related_questions": [
+        "ضرر روزانه چیه؟",
+        "چرا دیگه معامله باز نمی‌کنه؟",
+        "چطور جلوی ریونج ترید رو بگیرم؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0031",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "تنظیم «حداکثر اسپرد مجاز»",
+      "language": "fa",
+      "chunk_text": "اکسپرت پیش از باز کردن معامله مقدار اسپرد را بررسی می‌کند؛ اگر اسپرد از مقدار تعیین‌شده بیشتر باشد، معامله باز نمی‌شود.\nاسپرد ممکن است به‌طور موقت زیاد شود در: **زمان انتشار اخبار مهم اقتصادی، باز و بسته شدن بازار، ساعات کم‌حجم بازار، و نوسانات شدید**. سند رسمی می‌گوید ورود به معامله در چنین شرایطی معمولاً منطقی نیست، و اگر معامله باز نشد، اسپرد می‌تواند یکی از علت‌ها باشد.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش چهارم — پرسش‌های ۱۱ تا ۱۳",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BROKER_DEPENDENT",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "rule": "اکسپرت با اسپرد بالاتر از حد مجاز معامله باز نمی‌کند — این محافظت است، نه خطا.",
+      "keywords": [
+        "اسپرد",
+        "اخبار",
+        "نوسان",
+        "ساعات کم‌حجم"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0006",
+        "ACA-EXP-0035",
+        "GEN-DEF-0003"
+      ],
+      "related_questions": [
+        "اسپرد چرا زیاد می‌شه؟",
+        "چرا وقت خبر معامله باز نشد؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0032",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "ریسک پیش‌فرض و حد سود پیش‌فرض",
+      "language": "fa",
+      "chunk_text": "**ریسک پیش‌فرض معاملات:** تعیین می‌کند هنگام اجرای اکسپرت، مقدار اولیه‌ی ریسک روی چند درصد باشد؛ مثلاً با تنظیم ۱ درصد، هر بار اکسپرت با ریسک ۱ درصد بالا می‌آید. پیش از هر معامله می‌توان این مقدار را تغییر داد.\nبرای معاملات **Market** و **Pending** می‌توان مقدار پیش‌فرض جداگانه تعیین کرد — هم برای ریسک و هم برای Take Profit.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش چهارم — پرسش‌های ۱۴ تا ۱۶",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "keywords": [
+        "ریسک پیش‌فرض",
+        "TP پیش‌فرض",
+        "Market",
+        "Pending"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0026",
+        "ACA-INT-0175"
+      ],
+      "related_questions": [
+        "ریسک پیش‌فرض چطور تنظیم می‌شه؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0033",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "میانبرهای کیبورد (Hotkey) در اکسپرت",
+      "language": "fa",
+      "chunk_text": "Hotkey اجازه می‌دهد بدون کلیک کردن روی گزینه‌های اکسپرت، امکانات را سریع‌تر اجرا کنید — به‌ویژه وقتی نمودار شلوغ است یا ابزار اکسپرت در گوشه‌ی دیگری از صفحه است.\nابتدا باید در تنظیمات اکسپرت گزینه‌ی فعال‌سازی Hotkey روشن شود. کلیدها:\n• **R** — فعال کردن سریع Risk Line روی نمودار\n• **Tab** — باز کردن معامله‌ی Market پس از مشخص شدن Risk Line\n• **P** — فعال کردن ابزار Pending Line\n• **Enter** — ثبت سفارش Pending پس از تنظیم خطوط\n• **Backspace** — بستن تمام معاملات باز",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش پنجم — پرسش‌های ۱ تا ۷",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "warnings": [
+        "کلید Backspace بلافاصله همه‌ی معاملات باز را می‌بندد."
+      ],
+      "keywords": [
+        "Hotkey",
+        "میانبر",
+        "کلید R",
+        "Tab",
+        "Backspace"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0019",
+        "ACA-EXP-0021",
+        "ACA-EXP-0025",
+        "ACA-EXP-0034"
+      ],
+      "related_questions": [
+        "میانبرها چیه؟",
+        "با کیبورد چطور معامله باز کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0034",
+      "object_type": "TROUBLESHOOTING",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "میانبرهای کیبورد کار نمی‌کنند",
+      "language": "fa",
+      "chunk_text": "چهار مورد باید هم‌زمان برقرار باشد تا Hotkey کار کند.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش پنجم — پرسش ۸",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "symptoms": [
+        "فشردن کلیدهای R، Tab، P، Enter یا Backspace هیچ اثری ندارد."
+      ],
+      "causes": [
+        "گزینه‌ی Hotkey در تنظیمات فعال نیست.",
+        "اکسپرت دیگر روی نمودار فعال نیست.",
+        "Algo Trading خاموش است.",
+        "نمودار متاتریدر فعال و انتخاب‌شده نیست."
+      ],
+      "resolutions": [
+        "گزینه‌ی Hotkey را در تنظیمات اکسپرت فعال کنید.",
+        "مطمئن شوید اکسپرت هنوز روی نمودار قرار دارد.",
+        "Algo Trading را روشن کنید.",
+        "یک بار روی خود نمودار کلیک کنید تا فعال شود، سپس کلید را بزنید."
+      ],
+      "keywords": [
+        "Hotkey",
+        "کار نمی‌کند",
+        "کیبورد"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0033",
+        "ACA-EXP-0005"
+      ],
+      "related_questions": [
+        "کلیدهای میانبر کار نمی‌کنه"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0035",
+      "object_type": "TROUBLESHOOTING",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "اکسپرت اصلاً معامله باز نمی‌کند — پنج علت رسمی",
+      "language": "fa",
+      "chunk_text": "سند رسمی پنج علت را برای باز نشدن معامله فهرست کرده است.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش پنجم — پرسش ۹",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "symptoms": [
+        "اکسپرت روی چارت هست ولی هیچ معامله‌ای باز نمی‌کند."
+      ],
+      "causes": [
+        "Algo Trading خاموش است و اکسپرت اجازه‌ی ارسال سفارش ندارد.",
+        "بازار بسته است.",
+        "اسپرد بیشتر از مقدار تعیین‌شده است.",
+        "به سقف ضرر روزانه رسیده‌اید و تا پایان روز معامله‌ی جدید باز نمی‌شود.",
+        "حجم محاسبه‌شده خارج از محدودیت‌های بروکر است."
+      ],
+      "resolutions": [
+        "Algo Trading را روشن کنید.",
+        "ساعت بازار و باز بودن نماد را بررسی کنید.",
+        "مقدار اسپرد لحظه‌ای را با سقف مجاز مقایسه کنید.",
+        "وضعیت سقف ضرر روزانه را بررسی کنید.",
+        "حجم و فاصله‌ی حد ضرر را با حداقل/حداکثر مجاز بروکر بسنجید."
+      ],
+      "keywords": [
+        "معامله باز نمی‌شود",
+        "بازار بسته",
+        "اسپرد",
+        "ضرر روزانه",
+        "حجم"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0005",
+        "ACA-EXP-0006",
+        "ACA-EXP-0030",
+        "ACA-EXP-0031"
+      ],
+      "related_questions": [
+        "چرا هیچ معامله‌ای باز نمی‌شه؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0036",
+      "object_type": "TROUBLESHOOTING",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "اکسپرت حجم را صفر یا غیرعادی نشان می‌دهد",
+      "language": "fa",
+      "chunk_text": "حجم صفر یا غیرعادی معمولاً به ورودی‌های معامله یا مشخصات نماد برمی‌گردد، نه به خطای اکسپرت.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش پنجم — پرسش‌های ۱۰ و ۱۱",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BROKER_DEPENDENT",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "symptoms": [
+        "حجم نمایش‌داده‌شده صفر است یا عددی به‌وضوح غیرعادی است."
+      ],
+      "causes": [
+        "حد ضرر مشخص نشده است.",
+        "فاصله‌ی ورود تا حد ضرر بسیار کم یا بسیار زیاد است.",
+        "مشخصات نماد در این بروکر متفاوت است.",
+        "حساب یا نماد موردنظر محدودیت حجمی دارد."
+      ],
+      "resolutions": [
+        "ابتدا Risk Line را روی محل حد ضرر قرار دهید.",
+        "فاصله‌ی حد ضرر را منطقی کنید.",
+        "مشخصات نماد را در Market Watch بررسی کنید.",
+        "روی دموی همان بروکر تست بگیرید."
+      ],
+      "warnings": [
+        "حجم را اکسپرت بر اساس ریسک، فاصله‌ی حد ضرر، موجودی حساب و قوانین حجم بروکر می‌سازد؛ حجم دلخواه دستی انتخاب نمی‌شود."
+      ],
+      "keywords": [
+        "حجم صفر",
+        "حجم غیرعادی",
+        "مشخصات نماد"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0010",
+        "ACA-EXP-0029",
+        "ACA-EXP-0007"
+      ],
+      "related_questions": [
+        "حجم صفر می‌ده",
+        "چرا حجمی که می‌خوام باز نمی‌شه؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0037",
+      "object_type": "TROUBLESHOOTING",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "علامت قرمز کنار نام اکسپرت روی چارت",
+      "language": "fa",
+      "chunk_text": "این علامت معمولاً یعنی اکسپرت فعال نیست یا Algo Trading خاموش است.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش پنجم — پرسش ۱۲",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "symptoms": [
+        "کنار نام اکسپرت در گوشه‌ی چارت علامت قرمز دیده می‌شود."
+      ],
+      "causes": [
+        "Algo Trading خاموش است.",
+        "اجازه‌ی معامله برای اکسپرت فعال نشده است.",
+        "اکسپرت درست روی چارت قرار نگرفته است."
+      ],
+      "resolutions": [
+        "Algo Trading را روشن کنید.",
+        "در تنظیمات اکسپرت، اجازه‌ی معامله را فعال کنید.",
+        "اکسپرت را دوباره روی چارت بیندازید."
+      ],
+      "keywords": [
+        "علامت قرمز",
+        "غیرفعال",
+        "Algo Trading"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0005",
+        "ACA-EXP-0039"
+      ],
+      "related_questions": [
+        "چرا کنار اکسپرت ضربدر قرمزه؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0038",
+      "object_type": "TROUBLESHOOTING",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "سفارش Pending ثبت نمی‌شود",
+      "language": "fa",
+      "chunk_text": "چهار علت رایج برای ثبت نشدن سفارش Pending.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش پنجم — پرسش ۱۴",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BROKER_DEPENDENT",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "symptoms": [
+        "سفارش Pending ثبت نمی‌شود یا بلافاصله رد می‌شود."
+      ],
+      "causes": [
+        "محل ورود اشتباه انتخاب شده است.",
+        "فاصله‌ی سفارش با قیمت فعلی کمتر از حد مجاز بروکر است.",
+        "حد ضرر در محل صحیح قرار نگرفته است.",
+        "بازار نوسان زیادی دارد و قیمت از محل تعیین‌شده عبور کرده است."
+      ],
+      "resolutions": [
+        "محل ورود را نسبت به قیمت فعلی بازبینی کنید.",
+        "فاصله‌ی سفارش تا قیمت فعلی را بیشتر کنید (حداقل فاصله‌ی مجاز بروکر).",
+        "محل حد ضرر را اصلاح کنید.",
+        "در نوسان شدید صبر کنید تا بازار آرام شود."
+      ],
+      "keywords": [
+        "Pending",
+        "ثبت نمی‌شود",
+        "حداقل فاصله"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0021",
+        "ACA-EXP-0022"
+      ],
+      "related_questions": [
+        "اردر پندینگم ثبت نشد"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0039",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "اعمال تنظیمات جدید: اکسپرت باید دوباره اجرا شود",
+      "language": "fa",
+      "chunk_text": "پس از تغییر بعضی تنظیمات، لازم است اکسپرت دوباره روی نمودار اجرا شود تا تنظیمات جدید اعمال گردد.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش پنجم — پرسش ۱۳",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "steps": [
+        "اکسپرت را از روی نمودار حذف کنید.",
+        "دوباره آن را روی نمودار قرار دهید.",
+        "تنظیمات جدید را اعمال کنید."
+      ],
+      "keywords": [
+        "تنظیمات جدید",
+        "اجرای مجدد",
+        "اعمال نمی‌شود"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0037",
+        "ACA-EXP-0042"
+      ],
+      "related_questions": [
+        "تنظیماتم اعمال نمی‌شه"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0040",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "اجرای هم‌زمان اکسپرت روی چند نمودار",
+      "language": "fa",
+      "chunk_text": "می‌توان اکسپرت را هم‌زمان روی چند نمودار اجرا کرد، اما مدیریت معاملات و ریسک هر نمودار باید جداگانه بررسی شود.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش پنجم — پرسش ۱۶",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "BOTH",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "warnings": [
+        "ریسک کل حساب با اجرای هم‌زمان روی چند نمودار جمع می‌شود؛ سقف‌ها را جداگانه بسنجید."
+      ],
+      "keywords": [
+        "چند چارت",
+        "هم‌زمان",
+        "مدیریت ریسک"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0028",
+        "ACA-EXP-0030"
+      ],
+      "related_questions": [
+        "روی چند جفت‌ارز هم‌زمان بذارم؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0041",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "اکسپرت فقط روی ویندوز و مک اجرا می‌شود",
+      "language": "fa",
+      "chunk_text": "اکسپرت‌های متاتریدر **فقط روی نسخه‌ی دسکتاپ** متاتریدر اجرا می‌شوند.\n✅ **تأییدشده توسط مالک آکادمی (`D-0019`):**\n• **ویندوز** — کار می‌کند\n• **مک (مکینتاش)** — کار می‌کند\n• **اندروید** — کار **نمی‌کند**\n• **iOS (آیفون و آیپد)** — کار **نمی‌کند**\nاگر کاربر می‌خواهد اکسپرت همیشه فعال باشد بدون اینکه کامپیوترش روشن بماند، راهکار **VPS** است، نه موبایل (`ACA-EXP-0042`).\n⚠️ این موضوع با پلتفرم‌های پخش‌کننده‌ی دوره فرق دارد: اسپات پلیر روی اندروید هم کار می‌کند ولی روی iOS نه (`ACA-SUP-0007`).",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش پنجم — پرسش ۱۷",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "warnings": [
+        "کاربر موبایل باید پیش از برنامه‌ریزی بداند اکسپرت روی گوشی اجرا نمی‌شود."
+      ],
+      "keywords": [
+        "موبایل",
+        "iOS",
+        "اندروید",
+        "ویندوز",
+        "مک",
+        "دسکتاپ"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0042",
+        "ACA-SUP-0007",
+        "ACA-SUP-0001"
+      ],
+      "related_questions": [
+        "روی گوشی کار می‌کنه؟",
+        "روی آیفون نصب می‌شه؟",
+        "روی مک کار می‌کنه؟",
+        "روی اندروید چی؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0042",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "با خاموش شدن کامپیوتر، اکسپرت متوقف می‌شود",
+      "language": "fa",
+      "chunk_text": "برای فعال ماندن اکسپرت، متاتریدر باید باز و به اینترنت متصل باشد؛ با خاموش شدن کامپیوتر، اکسپرت به کار خود ادامه نمی‌دهد. اگر نیاز دارید اکسپرت دائماً فعال باشد، می‌توانید از **VPS** استفاده کنید.\nدرباره‌ی تنظیمات: اگر ذخیره شده باشند معمولاً قابل بازیابی‌اند، اما سند توصیه می‌کند پیش از تغییرات مهم از تنظیمات خود نسخه‌ی پشتیبان بگیرید.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش پنجم — پرسش‌های ۱۸ و ۱۹",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "keywords": [
+        "VPS",
+        "کامپیوتر خاموش",
+        "پشتیبان تنظیمات"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0039",
+        "ACA-EXP-0041"
+      ],
+      "related_questions": [
+        "اگه کامپیوترم خاموش بشه چی؟",
+        "وی‌پی‌اس لازمه؟"
+      ]
+    },
+    {
+      "id": "ACA-EXP-0043",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "اکسپرت SSProX",
+      "title": "اکسپرت جایگزین استراتژی و مدیریت سرمایه نیست",
+      "language": "fa",
+      "chunk_text": "این جمع‌بندی رسمی سند است و مرز نقش اکسپرت را تعیین می‌کند: اکسپرت فقط ابزار اجرای سریع‌تر و دقیق‌تر مدیریت سرمایه است.\n**انتخاب موقعیت معاملاتی، تحلیل بازار، رعایت قوانین استراتژی و تصمیم نهایی معامله همچنان بر عهده‌ی معامله‌گر است.**\nپس مربی نباید اکسپرت را به‌عنوان راه‌حل ضعف استراتژی یا جایگزین یادگیری معرفی کند.",
+      "source": {
+        "source_type": "ACADEMY_DOCUMENT",
+        "source_ref": "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "source_location": "بخش پنجم — پرسش ۲۰",
+        "author": "آکادمی سبحان صمدی — راهنمای رسمی اکسپرت SSProX نسخه ۱.۳"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "APPROVED",
+      "lifecycle_status": "ACTIVE",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:01:27Z",
+      "updated_at": "2026-09-05T22:01:27Z",
+      "rule": "اکسپرت ابزار اجراست، نه تصمیم‌گیر؛ مربی آن را جایگزین استراتژی، تحلیل یا آموزش معرفی نمی‌کند.",
+      "keywords": [
+        "جایگزین نیست",
+        "استراتژی",
+        "تصمیم معامله‌گر"
+      ],
+      "related_concepts": [
+        "ACA-EXP-0009",
+        "ACA-RULE-0002",
+        "ACA-RULE-0003",
+        "ACA-SUP-0015"
+      ],
+      "related_questions": [
+        "اکسپرت جای استراتژی رو می‌گیره؟",
+        "با اکسپرت سود می‌کنم؟"
+      ]
+    }
+  ]
+}

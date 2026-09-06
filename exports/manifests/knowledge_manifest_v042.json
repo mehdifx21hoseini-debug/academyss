@@ -1,0 +1,900 @@
+{
+  "manifest_type": "mentorai_knowledge_base",
+  "version": "v042",
+  "generated_at": "2026-09-05T22:31:01Z",
+  "generator": "tools/kb_build_manifest.py",
+  "schema_versions": {
+    "enums": "1.0.0"
+  },
+  "totals": {
+    "objects": 717,
+    "by_domain": {
+      "brokers": 3,
+      "psychology": 27,
+      "metatrader": 102,
+      "general_trading": 49,
+      "mentor_qa": 80,
+      "academy": 450,
+      "meta": 6
+    },
+    "by_object_type": {
+      "BROKER_RULE": 1,
+      "PSYCHOLOGY_PATTERN": 26,
+      "RULE": 95,
+      "METATRADER_PROCEDURE": 48,
+      "DEFINITION": 37,
+      "CONCEPT": 188,
+      "TROUBLESHOOTING": 25,
+      "COMPARISON": 17,
+      "GLOSSARY": 22,
+      "MENTOR_QA": 79,
+      "CONFLICT_RECORD": 10,
+      "REVIEW_ITEM": 36,
+      "CATALOG_ITEM": 16,
+      "OPERATIONAL_FACT": 36,
+      "PROCEDURE": 53,
+      "EXAMPLE": 17,
+      "COMMON_MISTAKE": 11
+    },
+    "by_authority": {
+      "ACADEMY_PRIMARY": 379,
+      "GENERAL_KNOWLEDGE": 166,
+      "EXTERNAL_METHODOLOGY": 7,
+      "MENTOR_VERIFIED": 79,
+      "<unset>": 46,
+      "ACADEMY_DERIVED": 40
+    },
+    "by_approval": {
+      "REVIEW_REQUIRED": 9,
+      "PENDING_VERIFICATION": 172,
+      "PENDING_REVIEW": 405,
+      "<unset>": 46,
+      "APPROVED": 85
+    },
+    "by_lifecycle": {
+      "PENDING_REVIEW": 586,
+      "<unset>": 46,
+      "ACTIVE": 85
+    },
+    "by_platform_scope": {
+      "MT4_ONLY": 41,
+      "NOT_APPLICABLE": 456,
+      "BOTH": 84,
+      "BROKER_DEPENDENT": 29,
+      "VERSION_DEPENDENT": 15,
+      "MT5_ONLY": 25,
+      "<unset>": 67
+    },
+    "by_source_type": {
+      "ACADEMY_COURSE_TRANSCRIPT": 309,
+      "MODEL_DRAFT": 173,
+      "MENTOR_CONVERSATION": 89,
+      "<unset>": 46,
+      "ACADEMY_APP_DATA": 12,
+      "ACADEMY_WEBSITE": 3,
+      "ACADEMY_DOCUMENT": 85
+    }
+  },
+  "verification_pending": 260,
+  "collections": [
+    {
+      "collection_id": "academy_recommended_broker",
+      "title": "بروکر معرفی‌شده‌ی آکادمی",
+      "domain": "brokers",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/brokers/academy_recommended_broker.json",
+      "object_count": 1,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_04.md"
+      ]
+    },
+    {
+      "collection_id": "psychology_patterns",
+      "title": "الگوهای روان‌شناسی معامله‌گری",
+      "domain": "psychology",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/psychology/psychology_patterns.json",
+      "object_count": 24,
+      "source_files": [
+        "tools/seed_psychology.py"
+      ]
+    },
+    {
+      "collection_id": "psychology_safety_policy",
+      "title": "مرز ایمنی لایه‌ی روان‌شناسی",
+      "domain": "psychology",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/psychology/psychology_safety_policy.json",
+      "object_count": 1,
+      "source_files": [
+        "tools/seed_psychology_safety.py"
+      ]
+    },
+    {
+      "collection_id": "metatrader_common_procedures",
+      "title": "رویه‌های مشترک متاتریدر ۴ و ۵",
+      "domain": "metatrader",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/metatrader/mt_common_procedures.json",
+      "object_count": 23,
+      "source_files": [
+        "tools/seed_mt_common.py"
+      ]
+    },
+    {
+      "collection_id": "metatrader_concepts",
+      "title": "مفاهیم پایه‌ی متاتریدر",
+      "domain": "metatrader",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/metatrader/mt_concepts.json",
+      "object_count": 16,
+      "source_files": [
+        "tools/seed_mt_concepts.py"
+      ]
+    },
+    {
+      "collection_id": "metatrader_troubleshooting",
+      "title": "عیب‌یابی خطاهای رایج متاتریدر",
+      "domain": "metatrader",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/metatrader/mt_troubleshooting.json",
+      "object_count": 17,
+      "source_files": [
+        "tools/seed_mt_troubleshooting.py"
+      ]
+    },
+    {
+      "collection_id": "metatrader_mt4_vs_mt5",
+      "title": "موتور تفاوت متاتریدر ۴ و ۵",
+      "domain": "metatrader",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/metatrader/comparison/mt4_vs_mt5.json",
+      "object_count": 12,
+      "source_files": [
+        "tools/seed_mt_comparison.py"
+      ]
+    },
+    {
+      "collection_id": "metatrader_mt4_core",
+      "title": "دانش پایه و رویه‌های متاتریدر ۴",
+      "domain": "metatrader",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/metatrader/mt4/mt4_core.json",
+      "object_count": 13,
+      "source_files": [
+        "tools/seed_mt4.py"
+      ]
+    },
+    {
+      "collection_id": "metatrader_mt5_core",
+      "title": "دانش پایه و رویه‌های متاتریدر ۵",
+      "domain": "metatrader",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/metatrader/mt5/mt5_core.json",
+      "object_count": 18,
+      "source_files": [
+        "tools/seed_mt5.py"
+      ]
+    },
+    {
+      "collection_id": "external_methodologies_quarantine",
+      "title": "قرنطینه‌ی روش‌های معاملاتی بیرونی",
+      "domain": "general_trading",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/general_trading/external_methodologies_quarantine.json",
+      "object_count": 7,
+      "source_files": [
+        "tools/seed_governance.py",
+        "MENTORAI_KB_CHARTER.md"
+      ]
+    },
+    {
+      "collection_id": "general_trading_mechanics",
+      "title": "مکانیزم بازار و محاسبات معامله‌گری",
+      "domain": "general_trading",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/general_trading/market_mechanics.json",
+      "object_count": 20,
+      "source_files": [
+        "tools/seed_general_mechanics.py"
+      ]
+    },
+    {
+      "collection_id": "general_trading_glossary",
+      "title": "واژه‌نامه‌ی دانش عمومی معامله‌گری",
+      "domain": "general_trading",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/general_trading/glossary/general_trading_glossary.json",
+      "object_count": 22,
+      "source_files": [
+        "tools/seed_general_trading.py"
+      ]
+    },
+    {
+      "collection_id": "mentor_qa_pack_01",
+      "title": "پرسش و پاسخ منتورینگ — بسته ۱ (۲۹ جولای تا ۴ آگوست ۲۰۲۶)",
+      "domain": "mentor_qa",
+      "record_kind": "mentor_qa",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/mentor_qa/structured/qa_pack_01.json",
+      "object_count": 26,
+      "source_files": [
+        "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "raw_sources/mentor_qa/mentor_qa_2026_07_29.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "mentor_qa_pack_02",
+      "title": "پرسش و پاسخ منتورینگ — بسته ۱، بخش فنی و عملیاتی",
+      "domain": "mentor_qa",
+      "record_kind": "mentor_qa",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/mentor_qa/structured/qa_pack_02.json",
+      "object_count": 16,
+      "source_files": [
+        "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "raw_sources/mentor_qa/mentor_qa_2026_07_29.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "mentor_qa_pack_03",
+      "title": "پرسش و پاسخ منتورینگ — بسته ۲ (۴ تا ۲۷ آگوست ۲۰۲۶)",
+      "domain": "mentor_qa",
+      "record_kind": "mentor_qa",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/mentor_qa/structured/qa_pack_03.json",
+      "object_count": 28,
+      "source_files": [
+        "raw_sources/mentor_qa/mentor_qa_2026_08_04.md",
+        "raw_sources/mentor_qa/mentor_qa_2026_08_04.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "mentor_qa_pack_04",
+      "title": "پرسش و پاسخ منتورینگ — بسته ۳ (۲۷ آگوست تا ۳ سپتامبر ۲۰۲۶)",
+      "domain": "mentor_qa",
+      "record_kind": "mentor_qa",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/mentor_qa/structured/qa_pack_04.json",
+      "object_count": 9,
+      "source_files": [
+        "raw_sources/mentor_qa/mentor_qa_2026_08_27.md",
+        "raw_sources/mentor_qa/mentor_qa_2026_08_27.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "conflict_registry",
+      "title": "دفتر ثبت تعارض‌ها",
+      "domain": "meta",
+      "record_kind": "conflict_record",
+      "version": "v001",
+      "pipeline_stage": "VALIDATED",
+      "file": "knowledge_base/conflicts/conflict_registry.json",
+      "object_count": 10,
+      "source_files": [
+        "index.html",
+        "js/data.js"
+      ]
+    },
+    {
+      "collection_id": "review_queue_open_items",
+      "title": "صف بازبینی انسانی",
+      "domain": "meta",
+      "record_kind": "review_item",
+      "version": "v001",
+      "pipeline_stage": "VALIDATED",
+      "file": "knowledge_base/review_queue/open_items.json",
+      "object_count": 36,
+      "source_files": [
+        "MENTORAI_KB_AUDIT.md"
+      ]
+    },
+    {
+      "collection_id": "academy_site_catalog",
+      "title": "کاتالوگ و اطلاعات عملیاتی آکادمی سبحان صمدی",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/catalog/academy_site_catalog.json",
+      "object_count": 15,
+      "source_files": [
+        "js/data.js",
+        "index.html",
+        "README.md",
+        "raw_sources/academy/site_data_v001.json"
+      ]
+    },
+    {
+      "collection_id": "kb_policy_rules",
+      "title": "قواعد حاکم بر پایگاه دانش و حفاظت از متدولوژی",
+      "domain": "meta",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "VALIDATED",
+      "file": "knowledge_base/academy/methodology/kb_policy_rules.json",
+      "object_count": 6,
+      "source_files": [
+        "MENTORAI_KB_CHARTER.md"
+      ]
+    },
+    {
+      "collection_id": "academy_psychology_lesson_p01",
+      "title": "درس روان‌شناسی و انضباط معامله‌گری — قسمت ۱",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/psychology/lesson_p01.json",
+      "object_count": 16,
+      "source_files": [
+        "raw_sources/academy/psychology/psychology_lesson_p01.txt",
+        "raw_sources/academy/psychology/psychology_lesson_p01.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_eq_lesson_01",
+      "title": "دوره‌ی رایگان هوش هیجانی (EQ) — بخش اول از چهار بخش",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/eq/lesson_01.json",
+      "object_count": 16,
+      "source_files": [
+        "raw_sources/academy/eq/eq_lesson_1.md",
+        "raw_sources/academy/eq/eq_lesson_1.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_eq_lesson_02",
+      "title": "دوره‌ی رایگان هوش هیجانی (EQ) — بخش دوم از چهار بخش",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/eq/lesson_02.json",
+      "object_count": 8,
+      "source_files": [
+        "raw_sources/academy/eq/eq_lesson_2.md",
+        "raw_sources/academy/eq/eq_lesson_2.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_eq_lesson_03",
+      "title": "دوره‌ی رایگان هوش هیجانی (EQ) — بخش سوم از چهار بخش",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/eq/lesson_03.json",
+      "object_count": 17,
+      "source_files": [
+        "raw_sources/academy/eq/eq_lesson_3.md",
+        "raw_sources/academy/eq/eq_lesson_3.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_response_policies",
+      "title": "سیاست‌های پاسخ‌گویی مربی",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "VALIDATED",
+      "file": "knowledge_base/academy/rules/academy_response_policies.json",
+      "object_count": 5,
+      "source_files": [
+        "MENTORAI_KB_DECISIONS.md"
+      ]
+    },
+    {
+      "collection_id": "academy_support_bot_policy",
+      "title": "سیاست‌های رسمی پشتیبانی آکادمی (سند v1.0)",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "VALIDATED",
+      "file": "knowledge_base/academy/rules/support_bot_policy.json",
+      "object_count": 17,
+      "source_files": [
+        "raw_sources/academy/support_bot_kb_v1.md",
+        "raw_sources/academy/support_bot_kb_v1.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_tools",
+      "title": "ابزارهای رسمی آکادمی",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/operations/academy_tools.json",
+      "object_count": 1,
+      "source_files": [
+        "raw_sources/mentor_qa/mentor_qa_2026_08_27.md"
+      ]
+    },
+    {
+      "collection_id": "academy_clarifications",
+      "title": "رفع ابهام‌های تأییدشده",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "VALIDATED",
+      "file": "knowledge_base/academy/operations/clarifications.json",
+      "object_count": 4,
+      "source_files": [
+        "MENTORAI_KB_DECISIONS.md"
+      ]
+    },
+    {
+      "collection_id": "academy_mentor_style",
+      "title": "لحن و ساختار پاسخ منتورهای آکادمی",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/operations/mentor_style.json",
+      "object_count": 10,
+      "source_files": [
+        "raw_sources/mentor_qa/mentor_qa_2026_07_29.md",
+        "raw_sources/mentor_qa/mentor_qa_2026_07_29.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_support_bot_style",
+      "title": "لحن رسمی ربات پشتیبانی آکادمی",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "VALIDATED",
+      "file": "knowledge_base/academy/operations/support_bot_style.json",
+      "object_count": 9,
+      "source_files": [
+        "raw_sources/academy/support_bot_kb_v1.md",
+        "raw_sources/academy/support_bot_kb_v1.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_ssprox_faq",
+      "title": "راهنمای رسمی اکسپرت SSProX (نسخه ۱.۳)",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "VALIDATED",
+      "file": "knowledge_base/academy/tools/ssprox_faq.json",
+      "object_count": 43,
+      "source_files": [
+        "raw_sources/academy/ssprox_expert_faq_v13.md",
+        "raw_sources/academy/ssprox_expert_faq_v13.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_01",
+      "title": "دوره مقدماتی — جلسه ۱: معاملگری حرکات قیمت",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_01.json",
+      "object_count": 19,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_01.md",
+        "raw_sources/academy/intro/intro_lesson_01.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_02",
+      "title": "دوره مقدماتی — جلسه ۲: آشنایی با فارکس و مفاهیم پایه",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_02.json",
+      "object_count": 26,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_02.md",
+        "raw_sources/academy/intro/intro_lesson_02.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_03",
+      "title": "دوره مقدماتی — جلسه ۳: دلیل حرکت قیمت و بررسی سیستم‌های معاملاتی",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_03.json",
+      "object_count": 23,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_03.md",
+        "raw_sources/academy/intro/intro_lesson_03.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_04",
+      "title": "دوره مقدماتی — جلسه ۴: ثبت‌نام در بروکر، دانلود و اتصال متاتریدر",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_04.json",
+      "object_count": 15,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_04.md",
+        "raw_sources/academy/intro/intro_lesson_04.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_05",
+      "title": "دوره مقدماتی — جلسه ۵: آشنایی کامل با متاتریدر ۴",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_05.json",
+      "object_count": 25,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_05.md",
+        "raw_sources/academy/intro/intro_lesson_05.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_06",
+      "title": "دوره مقدماتی — جلسه ۶: آشنایی با متاتریدر ۵",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_06.json",
+      "object_count": 10,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_06.md",
+        "raw_sources/academy/intro/intro_lesson_06.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_07",
+      "title": "دوره مقدماتی — جلسه ۷: پیپ، پیپت، لات و لوریج",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_07.json",
+      "object_count": 12,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_07.md",
+        "raw_sources/academy/intro/intro_lesson_07.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_08a",
+      "title": "دوره مقدماتی — جلسه ۸ (قسمت اول): کندل‌شناسی",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_08a.json",
+      "object_count": 13,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_08a.md",
+        "raw_sources/academy/intro/intro_lesson_08a.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_09",
+      "title": "دوره مقدماتی — جلسه ۹: باز کردن معامله، انواع اردر و مدیریت ریسک",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_09.json",
+      "object_count": 16,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_09.md",
+        "raw_sources/academy/intro/intro_lesson_09.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_10",
+      "title": "دوره مقدماتی — جلسه ۱۰: بالانس، اکویتی، مارجین و مدیریت ریسک",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_10.json",
+      "object_count": 14,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_10.md",
+        "raw_sources/academy/intro/intro_lesson_10.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_11",
+      "title": "دوره مقدماتی — جلسه ۱۱: پرایس اکشن چیست",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_11.json",
+      "object_count": 13,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_11.md",
+        "raw_sources/academy/intro/intro_lesson_11.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_12",
+      "title": "دوره مقدماتی — جلسه ۱۲: پین‌بار و الگوهای شمعی",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_12.json",
+      "object_count": 11,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_12.md",
+        "raw_sources/academy/intro/intro_lesson_12.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_13",
+      "title": "دوره مقدماتی — جلسه ۱۳: روندها و نحوه‌ی شناسایی آن‌ها",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_13.json",
+      "object_count": 10,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_13.md",
+        "raw_sources/academy/intro/intro_lesson_13.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_14",
+      "title": "دوره مقدماتی — جلسه ۱۴: بررسی کندل به کندل و کی بار",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_14.json",
+      "object_count": 11,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_14.md",
+        "raw_sources/academy/intro/intro_lesson_14.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_15",
+      "title": "دوره مقدماتی — جلسه ۱۵: واریز و برداشت با تتر",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_15.json",
+      "object_count": 12,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_15.md",
+        "raw_sources/academy/intro/intro_lesson_15.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_16",
+      "title": "دوره مقدماتی — جلسه ۱۶: واریز و برداشت، نکات تکمیلی در شرایط تحریم",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_16.json",
+      "object_count": 8,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_16.md",
+        "raw_sources/academy/intro/intro_lesson_16.ingest.json"
+      ]
+    },
+    {
+      "collection_id": "academy_intro_lesson_17",
+      "title": "دوره مقدماتی — جلسه ۱۷ (پایانی): جمع‌بندی و مسیر پیش رو",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/intro/lesson_17.json",
+      "object_count": 13,
+      "source_files": [
+        "raw_sources/academy/intro/intro_lesson_17.md",
+        "raw_sources/academy/intro/intro_lesson_17.ingest.json"
+      ]
+    }
+  ],
+  "open_conflicts": [
+    {
+      "id": "CONF-0001",
+      "topic": "حجم واقعی محتوای صوتی منتشرشده‌ی آکادمی",
+      "priority": "P1"
+    }
+  ],
+  "open_review_items": [
+    {
+      "id": "RQ-0001",
+      "title": "محتوای دوره‌های آکادمی در مخزن موجود نیست",
+      "priority": "P0",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0002",
+      "title": "دیتاست پرسش و پاسخ منتور موجود نیست",
+      "priority": "P0",
+      "domain": "mentor_qa"
+    },
+    {
+      "id": "RQ-0003",
+      "title": "دوره‌ی روان‌شناسی آکادمی دریافت نشده است",
+      "priority": "P1",
+      "domain": "psychology"
+    },
+    {
+      "id": "RQ-0004",
+      "title": "مستندات رسمی بروکر معرفی‌شده دریافت نشده است",
+      "priority": "P1",
+      "domain": "brokers"
+    },
+    {
+      "id": "RQ-0005",
+      "title": "احتمال نمونه/دمو بودن محتوای سایت",
+      "priority": "P1",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0006",
+      "title": "شرایط و قیمت منتورینگ مشخص نیست",
+      "priority": "P1",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0007",
+      "title": "دانش متاتریدر ساخته شد اما تأیید نشده است",
+      "priority": "P1",
+      "domain": "metatrader"
+    },
+    {
+      "id": "RQ-0008",
+      "title": "متدولوژی رسمی آکادمی هنوز کامل مستند نشده است",
+      "priority": "P0",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0011",
+      "title": "متن و مسیر ارجاع در موقعیت‌های حساس روانی تأیید نشده است",
+      "priority": "P1",
+      "domain": "psychology"
+    },
+    {
+      "id": "RQ-0012",
+      "title": "اولین فایل ترنسکریپت دوره فاقد گفتار است",
+      "priority": "P0",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0013",
+      "title": "نام دوره و شماره‌ی جلسه‌ی ترنسکریپت دوم مشخص نیست",
+      "priority": "P2",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0014",
+      "title": "مفاهیم نام‌برده‌شده در جلسه‌ی اول هنوز تعریف نشده‌اند",
+      "priority": "P2",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0019",
+      "title": "معادل‌سازی کندل پوشاننده با «پین‌بار قوی» نیازمند عبارت دقیق است",
+      "priority": "P2",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0023",
+      "title": "شماره‌گذاری بخش‌های دوره‌ی پیشرفته هم‌خوان نیست",
+      "priority": "P2",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0025",
+      "title": "تأیید پروفایل لحن منتور برای استفاده‌ی مربی",
+      "priority": "P1",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0033",
+      "title": "اعداد درصدی درس هوش هیجانی منبع ندارند",
+      "priority": "P2",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0034",
+      "title": "انتساب آزمایش مارشمالو به «آقای بارون» قابل تأیید نیست",
+      "priority": "P2",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0035",
+      "title": "سه بخش دیگر دوره‌ی هوش هیجانی دریافت نشده است",
+      "priority": "P1",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0036",
+      "title": "مؤلفه‌ی «مدیریت استرس» در دوره‌ی هوش هیجانی تدریس نشده است",
+      "priority": "P1",
+      "domain": "academy"
+    }
+  ],
+  "source_coverage": {
+    "academy_course_material": {
+      "state": "MISSING",
+      "note": "هیچ ترنسکریپت یا سند دوره‌ای دریافت نشده (RQ-0001)."
+    },
+    "academy_methodology": {
+      "state": "MISSING",
+      "note": "سند متدولوژی رسمی وجود ندارد (RQ-0008)."
+    },
+    "academy_catalog": {
+      "state": "PARTIAL",
+      "note": "از سایت استخراج شد؛ نیازمند تأیید (RQ-0005)."
+    },
+    "mentor_qa": {
+      "state": "MISSING",
+      "note": "دیتاست گفت‌وگو دریافت نشده (RQ-0002)."
+    },
+    "metatrader_mt4": {
+      "state": "SEED",
+      "note": "نمونه‌ی اولیه، تأییدنشده (RQ-0007)."
+    },
+    "metatrader_mt5": {
+      "state": "SEED",
+      "note": "نمونه‌ی اولیه، تأییدنشده (RQ-0007)."
+    },
+    "brokers": {
+      "state": "MISSING",
+      "note": "بروکر مشخص نشده (RQ-0004)."
+    },
+    "psychology": {
+      "state": "SEED",
+      "note": "دوره‌ی روان‌شناسی آکادمی دریافت نشده (RQ-0003)."
+    },
+    "general_trading": {
+      "state": "SEED",
+      "note": "واژه‌نامه‌ی پایه ساخته شد؛ تأییدنشده."
+    }
+  }
+}

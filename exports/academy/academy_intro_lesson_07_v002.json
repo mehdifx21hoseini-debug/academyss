@@ -1,0 +1,504 @@
+{
+  "collection_id": "academy_intro_lesson_07",
+  "domain": "academy",
+  "title": "دوره مقدماتی — جلسه ۷: پیپ، پیپت، لات و لوریج",
+  "description": "واحدهای اندازه‌گیری بازار و محاسبه‌ی سود و زیان: پیپ و پیپت، تشخیص آن‌ها در جفت‌ارزهای مختلف، انواع لات، ارزش هر پیپ، و مفهوم لوریج.",
+  "version": "v001",
+  "generated_at": "2026-09-05T19:11:22Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "raw_sources/academy/intro/intro_lesson_07.md",
+    "raw_sources/academy/intro/intro_lesson_07.ingest.json"
+  ],
+  "notes": [
+    "قاعده‌ی مرجع برای پاسخ‌گویی، رکورد ACA-INT-0126 (هر پیپ ≈ ۱۰ دلار در یک لات) است.",
+    "فرمول بخش ۷ و عدد ۹.۰۵ به تصمیم مالک پروژه (D-0006) به‌کلی حذف شدند؛ متن اصلی فقط در ترنسکریپت خام باقی است و مربی این فرمول را ارائه نمی‌دهد.",
+    "اعداد ارزش پیپ برای USD/JPY و طلا وابسته به نرخ روز و بروکرند و به‌عنوان ثابت ثبت نشدند."
+  ],
+  "objects": [
+    {
+      "id": "ACA-INT-0120",
+      "object_type": "DEFINITION",
+      "domain": "academy",
+      "title": "پیپ: واحد اندازه‌گیری تغییر قیمت",
+      "language": "fa",
+      "chunk_text": "پیپ واحد اندازه‌گیری تغییرات قیمت در بازار فارکس است. مدرس آن را با واحدهای اندازه‌گیری دیگر مقایسه می‌کند: همان‌طور که طول را با متر و سانتی‌متر و وزن را با کیلوگرم و گرم می‌سنجیم، تغییر قیمت را با پیپ می‌سنجیم. به‌جای اینکه بگوییم قیمت از فلان عدد به فلان عدد رفت، می‌گوییم صد پیپ تغییر کرد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_07.md",
+        "source_location": "بخش ۲",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۷",
+        "section": "بخش ۲",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "واحد تغییرات قیمت در این مارکت میشه پیپ … هر چیزی واحد تغییرات داره … می‌گیم صد پیپ تغییر کرد. واحد اندازه‌گیریش می‌شه پیپ."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
+      "definition": "پیپ: واحد استاندارد اندازه‌گیری تغییر قیمت در بازار فارکس.",
+      "keywords": [
+        "پیپ",
+        "pip",
+        "واحد اندازه‌گیری"
+      ],
+      "related_concepts": [
+        "GEN-DEF-0001",
+        "MT-CONC-0003"
+      ],
+      "related_questions": [
+        "پیپ یعنی چی؟",
+        "چرا با پیپ اندازه می‌گیرن؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0121",
+      "object_type": "DEFINITION",
+      "domain": "academy",
+      "title": "پیپت: یک دهم پیپ",
+      "language": "fa",
+      "chunk_text": "پیپت یک دهم پیپ است؛ یعنی هر پیپ تقسیم بر ده. در نمایش قیمت، پیپت رقم اضافه‌ای است که پس از رقم پیپ می‌آید.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_07.md",
+        "source_location": "بخش ۲",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۷",
+        "section": "بخش ۲",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "پیپت چیست؟ یک دهم پیپه. هر یک پیپ تقسیم بر ده می‌شه پیپت."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
+      "definition": "پیپت: یک دهم پیپ.",
+      "keywords": [
+        "پیپت",
+        "pipette",
+        "point"
+      ],
+      "related_concepts": [
+        "ACA-INT-0120",
+        "MT-CONC-0003",
+        "GEN-DEF-0002"
+      ],
+      "related_questions": [
+        "پیپت چیه؟",
+        "فرق پیپ و پیپت چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0122",
+      "object_type": "RULE",
+      "domain": "academy",
+      "title": "تشخیص پیپ و پیپت در جفت‌ارزهای مختلف",
+      "language": "fa",
+      "chunk_text": "قاعده‌ی تشخیص بر اساس نوع جفت‌ارز است. در جفت‌ارزهایی مانند EUR/USD و GBP/USD، رقم چهارم بعد از اعشار پیپ و رقم پنجم پیپت است. در جفت‌ارزهای دارای ین ژاپن مانند USD/JPY، رقم دوم بعد از اعشار پیپ و رقم سوم پیپت است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_07.md",
+        "source_location": "بخش ۳ (نسخه‌ی ساختاریافته)",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۷",
+        "section": "بخش ۳ (نسخه‌ی ساختاریافته)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "در جفت‌ارزهایی مثل EUR/USD, GBP/USD: رقم چهارم بعد از اعشار = پیپ، رقم پنجم = پیپت. در جفت‌ارزهایی مثل USD/JPY: رقم دوم بعد از اعشار = پیپ، رقم سوم = پیپت."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
+      "rule": "جفت‌ارزهای معمولی: پیپ = رقم چهارم اعشار. جفت‌ارزهای ین: پیپ = رقم دوم اعشار.",
+      "keywords": [
+        "پیپ",
+        "ین",
+        "USDJPY",
+        "اعشار"
+      ],
+      "related_concepts": [
+        "MT-CONC-0003",
+        "GEN-DEF-0001"
+      ],
+      "related_questions": [
+        "پیپ توی ین چطور حساب می‌شه؟",
+        "کدوم رقم پیپه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0123",
+      "object_type": "EXAMPLE",
+      "domain": "academy",
+      "title": "محاسبه‌ی تعداد پیپ با مثال",
+      "language": "fa",
+      "chunk_text": "تعداد پیپ از تفاضل قیمت جدید و قیمت قدیم به دست می‌آید. نمونه‌هایی که در درس آمده: از ۱.۱۰۵۰ به ۱.۱۰۷۰ برابر ۲۰ پیپ؛ از ۱.۱۰۵۰ به ۱.۲۰۵۰ برابر ۱۰۰۰ پیپ؛ و در USD/JPY از ۱۴۵.۲۰ به ۱۴۵.۳۰ برابر ۱۰ پیپ.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_07.md",
+        "source_location": "بخش ۴ (نسخه‌ی ساختاریافته)",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۷",
+        "section": "بخش ۴ (نسخه‌ی ساختاریافته)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "از 1.1050 به 1.1070 = ۲۰ پیپ تغییر … از 1.1050 به 1.2050 = ۱۰۰۰ پیپ تغییر … از 145.20 به 145.30 = ۱۰ پیپ تغییر (USD/JPY)"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
+      "examples": [
+        "EUR/USD: ۱.۱۰۵۰ → ۱.۱۰۷۰ = ۲۰ پیپ",
+        "EUR/USD: ۱.۱۰۵۰ → ۱.۲۰۵۰ = ۱۰۰۰ پیپ",
+        "USD/JPY: ۱۴۵.۲۰ → ۱۴۵.۳۰ = ۱۰ پیپ"
+      ],
+      "keywords": [
+        "محاسبه پیپ",
+        "مثال"
+      ],
+      "related_concepts": [
+        "ACA-INT-0122"
+      ],
+      "related_questions": [
+        "چند پیپ حرکت کرده؟",
+        "پیپ رو چطور بشمارم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0124",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "چرا شناخت دقیق پیپ مهم است",
+      "language": "fa",
+      "chunk_text": "مدرس تأکید می‌کند دانستن دقیق پیپ برای معامله‌گر ضروری است، چون دو چیز بر پایه‌ی آن محاسبه می‌شود: مقدار جابه‌جایی قیمت و میزان ریسک. بدون این، محاسبه‌ی سود و زیان و اندازه‌ی ریسک ممکن نیست.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_07.md",
+        "source_location": "بخش ۲",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۷",
+        "section": "بخش ۲",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "داشتن اطلاعات دقیق در رابطه با پیپ اهمیت بسیاری داره … ۱. مقدار جابه‌جایی برای شما مهمه ۲. میزان ریسک مهمه"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
+      "keywords": [
+        "پیپ",
+        "ریسک",
+        "محاسبه سود"
+      ],
+      "related_concepts": [
+        "GEN-CONC-0009",
+        "GEN-DEF-0018"
+      ],
+      "related_questions": [
+        "چرا پیپ مهمه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0125",
+      "object_type": "DEFINITION",
+      "domain": "academy",
+      "title": "لات و انواع آن",
+      "language": "fa",
+      "chunk_text": "لات واحد اندازه‌گیری حجم معامله است. یک لات استاندارد برابر ۱۰۰٬۰۰۰ واحد از ارز پایه است. انواع دیگر: مینی‌لات ۰.۱ لات برابر ۱۰٬۰۰۰ واحد؛ میکرولات ۰.۰۱ لات برابر ۱٬۰۰۰ واحد؛ و نانولات ۰.۰۰۱ لات برابر ۱۰۰ واحد. یعنی باز کردن یک لات در EUR/USD به معنای خرید یا فروش ۱۰۰٬۰۰۰ یورو است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_07.md",
+        "source_location": "بخش ۵",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۷",
+        "section": "بخش ۵",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "لات = واحد اندازه‌گیری حجم معاملات. یک لات استاندارد = ۱۰۰,۰۰۰ واحد از ارز پایه … مینی لات ۰.۱ … میکرو لات ۰.۰۱ … نانو لات ۰.۰۰۱"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
+      "definition": "لات: واحد حجم معامله؛ یک لات استاندارد = ۱۰۰٬۰۰۰ واحد ارز پایه.",
+      "keywords": [
+        "لات",
+        "مینی لات",
+        "میکرو لات",
+        "نانو لات",
+        "حجم"
+      ],
+      "related_concepts": [
+        "GEN-DEF-0004",
+        "MT-CONC-0005"
+      ],
+      "related_questions": [
+        "لات یعنی چی؟",
+        "۰.۰۱ لات یعنی چند واحد؟",
+        "مینی لات چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0128",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "ارزش پیپ در نمادهای غیر از جفت‌ارزهای دلاری",
+      "language": "fa",
+      "chunk_text": "در درس اشاره شده که ارزش پیپ در همه‌ی نمادها یکسان نیست و نمونه‌هایی ذکر شده است. نکته‌ی مهم این است که ارزش پیپ در جفت‌ارزهایی که دلار ارز دومشان نیست (مانند USD/JPY) به نرخ روز همان جفت‌ارز بستگی دارد و عدد ثابتی نیست؛ در نمادهایی مثل طلا هم به اندازه‌ی قرارداد بروکر وابسته است. مرجع دقیق، مقدار Tick Value در مشخصات نماد در پلتفرم خود معامله‌گر است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_07.md",
+        "source_location": "بخش ۷ (نسخه‌ی ساختاریافته)",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۷",
+        "section": "بخش ۷ (نسخه‌ی ساختاریافته)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "در نمادهای دیگر این عدد متفاوت است: USD/JPY: حدود ۸.۶۰ دلار؛ XAUUSD (طلا): حدود ۱۰ دلار"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "REVIEW_REQUIRED",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.6,
+      "version": "v001",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "review_priority": "P1",
+      "review_reason": "اعداد ذکرشده وابسته به نرخ روز و اندازه‌ی قرارداد بروکرند و به‌عنوان ثابت قابل ارائه نیستند.",
+      "warnings": [
+        "این اعداد به‌عنوان مقدار ثابت ارائه نشوند؛ ارزش پیپ هر نماد از Tick Value در مشخصات نماد خوانده می‌شود."
+      ],
+      "validity": {
+        "rate_dependent": true,
+        "broker_specific": true
+      },
+      "keywords": [
+        "ارزش پیپ",
+        "USDJPY",
+        "طلا",
+        "tick value"
+      ],
+      "related_concepts": [
+        "MT-CONC-0004",
+        "MT5-PROC-0005",
+        "MT4-PROC-0011"
+      ],
+      "related_questions": [
+        "ارزش پیپ طلا چقدره؟",
+        "پیپ ین چقدر می‌ارزه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0129",
+      "object_type": "DEFINITION",
+      "domain": "academy",
+      "title": "لوریج (اهرم) چیست",
+      "language": "fa",
+      "chunk_text": "لوریج اهرمی است که بروکر در اختیار معامله‌گر می‌گذارد تا با سرمایه‌ی کمتر بتواند حجم بیشتری معامله کند. مثال درس: با ۱۰۰ دلار سرمایه و اهرم ۱:۱۰۰، قدرت خریدی معادل ۱۰٬۰۰۰ دلار در اختیار دارید. مدرس اشاره می‌کند که این مفهوم برای کسانی که از بازار کریپتو آمده‌اند معمولاً محل سؤال است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_07.md",
+        "source_location": "بخش ۸",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۷",
+        "section": "بخش ۸",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "لوریج = قرضی که بروکر در اختیار شما قرار می‌دهد تا بتوانید با سرمایه کمتر، حجم بیشتری معامله کنید … با ۱۰۰ دلار سرمایه و لوریج ۱:۱۰۰، انگار ۱۰,۰۰۰ دلار در حساب دارید."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
+      "definition": "لوریج: اهرم بروکر که قدرت باز کردن حجم بیشتر با سرمایه‌ی کمتر را می‌دهد.",
+      "keywords": [
+        "لوریج",
+        "اهرم",
+        "leverage",
+        "کریپتو"
+      ],
+      "related_concepts": [
+        "GEN-DEF-0006",
+        "GEN-CONC-0008",
+        "ACA-INT-0013",
+        "MT-CONC-0006"
+      ],
+      "related_questions": [
+        "لوریج چیه؟",
+        "اهرم ۱:۱۰۰ یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0130",
+      "object_type": "RULE",
+      "domain": "academy",
+      "title": "سود و زیان تابع حجم معامله است، نه لوریج",
+      "language": "fa",
+      "chunk_text": "نکته‌ای که مدرس آن را «بسیار مهم» می‌نامد: سود و زیان نهایی شما به حجم معامله (لات) بستگی دارد، نه به لوریج. کار لوریج فقط این است که امکان باز کردن حجم بیشتر با سرمایه‌ی کمتر را فراهم کند. توضیح تکمیلی: با حجم ثابت، تغییر اهرم مقدار سود و زیان هر پیپ را عوض نمی‌کند؛ فقط مارجین قفل‌شده و در نتیجه حداکثر حجم قابل باز کردن را تغییر می‌دهد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_07.md",
+        "source_location": "بخش ۸",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۷",
+        "section": "بخش ۸",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "نکته بسیار مهم: سود و ضرر شما به حجم معامله (لات) بستگی دارد، نه به لوریج. لوریج فقط به شما امکان می‌دهد با سرمایه کمتر، حجم بیشتری وارد کنید."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
+      "rule": "ریسک واقعی را حجم معامله و فاصله‌ی حد ضرر تعیین می‌کند، نه عدد اهرم.",
+      "summary": "لوریج ریسک را تعیین نمی‌کند؛ حجم معامله می‌کند.",
+      "keywords": [
+        "لوریج",
+        "حجم",
+        "ریسک"
+      ],
+      "related_concepts": [
+        "GEN-CONC-0008",
+        "GEN-CONC-0009",
+        "ACA-INT-0131"
+      ],
+      "related_questions": [
+        "اهرم بالا خطرناکه؟",
+        "چه اهرمی بگیرم؟",
+        "لوریج ریسکمو زیاد می‌کنه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0131",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "لوریج شمشیر دولبه است",
+      "language": "fa",
+      "chunk_text": "مدرس لوریج را شمشیر دولبه توصیف می‌کند: اگر درست استفاده شود امکان سود بیشتر می‌دهد و اگر اشتباه استفاده شود زیان را چند برابر می‌کند. توصیه‌ی او این است که لوریج همیشه با مدیریت سرمایه و ریسک ترکیب شود. توجه: این جمله با قاعده‌ی «سود و زیان تابع حجم است» در تضاد نیست — بزرگ شدن سود و زیان از مسیر حجم بزرگ‌تری می‌آید که اهرم آن را ممکن می‌کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_07.md",
+        "source_location": "بخش ۸",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۷",
+        "section": "بخش ۸",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "لوریج شمشیر دو لبه است: سود شما را چند برابر می‌کند؛ ضرر شما را هم چند برابر می‌کند … همیشه لوریج را با مدیریت سرمایه و ریسک ترکیب کنید."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
+      "warnings": [
+        "اهرم بالا با حجم کنترل‌نشده، سریع‌ترین راه از دست دادن حساب است."
+      ],
+      "keywords": [
+        "شمشیر دولبه",
+        "لوریج",
+        "مدیریت ریسک"
+      ],
+      "related_concepts": [
+        "ACA-INT-0130",
+        "ACA-INT-0012"
+      ],
+      "related_questions": [
+        "لوریج بالا بگیرم یا پایین؟",
+        "خطر لوریج چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0132",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "معامله‌گری یک مهارت است، نه اتفاق یک‌شبه",
+      "language": "fa",
+      "chunk_text": "جمع‌بندی پایانی مدرس: بازار مالی یک مهارت است و یک‌روزه و یک‌شبه به دست نمی‌آید؛ جهان بر پایه‌ی پروسه پیش می‌رود و تنها درخواست او از دانشجو ثابت‌قدم بودن است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_07.md",
+        "source_location": "بخش ۱۰ (نسخه‌ی ساختاریافته)",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۷",
+        "section": "بخش ۱۰ (نسخه‌ی ساختاریافته)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "بازار مالی یک مهارته، یک روزه نیست، یک شبه نیست. تنها درخواستم از شما: ثابت‌قدم باش"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T19:11:22Z",
+      "updated_at": "2026-09-05T19:11:22Z",
+      "keywords": [
+        "مهارت",
+        "پروسه",
+        "ثابت‌قدمی"
+      ],
+      "related_concepts": [
+        "ACA-INT-0019",
+        "PSY-PAT-0020"
+      ],
+      "related_questions": [
+        "چقدر طول می‌کشه یاد بگیرم؟"
+      ]
+    }
+  ]
+}

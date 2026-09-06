@@ -1,0 +1,89 @@
+{
+  "$comment": "MENTORAI Knowledge Base - controlled vocabularies. Single source of truth for all enum values used by schemas, validator, manifest and exporters.",
+  "version": "1.0.0",
+  "domain": [
+    "academy",
+    "mentor_qa",
+    "metatrader",
+    "brokers",
+    "general_trading",
+    "psychology",
+    "meta"
+  ],
+  "object_type": [
+    "CONCEPT",
+    "DEFINITION",
+    "RULE",
+    "CONDITION",
+    "EXCEPTION",
+    "EXAMPLE",
+    "PROCEDURE",
+    "TROUBLESHOOTING",
+    "FAQ",
+    "MENTOR_QA",
+    "COMMON_MISTAKE",
+    "PSYCHOLOGY_PATTERN",
+    "METATRADER_PROCEDURE",
+    "BROKER_RULE",
+    "GLOSSARY",
+    "COMPARISON",
+    "CONFLICT_RECORD",
+    "CATALOG_ITEM",
+    "OPERATIONAL_FACT"
+  ],
+  "authority_level": [
+    "ACADEMY_PRIMARY",
+    "ACADEMY_DERIVED",
+    "MENTOR_VERIFIED",
+    "MENTOR_UNVERIFIED",
+    "VENDOR_OFFICIAL",
+    "BROKER_OFFICIAL",
+    "GENERAL_KNOWLEDGE",
+    "EXTERNAL_METHODOLOGY"
+  ],
+  "source_type": [
+    "ACADEMY_COURSE_TRANSCRIPT",
+    "ACADEMY_DOCUMENT",
+    "ACADEMY_WEBSITE",
+    "ACADEMY_APP_DATA",
+    "MENTOR_CONVERSATION",
+    "VENDOR_DOCUMENTATION",
+    "BROKER_DOCUMENTATION",
+    "PUBLIC_DOMAIN_KNOWLEDGE",
+    "MODEL_DRAFT"
+  ],
+  "approval_status": [
+    "APPROVED",
+    "PENDING_REVIEW",
+    "PENDING_VERIFICATION",
+    "REVIEW_REQUIRED",
+    "REJECTED"
+  ],
+  "lifecycle_status": [
+    "ACTIVE",
+    "SUPERSEDED",
+    "DEPRECATED",
+    "PENDING_REVIEW",
+    "CONFLICTING"
+  ],
+  "platform_scope": [
+    "MT4_ONLY",
+    "MT5_ONLY",
+    "BOTH",
+    "BROKER_DEPENDENT",
+    "VERSION_DEPENDENT",
+    "NOT_APPLICABLE"
+  ],
+  "methodology_scope": [
+    "ACADEMY_METHODOLOGY",
+    "PLATFORM_OPERATION",
+    "GENERAL_TRADING",
+    "TRADING_PSYCHOLOGY",
+    "BROKER_SPECIFIC",
+    "ACADEMY_OPERATIONS",
+    "EXTERNAL_METHODOLOGY_QUARANTINE"
+  ],
+  "language": ["fa", "en", "fa-en"],
+  "review_priority": ["P0", "P1", "P2", "P3"],
+  "progress_state": ["DONE", "IN_PROGRESS", "PENDING", "REVIEW_REQUIRED", "BLOCKED"]
+}

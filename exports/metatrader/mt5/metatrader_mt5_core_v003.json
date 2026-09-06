@@ -1,0 +1,825 @@
+{
+  "collection_id": "metatrader_mt5_core",
+  "domain": "metatrader",
+  "title": "دانش پایه و رویه‌های متاتریدر ۵",
+  "description": "رویه‌های عملیاتی و مفاهیم اختصاصی متاتریدر ۵. رویه‌های مشترک با متاتریدر ۴ در مجموعه‌ی «رویه‌های مشترک» نگهداری می‌شوند.",
+  "version": "v001",
+  "generated_at": "2026-09-05T13:16:20Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "tools/seed_mt5.py"
+  ],
+  "notes": [
+    "ساخته‌شده به‌صورت خودکار توسط ابزارهای tools/seed_mt_*.py — دستی ویرایش نشود.",
+    "همه‌ی رکوردها PENDING_VERIFICATION هستند و باید با مستندات رسمی MetaQuotes تطبیق داده شوند."
+  ],
+  "objects": [
+    {
+      "id": "MT5-PROC-0001",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "ورود به حساب معاملاتی در متاتریدر ۵",
+      "language": "fa-en",
+      "chunk_text": "برای اتصال به حساب در متاتریدر ۵ باید شماره‌ی حساب (Login)، رمز عبور و نام دقیق سرور بروکر را داشته باشید. سرور را حتماً از فهرست سرورهای همان بروکر انتخاب کنید؛ انتخاب سرور اشتباه رایج‌ترین علت خطای اتصال است.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-PROC-0001"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "اتصال و حساب",
+      "steps": [
+        "از منوی File گزینه‌ی Login to Trade Account را انتخاب کنید.",
+        "نام سرور بروکر را در کادر جست‌وجو وارد و از فهرست انتخاب کنید.",
+        "شماره حساب و رمز عبور (Master یا Investor) را وارد کنید.",
+        "روی OK بزنید و وضعیت اتصال را در گوشه‌ی پایین-راست ترمینال بررسی کنید."
+      ],
+      "common_mistakes": [
+        "وارد کردن رمز سرمایه‌گذار (Investor) به‌جای رمز اصلی؛ در این حالت امکان معامله وجود ندارد.",
+        "انتخاب سرور دمو به‌جای سرور ریل یا برعکس."
+      ],
+      "warnings": [
+        "اگر پیام Invalid account یا No connection دیدید، ابتدا نام سرور و سپس اینترنت را بررسی کنید."
+      ],
+      "keywords": [
+        "login",
+        "ورود به حساب",
+        "server",
+        "متاتریدر ۵"
+      ],
+      "related_concepts": [
+        "MT-TRBL-0005"
+      ],
+      "related_questions": [
+        "چطور وارد حسابم بشم؟",
+        "سرور بروکر رو کجا وارد کنم؟",
+        "Invalid account یعنی چی؟"
+      ]
+    },
+    {
+      "id": "MT5-PROC-0002",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "نمایش نمادهای پنهان در Market Watch (متاتریدر ۵)",
+      "language": "fa-en",
+      "chunk_text": "اگر نمادی مثل XAUUSD در Market Watch دیده نمی‌شود، معمولاً نماد پنهان است نه اینکه بروکر آن را نداشته باشد. با پنجره‌ی Symbols می‌توان نماد را نمایش داد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-PROC-0002"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "نمادها",
+      "steps": [
+        "روی پنجره‌ی Market Watch راست‌کلیک کنید و Symbols را بزنید (یا Ctrl+U).",
+        "در درخت گروه‌ها یا کادر جست‌وجو نام نماد را پیدا کنید.",
+        "نماد را انتخاب و روی Show بزنید، سپس پنجره را ببندید."
+      ],
+      "warnings": [
+        "پسوند نماد بین بروکرها فرق می‌کند (مثلاً EURUSD.m یا XAUUSD_i)؛ همیشه نام دقیق بروکر خودتان را جست‌وجو کنید."
+      ],
+      "keywords": [
+        "market watch",
+        "symbols",
+        "نماد",
+        "XAUUSD"
+      ],
+      "related_concepts": [
+        "MT-CONC-0013",
+        "MT-TRBL-0007"
+      ],
+      "related_questions": [
+        "چرا طلا توی متاتریدر نیست؟",
+        "چطور نماد اضافه کنم؟",
+        "لیست نمادها کجاست؟"
+      ]
+    },
+    {
+      "id": "MT5-PROC-0003",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "باز کردن معامله و انواع سفارش در متاتریدر ۵",
+      "language": "fa-en",
+      "chunk_text": "پنجره‌ی New Order با کلید F9 یا دکمه‌ی New Order باز می‌شود. در متاتریدر ۵ نوع اجرا (Type) می‌تواند Market Execution یا Pending Order باشد و شش نوع سفارش معلق در دسترس است: Buy Limit، Sell Limit، Buy Stop، Sell Stop، Buy Stop Limit و Sell Stop Limit.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-PROC-0003"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "معامله",
+      "steps": [
+        "نماد موردنظر را در Market Watch انتخاب کنید.",
+        "کلید F9 را بزنید تا پنجره‌ی New Order باز شود.",
+        "حجم (Volume) را بر اساس مدیریت ریسک خود وارد کنید.",
+        "در صورت نیاز Stop Loss و Take Profit را وارد کنید.",
+        "برای ورود فوری Buy/Sell را بزنید یا Type را روی Pending Order بگذارید و قیمت فعال‌سازی را وارد کنید."
+      ],
+      "warnings": [
+        "حجم پیش‌فرض پنجره را بدون بررسی تغییر ندهید؛ ورود با حجم اشتباه یکی از پرتکرارترین خطاهاست."
+      ],
+      "keywords": [
+        "new order",
+        "F9",
+        "pending order",
+        "stop limit"
+      ],
+      "related_concepts": [
+        "MT5-CONC-0003",
+        "MT5-PROC-0008"
+      ],
+      "related_questions": [
+        "چطور معامله باز کنم؟",
+        "سفارش معلق چطور بذارم؟",
+        "Buy Stop Limit چیه؟"
+      ]
+    },
+    {
+      "id": "MT5-PROC-0004",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "تنظیم یا تغییر حد ضرر و حد سود روی معامله‌ی باز (متاتریدر ۵)",
+      "language": "fa-en",
+      "chunk_text": "برای افزودن یا تغییر SL/TP روی یک پوزیشن باز، از تب Trade در پنجره‌ی Toolbox استفاده می‌شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-PROC-0004"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "مدیریت معامله",
+      "steps": [
+        "پنجره‌ی Toolbox را باز کنید (Ctrl+T) و به تب Trade بروید.",
+        "روی پوزیشن موردنظر راست‌کلیک و Modify or Delete Position را بزنید.",
+        "مقادیر Stop Loss و Take Profit را وارد کنید.",
+        "روی دکمه‌ی Modify بزنید و اعمال شدن مقادیر را در تب Trade بررسی کنید."
+      ],
+      "common_mistakes": [
+        "دور کردن حد ضرر هنگام ضرر؛ این کار مدیریت ریسک را از بین می‌برد."
+      ],
+      "keywords": [
+        "stop loss",
+        "take profit",
+        "modify position",
+        "toolbox"
+      ],
+      "related_concepts": [
+        "MT-CONC-0009",
+        "MT-TRBL-0001"
+      ],
+      "related_questions": [
+        "چطور حد ضرر بذارم؟",
+        "چطور حد ضرر رو جابه‌جا کنم؟"
+      ]
+    },
+    {
+      "id": "MT5-PROC-0005",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "مشاهده‌ی مشخصات نماد در متاتریدر ۵",
+      "language": "fa-en",
+      "chunk_text": "پنجره‌ی Specification اطلاعات کلیدی هر نماد را نشان می‌دهد: اندازه‌ی قرارداد، حداقل و حداکثر حجم، گام حجم، Tick Size و Tick Value، سطح استاپ (Stops Level)، نرخ سواپ، ساعات معاملاتی و نوع اجرا. این مقادیر بین بروکرها متفاوت است و مرجع پاسخ به سؤال‌های «چقدر» و «چه ساعتی» همین پنجره است.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-PROC-0005"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "نمادها",
+      "steps": [
+        "در Market Watch روی نماد راست‌کلیک کنید.",
+        "گزینه‌ی Specification را انتخاب کنید.",
+        "مقادیر موردنیاز (Contract size، Volume limits، Stops level، Swap، Trading hours) را بخوانید."
+      ],
+      "keywords": [
+        "specification",
+        "مشخصات نماد",
+        "stops level",
+        "tick value"
+      ],
+      "related_concepts": [
+        "MT-CONC-0004",
+        "MT-CONC-0005",
+        "MT-CONC-0009"
+      ],
+      "related_questions": [
+        "اندازه قرارداد طلا چقدره؟",
+        "حداقل حجم چقدره؟",
+        "ساعت معاملاتی نماد رو کجا ببینم؟"
+      ]
+    },
+    {
+      "id": "MT5-PROC-0006",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "گزارش تاریخچه‌ی معاملات در متاتریدر ۵",
+      "language": "fa-en",
+      "chunk_text": "تاریخچه‌ی معاملات در تب History از Toolbox نمایش داده می‌شود و می‌توان از آن گزارش گرفت. در متاتریدر ۵ نمایش تاریخچه بین حالت‌های Positions، Orders و Deals قابل تغییر است.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-PROC-0006"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "گزارش‌گیری",
+      "steps": [
+        "Toolbox را باز کنید (Ctrl+T) و به تب History بروید.",
+        "روی ناحیه‌ی تاریخچه راست‌کلیک و بازه‌ی زمانی دلخواه را انتخاب کنید.",
+        "برای گرفتن خروجی، راست‌کلیک و Report را بزنید و قالب موردنظر را انتخاب کنید."
+      ],
+      "keywords": [
+        "history",
+        "report",
+        "تاریخچه",
+        "گزارش"
+      ],
+      "related_concepts": [
+        "MT5-CONC-0002",
+        "MT5-PROC-0012"
+      ],
+      "related_questions": [
+        "گزارش معاملاتم رو چطور بگیرم؟",
+        "تاریخچه معاملات کجاست؟"
+      ]
+    },
+    {
+      "id": "MT5-PROC-0007",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "فعال‌سازی AutoTrading و اجرای اکسپرت در متاتریدر ۵",
+      "language": "fa-en",
+      "chunk_text": "برای اجرای اکسپرت (EA) باید دکمه‌ی AutoTrading در نوار ابزار فعال باشد و اکسپرت روی چارت اجرا شده باشد. اگر روی چارت به‌جای صورتک لبخند علامت توقف دیده شود، معامله‌ی خودکار غیرفعال است.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-PROC-0007"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "اکسپرت",
+      "steps": [
+        "فایل اکسپرت را در پوشه‌ی MQL5/Experts قرار دهید (File > Open Data Folder).",
+        "در پنجره‌ی Navigator روی Expert Advisors راست‌کلیک و Refresh بزنید.",
+        "اکسپرت را روی چارت بکشید و در تب Common گزینه‌ی Allow Algo Trading را تیک بزنید.",
+        "دکمه‌ی AutoTrading در نوار ابزار را فعال کنید."
+      ],
+      "warnings": [
+        "پیش از اجرای هر اکسپرت روی حساب واقعی، آن را روی حساب دمو آزمایش کنید."
+      ],
+      "keywords": [
+        "expert advisor",
+        "autotrading",
+        "MQL5",
+        "ربات"
+      ],
+      "related_concepts": [
+        "MT-TRBL-0010",
+        "MT-PROC-0016"
+      ],
+      "related_questions": [
+        "چرا اکسپرتم معامله نمی‌کنه؟",
+        "اکسپرت رو چطور نصب کنم؟"
+      ]
+    },
+    {
+      "id": "MT5-PROC-0008",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "تنظیم انحراف مجاز و نوع پر شدن سفارش (Deviation و Filling)",
+      "language": "fa-en",
+      "chunk_text": "در پنجره‌ی New Order متاتریدر ۵ دو تنظیم مهم وجود دارد: Deviation که حداکثر انحراف قابل قبول قیمت را مشخص می‌کند، و Filling type که تعیین می‌کند سفارش در صورت نبود حجم کافی چه رفتاری داشته باشد: Fill or Kill (یا کامل اجرا شود یا لغو)، Immediate or Cancel (بخش موجود اجرا و بقیه لغو) و Return (بخش موجود اجرا و باقی‌مانده به‌صورت سفارش باقی می‌ماند). گزینه‌های در دسترس را بروکر تعیین می‌کند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-PROC-0008"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "معامله",
+      "steps": [
+        "پنجره‌ی New Order را باز کنید (F9).",
+        "در صورت نمایش گزینه‌ی Deviation، مقدار مجاز را بر حسب پوینت وارد کنید.",
+        "نوع Filling را از فهرست انتخاب کنید.",
+        "سفارش را ثبت و نتیجه را در تب Journal بررسی کنید."
+      ],
+      "keywords": [
+        "deviation",
+        "filling",
+        "fill or kill",
+        "IOC"
+      ],
+      "related_concepts": [
+        "MT-CONC-0010",
+        "MT-TRBL-0009"
+      ],
+      "related_questions": [
+        "Fill or Kill یعنی چی؟",
+        "Deviation رو چقدر بذارم؟"
+      ]
+    },
+    {
+      "id": "MT5-PROC-0009",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "استفاده از عمق بازار (Depth of Market)",
+      "language": "fa-en",
+      "chunk_text": "عمق بازار سفارش‌های خرید و فروش در سطوح مختلف قیمت را نشان می‌دهد و امکان ثبت سریع سفارش از داخل همان پنجره را می‌دهد. نمایش داده‌های واقعی عمق بازار به ارائه‌ی آن از سوی بروکر بستگی دارد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-PROC-0009"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "معامله",
+      "steps": [
+        "در Market Watch روی نماد راست‌کلیک کنید.",
+        "گزینه‌ی Depth of Market را انتخاب کنید (یا Alt+B).",
+        "برای نمایش نمودار قیمت و دکمه‌های سفارش، آیکون‌های بالای پنجره را فعال کنید."
+      ],
+      "warnings": [
+        "اگر بروکر داده‌ی عمق بازار ارائه ندهد، پنجره فقط Bid و Ask را نشان می‌دهد."
+      ],
+      "keywords": [
+        "depth of market",
+        "DOM",
+        "عمق بازار"
+      ],
+      "related_concepts": [
+        "MT-CMP-0006"
+      ],
+      "related_questions": [
+        "عمق بازار رو چطور باز کنم؟"
+      ]
+    },
+    {
+      "id": "MT5-PROC-0010",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "تقویم اقتصادی داخلی متاتریدر ۵",
+      "language": "fa-en",
+      "chunk_text": "متاتریدر ۵ تقویم اقتصادی داخلی دارد که در تب Calendar از Toolbox نمایش داده می‌شود و می‌توان رویدادهای مهم را روی چارت هم مشاهده کرد. فهرست کشورها و اهمیت رویدادها قابل فیلتر کردن است.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-PROC-0010"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "اخبار",
+      "steps": [
+        "Toolbox را باز کنید (Ctrl+T) و به تب Calendar بروید.",
+        "با فیلترهای بالای پنجره، کشور و درجه‌ی اهمیت رویداد را انتخاب کنید.",
+        "برای نمایش رویدادها روی چارت، گزینه‌ی نمایش رویدادها را در تنظیمات چارت فعال کنید."
+      ],
+      "keywords": [
+        "calendar",
+        "تقویم اقتصادی",
+        "اخبار"
+      ],
+      "related_concepts": [
+        "GEN-DEF-0022"
+      ],
+      "related_questions": [
+        "تقویم اقتصادی متاتریدر کجاست؟",
+        "اخبار مهم رو کجا ببینم؟"
+      ]
+    },
+    {
+      "id": "MT5-PROC-0011",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "تستر استراتژی و بهینه‌سازی در متاتریدر ۵",
+      "language": "fa-en",
+      "chunk_text": "تستر استراتژی متاتریدر ۵ با Ctrl+R باز می‌شود و امکان تست تک‌نمادی و چندنمادی، انتخاب حالت مدل‌سازی (از جمله تیک‌های واقعی)، بهینه‌سازی پارامترها و اجرای موازی روی چند هسته را دارد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-PROC-0011"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "تست و بهینه‌سازی",
+      "steps": [
+        "کلید Ctrl+R را بزنید تا پنجره‌ی Strategy Tester باز شود.",
+        "اکسپرت، نماد، تایم‌فریم و بازه‌ی زمانی تست را انتخاب کنید.",
+        "حالت مدل‌سازی (مثلاً Every tick based on real ticks) و سپرده‌ی اولیه را تعیین کنید.",
+        "برای بهینه‌سازی، گزینه‌ی Optimization را فعال و بازه‌ی پارامترها را در تب Inputs مشخص کنید.",
+        "نتیجه را در تب‌های Results، Graph و Report بررسی کنید."
+      ],
+      "warnings": [
+        "نتیجه‌ی بک‌تست تضمینی برای عملکرد آینده نیست و به کیفیت داده‌ی تاریخی و شرایط اسپرد وابسته است."
+      ],
+      "keywords": [
+        "strategy tester",
+        "optimization",
+        "backtest",
+        "بک تست"
+      ],
+      "related_concepts": [
+        "MT-CMP-0005"
+      ],
+      "related_questions": [
+        "چطور بک‌تست بگیرم؟",
+        "بهینه‌سازی اکسپرت چطوریه؟"
+      ]
+    },
+    {
+      "id": "MT5-PROC-0012",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "تب‌های تاریخچه: Positions، Orders و Deals",
+      "language": "fa-en",
+      "chunk_text": "در متاتریدر ۵ تاریخچه سه نمای متفاوت دارد. Positions پوزیشن‌های بسته‌شده، Orders سفارش‌های ثبت‌شده (اجراشده یا لغوشده) و Deals تراکنش‌های واقعی انجام‌شده روی حساب را نشان می‌دهد. برای بررسی دقیق سود و زیان و کارمزد، نمای Deals مرجع است.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-PROC-0012"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "گزارش‌گیری",
+      "steps": [
+        "به تب History در Toolbox بروید.",
+        "روی ناحیه‌ی تاریخچه راست‌کلیک کنید.",
+        "یکی از نماهای Positions، Orders یا Deals را انتخاب کنید.",
+        "در صورت نیاز، بازه‌ی زمانی سفارشی تعیین کنید."
+      ],
+      "keywords": [
+        "deals",
+        "positions",
+        "orders",
+        "history"
+      ],
+      "related_concepts": [
+        "MT5-CONC-0002"
+      ],
+      "related_questions": [
+        "چرا تعداد معاملات تاریخچه با تصورم فرق داره؟",
+        "کارمزد رو کجا ببینم؟"
+      ]
+    },
+    {
+      "id": "MT5-PROC-0013",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "مدیریت پوزیشن در حساب Netting",
+      "language": "fa-en",
+      "chunk_text": "در حساب Netting هر نماد فقط یک پوزیشن دارد. معامله‌ی جدید هم‌جهت، حجم پوزیشن را افزایش و میانگین قیمت ورود را جابه‌جا می‌کند؛ معامله‌ی مخالف، حجم را کاهش می‌دهد و در صورت برابری، پوزیشن را می‌بندد. بنابراین «باز کردن معامله‌ی دوم» در این نوع حساب به معنای داشتن دو معامله‌ی جدا نیست.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-PROC-0013"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "مدیریت معامله",
+      "steps": [
+        "نوع حساب را در عنوان پنجره‌ی Toolbox یا مشخصات حساب بررسی کنید (Netting یا Hedging).",
+        "برای کاهش حجم، معامله‌ای در جهت مخالف با حجم کمتر ثبت کنید.",
+        "برای بستن کامل، معامله‌ای مخالف با همان حجم ثبت کنید یا از گزینه‌ی Close استفاده کنید."
+      ],
+      "keywords": [
+        "netting",
+        "position",
+        "میانگین قیمت"
+      ],
+      "related_concepts": [
+        "MT5-CONC-0001",
+        "MT-CMP-0002"
+      ],
+      "related_questions": [
+        "چرا معامله دومم با اولی یکی شد؟",
+        "چرا نمی‌تونم همزمان خرید و فروش بزنم؟"
+      ]
+    },
+    {
+      "id": "MT5-PROC-0014",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "دانلود داده‌های تاریخی نماد",
+      "language": "fa-en",
+      "chunk_text": "متاتریدر ۵ داده‌های تاریخی را به‌صورت خودکار از سرور دریافت می‌کند، اما برای بک‌تست دقیق می‌توان داده‌ی کندلی یا تیکی یک نماد را از پنجره‌ی Symbols به‌صورت دستی دانلود کرد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-PROC-0014"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "داده",
+      "steps": [
+        "پنجره‌ی Symbols را باز کنید (Ctrl+U).",
+        "نماد را انتخاب و به تب Bars یا Ticks بروید.",
+        "بازه‌ی زمانی موردنظر را مشخص و دکمه‌ی Request را بزنید.",
+        "پس از پایان دانلود، چارت را ببندید و دوباره باز کنید."
+      ],
+      "keywords": [
+        "history data",
+        "ticks",
+        "bars",
+        "داده تاریخی"
+      ],
+      "related_concepts": [
+        "MT-TRBL-0012",
+        "MT-CMP-0007"
+      ],
+      "related_questions": [
+        "چرا چارتم داده‌ی قدیمی نداره؟",
+        "داده‌ی تیک رو چطور بگیرم؟"
+      ]
+    },
+    {
+      "id": "MT5-CONC-0001",
+      "object_type": "CONCEPT",
+      "domain": "metatrader",
+      "title": "نوع حساب Netting و Hedging در متاتریدر ۵",
+      "language": "fa-en",
+      "chunk_text": "متاتریدر ۵ دو سیستم حسابداری پوزیشن دارد. در حساب Netting برای هر نماد فقط یک پوزیشن وجود دارد و معامله‌ی جدید در جهت مخالف، پوزیشن موجود را کم یا خنثی می‌کند. در حساب Hedging می‌توان چند پوزیشن مستقل و حتی در دو جهت مخالف روی یک نماد داشت. نوع حساب را بروکر هنگام ساخت حساب تعیین می‌کند و کاربر نمی‌تواند آن را تغییر دهد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-CONC-0001"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "مفاهیم پایه",
+      "definition": "Netting: یک پوزیشن خالص برای هر نماد. Hedging: امکان چند پوزیشن مستقل روی یک نماد.",
+      "keywords": [
+        "netting",
+        "hedging",
+        "نوع حساب"
+      ],
+      "related_concepts": [
+        "MT5-PROC-0013",
+        "MT-CMP-0002"
+      ],
+      "related_questions": [
+        "چرا معامله دومم با اولی ادغام شد؟",
+        "چرا نمی‌تونم همزمان خرید و فروش بزنم؟"
+      ]
+    },
+    {
+      "id": "MT5-CONC-0002",
+      "object_type": "CONCEPT",
+      "domain": "metatrader",
+      "title": "تفاوت Order، Deal و Position در متاتریدر ۵",
+      "language": "fa-en",
+      "chunk_text": "متاتریدر ۵ سه موجودیت جدا دارد: Order درخواست معامله است، Deal اجرای واقعی آن درخواست روی سرور، و Position نتیجه‌ی تجمیعی معاملات باز روی یک نماد. یک پوزیشن می‌تواند از چند Deal ساخته شود و یک Order می‌تواند به چند Deal منجر شود. همین ساختار، دلیل تفاوت شمارش معاملات در تاریخچه است.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-CONC-0002"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "مفاهیم پایه",
+      "definition": "Order: درخواست. Deal: اجرای واقعی. Position: وضعیت باز فعلی نماد.",
+      "keywords": [
+        "order",
+        "deal",
+        "position"
+      ],
+      "related_concepts": [
+        "MT5-PROC-0012",
+        "MT-CMP-0008"
+      ],
+      "related_questions": [
+        "فرق order و deal چیه؟",
+        "چرا تعداد معاملات تاریخچه بیشتره؟"
+      ]
+    },
+    {
+      "id": "MT5-CONC-0003",
+      "object_type": "CONCEPT",
+      "domain": "metatrader",
+      "title": "سفارش‌های Stop Limit در متاتریدر ۵",
+      "language": "fa-en",
+      "chunk_text": "Buy Stop Limit و Sell Stop Limit ترکیبی از دو سفارش‌اند: وقتی قیمت به سطح Stop برسد، یک سفارش Limit در قیمت تعیین‌شده ثبت می‌شود. یعنی ابتدا شکست سطح تأیید می‌شود و سپس ورود در قیمت بهتر انجام می‌گیرد. این دو نوع سفارش در متاتریدر ۴ وجود ندارند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-CONC-0003"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "مفاهیم پایه",
+      "definition": "Stop Limit: با رسیدن قیمت به سطح Stop، یک سفارش Limit در قیمت مشخص ثبت می‌شود.",
+      "examples": [
+        "برای خرید پس از شکست مقاومت اما با پول‌بک: Buy Stop Limit با سطح Stop بالای مقاومت و قیمت Limit پایین‌تر از آن."
+      ],
+      "keywords": [
+        "stop limit",
+        "buy stop limit",
+        "سفارش معلق"
+      ],
+      "related_concepts": [
+        "MT5-PROC-0003",
+        "MT-CMP-0001"
+      ],
+      "related_questions": [
+        "Buy Stop Limit چطور کار می‌کنه؟",
+        "فرق stop و stop limit چیه؟"
+      ]
+    },
+    {
+      "id": "MT5-CONC-0004",
+      "object_type": "CONCEPT",
+      "domain": "metatrader",
+      "title": "شناسه‌ها در متاتریدر ۵: Order، Position ID و Magic Number",
+      "language": "fa-en",
+      "chunk_text": "در متاتریدر ۵ هر سفارش شناسه‌ی خود را دارد و هر پوزیشن یک Position ID جدا. معامله‌های مربوط به یک پوزیشن با همین شناسه به هم متصل می‌شوند، بنابراین برخلاف متاتریدر ۴ با بستن جزئی، شناسه‌ی پوزیشن عوض نمی‌شود. Magic Number همان نقش متاتریدر ۴ را دارد و اکسپرت‌ها با آن معاملات خودشان را تشخیص می‌دهند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_mt5.py",
+        "source_location": "MT5-CONC-0004"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T13:16:20Z",
+      "updated_at": "2026-09-05T13:16:20Z",
+      "category": "مفاهیم پایه",
+      "definition": "Order ID: شناسه‌ی سفارش. Position ID: شناسه‌ی پوزیشن. Magic Number: شناسه‌ی اکسپرت.",
+      "keywords": [
+        "position id",
+        "order id",
+        "magic number"
+      ],
+      "related_concepts": [
+        "MT5-CONC-0002",
+        "MT4-CONC-0002",
+        "MT-CMP-0009"
+      ],
+      "related_questions": [
+        "شماره‌ی پوزیشن رو کجا ببینم؟",
+        "Magic Number توی متاتریدر ۵ چیه؟"
+      ]
+    }
+  ]
+}

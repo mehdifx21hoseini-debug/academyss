@@ -1,0 +1,43 @@
+{
+  "report_type": "validation",
+  "version": "v019",
+  "generated_at": "2026-09-05T15:30:34Z",
+  "stats": {
+    "files": 20,
+    "objects": 300,
+    "by_kind": {
+      "knowledge_object": 18,
+      "conflict_record": 1,
+      "review_item": 1
+    },
+    "by_domain": {
+      "psychology": 27,
+      "metatrader": 103,
+      "general_trading": 49,
+      "academy": 113,
+      "mentor_qa": 1,
+      "brokers": 1,
+      "meta": 6
+    },
+    "by_approval": {
+      "PENDING_VERIFICATION": 173,
+      "REVIEW_REQUIRED": 8,
+      "PENDING_REVIEW": 92,
+      "APPROVED": 9
+    }
+  },
+  "errors": 2,
+  "warnings": 0,
+  "findings": [
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/intro/lesson_03.json :: ACA-INT-0060",
+      "message": "object_type DEFINITION requires non-empty 'definition'"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/intro/lesson_03.json :: ACA-INT-0062",
+      "message": "object_type DEFINITION requires non-empty 'definition'"
+    }
+  ]
+}

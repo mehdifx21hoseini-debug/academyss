@@ -1,0 +1,684 @@
+{
+  "collection_id": "academy_eq_lesson_04",
+  "domain": "academy",
+  "title": "دوره‌ی رایگان هوش هیجانی (EQ) — بخش چهارم: مدیریت استرس",
+  "description": "مدیریت استرس و سه بخش آن، بازتعریف ترس و استرس به‌عنوان چیز مفید، جدول تفسیر نمره‌ی کل، سه عامل موفقیت گلمن، شش نکته‌ی کلیدی معامله‌گران و تمرین غار تنهایی.",
+  "version": "v001",
+  "generated_at": "2026-09-06T08:31:44Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "raw_sources/academy/eq/eq_lesson_4.md",
+    "raw_sources/academy/eq/eq_lesson_4.ingest.json"
+  ],
+  "notes": [
+    "این بخش جای خالی RQ-0036 را پر کرد: مدیریت استرس اینجا کامل تدریس شد.",
+    "دوره دو فهرست پنج‌مؤلفه‌ای دارد؛ هر دو نگهداری و تفکیک شد (RQ-0037).",
+    "سایت رسمی با تصمیم D-0020 تأیید شد: فقط sobhansamadi.com (CONF-0011 حل شد).",
+    "مقایسه با سیگار بدون نام بردن پژوهش است و به‌عنوان ادعای درس ثبت شد (RQ-0033).",
+    "دو ایراد ترنسکریپت (فاصله‌ی ۱۶۰ تا ۱۶۳ و املای «قار تنهایی») ثبت و پنهان نشد."
+  ],
+  "objects": [
+    {
+      "id": "ACA-EQ-0042",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "مؤلفه‌ی مدیریت استرس و سه بخش آن",
+      "language": "fa",
+      "chunk_text": "**مدیریت استرس (Stress Management)** پنجمین و آخرین مؤلفه‌ی هوش هیجانی است و مدرس آن را برای معامله‌گر مهم‌ترین می‌داند. سه بخش دارد:\n• **انعطاف‌پذیری** — توانایی سازگاری با شرایط فعلی (`ACA-EQ-0045`)\n• **تحمل فشار روانی** — میزان مقاومت در برابر مشکلات (`ACA-EQ-0046`)\n• **خوش‌بینی** — نگاه مثبت به اتفاقات (`ACA-EQ-0047`)\nاین رکورد جای خالی `RQ-0036` را پر می‌کند: مؤلفه‌ای که در بخش سوم فقط نام برده شده بود، اینجا کامل تدریس شد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_4.md",
+        "source_location": "مدیریت استرس (Stress Management)",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۴",
+        "section": "مدیریت استرس (Stress Management)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "رسیدیم به آخرین بخش و مؤلفه هوش هیجانی: مدیریت استرس. و برای یک معامله‌گر، خودتون می‌دونید چقدر این مبحث مهم است."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-06T08:31:44Z",
+      "updated_at": "2026-09-06T08:31:44Z",
+      "keywords": [
+        "مدیریت استرس",
+        "انعطاف‌پذیری",
+        "تحمل فشار",
+        "خوش‌بینی"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0025",
+        "ACA-EQ-0045",
+        "ACA-EQ-0046",
+        "ACA-EQ-0047",
+        "ACA-EQ-0029"
+      ],
+      "related_questions": [
+        "مدیریت استرس یعنی چی؟",
+        "نمره‌ی مدیریت استرسم پایینه چیکار کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0043",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "ادعای درس: هزینه‌ی استرس دائمی برابر سیگار کشیدن پیاپی",
+      "language": "fa",
+      "chunk_text": "مدرس می‌گوید **«طبق پژوهش‌های انجام شده»**، کسی که همواره دچار ترس و استرس است، ضرر و زیانش با کسی که پشت سر هم سیگار مصرف می‌کند برابری می‌کند. نتیجه‌ای که می‌گیرد: «خیلی به خودت آسیب می‌زنی اگر همواره کسی هستی که دچار استرسی.»\n⚠️ **در درس هیچ پژوهش مشخصی نام برده نشده است.** مربی این را به‌عنوان تشبیه و هشدار مدرس نقل می‌کند، نه به‌عنوان یافته‌ی پژوهشی (`RQ-0033`).\n💡 پیام، مستقل از تشبیه، درست است: استرس مزمن هزینه‌ی جسمی دارد و رایگان نیست.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_4.md",
+        "source_location": "تاثیر استرس بر معامله‌گری",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۴",
+        "section": "تاثیر استرس بر معامله‌گری",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "طبق پژوهش‌های انجام شده، کسی که همواره دچار ترس و استرس است، ضرر و زیانش برابری می‌کند با کسی که پشت سر هم سیگار مصرف می‌کند."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-06T08:31:44Z",
+      "updated_at": "2026-09-06T08:31:44Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "validity": {
+        "time_bound": true,
+        "note": "ادعای درس بدون نام بردن پژوهش."
+      },
+      "warnings": [
+        "مربی این مقایسه را به‌عنوان یافته‌ی پژوهشی اعلام نمی‌کند."
+      ],
+      "keywords": [
+        "استرس مزمن",
+        "سیگار",
+        "آسیب",
+        "پژوهش"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0042",
+        "ACA-EQ-0044",
+        "PSY-RULE-0001"
+      ],
+      "related_questions": [
+        "استرس چه بلایی سرم میاره؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0044",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "ترس و استرس بد نیستند — تا وقتی دخالت نکنند",
+      "language": "fa",
+      "chunk_text": "یکی از مهم‌ترین بازتعریف‌های دوره: **ترس و استرس بد نیستند، بلکه مفیدند تا زمانی که به شما آسیب نزنند و در تصمیماتتان دخالت نکنند.**\nسه مثال خود درس:\n• اگر ترس از دست دادن جان نباشد، سر پیچ سرعت را کم نمی‌کنی.\n• اگر استرس امتحان نباشد، درس نمی‌خوانی.\n• **اگر استرس از دست دادن سرمایه نباشد، مدیریت سرمایه و ریسک را رعایت نمی‌کنی.**\n**اصل کلیدی:** ترس و طمع همیشه هستند. نمی‌توان گفت نیستند، اما می‌توان بر آن‌ها تسلط داشت — «به قدری کمرنگ می‌شوند که شاید اصلاً به چشمت نیایند».\n💡 این مکمل `ACA-EQ-0029` است، نه ناقض آن: هدف **حذف** احساس نیست، هدف این است که احساس تصمیم را نگیرد. سومین مثال هم مستقیماً مدیریت ریسک آکادمی را به همین ترس سالم وصل می‌کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_4.md",
+        "source_location": "ترس و استرس بد نیستند!",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۴",
+        "section": "ترس و استرس بد نیستند!",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "ترس و طمع همیشه هستند، اما تو وقتی روی آنها تسلط داشته باشی، به قدری کمرنگ می‌شوند که شاید اصلاً به چشمت نیایند."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-06T08:31:44Z",
+      "updated_at": "2026-09-06T08:31:44Z",
+      "examples": [
+        "ترس از دست دادن سرمایه همان چیزی است که باعث می‌شود قانون ۲٪ را رعایت کنی."
+      ],
+      "keywords": [
+        "ترس",
+        "طمع",
+        "استرس مفید",
+        "تسلط",
+        "مدیریت ریسک"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0029",
+        "ACA-EQ-0030",
+        "ACA-INT-0175",
+        "ACA-EXP-0028",
+        "PSY-PAT-0016"
+      ],
+      "related_questions": [
+        "ترس بده؟",
+        "چطور ترسم رو از بین ببرم؟",
+        "طمع رو چطور کنترل کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0045",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "انعطاف‌پذیری — سازگاری با شرایطی که عوض شده",
+      "language": "fa",
+      "chunk_text": "**انعطاف‌پذیری:** توانایی وفق پیدا کردن با شرایط فعلی و سازگار شدن با محیط.\nمثال درس: در شرایطی مثل دوران کرونا یا تغییرات اقتصادی، افرادی که انعطاف‌پذیری بالایی دارند خودشان را با شرایط جدید وفق می‌دهند.\n💡 معادل معاملاتی‌اش روشن است: بازاری که رفتارش عوض شده، معامله‌گری می‌خواهد که برنامه‌اش را با شرایط جدید تطبیق بدهد، نه کسی که با شرایط قدیمی بجنگد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_4.md",
+        "source_location": "انعطاف‌پذیری",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۴",
+        "section": "انعطاف‌پذیری",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "توانایی وفق پیدا کردن با شرایط فعلی و سازگار شدن با محیط."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-06T08:31:44Z",
+      "updated_at": "2026-09-06T08:31:44Z",
+      "keywords": [
+        "انعطاف‌پذیری",
+        "سازگاری",
+        "شرایط جدید",
+        "کرونا"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0042",
+        "ACA-EQ-0047",
+        "PSY-PAT-0022"
+      ],
+      "related_questions": [
+        "انعطاف‌پذیری یعنی چی؟",
+        "بازار عوض شده چیکار کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0046",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "تحمل فشار روانی — و مثال تصادف",
+      "language": "fa",
+      "chunk_text": "**تحمل فشار روانی:** میزان مقاومت در برابر مشکلات.\n**تحمل پایین:** با کوچک‌ترین چیزی به هم می‌ریزد · سریع دچار استرس می‌شود · واکنش شدید نشان می‌دهد.\n**تحمل بالا:** در شرایط بحرانی کنترل دارد · می‌پذیرد و مدیریت می‌کند · هندل می‌کند.\n**مثال درس — تصادف:** فرد با تحمل پایین دعوا می‌کند و از کوره در می‌رود؛ فرد با تحمل بالا می‌پذیرد و مدیریت می‌کند.\n**آستانه‌ی نمره در این بخش:** بالای ۲۰ تا ۲۸ خوب است.\n💡 معادل معاملاتی مثال تصادف: همان ضرری که اتفاق افتاده — یکی با بازار دعوا می‌کند (انتقام و اوورترید)، دیگری می‌پذیرد و روز را می‌بندد (`ACA-EQ-0007`).",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_4.md",
+        "source_location": "تحمل فشار روانی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۴",
+        "section": "تحمل فشار روانی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "فرد با تحمل پایین: دعوا می‌کند، از کوره در می‌رود. فرد با تحمل بالا: می‌پذیرد، مدیریت می‌کند. (بالای ۲۰-۲۸ = خوب)"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-06T08:31:44Z",
+      "updated_at": "2026-09-06T08:31:44Z",
+      "validity": {
+        "time_bound": true,
+        "as_of": "تست هوش هیجانی سایت آکادمی در زمان ضبط دوره",
+        "note": "این آستانه‌ها مربوط به همین تست است و آستانه‌ی عمومی نیست."
+      },
+      "keywords": [
+        "تحمل فشار روانی",
+        "مقاومت",
+        "تصادف",
+        "پذیرش"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0042",
+        "ACA-EQ-0007",
+        "ACA-EQ-0031",
+        "ACA-EQ-0039"
+      ],
+      "related_questions": [
+        "تحمل فشارم پایینه",
+        "چرا زود به هم می‌ریزم؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0047",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "خوش‌بینی — عینکت را انتخاب کن",
+      "language": "fa",
+      "chunk_text": "**اصل درس:** عینک خود را انتخاب کن. اگر عینک کدر باشد، همه چیز را کدر می‌بینی.\n**مثال:** اگر لاستیک ماشین پنچر شد، شاید همان ۱۰ دقیقه توقف تو را از یک اتفاق بدتر نجات داده باشد.\n**قید مهم مدرس:** «نمی‌خواهیم غیرواقعی‌بینانه نگاه کنیم، اما خوش‌بینی به ما انرژی می‌دهد.» — یعنی خوش‌بینی جایگزین واقع‌بینی نیست.\n⚠️ **مرز مهم برای مربی:** این رکورد درباره‌ی نگاه به اتفاقات گذشته است، نه درباره‌ی انتظار از بازار. مربی هرگز از آن برای دلگرمی دادن نسبت به یک معامله‌ی باز یا پیش‌بینی نتیجه استفاده نمی‌کند (`ACA-RULE-0003`).",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_4.md",
+        "source_location": "خوش‌بینی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۴",
+        "section": "خوش‌بینی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "عینک خود را انتخاب کن. اگر عینک کدر باشد، همه چیز را کدر می‌بینی … نمی‌خواهیم غیرواقعی‌بینانه نگاه کنیم، اما خوش‌بینی به ما انرژی می‌دهد."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-06T08:31:44Z",
+      "updated_at": "2026-09-06T08:31:44Z",
+      "warnings": [
+        "خوش‌بینی جایگزین واقع‌بینی نیست؛ مربی از آن برای امیدوار کردن نسبت به یک معامله‌ی باز استفاده نمی‌کند."
+      ],
+      "keywords": [
+        "خوش‌بینی",
+        "عینک",
+        "نگاه مثبت",
+        "واقع‌بینی"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0042",
+        "ACA-EQ-0030",
+        "ACA-RULE-0003",
+        "PSY-PAT-0024"
+      ],
+      "related_questions": [
+        "خوش‌بین باشم یعنی چی؟",
+        "چطور مثبت نگاه کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0048",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "جدول نمره‌ی کل هوش هیجانی و پنج سطح آن",
+      "language": "fa",
+      "chunk_text": "**تفسیر نمره‌ی کل تست:**\n• ۹۰ تا ۱۶۰ → **خیلی کم**\n• ۱۶۳ تا ۲۳۴ → **کم**\n• ۲۳۵ تا ۳۰۶ → **متوسط**\n• ۳۰۷ تا ۳۷۸ → **زیاد**\n• ۳۷۹ تا ۴۵۰ → **خیلی زیاد**\n**قاعده‌ی مدرس برای هر نمره‌ای:** هر عددی که هستی باید روی افزایشش تلاش کنی؛ و اگر نمره‌ی بالایی داری، باید روی **حفظ و بهبود** آن کار کنی.\nتشبیه مدرس: «اگر یک بدنساز ۱۰ سال بدنسازی رفته، نمی‌تواند بگوید یک سال نروم، هیکلم همان می‌ماند.» — همان نکته‌ی بخش اول که EQ قابل کاهش هم هست (`ACA-EQ-0005`).\n⚠️ در ترنسکریپت بین ۱۶۰ و ۱۶۳ فاصله افتاده است؛ عین متن ثبت شد و اصلاح نشد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_4.md",
+        "source_location": "نمره هوش هیجانی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۴",
+        "section": "نمره هوش هیجانی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۹۰ تا ۱۶۰ خیلی کم · ۱۶۳ تا ۲۳۴ کم · ۲۳۵ تا ۳۰۶ متوسط · ۳۰۷ تا ۳۷۸ زیاد · ۳۷۹ تا ۴۵۰ خیلی زیاد"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-06T08:31:44Z",
+      "updated_at": "2026-09-06T08:31:44Z",
+      "validity": {
+        "time_bound": true,
+        "as_of": "تست هوش هیجانی سایت آکادمی در زمان ضبط دوره",
+        "note": "این آستانه‌ها مربوط به همین تست است و آستانه‌ی عمومی نیست."
+      },
+      "warnings": [
+        "فاصله‌ی بین ۱۶۰ و ۱۶۳ در متن درس وجود دارد و اصلاح نشده است."
+      ],
+      "keywords": [
+        "نمره کل",
+        "تفسیر نمره",
+        "خیلی کم",
+        "خیلی زیاد",
+        "بدنساز"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0024",
+        "ACA-EQ-0016",
+        "ACA-EQ-0005",
+        "ACA-EQ-0025"
+      ],
+      "related_questions": [
+        "نمره‌م ۲۸۰ شد یعنی چی؟",
+        "نمره‌ی خوب چنده؟",
+        "نمره‌م بالاست، دیگه کاری نکنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0049",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "سه عامل اصلی موفقیت از دید دانیل گلمن",
+      "language": "fa",
+      "chunk_text": "جمع‌بندی سه‌عاملی که درس به دانیل گلمن نسبت می‌دهد:\n۱. **مدیریت احساسات** (کنترل خود)\n۲. **قدرت تصمیم‌گیری** (انتخاب درست)\n۳. **به تأخیر انداختن خواسته‌های لذت** برای رسیدن به اهداف\n💡 این سه دقیقاً همان سه ستونی است که کل دوره روی آن‌ها ساخته شده: `ACA-EQ-0029` (مدیریت احساس)، `ACA-EQ-0037` (فرمول تصمیم) و `ACA-EQ-0011` (تکانه و مهار نفس).",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_4.md",
+        "source_location": "سه عامل اصلی موفقیت از دید دانیل گلمن",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۴",
+        "section": "سه عامل اصلی موفقیت از دید دانیل گلمن",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱ مدیریت احساسات (کنترل خود) ۲ قدرت تصمیم‌گیری (انتخاب درست) ۳ به تأخیر انداختن خواسته‌های لذت برای رسیدن به اهداف"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-06T08:31:44Z",
+      "updated_at": "2026-09-06T08:31:44Z",
+      "keywords": [
+        "دانیل گلمن",
+        "سه عامل موفقیت",
+        "مدیریت احساسات",
+        "تأخیر لذت"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0020",
+        "ACA-EQ-0029",
+        "ACA-EQ-0037",
+        "ACA-EQ-0011",
+        "ACA-EQ-0012"
+      ],
+      "related_questions": [
+        "راز موفقیت چیه؟",
+        "گلمن چی می‌گه؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0050",
+      "object_type": "COMPARISON",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "دوره دو فهرست پنج‌مؤلفه‌ای دارد — و هر دو درست‌اند",
+      "language": "fa",
+      "chunk_text": "در پایان دوره فهرست دومی از «پنج مؤلفه‌ی اصلی هوش هیجانی» می‌آید که با فهرست بخش سوم یکی نیست. این تناقض نیست — **دو چارچوب متفاوت‌اند** و دوره هر دو را استفاده می‌کند:\n⚠️ این تفکیک **برداشت من از متن** است، نه چیزی که خود درس صریح گفته باشد؛ برای تأیید ثبت شد (`RQ-0037`). تا آن زمان مربی هر دو فهرست را می‌شناسد و هیچ‌کدام را «تنها فهرست درست» معرفی نمی‌کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_4.md",
+        "source_location": "پنج مؤلفه اصلی هوش هیجانی (مرور نهایی)",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۴",
+        "section": "پنج مؤلفه اصلی هوش هیجانی (مرور نهایی)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱ خودآگاهی ۲ خودتنظیمی ۳ انگیزش ۴ همدلی ۵ مهارت‌های اجتماعی"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-06T08:31:44Z",
+      "updated_at": "2026-09-06T08:31:44Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "comparison": {
+        "فهرست بخش سوم — ساختار تست": [
+          "خودپنداره",
+          "خودبیانگری",
+          "بین فردی",
+          "تصمیم‌گیری",
+          "مدیریت استرس"
+        ],
+        "کاربرد فهرست اول": "خواندن و تفسیر نمره‌های تست هوش هیجانی سایت.",
+        "فهرست بخش چهارم — مرور مفهومی": [
+          "خودآگاهی",
+          "خودتنظیمی",
+          "انگیزش",
+          "همدلی",
+          "مهارت‌های اجتماعی"
+        ],
+        "کاربرد فهرست دوم": "توضیح مفهومی هوش هیجانی، در امتداد نام دانیل گلمن که دوره برده است.",
+        "نتیجه": "دو چارچوب متفاوت برای یک مفهوم؛ هیچ‌کدام دیگری را باطل نمی‌کند."
+      },
+      "review_reason": "تفکیک دو چارچوب برداشت من از متن است و نیازمند تأیید مدرس است.",
+      "warnings": [
+        "مربی هیچ‌کدام از دو فهرست را «تنها فهرست درست» معرفی نمی‌کند."
+      ],
+      "keywords": [
+        "پنج مؤلفه",
+        "خودتنظیمی",
+        "انگیزش",
+        "مهارت اجتماعی",
+        "دو مدل"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0025",
+        "ACA-EQ-0020",
+        "ACA-EQ-0021",
+        "ACA-EQ-0049"
+      ],
+      "related_questions": [
+        "بالاخره پنج مؤلفه کدومان؟",
+        "خودتنظیمی یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0051",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "شش نکته‌ی کلیدی دوره برای معامله‌گران",
+      "language": "fa",
+      "chunk_text": "جمع‌بندی عملیاتی خود مدرس در پایان دوره — کوتاه‌ترین صورت کل چهار بخش:\n۱. **خودآگاهی:** بدان چه احساسی داری و چرا.\n۲. **عزت نفس:** خودت را باور داشته باش؛ لیاقت موفقیت را داری.\n۳. **مدیریت تکانش:** واکنش‌های لحظه‌ای را کنترل کن.\n۴. **قبول ضرر:** مسئولیت‌پذیر باش — «من ضرر کردم»، نه «بازار به من ضرر زد».\n۵. **خوش‌بینی:** از هر اتفاقی یک نکته‌ی مثبت پیدا کن.\n۶. **صبر:** برای رسیدن به اهداف، خواسته‌های فعلی را به تأخیر بینداز.\n💡 این مناسب‌ترین رکورد برای پاسخ کوتاه مربی به «خلاصه‌ی دوره‌ی هوش هیجانی چیست؟» است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_4.md",
+        "source_location": "نکات کلیدی برای معامله‌گران",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۴",
+        "section": "نکات کلیدی برای معامله‌گران",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "خودآگاهی · عزت نفس · مدیریت تکانش · قبول ضرر · خوش‌بینی · صبر"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-06T08:31:44Z",
+      "updated_at": "2026-09-06T08:31:44Z",
+      "rule": "شش اصل عملی دوره: خودآگاهی، عزت نفس، مدیریت تکانش، قبول ضرر، خوش‌بینی و صبر.",
+      "keywords": [
+        "جمع‌بندی",
+        "شش نکته",
+        "چک‌لیست",
+        "معامله‌گر"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0029",
+        "ACA-EQ-0027",
+        "ACA-EQ-0039",
+        "ACA-EQ-0031",
+        "ACA-EQ-0047",
+        "ACA-EQ-0011"
+      ],
+      "related_questions": [
+        "خلاصه‌ی دوره چیه؟",
+        "چیکار کنم بهتر بشم؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0052",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "تمرین نهایی دوره: غار تنهایی",
+      "language": "fa",
+      "chunk_text": "تمرین پایانی دوره، یک عادت روزانه است، نه یک کار یک‌باره:\nجمله‌ی مدرس: «هر آدم موفق در جهان، در برهه‌ای از زندگی تنها بوده و با خودش خلوت کرده است.»\n💡 این تمرین مستقیماً همان «۵۰ درصد راه بهبود = خودشناسی» را عملی می‌کند (`ACA-EQ-0015`)، و مکمل تمرین دفتر تصمیمات بخش سوم است (`ACA-EQ-0041`).\n⚠️ در ترنسکریپت «غار تنهایی» به‌صورت «قار تنهایی» نوشته شده؛ عین متن حفظ و املای درست اینجا ثبت شد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_4.md",
+        "source_location": "تمرین نهایی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۴",
+        "section": "تمرین نهایی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "قار تنهایی خود را پیدا کن … هر آدم موفق در جهان، در بره‌ای از زندگی تنها بوده و با خودش خلوت کرده است."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-06T08:31:44Z",
+      "updated_at": "2026-09-06T08:31:44Z",
+      "steps": [
+        "هر روز چند دقیقه — حتی ۵ دقیقه — در خلوت خودت باش.",
+        "گوشی را کنار بگذار.",
+        "فقط فکر کن و خودت را بشناس.",
+        "نقاط قوت و ضعف خودت را مرور کن."
+      ],
+      "keywords": [
+        "غار تنهایی",
+        "خلوت",
+        "پنج دقیقه",
+        "خودشناسی",
+        "تمرین روزانه"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0015",
+        "ACA-EQ-0041",
+        "ACA-EQ-0018",
+        "PSY-PAT-0010"
+      ],
+      "related_questions": [
+        "تمرین روزانه چی انجام بدم؟",
+        "غار تنهایی چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0053",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "جمع‌بندی نهایی دوره و درخواست پایانی مدرس",
+      "language": "fa",
+      "chunk_text": "شش جمله‌ی پایانی دوره:\n• هوش هیجانی قابل بهبود است.\n• ۵۰ درصد راه بهبود = شناخت مؤلفه‌ها.\n• ترس و طمع همیشه هستند، اما قابل کنترل‌اند.\n• مسئولیت‌پذیر باش.\n• **از مسیر لذت ببر، نه فقط از مقصد.**\n• ثابت‌قدم باش.\n**تنها درخواست مدرس:** «ثابت‌قدم باشید. قدم بردارید، حتی شده روزی سی دقیقه.»\nو جمله‌ی بدرقه‌ی دوره: «هر کجای این جهان هستید، بدرخشید.»\n💡 عدد «روزی سی دقیقه» ارزش زیادی برای مربی دارد: به دانشجویی که می‌گوید وقت ندارد یا عقب افتاده، یک کف مشخص و کوچک می‌دهد به‌جای توصیه‌ی کلی.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_4.md",
+        "source_location": "جمع‌بندی نهایی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۴",
+        "section": "جمع‌بندی نهایی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "تنها درخواست من از شما: ثابت‌قدم باشید. قدم بردارید، حتی شده روزی سی دقیقه. … هر کجای این جهان هستید، بدرخشید."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-06T08:31:44Z",
+      "updated_at": "2026-09-06T08:31:44Z",
+      "keywords": [
+        "جمع‌بندی",
+        "ثابت‌قدم",
+        "سی دقیقه",
+        "مسیر",
+        "بدرخشید"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0005",
+        "ACA-EQ-0015",
+        "ACA-EQ-0044",
+        "ACA-EQ-0051",
+        "ACA-INT-0248"
+      ],
+      "related_questions": [
+        "وقت ندارم چیکار کنم؟",
+        "از کجا شروع کنم؟",
+        "خیلی عقبم، فایده داره؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0054",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "سایت رسمی آکادمی sobhansamadi.com است",
+      "language": "fa",
+      "chunk_text": "✅ **تأییدشده توسط مالک آکادمی (`D-0020`):** سایت اصلی و رسمی آکادمی **sobhansamadi.com** است — همان نشانی که در فهرست کانال‌های رسمی (`ACA-SUP-0001`) ثبت شده.\n**قاعده‌ی پاسخ:** مربی در جواب «سایتتون چیه؟» فقط و فقط **sobhansamadi.com** را اعلام می‌کند و هیچ نشانی دیگری را — حتی نشانی‌ای که در ویدیوی دوره دیده شده — به کاربر نمی‌دهد.\n**زمینه:** در انتهای بخش چهارم دوره‌ی هوش هیجانی نشانی دیگری (`www.sobhan7.com`) نمایش داده شده است. مالک آکادمی سایت رسمی را sobhansamadi.com تأیید کرد اما درباره‌ی وضعیت آن نشانی دوم چیزی نگفت. بنابراین اگر کاربری بپرسد «فلان نشانی هم مال شماست؟»، مربی نه تأیید می‌کند و نه رد — او را به پشتیبانی رسمی ارجاع می‌دهد (`ACA-SUP-0001`).\n**چرا این‌قدر سخت‌گیرانه:** دامنه‌ی جعلی یکی از رایج‌ترین راه‌های کلاهبرداری در این حوزه است و نشانی اشتباه از زبان مربی، اعتماد دانشجو را هزینه می‌کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_4.md",
+        "source_location": "پایان درس — نشانی سایت",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۴",
+        "section": "پایان درس — نشانی سایت",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "www.sobhan7.com"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-06T08:31:44Z",
+      "updated_at": "2026-09-06T08:31:44Z",
+      "rule": "تنها نشانی سایتی که مربی اعلام می‌کند sobhansamadi.com است؛ هیچ دامنه‌ی دیگری تأیید یا اعلام نمی‌شود.",
+      "warnings": [
+        "مربی هیچ نشانی خارج از فهرست تأییدشده‌ی ACA-SUP-0001 را اعلام نمی‌کند.",
+        "پرسش درباره‌ی دامنه‌های دیگر نه تأیید می‌شود نه رد؛ به پشتیبانی ارجاع می‌شود."
+      ],
+      "keywords": [
+        "سایت",
+        "دامنه",
+        "نشانی رسمی",
+        "sobhansamadi.com",
+        "کلاهبرداری"
+      ],
+      "related_concepts": [
+        "ACA-SUP-0001",
+        "ACA-SUP-0003",
+        "ACA-SUP-0016",
+        "ACA-SUP-0017"
+      ],
+      "related_questions": [
+        "سایتتون چیه؟",
+        "آدرس سایت رو بدید",
+        "این سایت مال شماست؟",
+        "از کجا بفهمم سایت اصلیه؟"
+      ]
+    }
+  ]
+}

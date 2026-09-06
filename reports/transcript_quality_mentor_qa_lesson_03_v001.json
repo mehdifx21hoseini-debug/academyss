@@ -1,0 +1,50 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "mentor_qa_lesson_03",
+  "course": "mentor_qa",
+  "lesson": "03",
+  "title": "پرسش و پاسخ منتورینگ — بسته ۳",
+  "original_filename": "mentor_qa_2026_08_27.md",
+  "raw_file": "raw_sources/academy/mentor_qa/mentor_qa_lesson_03.md",
+  "ingested_at": "2026-09-05T20:37:04Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 66,
+    "filler_cues": 10,
+    "speech_cues": 56,
+    "speech_ratio": 0.8485,
+    "words": 1759,
+    "unique_words": 786,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "---",
+        "count": 10
+      },
+      {
+        "text": "# RAW — پرسش و پاسخ منتورینگ آکادمی سبحان صمدی (بسته‌ی ۳)",
+        "count": 1
+      },
+      {
+        "text": "بازه: ۲۷ آگوست تا ۳ سپتامبر ۲۰۲۶",
+        "count": 1
+      },
+      {
+        "text": "منبع: خروجی گروه منتورینگ، ارسال‌شده توسط مالک پروژه (۲۰۲۶-۰۹-۰۵)",
+        "count": 1
+      },
+      {
+        "text": "> **حریم خصوصی:** نام نمایشی دانشجویان با شناسه‌ی بی‌نام جایگزین شده و نگاشت ذخیره نشده است.",
+        "count": 1
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "report_type": "transcript_quality",
+  "version": "v001"
+}

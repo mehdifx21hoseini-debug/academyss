@@ -1,0 +1,512 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "eq_lesson_2",
+  "course": "eq",
+  "lesson": "2",
+  "title": "هوش هیجانی (EQ) در معامله‌گری و زندگی — بخش دوم",
+  "original_filename": "eq_02.md",
+  "raw_file": "raw_sources/academy/eq/eq_lesson_2.md",
+  "ingested_at": "2026-09-05T22:21:15Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 77,
+    "filler_cues": 0,
+    "speech_cues": 77,
+    "speech_ratio": 1.0,
+    "words": 597,
+    "unique_words": 268,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "عنوان درس",
+        "count": 2
+      },
+      {
+        "text": "هوش هیجانی (EQ) در معامله‌گری و زندگی (بخش دوم از چهار بخش)",
+        "count": 2
+      },
+      {
+        "text": "=============================================================",
+        "count": 2
+      },
+      {
+        "text": "متن پاک‌سازی‌شده",
+        "count": 1
+      },
+      {
+        "text": "تعریف هوش هیجانی",
+        "count": 1
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "cues": [
+    {
+      "index": 1,
+      "start": null,
+      "end": null,
+      "text": "عنوان درس"
+    },
+    {
+      "index": 3,
+      "start": null,
+      "end": null,
+      "text": "هوش هیجانی (EQ) در معامله‌گری و زندگی (بخش دوم از چهار بخش)"
+    },
+    {
+      "index": 4,
+      "start": null,
+      "end": null,
+      "text": "متن پاک‌سازی‌شده"
+    },
+    {
+      "index": 5,
+      "start": null,
+      "end": null,
+      "text": "تعریف هوش هیجانی"
+    },
+    {
+      "index": 7,
+      "start": null,
+      "end": null,
+      "text": "هوش هیجانی مجموعه‌ای از یک سری توانایی‌ها، قابلیت‌ها و مهارت‌های غیرشناختی است که بر توانایی شخص در کنار آمدن با مشکلات و فشارهای محیطی تأثیر می‌گذارد."
+    },
+    {
+      "index": 8,
+      "start": null,
+      "end": null,
+      "text": "توانایی درک احساسات"
+    },
+    {
+      "index": 10,
+      "start": null,
+      "end": null,
+      "text": "یکی از نشانه‌های این که یک شخصی هوش هیجانی بالایی دارد، این است که برای مثال شخصی رو ببینه و بتونه درکش کنه، بتونه احساساتش رو درک کنه."
+    },
+    {
+      "index": 12,
+      "start": null,
+      "end": null,
+      "text": "توانایی فهم و احساسات و هیجانات خود: این که آدم خودش رو بشناسد، احساساتش رو بشناسد و درک کند."
+    },
+    {
+      "index": 14,
+      "start": null,
+      "end": null,
+      "text": "آمار جالب: بالغ بر ۴۰٪ از افراد اصلاً نمی‌دانند اگر الان حالشان بد است، چرا بد است؟"
+    },
+    {
+      "index": 16,
+      "start": null,
+      "end": null,
+      "text": "چون خودشناسی ندارند. هوش هیجانی که می‌خوام بهت یاد بدم دقیقاً کمکت می‌کند:"
+    },
+    {
+      "index": 18,
+      "start": null,
+      "end": null,
+      "text": "خودت رو بشناسی"
+    },
+    {
+      "index": 20,
+      "start": null,
+      "end": null,
+      "text": "توانایی کنترل احساس و هیجانات خودت و دیگران رو داشته باشی"
+    },
+    {
+      "index": 22,
+      "start": null,
+      "end": null,
+      "text": "حتی بتونی دوستت رو ببینی و بتونی درکش کنی"
+    },
+    {
+      "index": 24,
+      "start": null,
+      "end": null,
+      "text": "دانیل گلمن و هوش هیجانی"
+    },
+    {
+      "index": 26,
+      "start": null,
+      "end": null,
+      "text": "آقای دانیل گلمن، کسی است که در کنار آقای بارون، این دو نفر اومدن کلی در مورد EQ و هوش هیجانی صحبت کردن."
+    },
+    {
+      "index": 28,
+      "start": null,
+      "end": null,
+      "text": "هوش هیجانی شامل توانایی‌هایی مثل:"
+    },
+    {
+      "index": 29,
+      "start": null,
+      "end": null,
+      "text": "توانایی\tتوضیح"
+    },
+    {
+      "index": 30,
+      "start": null,
+      "end": null,
+      "text": "انگیزه دادن به خود\tکسی که هوش هیجانی بالایی دارد، دنبال انگیزه گرفتن از کسی نیست"
+    },
+    {
+      "index": 31,
+      "start": null,
+      "end": null,
+      "text": "پشتکار\tدر شرایط دشوار و سرخوردگی"
+    },
+    {
+      "index": 32,
+      "start": null,
+      "end": null,
+      "text": "کنترل رفتارهای تکانشی\tکنترل واکنش‌های لحظه‌ای و از کوره در رفتن"
+    },
+    {
+      "index": 33,
+      "start": null,
+      "end": null,
+      "text": "به تأخیر انداختن خواسته‌ها\tبرای رسیدن به اهداف"
+    },
+    {
+      "index": 34,
+      "start": null,
+      "end": null,
+      "text": "تنظیم هیجانات\tجلوگیری از غلبه استرس بر قدرت تفکر"
+    },
+    {
+      "index": 35,
+      "start": null,
+      "end": null,
+      "text": "همدلی با دیگران\tتوانایی درک دیگران"
+    },
+    {
+      "index": 36,
+      "start": null,
+      "end": null,
+      "text": "امیدواری\tحفظ روحیه در شرایط سخت"
+    },
+    {
+      "index": 37,
+      "start": null,
+      "end": null,
+      "text": "نکته کلیدی درباره انگیزه"
+    },
+    {
+      "index": 39,
+      "start": null,
+      "end": null,
+      "text": "هوش هیجانی قائم به ذات باید باشد. تو خودت باشی، خودت باشی."
+    },
+    {
+      "index": 41,
+      "start": null,
+      "end": null,
+      "text": "من هیچ‌وقت دنبال انگیزه گرفتن از کسی نبودم. البته نمی‌توانم بگویم هیچ‌وقت نبودم، از دیدن ماشین‌های گرون‌قیمت لذت می‌بردم، ولی کسی نبود بیاید به من آب پرتقال بدهد و بگوید بلند شو، قدم بردار، تلاشت رو بکن."
+    },
+    {
+      "index": 43,
+      "start": null,
+      "end": null,
+      "text": "اگر باید، نباید دنبال این باشی که کسی بیاید دستت رو بگیرد."
+    },
+    {
+      "index": 44,
+      "start": null,
+      "end": null,
+      "text": "جمع‌بندی تعریف هوش هیجانی"
+    },
+    {
+      "index": 46,
+      "start": null,
+      "end": null,
+      "text": "هوش هیجانی مجموعه‌ای از:"
+    },
+    {
+      "index": 48,
+      "start": null,
+      "end": null,
+      "text": "کنترل تکانش"
+    },
+    {
+      "index": 50,
+      "start": null,
+      "end": null,
+      "text": "به تأخیر انداختن خواسته‌ها"
+    },
+    {
+      "index": 52,
+      "start": null,
+      "end": null,
+      "text": "قائم به ذات بودن در انگیزه دادن"
+    },
+    {
+      "index": 54,
+      "start": null,
+      "end": null,
+      "text": "درک احساسات خود"
+    },
+    {
+      "index": 56,
+      "start": null,
+      "end": null,
+      "text": "درک احساسات دیگران"
+    },
+    {
+      "index": 58,
+      "start": null,
+      "end": null,
+      "text": "کنترل هیجانات"
+    },
+    {
+      "index": 60,
+      "start": null,
+      "end": null,
+      "text": "تست هوش هیجانی"
+    },
+    {
+      "index": 62,
+      "start": null,
+      "end": null,
+      "text": "در سایت، تست هوش هیجانی قرار داده شده است. این تست:"
+    },
+    {
+      "index": 64,
+      "start": null,
+      "end": null,
+      "text": "بسیار کامل و بین‌المللی است"
+    },
+    {
+      "index": 66,
+      "start": null,
+      "end": null,
+      "text": "واقع‌بینانه به آن پاسخ دهید"
+    },
+    {
+      "index": 68,
+      "start": null,
+      "end": null,
+      "text": "سایت امتیاز شما را محاسبه می‌کند"
+    },
+    {
+      "index": 70,
+      "start": null,
+      "end": null,
+      "text": "یا خودتان می‌توانید جداگانه امتیاز بگیرید"
+    },
+    {
+      "index": 72,
+      "start": null,
+      "end": null,
+      "text": "پس از تست، به دوره برمی‌گردیم و کامل در موردش صحبت می‌کنیم."
+    },
+    {
+      "index": 73,
+      "start": null,
+      "end": null,
+      "text": "موارد نیازمند بررسی"
+    },
+    {
+      "index": 75,
+      "start": null,
+      "end": null,
+      "text": "موردی برای بررسی پیدا نشد."
+    },
+    {
+      "index": 77,
+      "start": null,
+      "end": null,
+      "text": "============================================================="
+    },
+    {
+      "index": 78,
+      "start": null,
+      "end": null,
+      "text": "STRUCTURED TRANSCRIPT"
+    },
+    {
+      "index": 79,
+      "start": null,
+      "end": null,
+      "text": "============================================================="
+    },
+    {
+      "index": 80,
+      "start": null,
+      "end": null,
+      "text": "عنوان درس"
+    },
+    {
+      "index": 82,
+      "start": null,
+      "end": null,
+      "text": "هوش هیجانی (EQ) در معامله‌گری و زندگی (بخش دوم از چهار بخش)"
+    },
+    {
+      "index": 83,
+      "start": null,
+      "end": null,
+      "text": "۱. تعریف هوش هیجانی"
+    },
+    {
+      "index": 85,
+      "start": null,
+      "end": null,
+      "text": "هوش هیجانی مجموعه‌ای از توانایی‌ها، قابلیت‌ها و مهارت‌های غیرشناختی است که بر توانایی شخص در کنار آمدن با مشکلات و فشارهای محیطی تأثیر می‌گذارد."
+    },
+    {
+      "index": 86,
+      "start": null,
+      "end": null,
+      "text": "۲. توانایی درک احساسات"
+    },
+    {
+      "index": 87,
+      "start": null,
+      "end": null,
+      "text": "مهارت\tتوضیح"
+    },
+    {
+      "index": 88,
+      "start": null,
+      "end": null,
+      "text": "درک دیگران\tتوانایی درک احساسات دیگران"
+    },
+    {
+      "index": 89,
+      "start": null,
+      "end": null,
+      "text": "درک خود\tشناخت احساسات و هیجانات خود"
+    },
+    {
+      "index": 91,
+      "start": null,
+      "end": null,
+      "text": "آمار: ۴۰٪ از افراد نمی‌دانند چرا حالشان بد است (کمبود خودشناسی)"
+    },
+    {
+      "index": 92,
+      "start": null,
+      "end": null,
+      "text": "۳. دانیل گلمن (نظریه‌پرداز هوش هیجانی)"
+    },
+    {
+      "index": 94,
+      "start": null,
+      "end": null,
+      "text": "هفت توانایی کلیدی هوش هیجانی:"
+    },
+    {
+      "index": 95,
+      "start": null,
+      "end": null,
+      "text": "#\tتوانایی\tتوضیح"
+    },
+    {
+      "index": 96,
+      "start": null,
+      "end": null,
+      "text": "۱\tانگیزه دادن به خود\tقائم به ذات، نه منتظر دیگران"
+    },
+    {
+      "index": 97,
+      "start": null,
+      "end": null,
+      "text": "۲\tپشتکار\tدر شرایط دشوار و سرخوردگی"
+    },
+    {
+      "index": 98,
+      "start": null,
+      "end": null,
+      "text": "۳\tکنترل رفتارهای تکانشی\tجلوگیری از واکنش‌های لحظه‌ای"
+    },
+    {
+      "index": 99,
+      "start": null,
+      "end": null,
+      "text": "۴\tبه تأخیر انداختن خواسته‌ها\tاولویت با اهداف بلندمدت"
+    },
+    {
+      "index": 100,
+      "start": null,
+      "end": null,
+      "text": "۵\tتنظیم هیجانات\tجلوگیری از غلبه استرس بر تفکر"
+    },
+    {
+      "index": 101,
+      "start": null,
+      "end": null,
+      "text": "۶\tهمدلی با دیگران\tدرک و ارتباط با دیگران"
+    },
+    {
+      "index": 102,
+      "start": null,
+      "end": null,
+      "text": "۷\tامیدواری\tحفظ روحیه در شرایط سخت"
+    },
+    {
+      "index": 103,
+      "start": null,
+      "end": null,
+      "text": "۴. نکته کلیدی درباره انگیزه"
+    },
+    {
+      "index": 105,
+      "start": null,
+      "end": null,
+      "text": "هوش هیجانی قائم به ذات است. کسی که هوش هیجانی بالا دارد:"
+    },
+    {
+      "index": 107,
+      "start": null,
+      "end": null,
+      "text": "دنبال انگیزه از دیگران نیست"
+    },
+    {
+      "index": 109,
+      "start": null,
+      "end": null,
+      "text": "خودش به خودش انگیزه می‌دهد"
+    },
+    {
+      "index": 111,
+      "start": null,
+      "end": null,
+      "text": "منتظر نمی‌ماند کسی دستش را بگیرد"
+    },
+    {
+      "index": 113,
+      "start": null,
+      "end": null,
+      "text": "۵. تست هوش هیجانی"
+    },
+    {
+      "index": 115,
+      "start": null,
+      "end": null,
+      "text": "تست بین‌المللی و کامل"
+    },
+    {
+      "index": 117,
+      "start": null,
+      "end": null,
+      "text": "در سایت موجود است"
+    },
+    {
+      "index": 119,
+      "start": null,
+      "end": null,
+      "text": "واقع‌بینانه پاسخ دهید"
+    },
+    {
+      "index": 121,
+      "start": null,
+      "end": null,
+      "text": "امتیاز شما محاسبه می‌شود"
+    }
+  ]
+}

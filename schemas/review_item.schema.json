@@ -1,0 +1,23 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "mentorai/review_item.schema.json",
+  "title": "MENTORAI Review Queue Item",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "title", "reason", "priority", "status", "created_at"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^RQ-[0-9]{4}$" },
+    "title": { "type": "string" },
+    "domain": { "type": "string", "enum_ref": "domain" },
+    "object_ids": { "type": "array", "items": { "type": "string" } },
+    "reason": { "type": "string" },
+    "question_for_human": { "type": "string" },
+    "options": { "type": "array", "items": { "type": "string" } },
+    "recommendation": { "type": "string" },
+    "priority": { "type": "string", "enum_ref": "review_priority" },
+    "status": { "type": "string", "enum": ["OPEN", "ANSWERED", "CLOSED"] },
+    "answer": { "type": "string" },
+    "created_at": { "type": "string" },
+    "updated_at": { "type": "string" }
+  }
+}

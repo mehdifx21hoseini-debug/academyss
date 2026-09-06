@@ -1,0 +1,313 @@
+{
+  "manifest_type": "mentorai_knowledge_base",
+  "version": "v002",
+  "generated_at": "2026-09-05T12:21:37Z",
+  "generator": "tools/kb_build_manifest.py",
+  "schema_versions": {
+    "enums": "1.0.0"
+  },
+  "totals": {
+    "objects": 94,
+    "by_domain": {
+      "psychology": 11,
+      "metatrader": 26,
+      "general_trading": 29,
+      "academy": 20,
+      "mentor_qa": 1,
+      "brokers": 1,
+      "meta": 6
+    },
+    "by_object_type": {
+      "PSYCHOLOGY_PATTERN": 10,
+      "TROUBLESHOOTING": 5,
+      "COMPARISON": 6,
+      "METATRADER_PROCEDURE": 12,
+      "CONCEPT": 9,
+      "GLOSSARY": 22,
+      "CONFLICT_RECORD": 1,
+      "REVIEW_ITEM": 8,
+      "CATALOG_ITEM": 12,
+      "OPERATIONAL_FACT": 2,
+      "PROCEDURE": 1,
+      "RULE": 6
+    },
+    "by_authority": {
+      "GENERAL_KNOWLEDGE": 57,
+      "EXTERNAL_METHODOLOGY": 7,
+      "<unset>": 9,
+      "ACADEMY_DERIVED": 21
+    },
+    "by_approval": {
+      "PENDING_VERIFICATION": 64,
+      "<unset>": 9,
+      "PENDING_REVIEW": 15,
+      "APPROVED": 6
+    },
+    "by_lifecycle": {
+      "PENDING_REVIEW": 79,
+      "<unset>": 9,
+      "ACTIVE": 6
+    },
+    "by_platform_scope": {
+      "NOT_APPLICABLE": 39,
+      "BOTH": 5,
+      "VERSION_DEPENDENT": 6,
+      "MT4_ONLY": 6,
+      "MT5_ONLY": 8,
+      "<unset>": 30
+    },
+    "by_source_type": {
+      "MODEL_DRAFT": 64,
+      "<unset>": 9,
+      "ACADEMY_APP_DATA": 12,
+      "ACADEMY_WEBSITE": 3,
+      "ACADEMY_DOCUMENT": 6
+    }
+  },
+  "verification_pending": 79,
+  "collections": [
+    {
+      "collection_id": "psychology_patterns",
+      "title": "الگوهای روان‌شناسی معامله‌گری",
+      "domain": "psychology",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/psychology/psychology_patterns.json",
+      "object_count": 10,
+      "source_files": [
+        "tools/seed_psychology.py"
+      ]
+    },
+    {
+      "collection_id": "metatrader_troubleshooting",
+      "title": "عیب‌یابی خطاهای رایج متاتریدر",
+      "domain": "metatrader",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/metatrader/mt_troubleshooting.json",
+      "object_count": 5,
+      "source_files": [
+        "tools/seed_metatrader.py"
+      ]
+    },
+    {
+      "collection_id": "metatrader_mt4_vs_mt5",
+      "title": "موتور تفاوت متاتریدر ۴ و ۵",
+      "domain": "metatrader",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/metatrader/comparison/mt4_vs_mt5.json",
+      "object_count": 6,
+      "source_files": [
+        "tools/seed_metatrader.py"
+      ]
+    },
+    {
+      "collection_id": "metatrader_mt4_core",
+      "title": "دانش پایه و رویه‌های متاتریدر ۴",
+      "domain": "metatrader",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/metatrader/mt4/mt4_core.json",
+      "object_count": 6,
+      "source_files": [
+        "tools/seed_metatrader.py"
+      ]
+    },
+    {
+      "collection_id": "metatrader_mt5_core",
+      "title": "دانش پایه و رویه‌های متاتریدر ۵",
+      "domain": "metatrader",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/metatrader/mt5/mt5_core.json",
+      "object_count": 8,
+      "source_files": [
+        "tools/seed_metatrader.py"
+      ]
+    },
+    {
+      "collection_id": "external_methodologies_quarantine",
+      "title": "قرنطینه‌ی روش‌های معاملاتی بیرونی",
+      "domain": "general_trading",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/general_trading/external_methodologies_quarantine.json",
+      "object_count": 7,
+      "source_files": [
+        "tools/seed_governance.py",
+        "MENTORAI_KB_CHARTER.md"
+      ]
+    },
+    {
+      "collection_id": "general_trading_glossary",
+      "title": "واژه‌نامه‌ی دانش عمومی معامله‌گری",
+      "domain": "general_trading",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/general_trading/glossary/general_trading_glossary.json",
+      "object_count": 22,
+      "source_files": [
+        "tools/seed_general_trading.py"
+      ]
+    },
+    {
+      "collection_id": "conflict_registry",
+      "title": "دفتر ثبت تعارض‌ها",
+      "domain": "meta",
+      "record_kind": "conflict_record",
+      "version": "v001",
+      "pipeline_stage": "VALIDATED",
+      "file": "knowledge_base/conflicts/conflict_registry.json",
+      "object_count": 1,
+      "source_files": [
+        "index.html",
+        "js/data.js"
+      ]
+    },
+    {
+      "collection_id": "review_queue_open_items",
+      "title": "صف بازبینی انسانی",
+      "domain": "meta",
+      "record_kind": "review_item",
+      "version": "v001",
+      "pipeline_stage": "VALIDATED",
+      "file": "knowledge_base/review_queue/open_items.json",
+      "object_count": 8,
+      "source_files": [
+        "MENTORAI_KB_AUDIT.md"
+      ]
+    },
+    {
+      "collection_id": "academy_site_catalog",
+      "title": "کاتالوگ و اطلاعات عملیاتی آکادمی سبحان صمدی",
+      "domain": "academy",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "STRUCTURED",
+      "file": "knowledge_base/academy/catalog/academy_site_catalog.json",
+      "object_count": 15,
+      "source_files": [
+        "js/data.js",
+        "index.html",
+        "README.md",
+        "raw_sources/academy/site_data_v001.json"
+      ]
+    },
+    {
+      "collection_id": "kb_policy_rules",
+      "title": "قواعد حاکم بر پایگاه دانش و حفاظت از متدولوژی",
+      "domain": "meta",
+      "record_kind": "knowledge_object",
+      "version": "v001",
+      "pipeline_stage": "VALIDATED",
+      "file": "knowledge_base/academy/methodology/kb_policy_rules.json",
+      "object_count": 6,
+      "source_files": [
+        "MENTORAI_KB_CHARTER.md"
+      ]
+    }
+  ],
+  "open_conflicts": [
+    {
+      "id": "CONF-0001",
+      "topic": "حجم واقعی محتوای صوتی منتشرشده‌ی آکادمی",
+      "priority": "P1"
+    }
+  ],
+  "open_review_items": [
+    {
+      "id": "RQ-0001",
+      "title": "محتوای دوره‌های آکادمی در مخزن موجود نیست",
+      "priority": "P0",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0002",
+      "title": "دیتاست پرسش و پاسخ منتور موجود نیست",
+      "priority": "P0",
+      "domain": "mentor_qa"
+    },
+    {
+      "id": "RQ-0003",
+      "title": "دوره‌ی روان‌شناسی آکادمی دریافت نشده است",
+      "priority": "P1",
+      "domain": "psychology"
+    },
+    {
+      "id": "RQ-0004",
+      "title": "بروکر یا بروکرهای مورد استفاده مشخص نیستند",
+      "priority": "P1",
+      "domain": "brokers"
+    },
+    {
+      "id": "RQ-0005",
+      "title": "احتمال نمونه/دمو بودن محتوای سایت",
+      "priority": "P1",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0006",
+      "title": "شرایط و قیمت منتورینگ مشخص نیست",
+      "priority": "P1",
+      "domain": "academy"
+    },
+    {
+      "id": "RQ-0007",
+      "title": "دانش متاتریدر بدون تأیید منبع رسمی",
+      "priority": "P1",
+      "domain": "metatrader"
+    },
+    {
+      "id": "RQ-0008",
+      "title": "متدولوژی رسمی آکادمی تعریف نشده است",
+      "priority": "P0",
+      "domain": "academy"
+    }
+  ],
+  "source_coverage": {
+    "academy_course_material": {
+      "state": "MISSING",
+      "note": "هیچ ترنسکریپت یا سند دوره‌ای دریافت نشده (RQ-0001)."
+    },
+    "academy_methodology": {
+      "state": "MISSING",
+      "note": "سند متدولوژی رسمی وجود ندارد (RQ-0008)."
+    },
+    "academy_catalog": {
+      "state": "PARTIAL",
+      "note": "از سایت استخراج شد؛ نیازمند تأیید (RQ-0005)."
+    },
+    "mentor_qa": {
+      "state": "MISSING",
+      "note": "دیتاست گفت‌وگو دریافت نشده (RQ-0002)."
+    },
+    "metatrader_mt4": {
+      "state": "SEED",
+      "note": "نمونه‌ی اولیه، تأییدنشده (RQ-0007)."
+    },
+    "metatrader_mt5": {
+      "state": "SEED",
+      "note": "نمونه‌ی اولیه، تأییدنشده (RQ-0007)."
+    },
+    "brokers": {
+      "state": "MISSING",
+      "note": "بروکر مشخص نشده (RQ-0004)."
+    },
+    "psychology": {
+      "state": "SEED",
+      "note": "دوره‌ی روان‌شناسی آکادمی دریافت نشده (RQ-0003)."
+    },
+    "general_trading": {
+      "state": "SEED",
+      "note": "واژه‌نامه‌ی پایه ساخته شد؛ تأییدنشده."
+    }
+  }
+}

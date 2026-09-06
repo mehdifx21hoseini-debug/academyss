@@ -1,0 +1,39 @@
+{
+  "report_type": "validation",
+  "version": "v064",
+  "generated_at": "2026-09-05T22:37:04Z",
+  "stats": {
+    "files": 49,
+    "objects": 730,
+    "by_kind": {
+      "knowledge_object": 43,
+      "mentor_qa": 4,
+      "conflict_record": 1,
+      "review_item": 1
+    },
+    "by_domain": {
+      "brokers": 3,
+      "psychology": 27,
+      "metatrader": 102,
+      "general_trading": 49,
+      "mentor_qa": 80,
+      "academy": 463,
+      "meta": 6
+    },
+    "by_approval": {
+      "REVIEW_REQUIRED": 10,
+      "PENDING_VERIFICATION": 172,
+      "PENDING_REVIEW": 417,
+      "APPROVED": 85
+    }
+  },
+  "errors": 0,
+  "warnings": 1,
+  "findings": [
+    {
+      "level": "WARNING",
+      "where": "knowledge_base/academy/eq/lesson_04.json :: ACA-EQ-0054",
+      "message": "conflicts references unknown id CONF-0011"
+    }
+  ]
+}

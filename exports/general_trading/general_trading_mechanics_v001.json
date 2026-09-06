@@ -1,0 +1,809 @@
+{
+  "collection_id": "general_trading_mechanics",
+  "domain": "general_trading",
+  "title": "مکانیزم بازار و محاسبات معامله‌گری",
+  "description": "مفاهیم و محاسبات عمومی که برای پاسخ به سؤال‌های «چطور حساب می‌شود» و «چرا این‌طور است» لازم‌اند. هیچ تصمیم روشی (نقطه‌ی ورود، درصد ریسک، سطوح تحلیل) در این لایه وجود ندارد.",
+  "version": "v001",
+  "generated_at": "2026-09-05T13:25:07Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "tools/seed_general_mechanics.py"
+  ],
+  "notes": [
+    "مرز این لایه با متدولوژی آکادمی عمدی است: هر چیزی که «روش» باشد اینجا نیست.",
+    "همه‌ی رکوردها PENDING_VERIFICATION هستند."
+  ],
+  "objects": [
+    {
+      "id": "GEN-CONC-0001",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "بازارها و نمادهای رایج",
+      "title_en": "Markets and Instruments",
+      "language": "fa-en",
+      "summary": "نمادهای در دسترس در پلتفرم‌های معاملاتی معمولاً در این گروه‌ها قرار می‌گیرند: جفت‌ارزها (فارکس).",
+      "chunk_text": "بازارها و نمادهای رایج (Markets and Instruments): نمادهای در دسترس در پلتفرم‌های معاملاتی معمولاً در این گروه‌ها قرار می‌گیرند: جفت‌ارزها (فارکس)، فلزات گران‌بها مثل طلا و نقره، شاخص‌های سهام، انرژی مثل نفت، و در برخی بروکرها رمزارزها و سهام. هر گروه اندازه‌ی قرارداد، ساعات معاملاتی و رفتار نوسان متفاوتی دارد و نمی‌توان اعداد یک گروه را به گروه دیگر تعمیم داد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[1]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "فارکس",
+        "طلا",
+        "شاخص",
+        "نماد"
+      ],
+      "related_questions": [
+        "چه بازارهایی هست؟",
+        "طلا هم می‌شه معامله کرد؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0002",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "جفت‌ارزهای اصلی، فرعی و کراس",
+      "title_en": "Major, Minor and Cross Pairs",
+      "language": "fa-en",
+      "summary": "جفت‌ارزهای اصلی آن‌هایی هستند که یک طرفشان دلار آمریکاست و بیشترین حجم معامله را دارند (مثل EURUSD و GBPUSD).",
+      "chunk_text": "جفت‌ارزهای اصلی، فرعی و کراس (Major, Minor and Cross Pairs): جفت‌ارزهای اصلی آن‌هایی هستند که یک طرفشان دلار آمریکاست و بیشترین حجم معامله را دارند (مثل EURUSD و GBPUSD). جفت‌ارزهای فرعی یا کراس، جفت‌هایی بدون دلار هستند (مثل EURGBP). جفت‌های اصلی معمولاً اسپرد کمتر و نقدشوندگی بیشتری دارند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[2]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "major",
+        "cross",
+        "جفت ارز"
+      ],
+      "related_questions": [
+        "فرق جفت اصلی و کراس چیه؟",
+        "کدوم جفت‌ارز اسپردش کمتره؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0003",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "بازار اسپات و قرارداد مابه‌التفاوت (CFD)",
+      "title_en": "Spot vs CFD",
+      "language": "fa-en",
+      "summary": "در معاملات خرد فارکس و فلزات.",
+      "chunk_text": "بازار اسپات و قرارداد مابه‌التفاوت (CFD) (Spot vs CFD): در معاملات خرد فارکس و فلزات، آنچه در پلتفرم معامله می‌شود معمولاً قرارداد مابه‌التفاوت است: دارایی واقعی تحویل داده نمی‌شود و سود و زیان از اختلاف قیمت ورود و خروج محاسبه می‌شود. به همین دلیل مفاهیمی مثل سواپ شبانه و اهرم معنا پیدا می‌کنند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[3]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "CFD",
+        "spot",
+        "قرارداد مابه‌التفاوت"
+      ],
+      "related_questions": [
+        "طلایی که می‌خرم فیزیکیه؟",
+        "CFD یعنی چی؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0004",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "انواع حساب معاملاتی",
+      "title_en": "Account Types",
+      "language": "fa-en",
+      "summary": "بروکرها معمولاً چند نوع حساب ارائه می‌دهند: حساب استاندارد با اسپرد بیشتر و بدون کمیسیون.",
+      "chunk_text": "انواع حساب معاملاتی (Account Types): بروکرها معمولاً چند نوع حساب ارائه می‌دهند: حساب استاندارد با اسپرد بیشتر و بدون کمیسیون، حساب ECN یا Raw با اسپرد بسیار کم به‌علاوه‌ی کمیسیون، حساب سنت برای سرمایه‌های کوچک، و حساب بدون سواپ. نام‌ها، شرایط و هزینه‌ها کاملاً وابسته به بروکر است و باید از خود بروکر گرفته شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[4]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست. جزئیات دقیق انواع حساب باید از مستندات بروکر گرفته شود (RQ-0004).",
+      "confidence": 0.7,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "ECN",
+        "حساب سنت",
+        "بدون سواپ",
+        "نوع حساب"
+      ],
+      "related_questions": [
+        "چه حسابی باز کنم؟",
+        "حساب سنت چیه؟",
+        "فرق استاندارد و ECN چیه؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0005",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "اسپرد ثابت و اسپرد شناور",
+      "title_en": "Fixed vs Floating Spread",
+      "language": "fa-en",
+      "summary": "در حساب با اسپرد ثابت.",
+      "chunk_text": "اسپرد ثابت و اسپرد شناور (Fixed vs Floating Spread): در حساب با اسپرد ثابت، اختلاف Bid و Ask تغییر نمی‌کند اما معمولاً از میانگین اسپرد شناور بیشتر است. در حساب با اسپرد شناور، اسپرد با نقدشوندگی بازار تغییر می‌کند: در ساعات پرحجم کمتر و در زمان اخبار و بازگشایی بازار بیشتر می‌شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[5]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "fixed spread",
+        "floating spread"
+      ],
+      "related_questions": [
+        "اسپرد ثابت بهتره یا شناور؟",
+        "چرا اسپرد شبانه زیاد می‌شه؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0006",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "هزینه‌ی کل یک معامله",
+      "title_en": "Total Cost of a Trade",
+      "language": "fa-en",
+      "summary": "هزینه‌ی واقعی یک معامله مجموع سه چیز است: اسپرد.",
+      "chunk_text": "هزینه‌ی کل یک معامله (Total Cost of a Trade): هزینه‌ی واقعی یک معامله مجموع سه چیز است: اسپرد، کمیسیون (اگر حساب کمیسیونی باشد) و سواپ (اگر معامله شب‌مانده باشد). مقایسه‌ی بروکرها فقط بر اساس اسپرد گمراه‌کننده است؛ باید هر سه با هم و روی همان نمادی که معامله می‌کنید سنجیده شوند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[6]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "هزینه معامله",
+        "کمیسیون",
+        "سواپ",
+        "اسپرد"
+      ],
+      "related_questions": [
+        "هزینه‌ی هر معامله چقدره؟",
+        "کدوم بروکر ارزون‌تره؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0007",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "محاسبه‌ی ارزش هر پیپ",
+      "title_en": "Pip Value Calculation",
+      "language": "fa-en",
+      "summary": "ارزش هر پیپ برابر است با: اندازه‌ی قرارداد × حجم (لات) × اندازه‌ی یک پیپ بر حسب قیمت.",
+      "chunk_text": "محاسبه‌ی ارزش هر پیپ (Pip Value Calculation): ارزش هر پیپ برابر است با: اندازه‌ی قرارداد × حجم (لات) × اندازه‌ی یک پیپ بر حسب قیمت. برای جفت‌ارزهایی که دلار ارز دوم است (مثل EURUSD)، یک پیپ در یک لات استاندارد برابر ۱۰ دلار است. برای بقیه‌ی نمادها، عدد به نرخ تبدیل و اندازه‌ی قرارداد همان نماد بستگی دارد و ساده‌ترین راه، خواندن Tick Value از مشخصات نماد در پلتفرم است.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[7]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "ارزش پیپ",
+        "pip value",
+        "محاسبه"
+      ],
+      "examples": [
+        "EURUSD، حجم ۰.۱ لات: هر پیپ حدود ۱ دلار.",
+        "EURUSD، حجم ۰.۰۱ لات: هر پیپ حدود ۰.۱ دلار."
+      ],
+      "related_concepts": [
+        "MT-CONC-0004",
+        "MT5-PROC-0005",
+        "MT4-PROC-0011"
+      ],
+      "related_questions": [
+        "هر پیپ چند دلاره؟",
+        "با ۰.۰۱ لات هر پیپ چقدر می‌شه؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0008",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "محاسبه‌ی مارجین موردنیاز",
+      "title_en": "Margin Calculation",
+      "language": "fa-en",
+      "summary": "مارجین موردنیاز برابر است با: (اندازه‌ی قرارداد × حجم × قیمت) تقسیم بر اهرم.",
+      "chunk_text": "محاسبه‌ی مارجین موردنیاز (Margin Calculation): مارجین موردنیاز برابر است با: (اندازه‌ی قرارداد × حجم × قیمت) تقسیم بر اهرم. یعنی با ثابت ماندن حجم، هرچه اهرم بیشتر باشد مارجین کمتری قفل می‌شود. اهرم بیشتر به‌خودی‌خود ریسک را بالا نمی‌برد؛ چیزی که ریسک را تعیین می‌کند حجم معامله و فاصله‌ی حد ضرر است.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[8]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "margin",
+        "محاسبه مارجین",
+        "اهرم"
+      ],
+      "related_concepts": [
+        "MT-CONC-0006",
+        "GEN-DEF-0007"
+      ],
+      "related_questions": [
+        "مارجین چطور حساب می‌شه؟",
+        "با اهرم ۱:۱۰۰ چقدر پول قفل می‌شه؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0009",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "محاسبه‌ی حجم معامله بر اساس ریسک",
+      "title_en": "Position Size Calculation",
+      "language": "fa-en",
+      "summary": "فرمول محاسبه‌ی حجم چنین است: حجم = (مبلغ ریسک) تقسیم بر (فاصله‌ی حد ضرر بر حسب پیپ × ارزش هر پیپ برای یک لات).",
+      "chunk_text": "محاسبه‌ی حجم معامله بر اساس ریسک (Position Size Calculation): فرمول محاسبه‌ی حجم چنین است: حجم = (مبلغ ریسک) تقسیم بر (فاصله‌ی حد ضرر بر حسب پیپ × ارزش هر پیپ برای یک لات). مبلغ ریسک هم از درصد ریسک مجاز ضرب در سرمایه به دست می‌آید. درصد ریسک مجاز یک تصمیم روشی است و باید از متدولوژی آکادمی گرفته شود، نه از منابع عمومی.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[9]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "position size",
+        "حجم معامله",
+        "محاسبه ریسک"
+      ],
+      "examples": [
+        "سرمایه ۱۰۰۰ دلار، ریسک ۱٪ = ۱۰ دلار؛ حد ضرر ۵۰ پیپ روی EURUSD (هر پیپ در یک لات ۱۰ دلار) → حجم = ۱۰ ÷ (۵۰ × ۱۰) = ۰.۰۲ لات."
+      ],
+      "warnings": [
+        "عدد درصد ریسک در این مثال صرفاً برای نمایش فرمول است و توصیه‌ی آکادمی نیست."
+      ],
+      "related_concepts": [
+        "GEN-DEF-0018",
+        "GEN-CONC-0007"
+      ],
+      "related_questions": [
+        "حجم معامله رو چطور حساب کنم؟",
+        "با حد ضرر ۳۰ پیپ چه حجمی بزنم؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0010",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "امید ریاضی و نرخ برد",
+      "title_en": "Expectancy and Win Rate",
+      "language": "fa-en",
+      "summary": "سودآوری بلندمدت یک روش را نه نرخ برد به‌تنهایی.",
+      "chunk_text": "امید ریاضی و نرخ برد (Expectancy and Win Rate): سودآوری بلندمدت یک روش را نه نرخ برد به‌تنهایی، بلکه امید ریاضی تعیین می‌کند: (نرخ برد × میانگین سود) منهای (نرخ باخت × میانگین زیان). روشی با نرخ برد ۴۰ درصد می‌تواند سودده باشد اگر میانگین سودش به‌اندازه‌ی کافی از میانگین زیانش بزرگ‌تر باشد، و روشی با نرخ برد ۷۰ درصد می‌تواند زیان‌ده باشد اگر زیان‌هایش بزرگ باشند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[10]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "expectancy",
+        "win rate",
+        "امید ریاضی",
+        "نرخ برد"
+      ],
+      "related_concepts": [
+        "GEN-DEF-0017"
+      ],
+      "related_questions": [
+        "نرخ برد چقدر باید باشه؟",
+        "چرا با وجود برد زیاد ضرر می‌کنم؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0011",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "ریاضیات جبران افت سرمایه",
+      "title_en": "Drawdown Recovery Math",
+      "language": "fa-en",
+      "summary": "جبران ضرر به بازدهی بزرگ‌تر از خود ضرر نیاز دارد.",
+      "chunk_text": "ریاضیات جبران افت سرمایه (Drawdown Recovery Math): جبران ضرر به بازدهی بزرگ‌تر از خود ضرر نیاز دارد، چون پس از ضرر روی سرمایه‌ی کمتری کار می‌کنید. ۱۰ درصد ضرر با حدود ۱۱ درصد سود جبران می‌شود، ۲۰ درصد ضرر با ۲۵ درصد، ۵۰ درصد ضرر با ۱۰۰ درصد و ۹۰ درصد ضرر با ۹۰۰ درصد. همین رابطه، دلیل ریاضی محدود نگه‌داشتن زیان است.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[11]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "drawdown",
+        "جبران ضرر",
+        "ریاضیات ریسک"
+      ],
+      "related_concepts": [
+        "GEN-DEF-0010"
+      ],
+      "related_questions": [
+        "اگه نصف سرمایه‌م بره چقدر باید سود کنم؟",
+        "چرا ضرر بزرگ خطرناکه؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0012",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "سری ضررهای متوالی",
+      "title_en": "Losing Streaks",
+      "language": "fa-en",
+      "summary": "حتی در یک روش سودده.",
+      "chunk_text": "سری ضررهای متوالی (Losing Streaks): حتی در یک روش سودده، ضررهای پیاپی اتفاق طبیعی و قابل انتظار است. هرچه نرخ برد پایین‌تر باشد، احتمال سری‌های طولانی‌تر بیشتر می‌شود. برنامه‌ریزی ریسک باید به‌گونه‌ای باشد که چند ضرر پیاپی نه حساب را نابود کند و نه معامله‌گر را به تغییر عجولانه‌ی روش بکشاند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[12]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "losing streak",
+        "ضرر متوالی"
+      ],
+      "related_concepts": [
+        "PSY-PAT-0006",
+        "GEN-CONC-0010"
+      ],
+      "related_questions": [
+        "چند ضرر پشت سر هم طبیعیه؟",
+        "روشم خراب شده یا عادیه؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0013",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "گپ قیمتی و بازگشایی بازار",
+      "title_en": "Price Gaps",
+      "language": "fa-en",
+      "summary": "گپ یعنی باز شدن قیمت در سطحی متفاوت از قیمت بسته‌شدن قبلی.",
+      "chunk_text": "گپ قیمتی و بازگشایی بازار (Price Gaps): گپ یعنی باز شدن قیمت در سطحی متفاوت از قیمت بسته‌شدن قبلی، که معمولاً در بازگشایی بازار پس از آخر هفته یا پس از رویدادهای مهم رخ می‌دهد. در گپ، حد ضرر می‌تواند با قیمتی بدتر از سطح تعیین‌شده اجرا شود و زیان از مقدار پیش‌بینی‌شده بیشتر شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[13]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "gap",
+        "گپ",
+        "بازگشایی بازار"
+      ],
+      "related_concepts": [
+        "GEN-DEF-0013"
+      ],
+      "related_questions": [
+        "چرا حد ضررم با قیمت بدتری خورد؟",
+        "گپ آخر هفته چیه؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0014",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "رول‌اوور و پایان روز معاملاتی",
+      "title_en": "Rollover / End of Trading Day",
+      "language": "fa-en",
+      "summary": "بازار فارکس ۲۴ ساعته است اما یک لحظه‌ی مشخص به‌عنوان پایان روز معاملاتی تعریف می‌شود.",
+      "chunk_text": "رول‌اوور و پایان روز معاملاتی (Rollover / End of Trading Day): بازار فارکس ۲۴ ساعته است اما یک لحظه‌ی مشخص به‌عنوان پایان روز معاملاتی تعریف می‌شود. در همان لحظه سواپ اعمال می‌شود، کندل روزانه بسته می‌شود و معمولاً نقدشوندگی برای چند دقیقه کم و اسپرد زیاد می‌شود. زمان دقیق آن بر اساس ساعت سرور بروکر است.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[14]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "rollover",
+        "پایان روز",
+        "سواپ"
+      ],
+      "related_concepts": [
+        "MT-CONC-0008",
+        "MT-CONC-0011"
+      ],
+      "related_questions": [
+        "چرا نصفه‌شب اسپرد زیاد می‌شه؟",
+        "روز معاملاتی کی تموم می‌شه؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0015",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "سشن‌های معاملاتی و همپوشانی",
+      "title_en": "Trading Sessions and Overlaps",
+      "language": "fa-en",
+      "summary": "بازار در سه سشن اصلی آسیا.",
+      "chunk_text": "سشن‌های معاملاتی و همپوشانی (Trading Sessions and Overlaps): بازار در سه سشن اصلی آسیا، لندن و نیویورک فعال است. بیشترین حجم و نوسان معمولاً در همپوشانی لندن و نیویورک رخ می‌دهد و کم‌ترین نوسان در ساعات پایانی سشن آمریکا و ابتدای آسیا دیده می‌شود. ساعت‌ها باید بر مبنای ساعت سرور بروکر محاسبه شوند و با تغییر ساعت تابستانی جابه‌جا می‌شوند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[15]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "session",
+        "لندن",
+        "نیویورک",
+        "همپوشانی"
+      ],
+      "related_concepts": [
+        "GEN-DEF-0021",
+        "MT-CONC-0011"
+      ],
+      "related_questions": [
+        "بهترین ساعت معامله کیه؟",
+        "سشن لندن ساعت چنده؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0016",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "مهم‌ترین داده‌های تقویم اقتصادی",
+      "title_en": "Key Economic Releases",
+      "language": "fa-en",
+      "summary": "پرتأثیرترین داده‌های اقتصادی برای بازارهای ارز معمولاً این‌ها هستند: تصمیم نرخ بهره‌ی بانک‌های مرکزی.",
+      "chunk_text": "مهم‌ترین داده‌های تقویم اقتصادی (Key Economic Releases): پرتأثیرترین داده‌های اقتصادی برای بازارهای ارز معمولاً این‌ها هستند: تصمیم نرخ بهره‌ی بانک‌های مرکزی، شاخص قیمت مصرف‌کننده (CPI)، آمار اشتغال آمریکا (NFP)، تولید ناخالص داخلی و شاخص‌های مدیران خرید (PMI). در زمان انتشار این داده‌ها اسپرد افزایش و نقدشوندگی کاهش می‌یابد و احتمال لغزش قیمت بیشتر می‌شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[16]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "NFP",
+        "CPI",
+        "نرخ بهره",
+        "اخبار"
+      ],
+      "related_concepts": [
+        "GEN-DEF-0022",
+        "MT5-PROC-0010"
+      ],
+      "related_questions": [
+        "مهم‌ترین خبرها کدومن؟",
+        "NFP چیه؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0017",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "نقدشوندگی، تأمین‌کننده و نحوه‌ی اجرای بروکر",
+      "title_en": "Liquidity and Broker Execution",
+      "language": "fa-en",
+      "summary": "قیمتی که در پلتفرم می‌بینید از تأمین‌کنندگان نقدینگی بروکر می‌آید و ممکن است با بروکر دیگر تفاوت جزئی داشته باشد.",
+      "chunk_text": "نقدشوندگی، تأمین‌کننده و نحوه‌ی اجرای بروکر (Liquidity and Broker Execution): قیمتی که در پلتفرم می‌بینید از تأمین‌کنندگان نقدینگی بروکر می‌آید و ممکن است با بروکر دیگر تفاوت جزئی داشته باشد. نحوه‌ی اجرای سفارش، سرعت اجرا و میزان لغزش، بین بروکرها متفاوت است. این تفاوت‌ها دلیل اختلاف جزئی کندل‌ها و نتایج بک‌تست بین دو بروکر است.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[17]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست. جزئیات مدل اجرای هر بروکر باید از مستندات همان بروکر گرفته شود (RQ-0004).",
+      "confidence": 0.7,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "liquidity provider",
+        "execution",
+        "بروکر"
+      ],
+      "related_concepts": [
+        "MT-CONC-0010",
+        "GEN-DEF-0014"
+      ],
+      "related_questions": [
+        "چرا قیمت بروکرها فرق داره؟",
+        "چرا بک‌تستم با دوستم فرق داره؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0018",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "سنجش نوسان و اندیکاتور ATR",
+      "title_en": "Volatility Measurement (ATR)",
+      "language": "fa-en",
+      "summary": "برای سنجش عددی نوسان.",
+      "chunk_text": "سنجش نوسان و اندیکاتور ATR (Volatility Measurement (ATR)): برای سنجش عددی نوسان، رایج‌ترین ابزار استاندارد ATR است که میانگین دامنه‌ی حرکت قیمت در چند کندل اخیر را نشان می‌دهد و در همه‌ی پلتفرم‌ها به‌صورت پیش‌فرض وجود دارد. استفاده یا عدم استفاده از آن در روش معاملاتی، یک تصمیم روشی است و باید از متدولوژی آکادمی گرفته شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[18]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "ATR",
+        "نوسان",
+        "volatility"
+      ],
+      "warnings": [
+        "این رکورد فقط تعریف ابزار است، نه توصیه به استفاده از آن در روش آکادمی."
+      ],
+      "related_concepts": [
+        "GEN-DEF-0015",
+        "MET-RULE-0001"
+      ],
+      "related_questions": [
+        "ATR چیه؟",
+        "نوسان رو چطور اندازه بگیرم؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0019",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "سرمایه‌ی ریسک‌پذیر و سلامت مالی",
+      "title_en": "Risk Capital",
+      "language": "fa-en",
+      "summary": "سرمایه‌ای که وارد بازار می‌شود باید سرمایه‌ی ریسک‌پذیر باشد: پولی که از دست رفتنش زندگی روزمره.",
+      "chunk_text": "سرمایه‌ی ریسک‌پذیر و سلامت مالی (Risk Capital): سرمایه‌ای که وارد بازار می‌شود باید سرمایه‌ی ریسک‌پذیر باشد: پولی که از دست رفتنش زندگی روزمره، هزینه‌های ضروری یا تعهدات مالی فرد را مختل نمی‌کند. معامله با پول قرضی، پول اجاره یا سرمایه‌ی ضروری، تصمیم‌گیری را تحت فشار می‌برد و رفتار پرریسک را تشدید می‌کند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[19]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "سرمایه ریسک‌پذیر",
+        "risk capital",
+        "سلامت مالی"
+      ],
+      "related_concepts": [
+        "PSY-PAT-0024"
+      ],
+      "related_questions": [
+        "با چقدر پول شروع کنم؟",
+        "می‌تونم با وام ترید کنم؟"
+      ]
+    },
+    {
+      "id": "GEN-CONC-0020",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "مکانیزم بازار و محاسبات",
+      "title": "انتظارات واقع‌بینانه از بازدهی",
+      "title_en": "Realistic Return Expectations",
+      "language": "fa-en",
+      "summary": "بازدهی در معامله‌گری نه ثابت است و نه خطی: دوره‌های سود و دوره‌های افت.",
+      "chunk_text": "انتظارات واقع‌بینانه از بازدهی (Realistic Return Expectations): بازدهی در معامله‌گری نه ثابت است و نه خطی: دوره‌های سود و دوره‌های افت، هر دو بخشی از مسیرند. هدف‌گذاری بازدهی درصدی ثابت ماهانه، معمولاً به افزایش ریسک در دوره‌های بد و آسیب به حساب منجر می‌شود. معیار درست ارزیابی، اجرای درست فرایند و کنترل ریسک است، نه بازدهی یک ماه.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_general_mechanics.py",
+        "source_location": "ITEMS[20]"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "GENERAL_TRADING",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "دانش عمومی صنعت، نوشته‌شده بدون دسترسی به منبع بیرونی (شبکه در محیط پردازش مسدود بود). پیش از استفاده به‌عنوان پاسخ رسمی باید بازبینی شود. این لایه هرگز جایگزین متدولوژی آکادمی نیست.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T13:25:07Z",
+      "updated_at": "2026-09-05T13:25:07Z",
+      "keywords": [
+        "بازدهی",
+        "انتظارات",
+        "هدف‌گذاری"
+      ],
+      "related_concepts": [
+        "PSY-PAT-0020",
+        "GEN-CONC-0012"
+      ],
+      "related_questions": [
+        "ماهی چند درصد سود منطقیه؟",
+        "کی می‌تونم از ترید درآمد داشته باشم؟"
+      ]
+    }
+  ]
+}

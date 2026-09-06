@@ -1,0 +1,944 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "intro_lesson_09",
+  "course": "intro",
+  "lesson": "09",
+  "title": "باز کردن معامله، انواع اردر و مدیریت ریسک",
+  "original_filename": "intro_lesson_09.md",
+  "raw_file": "raw_sources/academy/intro/intro_lesson_09.md",
+  "ingested_at": "2026-09-05T16:48:22Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 149,
+    "filler_cues": 0,
+    "speech_cues": 149,
+    "speech_ratio": 1.0,
+    "words": 1353,
+    "unique_words": 420,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "عنوان درس: آموزش مقدماتی - نحوه باز کردن معامله، انواع اردرها و مدیریت ریسک (بخش نهم)",
+        "count": 2
+      },
+      {
+        "text": "دوست عزیزم، سلام. رسیدیم به بحث اردر که داخل این محتوا می‌خوام کامل بهت یاد بدم چطوری یک سفارش خرید یا فروش باز کنیم.",
+        "count": 2
+      },
+      {
+        "text": "|---|---|",
+        "count": 2
+      },
+      {
+        "text": "۱. ابزار Fibonacci Retracement را انتخاب کنید",
+        "count": 2
+      },
+      {
+        "text": "۲. از نقطه ورود تا حد ضرر بکشید",
+        "count": 2
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "cues": [
+    {
+      "index": 1,
+      "start": null,
+      "end": null,
+      "text": "# TRANSCRIPT — آموزش مقدماتی، بخش نهم"
+    },
+    {
+      "index": 2,
+      "start": null,
+      "end": null,
+      "text": "عنوان درس: آموزش مقدماتی - نحوه باز کردن معامله، انواع اردرها و مدیریت ریسک (بخش نهم)"
+    },
+    {
+      "index": 3,
+      "start": null,
+      "end": null,
+      "text": "منبع: متن پاک‌سازی‌شده و ساختاریافته‌ی ارسالی مالک پروژه (۲۰۲۶-۰۹-۰۵)"
+    },
+    {
+      "index": 5,
+      "start": null,
+      "end": null,
+      "text": "## متن پاک‌سازی‌شده"
+    },
+    {
+      "index": 7,
+      "start": null,
+      "end": null,
+      "text": "دوست عزیزم، سلام. رسیدیم به بحث اردر که داخل این محتوا می‌خوام کامل بهت یاد بدم چطوری یک سفارش خرید یا فروش باز کنیم."
+    },
+    {
+      "index": 9,
+      "start": null,
+      "end": null,
+      "text": "متوجه شدید تا اینجای کار که ما توی ویدیوهای قبلی بهت گفتم که چطوری از بازار کسب سود می‌کنیم، چه از افزایش قیمت، چه از ریزش قیمت. الان می‌خواهیم یاد بگیریم چطوری وارد معامله خرید بشیم یا فروش بشیم."
+    },
+    {
+      "index": 11,
+      "start": null,
+      "end": null,
+      "text": "### انواع معاملات"
+    },
+    {
+      "index": 13,
+      "start": null,
+      "end": null,
+      "text": "ما دو نوع معامله داریم:"
+    },
+    {
+      "index": 15,
+      "start": null,
+      "end": null,
+      "text": "۱. مارکت اردر (Market Order)"
+    },
+    {
+      "index": 16,
+      "start": null,
+      "end": null,
+      "text": "معامله در لحظه. خودت دستی کلیک می‌کنی روی معامله خرید (Buy) که از افزایش قیمت کسب سود کنی، یا روی معامله فروش (Sell) که از ریزش قیمت کسب سود کنی. این دست خودته."
+    },
+    {
+      "index": 18,
+      "start": null,
+      "end": null,
+      "text": "۲. پندینگ اردر (Pending Order)"
+    },
+    {
+      "index": 19,
+      "start": null,
+      "end": null,
+      "text": "معاملات شرطی. به بروکرت شرط می‌بندی. مثلاً می‌گویی قیمت فعلی هزار دلار است، اگر رسید به هزار و پانصد دلار، تو بفروش. یعنی معامله‌ات رو می‌گذاری به اصطلاح. اگر خوابی، اگر بیرونی، خودش وارد معامله می‌شه. حد سودت رو هم مشخص کردی، خودش می‌بنده چه در ضرر، چه در سود."
+    },
+    {
+      "index": 21,
+      "start": null,
+      "end": null,
+      "text": "### انواع پندینگ اردر"
+    },
+    {
+      "index": 23,
+      "start": null,
+      "end": null,
+      "text": "پندینگ اردر دو دسته دارد:"
+    },
+    {
+      "index": 25,
+      "start": null,
+      "end": null,
+      "text": "| نوع | توضیح |"
+    },
+    {
+      "index": 26,
+      "start": null,
+      "end": null,
+      "text": "|---|---|"
+    },
+    {
+      "index": 27,
+      "start": null,
+      "end": null,
+      "text": "| استاپ (Stop) | وقتی قیمت به سطح مورد نظر رسید، معامله فعال می‌شود |"
+    },
+    {
+      "index": 28,
+      "start": null,
+      "end": null,
+      "text": "| لیمیت (Limit) | وقتی قیمت در برگشت به سطح مورد نظر رسید، معامله فعال می‌شود |"
+    },
+    {
+      "index": 30,
+      "start": null,
+      "end": null,
+      "text": "انواع:"
+    },
+    {
+      "index": 32,
+      "start": null,
+      "end": null,
+      "text": "- Buy Stop: قیمت بالاتر از قیمت فعلی - برای ورود به خرید در شکست مقاومت"
+    },
+    {
+      "index": 33,
+      "start": null,
+      "end": null,
+      "text": "- Sell Stop: قیمت پایین‌تر از قیمت فعلی - برای ورود به فروش در شکست حمایت"
+    },
+    {
+      "index": 34,
+      "start": null,
+      "end": null,
+      "text": "- Buy Limit: قیمت پایین‌تر از قیمت فعلی - برای ورود به خرید در برگشت از حمایت"
+    },
+    {
+      "index": 35,
+      "start": null,
+      "end": null,
+      "text": "- Sell Limit: قیمت بالاتر از قیمت فعلی - برای ورود به فروش در برگشت از مقاومت"
+    },
+    {
+      "index": 37,
+      "start": null,
+      "end": null,
+      "text": "### نحوه باز کردن معامله در متاتریدر"
+    },
+    {
+      "index": 39,
+      "start": null,
+      "end": null,
+      "text": "روش اول: از طریق New Order"
+    },
+    {
+      "index": 41,
+      "start": null,
+      "end": null,
+      "text": "۱. روی دکمه New Order کلیک کنید"
+    },
+    {
+      "index": 42,
+      "start": null,
+      "end": null,
+      "text": "۲. نماد معاملاتی خود را انتخاب کنید"
+    },
+    {
+      "index": 43,
+      "start": null,
+      "end": null,
+      "text": "۳. حجم معامله (لات) را مشخص کنید"
+    },
+    {
+      "index": 44,
+      "start": null,
+      "end": null,
+      "text": "۴. روی Buy (خرید) یا Sell (فروش) کلیک کنید"
+    },
+    {
+      "index": 46,
+      "start": null,
+      "end": null,
+      "text": "### وان کلیک تریدینگ (One Click Trading)"
+    },
+    {
+      "index": 48,
+      "start": null,
+      "end": null,
+      "text": "برای سرعت بیشتر در معامله‌گری:"
+    },
+    {
+      "index": 50,
+      "start": null,
+      "end": null,
+      "text": "۱. راست کلیک روی صفحه"
+    },
+    {
+      "index": 51,
+      "start": null,
+      "end": null,
+      "text": "۲. گزینه One Click Trading را فعال کنید"
+    },
+    {
+      "index": 52,
+      "start": null,
+      "end": null,
+      "text": "۳. با یک کلیک می‌توانید وارد معامله شوید"
+    },
+    {
+      "index": 54,
+      "start": null,
+      "end": null,
+      "text": "### تعیین حد ضرر (Stop Loss) و حد سود (Take Profit)"
+    },
+    {
+      "index": 56,
+      "start": null,
+      "end": null,
+      "text": "روش اول: از طریق Modify Order"
+    },
+    {
+      "index": 58,
+      "start": null,
+      "end": null,
+      "text": "۱. روی معامله باز دوبار کلیک کنید"
+    },
+    {
+      "index": 59,
+      "start": null,
+      "end": null,
+      "text": "۲. در پنجره Modify Order، مقادیر Stop Loss و Take Profit را وارد کنید"
+    },
+    {
+      "index": 60,
+      "start": null,
+      "end": null,
+      "text": "۳. OK کنید"
+    },
+    {
+      "index": 62,
+      "start": null,
+      "end": null,
+      "text": "روش دوم: کشیدن روی نمودار"
+    },
+    {
+      "index": 64,
+      "start": null,
+      "end": null,
+      "text": "۱. روی خط معامله در نمودار کلیک کنید"
+    },
+    {
+      "index": 65,
+      "start": null,
+      "end": null,
+      "text": "۲. برای حد ضرر، خط را به سمت مخالف جهت معامله بکشید"
+    },
+    {
+      "index": 66,
+      "start": null,
+      "end": null,
+      "text": "۳. برای حد سود، خط را به سمت جهت معامله بکشید"
+    },
+    {
+      "index": 68,
+      "start": null,
+      "end": null,
+      "text": "### بستن معامله"
+    },
+    {
+      "index": 70,
+      "start": null,
+      "end": null,
+      "text": "- روی معامله در قسمت Trade دوبار کلیک کنید"
+    },
+    {
+      "index": 71,
+      "start": null,
+      "end": null,
+      "text": "- گزینه Close را بزنید"
+    },
+    {
+      "index": 72,
+      "start": null,
+      "end": null,
+      "text": "- یا از طریق One Click Trading"
+    },
+    {
+      "index": 74,
+      "start": null,
+      "end": null,
+      "text": "### مثال عملی"
+    },
+    {
+      "index": 76,
+      "start": null,
+      "end": null,
+      "text": "معامله فروش (Sell) روی داو جونز:"
+    },
+    {
+      "index": 78,
+      "start": null,
+      "end": null,
+      "text": "- قیمت ورود: ۳۳,۹۶۲"
+    },
+    {
+      "index": 79,
+      "start": null,
+      "end": null,
+      "text": "- حجم: ۱ لات"
+    },
+    {
+      "index": 80,
+      "start": null,
+      "end": null,
+      "text": "- حد ضرر: ۳۳,۹۷۹"
+    },
+    {
+      "index": 81,
+      "start": null,
+      "end": null,
+      "text": "- حد سود: ۳۳,۹۲۳"
+    },
+    {
+      "index": 83,
+      "start": null,
+      "end": null,
+      "text": "نتیجه: اگر قیمت بر خلاف جهت معامله حرکت کند، حد ضرر فعال می‌شود و ضرر محدود می‌گردد. اگر به سمت هدف حرکت کند، حد سود فعال می‌شود."
+    },
+    {
+      "index": 85,
+      "start": null,
+      "end": null,
+      "text": "### نکات مهم در اردرگذاری"
+    },
+    {
+      "index": 87,
+      "start": null,
+      "end": null,
+      "text": "۱. حجم معامله را متناسب با سرمایه خود انتخاب کنید"
+    },
+    {
+      "index": 88,
+      "start": null,
+      "end": null,
+      "text": "۲. همیشه حد ضرر بگذارید - این قانون اول معامله‌گری است"
+    },
+    {
+      "index": 89,
+      "start": null,
+      "end": null,
+      "text": "۳. حد سود را مشخص کنید - بدانید کجا از معامله خارج شوید"
+    },
+    {
+      "index": 90,
+      "start": null,
+      "end": null,
+      "text": "۴. ریسک به ریوارد را محاسبه کنید - مثلاً ۱ به ۲ یا ۱ به ۳"
+    },
+    {
+      "index": 92,
+      "start": null,
+      "end": null,
+      "text": "### تعیین ریسک به ریوارد با فیبوناچی"
+    },
+    {
+      "index": 94,
+      "start": null,
+      "end": null,
+      "text": "برای محاسبه نسبت ریسک به ریوارد:"
+    },
+    {
+      "index": 96,
+      "start": null,
+      "end": null,
+      "text": "۱. ابزار Fibonacci Retracement را انتخاب کنید"
+    },
+    {
+      "index": 97,
+      "start": null,
+      "end": null,
+      "text": "۲. از نقطه ورود تا حد ضرر بکشید"
+    },
+    {
+      "index": 98,
+      "start": null,
+      "end": null,
+      "text": "۳. تنظیمات فیبوناچی را مانند زیر تغییر دهید:"
+    },
+    {
+      "index": 100,
+      "start": null,
+      "end": null,
+      "text": "- Level 0: Entry (نقطه ورود)"
+    },
+    {
+      "index": 101,
+      "start": null,
+      "end": null,
+      "text": "- Level 1: -SL (حد ضرر)"
+    },
+    {
+      "index": 102,
+      "start": null,
+      "end": null,
+      "text": "- Level 2: TP1 (هدف اول)"
+    },
+    {
+      "index": 103,
+      "start": null,
+      "end": null,
+      "text": "- Level 3: TP2 (هدف دوم)"
+    },
+    {
+      "index": 105,
+      "start": null,
+      "end": null,
+      "text": "نکته: نسبت ریسک به ریوارد در معاملات بسیار مهم است. اگر ریسک شما ۱ باشد و ریوارد ۲، یعنی به ازای هر ۱ دلار ریسک، ۲ دلار سود هدف دارید."
+    },
+    {
+      "index": 107,
+      "start": null,
+      "end": null,
+      "text": "### جمع‌بندی"
+    },
+    {
+      "index": 109,
+      "start": null,
+      "end": null,
+      "text": "| نوع اردر | توضیح |"
+    },
+    {
+      "index": 110,
+      "start": null,
+      "end": null,
+      "text": "|---|---|"
+    },
+    {
+      "index": 111,
+      "start": null,
+      "end": null,
+      "text": "| Market Order | خرید یا فروش در لحظه |"
+    },
+    {
+      "index": 112,
+      "start": null,
+      "end": null,
+      "text": "| Buy Stop | خرید در قیمت بالاتر از فعلی |"
+    },
+    {
+      "index": 113,
+      "start": null,
+      "end": null,
+      "text": "| Sell Stop | فروش در قیمت پایین‌تر از فعلی |"
+    },
+    {
+      "index": 114,
+      "start": null,
+      "end": null,
+      "text": "| Buy Limit | خرید در برگشت از پایین |"
+    },
+    {
+      "index": 115,
+      "start": null,
+      "end": null,
+      "text": "| Sell Limit | فروش در برگشت از بالا |"
+    },
+    {
+      "index": 116,
+      "start": null,
+      "end": null,
+      "text": "| Stop Loss | حد ضرر - برای محدود کردن ضرر |"
+    },
+    {
+      "index": 117,
+      "start": null,
+      "end": null,
+      "text": "| Take Profit | حد سود - برای برداشت سود در هدف |"
+    },
+    {
+      "index": 119,
+      "start": null,
+      "end": null,
+      "text": "## موارد نیازمند بررسی (طبق متن ارسالی)"
+    },
+    {
+      "index": 121,
+      "start": null,
+      "end": null,
+      "text": "موردی برای بررسی پیدا نشد."
+    },
+    {
+      "index": 123,
+      "start": null,
+      "end": null,
+      "text": "## متن ساختاریافته (STRUCTURED TRANSCRIPT)"
+    },
+    {
+      "index": 125,
+      "start": null,
+      "end": null,
+      "text": "عنوان درس: آموزش مقدماتی - نحوه باز کردن معامله، انواع اردرها و مدیریت ریسک (بخش نهم)"
+    },
+    {
+      "index": 127,
+      "start": null,
+      "end": null,
+      "text": "### ۱. مقدمه"
+    },
+    {
+      "index": 129,
+      "start": null,
+      "end": null,
+      "text": "دوست عزیزم، سلام. رسیدیم به بحث اردر که داخل این محتوا می‌خوام کامل بهت یاد بدم چطوری یک سفارش خرید یا فروش باز کنیم."
+    },
+    {
+      "index": 131,
+      "start": null,
+      "end": null,
+      "text": "متوجه شدید تا اینجای کار که ما توی ویدیوهای قبلی بهت گفتم که چطوری از بازار کسب سود می‌کنیم، چه از افزایش قیمت، چه از ریزش قیمت."
+    },
+    {
+      "index": 133,
+      "start": null,
+      "end": null,
+      "text": "### ۲. انواع معاملات"
+    },
+    {
+      "index": 135,
+      "start": null,
+      "end": null,
+      "text": "مارکت اردر (Market Order): معامله در لحظه. خودت دستی کلیک می‌کنی روی Buy یا Sell."
+    },
+    {
+      "index": 137,
+      "start": null,
+      "end": null,
+      "text": "پندینگ اردر (Pending Order): معاملات شرطی. بروکر را موظف می‌کنی در شرایط خاص وارد معامله شود."
+    },
+    {
+      "index": 139,
+      "start": null,
+      "end": null,
+      "text": "### ۳. انواع پندینگ اردر"
+    },
+    {
+      "index": 141,
+      "start": null,
+      "end": null,
+      "text": "| نوع | معنی | کاربرد |"
+    },
+    {
+      "index": 142,
+      "start": null,
+      "end": null,
+      "text": "|---|---|---|"
+    },
+    {
+      "index": 143,
+      "start": null,
+      "end": null,
+      "text": "| Buy Stop | خرید در قیمت بالاتر | شکست مقاومت |"
+    },
+    {
+      "index": 144,
+      "start": null,
+      "end": null,
+      "text": "| Sell Stop | فروش در قیمت پایین‌تر | شکست حمایت |"
+    },
+    {
+      "index": 145,
+      "start": null,
+      "end": null,
+      "text": "| Buy Limit | خرید در قیمت پایین‌تر | برگشت از حمایت |"
+    },
+    {
+      "index": 146,
+      "start": null,
+      "end": null,
+      "text": "| Sell Limit | فروش در قیمت بالاتر | برگشت از مقاومت |"
+    },
+    {
+      "index": 148,
+      "start": null,
+      "end": null,
+      "text": "نکته کلیدی: استاپ برای ورود در ادامه روند، لیمیت برای ورود در برگشت قیمت."
+    },
+    {
+      "index": 150,
+      "start": null,
+      "end": null,
+      "text": "### ۴. نحوه باز کردن معامله در متاتریدر"
+    },
+    {
+      "index": 152,
+      "start": null,
+      "end": null,
+      "text": "روش New Order:"
+    },
+    {
+      "index": 154,
+      "start": null,
+      "end": null,
+      "text": "۱. کلیک روی New Order (یا F9)"
+    },
+    {
+      "index": 155,
+      "start": null,
+      "end": null,
+      "text": "۲. انتخاب نماد"
+    },
+    {
+      "index": 156,
+      "start": null,
+      "end": null,
+      "text": "۳. تنظیم حجم (لات)"
+    },
+    {
+      "index": 157,
+      "start": null,
+      "end": null,
+      "text": "۴. کلیک روی Buy یا Sell"
+    },
+    {
+      "index": 159,
+      "start": null,
+      "end": null,
+      "text": "روش One Click Trading:"
+    },
+    {
+      "index": 161,
+      "start": null,
+      "end": null,
+      "text": "۱. راست کلیک → One Click Trading"
+    },
+    {
+      "index": 162,
+      "start": null,
+      "end": null,
+      "text": "۲. فعال کردن گزینه"
+    },
+    {
+      "index": 163,
+      "start": null,
+      "end": null,
+      "text": "۳. یک کلیک برای ورود به معامله"
+    },
+    {
+      "index": 165,
+      "start": null,
+      "end": null,
+      "text": "### ۵. مدیریت معامله"
+    },
+    {
+      "index": 167,
+      "start": null,
+      "end": null,
+      "text": "حد ضرر (Stop Loss):"
+    },
+    {
+      "index": 168,
+      "start": null,
+      "end": null,
+      "text": "- محلی که اگر قیمت به آن رسید، معامله با ضرر بسته شود"
+    },
+    {
+      "index": 169,
+      "start": null,
+      "end": null,
+      "text": "- همیشه باید تعیین شود"
+    },
+    {
+      "index": 171,
+      "start": null,
+      "end": null,
+      "text": "حد سود (Take Profit):"
+    },
+    {
+      "index": 172,
+      "start": null,
+      "end": null,
+      "text": "- محلی که اگر قیمت به آن رسید، معامله با سود بسته شود"
+    },
+    {
+      "index": 173,
+      "start": null,
+      "end": null,
+      "text": "- برای برداشت سود در هدف"
+    },
+    {
+      "index": 175,
+      "start": null,
+      "end": null,
+      "text": "روش‌های تعیین:"
+    },
+    {
+      "index": 177,
+      "start": null,
+      "end": null,
+      "text": "۱. Modify Order → وارد کردن اعداد"
+    },
+    {
+      "index": 178,
+      "start": null,
+      "end": null,
+      "text": "۲. کشیدن خط روی نمودار"
+    },
+    {
+      "index": 180,
+      "start": null,
+      "end": null,
+      "text": "### ۶. بستن معامله"
+    },
+    {
+      "index": 182,
+      "start": null,
+      "end": null,
+      "text": "روش‌های بستن معامله:"
+    },
+    {
+      "index": 184,
+      "start": null,
+      "end": null,
+      "text": "- دوبار کلیک روی معامله → Close"
+    },
+    {
+      "index": 185,
+      "start": null,
+      "end": null,
+      "text": "- کلیک روی × در One Click Trading"
+    },
+    {
+      "index": 186,
+      "start": null,
+      "end": null,
+      "text": "- راست کلیک → Close Order"
+    },
+    {
+      "index": 188,
+      "start": null,
+      "end": null,
+      "text": "### ۷. ریسک به ریوارد (Risk/Reward)"
+    },
+    {
+      "index": 190,
+      "start": null,
+      "end": null,
+      "text": "نسبت ریسک به ریوارد = میزان ضرر احتمالی ÷ میزان سود هدف"
+    },
+    {
+      "index": 192,
+      "start": null,
+      "end": null,
+      "text": "مثال: اگر حد ضرر ۱۰۰ پیپ و حد سود ۲۰۰ پیپ باشد، نسبت ریسک به ریوارد = ۱:۲"
+    },
+    {
+      "index": 194,
+      "start": null,
+      "end": null,
+      "text": "توصیه: همیشه به دنبال نسبت ریسک به ریوارد حداقل ۱:۲ باشید."
+    },
+    {
+      "index": 196,
+      "start": null,
+      "end": null,
+      "text": "### ۸. فیبوناچی برای محاسبه ریسک به ریوارد"
+    },
+    {
+      "index": 198,
+      "start": null,
+      "end": null,
+      "text": "برای نمایش واضح ریسک به ریوارد:"
+    },
+    {
+      "index": 200,
+      "start": null,
+      "end": null,
+      "text": "۱. ابزار Fibonacci Retracement را انتخاب کنید"
+    },
+    {
+      "index": 201,
+      "start": null,
+      "end": null,
+      "text": "۲. از نقطه ورود تا حد ضرر بکشید"
+    },
+    {
+      "index": 202,
+      "start": null,
+      "end": null,
+      "text": "۳. تنظیمات سطح‌ها را تغییر دهید:"
+    },
+    {
+      "index": 204,
+      "start": null,
+      "end": null,
+      "text": "| Level | نام | توضیح |"
+    },
+    {
+      "index": 205,
+      "start": null,
+      "end": null,
+      "text": "|---|---|---|"
+    },
+    {
+      "index": 206,
+      "start": null,
+      "end": null,
+      "text": "| ۰ | Entry | نقطه ورود |"
+    },
+    {
+      "index": 207,
+      "start": null,
+      "end": null,
+      "text": "| ۱ | -SL | حد ضرر |"
+    },
+    {
+      "index": 208,
+      "start": null,
+      "end": null,
+      "text": "| ۲ | TP1 | هدف اول (۱ برابر ریسک) |"
+    },
+    {
+      "index": 209,
+      "start": null,
+      "end": null,
+      "text": "| ۳ | TP2 | هدف دوم (۲ برابر ریسک) |"
+    },
+    {
+      "index": 211,
+      "start": null,
+      "end": null,
+      "text": "### ۹. نکات کلیدی"
+    },
+    {
+      "index": 213,
+      "start": null,
+      "end": null,
+      "text": "۱. هیچ وقت بدون حد ضرر معامله نکنید"
+    },
+    {
+      "index": 214,
+      "start": null,
+      "end": null,
+      "text": "۲. حجم معامله را متناسب با سرمایه انتخاب کنید"
+    },
+    {
+      "index": 215,
+      "start": null,
+      "end": null,
+      "text": "۳. نسبت ریسک به ریوارد را قبل از ورود محاسبه کنید"
+    },
+    {
+      "index": 216,
+      "start": null,
+      "end": null,
+      "text": "۴. از One Click Trading برای سرعت بیشتر استفاده کنید"
+    },
+    {
+      "index": 217,
+      "start": null,
+      "end": null,
+      "text": "۵. معاملات شرطی (پندینگ اردر) برای زمانی که پشت سیستم نیستید مفید است"
+    },
+    {
+      "index": 219,
+      "start": null,
+      "end": null,
+      "text": "### ۱۰. جمع‌بندی نهایی"
+    },
+    {
+      "index": 221,
+      "start": null,
+      "end": null,
+      "text": "- دو نوع اصلی اردر: مارکت اردر و پندینگ اردر"
+    },
+    {
+      "index": 222,
+      "start": null,
+      "end": null,
+      "text": "- پندینگ اردر شامل: استاپ و لیمیت (هر کدام Buy و Sell)"
+    },
+    {
+      "index": 223,
+      "start": null,
+      "end": null,
+      "text": "- حد ضرر و حد سود را همیشه مشخص کنید"
+    },
+    {
+      "index": 224,
+      "start": null,
+      "end": null,
+      "text": "- نسبت ریسک به ریوارد را محاسبه کنید"
+    },
+    {
+      "index": 225,
+      "start": null,
+      "end": null,
+      "text": "- با حساب دمو تمرین کنید قبل از معامله واقعی"
+    }
+  ]
+}

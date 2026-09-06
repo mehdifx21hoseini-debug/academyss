@@ -1,0 +1,251 @@
+{
+  "collection_id": "metatrader_mt4_core",
+  "domain": "metatrader",
+  "title": "دانش پایه و رویه‌های متاتریدر ۴",
+  "description": "رویه‌های عملیاتی و مفاهیم پایه‌ی متاتریدر ۴ برای پاسخ به سؤال‌های اجرایی دانشجو.",
+  "version": "v001",
+  "generated_at": "2026-09-05T12:13:09Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "tools/seed_metatrader.py"
+  ],
+  "notes": [
+    "نمونه‌ی اول (sample-first) — پیش از تولید انبوه باید ساختار و صحت تأیید شود.",
+    "همه‌ی رکوردها PENDING_VERIFICATION هستند و باید با مستندات رسمی MetaQuotes تطبیق داده شوند."
+  ],
+  "objects": [
+    {
+      "id": "MT4-PROC-0001",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "ورود به حساب معاملاتی در متاتریدر ۴",
+      "language": "fa-en",
+      "chunk_text": "در متاتریدر ۴ اتصال به حساب از منوی File > Login to Trade Account انجام می‌شود و به شماره‌ی حساب، رمز عبور و سرور بروکر نیاز دارد. وضعیت اتصال در گوشه‌ی پایین-راست نمایش داده می‌شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_metatrader.py",
+        "source_location": "MT4-PROC-0001"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "اتصال و حساب",
+      "steps": [
+        "منوی File و سپس Login to Trade Account را باز کنید.",
+        "شماره حساب، رمز عبور و سرور بروکر را وارد کنید.",
+        "OK را بزنید و نوار وضعیت پایین-راست را بررسی کنید."
+      ],
+      "warnings": [
+        "اگر سرور بروکر در فهرست نبود، فایل srv بروکر باید در پوشه‌ی config قرار بگیرد یا از نصاب اختصاصی بروکر استفاده شود."
+      ],
+      "keywords": [
+        "login",
+        "ورود",
+        "متاتریدر ۴"
+      ],
+      "related_questions": [
+        "چطور وارد متاتریدر ۴ بشم؟",
+        "سرور بروکر رو پیدا نمی‌کنم"
+      ]
+    },
+    {
+      "id": "MT4-PROC-0002",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "نمایش همه‌ی نمادها در Market Watch (متاتریدر ۴)",
+      "language": "fa-en",
+      "chunk_text": "در متاتریدر ۴ با راست‌کلیک روی Market Watch و انتخاب Show All همه‌ی نمادهای در دسترس نمایش داده می‌شوند؛ برای فهرست کامل و گروه‌بندی‌شده از پنجره‌ی Symbols استفاده کنید.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_metatrader.py",
+        "source_location": "MT4-PROC-0002"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "نمادها",
+      "steps": [
+        "روی Market Watch راست‌کلیک کنید.",
+        "گزینه‌ی Show All را بزنید تا همه‌ی نمادها نمایش داده شوند.",
+        "برای انتخاب دقیق‌تر، Symbols را باز کنید و نماد را Show کنید."
+      ],
+      "keywords": [
+        "show all",
+        "market watch",
+        "نماد"
+      ],
+      "related_questions": [
+        "چرا نماد رو نمی‌بینم؟",
+        "چطور همه نمادها رو نشون بدم؟"
+      ]
+    },
+    {
+      "id": "MT4-PROC-0003",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "باز کردن معامله و انواع سفارش در متاتریدر ۴",
+      "language": "fa-en",
+      "chunk_text": "پنجره‌ی Order با کلید F9 باز می‌شود. متاتریدر ۴ چهار نوع سفارش معلق دارد: Buy Limit، Sell Limit، Buy Stop و Sell Stop. سفارش‌های Stop Limit فقط در متاتریدر ۵ وجود دارند.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_metatrader.py",
+        "source_location": "MT4-PROC-0003"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "معامله",
+      "steps": [
+        "نماد را در Market Watch انتخاب کنید.",
+        "کلید F9 را بزنید.",
+        "حجم (Volume)، و در صورت نیاز Stop Loss و Take Profit را وارد کنید.",
+        "برای ورود فوری Buy یا Sell را بزنید یا Type را روی Pending Order بگذارید."
+      ],
+      "keywords": [
+        "F9",
+        "order",
+        "pending",
+        "متاتریدر ۴"
+      ],
+      "related_questions": [
+        "چطور توی متاتریدر ۴ معامله باز کنم؟",
+        "متاتریدر ۴ چند نوع سفارش معلق داره؟"
+      ]
+    },
+    {
+      "id": "MT4-PROC-0004",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "تنظیم حد ضرر و حد سود روی معامله‌ی باز (متاتریدر ۴)",
+      "language": "fa-en",
+      "chunk_text": "در متاتریدر ۴ حد ضرر و حد سود از تب Trade در پنجره‌ی Terminal تنظیم می‌شود.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_metatrader.py",
+        "source_location": "MT4-PROC-0004"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "مدیریت معامله",
+      "steps": [
+        "پنجره‌ی Terminal را باز کنید (Ctrl+T) و به تب Trade بروید.",
+        "روی معامله راست‌کلیک و Modify or Delete Order را بزنید.",
+        "مقادیر Stop Loss و Take Profit را وارد و Modify را بزنید."
+      ],
+      "keywords": [
+        "stop loss",
+        "take profit",
+        "modify order"
+      ],
+      "related_questions": [
+        "چطور حد ضرر بذارم متاتریدر ۴؟"
+      ]
+    },
+    {
+      "id": "MT4-PROC-0005",
+      "object_type": "METATRADER_PROCEDURE",
+      "domain": "metatrader",
+      "title": "فعال‌سازی AutoTrading و اکسپرت در متاتریدر ۴",
+      "language": "fa-en",
+      "chunk_text": "در متاتریدر ۴ معامله‌ی خودکار با دکمه‌ی AutoTrading (در نسخه‌های قدیمی‌تر Expert Advisors) فعال می‌شود و اکسپرت باید در پوشه‌ی MQL4/Experts قرار بگیرد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_metatrader.py",
+        "source_location": "MT4-PROC-0005"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "اکسپرت",
+      "steps": [
+        "File > Open Data Folder را باز کنید و فایل را در MQL4/Experts بگذارید.",
+        "در Navigator روی Expert Advisors راست‌کلیک و Refresh بزنید.",
+        "اکسپرت را روی چارت بکشید و Allow live trading را تیک بزنید.",
+        "دکمه‌ی AutoTrading در نوار ابزار را فعال کنید."
+      ],
+      "keywords": [
+        "expert advisor",
+        "MQL4",
+        "autotrading"
+      ],
+      "related_questions": [
+        "اکسپرت متاتریدر ۴ رو چطور نصب کنم؟"
+      ]
+    },
+    {
+      "id": "MT4-CONC-0001",
+      "object_type": "CONCEPT",
+      "domain": "metatrader",
+      "title": "حسابداری معاملات در متاتریدر ۴ (فقط Hedging)",
+      "language": "fa-en",
+      "chunk_text": "متاتریدر ۴ فقط سیستم Hedging دارد: هر معامله یک تیکت مستقل است و می‌توان همزمان چند معامله‌ی خرید و فروش روی یک نماد باز داشت. مفهوم «پوزیشن خالص» (Netting) در متاتریدر ۴ وجود ندارد.",
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_metatrader.py",
+        "source_location": "MT4-CONC-0001"
+      },
+      "authority_level": "GENERAL_KNOWLEDGE",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "نوشته‌شده بر پایه‌ی دانش عمومی از پلتفرم، بدون دسترسی به مستندات رسمی MetaQuotes (شبکه‌ی خروجی در محیط پردازش مسدود بود). مسیر منوها، پیام‌های خطا و محدودیت‌ها باید با راهنمای رسمی و بیلد فعلی پلتفرم تطبیق داده شود.",
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T12:13:09Z",
+      "updated_at": "2026-09-05T12:13:09Z",
+      "category": "مفاهیم پایه",
+      "definition": "در متاتریدر ۴ هر سفارش یک معامله‌ی مستقل با تیکت مجزاست.",
+      "keywords": [
+        "hedging",
+        "ticket",
+        "پوزیشن"
+      ],
+      "related_questions": [
+        "می‌تونم همزمان خرید و فروش داشته باشم؟"
+      ]
+    }
+  ]
+}

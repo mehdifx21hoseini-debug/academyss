@@ -1,0 +1,327 @@
+{
+  "collection_id": "external_methodologies_quarantine",
+  "domain": "general_trading",
+  "title": "قرنطینه‌ی روش‌های معاملاتی بیرونی",
+  "description": "توضیح کوتاه روش‌هایی که جزو متدولوژی آکادمی نیستند، صرفاً برای تشخیص سؤال دانشجو و هدایت او به چارچوب آکادمی. این محتوا هرگز به‌عنوان آموزش آکادمی ارائه نمی‌شود.",
+  "version": "v001",
+  "generated_at": "2026-09-05T15:31:16Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "tools/seed_governance.py",
+    "MENTORAI_KB_CHARTER.md"
+  ],
+  "notes": [
+    "گسترش محتوای این روش‌ها ممنوع است؛ فقط سطح شناسایی نگهداری می‌شود."
+  ],
+  "objects": [
+    {
+      "id": "EXT-CONC-0001",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "روش‌های بیرونی (قرنطینه)",
+      "title": "Smart Money Concepts (SMC)",
+      "language": "fa-en",
+      "summary": "رویکردی که بر ردپای پول هوشمند، نقدینگی، بلوک سفارش و شکست ساختار تمرکز دارد.",
+      "definition": "رویکردی که بر ردپای پول هوشمند، نقدینگی، بلوک سفارش و شکست ساختار تمرکز دارد.",
+      "chunk_text": "Smart Money Concepts (SMC): رویکردی که بر ردپای پول هوشمند، نقدینگی، بلوک سفارش و شکست ساختار تمرکز دارد. ⚠️ این روش جزو متدولوژی آکادمی سبحان صمدی نیست. موضع رسمی آکادمی در رکورد ACA-INT-0063 ثبت شده است: مدرس این سیستم‌ها را رد یا تحقیر نمی‌کند و می‌گوید می‌توان با آن‌ها سود کرد، اما مسیر آکادمی پرایس اکشن مبتنی بر عرضه و تقاضاست. این توضیح فقط برای شناخت نام و مفهوم کلی نگهداری می‌شود و مبنای تحلیل یا پاسخ آموزشی آکادمی نیست.",
+      "warnings": [
+        "خارج از متدولوژی آکادمی — فقط برای شناسایی و توضیح کوتاه."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_governance.py",
+        "source_location": "EXTERNAL[0]"
+      },
+      "authority_level": "EXTERNAL_METHODOLOGY",
+      "methodology_scope": "EXTERNAL_METHODOLOGY_QUARANTINE",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "توضیح کوتاه شناسایی، بدون منبع بیرونی. محتوای آموزشی این روش‌ها گسترش داده نمی‌شود.",
+      "confidence": 0.7,
+      "version": "v001",
+      "keywords": [
+        "اسمارت مانی",
+        "SMC",
+        "order block",
+        "liquidity"
+      ],
+      "related_concepts": [
+        "MET-RULE-0002",
+        "ACA-INT-0063",
+        "ACA-INT-0064"
+      ],
+      "related_questions": [
+        "نظر آکادمی درباره‌ی Smart Money Concepts (SMC) چیه؟",
+        "Smart Money Concepts (SMC) رو آموزش می‌دید؟"
+      ],
+      "created_at": "2026-09-05T15:31:16Z",
+      "updated_at": "2026-09-05T15:31:16Z"
+    },
+    {
+      "id": "EXT-CONC-0002",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "روش‌های بیرونی (قرنطینه)",
+      "title": "ICT",
+      "language": "fa-en",
+      "summary": "مجموعه‌ای از مفاهیم منتسب به Inner Circle Trader شامل شکاف ارزش منصفانه و مدل‌های زمانی.",
+      "definition": "مجموعه‌ای از مفاهیم منتسب به Inner Circle Trader شامل شکاف ارزش منصفانه و مدل‌های زمانی.",
+      "chunk_text": "ICT: مجموعه‌ای از مفاهیم منتسب به Inner Circle Trader شامل شکاف ارزش منصفانه و مدل‌های زمانی. ⚠️ این روش جزو متدولوژی آکادمی سبحان صمدی نیست. موضع رسمی آکادمی در رکورد ACA-INT-0063 ثبت شده است: مدرس این سیستم‌ها را رد یا تحقیر نمی‌کند و می‌گوید می‌توان با آن‌ها سود کرد، اما مسیر آکادمی پرایس اکشن مبتنی بر عرضه و تقاضاست. این توضیح فقط برای شناخت نام و مفهوم کلی نگهداری می‌شود و مبنای تحلیل یا پاسخ آموزشی آکادمی نیست.",
+      "warnings": [
+        "خارج از متدولوژی آکادمی — فقط برای شناسایی و توضیح کوتاه."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_governance.py",
+        "source_location": "EXTERNAL[1]"
+      },
+      "authority_level": "EXTERNAL_METHODOLOGY",
+      "methodology_scope": "EXTERNAL_METHODOLOGY_QUARANTINE",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "توضیح کوتاه شناسایی، بدون منبع بیرونی. محتوای آموزشی این روش‌ها گسترش داده نمی‌شود.",
+      "confidence": 0.7,
+      "version": "v001",
+      "keywords": [
+        "ICT",
+        "fair value gap",
+        "FVG"
+      ],
+      "related_concepts": [
+        "MET-RULE-0002",
+        "ACA-INT-0063",
+        "ACA-INT-0064"
+      ],
+      "related_questions": [
+        "نظر آکادمی درباره‌ی ICT چیه؟",
+        "ICT رو آموزش می‌دید؟"
+      ],
+      "created_at": "2026-09-05T15:31:16Z",
+      "updated_at": "2026-09-05T15:31:16Z"
+    },
+    {
+      "id": "EXT-CONC-0003",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "روش‌های بیرونی (قرنطینه)",
+      "title": "ایچیموکو",
+      "language": "fa-en",
+      "summary": "سیستم اندیکاتوری ژاپنی شامل ابر کومو و خطوط تنکان و کیجون.",
+      "definition": "سیستم اندیکاتوری ژاپنی شامل ابر کومو و خطوط تنکان و کیجون.",
+      "chunk_text": "ایچیموکو: سیستم اندیکاتوری ژاپنی شامل ابر کومو و خطوط تنکان و کیجون. ⚠️ این روش جزو متدولوژی آکادمی سبحان صمدی نیست. موضع رسمی آکادمی در رکورد ACA-INT-0063 ثبت شده است: مدرس این سیستم‌ها را رد یا تحقیر نمی‌کند و می‌گوید می‌توان با آن‌ها سود کرد، اما مسیر آکادمی پرایس اکشن مبتنی بر عرضه و تقاضاست. این توضیح فقط برای شناخت نام و مفهوم کلی نگهداری می‌شود و مبنای تحلیل یا پاسخ آموزشی آکادمی نیست.",
+      "warnings": [
+        "خارج از متدولوژی آکادمی — فقط برای شناسایی و توضیح کوتاه."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_governance.py",
+        "source_location": "EXTERNAL[2]"
+      },
+      "authority_level": "EXTERNAL_METHODOLOGY",
+      "methodology_scope": "EXTERNAL_METHODOLOGY_QUARANTINE",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "توضیح کوتاه شناسایی، بدون منبع بیرونی. محتوای آموزشی این روش‌ها گسترش داده نمی‌شود.",
+      "confidence": 0.7,
+      "version": "v001",
+      "keywords": [
+        "ایچیموکو",
+        "ichimoku",
+        "کومو"
+      ],
+      "related_concepts": [
+        "MET-RULE-0002",
+        "ACA-INT-0063",
+        "ACA-INT-0064"
+      ],
+      "related_questions": [
+        "نظر آکادمی درباره‌ی ایچیموکو چیه؟",
+        "ایچیموکو رو آموزش می‌دید؟"
+      ],
+      "created_at": "2026-09-05T15:31:16Z",
+      "updated_at": "2026-09-05T15:31:16Z"
+    },
+    {
+      "id": "EXT-CONC-0004",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "روش‌های بیرونی (قرنطینه)",
+      "title": "امواج الیوت",
+      "language": "fa-en",
+      "summary": "نظریه‌ای که حرکات بازار را در قالب الگوهای موجی پنج‌تایی و سه‌تایی توصیف می‌کند.",
+      "definition": "نظریه‌ای که حرکات بازار را در قالب الگوهای موجی پنج‌تایی و سه‌تایی توصیف می‌کند.",
+      "chunk_text": "امواج الیوت: نظریه‌ای که حرکات بازار را در قالب الگوهای موجی پنج‌تایی و سه‌تایی توصیف می‌کند. ⚠️ این روش جزو متدولوژی آکادمی سبحان صمدی نیست. موضع رسمی آکادمی در رکورد ACA-INT-0063 ثبت شده است: مدرس این سیستم‌ها را رد یا تحقیر نمی‌کند و می‌گوید می‌توان با آن‌ها سود کرد، اما مسیر آکادمی پرایس اکشن مبتنی بر عرضه و تقاضاست. این توضیح فقط برای شناخت نام و مفهوم کلی نگهداری می‌شود و مبنای تحلیل یا پاسخ آموزشی آکادمی نیست.",
+      "warnings": [
+        "خارج از متدولوژی آکادمی — فقط برای شناسایی و توضیح کوتاه."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_governance.py",
+        "source_location": "EXTERNAL[3]"
+      },
+      "authority_level": "EXTERNAL_METHODOLOGY",
+      "methodology_scope": "EXTERNAL_METHODOLOGY_QUARANTINE",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "توضیح کوتاه شناسایی، بدون منبع بیرونی. محتوای آموزشی این روش‌ها گسترش داده نمی‌شود.",
+      "confidence": 0.7,
+      "version": "v001",
+      "keywords": [
+        "الیوت",
+        "elliott wave",
+        "موج"
+      ],
+      "related_concepts": [
+        "MET-RULE-0002",
+        "ACA-INT-0063",
+        "ACA-INT-0064"
+      ],
+      "related_questions": [
+        "نظر آکادمی درباره‌ی امواج الیوت چیه؟",
+        "امواج الیوت رو آموزش می‌دید؟"
+      ],
+      "created_at": "2026-09-05T15:31:16Z",
+      "updated_at": "2026-09-05T15:31:16Z"
+    },
+    {
+      "id": "EXT-CONC-0005",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "روش‌های بیرونی (قرنطینه)",
+      "title": "وایکاف",
+      "language": "fa-en",
+      "summary": "روشی مبتنی بر مراحل انباشت و توزیع و رابطه‌ی قیمت و حجم.",
+      "definition": "روشی مبتنی بر مراحل انباشت و توزیع و رابطه‌ی قیمت و حجم.",
+      "chunk_text": "وایکاف: روشی مبتنی بر مراحل انباشت و توزیع و رابطه‌ی قیمت و حجم. ⚠️ این روش جزو متدولوژی آکادمی سبحان صمدی نیست. موضع رسمی آکادمی در رکورد ACA-INT-0063 ثبت شده است: مدرس این سیستم‌ها را رد یا تحقیر نمی‌کند و می‌گوید می‌توان با آن‌ها سود کرد، اما مسیر آکادمی پرایس اکشن مبتنی بر عرضه و تقاضاست. این توضیح فقط برای شناخت نام و مفهوم کلی نگهداری می‌شود و مبنای تحلیل یا پاسخ آموزشی آکادمی نیست.",
+      "warnings": [
+        "خارج از متدولوژی آکادمی — فقط برای شناسایی و توضیح کوتاه."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_governance.py",
+        "source_location": "EXTERNAL[4]"
+      },
+      "authority_level": "EXTERNAL_METHODOLOGY",
+      "methodology_scope": "EXTERNAL_METHODOLOGY_QUARANTINE",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "توضیح کوتاه شناسایی، بدون منبع بیرونی. محتوای آموزشی این روش‌ها گسترش داده نمی‌شود.",
+      "confidence": 0.7,
+      "version": "v001",
+      "keywords": [
+        "وایکاف",
+        "wyckoff",
+        "انباشت"
+      ],
+      "related_concepts": [
+        "MET-RULE-0002",
+        "ACA-INT-0063",
+        "ACA-INT-0064"
+      ],
+      "related_questions": [
+        "نظر آکادمی درباره‌ی وایکاف چیه؟",
+        "وایکاف رو آموزش می‌دید؟"
+      ],
+      "created_at": "2026-09-05T15:31:16Z",
+      "updated_at": "2026-09-05T15:31:16Z"
+    },
+    {
+      "id": "EXT-CONC-0006",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "روش‌های بیرونی (قرنطینه)",
+      "title": "الگوهای هارمونیک",
+      "language": "fa-en",
+      "summary": "الگوهای هندسی مبتنی بر نسبت‌های فیبوناچی مانند گارتلی و پروانه.",
+      "definition": "الگوهای هندسی مبتنی بر نسبت‌های فیبوناچی مانند گارتلی و پروانه.",
+      "chunk_text": "الگوهای هارمونیک: الگوهای هندسی مبتنی بر نسبت‌های فیبوناچی مانند گارتلی و پروانه. ⚠️ این روش جزو متدولوژی آکادمی سبحان صمدی نیست. موضع رسمی آکادمی در رکورد ACA-INT-0063 ثبت شده است: مدرس این سیستم‌ها را رد یا تحقیر نمی‌کند و می‌گوید می‌توان با آن‌ها سود کرد، اما مسیر آکادمی پرایس اکشن مبتنی بر عرضه و تقاضاست. این توضیح فقط برای شناخت نام و مفهوم کلی نگهداری می‌شود و مبنای تحلیل یا پاسخ آموزشی آکادمی نیست.",
+      "warnings": [
+        "خارج از متدولوژی آکادمی — فقط برای شناسایی و توضیح کوتاه."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_governance.py",
+        "source_location": "EXTERNAL[5]"
+      },
+      "authority_level": "EXTERNAL_METHODOLOGY",
+      "methodology_scope": "EXTERNAL_METHODOLOGY_QUARANTINE",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "توضیح کوتاه شناسایی، بدون منبع بیرونی. محتوای آموزشی این روش‌ها گسترش داده نمی‌شود.",
+      "confidence": 0.7,
+      "version": "v001",
+      "keywords": [
+        "هارمونیک",
+        "گارتلی",
+        "harmonic"
+      ],
+      "related_concepts": [
+        "MET-RULE-0002",
+        "ACA-INT-0063",
+        "ACA-INT-0064"
+      ],
+      "related_questions": [
+        "نظر آکادمی درباره‌ی الگوهای هارمونیک چیه؟",
+        "الگوهای هارمونیک رو آموزش می‌دید؟"
+      ],
+      "created_at": "2026-09-05T15:31:16Z",
+      "updated_at": "2026-09-05T15:31:16Z"
+    },
+    {
+      "id": "EXT-CONC-0007",
+      "object_type": "CONCEPT",
+      "domain": "general_trading",
+      "category": "روش‌های بیرونی (قرنطینه)",
+      "title": "اردر فلو و ولوم پروفایل",
+      "language": "fa-en",
+      "summary": "تحلیل جریان سفارش‌ها و توزیع حجم در سطوح قیمتی.",
+      "definition": "تحلیل جریان سفارش‌ها و توزیع حجم در سطوح قیمتی.",
+      "chunk_text": "اردر فلو و ولوم پروفایل: تحلیل جریان سفارش‌ها و توزیع حجم در سطوح قیمتی. ⚠️ این روش جزو متدولوژی آکادمی سبحان صمدی نیست. موضع رسمی آکادمی در رکورد ACA-INT-0063 ثبت شده است: مدرس این سیستم‌ها را رد یا تحقیر نمی‌کند و می‌گوید می‌توان با آن‌ها سود کرد، اما مسیر آکادمی پرایس اکشن مبتنی بر عرضه و تقاضاست. این توضیح فقط برای شناخت نام و مفهوم کلی نگهداری می‌شود و مبنای تحلیل یا پاسخ آموزشی آکادمی نیست.",
+      "warnings": [
+        "خارج از متدولوژی آکادمی — فقط برای شناسایی و توضیح کوتاه."
+      ],
+      "source": {
+        "source_type": "MODEL_DRAFT",
+        "source_ref": "tools/seed_governance.py",
+        "source_location": "EXTERNAL[6]"
+      },
+      "authority_level": "EXTERNAL_METHODOLOGY",
+      "methodology_scope": "EXTERNAL_METHODOLOGY_QUARANTINE",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_VERIFICATION",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "verification_note": "توضیح کوتاه شناسایی، بدون منبع بیرونی. محتوای آموزشی این روش‌ها گسترش داده نمی‌شود.",
+      "confidence": 0.7,
+      "version": "v001",
+      "keywords": [
+        "order flow",
+        "volume profile",
+        "فوت پرینت"
+      ],
+      "related_concepts": [
+        "MET-RULE-0002",
+        "ACA-INT-0063",
+        "ACA-INT-0064"
+      ],
+      "related_questions": [
+        "نظر آکادمی درباره‌ی اردر فلو و ولوم پروفایل چیه؟",
+        "اردر فلو و ولوم پروفایل رو آموزش می‌دید؟"
+      ],
+      "created_at": "2026-09-05T15:31:16Z",
+      "updated_at": "2026-09-05T15:31:16Z"
+    }
+  ]
+}

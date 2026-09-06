@@ -1,0 +1,50 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "academy_docs_lesson_support_bot",
+  "course": "academy_docs",
+  "lesson": "support_bot",
+  "title": "KB پشتیبانی رسمی آکادمی v1.0",
+  "original_filename": "support_bot_kb_v1.md",
+  "raw_file": "raw_sources/academy/academy_docs/academy_docs_lesson_support_bot.md",
+  "ingested_at": "2026-09-05T20:58:48Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 161,
+    "filler_cues": 0,
+    "speech_cues": 161,
+    "speech_ratio": 1.0,
+    "words": 2938,
+    "unique_words": 1110,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "# RAW — KNOWLEDGE BASE پشتیبانی رسمی آکادمی سبحان صمدی (نسخه ۱.۰)",
+        "count": 1
+      },
+      {
+        "text": "منبع: سند رسمی سیاست‌های ربات پشتیبانی، ارسال‌شده توسط مالک پروژه (۲۰۲۶-۰۹-۰۵)",
+        "count": 1
+      },
+      {
+        "text": "هدف سند: مرجع پاسخ‌گویی AI پشتیبانی ربات تلگرامی آکادمی",
+        "count": 1
+      },
+      {
+        "text": "## هویت و مأموریت",
+        "count": 1
+      },
+      {
+        "text": "آکادمی سبحان صمدی یک مجموعه آموزشی در حوزه معامله‌گری و بازارهای مالی است؛ هدف: آموزش و پرورش معامله‌گر حرفه‌ای. تمرکز اصلی روی فارکس و CFDها.",
+        "count": 1
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "report_type": "transcript_quality",
+  "version": "v001"
+}

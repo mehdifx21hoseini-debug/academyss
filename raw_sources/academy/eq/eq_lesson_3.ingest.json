@@ -1,0 +1,1388 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "eq_lesson_3",
+  "course": "eq",
+  "lesson": "3",
+  "title": "هوش هیجانی (EQ) در معامله‌گری و زندگی — بخش سوم",
+  "original_filename": "eq_03.md",
+  "raw_file": "raw_sources/academy/eq/eq_lesson_3.md",
+  "ingested_at": "2026-09-05T22:27:03Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 223,
+    "filler_cues": 0,
+    "speech_cues": 223,
+    "speech_ratio": 1.0,
+    "words": 1322,
+    "unique_words": 520,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "بخش\tتوضیح",
+        "count": 6
+      },
+      {
+        "text": "نمره‌ها:",
+        "count": 3
+      },
+      {
+        "text": "بالای ۶۰ = خوب",
+        "count": 3
+      },
+      {
+        "text": "بالای ۸۰ = عالی",
+        "count": 3
+      },
+      {
+        "text": "سه بخش:",
+        "count": 3
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "cues": [
+    {
+      "index": 1,
+      "start": null,
+      "end": null,
+      "text": "عنوان درس"
+    },
+    {
+      "index": 3,
+      "start": null,
+      "end": null,
+      "text": "هوش هیجانی (EQ) در معامله‌گری و زندگی (بخش سوم از چهار بخش)"
+    },
+    {
+      "index": 4,
+      "start": null,
+      "end": null,
+      "text": "متن پاک‌سازی‌شده"
+    },
+    {
+      "index": 6,
+      "start": null,
+      "end": null,
+      "text": "سلام مجدد به همه عزیزان. خب، بریم با همدیگه به بررسی و ادامه‌ی مینی‌دوره‌ی هوش هیجانی."
+    },
+    {
+      "index": 8,
+      "start": null,
+      "end": null,
+      "text": "شما الان تست هوش هیجانی رو کامل پر کردید. تست هوش هیجانی شما زمانی که پر می‌شود، شامل یک نمره کل است. شما الان یک نمره کل دارید که بهش می‌پردازم که چه نمره‌ای خوب است، چه نمره‌ای عالی است، چه نمره‌ای ضعیف است."
+    },
+    {
+      "index": 9,
+      "start": null,
+      "end": null,
+      "text": "پنج مؤلفه اصلی هوش هیجانی"
+    },
+    {
+      "index": 11,
+      "start": null,
+      "end": null,
+      "text": "هوش هیجانی شامل پنج مؤلفه اصلی است:"
+    },
+    {
+      "index": 12,
+      "start": null,
+      "end": null,
+      "text": "مؤلفه\tتوضیح"
+    },
+    {
+      "index": 13,
+      "start": null,
+      "end": null,
+      "text": "خودپنداره (Self-Perception)\tخودانگاره، خودبیانگری"
+    },
+    {
+      "index": 14,
+      "start": null,
+      "end": null,
+      "text": "مدیریت استرس\tکنترل احساسات در شرایط سخت"
+    },
+    {
+      "index": 15,
+      "start": null,
+      "end": null,
+      "text": "بین فردی\tروابط با دیگران"
+    },
+    {
+      "index": 16,
+      "start": null,
+      "end": null,
+      "text": "تصمیم‌گیری\tانتخاب بین گزینه‌ها"
+    },
+    {
+      "index": 18,
+      "start": null,
+      "end": null,
+      "text": "نکته مهم: ۵۰ درصد از افزایش هوش هیجانی، فقط شناخت همین پنج مؤلفه است."
+    },
+    {
+      "index": 19,
+      "start": null,
+      "end": null,
+      "text": "مؤلفه اول: خودپنداره (Self-Perception)"
+    },
+    {
+      "index": 21,
+      "start": null,
+      "end": null,
+      "text": "خودپنداره شامل سه بخش است:"
+    },
+    {
+      "index": 22,
+      "start": null,
+      "end": null,
+      "text": "بخش\tتوضیح"
+    },
+    {
+      "index": 23,
+      "start": null,
+      "end": null,
+      "text": "عزت نفس\tخود را دوست داشتن، باور به خود"
+    },
+    {
+      "index": 24,
+      "start": null,
+      "end": null,
+      "text": "خودشکوفایی\tشناخت رسالت و هدف زندگی"
+    },
+    {
+      "index": 25,
+      "start": null,
+      "end": null,
+      "text": "خودآگاهی هیجانی\tآگاهی از احساسات خود"
+    },
+    {
+      "index": 26,
+      "start": null,
+      "end": null,
+      "text": "عزت نفس"
+    },
+    {
+      "index": 28,
+      "start": null,
+      "end": null,
+      "text": "نمره‌ها:"
+    },
+    {
+      "index": 30,
+      "start": null,
+      "end": null,
+      "text": "بالای ۶۰ = خوب"
+    },
+    {
+      "index": 32,
+      "start": null,
+      "end": null,
+      "text": "بالای ۸۰ = عالی"
+    },
+    {
+      "index": 34,
+      "start": null,
+      "end": null,
+      "text": "عزت نفس یعنی: خودت را دوست داشته باشی، به خودت ایمان داشته باشی، باور داشته باشی که لیاقت موفقیت را داری."
+    },
+    {
+      "index": 36,
+      "start": null,
+      "end": null,
+      "text": "«خیلی از افراد با دست خودشان به خودشان ضرر می‌زنند، چون عزت نفس پایینی دارند.»"
+    },
+    {
+      "index": 38,
+      "start": null,
+      "end": null,
+      "text": "نکته: اگر عزت نفس پایین باشد، فرد:"
+    },
+    {
+      "index": 40,
+      "start": null,
+      "end": null,
+      "text": "خودش را باور ندارد"
+    },
+    {
+      "index": 42,
+      "start": null,
+      "end": null,
+      "text": "دنبال الگوهای شکست می‌گردد"
+    },
+    {
+      "index": 44,
+      "start": null,
+      "end": null,
+      "text": "فکر می‌کند حتماً باید شکست بخورد تا موفق شود"
+    },
+    {
+      "index": 46,
+      "start": null,
+      "end": null,
+      "text": "خودشکوفایی"
+    },
+    {
+      "index": 48,
+      "start": null,
+      "end": null,
+      "text": "نمره بالای ۶۵ = بسیار خوب"
+    },
+    {
+      "index": 50,
+      "start": null,
+      "end": null,
+      "text": "خودشکوفایی یعنی: دقیقاً بدانی رسالت و هدف زندگی‌ات چیست."
+    },
+    {
+      "index": 52,
+      "start": null,
+      "end": null,
+      "text": "بسیاری از افراد تا ۸۰-۹۰ سالگی هنوز نمی‌دانند چرا به این دنیا آمده‌اند."
+    },
+    {
+      "index": 53,
+      "start": null,
+      "end": null,
+      "text": "خودآگاهی هیجانی"
+    },
+    {
+      "index": 55,
+      "start": null,
+      "end": null,
+      "text": "اهمیت: این یکی از مهم‌ترین بخش‌ها برای یک معامله‌گر است."
+    },
+    {
+      "index": 57,
+      "start": null,
+      "end": null,
+      "text": "یعنی:"
+    },
+    {
+      "index": 59,
+      "start": null,
+      "end": null,
+      "text": "بدانی الان چه احساسی داری"
+    },
+    {
+      "index": 61,
+      "start": null,
+      "end": null,
+      "text": "بدانی ترس داری یا ناراحتی"
+    },
+    {
+      "index": 63,
+      "start": null,
+      "end": null,
+      "text": "بدانی هیجان داری یا خشمگین"
+    },
+    {
+      "index": 65,
+      "start": null,
+      "end": null,
+      "text": "آگاه باشی که این احساسات روی معاملاتت تأثیر می‌گذارند"
+    },
+    {
+      "index": 67,
+      "start": null,
+      "end": null,
+      "text": "«اگر آگاهی داشته باشی، می‌توانی منطقی به احساساتت نگاه کنی.»"
+    },
+    {
+      "index": 69,
+      "start": null,
+      "end": null,
+      "text": "احساسات مثبت و منفی"
+    },
+    {
+      "index": 70,
+      "start": null,
+      "end": null,
+      "text": "احساسات مثبت\tاحساسات منفی"
+    },
+    {
+      "index": 71,
+      "start": null,
+      "end": null,
+      "text": "گاز موفقیت\tترمز شما"
+    },
+    {
+      "index": 72,
+      "start": null,
+      "end": null,
+      "text": "شادمانی\tترس از شکست"
+    },
+    {
+      "index": 73,
+      "start": null,
+      "end": null,
+      "text": "مسئولیت‌پذیری\tسرخوردگی"
+    },
+    {
+      "index": 74,
+      "start": null,
+      "end": null,
+      "text": "امیدواری\tناامیدی"
+    },
+    {
+      "index": 76,
+      "start": null,
+      "end": null,
+      "text": "یادت باشد: احساسات مثبت شما را به سمت موفقیت پیش می‌برند و احساسات منفی مانند ترمز عمل می‌کنند."
+    },
+    {
+      "index": 77,
+      "start": null,
+      "end": null,
+      "text": "مسئولیت‌پذیری"
+    },
+    {
+      "index": 79,
+      "start": null,
+      "end": null,
+      "text": "یکی از مهم‌ترین ویژگی‌های هوش هیجانی بالا:"
+    },
+    {
+      "index": 81,
+      "start": null,
+      "end": null,
+      "text": "مسئولیت زندگی خودت باش"
+    },
+    {
+      "index": 83,
+      "start": null,
+      "end": null,
+      "text": "تقصیر را به گردن دیگران نینداز"
+    },
+    {
+      "index": 85,
+      "start": null,
+      "end": null,
+      "text": "اگر ضرر کردی، بپذیر: «من ضرر کردم»"
+    },
+    {
+      "index": 87,
+      "start": null,
+      "end": null,
+      "text": "نه اینکه «بازار به من ضرر زد»"
+    },
+    {
+      "index": 89,
+      "start": null,
+      "end": null,
+      "text": "«زمانی که مسئولیت‌پذیر کار خود باشی، تخت‌گاز پیش می‌روی.»"
+    },
+    {
+      "index": 91,
+      "start": null,
+      "end": null,
+      "text": "خودبیانگری (Self-Expression)"
+    },
+    {
+      "index": 93,
+      "start": null,
+      "end": null,
+      "text": "خودبیانگری شامل سه بخش است:"
+    },
+    {
+      "index": 94,
+      "start": null,
+      "end": null,
+      "text": "بخش\tتوضیح"
+    },
+    {
+      "index": 95,
+      "start": null,
+      "end": null,
+      "text": "شادمانی\tحال خوب داشتن"
+    },
+    {
+      "index": 96,
+      "start": null,
+      "end": null,
+      "text": "خودابرازی\tتوانایی بیان درست احساسات"
+    },
+    {
+      "index": 97,
+      "start": null,
+      "end": null,
+      "text": "استقلال\tوابسته نبودن به دیگران"
+    },
+    {
+      "index": 98,
+      "start": null,
+      "end": null,
+      "text": "شادمانی"
+    },
+    {
+      "index": 100,
+      "start": null,
+      "end": null,
+      "text": "سوال کلیدی: آیا می‌شود بدون حال خوب، به موفقیت رسید؟"
+    },
+    {
+      "index": 102,
+      "start": null,
+      "end": null,
+      "text": "پاسخ: خیر. تلاش کردن برای حال خوب، خودش یک اقدام هوشمندانه است."
+    },
+    {
+      "index": 104,
+      "start": null,
+      "end": null,
+      "text": "«تا زمانی که حالمون خوب باشه، می‌تونیم برای موفقیت قدم برداریم.»"
+    },
+    {
+      "index": 106,
+      "start": null,
+      "end": null,
+      "text": "نکته از رابرت کیوساکی: اگر نتوانی یک میلیون تومان را مدیریت کنی، نمی‌توانی یک میلیارد تومان را مدیریت کنی."
+    },
+    {
+      "index": 107,
+      "start": null,
+      "end": null,
+      "text": "خودابرازی"
+    },
+    {
+      "index": 109,
+      "start": null,
+      "end": null,
+      "text": "توانایی بیان درست احساسات: خوشحالی، ناراحتی، خشم و..."
+    },
+    {
+      "index": 111,
+      "start": null,
+      "end": null,
+      "text": "تأکید: معامله‌گران چون بیشتر با مانیتور سروکار دارند تا با افراد، باید بیشتر روی این موضوع کار کنند تا روابط زندگیشان تحت تأثیر قرار نگیرد."
+    },
+    {
+      "index": 112,
+      "start": null,
+      "end": null,
+      "text": "استقلال"
+    },
+    {
+      "index": 114,
+      "start": null,
+      "end": null,
+      "text": "من وابسته به هیچ‌کس نیستم"
+    },
+    {
+      "index": 116,
+      "start": null,
+      "end": null,
+      "text": "من خالق مسئولیت و نتایج زندگی خودم هستم"
+    },
+    {
+      "index": 118,
+      "start": null,
+      "end": null,
+      "text": "منتظر تغییرات بیرونی نباش"
+    },
+    {
+      "index": 120,
+      "start": null,
+      "end": null,
+      "text": "مؤلفه دوم: بین فردی (Interpersonal)"
+    },
+    {
+      "index": 122,
+      "start": null,
+      "end": null,
+      "text": "بین فردی شامل سه بخش است:"
+    },
+    {
+      "index": 123,
+      "start": null,
+      "end": null,
+      "text": "بخش\tتوضیح"
+    },
+    {
+      "index": 124,
+      "start": null,
+      "end": null,
+      "text": "روابط بین فردی\tتوانایی ارتباط با دیگران"
+    },
+    {
+      "index": 125,
+      "start": null,
+      "end": null,
+      "text": "همدلی\tدرک احساسات دیگران"
+    },
+    {
+      "index": 126,
+      "start": null,
+      "end": null,
+      "text": "مسئولیت‌پذیری اجتماعی\tتوجه به جامعه و قوانین آن"
+    },
+    {
+      "index": 128,
+      "start": null,
+      "end": null,
+      "text": "نکته: مغز انسان برای ارتباط با دیگران طراحی شده است. انزوا ممکن است به مرور زمان به روابط آسیب بزند."
+    },
+    {
+      "index": 130,
+      "start": null,
+      "end": null,
+      "text": "تأثیر احساسات: احساسات مانند ویروس هستند. حال خوب شما به دیگران هم منتقل می‌شود."
+    },
+    {
+      "index": 131,
+      "start": null,
+      "end": null,
+      "text": "مؤلفه سوم: تصمیم‌گیری"
+    },
+    {
+      "index": 133,
+      "start": null,
+      "end": null,
+      "text": "نمره‌ها:"
+    },
+    {
+      "index": 135,
+      "start": null,
+      "end": null,
+      "text": "بالای ۶۰ = خوب"
+    },
+    {
+      "index": 137,
+      "start": null,
+      "end": null,
+      "text": "بالای ۸۰ = عالی"
+    },
+    {
+      "index": 139,
+      "start": null,
+      "end": null,
+      "text": "اصل کلیدی: اگر نتیجه متفاوتی می‌خواهی، باید متفاوت قدم برداری."
+    },
+    {
+      "index": 141,
+      "start": null,
+      "end": null,
+      "text": "فرآیند تصمیم‌گیری:"
+    },
+    {
+      "index": 143,
+      "start": null,
+      "end": null,
+      "text": "۱. بین دو یا چند گزینه هستی"
+    },
+    {
+      "index": 144,
+      "start": null,
+      "end": null,
+      "text": "۲. سریع تصمیم نگیر (تکانه را کنترل کن)"
+    },
+    {
+      "index": 145,
+      "start": null,
+      "end": null,
+      "text": "۳. روی کاغذ بنویس"
+    },
+    {
+      "index": 146,
+      "start": null,
+      "end": null,
+      "text": "۴. مزایا و معایب هر گزینه را بنویس"
+    },
+    {
+      "index": 147,
+      "start": null,
+      "end": null,
+      "text": "۵. بعد تصمیم بگیر"
+    },
+    {
+      "index": 148,
+      "start": null,
+      "end": null,
+      "text": "تمرین تصمیم‌گیری"
+    },
+    {
+      "index": 150,
+      "start": null,
+      "end": null,
+      "text": "سوال: کدام نماد معاملاتی را انتخاب کنم؟ یورو/دلار یا طلا؟"
+    },
+    {
+      "index": 152,
+      "start": null,
+      "end": null,
+      "text": "۱. مزایا و معایب هرکدام را بنویس"
+    },
+    {
+      "index": 153,
+      "start": null,
+      "end": null,
+      "text": "۲. مقایسه کن"
+    },
+    {
+      "index": 154,
+      "start": null,
+      "end": null,
+      "text": "۳. تصمیم منطقی بگیر"
+    },
+    {
+      "index": 156,
+      "start": null,
+      "end": null,
+      "text": "نکته: افرادی که تصمیم‌گیرنده‌های ضعیفی هستند، باید خیلی روی خودشان کار کنند."
+    },
+    {
+      "index": 157,
+      "start": null,
+      "end": null,
+      "text": "خودداری و کنترل تکانش (Impulse Control)"
+    },
+    {
+      "index": 159,
+      "start": null,
+      "end": null,
+      "text": "تکانش یعنی: واکنش لحظه‌ای، از کوره در رفتن، تصمیم عجولانه."
+    },
+    {
+      "index": 161,
+      "start": null,
+      "end": null,
+      "text": "در معامله‌گری:"
+    },
+    {
+      "index": 163,
+      "start": null,
+      "end": null,
+      "text": "سه تا ضرر پشت سر هم خوردی → می‌خواهی انتقام بگیری"
+    },
+    {
+      "index": 165,
+      "start": null,
+      "end": null,
+      "text": "کلی سود کردی → احساس سرخوشی و اعتمادبه‌نفس کاذب"
+    },
+    {
+      "index": 167,
+      "start": null,
+      "end": null,
+      "text": "یک معامله اشتباه به سود رسید → دوباره تکرارش می‌کنی"
+    },
+    {
+      "index": 169,
+      "start": null,
+      "end": null,
+      "text": "«همون یه بار اشتباهی که به سود رسید، ریشه‌ی نابودی حساب می‌شود.»"
+    },
+    {
+      "index": 171,
+      "start": null,
+      "end": null,
+      "text": "راه حل: آگاهی داشته باش که این ضعف را داری. وقتی به سه ضرر رسیدی، بپذیر و دست نگه دار."
+    },
+    {
+      "index": 172,
+      "start": null,
+      "end": null,
+      "text": "چرا با وجود اشتباه، دوباره تکرار می‌کنیم؟"
+    },
+    {
+      "index": 174,
+      "start": null,
+      "end": null,
+      "text": "دلیل: قبلاً آن اشتباه به ما سود داده است."
+    },
+    {
+      "index": 176,
+      "start": null,
+      "end": null,
+      "text": "یک بار اشتباه کردی و سود کردی"
+    },
+    {
+      "index": 178,
+      "start": null,
+      "end": null,
+      "text": "ذهنت می‌گوید: «این بار هم جواب می‌دهد»"
+    },
+    {
+      "index": 180,
+      "start": null,
+      "end": null,
+      "text": "ولی این بار حساب نابود می‌شود"
+    },
+    {
+      "index": 182,
+      "start": null,
+      "end": null,
+      "text": "راه حل: آگاهی از این الگو، تعهد به پلن، و مسئولیت‌پذیری."
+    },
+    {
+      "index": 183,
+      "start": null,
+      "end": null,
+      "text": "تمرین عملی"
+    },
+    {
+      "index": 185,
+      "start": null,
+      "end": null,
+      "text": "دفترت را بردار و شروع کن به نوشتن:"
+    },
+    {
+      "index": 187,
+      "start": null,
+      "end": null,
+      "text": "۱. تصمیماتی که در گذشته گرفتی و به موفقیت رسیدی"
+    },
+    {
+      "index": 188,
+      "start": null,
+      "end": null,
+      "text": "۲. تصمیماتی که به اتفاق ناخوشایند منجر شد"
+    },
+    {
+      "index": 189,
+      "start": null,
+      "end": null,
+      "text": "۳. ریشه‌ی هر کدام را بررسی کن"
+    },
+    {
+      "index": 190,
+      "start": null,
+      "end": null,
+      "text": "۴. اگر همان لحظه برگشتی، با فرمول تصمیم‌گیری آیا همان کار را می‌کردی؟"
+    },
+    {
+      "index": 192,
+      "start": null,
+      "end": null,
+      "text": "نکته مهم: افراد موفق جهان همه دفتر دارند. با دفترت رفیق شو. نوشتن معجزه می‌کند."
+    },
+    {
+      "index": 193,
+      "start": null,
+      "end": null,
+      "text": "جمع‌بندی بخش سوم"
+    },
+    {
+      "index": 194,
+      "start": null,
+      "end": null,
+      "text": "مؤلفه\tکلیدواژه"
+    },
+    {
+      "index": 195,
+      "start": null,
+      "end": null,
+      "text": "خودپنداره\tعزت نفس، خودشکوفایی، خودآگاهی"
+    },
+    {
+      "index": 196,
+      "start": null,
+      "end": null,
+      "text": "بین فردی\tروابط، همدلی، مسئولیت اجتماعی"
+    },
+    {
+      "index": 197,
+      "start": null,
+      "end": null,
+      "text": "تصمیم‌گیری\tنوشتن، تحلیل مزایا و معایب"
+    },
+    {
+      "index": 198,
+      "start": null,
+      "end": null,
+      "text": "کنترل تکانش\tآگاهی، تعهد به پلن"
+    },
+    {
+      "index": 199,
+      "start": null,
+      "end": null,
+      "text": "موارد نیازمند بررسی"
+    },
+    {
+      "index": 201,
+      "start": null,
+      "end": null,
+      "text": "موردی برای بررسی پیدا نشد."
+    },
+    {
+      "index": 203,
+      "start": null,
+      "end": null,
+      "text": "============================================================="
+    },
+    {
+      "index": 204,
+      "start": null,
+      "end": null,
+      "text": "STRUCTURED TRANSCRIPT"
+    },
+    {
+      "index": 205,
+      "start": null,
+      "end": null,
+      "text": "============================================================="
+    },
+    {
+      "index": 206,
+      "start": null,
+      "end": null,
+      "text": "عنوان درس"
+    },
+    {
+      "index": 208,
+      "start": null,
+      "end": null,
+      "text": "هوش هیجانی (EQ) در معامله‌گری و زندگی (بخش سوم از چهار بخش)"
+    },
+    {
+      "index": 209,
+      "start": null,
+      "end": null,
+      "text": "۱. مقدمه"
+    },
+    {
+      "index": 211,
+      "start": null,
+      "end": null,
+      "text": "سلام مجدد به همه عزیزان. بریم با همدیگه به بررسی و ادامه‌ی مینی‌دوره‌ی هوش هیجانی."
+    },
+    {
+      "index": 213,
+      "start": null,
+      "end": null,
+      "text": "شما الان تست هوش هیجانی رو کامل پر کردید و یک نمره کل دارید."
+    },
+    {
+      "index": 214,
+      "start": null,
+      "end": null,
+      "text": "۲. پنج مؤلفه اصلی هوش هیجانی"
+    },
+    {
+      "index": 215,
+      "start": null,
+      "end": null,
+      "text": "#\tمؤلفه"
+    },
+    {
+      "index": 216,
+      "start": null,
+      "end": null,
+      "text": "۱\tخودپنداره (Self-Perception)"
+    },
+    {
+      "index": 217,
+      "start": null,
+      "end": null,
+      "text": "۲\tمدیریت استرس"
+    },
+    {
+      "index": 218,
+      "start": null,
+      "end": null,
+      "text": "۳\tبین فردی (Interpersonal)"
+    },
+    {
+      "index": 219,
+      "start": null,
+      "end": null,
+      "text": "۴\tتصمیم‌گیری"
+    },
+    {
+      "index": 220,
+      "start": null,
+      "end": null,
+      "text": "۵\tخودبیانگری (Self-Expression)"
+    },
+    {
+      "index": 221,
+      "start": null,
+      "end": null,
+      "text": "۳. خودپنداره (Self-Perception)"
+    },
+    {
+      "index": 223,
+      "start": null,
+      "end": null,
+      "text": "سه بخش:"
+    },
+    {
+      "index": 224,
+      "start": null,
+      "end": null,
+      "text": "بخش\tتوضیح"
+    },
+    {
+      "index": 225,
+      "start": null,
+      "end": null,
+      "text": "عزت نفس\tخود را دوست داشتن، باور به خود"
+    },
+    {
+      "index": 226,
+      "start": null,
+      "end": null,
+      "text": "خودشکوفایی\tشناخت رسالت و هدف زندگی"
+    },
+    {
+      "index": 227,
+      "start": null,
+      "end": null,
+      "text": "خودآگاهی هیجانی\tآگاهی از احساسات خود"
+    },
+    {
+      "index": 229,
+      "start": null,
+      "end": null,
+      "text": "نمره‌ها:"
+    },
+    {
+      "index": 231,
+      "start": null,
+      "end": null,
+      "text": "بالای ۶۰ = خوب"
+    },
+    {
+      "index": 233,
+      "start": null,
+      "end": null,
+      "text": "بالای ۸۰ = عالی"
+    },
+    {
+      "index": 235,
+      "start": null,
+      "end": null,
+      "text": "۴. عزت نفس"
+    },
+    {
+      "index": 237,
+      "start": null,
+      "end": null,
+      "text": "نشانه‌های عزت نفس پایین:"
+    },
+    {
+      "index": 239,
+      "start": null,
+      "end": null,
+      "text": "باور نداشتن به خود"
+    },
+    {
+      "index": 241,
+      "start": null,
+      "end": null,
+      "text": "دنبال الگوهای شکست"
+    },
+    {
+      "index": 243,
+      "start": null,
+      "end": null,
+      "text": "فکر کردن به شکست اجباری"
+    },
+    {
+      "index": 245,
+      "start": null,
+      "end": null,
+      "text": "منتظر بودن برای تأیید دیگران"
+    },
+    {
+      "index": 247,
+      "start": null,
+      "end": null,
+      "text": "نشانه‌های عزت نفس بالا:"
+    },
+    {
+      "index": 249,
+      "start": null,
+      "end": null,
+      "text": "خود را دوست داشتن"
+    },
+    {
+      "index": 251,
+      "start": null,
+      "end": null,
+      "text": "مسئولیت‌پذیری"
+    },
+    {
+      "index": 253,
+      "start": null,
+      "end": null,
+      "text": "اقدام کردن بدون منتظر ماندن"
+    },
+    {
+      "index": 255,
+      "start": null,
+      "end": null,
+      "text": "۵. خودشکوفایی"
+    },
+    {
+      "index": 257,
+      "start": null,
+      "end": null,
+      "text": "شناخت رسالت زندگی"
+    },
+    {
+      "index": 259,
+      "start": null,
+      "end": null,
+      "text": "دانستن هدف از زندگی"
+    },
+    {
+      "index": 261,
+      "start": null,
+      "end": null,
+      "text": "نمره بالای ۶۵ = بسیار خوب"
+    },
+    {
+      "index": 263,
+      "start": null,
+      "end": null,
+      "text": "۶. خودآگاهی هیجانی"
+    },
+    {
+      "index": 265,
+      "start": null,
+      "end": null,
+      "text": "اهمیت برای معامله‌گر:"
+    },
+    {
+      "index": 266,
+      "start": null,
+      "end": null,
+      "text": "احساس\tاقدام"
+    },
+    {
+      "index": 267,
+      "start": null,
+      "end": null,
+      "text": "ترس\tمعامله نکن"
+    },
+    {
+      "index": 268,
+      "start": null,
+      "end": null,
+      "text": "ناراحتی\tمعامله نکن"
+    },
+    {
+      "index": 269,
+      "start": null,
+      "end": null,
+      "text": "هیجان زیاد\tمعامله نکن"
+    },
+    {
+      "index": 270,
+      "start": null,
+      "end": null,
+      "text": "خشم\tمعامله نکن"
+    },
+    {
+      "index": 271,
+      "start": null,
+      "end": null,
+      "text": "آرامش\tمی‌توانی معامله کنی"
+    },
+    {
+      "index": 272,
+      "start": null,
+      "end": null,
+      "text": "۷. احساسات مثبت و منفی"
+    },
+    {
+      "index": 273,
+      "start": null,
+      "end": null,
+      "text": "احساسات مثبت\tاحساسات منفی"
+    },
+    {
+      "index": 274,
+      "start": null,
+      "end": null,
+      "text": "گاز موفقیت\tترمز"
+    },
+    {
+      "index": 275,
+      "start": null,
+      "end": null,
+      "text": "شادمانی\tترس از شکست"
+    },
+    {
+      "index": 276,
+      "start": null,
+      "end": null,
+      "text": "مسئولیت‌پذیری\tسرخوردگی"
+    },
+    {
+      "index": 278,
+      "start": null,
+      "end": null,
+      "text": "یادت باشد: احساسات مثبت تو را جلو می‌برند، احساسات منفی ترمز می‌کنند."
+    },
+    {
+      "index": 279,
+      "start": null,
+      "end": null,
+      "text": "۸. مسئولیت‌پذیری"
+    },
+    {
+      "index": 281,
+      "start": null,
+      "end": null,
+      "text": "اصل کلیدی: مسئولیت زندگی خودت باش."
+    },
+    {
+      "index": 282,
+      "start": null,
+      "end": null,
+      "text": "رفتار نادرست\tرفتار درست"
+    },
+    {
+      "index": 283,
+      "start": null,
+      "end": null,
+      "text": "تقصیر گردن دیگران\tپذیرش مسئولیت"
+    },
+    {
+      "index": 284,
+      "start": null,
+      "end": null,
+      "text": "«بازار به من ضرر زد»\t«من ضرر کردم»"
+    },
+    {
+      "index": 285,
+      "start": null,
+      "end": null,
+      "text": "منتظر تغییر دیگران\tخودم تغییر می‌کنم"
+    },
+    {
+      "index": 286,
+      "start": null,
+      "end": null,
+      "text": "۹. خودبیانگری (Self-Expression)"
+    },
+    {
+      "index": 288,
+      "start": null,
+      "end": null,
+      "text": "سه بخش:"
+    },
+    {
+      "index": 289,
+      "start": null,
+      "end": null,
+      "text": "بخش\tتوضیح"
+    },
+    {
+      "index": 290,
+      "start": null,
+      "end": null,
+      "text": "شادمانی\tحال خوب داشتن"
+    },
+    {
+      "index": 291,
+      "start": null,
+      "end": null,
+      "text": "خودابرازی\tبیان درست احساسات"
+    },
+    {
+      "index": 292,
+      "start": null,
+      "end": null,
+      "text": "استقلال\tوابسته نبودن به دیگران"
+    },
+    {
+      "index": 293,
+      "start": null,
+      "end": null,
+      "text": "۱۰. بین فردی (Interpersonal)"
+    },
+    {
+      "index": 295,
+      "start": null,
+      "end": null,
+      "text": "سه بخش:"
+    },
+    {
+      "index": 296,
+      "start": null,
+      "end": null,
+      "text": "بخش\tتوضیح"
+    },
+    {
+      "index": 297,
+      "start": null,
+      "end": null,
+      "text": "روابط بین فردی\tتوانایی ارتباط با دیگران"
+    },
+    {
+      "index": 298,
+      "start": null,
+      "end": null,
+      "text": "همدلی\tدرک احساسات دیگران"
+    },
+    {
+      "index": 299,
+      "start": null,
+      "end": null,
+      "text": "مسئولیت‌پذیری اجتماعی\tتوجه به جامعه و قوانین آن"
+    },
+    {
+      "index": 300,
+      "start": null,
+      "end": null,
+      "text": "۱۱. تصمیم‌گیری"
+    },
+    {
+      "index": 302,
+      "start": null,
+      "end": null,
+      "text": "فرآیند تصمیم‌گیری:"
+    },
+    {
+      "index": 304,
+      "start": null,
+      "end": null,
+      "text": "۱. بین دو یا چند گزینه هستی"
+    },
+    {
+      "index": 305,
+      "start": null,
+      "end": null,
+      "text": "۲. سریع تصمیم نگیر"
+    },
+    {
+      "index": 306,
+      "start": null,
+      "end": null,
+      "text": "۳. روی کاغذ بنویس"
+    },
+    {
+      "index": 307,
+      "start": null,
+      "end": null,
+      "text": "۴. مزایا و معایب هر گزینه را بنویس"
+    },
+    {
+      "index": 308,
+      "start": null,
+      "end": null,
+      "text": "۵. تصمیم منطقی بگیر"
+    },
+    {
+      "index": 310,
+      "start": null,
+      "end": null,
+      "text": "اصل: اگر نتیجه متفاوتی می‌خواهی، باید متفاوت قدم برداری."
+    },
+    {
+      "index": 311,
+      "start": null,
+      "end": null,
+      "text": "۱۲. کنترل تکانش (Impulse Control)"
+    },
+    {
+      "index": 313,
+      "start": null,
+      "end": null,
+      "text": "تکانش = واکنش لحظه‌ای، از کوره در رفتن"
+    },
+    {
+      "index": 315,
+      "start": null,
+      "end": null,
+      "text": "در معامله‌گری:"
+    },
+    {
+      "index": 317,
+      "start": null,
+      "end": null,
+      "text": "سه ضرر پشت سر هم → انتقام"
+    },
+    {
+      "index": 319,
+      "start": null,
+      "end": null,
+      "text": "سود زیاد → سرخوشی کاذب"
+    },
+    {
+      "index": 321,
+      "start": null,
+      "end": null,
+      "text": "اشتباه سودده → تکرار اشتباه"
+    },
+    {
+      "index": 323,
+      "start": null,
+      "end": null,
+      "text": "راه حل: آگاهی + تعهد به پلن + مسئولیت‌پذیری"
+    },
+    {
+      "index": 324,
+      "start": null,
+      "end": null,
+      "text": "۱۳. تمرین عملی"
+    },
+    {
+      "index": 326,
+      "start": null,
+      "end": null,
+      "text": "۱. دفترت را بردار"
+    },
+    {
+      "index": 327,
+      "start": null,
+      "end": null,
+      "text": "۲. تصمیمات گذشته را بنویس"
+    },
+    {
+      "index": 328,
+      "start": null,
+      "end": null,
+      "text": "۳. ریشه موفقیت‌ها و شکست‌ها را بررسی کن"
+    },
+    {
+      "index": 329,
+      "start": null,
+      "end": null,
+      "text": "۴. با فرمول تصمیم‌گیری دوباره تحلیل کن"
+    },
+    {
+      "index": 330,
+      "start": null,
+      "end": null,
+      "text": "۱۴. جمع‌بندی"
+    },
+    {
+      "index": 332,
+      "start": null,
+      "end": null,
+      "text": "۵۰٪ راه بهبود = شناخت مؤلفه‌ها"
+    },
+    {
+      "index": 334,
+      "start": null,
+      "end": null,
+      "text": "نوشتن = معجزه می‌کند"
+    },
+    {
+      "index": 336,
+      "start": null,
+      "end": null,
+      "text": "افراد موفق همه دفتر دارند"
+    },
+    {
+      "index": 338,
+      "start": null,
+      "end": null,
+      "text": "مسئولیت‌پذیر باش"
+    },
+    {
+      "index": 340,
+      "start": null,
+      "end": null,
+      "text": "آگاه باش و عمل کن"
+    }
+  ]
+}

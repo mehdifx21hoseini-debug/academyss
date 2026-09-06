@@ -1,0 +1,50 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "intro_lesson_14",
+  "course": "intro",
+  "lesson": "14",
+  "title": "بررسی کندل به کندل بازار و کی بار",
+  "original_filename": "intro_lesson_14.md",
+  "raw_file": "raw_sources/academy/intro/intro_lesson_14_01.md",
+  "ingested_at": "2026-09-05T17:54:00Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 119,
+    "filler_cues": 0,
+    "speech_cues": 119,
+    "speech_ratio": 1.0,
+    "words": 1151,
+    "unique_words": 409,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "عنوان درس: آموزش مقدماتی - بررسی کندل به کندل بازار و سیگنال بار (کی بار) (بخش چهاردهم)",
+        "count": 2
+      },
+      {
+        "text": "- یا کف پایین‌تر بزند",
+        "count": 2
+      },
+      {
+        "text": "نکته کلیدی: اولین جایی که روند شکسته می‌شود، اهمیت بالایی دارد.",
+        "count": 2
+      },
+      {
+        "text": "۱. روی نمودار خودت سقف و کف‌ها را رسم کن",
+        "count": 2
+      },
+      {
+        "text": "۳. به دنبال پین‌بارها بگرد",
+        "count": 2
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "report_type": "transcript_quality",
+  "version": "v001"
+}

@@ -1,0 +1,69 @@
+{
+  "report_type": "validation",
+  "version": "v045",
+  "generated_at": "2026-09-05T19:40:22Z",
+  "stats": {
+    "files": 39,
+    "objects": 548,
+    "by_kind": {
+      "knowledge_object": 35,
+      "mentor_qa": 2,
+      "conflict_record": 1,
+      "review_item": 1
+    },
+    "by_domain": {
+      "brokers": 3,
+      "psychology": 27,
+      "metatrader": 102,
+      "general_trading": 49,
+      "mentor_qa": 43,
+      "academy": 318,
+      "meta": 6
+    },
+    "by_approval": {
+      "REVIEW_REQUIRED": 9,
+      "PENDING_VERIFICATION": 172,
+      "PENDING_REVIEW": 324,
+      "APPROVED": 13
+    }
+  },
+  "errors": 7,
+  "warnings": 0,
+  "findings": [
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/operations/mentor_style.json :: STY-0001.id",
+      "message": "value 'STY-0001' does not match ^[A-Z0-9]{2,6}-[A-Z]{2,5}-[0-9]{4}$"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/operations/mentor_style.json :: STY-0002.id",
+      "message": "value 'STY-0002' does not match ^[A-Z0-9]{2,6}-[A-Z]{2,5}-[0-9]{4}$"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/operations/mentor_style.json :: STY-0003.id",
+      "message": "value 'STY-0003' does not match ^[A-Z0-9]{2,6}-[A-Z]{2,5}-[0-9]{4}$"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/operations/mentor_style.json :: STY-0004.id",
+      "message": "value 'STY-0004' does not match ^[A-Z0-9]{2,6}-[A-Z]{2,5}-[0-9]{4}$"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/operations/mentor_style.json :: STY-0005.id",
+      "message": "value 'STY-0005' does not match ^[A-Z0-9]{2,6}-[A-Z]{2,5}-[0-9]{4}$"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/operations/mentor_style.json :: STY-0006.id",
+      "message": "value 'STY-0006' does not match ^[A-Z0-9]{2,6}-[A-Z]{2,5}-[0-9]{4}$"
+    },
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/operations/mentor_style.json :: STY-0007.id",
+      "message": "value 'STY-0007' does not match ^[A-Z0-9]{2,6}-[A-Z]{2,5}-[0-9]{4}$"
+    }
+  ]
+}

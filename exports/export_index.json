@@ -1,0 +1,2242 @@
+{
+  "psychology_patterns.md": [
+    {
+      "version": "v001",
+      "sha": "cb592feceab6b53e",
+      "file": "exports/psychology/psychology_patterns_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "a8f853851157f894",
+      "file": "exports/psychology/psychology_patterns_v002.md",
+      "generated_at": "2026-09-05T13:27:52Z"
+    }
+  ],
+  "psychology_patterns.json": [
+    {
+      "version": "v001",
+      "sha": "815bef625974a084",
+      "file": "exports/psychology/psychology_patterns_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "d82b73fd2dcd9f49",
+      "file": "exports/psychology/psychology_patterns_v002.json",
+      "generated_at": "2026-09-05T13:27:52Z"
+    }
+  ],
+  "metatrader_troubleshooting.md": [
+    {
+      "version": "v001",
+      "sha": "8b7290c297cf33f4",
+      "file": "exports/metatrader/metatrader_troubleshooting_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "1768edc3a1c972d7",
+      "file": "exports/metatrader/metatrader_troubleshooting_v002.md",
+      "generated_at": "2026-09-05T12:36:34Z"
+    }
+  ],
+  "metatrader_troubleshooting.json": [
+    {
+      "version": "v001",
+      "sha": "4dd95068cf0462fe",
+      "file": "exports/metatrader/metatrader_troubleshooting_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "caa83fd7c6086f28",
+      "file": "exports/metatrader/metatrader_troubleshooting_v002.json",
+      "generated_at": "2026-09-05T12:36:34Z"
+    }
+  ],
+  "metatrader_mt4_vs_mt5.md": [
+    {
+      "version": "v001",
+      "sha": "e0b11bfdc72ef6ef",
+      "file": "exports/metatrader/metatrader_mt4_vs_mt5_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "e7504270ab5cb891",
+      "file": "exports/metatrader/metatrader_mt4_vs_mt5_v002.md",
+      "generated_at": "2026-09-05T12:36:34Z"
+    },
+    {
+      "version": "v003",
+      "sha": "38270d17c8849aa2",
+      "file": "exports/metatrader/metatrader_mt4_vs_mt5_v003.md",
+      "generated_at": "2026-09-05T13:17:49Z"
+    }
+  ],
+  "metatrader_mt4_vs_mt5.json": [
+    {
+      "version": "v001",
+      "sha": "01c4ae025f252e4e",
+      "file": "exports/metatrader/metatrader_mt4_vs_mt5_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "3f7732a60525120b",
+      "file": "exports/metatrader/metatrader_mt4_vs_mt5_v002.json",
+      "generated_at": "2026-09-05T12:36:34Z"
+    },
+    {
+      "version": "v003",
+      "sha": "1d216fa77354d48e",
+      "file": "exports/metatrader/metatrader_mt4_vs_mt5_v003.json",
+      "generated_at": "2026-09-05T13:17:49Z"
+    }
+  ],
+  "metatrader_mt4_core.md": [
+    {
+      "version": "v001",
+      "sha": "b1440b56b41cc439",
+      "file": "exports/metatrader/mt4/metatrader_mt4_core_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "ad644f0fd8a50a15",
+      "file": "exports/metatrader/mt4/metatrader_mt4_core_v002.md",
+      "generated_at": "2026-09-05T12:36:34Z"
+    },
+    {
+      "version": "v003",
+      "sha": "76659da52fda4b66",
+      "file": "exports/metatrader/mt4/metatrader_mt4_core_v003.md",
+      "generated_at": "2026-09-05T13:17:49Z"
+    },
+    {
+      "version": "v004",
+      "sha": "2839eccbcb38fd66",
+      "file": "exports/metatrader/mt4/metatrader_mt4_core_v004.md",
+      "generated_at": "2026-09-05T16:16:58Z"
+    }
+  ],
+  "metatrader_mt4_core.json": [
+    {
+      "version": "v001",
+      "sha": "b4cdd1858e6a0e17",
+      "file": "exports/metatrader/mt4/metatrader_mt4_core_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "51d340c65f81ccb2",
+      "file": "exports/metatrader/mt4/metatrader_mt4_core_v002.json",
+      "generated_at": "2026-09-05T12:36:34Z"
+    },
+    {
+      "version": "v003",
+      "sha": "2f33ef93e14f9e44",
+      "file": "exports/metatrader/mt4/metatrader_mt4_core_v003.json",
+      "generated_at": "2026-09-05T13:17:49Z"
+    },
+    {
+      "version": "v004",
+      "sha": "e0ef43d0d9fdbd84",
+      "file": "exports/metatrader/mt4/metatrader_mt4_core_v004.json",
+      "generated_at": "2026-09-05T16:16:58Z"
+    }
+  ],
+  "metatrader_mt5_core.md": [
+    {
+      "version": "v001",
+      "sha": "c033409314ba1e77",
+      "file": "exports/metatrader/mt5/metatrader_mt5_core_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "27d8cb8c5461a44d",
+      "file": "exports/metatrader/mt5/metatrader_mt5_core_v002.md",
+      "generated_at": "2026-09-05T12:36:34Z"
+    },
+    {
+      "version": "v003",
+      "sha": "14f8a8989b1375b1",
+      "file": "exports/metatrader/mt5/metatrader_mt5_core_v003.md",
+      "generated_at": "2026-09-05T13:17:49Z"
+    }
+  ],
+  "metatrader_mt5_core.json": [
+    {
+      "version": "v001",
+      "sha": "d7ce2570a70503ba",
+      "file": "exports/metatrader/mt5/metatrader_mt5_core_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "6e76e77860838eee",
+      "file": "exports/metatrader/mt5/metatrader_mt5_core_v002.json",
+      "generated_at": "2026-09-05T12:36:34Z"
+    },
+    {
+      "version": "v003",
+      "sha": "90c94aa3b38779ed",
+      "file": "exports/metatrader/mt5/metatrader_mt5_core_v003.json",
+      "generated_at": "2026-09-05T13:17:49Z"
+    }
+  ],
+  "external_methodologies_quarantine.md": [
+    {
+      "version": "v001",
+      "sha": "472020b0351a0014",
+      "file": "exports/general_trading/external_methodologies_quarantine_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "552182face148331",
+      "file": "exports/general_trading/external_methodologies_quarantine_v002.md",
+      "generated_at": "2026-09-05T15:31:16Z"
+    }
+  ],
+  "external_methodologies_quarantine.json": [
+    {
+      "version": "v001",
+      "sha": "4c94a7a1c92303fd",
+      "file": "exports/general_trading/external_methodologies_quarantine_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "dede718dd0cae890",
+      "file": "exports/general_trading/external_methodologies_quarantine_v002.json",
+      "generated_at": "2026-09-05T15:31:16Z"
+    }
+  ],
+  "general_trading_glossary.md": [
+    {
+      "version": "v001",
+      "sha": "1030dba20eea7848",
+      "file": "exports/general_trading/general_trading_glossary_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "general_trading_glossary.json": [
+    {
+      "version": "v001",
+      "sha": "32b2e2ad60a62fb8",
+      "file": "exports/general_trading/general_trading_glossary_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "conflict_registry.md": [
+    {
+      "version": "v001",
+      "sha": "4b3d01e2c205819a",
+      "file": "exports/conflicts/conflict_registry_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "f95d8fb7cacc40a6",
+      "file": "exports/conflicts/conflict_registry_v002.md",
+      "generated_at": "2026-09-05T14:55:26Z"
+    },
+    {
+      "version": "v003",
+      "sha": "163d97c29d64095a",
+      "file": "exports/conflicts/conflict_registry_v003.md",
+      "generated_at": "2026-09-05T15:45:00Z"
+    },
+    {
+      "version": "v004",
+      "sha": "f06dd0ca73a9b8c9",
+      "file": "exports/conflicts/conflict_registry_v004.md",
+      "generated_at": "2026-09-05T15:48:44Z"
+    },
+    {
+      "version": "v005",
+      "sha": "3ab917aa8616bf4a",
+      "file": "exports/conflicts/conflict_registry_v005.md",
+      "generated_at": "2026-09-05T15:58:30Z"
+    },
+    {
+      "version": "v006",
+      "sha": "c18e76249b831164",
+      "file": "exports/conflicts/conflict_registry_v006.md",
+      "generated_at": "2026-09-05T16:04:40Z"
+    },
+    {
+      "version": "v007",
+      "sha": "f00b138374c5cf76",
+      "file": "exports/conflicts/conflict_registry_v007.md",
+      "generated_at": "2026-09-05T16:16:58Z"
+    },
+    {
+      "version": "v008",
+      "sha": "7685df5d770f3098",
+      "file": "exports/conflicts/conflict_registry_v008.md",
+      "generated_at": "2026-09-05T17:07:03Z"
+    },
+    {
+      "version": "v009",
+      "sha": "a9bc9764fe19ca82",
+      "file": "exports/conflicts/conflict_registry_v009.md",
+      "generated_at": "2026-09-05T17:33:17Z"
+    },
+    {
+      "version": "v010",
+      "sha": "76d8510f14cf5b62",
+      "file": "exports/conflicts/conflict_registry_v010.md",
+      "generated_at": "2026-09-05T17:37:41Z"
+    },
+    {
+      "version": "v011",
+      "sha": "6530735e13d87422",
+      "file": "exports/conflicts/conflict_registry_v011.md",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v012",
+      "sha": "eb314508a4c3b54f",
+      "file": "exports/conflicts/conflict_registry_v012.md",
+      "generated_at": "2026-09-05T19:40:31Z"
+    },
+    {
+      "version": "v013",
+      "sha": "8e2d7d95bc8c51b6",
+      "file": "exports/conflicts/conflict_registry_v013.md",
+      "generated_at": "2026-09-05T20:32:24Z"
+    },
+    {
+      "version": "v014",
+      "sha": "74c7ad2885bb2140",
+      "file": "exports/conflicts/conflict_registry_v014.md",
+      "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v015",
+      "sha": "28c6bcf99e285b97",
+      "file": "exports/conflicts/conflict_registry_v015.md",
+      "generated_at": "2026-09-05T20:50:22Z"
+    },
+    {
+      "version": "v016",
+      "sha": "3bd21fc34bb2c67a",
+      "file": "exports/conflicts/conflict_registry_v016.md",
+      "generated_at": "2026-09-05T21:04:35Z"
+    },
+    {
+      "version": "v017",
+      "sha": "5f451f7eae70c361",
+      "file": "exports/conflicts/conflict_registry_v017.md",
+      "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v018",
+      "sha": "4a25bfb71ef7bb81",
+      "file": "exports/conflicts/conflict_registry_v018.md",
+      "generated_at": "2026-09-05T22:01:27Z"
+    },
+    {
+      "version": "v019",
+      "sha": "f96bd770a95cf8dd",
+      "file": "exports/conflicts/conflict_registry_v019.md",
+      "generated_at": "2026-09-05T22:37:51Z"
+    },
+    {
+      "version": "v020",
+      "sha": "6aac2c38fe371a0b",
+      "file": "exports/conflicts/conflict_registry_v020.md",
+      "generated_at": "2026-09-06T08:32:12Z"
+    }
+  ],
+  "conflict_registry.json": [
+    {
+      "version": "v001",
+      "sha": "cb3470020c253d1e",
+      "file": "exports/conflicts/conflict_registry_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "605750eea53dfea7",
+      "file": "exports/conflicts/conflict_registry_v002.json",
+      "generated_at": "2026-09-05T14:55:26Z"
+    },
+    {
+      "version": "v003",
+      "sha": "912d49f707e5554a",
+      "file": "exports/conflicts/conflict_registry_v003.json",
+      "generated_at": "2026-09-05T15:45:00Z"
+    },
+    {
+      "version": "v004",
+      "sha": "13dc0ef6dac6aefc",
+      "file": "exports/conflicts/conflict_registry_v004.json",
+      "generated_at": "2026-09-05T15:48:44Z"
+    },
+    {
+      "version": "v005",
+      "sha": "6436532495989011",
+      "file": "exports/conflicts/conflict_registry_v005.json",
+      "generated_at": "2026-09-05T15:58:30Z"
+    },
+    {
+      "version": "v006",
+      "sha": "2bf13a54cb1b3a44",
+      "file": "exports/conflicts/conflict_registry_v006.json",
+      "generated_at": "2026-09-05T16:04:40Z"
+    },
+    {
+      "version": "v007",
+      "sha": "4f04bd932a10c916",
+      "file": "exports/conflicts/conflict_registry_v007.json",
+      "generated_at": "2026-09-05T16:16:58Z"
+    },
+    {
+      "version": "v008",
+      "sha": "cad63be1ab48448a",
+      "file": "exports/conflicts/conflict_registry_v008.json",
+      "generated_at": "2026-09-05T17:07:03Z"
+    },
+    {
+      "version": "v009",
+      "sha": "64c1d4644a89faae",
+      "file": "exports/conflicts/conflict_registry_v009.json",
+      "generated_at": "2026-09-05T17:33:17Z"
+    },
+    {
+      "version": "v010",
+      "sha": "e58c73878598ea24",
+      "file": "exports/conflicts/conflict_registry_v010.json",
+      "generated_at": "2026-09-05T17:37:41Z"
+    },
+    {
+      "version": "v011",
+      "sha": "a411e70a04a6c739",
+      "file": "exports/conflicts/conflict_registry_v011.json",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v012",
+      "sha": "296ff7532e56fe83",
+      "file": "exports/conflicts/conflict_registry_v012.json",
+      "generated_at": "2026-09-05T19:40:31Z"
+    },
+    {
+      "version": "v013",
+      "sha": "8e8ec9db17a686e2",
+      "file": "exports/conflicts/conflict_registry_v013.json",
+      "generated_at": "2026-09-05T20:32:24Z"
+    },
+    {
+      "version": "v014",
+      "sha": "c40917feacc209c2",
+      "file": "exports/conflicts/conflict_registry_v014.json",
+      "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v015",
+      "sha": "840713aca0c1ec6b",
+      "file": "exports/conflicts/conflict_registry_v015.json",
+      "generated_at": "2026-09-05T20:50:22Z"
+    },
+    {
+      "version": "v016",
+      "sha": "00c321fe8bc885f1",
+      "file": "exports/conflicts/conflict_registry_v016.json",
+      "generated_at": "2026-09-05T21:04:35Z"
+    },
+    {
+      "version": "v017",
+      "sha": "92868df550cea21b",
+      "file": "exports/conflicts/conflict_registry_v017.json",
+      "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v018",
+      "sha": "e468032e9700f745",
+      "file": "exports/conflicts/conflict_registry_v018.json",
+      "generated_at": "2026-09-05T22:01:27Z"
+    },
+    {
+      "version": "v019",
+      "sha": "50fc949f1b9611fb",
+      "file": "exports/conflicts/conflict_registry_v019.json",
+      "generated_at": "2026-09-05T22:37:51Z"
+    },
+    {
+      "version": "v020",
+      "sha": "dbc56f85f71b1832",
+      "file": "exports/conflicts/conflict_registry_v020.json",
+      "generated_at": "2026-09-06T08:32:12Z"
+    }
+  ],
+  "review_queue_open_items.md": [
+    {
+      "version": "v001",
+      "sha": "37009992318ded06",
+      "file": "exports/reports/review_queue_open_items_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "8972c5bb6c9798db",
+      "file": "exports/reports/review_queue_open_items_v002.md",
+      "generated_at": "2026-09-05T12:38:06Z"
+    },
+    {
+      "version": "v003",
+      "sha": "fe0526093360fd37",
+      "file": "exports/reports/review_queue_open_items_v003.md",
+      "generated_at": "2026-09-05T13:17:49Z"
+    },
+    {
+      "version": "v004",
+      "sha": "1e1e10098c3860bf",
+      "file": "exports/reports/review_queue_open_items_v004.md",
+      "generated_at": "2026-09-05T13:27:52Z"
+    },
+    {
+      "version": "v005",
+      "sha": "d58790ad529e7c1d",
+      "file": "exports/reports/review_queue_open_items_v005.md",
+      "generated_at": "2026-09-05T13:45:58Z"
+    },
+    {
+      "version": "v006",
+      "sha": "7f6174691de5e718",
+      "file": "exports/reports/review_queue_open_items_v006.md",
+      "generated_at": "2026-09-05T14:00:46Z"
+    },
+    {
+      "version": "v007",
+      "sha": "80e1c9951f1ce614",
+      "file": "exports/reports/review_queue_open_items_v007.md",
+      "generated_at": "2026-09-05T14:54:57Z"
+    },
+    {
+      "version": "v008",
+      "sha": "aa6be4123138fb0f",
+      "file": "exports/reports/review_queue_open_items_v008.md",
+      "generated_at": "2026-09-05T15:14:23Z"
+    },
+    {
+      "version": "v009",
+      "sha": "1b1fdae58b7dd6b3",
+      "file": "exports/reports/review_queue_open_items_v009.md",
+      "generated_at": "2026-09-05T15:45:00Z"
+    },
+    {
+      "version": "v010",
+      "sha": "7aa3e580de7d7c18",
+      "file": "exports/reports/review_queue_open_items_v010.md",
+      "generated_at": "2026-09-05T15:58:30Z"
+    },
+    {
+      "version": "v011",
+      "sha": "1d3e5be61c8ca583",
+      "file": "exports/reports/review_queue_open_items_v011.md",
+      "generated_at": "2026-09-05T16:52:14Z"
+    },
+    {
+      "version": "v012",
+      "sha": "c7c1316d2ec70aa3",
+      "file": "exports/reports/review_queue_open_items_v012.md",
+      "generated_at": "2026-09-05T16:59:38Z"
+    },
+    {
+      "version": "v013",
+      "sha": "96dbe66df0c09b31",
+      "file": "exports/reports/review_queue_open_items_v013.md",
+      "generated_at": "2026-09-05T17:07:03Z"
+    },
+    {
+      "version": "v014",
+      "sha": "45faaf667e19b893",
+      "file": "exports/reports/review_queue_open_items_v014.md",
+      "generated_at": "2026-09-05T17:33:17Z"
+    },
+    {
+      "version": "v015",
+      "sha": "c14e1a57a42918ea",
+      "file": "exports/reports/review_queue_open_items_v015.md",
+      "generated_at": "2026-09-05T17:37:41Z"
+    },
+    {
+      "version": "v016",
+      "sha": "49aaa022a9094646",
+      "file": "exports/reports/review_queue_open_items_v016.md",
+      "generated_at": "2026-09-05T17:56:27Z"
+    },
+    {
+      "version": "v017",
+      "sha": "020cbf6bad889381",
+      "file": "exports/reports/review_queue_open_items_v017.md",
+      "generated_at": "2026-09-05T18:06:26Z"
+    },
+    {
+      "version": "v018",
+      "sha": "517b916f89f82f91",
+      "file": "exports/reports/review_queue_open_items_v018.md",
+      "generated_at": "2026-09-05T18:45:38Z"
+    },
+    {
+      "version": "v019",
+      "sha": "f35b151ac83eb7b7",
+      "file": "exports/reports/review_queue_open_items_v019.md",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v020",
+      "sha": "021736c591c0a0fd",
+      "file": "exports/reports/review_queue_open_items_v020.md",
+      "generated_at": "2026-09-05T19:40:31Z"
+    },
+    {
+      "version": "v021",
+      "sha": "f44a347842838a69",
+      "file": "exports/reports/review_queue_open_items_v021.md",
+      "generated_at": "2026-09-05T20:32:24Z"
+    },
+    {
+      "version": "v022",
+      "sha": "25726ea5566b4ef6",
+      "file": "exports/reports/review_queue_open_items_v022.md",
+      "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v023",
+      "sha": "0237014256c3bf5a",
+      "file": "exports/reports/review_queue_open_items_v023.md",
+      "generated_at": "2026-09-05T20:50:22Z"
+    },
+    {
+      "version": "v024",
+      "sha": "fa778313fa1b72da",
+      "file": "exports/reports/review_queue_open_items_v024.md",
+      "generated_at": "2026-09-05T21:04:35Z"
+    },
+    {
+      "version": "v025",
+      "sha": "23adab4f72797756",
+      "file": "exports/reports/review_queue_open_items_v025.md",
+      "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v026",
+      "sha": "4853291d1c06e98e",
+      "file": "exports/reports/review_queue_open_items_v026.md",
+      "generated_at": "2026-09-05T22:01:27Z"
+    },
+    {
+      "version": "v027",
+      "sha": "4fd256ee9743f017",
+      "file": "exports/reports/review_queue_open_items_v027.md",
+      "generated_at": "2026-09-05T22:18:44Z"
+    },
+    {
+      "version": "v028",
+      "sha": "2759775503ad8983",
+      "file": "exports/reports/review_queue_open_items_v028.md",
+      "generated_at": "2026-09-05T22:23:47Z"
+    },
+    {
+      "version": "v029",
+      "sha": "0e4499c2b3c4c3ce",
+      "file": "exports/reports/review_queue_open_items_v029.md",
+      "generated_at": "2026-09-05T22:31:01Z"
+    },
+    {
+      "version": "v030",
+      "sha": "ea590833401aad9b",
+      "file": "exports/reports/review_queue_open_items_v030.md",
+      "generated_at": "2026-09-05T22:37:51Z"
+    },
+    {
+      "version": "v031",
+      "sha": "71b31289ea271765",
+      "file": "exports/reports/review_queue_open_items_v031.md",
+      "generated_at": "2026-09-06T08:32:12Z"
+    },
+    {
+      "version": "v032",
+      "sha": "31441a04672c6b02",
+      "file": "exports/reports/review_queue_open_items_v032.md",
+      "generated_at": "2026-09-06T08:34:29Z"
+    },
+    {
+      "version": "v033",
+      "sha": "f9e1eded77a9d6f9",
+      "file": "exports/reports/review_queue_open_items_v033.md",
+      "generated_at": "2026-09-06T09:07:02Z"
+    }
+  ],
+  "review_queue_open_items.json": [
+    {
+      "version": "v001",
+      "sha": "75cae950b62ef33a",
+      "file": "exports/reports/review_queue_open_items_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "1195c6b366816569",
+      "file": "exports/reports/review_queue_open_items_v002.json",
+      "generated_at": "2026-09-05T12:38:06Z"
+    },
+    {
+      "version": "v003",
+      "sha": "82a211b46ca95c16",
+      "file": "exports/reports/review_queue_open_items_v003.json",
+      "generated_at": "2026-09-05T13:17:49Z"
+    },
+    {
+      "version": "v004",
+      "sha": "495b60ba35f8b011",
+      "file": "exports/reports/review_queue_open_items_v004.json",
+      "generated_at": "2026-09-05T13:27:52Z"
+    },
+    {
+      "version": "v005",
+      "sha": "a4c7d8a1383c86f9",
+      "file": "exports/reports/review_queue_open_items_v005.json",
+      "generated_at": "2026-09-05T13:45:58Z"
+    },
+    {
+      "version": "v006",
+      "sha": "a0395e847588a35f",
+      "file": "exports/reports/review_queue_open_items_v006.json",
+      "generated_at": "2026-09-05T14:00:46Z"
+    },
+    {
+      "version": "v007",
+      "sha": "3dfd6ba8b25bcf73",
+      "file": "exports/reports/review_queue_open_items_v007.json",
+      "generated_at": "2026-09-05T14:54:57Z"
+    },
+    {
+      "version": "v008",
+      "sha": "79e6a4c318d35263",
+      "file": "exports/reports/review_queue_open_items_v008.json",
+      "generated_at": "2026-09-05T15:14:23Z"
+    },
+    {
+      "version": "v009",
+      "sha": "bb5ace52d25eb12c",
+      "file": "exports/reports/review_queue_open_items_v009.json",
+      "generated_at": "2026-09-05T15:45:00Z"
+    },
+    {
+      "version": "v010",
+      "sha": "d1a413f25ca10508",
+      "file": "exports/reports/review_queue_open_items_v010.json",
+      "generated_at": "2026-09-05T15:58:30Z"
+    },
+    {
+      "version": "v011",
+      "sha": "1821da1caa03baf5",
+      "file": "exports/reports/review_queue_open_items_v011.json",
+      "generated_at": "2026-09-05T16:52:14Z"
+    },
+    {
+      "version": "v012",
+      "sha": "83f178019d15f3b7",
+      "file": "exports/reports/review_queue_open_items_v012.json",
+      "generated_at": "2026-09-05T16:59:38Z"
+    },
+    {
+      "version": "v013",
+      "sha": "5a312eed36b6cac3",
+      "file": "exports/reports/review_queue_open_items_v013.json",
+      "generated_at": "2026-09-05T17:07:03Z"
+    },
+    {
+      "version": "v014",
+      "sha": "9d85a18caf79f6e7",
+      "file": "exports/reports/review_queue_open_items_v014.json",
+      "generated_at": "2026-09-05T17:33:17Z"
+    },
+    {
+      "version": "v015",
+      "sha": "c8f619a5bc28eb86",
+      "file": "exports/reports/review_queue_open_items_v015.json",
+      "generated_at": "2026-09-05T17:37:41Z"
+    },
+    {
+      "version": "v016",
+      "sha": "4b25e63fa9a231a6",
+      "file": "exports/reports/review_queue_open_items_v016.json",
+      "generated_at": "2026-09-05T17:56:27Z"
+    },
+    {
+      "version": "v017",
+      "sha": "15614b964b77308f",
+      "file": "exports/reports/review_queue_open_items_v017.json",
+      "generated_at": "2026-09-05T18:06:26Z"
+    },
+    {
+      "version": "v018",
+      "sha": "723e873e9fe6bc20",
+      "file": "exports/reports/review_queue_open_items_v018.json",
+      "generated_at": "2026-09-05T18:45:38Z"
+    },
+    {
+      "version": "v019",
+      "sha": "2076c392cb3084ee",
+      "file": "exports/reports/review_queue_open_items_v019.json",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v020",
+      "sha": "33311986be781754",
+      "file": "exports/reports/review_queue_open_items_v020.json",
+      "generated_at": "2026-09-05T19:40:31Z"
+    },
+    {
+      "version": "v021",
+      "sha": "5bbf313ac2efd31a",
+      "file": "exports/reports/review_queue_open_items_v021.json",
+      "generated_at": "2026-09-05T20:32:24Z"
+    },
+    {
+      "version": "v022",
+      "sha": "d7e308772c398c6c",
+      "file": "exports/reports/review_queue_open_items_v022.json",
+      "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v023",
+      "sha": "31afc6cb5c7a4a65",
+      "file": "exports/reports/review_queue_open_items_v023.json",
+      "generated_at": "2026-09-05T20:50:22Z"
+    },
+    {
+      "version": "v024",
+      "sha": "282e4287407fcfa4",
+      "file": "exports/reports/review_queue_open_items_v024.json",
+      "generated_at": "2026-09-05T21:04:35Z"
+    },
+    {
+      "version": "v025",
+      "sha": "5435b5d9dd01caa8",
+      "file": "exports/reports/review_queue_open_items_v025.json",
+      "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v026",
+      "sha": "46866b02eec0d177",
+      "file": "exports/reports/review_queue_open_items_v026.json",
+      "generated_at": "2026-09-05T22:01:27Z"
+    },
+    {
+      "version": "v027",
+      "sha": "b1c3f1730e23a73c",
+      "file": "exports/reports/review_queue_open_items_v027.json",
+      "generated_at": "2026-09-05T22:18:44Z"
+    },
+    {
+      "version": "v028",
+      "sha": "419b99b1807cfbec",
+      "file": "exports/reports/review_queue_open_items_v028.json",
+      "generated_at": "2026-09-05T22:23:47Z"
+    },
+    {
+      "version": "v029",
+      "sha": "f29c342bf0f88248",
+      "file": "exports/reports/review_queue_open_items_v029.json",
+      "generated_at": "2026-09-05T22:31:01Z"
+    },
+    {
+      "version": "v030",
+      "sha": "66a9c0971095e201",
+      "file": "exports/reports/review_queue_open_items_v030.json",
+      "generated_at": "2026-09-05T22:37:51Z"
+    },
+    {
+      "version": "v031",
+      "sha": "e1dbfbcf49727378",
+      "file": "exports/reports/review_queue_open_items_v031.json",
+      "generated_at": "2026-09-06T08:32:12Z"
+    },
+    {
+      "version": "v032",
+      "sha": "044c751d83573103",
+      "file": "exports/reports/review_queue_open_items_v032.json",
+      "generated_at": "2026-09-06T08:34:29Z"
+    },
+    {
+      "version": "v033",
+      "sha": "af5eefd02c13b395",
+      "file": "exports/reports/review_queue_open_items_v033.json",
+      "generated_at": "2026-09-06T09:07:02Z"
+    }
+  ],
+  "academy_site_catalog.md": [
+    {
+      "version": "v001",
+      "sha": "455e4e9aa1c53c95",
+      "file": "exports/academy/academy_site_catalog_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "academy_site_catalog.json": [
+    {
+      "version": "v001",
+      "sha": "bc00a2dea1cf48a1",
+      "file": "exports/academy/academy_site_catalog_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "kb_policy_rules.md": [
+    {
+      "version": "v001",
+      "sha": "6970c707ba4ef2a7",
+      "file": "exports/reports/kb_policy_rules_v001.md",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "kb_policy_rules.json": [
+    {
+      "version": "v001",
+      "sha": "ef298f34fcb480aa",
+      "file": "exports/reports/kb_policy_rules_v001.json",
+      "generated_at": "2026-09-05T12:16:30Z"
+    }
+  ],
+  "kb_index.csv": [
+    {
+      "version": "v001",
+      "sha": "53cfb1cec7d2f81c",
+      "file": "exports/reports/kb_index_v001.csv",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "057d21e362be6ddc",
+      "file": "exports/reports/kb_index_v002.csv",
+      "generated_at": "2026-09-05T12:21:37Z"
+    },
+    {
+      "version": "v003",
+      "sha": "7fe45cb01fe53b3a",
+      "file": "exports/reports/kb_index_v003.csv",
+      "generated_at": "2026-09-05T12:36:34Z"
+    },
+    {
+      "version": "v004",
+      "sha": "d550b862290601d3",
+      "file": "exports/reports/kb_index_v004.csv",
+      "generated_at": "2026-09-05T12:38:06Z"
+    },
+    {
+      "version": "v005",
+      "sha": "698decfbdd31a6f0",
+      "file": "exports/reports/kb_index_v005.csv",
+      "generated_at": "2026-09-05T13:17:49Z"
+    },
+    {
+      "version": "v006",
+      "sha": "7930809514269f89",
+      "file": "exports/reports/kb_index_v006.csv",
+      "generated_at": "2026-09-05T13:27:52Z"
+    },
+    {
+      "version": "v007",
+      "sha": "2473fa32b90e273c",
+      "file": "exports/reports/kb_index_v007.csv",
+      "generated_at": "2026-09-05T13:45:58Z"
+    },
+    {
+      "version": "v008",
+      "sha": "ce95fe8d6450aca7",
+      "file": "exports/reports/kb_index_v008.csv",
+      "generated_at": "2026-09-05T14:00:46Z"
+    },
+    {
+      "version": "v009",
+      "sha": "f2e6c8d84b50426d",
+      "file": "exports/reports/kb_index_v009.csv",
+      "generated_at": "2026-09-05T14:54:57Z"
+    },
+    {
+      "version": "v010",
+      "sha": "b7dd3280dfc767fe",
+      "file": "exports/reports/kb_index_v010.csv",
+      "generated_at": "2026-09-05T14:55:26Z"
+    },
+    {
+      "version": "v011",
+      "sha": "47ec78ec09f8530a",
+      "file": "exports/reports/kb_index_v011.csv",
+      "generated_at": "2026-09-05T15:14:23Z"
+    },
+    {
+      "version": "v012",
+      "sha": "533383708f27cfb0",
+      "file": "exports/reports/kb_index_v012.csv",
+      "generated_at": "2026-09-05T15:31:16Z"
+    },
+    {
+      "version": "v013",
+      "sha": "75bb9bfbc02da44b",
+      "file": "exports/reports/kb_index_v013.csv",
+      "generated_at": "2026-09-05T15:45:00Z"
+    },
+    {
+      "version": "v014",
+      "sha": "64f39fa63a96486d",
+      "file": "exports/reports/kb_index_v014.csv",
+      "generated_at": "2026-09-05T15:48:44Z"
+    },
+    {
+      "version": "v015",
+      "sha": "e3e0267f017ab100",
+      "file": "exports/reports/kb_index_v015.csv",
+      "generated_at": "2026-09-05T15:58:30Z"
+    },
+    {
+      "version": "v016",
+      "sha": "14d711917b0028ca",
+      "file": "exports/reports/kb_index_v016.csv",
+      "generated_at": "2026-09-05T16:04:40Z"
+    },
+    {
+      "version": "v017",
+      "sha": "3b79287c19b4e069",
+      "file": "exports/reports/kb_index_v017.csv",
+      "generated_at": "2026-09-05T16:16:58Z"
+    },
+    {
+      "version": "v018",
+      "sha": "5f3c7b0a4717e1dd",
+      "file": "exports/reports/kb_index_v018.csv",
+      "generated_at": "2026-09-05T16:21:51Z"
+    },
+    {
+      "version": "v019",
+      "sha": "8ae94fd28ca37986",
+      "file": "exports/reports/kb_index_v019.csv",
+      "generated_at": "2026-09-05T16:34:20Z"
+    },
+    {
+      "version": "v020",
+      "sha": "cb01e16eee6652ac",
+      "file": "exports/reports/kb_index_v020.csv",
+      "generated_at": "2026-09-05T16:39:10Z"
+    },
+    {
+      "version": "v021",
+      "sha": "340b9e9a288319a9",
+      "file": "exports/reports/kb_index_v021.csv",
+      "generated_at": "2026-09-05T16:52:14Z"
+    },
+    {
+      "version": "v022",
+      "sha": "2df6de35d6655190",
+      "file": "exports/reports/kb_index_v022.csv",
+      "generated_at": "2026-09-05T16:59:38Z"
+    },
+    {
+      "version": "v023",
+      "sha": "02c4a942243effac",
+      "file": "exports/reports/kb_index_v023.csv",
+      "generated_at": "2026-09-05T17:07:03Z"
+    },
+    {
+      "version": "v024",
+      "sha": "8f96e8030d8fe2d1",
+      "file": "exports/reports/kb_index_v024.csv",
+      "generated_at": "2026-09-05T17:33:17Z"
+    },
+    {
+      "version": "v025",
+      "sha": "1d278fe7c5fd4535",
+      "file": "exports/reports/kb_index_v025.csv",
+      "generated_at": "2026-09-05T17:37:41Z"
+    },
+    {
+      "version": "v026",
+      "sha": "f43d94f46c52477e",
+      "file": "exports/reports/kb_index_v026.csv",
+      "generated_at": "2026-09-05T17:56:27Z"
+    },
+    {
+      "version": "v027",
+      "sha": "1aaf806482de9611",
+      "file": "exports/reports/kb_index_v027.csv",
+      "generated_at": "2026-09-05T18:06:26Z"
+    },
+    {
+      "version": "v028",
+      "sha": "e8361a6c3109d167",
+      "file": "exports/reports/kb_index_v028.csv",
+      "generated_at": "2026-09-05T18:45:38Z"
+    },
+    {
+      "version": "v029",
+      "sha": "423f32d9fee1fe8b",
+      "file": "exports/reports/kb_index_v029.csv",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v030",
+      "sha": "e37b4c24a0eb405b",
+      "file": "exports/reports/kb_index_v030.csv",
+      "generated_at": "2026-09-05T19:12:20Z"
+    },
+    {
+      "version": "v031",
+      "sha": "7a8f24bb33cf22d7",
+      "file": "exports/reports/kb_index_v031.csv",
+      "generated_at": "2026-09-05T19:40:31Z"
+    },
+    {
+      "version": "v032",
+      "sha": "94d4fb28533e8a5f",
+      "file": "exports/reports/kb_index_v032.csv",
+      "generated_at": "2026-09-05T20:32:24Z"
+    },
+    {
+      "version": "v033",
+      "sha": "5f0921f3ce2bfa13",
+      "file": "exports/reports/kb_index_v033.csv",
+      "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v034",
+      "sha": "d6c6be8198220774",
+      "file": "exports/reports/kb_index_v034.csv",
+      "generated_at": "2026-09-05T20:50:22Z"
+    },
+    {
+      "version": "v035",
+      "sha": "6627c42269cdb53c",
+      "file": "exports/reports/kb_index_v035.csv",
+      "generated_at": "2026-09-05T21:03:28Z"
+    },
+    {
+      "version": "v036",
+      "sha": "0e9ba5aa996d8e01",
+      "file": "exports/reports/kb_index_v036.csv",
+      "generated_at": "2026-09-05T21:04:35Z"
+    },
+    {
+      "version": "v037",
+      "sha": "1e98601f77180c31",
+      "file": "exports/reports/kb_index_v037.csv",
+      "generated_at": "2026-09-05T21:06:19Z"
+    },
+    {
+      "version": "v038",
+      "sha": "c64ccb77d2bfa69c",
+      "file": "exports/reports/kb_index_v038.csv",
+      "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v039",
+      "sha": "aad0b325f8495678",
+      "file": "exports/reports/kb_index_v039.csv",
+      "generated_at": "2026-09-05T22:01:27Z"
+    },
+    {
+      "version": "v040",
+      "sha": "232c95e1ac5a53af",
+      "file": "exports/reports/kb_index_v040.csv",
+      "generated_at": "2026-09-05T22:18:44Z"
+    },
+    {
+      "version": "v041",
+      "sha": "746684381dd79af1",
+      "file": "exports/reports/kb_index_v041.csv",
+      "generated_at": "2026-09-05T22:23:47Z"
+    },
+    {
+      "version": "v042",
+      "sha": "ee641ee67ff3fa6d",
+      "file": "exports/reports/kb_index_v042.csv",
+      "generated_at": "2026-09-05T22:31:01Z"
+    },
+    {
+      "version": "v043",
+      "sha": "fba63a95f38489a4",
+      "file": "exports/reports/kb_index_v043.csv",
+      "generated_at": "2026-09-05T22:37:51Z"
+    },
+    {
+      "version": "v044",
+      "sha": "a3cdb76717365825",
+      "file": "exports/reports/kb_index_v044.csv",
+      "generated_at": "2026-09-06T08:32:12Z"
+    },
+    {
+      "version": "v045",
+      "sha": "77e93e73954b5408",
+      "file": "exports/reports/kb_index_v045.csv",
+      "generated_at": "2026-09-06T08:34:29Z"
+    },
+    {
+      "version": "v046",
+      "sha": "a38273c78dd06874",
+      "file": "exports/reports/kb_index_v046.csv",
+      "generated_at": "2026-09-06T09:07:02Z"
+    }
+  ],
+  "glossary.csv": [
+    {
+      "version": "v001",
+      "sha": "65fb13d4e76f58a5",
+      "file": "exports/glossary/glossary_v001.csv",
+      "generated_at": "2026-09-05T12:16:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "be4adbc837cde2d8",
+      "file": "exports/glossary/glossary_v002.csv",
+      "generated_at": "2026-09-05T12:36:34Z"
+    },
+    {
+      "version": "v003",
+      "sha": "6d2f442115c15d81",
+      "file": "exports/glossary/glossary_v003.csv",
+      "generated_at": "2026-09-05T15:14:23Z"
+    },
+    {
+      "version": "v004",
+      "sha": "88deca0f69ff538e",
+      "file": "exports/glossary/glossary_v004.csv",
+      "generated_at": "2026-09-05T15:31:16Z"
+    },
+    {
+      "version": "v005",
+      "sha": "8cd29653303c44fa",
+      "file": "exports/glossary/glossary_v005.csv",
+      "generated_at": "2026-09-05T15:45:00Z"
+    },
+    {
+      "version": "v006",
+      "sha": "aadb7c4f3f6d6373",
+      "file": "exports/glossary/glossary_v006.csv",
+      "generated_at": "2026-09-05T15:58:30Z"
+    },
+    {
+      "version": "v007",
+      "sha": "0241bbd35ddf6c8a",
+      "file": "exports/glossary/glossary_v007.csv",
+      "generated_at": "2026-09-05T16:34:20Z"
+    },
+    {
+      "version": "v008",
+      "sha": "8de7b115c30d3cf9",
+      "file": "exports/glossary/glossary_v008.csv",
+      "generated_at": "2026-09-05T16:39:10Z"
+    },
+    {
+      "version": "v009",
+      "sha": "3c614ddbe89b250e",
+      "file": "exports/glossary/glossary_v009.csv",
+      "generated_at": "2026-09-05T16:52:14Z"
+    },
+    {
+      "version": "v010",
+      "sha": "14fbc7a34c73f897",
+      "file": "exports/glossary/glossary_v010.csv",
+      "generated_at": "2026-09-05T16:59:38Z"
+    },
+    {
+      "version": "v011",
+      "sha": "dccddb7c5f8791a2",
+      "file": "exports/glossary/glossary_v011.csv",
+      "generated_at": "2026-09-05T17:07:03Z"
+    },
+    {
+      "version": "v012",
+      "sha": "e186c5be23873a8a",
+      "file": "exports/glossary/glossary_v012.csv",
+      "generated_at": "2026-09-05T17:33:17Z"
+    },
+    {
+      "version": "v013",
+      "sha": "7dbd8995774e5471",
+      "file": "exports/glossary/glossary_v013.csv",
+      "generated_at": "2026-09-05T17:56:27Z"
+    },
+    {
+      "version": "v014",
+      "sha": "8dbcbde9d55db70e",
+      "file": "exports/glossary/glossary_v014.csv",
+      "generated_at": "2026-09-05T18:06:26Z"
+    },
+    {
+      "version": "v015",
+      "sha": "86af0b30e27ecd67",
+      "file": "exports/glossary/glossary_v015.csv",
+      "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v016",
+      "sha": "0324cb4c9b0d773f",
+      "file": "exports/glossary/glossary_v016.csv",
+      "generated_at": "2026-09-05T22:18:44Z"
+    },
+    {
+      "version": "v017",
+      "sha": "9274d87aef02106b",
+      "file": "exports/glossary/glossary_v017.csv",
+      "generated_at": "2026-09-05T22:23:47Z"
+    }
+  ],
+  "metatrader_common_procedures.md": [
+    {
+      "version": "v001",
+      "sha": "79a7607f2db1a4ff",
+      "file": "exports/metatrader/metatrader_common_procedures_v001.md",
+      "generated_at": "2026-09-05T12:36:34Z"
+    },
+    {
+      "version": "v002",
+      "sha": "13f2634310fb0273",
+      "file": "exports/metatrader/metatrader_common_procedures_v002.md",
+      "generated_at": "2026-09-05T13:17:49Z"
+    }
+  ],
+  "metatrader_common_procedures.json": [
+    {
+      "version": "v001",
+      "sha": "94b2f9d9c0fe6ac3",
+      "file": "exports/metatrader/metatrader_common_procedures_v001.json",
+      "generated_at": "2026-09-05T12:36:34Z"
+    },
+    {
+      "version": "v002",
+      "sha": "361b485ca6c2b8b1",
+      "file": "exports/metatrader/metatrader_common_procedures_v002.json",
+      "generated_at": "2026-09-05T13:17:49Z"
+    }
+  ],
+  "metatrader_concepts.md": [
+    {
+      "version": "v001",
+      "sha": "8f478a329145b2b2",
+      "file": "exports/metatrader/metatrader_concepts_v001.md",
+      "generated_at": "2026-09-05T12:36:34Z"
+    }
+  ],
+  "metatrader_concepts.json": [
+    {
+      "version": "v001",
+      "sha": "830c7c3ccb4fe853",
+      "file": "exports/metatrader/metatrader_concepts_v001.json",
+      "generated_at": "2026-09-05T12:36:34Z"
+    }
+  ],
+  "academy_response_policies.md": [
+    {
+      "version": "v001",
+      "sha": "972adae703caf4d1",
+      "file": "exports/academy/academy_response_policies_v001.md",
+      "generated_at": "2026-09-05T13:17:49Z"
+    },
+    {
+      "version": "v002",
+      "sha": "854b3a382bd4dc20",
+      "file": "exports/academy/academy_response_policies_v002.md",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "27936814b89826b9",
+      "file": "exports/academy/academy_response_policies_v003.md",
+      "generated_at": "2026-09-05T20:32:24Z"
+    },
+    {
+      "version": "v004",
+      "sha": "ae8305a2c92deae3",
+      "file": "exports/academy/academy_response_policies_v004.md",
+      "generated_at": "2026-09-05T20:50:22Z"
+    }
+  ],
+  "academy_response_policies.json": [
+    {
+      "version": "v001",
+      "sha": "350f4a1431b9b4eb",
+      "file": "exports/academy/academy_response_policies_v001.json",
+      "generated_at": "2026-09-05T13:17:49Z"
+    },
+    {
+      "version": "v002",
+      "sha": "786d01860704c96b",
+      "file": "exports/academy/academy_response_policies_v002.json",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "c0925765622030f9",
+      "file": "exports/academy/academy_response_policies_v003.json",
+      "generated_at": "2026-09-05T20:32:24Z"
+    },
+    {
+      "version": "v004",
+      "sha": "72ec84a1bc67b2aa",
+      "file": "exports/academy/academy_response_policies_v004.json",
+      "generated_at": "2026-09-05T20:50:22Z"
+    }
+  ],
+  "psychology_safety_policy.md": [
+    {
+      "version": "v001",
+      "sha": "c2c1ede84a9ba340",
+      "file": "exports/psychology/psychology_safety_policy_v001.md",
+      "generated_at": "2026-09-05T13:27:52Z"
+    }
+  ],
+  "psychology_safety_policy.json": [
+    {
+      "version": "v001",
+      "sha": "59d3d2c548f985a8",
+      "file": "exports/psychology/psychology_safety_policy_v001.json",
+      "generated_at": "2026-09-05T13:27:52Z"
+    }
+  ],
+  "general_trading_mechanics.md": [
+    {
+      "version": "v001",
+      "sha": "4b014e391dbe41ac",
+      "file": "exports/general_trading/general_trading_mechanics_v001.md",
+      "generated_at": "2026-09-05T13:27:52Z"
+    }
+  ],
+  "general_trading_mechanics.json": [
+    {
+      "version": "v001",
+      "sha": "030c2ae043e83542",
+      "file": "exports/general_trading/general_trading_mechanics_v001.json",
+      "generated_at": "2026-09-05T13:27:52Z"
+    }
+  ],
+  "academy_psychology_lesson_p01.md": [
+    {
+      "version": "v001",
+      "sha": "faf46c261a100f15",
+      "file": "exports/academy/academy_psychology_lesson_p01_v001.md",
+      "generated_at": "2026-09-05T14:00:46Z"
+    },
+    {
+      "version": "v002",
+      "sha": "65dba7778ea38827",
+      "file": "exports/academy/academy_psychology_lesson_p01_v002.md",
+      "generated_at": "2026-09-05T14:01:10Z"
+    }
+  ],
+  "academy_psychology_lesson_p01.json": [
+    {
+      "version": "v001",
+      "sha": "04ee7928488a4528",
+      "file": "exports/academy/academy_psychology_lesson_p01_v001.json",
+      "generated_at": "2026-09-05T14:00:46Z"
+    }
+  ],
+  "academy_intro_lesson_01.md": [
+    {
+      "version": "v001",
+      "sha": "face781412a82bf7",
+      "file": "exports/academy/academy_intro_lesson_01_v001.md",
+      "generated_at": "2026-09-05T14:54:57Z"
+    },
+    {
+      "version": "v002",
+      "sha": "3c6b0055e6b4bd8d",
+      "file": "exports/academy/academy_intro_lesson_01_v002.md",
+      "generated_at": "2026-09-05T19:11:35Z"
+    }
+  ],
+  "academy_intro_lesson_01.json": [
+    {
+      "version": "v001",
+      "sha": "903ae9bfb55c7e09",
+      "file": "exports/academy/academy_intro_lesson_01_v001.json",
+      "generated_at": "2026-09-05T14:54:57Z"
+    },
+    {
+      "version": "v002",
+      "sha": "cc34d0c86f403d0a",
+      "file": "exports/academy/academy_intro_lesson_01_v002.json",
+      "generated_at": "2026-09-05T19:11:35Z"
+    }
+  ],
+  "academy_intro_lesson_02.md": [
+    {
+      "version": "v001",
+      "sha": "95623df55a612955",
+      "file": "exports/academy/academy_intro_lesson_02_v001.md",
+      "generated_at": "2026-09-05T15:14:23Z"
+    }
+  ],
+  "academy_intro_lesson_02.json": [
+    {
+      "version": "v001",
+      "sha": "20e12b07346f7953",
+      "file": "exports/academy/academy_intro_lesson_02_v001.json",
+      "generated_at": "2026-09-05T15:14:23Z"
+    }
+  ],
+  "academy_intro_lesson_03.md": [
+    {
+      "version": "v001",
+      "sha": "24fe9ad1c2d8a369",
+      "file": "exports/academy/academy_intro_lesson_03_v001.md",
+      "generated_at": "2026-09-05T15:31:16Z"
+    }
+  ],
+  "academy_intro_lesson_03.json": [
+    {
+      "version": "v001",
+      "sha": "72c60112a6a056aa",
+      "file": "exports/academy/academy_intro_lesson_03_v001.json",
+      "generated_at": "2026-09-05T15:31:16Z"
+    }
+  ],
+  "academy_recommended_broker.md": [
+    {
+      "version": "v001",
+      "sha": "cc9bda3701804fd4",
+      "file": "exports/brokers/academy_recommended_broker_v001.md",
+      "generated_at": "2026-09-05T15:45:00Z"
+    }
+  ],
+  "academy_recommended_broker.json": [
+    {
+      "version": "v001",
+      "sha": "314a09d47e679261",
+      "file": "exports/brokers/academy_recommended_broker_v001.json",
+      "generated_at": "2026-09-05T15:45:00Z"
+    }
+  ],
+  "academy_intro_lesson_04.md": [
+    {
+      "version": "v001",
+      "sha": "c338d07b0c2718b4",
+      "file": "exports/academy/academy_intro_lesson_04_v001.md",
+      "generated_at": "2026-09-05T15:45:00Z"
+    },
+    {
+      "version": "v002",
+      "sha": "3a14f854161c7d93",
+      "file": "exports/academy/academy_intro_lesson_04_v002.md",
+      "generated_at": "2026-09-05T15:48:44Z"
+    }
+  ],
+  "academy_intro_lesson_04.json": [
+    {
+      "version": "v001",
+      "sha": "0413919ac8354641",
+      "file": "exports/academy/academy_intro_lesson_04_v001.json",
+      "generated_at": "2026-09-05T15:45:00Z"
+    },
+    {
+      "version": "v002",
+      "sha": "115796ebd5e90c80",
+      "file": "exports/academy/academy_intro_lesson_04_v002.json",
+      "generated_at": "2026-09-05T15:48:44Z"
+    }
+  ],
+  "academy_clarifications.md": [
+    {
+      "version": "v001",
+      "sha": "9eb3727659fdf2fc",
+      "file": "exports/academy/academy_clarifications_v001.md",
+      "generated_at": "2026-09-05T15:48:44Z"
+    },
+    {
+      "version": "v002",
+      "sha": "fffe724bb134b28f",
+      "file": "exports/academy/academy_clarifications_v002.md",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "f6ddedb46a1c7a5d",
+      "file": "exports/academy/academy_clarifications_v003.md",
+      "generated_at": "2026-09-05T20:50:22Z"
+    }
+  ],
+  "academy_clarifications.json": [
+    {
+      "version": "v001",
+      "sha": "fdee3403f53c4598",
+      "file": "exports/academy/academy_clarifications_v001.json",
+      "generated_at": "2026-09-05T15:48:44Z"
+    },
+    {
+      "version": "v002",
+      "sha": "39a74630a9888331",
+      "file": "exports/academy/academy_clarifications_v002.json",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "e8d770a3eb1de7d8",
+      "file": "exports/academy/academy_clarifications_v003.json",
+      "generated_at": "2026-09-05T20:50:22Z"
+    }
+  ],
+  "academy_intro_lesson_05.md": [
+    {
+      "version": "v001",
+      "sha": "06dfed3ddefc2322",
+      "file": "exports/academy/academy_intro_lesson_05_v001.md",
+      "generated_at": "2026-09-05T15:58:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "a52691a2264af45c",
+      "file": "exports/academy/academy_intro_lesson_05_v002.md",
+      "generated_at": "2026-09-05T16:04:40Z"
+    }
+  ],
+  "academy_intro_lesson_05.json": [
+    {
+      "version": "v001",
+      "sha": "12b6d4e114bd5bc1",
+      "file": "exports/academy/academy_intro_lesson_05_v001.json",
+      "generated_at": "2026-09-05T15:58:30Z"
+    },
+    {
+      "version": "v002",
+      "sha": "bd3b3fcebd2fc1dc",
+      "file": "exports/academy/academy_intro_lesson_05_v002.json",
+      "generated_at": "2026-09-05T16:04:40Z"
+    }
+  ],
+  "academy_intro_lesson_06.md": [
+    {
+      "version": "v001",
+      "sha": "af9ed487a54120eb",
+      "file": "exports/academy/academy_intro_lesson_06_v001.md",
+      "generated_at": "2026-09-05T16:21:51Z"
+    }
+  ],
+  "academy_intro_lesson_06.json": [
+    {
+      "version": "v001",
+      "sha": "072fd6a97e8b0bc5",
+      "file": "exports/academy/academy_intro_lesson_06_v001.json",
+      "generated_at": "2026-09-05T16:21:51Z"
+    }
+  ],
+  "academy_intro_lesson_07.md": [
+    {
+      "version": "v001",
+      "sha": "a07c456cd6084fb8",
+      "file": "exports/academy/academy_intro_lesson_07_v001.md",
+      "generated_at": "2026-09-05T16:34:20Z"
+    },
+    {
+      "version": "v002",
+      "sha": "7a236e5ec7c986b5",
+      "file": "exports/academy/academy_intro_lesson_07_v002.md",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "f4e1a730ad2314ed",
+      "file": "exports/academy/academy_intro_lesson_07_v003.md",
+      "generated_at": "2026-09-05T19:12:20Z"
+    }
+  ],
+  "academy_intro_lesson_07.json": [
+    {
+      "version": "v001",
+      "sha": "dda4fba677420a35",
+      "file": "exports/academy/academy_intro_lesson_07_v001.json",
+      "generated_at": "2026-09-05T16:34:20Z"
+    },
+    {
+      "version": "v002",
+      "sha": "f9d226227f5844c0",
+      "file": "exports/academy/academy_intro_lesson_07_v002.json",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "fbffc993a91d4337",
+      "file": "exports/academy/academy_intro_lesson_07_v003.json",
+      "generated_at": "2026-09-05T19:12:20Z"
+    }
+  ],
+  "academy_intro_lesson_08a.md": [
+    {
+      "version": "v001",
+      "sha": "8855b42b15d5ea41",
+      "file": "exports/academy/academy_intro_lesson_08a_v001.md",
+      "generated_at": "2026-09-05T16:39:10Z"
+    },
+    {
+      "version": "v002",
+      "sha": "1c44de4b2819b48f",
+      "file": "exports/academy/academy_intro_lesson_08a_v002.md",
+      "generated_at": "2026-09-05T17:33:17Z"
+    }
+  ],
+  "academy_intro_lesson_08a.json": [
+    {
+      "version": "v001",
+      "sha": "4f8248129e3c3e77",
+      "file": "exports/academy/academy_intro_lesson_08a_v001.json",
+      "generated_at": "2026-09-05T16:39:10Z"
+    },
+    {
+      "version": "v002",
+      "sha": "761cdf503e4e4388",
+      "file": "exports/academy/academy_intro_lesson_08a_v002.json",
+      "generated_at": "2026-09-05T17:33:17Z"
+    }
+  ],
+  "academy_intro_lesson_09.md": [
+    {
+      "version": "v001",
+      "sha": "e2123d3515def395",
+      "file": "exports/academy/academy_intro_lesson_09_v001.md",
+      "generated_at": "2026-09-05T16:52:14Z"
+    },
+    {
+      "version": "v002",
+      "sha": "a9319619f5fd4fd5",
+      "file": "exports/academy/academy_intro_lesson_09_v002.md",
+      "generated_at": "2026-09-05T19:11:35Z"
+    }
+  ],
+  "academy_intro_lesson_09.json": [
+    {
+      "version": "v001",
+      "sha": "2ff05237c2f3a722",
+      "file": "exports/academy/academy_intro_lesson_09_v001.json",
+      "generated_at": "2026-09-05T16:52:14Z"
+    },
+    {
+      "version": "v002",
+      "sha": "74e71c56f98fc74e",
+      "file": "exports/academy/academy_intro_lesson_09_v002.json",
+      "generated_at": "2026-09-05T19:11:35Z"
+    }
+  ],
+  "academy_intro_lesson_10.md": [
+    {
+      "version": "v001",
+      "sha": "8bc57d38a560a3c6",
+      "file": "exports/academy/academy_intro_lesson_10_v001.md",
+      "generated_at": "2026-09-05T16:59:38Z"
+    },
+    {
+      "version": "v002",
+      "sha": "52d7e8c52e4b4d7c",
+      "file": "exports/academy/academy_intro_lesson_10_v002.md",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "7d69dd6cf0de5866",
+      "file": "exports/academy/academy_intro_lesson_10_v003.md",
+      "generated_at": "2026-09-05T19:12:20Z"
+    }
+  ],
+  "academy_intro_lesson_10.json": [
+    {
+      "version": "v001",
+      "sha": "c633c05e7df99eae",
+      "file": "exports/academy/academy_intro_lesson_10_v001.json",
+      "generated_at": "2026-09-05T16:59:38Z"
+    },
+    {
+      "version": "v002",
+      "sha": "77c9122bf87c159a",
+      "file": "exports/academy/academy_intro_lesson_10_v002.json",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "7615362cf1af8d91",
+      "file": "exports/academy/academy_intro_lesson_10_v003.json",
+      "generated_at": "2026-09-05T19:12:20Z"
+    }
+  ],
+  "academy_intro_lesson_11.md": [
+    {
+      "version": "v001",
+      "sha": "c846713586953cec",
+      "file": "exports/academy/academy_intro_lesson_11_v001.md",
+      "generated_at": "2026-09-05T17:07:03Z"
+    }
+  ],
+  "academy_intro_lesson_11.json": [
+    {
+      "version": "v001",
+      "sha": "be19e9aa57f89401",
+      "file": "exports/academy/academy_intro_lesson_11_v001.json",
+      "generated_at": "2026-09-05T17:07:03Z"
+    }
+  ],
+  "academy_intro_lesson_12.md": [
+    {
+      "version": "v001",
+      "sha": "b3ed9be02ec5abcd",
+      "file": "exports/academy/academy_intro_lesson_12_v001.md",
+      "generated_at": "2026-09-05T17:33:17Z"
+    }
+  ],
+  "academy_intro_lesson_12.json": [
+    {
+      "version": "v001",
+      "sha": "ce0f43afa0d5565d",
+      "file": "exports/academy/academy_intro_lesson_12_v001.json",
+      "generated_at": "2026-09-05T17:33:17Z"
+    }
+  ],
+  "academy_intro_lesson_13.md": [
+    {
+      "version": "v001",
+      "sha": "014d178d37d3b28b",
+      "file": "exports/academy/academy_intro_lesson_13_v001.md",
+      "generated_at": "2026-09-05T17:37:41Z"
+    }
+  ],
+  "academy_intro_lesson_13.json": [
+    {
+      "version": "v001",
+      "sha": "72dbc9700c0b5aaf",
+      "file": "exports/academy/academy_intro_lesson_13_v001.json",
+      "generated_at": "2026-09-05T17:37:41Z"
+    }
+  ],
+  "academy_intro_lesson_14.md": [
+    {
+      "version": "v001",
+      "sha": "992957791d8d7a0b",
+      "file": "exports/academy/academy_intro_lesson_14_v001.md",
+      "generated_at": "2026-09-05T17:56:27Z"
+    }
+  ],
+  "academy_intro_lesson_14.json": [
+    {
+      "version": "v001",
+      "sha": "abd036bedd342df0",
+      "file": "exports/academy/academy_intro_lesson_14_v001.json",
+      "generated_at": "2026-09-05T17:56:27Z"
+    }
+  ],
+  "academy_intro_lesson_15.md": [
+    {
+      "version": "v001",
+      "sha": "acb831fec68ec22a",
+      "file": "exports/academy/academy_intro_lesson_15_v001.md",
+      "generated_at": "2026-09-05T18:06:26Z"
+    },
+    {
+      "version": "v002",
+      "sha": "e8eacd5abee83ac5",
+      "file": "exports/academy/academy_intro_lesson_15_v002.md",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "e7bccd0732b028a6",
+      "file": "exports/academy/academy_intro_lesson_15_v003.md",
+      "generated_at": "2026-09-05T21:53:01Z"
+    }
+  ],
+  "academy_intro_lesson_15.json": [
+    {
+      "version": "v001",
+      "sha": "2f7286fa60c89f42",
+      "file": "exports/academy/academy_intro_lesson_15_v001.json",
+      "generated_at": "2026-09-05T18:06:26Z"
+    },
+    {
+      "version": "v002",
+      "sha": "1aeac373e425da48",
+      "file": "exports/academy/academy_intro_lesson_15_v002.json",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "2248e05c3fa2bc0b",
+      "file": "exports/academy/academy_intro_lesson_15_v003.json",
+      "generated_at": "2026-09-05T21:53:01Z"
+    }
+  ],
+  "academy_intro_lesson_16.md": [
+    {
+      "version": "v001",
+      "sha": "8d71b629ea0ba6ea",
+      "file": "exports/academy/academy_intro_lesson_16_v001.md",
+      "generated_at": "2026-09-05T18:06:26Z"
+    },
+    {
+      "version": "v002",
+      "sha": "dc3ecd99bc6741bc",
+      "file": "exports/academy/academy_intro_lesson_16_v002.md",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "448c4a79ab499604",
+      "file": "exports/academy/academy_intro_lesson_16_v003.md",
+      "generated_at": "2026-09-05T21:53:01Z"
+    }
+  ],
+  "academy_intro_lesson_16.json": [
+    {
+      "version": "v001",
+      "sha": "97dc67320d878620",
+      "file": "exports/academy/academy_intro_lesson_16_v001.json",
+      "generated_at": "2026-09-05T18:06:26Z"
+    },
+    {
+      "version": "v002",
+      "sha": "5afb735f42e71edb",
+      "file": "exports/academy/academy_intro_lesson_16_v002.json",
+      "generated_at": "2026-09-05T19:11:35Z"
+    },
+    {
+      "version": "v003",
+      "sha": "8c3758e7f3796131",
+      "file": "exports/academy/academy_intro_lesson_16_v003.json",
+      "generated_at": "2026-09-05T21:53:01Z"
+    }
+  ],
+  "academy_intro_lesson_17.md": [
+    {
+      "version": "v001",
+      "sha": "f639d9d7c2b0468e",
+      "file": "exports/academy/academy_intro_lesson_17_v001.md",
+      "generated_at": "2026-09-05T18:45:38Z"
+    }
+  ],
+  "academy_intro_lesson_17.json": [
+    {
+      "version": "v001",
+      "sha": "51429bd0a810efa9",
+      "file": "exports/academy/academy_intro_lesson_17_v001.json",
+      "generated_at": "2026-09-05T18:45:38Z"
+    }
+  ],
+  "mentor_qa_pack_01.md": [
+    {
+      "version": "v001",
+      "sha": "45a8e9fa6b31c9df",
+      "file": "exports/mentor_qa/mentor_qa_pack_01_v001.md",
+      "generated_at": "2026-09-05T19:40:31Z"
+    },
+    {
+      "version": "v002",
+      "sha": "3cba7fb415f7158b",
+      "file": "exports/mentor_qa/mentor_qa_pack_01_v002.md",
+      "generated_at": "2026-09-05T20:50:22Z"
+    }
+  ],
+  "mentor_qa_pack_01.json": [
+    {
+      "version": "v001",
+      "sha": "4144603b98933d99",
+      "file": "exports/mentor_qa/mentor_qa_pack_01_v001.json",
+      "generated_at": "2026-09-05T19:40:31Z"
+    },
+    {
+      "version": "v002",
+      "sha": "562b449017de5798",
+      "file": "exports/mentor_qa/mentor_qa_pack_01_v002.json",
+      "generated_at": "2026-09-05T20:50:22Z"
+    }
+  ],
+  "mentor_qa_pack_02.md": [
+    {
+      "version": "v001",
+      "sha": "c3bef95c060b6833",
+      "file": "exports/mentor_qa/mentor_qa_pack_02_v001.md",
+      "generated_at": "2026-09-05T19:40:31Z"
+    }
+  ],
+  "mentor_qa_pack_02.json": [
+    {
+      "version": "v001",
+      "sha": "447710c22f45f9c6",
+      "file": "exports/mentor_qa/mentor_qa_pack_02_v001.json",
+      "generated_at": "2026-09-05T19:40:31Z"
+    }
+  ],
+  "academy_mentor_style.md": [
+    {
+      "version": "v001",
+      "sha": "3210efa2ccf8627e",
+      "file": "exports/academy/academy_mentor_style_v001.md",
+      "generated_at": "2026-09-05T19:40:31Z"
+    },
+    {
+      "version": "v002",
+      "sha": "261aaae783aa2a13",
+      "file": "exports/academy/academy_mentor_style_v002.md",
+      "generated_at": "2026-09-05T20:32:24Z"
+    }
+  ],
+  "academy_mentor_style.json": [
+    {
+      "version": "v001",
+      "sha": "bb2487274ed753ab",
+      "file": "exports/academy/academy_mentor_style_v001.json",
+      "generated_at": "2026-09-05T19:40:31Z"
+    },
+    {
+      "version": "v002",
+      "sha": "5e57bc9d40b612b1",
+      "file": "exports/academy/academy_mentor_style_v002.json",
+      "generated_at": "2026-09-05T20:32:24Z"
+    }
+  ],
+  "mentor_qa_pack_03.md": [
+    {
+      "version": "v001",
+      "sha": "ad51ca7caaea09bf",
+      "file": "exports/mentor_qa/mentor_qa_pack_03_v001.md",
+      "generated_at": "2026-09-05T20:32:24Z"
+    }
+  ],
+  "mentor_qa_pack_03.json": [
+    {
+      "version": "v001",
+      "sha": "de6933ea8b34a77c",
+      "file": "exports/mentor_qa/mentor_qa_pack_03_v001.json",
+      "generated_at": "2026-09-05T20:32:24Z"
+    }
+  ],
+  "mentor_qa_pack_04.md": [
+    {
+      "version": "v001",
+      "sha": "4b6d9d9c96fe6e48",
+      "file": "exports/mentor_qa/mentor_qa_pack_04_v001.md",
+      "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v002",
+      "sha": "660f247107303caa",
+      "file": "exports/mentor_qa/mentor_qa_pack_04_v002.md",
+      "generated_at": "2026-09-05T20:50:22Z"
+    }
+  ],
+  "mentor_qa_pack_04.json": [
+    {
+      "version": "v001",
+      "sha": "bf83b025a56c89a6",
+      "file": "exports/mentor_qa/mentor_qa_pack_04_v001.json",
+      "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v002",
+      "sha": "c1dfa0da960545a7",
+      "file": "exports/mentor_qa/mentor_qa_pack_04_v002.json",
+      "generated_at": "2026-09-05T20:50:22Z"
+    }
+  ],
+  "academy_tools.md": [
+    {
+      "version": "v001",
+      "sha": "c9c4eeee64eb068d",
+      "file": "exports/academy/academy_tools_v001.md",
+      "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v002",
+      "sha": "ca065ae4605d29d7",
+      "file": "exports/academy/academy_tools_v002.md",
+      "generated_at": "2026-09-05T20:50:22Z"
+    },
+    {
+      "version": "v003",
+      "sha": "d97002bebac4028d",
+      "file": "exports/academy/academy_tools_v003.md",
+      "generated_at": "2026-09-05T21:53:01Z"
+    }
+  ],
+  "academy_tools.json": [
+    {
+      "version": "v001",
+      "sha": "d655362f7ca06d86",
+      "file": "exports/academy/academy_tools_v001.json",
+      "generated_at": "2026-09-05T20:40:39Z"
+    },
+    {
+      "version": "v002",
+      "sha": "e3c82242180bb27e",
+      "file": "exports/academy/academy_tools_v002.json",
+      "generated_at": "2026-09-05T20:50:22Z"
+    },
+    {
+      "version": "v003",
+      "sha": "f7b731f2dc6d7b4d",
+      "file": "exports/academy/academy_tools_v003.json",
+      "generated_at": "2026-09-05T21:53:01Z"
+    }
+  ],
+  "academy_support_bot_policy.md": [
+    {
+      "version": "v001",
+      "sha": "dd1ad85b54d979bd",
+      "file": "exports/academy/academy_support_bot_policy_v001.md",
+      "generated_at": "2026-09-05T21:03:28Z"
+    },
+    {
+      "version": "v002",
+      "sha": "5a9767daf3eba638",
+      "file": "exports/academy/academy_support_bot_policy_v002.md",
+      "generated_at": "2026-09-05T21:53:01Z"
+    }
+  ],
+  "academy_support_bot_policy.json": [
+    {
+      "version": "v001",
+      "sha": "87bc97b0d459f0b9",
+      "file": "exports/academy/academy_support_bot_policy_v001.json",
+      "generated_at": "2026-09-05T21:03:28Z"
+    },
+    {
+      "version": "v002",
+      "sha": "4b3502c836fab443",
+      "file": "exports/academy/academy_support_bot_policy_v002.json",
+      "generated_at": "2026-09-05T21:53:01Z"
+    }
+  ],
+  "academy_support_bot_style.md": [
+    {
+      "version": "v001",
+      "sha": "d2ad6996b60ff7d7",
+      "file": "exports/academy/academy_support_bot_style_v001.md",
+      "generated_at": "2026-09-05T21:06:19Z"
+    }
+  ],
+  "academy_support_bot_style.json": [
+    {
+      "version": "v001",
+      "sha": "e9d29ef696ce84a2",
+      "file": "exports/academy/academy_support_bot_style_v001.json",
+      "generated_at": "2026-09-05T21:06:19Z"
+    }
+  ],
+  "academy_ssprox_faq.md": [
+    {
+      "version": "v001",
+      "sha": "69e6fb539b2019e7",
+      "file": "exports/academy/academy_ssprox_faq_v001.md",
+      "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v002",
+      "sha": "8d4ca8da9e2982ab",
+      "file": "exports/academy/academy_ssprox_faq_v002.md",
+      "generated_at": "2026-09-05T22:01:27Z"
+    }
+  ],
+  "academy_ssprox_faq.json": [
+    {
+      "version": "v001",
+      "sha": "2c59dd286917ad01",
+      "file": "exports/academy/academy_ssprox_faq_v001.json",
+      "generated_at": "2026-09-05T21:53:01Z"
+    },
+    {
+      "version": "v002",
+      "sha": "59d9f9831ae2891a",
+      "file": "exports/academy/academy_ssprox_faq_v002.json",
+      "generated_at": "2026-09-05T22:01:27Z"
+    }
+  ],
+  "academy_eq_lesson_01.md": [
+    {
+      "version": "v001",
+      "sha": "c46e70741b0eb083",
+      "file": "exports/academy/academy_eq_lesson_01_v001.md",
+      "generated_at": "2026-09-05T22:18:44Z"
+    },
+    {
+      "version": "v002",
+      "sha": "227f9f40c37e2c18",
+      "file": "exports/academy/academy_eq_lesson_01_v002.md",
+      "generated_at": "2026-09-05T22:23:47Z"
+    }
+  ],
+  "academy_eq_lesson_01.json": [
+    {
+      "version": "v001",
+      "sha": "e25176c03f3677ed",
+      "file": "exports/academy/academy_eq_lesson_01_v001.json",
+      "generated_at": "2026-09-05T22:18:44Z"
+    },
+    {
+      "version": "v002",
+      "sha": "1acf3446c0dc5c6e",
+      "file": "exports/academy/academy_eq_lesson_01_v002.json",
+      "generated_at": "2026-09-05T22:23:47Z"
+    }
+  ],
+  "academy_eq_lesson_02.md": [
+    {
+      "version": "v001",
+      "sha": "bf0bf0ac2d1244cd",
+      "file": "exports/academy/academy_eq_lesson_02_v001.md",
+      "generated_at": "2026-09-05T22:23:47Z"
+    }
+  ],
+  "academy_eq_lesson_02.json": [
+    {
+      "version": "v001",
+      "sha": "b3e05c0858c0af69",
+      "file": "exports/academy/academy_eq_lesson_02_v001.json",
+      "generated_at": "2026-09-05T22:23:47Z"
+    }
+  ],
+  "academy_eq_lesson_03.md": [
+    {
+      "version": "v001",
+      "sha": "a4147c9f6aa7afbe",
+      "file": "exports/academy/academy_eq_lesson_03_v001.md",
+      "generated_at": "2026-09-05T22:31:01Z"
+    }
+  ],
+  "academy_eq_lesson_03.json": [
+    {
+      "version": "v001",
+      "sha": "8a656ea217962867",
+      "file": "exports/academy/academy_eq_lesson_03_v001.json",
+      "generated_at": "2026-09-05T22:31:01Z"
+    }
+  ],
+  "academy_eq_lesson_04.md": [
+    {
+      "version": "v001",
+      "sha": "4c4406ffe92b0c72",
+      "file": "exports/academy/academy_eq_lesson_04_v001.md",
+      "generated_at": "2026-09-05T22:37:51Z"
+    },
+    {
+      "version": "v002",
+      "sha": "8b46a10417772a9c",
+      "file": "exports/academy/academy_eq_lesson_04_v002.md",
+      "generated_at": "2026-09-06T08:32:12Z"
+    }
+  ],
+  "academy_eq_lesson_04.json": [
+    {
+      "version": "v001",
+      "sha": "0cf9cde9ac96e35e",
+      "file": "exports/academy/academy_eq_lesson_04_v001.json",
+      "generated_at": "2026-09-05T22:37:51Z"
+    },
+    {
+      "version": "v002",
+      "sha": "afe3b89e05f18eeb",
+      "file": "exports/academy/academy_eq_lesson_04_v002.json",
+      "generated_at": "2026-09-06T08:32:12Z"
+    }
+  ]
+}

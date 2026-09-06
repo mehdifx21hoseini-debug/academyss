@@ -1,0 +1,650 @@
+{
+  "collection_id": "academy_intro_lesson_15",
+  "domain": "academy",
+  "title": "دوره مقدماتی — جلسه ۱۵: واریز و برداشت با تتر",
+  "description": "ارتباط با پشتیبانی بروکر، روش‌های واریز و برداشت، تتر و کیف پول، امنیت عبارت بازیابی، شبکه‌ی TRC20 و کارمزد، و مسیر کامل واریز و برداشت.",
+  "version": "v001",
+  "generated_at": "2026-09-05T21:52:41Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "raw_sources/academy/intro/intro_lesson_15.md",
+    "raw_sources/academy/intro/intro_lesson_15.ingest.json"
+  ],
+  "notes": [
+    "پرسش‌های واقعی واریز/برداشت طبق ACA-RULE-0003 به پشتیبانی انسانی ارجاع داده می‌شوند؛ این رکوردها فقط توضیح فرایندند.",
+    "طبق تصمیم D-0016 این محتوا جزو ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی نیست؛ قبلاً در دوره بوده و اکنون به‌عنوان رویه‌ی کار با بروکر نگهداری می‌شود.",
+    "همه‌ی اعداد (کارمزد، قیمت کیف پول سخت‌افزاری، ساعت پاسخ‌گویی) زمان‌مند علامت خورده‌اند.",
+    "مزیت مدیر حساب مربوط به ثبت‌نام از طریق لینک معرف است و شفاف ثبت شد."
+  ],
+  "objects": [
+    {
+      "id": "ACA-INT-0222",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "category": "رویه‌های کار با بروکر — خارج از ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی (D-0016)",
+      "title": "دو راه ارتباط با پشتیبانی بروکر",
+      "language": "fa",
+      "chunk_text": "دو مسیر رسمی برای ارتباط با بروکر: (۱) ارسال تیکت از کابین معاملاتی — وارد کابین شوید، در پایین صفحه گزینه‌ی پشتیبانی و سپس «باز کردن تیکت» را بزنید و سؤالتان را بپرسید؛ (۲) ایمیل به آدرس پشتیبانی بروکر. مدرس می‌گوید پاسخ در سریع‌ترین زمان داده می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_15.md",
+        "source_location": "بخش ۱",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۵",
+        "section": "بخش ۱",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "راه اول: ارسال تیکت از کابین معاملاتی … قسمت پایین، گزینه پشتیبانی رو بزنید، باز کردن تیکت رو بزنید … راه دوم: از طریق ایمیل."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T21:52:41Z",
+      "updated_at": "2026-09-05T21:52:41Z",
+      "steps": [
+        "وارد کابین معاملاتی بروکر شوید.",
+        "در پایین صفحه گزینه‌ی پشتیبانی را بزنید.",
+        "«باز کردن تیکت» را انتخاب و پرسش خود را ثبت کنید.",
+        "یا همان پرسش را به ایمیل پشتیبانی بروکر بفرستید."
+      ],
+      "warnings": [
+        "پرسش‌های واقعی واریز/برداشت طبق ACA-RULE-0003 به پشتیبانی انسانی ارجاع داده می‌شوند."
+      ],
+      "keywords": [
+        "تیکت",
+        "پشتیبانی بروکر",
+        "کابین معاملاتی",
+        "ایمیل"
+      ],
+      "related_concepts": [
+        "ACA-INT-0223",
+        "ACA-RULE-0003",
+        "BRK-FACT-0001"
+      ],
+      "related_questions": [
+        "چطور با بروکر تماس بگیرم؟",
+        "تیکت چطور باز کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0223",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "category": "رویه‌های کار با بروکر — خارج از ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی (D-0016)",
+      "title": "مدیر حساب اختصاصی برای ثبت‌نام از طریق لینک معرف",
+      "language": "fa",
+      "chunk_text": "مدرس می‌گوید اگر از طریق لینک معرف او ثبت‌نام کنید، همان مدیر حسابی که مدیر حساب خودش است مدیر حساب شما هم می‌شود، از قبرس با شما تماس می‌گیرد و راهنمایی می‌کند؛ و اگر جایی به مشکل خوردید، خودش پیگیری می‌کند. ساعت پاسخ‌گویی مدیر حساب که اعلام می‌شود: دوشنبه تا جمعه، ۹:۳۰ صبح تا ۱۶:۳۰ عصر به وقت ایران؛ در کنار آن پشتیبانی ۲۴ ساعته هم وجود دارد.\n⚠️ این یک مزیت مربوط به ثبت‌نام از طریق لینک معرف است؛ مربی باید آن را به‌همین صورت شفاف بیان کند و آن را به‌عنوان توصیه‌ی مالی ارائه ندهد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_15.md",
+        "source_location": "بخش ۱",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۵",
+        "section": "بخش ۱",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "اگر از طریق لینک من ثبت‌نام کنید، مدیر حساب خود من، مدیر حساب شما می‌شود. از کشور قبرس با شما تماس می‌گیرد … ساعت پاسخگویی مدیر حساب: دوشنبه تا جمعه، ۹:۳۰ صبح تا ۱۶:۳۰ عصر به وقت ایران"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "BROKER_SPECIFIC",
+      "platform_scope": "BROKER_DEPENDENT",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T21:52:41Z",
+      "updated_at": "2026-09-05T21:52:41Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "validity": {
+        "time_bound": true,
+        "as_of": "زمان ضبط دوره",
+        "note": "ساعت پاسخ‌گویی و شرایط معرف ممکن است تغییر کرده باشد."
+      },
+      "warnings": [
+        "مزیت مربوط به لینک معرف است و باید شفاف بیان شود.",
+        "ساعت‌ها و شرایط زمان‌مندند؛ پیش از اتکا باید با بروکر بررسی شوند.",
+        "پرسش‌های واقعی واریز/برداشت طبق ACA-RULE-0003 به پشتیبانی انسانی ارجاع داده می‌شوند."
+      ],
+      "keywords": [
+        "مدیر حساب",
+        "لینک معرف",
+        "قبرس",
+        "ساعت پاسخگویی"
+      ],
+      "related_concepts": [
+        "BRK-FACT-0001",
+        "ACA-INT-0222",
+        "ACA-RULE-0003"
+      ],
+      "related_questions": [
+        "مدیر حساب چیه؟",
+        "از لینک شما ثبت‌نام کنم چی می‌شه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0224",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "رویه‌های کار با بروکر — خارج از ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی (D-0016)",
+      "title": "روش‌های واریز و برداشت: داخل و خارج ایران",
+      "language": "fa",
+      "chunk_text": "مدرس روش‌ها را دو دسته می‌کند. برای افراد خارج از ایران: کارت بانکی، پی‌پل، مسترکارت و ویزاکارت. برای افراد داخل ایران: وب‌مانی و پرفکت مانی (که آن‌ها را قدیمی می‌داند)، واریز ریالی از طریق کارگزاری بروکر (که توصیه نمی‌کند)، و تتر که آن را بهترین روش می‌داند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_15.md",
+        "source_location": "بخش ۲",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۵",
+        "section": "بخش ۲",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "برای افراد خارج از ایران: کارت بانکی، پی‌پل، مسترکارت، ویزاکارت. برای افراد داخل ایران: وب‌مانی (قدیمی)، پرفکت مانی (قدیمی)، واریز ریالی از طریق کارگزاری بروکر (توصیه نمی‌شود)، تتر (بهترین روش)."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T21:52:41Z",
+      "updated_at": "2026-09-05T21:52:41Z",
+      "validity": {
+        "time_bound": true,
+        "note": "در دسترس بودن هر روش به بروکر و شرایط روز بستگی دارد."
+      },
+      "warnings": [
+        "فهرست روش‌ها زمان‌مند و وابسته به بروکر است.",
+        "پرسش‌های واقعی واریز/برداشت طبق ACA-RULE-0003 به پشتیبانی انسانی ارجاع داده می‌شوند."
+      ],
+      "keywords": [
+        "واریز",
+        "برداشت",
+        "پی‌پل",
+        "پرفکت مانی",
+        "وب‌مانی",
+        "ریالی",
+        "تتر"
+      ],
+      "related_concepts": [
+        "ACA-INT-0225",
+        "ACA-INT-0239",
+        "BRK-FACT-0001"
+      ],
+      "related_questions": [
+        "چطور پول واریز کنم؟",
+        "کدوم روش واریز بهتره؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0225",
+      "object_type": "DEFINITION",
+      "domain": "academy",
+      "category": "رویه‌های کار با بروکر — خارج از ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی (D-0016)",
+      "title": "تتر (USDT) چیست",
+      "language": "fa",
+      "chunk_text": "تتر یک استیبل‌کوین است — به تعبیر مدرس «دلار مجازی». ویژگی‌هایی که برمی‌شمارد: هر ۱ تتر برابر ۱ دلار است، ارزش ثابت دارد و نوسان نمی‌کند، کمترین کارمزد را دارد، سریع‌ترین روش جابه‌جایی است، نقدشوندگی بالایی دارد و همه‌جا پشتیبانی می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_15.md",
+        "source_location": "بخش ۳",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۵",
+        "section": "بخش ۳",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "تتر = دلار مجازی (استیبل‌کوین). هر ۱ تتر = ۱ دلار. ارزش ثابت دارد (نوسان ندارد). پایین‌ترین کارمزد را دارد. سریع‌ترین روش جابه‌جایی. نقدشوندگی بالا."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T21:52:41Z",
+      "updated_at": "2026-09-05T21:52:41Z",
+      "definition": "تتر (USDT): استیبل‌کوینی که ارزشش به دلار آمریکا متصل است.",
+      "keywords": [
+        "تتر",
+        "USDT",
+        "استیبل کوین",
+        "دلار مجازی"
+      ],
+      "related_concepts": [
+        "ACA-INT-0229",
+        "ACA-INT-0224"
+      ],
+      "related_questions": [
+        "تتر چیه؟",
+        "چرا تتر؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0226",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "رویه‌های کار با بروکر — خارج از ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی (D-0016)",
+      "title": "کیف پول نرم‌افزاری و سخت‌افزاری",
+      "language": "fa",
+      "chunk_text": "برای نگهداری تتر به کیف پول نیاز است و دو نوع معرفی می‌شود:\n• نرم‌افزاری — روی گوشی. پیشنهاد مدرس: Trust Wallet؛ رایگان است و باید فقط از منابع رسمی (اپ‌استور یا گوگل‌پلی) نصب شود.\n• سخت‌افزاری — حدود ۲۰۰ دلار هزینه دارد، امنیت بیشتری می‌دهد و برای حجم‌های بالا مناسب‌تر است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_15.md",
+        "source_location": "بخش ۴",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۵",
+        "section": "بخش ۴",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "الف) کیف پول نرم‌افزاری … توصیه: Trust Wallet … نصب از اپ‌استور یا گوگل‌پلی (فقط از منابع رسمی) … ب) کیف پول سخت‌افزاری: هزینه حدود ۲۰۰ دلار، امنیت بیشتر."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T21:52:41Z",
+      "updated_at": "2026-09-05T21:52:41Z",
+      "validity": {
+        "time_bound": true,
+        "note": "قیمت کیف پول سخت‌افزاری مربوط به زمان ضبط است."
+      },
+      "warnings": [
+        "نصب کیف پول فقط از منابع رسمی؛ نسخه‌های جعلی رایج‌ترین راه سرقت دارایی‌اند."
+      ],
+      "keywords": [
+        "کیف پول",
+        "Trust Wallet",
+        "کیف پول سخت‌افزاری",
+        "wallet"
+      ],
+      "related_concepts": [
+        "ACA-INT-0227",
+        "ACA-INT-0228"
+      ],
+      "related_questions": [
+        "کدوم کیف پول رو نصب کنم؟",
+        "کیف پول سخت‌افزاری لازمه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0227",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "رویه‌های کار با بروکر — خارج از ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی (D-0016)",
+      "title": "۱۲ کلمه‌ی بازیابی (Seed Phrase) را به هیچ‌کس نده",
+      "language": "fa",
+      "chunk_text": "هنگام ساخت کیف پول، ۱۲ کلمه‌ی بازیابی داده می‌شود. تأکید درس: این کلمات را دقیقاً به ترتیب یادداشت کنید، در جای بسیار امن نگه دارید و به هیچ‌کس نشان ندهید — هر کسی به این کلمات دسترسی داشته باشد به کل دارایی شما دسترسی دارد.\nاین قاعده برای مربی مطلق است: مربی هرگز از دانشجو عبارت بازیابی، رمز یا اطلاعات حساب نمی‌خواهد و اگر دانشجو آن را فرستاد، باید فوراً هشدار دهد که کیف پول را سوخته فرض کند و دارایی را به کیف پول جدید منتقل کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_15.md",
+        "source_location": "بخش ۵",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۵",
+        "section": "بخش ۵",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "هنگام ساخت کیف پول، ۱۲ کلمه بازیابی (Seed Phrase) به شما داده می‌شود … به هیچکس نشان ندهید. هر کسی به این کلمات دسترسی داشته باشد، به کل دارایی شما دسترسی دارد."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T21:52:41Z",
+      "updated_at": "2026-09-05T21:52:41Z",
+      "rule": "۱۲ کلمه‌ی بازیابی هرگز با کسی — از جمله مربی، پشتیبانی و بروکر — در میان گذاشته نمی‌شود.",
+      "warnings": [
+        "مربی تحت هیچ شرایطی عبارت بازیابی یا رمز حساب را از دانشجو نمی‌خواهد.",
+        "اگر دانشجو عبارت بازیابی را جایی وارد یا ارسال کرده، باید بلافاصله دارایی را به کیف پول تازه منتقل کند."
+      ],
+      "keywords": [
+        "seed phrase",
+        "۱۲ کلمه",
+        "امنیت",
+        "بازیابی",
+        "کلاهبرداری"
+      ],
+      "related_concepts": [
+        "ACA-INT-0226",
+        "ACA-RULE-0003",
+        "ACA-INT-0021"
+      ],
+      "related_questions": [
+        "۱۲ کلمه چیه؟",
+        "کیف پولم هک شده چیکار کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0228",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "category": "رویه‌های کار با بروکر — خارج از ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی (D-0016)",
+      "title": "خرید تتر از صرافی و انتقال به کیف پول شخصی",
+      "language": "fa",
+      "chunk_text": "مسیری که درس می‌دهد: وارد صرافی معتبر شوید، احراز هویت کنید، مبلغ ریالی واریز کنید، تتر بخرید، شبکه‌ی TRC20 را انتخاب کنید و تتر را به آدرس کیف پول شخصی خود منتقل کنید.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_15.md",
+        "source_location": "بخش ۶",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۵",
+        "section": "بخش ۶",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱. وارد صرافی شوید ۲. احراز هویت کنید ۳. مبلغ ریالی واریز کنید ۴. تتر (USDT) بخرید ۵. شبکه TRC20 را انتخاب کنید (کارمزد پایین) ۶. تتر را به آدرس کیف پول خود انتقال دهید"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T21:52:41Z",
+      "updated_at": "2026-09-05T21:52:41Z",
+      "steps": [
+        "وارد حساب صرافی شوید و احراز هویت را کامل کنید.",
+        "مبلغ ریالی را به صرافی واریز کنید.",
+        "تتر (USDT) بخرید.",
+        "هنگام برداشت، شبکه‌ی TRC20 را انتخاب کنید.",
+        "آدرس کیف پول شخصی خود را وارد و انتقال را انجام دهید."
+      ],
+      "warnings": [
+        "طبق ACA-RULE-0004 مربی نام هیچ صرافی‌ای را نمی‌برد؛ نامی که در متن درس آمده توصیه‌ی آکادمی نیست.",
+        "وضعیت صرافی‌ها زمان‌مند است؛ جلسه‌ی ۱۶ هشدار جداگانه دارد (ACA-INT-0237).",
+        "پرسش‌های واقعی واریز/برداشت طبق ACA-RULE-0003 به پشتیبانی انسانی ارجاع داده می‌شوند."
+      ],
+      "keywords": [
+        "خرید تتر",
+        "صرافی",
+        "والکس",
+        "احراز هویت",
+        "TRC20"
+      ],
+      "related_concepts": [
+        "ACA-INT-0229",
+        "ACA-INT-0237",
+        "ACA-INT-0238"
+      ],
+      "related_questions": [
+        "تتر رو از کجا بخرم؟",
+        "چطور تتر بخرم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0229",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "رویه‌های کار با بروکر — خارج از ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی (D-0016)",
+      "title": "شبکه‌ی TRC20 و نیاز به ترون (TRX) برای کارمزد",
+      "language": "fa",
+      "chunk_text": "انتقال تتر در این آموزش روی شبکه‌ی TRC20 (بلاک‌چین ترون) انجام می‌شود، چون کارمزد پایین و سرعت بالایی دارد. نکته‌ی عملی مهم: برای پرداخت کارمزد باید مقداری ترون (TRX) در کیف پول داشته باشید، وگرنه هنگام انتقال می‌مانید. اعدادی که مدرس می‌گوید: کارمزد حدود ۱ تا ۴ دلار (معادل ۳ تا ۶ ترون)، و این کارمزد به مبلغ تراکنش بستگی ندارد.\n⚠️ اعداد کارمزد و معادل ترونی آن‌ها زمان‌مندند و با قیمت TRX تغییر می‌کنند؛ مربی باید آن‌ها را به‌عنوان «عدد زمان ضبط» بگوید، نه نرخ روز.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_15.md",
+        "source_location": "بخش ۷",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۵",
+        "section": "بخش ۷",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "برای انتقال تتر روی شبکه TRC20، به مقداری ترون (TRX) برای کارمزد نیاز دارید. … حدود ۱ تا ۴ دلار (معادل ۳ تا ۶ ترون) … حتی برای مبالغ بالا، کارمزد همان ۱ تا ۴ دلار است"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T21:52:41Z",
+      "updated_at": "2026-09-05T21:52:41Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "validity": {
+        "time_bound": true,
+        "as_of": "زمان ضبط دوره",
+        "illustrative_numbers": true,
+        "note": "کارمزد شبکه و معادل ترونی آن با قیمت TRX تغییر می‌کند."
+      },
+      "warnings": [
+        "اعداد کارمزد نرخ روز نیستند و نباید به‌عنوان قیمت فعلی گفته شوند."
+      ],
+      "keywords": [
+        "TRC20",
+        "ترون",
+        "TRX",
+        "کارمزد",
+        "شبکه"
+      ],
+      "related_concepts": [
+        "ACA-INT-0225",
+        "ACA-INT-0228",
+        "ACA-INT-0230"
+      ],
+      "related_questions": [
+        "چرا انتقالم انجام نشد؟",
+        "TRX برای چیه؟",
+        "کارمزد تتر چقدره؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0230",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "category": "رویه‌های کار با بروکر — خارج از ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی (D-0016)",
+      "title": "واریز تتر به بروکر",
+      "language": "fa",
+      "chunk_text": "مسیر واریز به روایت درس: تتر را از صرافی به کیف پول شخصی خود منتقل کنید، سپس از کیف پول به آدرس بروکر ارسال کنید، حتماً از شبکه‌ی TRC20 استفاده کنید و بعد از ارسال از تراکنش اسکرین‌شات بگیرید. در نسخه‌ی ساختاریافته دو نکته‌ی عملی هم اضافه شده: آدرس مقصد را دقیقاً کپی‌پیست کنید و هرگز دستی تایپ نکنید.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_15.md",
+        "source_location": "بخش ۸ و بخش ۹ (نکات کلیدی)",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۵",
+        "section": "بخش ۸ و بخش ۹ (نکات کلیدی)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱. تتر را از صرافی به کیف پول شخصی خود (Trust Wallet) انتقال دهید ۲. از کیف پول، تتر را به آدرس بروکر ارسال کنید ۳. حتماً از شبکه TRC20 استفاده کنید ۴. بعد از ارسال، از تراکنش اسکرین‌شات بگیرید … آدرس مقصد را دقیق کپی‌پیست کنید (دستی تایپ نکنید)"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T21:52:41Z",
+      "updated_at": "2026-09-05T21:52:41Z",
+      "steps": [
+        "تتر را از صرافی به کیف پول شخصی منتقل کنید.",
+        "آدرس واریز بروکر را از کابین معاملاتی کپی کنید (هرگز دستی تایپ نکنید).",
+        "شبکه‌ی TRC20 را انتخاب کنید.",
+        "مبلغ را وارد و ارسال را تأیید کنید.",
+        "بلافاصله از تراکنش اسکرین‌شات بگیرید."
+      ],
+      "warnings": [
+        "اشتباه در آدرس یا انتخاب شبکه‌ی نادرست معمولاً غیرقابل بازگشت است.",
+        "پرسش‌های واقعی واریز/برداشت طبق ACA-RULE-0003 به پشتیبانی انسانی ارجاع داده می‌شوند."
+      ],
+      "keywords": [
+        "واریز به بروکر",
+        "آدرس واریز",
+        "کپی پیست",
+        "TRC20"
+      ],
+      "related_concepts": [
+        "ACA-INT-0229",
+        "ACA-INT-0231",
+        "ACA-INT-0232"
+      ],
+      "related_questions": [
+        "چطور به بروکر واریز کنم؟",
+        "آدرس رو دستی بزنم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0231",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "category": "رویه‌های کار با بروکر — خارج از ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی (D-0016)",
+      "title": "اسکرین‌شات تراکنش و تأیید در بروکر",
+      "language": "fa",
+      "chunk_text": "بعد از ارسال تتر: در کیف پول روی تراکنش کلیک کنید، گزینه‌ی View on Explorer را بزنید و اسکرین‌شاتی بگیرید که آدرس مبدأ، آدرس مقصد، مبلغ و شناسه‌ی تراکنش در آن پیدا باشد. سپس اسکرین‌شات را در بروکر آپلود کنید؛ در ساعت پاسخ‌گویی (یا پشتیبانی ۲۴ ساعته) بررسی و تأیید می‌شود و حساب شارژ می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_15.md",
+        "source_location": "بخش ۹",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۵",
+        "section": "بخش ۹",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱. در کیف پول، روی تراکنش کلیک کنید ۲. گزینه View on Explorer را بزنید ۳. اسکرین‌شات بگیرید (آدرس مبدأ، آدرس مقصد، مبلغ و شناسه تراکنش مشخص باشد) ۴. در بروکر، اسکرین‌شات را آپلود کنید"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T21:52:41Z",
+      "updated_at": "2026-09-05T21:52:41Z",
+      "steps": [
+        "در کیف پول روی تراکنش انجام‌شده بزنید.",
+        "گزینه‌ی View on Explorer را باز کنید.",
+        "اسکرین‌شاتی بگیرید که آدرس مبدأ و مقصد، مبلغ و شناسه‌ی تراکنش در آن دیده شود.",
+        "اسکرین‌شات را در کابین بروکر آپلود کنید.",
+        "منتظر بررسی و تأیید بمانید تا حساب شارژ شود."
+      ],
+      "warnings": [
+        "پرسش‌های واقعی واریز/برداشت طبق ACA-RULE-0003 به پشتیبانی انسانی ارجاع داده می‌شوند."
+      ],
+      "keywords": [
+        "اسکرین‌شات",
+        "View on Explorer",
+        "شناسه تراکنش",
+        "تأیید واریز"
+      ],
+      "related_concepts": [
+        "ACA-INT-0230",
+        "ACA-INT-0222"
+      ],
+      "related_questions": [
+        "واریزم تأیید نشده چیکار کنم؟",
+        "چه اسکرین‌شاتی بفرستم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0232",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "رویه‌های کار با بروکر — خارج از ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی (D-0016)",
+      "title": "برداشت فقط از همان مسیری که واریز کرده‌اید",
+      "language": "fa",
+      "chunk_text": "قاعده‌ای که مدرس دو بار تکرار می‌کند: از هر طریقی که واریز کنید، از همان طریق می‌توانید برداشت کنید. مسیر برداشت: درخواست برداشت به همان آدرسی که از آن واریز کرده‌اید، تتر به کیف پول شما می‌آید، و از کیف پول می‌توانید به صرافی یا شخص دیگر منتقل کنید.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_15.md",
+        "source_location": "بخش ۸ و بخش ۱۰",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۵",
+        "section": "بخش ۸ و بخش ۱۰",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "از هر طریقی واریز کنید، از همان طریق می‌توانید برداشت کنید. … فقط از همان روشی که واریز کرده‌اید، می‌توانید برداشت کنید."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T21:52:41Z",
+      "updated_at": "2026-09-05T21:52:41Z",
+      "rule": "برداشت باید از همان روش و همان آدرسی انجام شود که واریز از آن انجام شده است.",
+      "warnings": [
+        "پرسش‌های واقعی واریز/برداشت طبق ACA-RULE-0003 به پشتیبانی انسانی ارجاع داده می‌شوند."
+      ],
+      "keywords": [
+        "برداشت",
+        "همان مسیر",
+        "آدرس برداشت"
+      ],
+      "related_concepts": [
+        "ACA-INT-0230",
+        "ACA-INT-0224",
+        "ACA-RULE-0003"
+      ],
+      "related_questions": [
+        "می‌تونم با روش دیگه برداشت کنم؟",
+        "چطور برداشت بزنم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0233",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "category": "رویه‌های کار با بروکر — خارج از ۱۵ جلسه‌ی رسمی دوره‌ی مقدماتی (D-0016)",
+      "title": "جمع‌بندی هفت‌مرحله‌ای مسیر واریز",
+      "language": "fa",
+      "chunk_text": "خلاصه‌ی کل مسیر در هفت مرحله: نصب کیف پول (Trust Wallet) ← خرید تتر از صرافی ← تهیه‌ی مقداری TRX برای کارمزد ← انتقال تتر به کیف پول شخصی ← انتقال از کیف پول به بروکر ← ارسال اسکرین‌شات به بروکر ← تأیید و شارژ حساب.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_15.md",
+        "source_location": "بخش ۱۱",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۵",
+        "section": "بخش ۱۱",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱ نصب Trust Wallet ۲ خرید تتر از صرافی (والکس و...) ۳ خرید مقداری TRX برای کارمزد ۴ انتقال تتر به کیف پول شخصی ۵ انتقال تتر از کیف پول به بروکر ۶ ارسال اسکرین‌شات به بروکر ۷ تأیید و شارژ حساب"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T21:52:41Z",
+      "updated_at": "2026-09-05T21:52:41Z",
+      "steps": [
+        "کیف پول نرم‌افزاری را از منبع رسمی نصب کنید.",
+        "از صرافی تتر بخرید.",
+        "مقداری TRX برای کارمزد تهیه کنید.",
+        "تتر را به کیف پول شخصی منتقل کنید.",
+        "از کیف پول به آدرس بروکر منتقل کنید.",
+        "اسکرین‌شات تراکنش را برای بروکر بفرستید.",
+        "پس از تأیید، حساب شارژ می‌شود."
+      ],
+      "warnings": [
+        "پرسش‌های واقعی واریز/برداشت طبق ACA-RULE-0003 به پشتیبانی انسانی ارجاع داده می‌شوند."
+      ],
+      "keywords": [
+        "جمع‌بندی",
+        "مراحل واریز",
+        "چک‌لیست"
+      ],
+      "related_concepts": [
+        "ACA-INT-0228",
+        "ACA-INT-0230",
+        "ACA-INT-0231"
+      ],
+      "related_questions": [
+        "خلاصه مراحل واریز چیه؟"
+      ]
+    }
+  ]
+}

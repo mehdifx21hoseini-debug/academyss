@@ -1,0 +1,32 @@
+{
+  "report_type": "validation",
+  "version": "v034",
+  "generated_at": "2026-09-05T17:07:03Z",
+  "stats": {
+    "files": 30,
+    "objects": 425,
+    "by_kind": {
+      "knowledge_object": 28,
+      "conflict_record": 1,
+      "review_item": 1
+    },
+    "by_domain": {
+      "brokers": 3,
+      "psychology": 27,
+      "metatrader": 102,
+      "general_trading": 49,
+      "academy": 237,
+      "mentor_qa": 1,
+      "meta": 6
+    },
+    "by_approval": {
+      "REVIEW_REQUIRED": 12,
+      "PENDING_VERIFICATION": 172,
+      "PENDING_REVIEW": 209,
+      "APPROVED": 10
+    }
+  },
+  "errors": 0,
+  "warnings": 0,
+  "findings": []
+}

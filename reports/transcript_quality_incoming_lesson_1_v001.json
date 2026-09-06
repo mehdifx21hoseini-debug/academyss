@@ -1,0 +1,35 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "incoming_lesson_1",
+  "course": "incoming",
+  "lesson": "1",
+  "title": null,
+  "original_filename": "c61ab255-4_5803142338981140486_________1.srt",
+  "raw_file": "raw_sources/academy/incoming/incoming_lesson_1.srt",
+  "ingested_at": "2026-09-05T13:45:31Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 120,
+    "filler_cues": 120,
+    "speech_cues": 0,
+    "speech_ratio": 0.0,
+    "words": 0,
+    "unique_words": 0,
+    "duration_seconds": 2906.6,
+    "duration_hhmm": "00:48",
+    "top_repeated_lines": [
+      {
+        "text": "موسیقی",
+        "count": 119
+      },
+      {
+        "text": "موسیقی موسیقی",
+        "count": 1
+      }
+    ]
+  },
+  "verdict": "UNUSABLE",
+  "verdict_reason": "متن گفتاری قابل استفاده‌ای در فایل وجود ندارد.",
+  "report_type": "transcript_quality",
+  "version": "v001"
+}

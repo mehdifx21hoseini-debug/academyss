@@ -1,0 +1,606 @@
+{
+  "collection_id": "academy_intro_lesson_11",
+  "domain": "academy",
+  "title": "دوره مقدماتی — جلسه ۱۱: پرایس اکشن چیست",
+  "description": "تعریف رسمی پرایس اکشن در آکادمی، جایگاه آن میان انواع تحلیل، روش کار، قانون شصت‌چهل، مزایا، پنج جزء موفقیت و باورهای غلط رایج.",
+  "version": "v001",
+  "generated_at": "2026-09-05T17:06:46Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "raw_sources/academy/intro/intro_lesson_11.md",
+    "raw_sources/academy/intro/intro_lesson_11.ingest.json"
+  ],
+  "notes": [
+    "اعداد ۶۰/۴۰ و ۷۰٪ مدل ذهنی و تأکید بیانی مدرس‌اند و به‌عنوان آمار ثبت نشده‌اند.",
+    "این جلسه «اسپایک، کانال قیمتی، تریدینگ رنج» را ذیل ماهیت/ساختار مارکت می‌آورد — شاهد تازه برای CONF-0002 و RQ-0015.",
+    "قسمت دوم جلسه ۸ (پین‌بار) هنوز دریافت نشده است."
+  ],
+  "objects": [
+    {
+      "id": "ACA-INT-0177",
+      "object_type": "DEFINITION",
+      "domain": "academy",
+      "title": "پرایس اکشن چیست",
+      "language": "fa",
+      "chunk_text": "پرایس اکشن یعنی روش معامله‌گری بر اساس حرکات خود قیمت: تحلیل تکنیکی حرکات قیمت، بدون تکیه بر اندیکاتورها یا سیستم‌های پیچیده. اصل کلیدی درس: «همه چیز تو خود قیمته» — همان کندلی که می‌بینی گویای همه چیز است. دلیلش این است که کار بر پایه‌ی عرضه و تقاضاست و هر چیزی در بازار از خریدار و فروشنده نشأت می‌گیرد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_11.md",
+        "source_location": "بخش ۲",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۱",
+        "section": "بخش ۲",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "پرایس اکشن = روش معامله‌گری بر اساس حرکات قیمت … اصل کلیدی: همه چیز تو خود قیمته. همین کندلی که می‌بینی، گویای همه چیز است. … چون ما بر اساس عرضه و تقاضا کار می‌کنیم و همه چیز از خریدار و فروشنده نشأت می‌گیرد."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:06:46Z",
+      "updated_at": "2026-09-05T17:06:46Z",
+      "definition": "پرایس اکشن: تحلیل و معامله بر اساس حرکات خود قیمت و عرضه و تقاضا، بدون اندیکاتور.",
+      "keywords": [
+        "پرایس اکشن",
+        "price action",
+        "عرضه و تقاضا",
+        "بدون اندیکاتور"
+      ],
+      "related_concepts": [
+        "ACA-INT-0063",
+        "ACA-INT-0065",
+        "ACA-INT-0087"
+      ],
+      "related_questions": [
+        "پرایس اکشن یعنی چی؟",
+        "سبک آکادمی چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0178",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "جایگاه پرایس اکشن میان سه نوع تحلیل",
+      "language": "fa",
+      "chunk_text": "درس سه نوع تحلیل را از هم جدا می‌کند: تکنیکال (تحلیل بر اساس خود قیمت و نمودار)، فاندامنتال (تحلیل بر اساس اخبار، گزارش‌ها و داده‌های اقتصادی) و پرایس اکشن که زیرشاخه‌ای از تکنیکال است و فقط بر اساس حرکات قیمت کار می‌کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_11.md",
+        "source_location": "بخش «سه نوع تحلیل در بازار»",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۱",
+        "section": "بخش «سه نوع تحلیل در بازار»",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱. تکنیکال: تحلیل بر اساس خود قیمت و نمودار ۲. فاندامنتال: تحلیل بر اساس اخبار، گزارش‌ها و داده‌های اقتصادی ۳. پرایس اکشن: زیرشاخه‌ای از تکنیکال که فقط بر اساس حرکات قیمت کار می‌کند"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:06:46Z",
+      "updated_at": "2026-09-05T17:06:46Z",
+      "summary": "پرایس اکشن زیرمجموعه‌ی تکنیکال است، نه چیزی جدا از آن.",
+      "keywords": [
+        "تکنیکال",
+        "فاندامنتال",
+        "پرایس اکشن",
+        "انواع تحلیل"
+      ],
+      "related_concepts": [
+        "ACA-INT-0177",
+        "ACA-INT-0062"
+      ],
+      "related_questions": [
+        "فرق تکنیکال و فاندامنتال چیه؟",
+        "پرایس اکشن جزو تکنیکاله؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0179",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "روش کار پرایس اکشن: سه عاملی که بررسی می‌شود",
+      "language": "fa",
+      "chunk_text": "اساس کار پرایس اکشن در آکادمی: تحلیل حرکات قیمت با کمک فشارهای عرضه و تقاضا و شناسایی نقاط تصمیم‌گیری هیجانی معامله‌گران — از قبل، نه بعد از وقوع. سه عاملی که بررسی می‌شود:\n۱) ماهیت مارکت (ساختار: اسپایک، کانال قیمتی، تریدینگ رنج)\n۲) علت حرکات قبلی قیمت\n۳) نقاط تصمیم‌گیری هیجانی معامله‌گران\nمزیتی که مدرس برجسته می‌کند: ورود به معامله پیش از اتفاق، برخلاف بسیاری از سیستم‌های دیگر که تأخیر دارند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_11.md",
+        "source_location": "بخش «روش معامله‌گری پرایس اکشن»",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۱",
+        "section": "بخش «روش معامله‌گری پرایس اکشن»",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "اساس کار: تحلیل حرکات قیمت با کمک فشارهای عرضه و تقاضا و شناسایی نقاط تصمیم‌گیری هیجانی معامله‌گران از قبل. مزیت: ورود به معامله قبل از اتفاق، نه بعد از آن … ماهیت مارکت (ساختار، اسپایک، کانال قیمتی، تریدینگ رنج)، علت حرکات قبلی قیمت، نقاط تصمیم‌گیری هیجانی معامله‌گران"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T17:06:46Z",
+      "updated_at": "2026-09-05T17:06:46Z",
+      "summary": "ماهیت مارکت + علت حرکت قبلی + نقاط هیجانی معامله‌گران.",
+      "keywords": [
+        "اسپایک",
+        "کانال قیمتی",
+        "تریدینگ رنج",
+        "ساختار بازار",
+        "نقاط هیجانی"
+      ],
+      "related_concepts": [
+        "ACA-INT-0006",
+        "ACA-INT-0177",
+        "ACA-INT-0088"
+      ],
+      "related_questions": [
+        "پرایس اکشن دقیقاً چی رو بررسی می‌کنه؟",
+        "ماهیت مارکت یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0180",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "چرا پرایس اکشن منقضی نمی‌شود",
+      "language": "fa",
+      "chunk_text": "استدلال مدرس: پرایس اکشن بازتاب رفتار انسان‌هاست و رفتار انسان‌ها در طول زمان تقریباً ثابت می‌ماند — ترس، طمع، هیجان و تصمیم‌های غیرمنطقی همیشه در قیمت منعکس می‌شوند. به همین دلیل او می‌گوید پرایس اکشن تاریخ انقضا ندارد و کهنه نمی‌شود. مثالی که می‌زند از بیرون بازارهای جهانی است: نوسان قیمت دلار در ایران و رفتار مردم در خرید و فروش هم با همین منطق قابل تحلیل است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_11.md",
+        "source_location": "بخش «پرایس اکشن = بازتابی از رفتار انسان‌ها» و بخش ۶",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۱",
+        "section": "بخش «پرایس اکشن = بازتابی از رفتار انسان‌ها» و بخش ۶",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "پرایس اکشن بر اساس رفتار انسان‌هاست. رفتار انسان‌ها در طول زمان تقریباً ثابت است. به همین دلیل پرایس اکشن تاریخی کهنه ندارد و منقضی نمی‌شود."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T17:06:46Z",
+      "updated_at": "2026-09-05T17:06:46Z",
+      "summary": "پایه‌ی روش، رفتار ثابت انسان است؛ بنابراین منقضی نمی‌شود.",
+      "keywords": [
+        "رفتار انسان",
+        "منقضی نمی‌شود",
+        "ترس و طمع"
+      ],
+      "related_concepts": [
+        "ACA-INT-0177",
+        "ACA-INT-0184",
+        "ACA-PSY-0001"
+      ],
+      "related_questions": [
+        "پرایس اکشن قدیمی نمی‌شه؟",
+        "چرا می‌گید همیشه جواب می‌ده؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0181",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "پرایس اکشن در همه‌ی بازارها کار می‌کند",
+      "language": "fa",
+      "chunk_text": "چون همه‌ی بازارها بر پایه‌ی عرضه و تقاضا کار می‌کنند، مدرس می‌گوید پرایس اکشن در تمام آن‌ها قابل استفاده است: فارکس، سهام، کالا، شاخص، CFD، ارز دیجیتال و بورس ایران.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_11.md",
+        "source_location": "بخش «پرایس اکشن = بازتابی از رفتار انسان‌ها» و بخش ۵",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۱",
+        "section": "بخش «پرایس اکشن = بازتابی از رفتار انسان‌ها» و بخش ۵",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "پرایس اکشن در تمام بازارها (فارکس، سهام، کالا، شاخص، ارز دیجیتال، بورس ایران) قابل استفاده است؛ چون همه بر اساس عرضه و تقاضا هستند."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T17:06:46Z",
+      "updated_at": "2026-09-05T17:06:46Z",
+      "keywords": [
+        "فارکس",
+        "بورس ایران",
+        "ارز دیجیتال",
+        "CFD",
+        "کالا"
+      ],
+      "related_concepts": [
+        "ACA-INT-0177",
+        "ACA-INT-0180"
+      ],
+      "related_questions": [
+        "پرایس اکشن تو بورس ایران جواب می‌ده؟",
+        "برای کریپتو هم می‌شه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0182",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "پرایس اکشن در همه‌ی تایم‌فریم‌ها",
+      "language": "fa",
+      "chunk_text": "پرایس اکشن به تایم‌فریم خاصی وابسته نیست و در ماهیانه، هفتگی، روزانه، چهارساعته، یک‌ساعته، سی‌دقیقه، پنج‌دقیقه و یک‌دقیقه قابل اجراست. اصل پشت این حرف: هر تغییر قیمت — تیک به تیک و پیپ به پیپ — دلیل پرایس‌اکشنی دارد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_11.md",
+        "source_location": "بخش «پرایس اکشن در تمام تایم‌فریم‌ها»",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۱",
+        "section": "بخش «پرایس اکشن در تمام تایم‌فریم‌ها»",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "پرایس اکشن در هر تایم‌فریمی قابل انجام است … اصل: هر تغییر قیمت، دلیل پرایس‌اکشنی دارد (تیک به تیک، پیپ به پیپ)."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T17:06:46Z",
+      "updated_at": "2026-09-05T17:06:46Z",
+      "keywords": [
+        "تایم فریم",
+        "تیک",
+        "پیپ"
+      ],
+      "related_concepts": [
+        "ACA-INT-0142",
+        "ACA-INT-0143",
+        "ACA-INT-0144"
+      ],
+      "related_questions": [
+        "پرایس اکشن تو چه تایم‌فریمی کار می‌کنه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0183",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "قانون شصت‌چهل: بازار، بازار احتمالات است",
+      "language": "fa",
+      "chunk_text": "مدرس تأکید می‌کند بازار مالی بازار احتمالات است نه قطعیات، و آن را «قانون شصت‌چهل» می‌نامد: بیش از ۶۰٪ نمی‌توان بازار را پیش‌بینی کرد و کمتر از ۴۰٪ هم نیست؛ تلاش معامله‌گر این است که از حالت ۵۰-۵۰ (مثل شیر یا خط سکه) به ۶۰-۴۰ برسد. نتیجه‌ای که می‌گیرد: هیچ‌کس ۱۰۰٪ نمی‌تواند بازار را پیش‌بینی کند، حتی رئیس فدرال رزرو؛ و حتی بزرگ‌ترین بانک‌ها و مؤسسات مالی هم ضرر می‌کنند — تفاوت در مدیریت ریسک و سرمایه است.\n⚠️ این یک مدل ذهنی برای توضیح ماهیت احتمالی بازار است، نه یک آمار اندازه‌گیری‌شده؛ مربی نباید آن را به‌عنوان عدد پژوهشی ارائه دهد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_11.md",
+        "source_location": "بخش «قانون شصت‌چهل در بازار» و بخش ۴",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۱",
+        "section": "بخش «قانون شصت‌چهل در بازار» و بخش ۴",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "بازار مالی، بازار احتمالات است، نه قطعیات. … بیش از ۶۰٪ نمی‌توانید بازار را پیش‌بینی کنید … تلاش ما این است که از ۵۰-۵۰ به ۶۰-۴۰ برسیم. … حتی بزرگترین بانک‌ها و مؤسسات مالی هم همیشه سود نمی‌کنند و ضرر دارند."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T17:06:46Z",
+      "updated_at": "2026-09-05T17:06:46Z",
+      "summary": "بازار احتمالی است؛ هدف رسیدن از ۵۰-۵۰ به ۶۰-۴۰ است، نه قطعیت.",
+      "warnings": [
+        "اعداد ۶۰ و ۴۰ مدل ذهنی مدرس‌اند، نه آمار اندازه‌گیری‌شده."
+      ],
+      "keywords": [
+        "قانون شصت چهل",
+        "احتمالات",
+        "پیش‌بینی",
+        "فدرال رزرو"
+      ],
+      "related_concepts": [
+        "ACA-INT-0172",
+        "PSY-PAT-0012",
+        "ACA-INT-0184"
+      ],
+      "related_questions": [
+        "می‌شه بازار رو پیش‌بینی کرد؟",
+        "قانون شصت چهل چیه؟",
+        "چرا همه‌ی معامله‌هام باید سود بده؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0184",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "پنج مزیت پرایس اکشن از نگاه آکادمی",
+      "language": "fa",
+      "chunk_text": "پنج مزیتی که مدرس برای پرایس اکشن برمی‌شمارد:\n۱) ساده و سریع — بدون سردرگمی میان اندیکاتورهای مختلف.\n۲) بدون تأخیر — تصمیم‌گیری در بهترین جای قیمت.\n۳) قابل استفاده در همه‌ی بازارها — فارکس، CFD، ارز دیجیتال، بورس ایران.\n۴) همیشه کارآمد — چون بر رفتار انسان بنا شده، منقضی نمی‌شود.\n۵) ریسک به ریوارد بالا — امکان شناسایی نقاط ورود بهتر.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_11.md",
+        "source_location": "بخش «مزایای پرایس اکشن» و بخش ۵",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۱",
+        "section": "بخش «مزایای پرایس اکشن» و بخش ۵",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱. ساده و سریع … ۲. بدون تأخیر … ۳. قابل استفاده در همه بازارها … ۴. همیشه کارآمد … ۵. ریسک به ریوارد بالا: امکان شناسایی نقاط ورود عالی"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T17:06:46Z",
+      "updated_at": "2026-09-05T17:06:46Z",
+      "keywords": [
+        "مزایا",
+        "بدون تأخیر",
+        "ریسک به ریوارد"
+      ],
+      "related_concepts": [
+        "ACA-INT-0177",
+        "ACA-INT-0065",
+        "ACA-INT-0159"
+      ],
+      "related_questions": [
+        "چرا پرایس اکشن بهتره؟",
+        "مزیت پرایس اکشن نسبت به اندیکاتور چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0185",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "پنج جزء موفقیت در معامله‌گری",
+      "language": "fa",
+      "chunk_text": "مدرس موفقیت در معامله‌گری را حاصل پنج جزء می‌داند و ترتیب اهمیت را هم می‌گوید:\n۱) روان‌شناسی (ذهنیت و شخصیت) — مهم‌ترین عامل\n۲) مهارت تکنیکال — یعنی همان پرایس اکشن\n۳) مدیریت سرمایه و ریسک — عامل بقا در بازار\n۴) استراتژی‌نویسی و تریدینگ پلن — نقشه‌ی راه\n۵) آموزش با مربی (منتورینگ) — برای تصحیح اشتباهات\nاو تأکید می‌کند که فقط تکنیکال کافی نیست.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_11.md",
+        "source_location": "بخش «تأثیر روانشناسی بر معامله‌گری» و بخش ۷",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۱",
+        "section": "بخش «تأثیر روانشناسی بر معامله‌گری» و بخش ۷",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱. روانشناسی (ذهنیت و شخصیت) - مهم‌ترین عامل ۲. مهارت تکنیکال - پرایس اکشن ۳. مدیریت سرمایه و ریسک - بقا در بازار ۴. استراتژی‌نویسی و تریدینگ پلن - نقشه راه ۵. آموزش با مربی (منتورینگ) - تصحیح اشتباهات"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:06:46Z",
+      "updated_at": "2026-09-05T17:06:46Z",
+      "summary": "موفقیت = روان‌شناسی + مهارت + مدیریت ریسک + استراتژی + منتور.",
+      "keywords": [
+        "موفقیت",
+        "روانشناسی",
+        "تریدینگ پلن",
+        "منتورینگ"
+      ],
+      "related_concepts": [
+        "ACA-INT-0172",
+        "ACA-PSY-0001",
+        "ACA-OPS-0002",
+        "ACA-INT-0011"
+      ],
+      "related_questions": [
+        "برای موفق شدن چی لازمه؟",
+        "فقط تکنیکال کافیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0186",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "نقش ناخودآگاه در تصمیم‌های معاملاتی",
+      "language": "fa",
+      "chunk_text": "مدرس می‌گوید بیش از ۷۰٪ تصمیم‌های ما از ناخودآگاهی می‌آید که از کودکی شکل گرفته است، و در جمع‌بندی همین بخش تأکید می‌کند بیش از ۷۰٪ موفقیت هم به روان‌شناسی برمی‌گردد. توصیه‌اش این است که خودت را بشناسی و روی ذهنیتت کار کنی؛ اگر احساس می‌کنی ضعیف هستی، برای ساختن ذهنیت قوی‌تر تلاش کن.\n⚠️ عدد ۷۰٪ تأکید بیانی مدرس بر اهمیت روان‌شناسی است، نه آمار پژوهشی؛ مربی باید آن را به همین شکل نقل کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_11.md",
+        "source_location": "بخش «تأثیر روانشناسی بر معامله‌گری» و بخش ۸",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۱",
+        "section": "بخش «تأثیر روانشناسی بر معامله‌گری» و بخش ۸",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "بیش از ۷۰٪ از تصمیمات ما از ناخودآگاه می‌آید که از کودکی شکل گرفته است. … تأکید: بیش از ۷۰٪ از موفقیت به روانشناسی برمی‌گردد."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T17:06:46Z",
+      "updated_at": "2026-09-05T17:06:46Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "warnings": [
+        "عدد ۷۰٪ منبع پژوهشی ندارد و باید به‌صورت «تأکید مدرس» نقل شود، نه آمار."
+      ],
+      "keywords": [
+        "ناخودآگاه",
+        "روانشناسی",
+        "ذهنیت",
+        "۷۰ درصد"
+      ],
+      "related_concepts": [
+        "ACA-INT-0185",
+        "ACA-PSY-0009",
+        "PSY-RULE-0001"
+      ],
+      "related_questions": [
+        "چرا روانشناسی مهمه؟",
+        "ناخودآگاه چه ربطی به ترید داره؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0187",
+      "object_type": "COMMON_MISTAKE",
+      "domain": "academy",
+      "title": "چهار باور غلط رایج که درس رد می‌کند",
+      "language": "fa",
+      "chunk_text": "چهار باور غلطی که مدرس نام می‌برد و پاسخش:\n۱) «هیچ‌کس در بازار سود نمی‌کند» — غلط است؛ بانک‌ها و مؤسسات مالی بزرگ هر روز در این بازار معامله می‌کنند. (⚠️ در همین جلسه گفته می‌شود حتی بزرگ‌ترین بانک‌ها هم همیشه سود نمی‌کنند و ضرر دارند؛ بنابراین پاسخ درست «حضور و فعالیت روزانه‌ی آن‌هاست»، نه «سود روزانه‌ی قطعی».)\n۲) «پرایس اکشن منقضی می‌شود» — غلط؛ چون بر رفتار انسان بنا شده، همیشه کارآمد است.\n۳) «با تجسم، پول از آسمان می‌بارد» — غلط؛ تجسم بدون عمل بی‌ارزش است.\n۴) «فقط تکنیکال کافی است» — نادرست؛ روان‌شناسی و مدیریت سرمایه به همان اندازه مهم‌اند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_11.md",
+        "source_location": "بخش «باورهای غلط رایج» و بخش ۹",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۱",
+        "section": "بخش «باورهای غلط رایج» و بخش ۹",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "«هیچ‌کس در بازار سود نمی‌کند» → غلط. بانک‌ها و مؤسسات مالی بزرگ هر روز در این بازار معامله می‌کنند. «پرایس اکشن منقضی می‌شود» → غلط … «با تجسم پول از آسمان می‌بارد» → غلط. تجسم بدون عمل بی‌ارزش است. «فقط تکنیکال کافی است» → نادرست."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T17:06:46Z",
+      "updated_at": "2026-09-05T17:06:46Z",
+      "common_mistakes": [
+        "باور به اینکه هیچ‌کس در بازار سود نمی‌کند",
+        "باور به اینکه پرایس اکشن منقضی می‌شود",
+        "تکیه بر تجسم بدون عمل و تمرین",
+        "بسنده کردن به تکنیکال و نادیده گرفتن روان‌شناسی و مدیریت سرمایه"
+      ],
+      "warnings": [
+        "نسخه‌ی ساختاریافته‌ی متن «بانک‌ها هر روز سود می‌کنند» را آورده که با گفته‌ی خود همین جلسه (بانک‌ها هم ضرر می‌کنند) هم‌خوان نیست؛ صورت دقیق‌تر ثبت شد."
+      ],
+      "keywords": [
+        "باور غلط",
+        "تجسم",
+        "بانک‌ها",
+        "سود"
+      ],
+      "related_concepts": [
+        "ACA-INT-0183",
+        "ACA-INT-0180",
+        "ACA-INT-0185"
+      ],
+      "related_questions": [
+        "راسته که تو فارکس کسی سود نمی‌کنه؟",
+        "تجسم کافیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0188",
+      "object_type": "RULE",
+      "domain": "academy",
+      "title": "درخواست مدرس: دو هفته فقط با این روش روی چارت کار کن",
+      "language": "fa",
+      "chunk_text": "مدرس از دانشجویی که پیش‌تر با سبک‌هایی مثل هارمونیک، الیوت یا ایچیموکو کار کرده می‌خواهد «ظرف دانش ذهنی‌اش را خالی کند» و فقط دو هفته آنچه در این دوره گفته می‌شود را روی نمودار خودش پیاده کند و نتیجه را ببیند. دلیلی که می‌آورد این است که آدم‌ها گاهی تعصب دارند و حاضر به تغییر نیستند. این همان درخواستی است که در جلسه‌ی اول هم مطرح شده بود (ACA-INT-0017).",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_11.md",
+        "source_location": "بخش «مقدمه»",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۱",
+        "section": "بخش «مقدمه»",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "ازت می‌خوام اگر که با سبک‌هایی مثل هارمونیک، الیوت، ایچیموکو کار کردی، ظرف دانش ذهنی‌ات را خالی کنی … فقط این دفعه دو هفته برو روی نمودار خودت. هر چی می‌گم رو ببین، نتیجه‌اش رو می‌بینی"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T17:06:46Z",
+      "updated_at": "2026-09-05T17:06:46Z",
+      "rule": "دانشجوی دارای سبک قبلی، دو هفته فقط روش این دوره را روی چارت خودش تمرین کند.",
+      "warnings": [
+        "این دعوت به تمرین است، نه رد کردن سبک‌های دیگر؛ موضع رسمی آکادمی در ACA-INT-0063 ثبت شده است."
+      ],
+      "keywords": [
+        "ظرف دانش",
+        "هارمونیک",
+        "الیوت",
+        "ایچیموکو",
+        "دو هفته"
+      ],
+      "related_concepts": [
+        "ACA-INT-0017",
+        "ACA-INT-0063",
+        "EXT-CONC-0003",
+        "EXT-CONC-0004",
+        "EXT-CONC-0006"
+      ],
+      "related_questions": [
+        "من با الیوت کار می‌کردم، چیکار کنم؟",
+        "سبک قبلیم رو کنار بذارم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0189",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "جمع‌بندی جلسه‌ی یازدهم",
+      "language": "fa",
+      "chunk_text": "پنج جمله‌ی پایانی درس:\n۱) پرایس اکشن = تحلیل حرکات قیمت بر اساس عرضه و تقاضا.\n۲) بازار = احتمالات (قانون شصت‌چهل).\n۳) پرایس اکشن = بازتاب رفتار انسان‌ها و به همین دلیل همیشه کارآمد.\n۴) موفقیت = روان‌شناسی + مهارت + مدیریت ریسک + استراتژی + منتور.\n۵) همه چیز در خود قیمت است.\nتوصیه‌ی پایانی: عمل کنید، تمرین کنید و با مربی همراه باشید.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_11.md",
+        "source_location": "بخش ۱۰",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۱",
+        "section": "بخش ۱۰",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱. پرایس اکشن = تحلیل حرکات قیمت بر اساس عرضه و تقاضا ۲. بازار = احتمالات (قانون شصت‌چهل) ۳. پرایس اکشن = بازتاب رفتار انسان‌ها (همیشه کارآمد) ۴. موفقیت = روانشناسی + مهارت + مدیریت ریسک + استراتژی + منتور ۵. همه چیز در خود قیمت است. توصیه نهایی: عمل کنید، تمرین کنید، و با مربی همراه باشید."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:06:46Z",
+      "updated_at": "2026-09-05T17:06:46Z",
+      "summary": "پنج جمله‌ی کلیدی پرایس اکشن از نگاه آکادمی.",
+      "keywords": [
+        "جمع‌بندی",
+        "پرایس اکشن",
+        "احتمالات"
+      ],
+      "related_concepts": [
+        "ACA-INT-0177",
+        "ACA-INT-0183",
+        "ACA-INT-0185",
+        "ACA-INT-0132"
+      ],
+      "related_questions": [
+        "خلاصه‌ی پرایس اکشن چیه؟"
+      ]
+    }
+  ]
+}

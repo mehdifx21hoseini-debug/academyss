@@ -1,0 +1,713 @@
+{
+  "collection_id": "academy_intro_lesson_04",
+  "domain": "academy",
+  "title": "دوره مقدماتی — جلسه ۴: ثبت‌نام در بروکر، دانلود و اتصال متاتریدر",
+  "description": "رویه‌های عملیاتی شروع کار: انتخاب و ثبت‌نام بروکر، دانلود متاتریدر ۴، اتصال پلتفرم به حساب و رفع مشکل اتصال.",
+  "version": "v001",
+  "generated_at": "2026-09-05T15:48:44Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "raw_sources/academy/intro/intro_lesson_04.md",
+    "raw_sources/academy/intro/intro_lesson_04.ingest.json"
+  ],
+  "notes": [
+    "کانال رسمی تلگرام در این جلسه اعلام شد (sobhanforex)؛ اینستاگرام و سایت هنوز نامشخص است.",
+    "بروکر معرفی‌شده در مجموعه‌ی جداگانه‌ی brokers/ ثبت شد تا قاعده‌ی MET-RULE-0005 رعایت شود.",
+    "تفاوت بیان «فیلترشکن» در جلسه‌ی ۲ و ۴ بررسی و توسط مالک پروژه حل شد (CONF-0003 / D-0003).",
+    "دوره روی متاتریدر ۴ نمایش داده می‌شود؛ این ناقض قاعده‌ی ACA-RULE-0001 نیست و مربی همچنان باید نسخه‌ی دانشجو را بپرسد."
+  ],
+  "objects": [
+    {
+      "id": "ACA-INT-0069",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "بروکر، واسط میان معامله‌گر و سیستم بانکی",
+      "language": "fa",
+      "chunk_text": "مدرس بروکر را یکی از مهم‌ترین قطعات پازل معامله‌گری می‌داند، چون واسط بین معامله‌گر و سیستم بانکی است: هر دستور خرید و فروش باید توسط بروکر به تأمین‌کننده‌ی نقدینگی (LP) یا بانک‌ها وصل شود. او می‌گوید خودش سر همین موضوع ضررهای زیادی دیده و بارها بروکر عوض کرده است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_04.md",
+        "source_location": "بخش ۲",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۴",
+        "section": "بخش ۲",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "یکی از مهم‌ترین پازل‌های ما معامله‌گر هست تو مسیر. چون واسط بین من معامله‌گر و سیستم بانکی‌ست. … بروکر باید دقیقاً وصل کنه به اون LP یا بانک‌ها. من سر همین بروکر خیلی ضرر دیدم."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z",
+      "keywords": [
+        "بروکر",
+        "LP",
+        "نقدینگی",
+        "واسط"
+      ],
+      "related_concepts": [
+        "ACA-INT-0033"
+      ],
+      "related_questions": [
+        "بروکر چقدر مهمه؟",
+        "بروکر چیکار می‌کنه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0070",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "چرا انتخاب بروکر برای ایرانی‌ها دشوار است",
+      "language": "fa",
+      "chunk_text": "به گفته‌ی مدرس، به دلیل جدا بودن سیستم بانکی ایران از جهان، بروکرهای درجه‌یک جهانی مانند FxPro انگلستان یا IG Market به کاربران ایرانی خدمات نمی‌دهند. نبود نظارت باعث شده بروکرهای بی‌رگوله زیادی شکل بگیرند که وقتی کاربر به سود می‌رسد پول او را پرداخت نمی‌کنند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_04.md",
+        "source_location": "بخش ۴",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۴",
+        "section": "بخش ۴",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "ایران به واسطه سیستم جزیره‌ای که داره، با جهان ارتباطی نداره. … مثل اف‌اکس‌پرو انگلستان … مثل آی‌جی مارکت … به ما ایرانی‌ها خدمات نمی‌دن. … خیلی از بروکرها مثل قارچ رشد کردن … شما وقتی به سود می‌رسید، اصلاً به شما پولی نمی‌دن."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z",
+      "warnings": [
+        "ریسک اصلی برای کاربر ایرانی، بروکر بدون رگوله و عدم پرداخت سود است."
+      ],
+      "keywords": [
+        "ایران",
+        "بروکر بی‌رگوله",
+        "کلاهبرداری",
+        "FxPro",
+        "IG"
+      ],
+      "related_concepts": [
+        "ACA-INT-0034",
+        "ACA-INT-0071"
+      ],
+      "related_questions": [
+        "چرا نمی‌تونم با بروکر معروف کار کنم؟",
+        "بروکر ایرانی امنه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0071",
+      "object_type": "RULE",
+      "domain": "academy",
+      "title": "چهار معیار انتخاب بروکر از نگاه مدرس",
+      "language": "fa",
+      "chunk_text": "مدرس چهار معیار اصلی خودش برای انتخاب بروکر را می‌گوید: یک، امنیت سرمایه — از صد دلار تا صدها هزار دلار باید در جای امن باشد. دو، برداشت بدون دردسر — هر مقدار سود، بدون چون و چرا پرداخت شود. سه، پشتیبانی فارسی و مدیر حساب توانا. چهار، رگوله‌ی معتبر. او اضافه می‌کند اسپرد مناسب، پوشش نمادهای موردنیاز و عملکرد خوب در زمان اخبار هم مهم است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_04.md",
+        "source_location": "بخش ۵ و ۷",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۴",
+        "section": "بخش ۵ و ۷",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱. امنیت سرمایه … ۲. برداشت بدون مشکل … ۳. پشتیبان فارسی … ۴. رگوله معتبر … اسپرد مناسبی داشته باشه، تمام نمادهایی که می‌خوام رو ارائه بده، موقع خبر خوب باشه."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z",
+      "rule": "معیارهای انتخاب بروکر: امنیت سرمایه، برداشت بدون مشکل، پشتیبانی فارسی، رگوله‌ی معتبر.",
+      "steps": [
+        "امنیت سرمایه و سابقه‌ی بروکر را بررسی کنید.",
+        "شرایط و سابقه‌ی برداشت را بسنجید.",
+        "کیفیت پشتیبانی فارسی و مدیر حساب را بررسی کنید.",
+        "رگوله و مجوزهای بروکر را راستی‌آزمایی کنید.",
+        "اسپرد، پوشش نمادها و رفتار بروکر در زمان اخبار را بسنجید."
+      ],
+      "keywords": [
+        "انتخاب بروکر",
+        "امنیت سرمایه",
+        "برداشت",
+        "رگوله",
+        "پشتیبانی"
+      ],
+      "related_concepts": [
+        "ACA-INT-0035",
+        "ACA-INT-0072"
+      ],
+      "related_questions": [
+        "بروکر خوب چه ویژگی‌هایی داره؟",
+        "چطور بروکر انتخاب کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0072",
+      "object_type": "DEFINITION",
+      "domain": "academy",
+      "title": "رگوله یعنی چه",
+      "language": "fa",
+      "chunk_text": "به تعریف مدرس، رگوله یعنی دستگاه‌های نظارتی بر بروکر نظارت دارند و بروکر نمی‌تواند از مسیر درست خارج شود، چون جریمه‌های سنگین در انتظارش است؛ و نتیجه‌ی نهایی این نظارت، بیمه بودن حساب‌هاست.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_04.md",
+        "source_location": "بخش ۶",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۴",
+        "section": "بخش ۶",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "رگوله یعنی دستگاه‌های نظارتی روی اون بروکر نظارت دارن و بروکر نمی‌تونه یک هزارم پاش رو از مسیر درست خارج بذاره. … چون جریمه‌های سنگین می‌شه … و در انتها حساب‌ها بیمه باشه."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z",
+      "definition": "رگوله: نظارت یک نهاد ناظر بر بروکر، با ضمانت اجرای جریمه.",
+      "warnings": [
+        "اعتبار رگوله‌ها یکسان نیست؛ صرفِ داشتن مجوز به معنای سطح نظارتی بالا نیست."
+      ],
+      "keywords": [
+        "رگوله",
+        "مجوز",
+        "نظارت",
+        "بیمه حساب"
+      ],
+      "related_concepts": [
+        "ACA-INT-0034",
+        "BRK-FACT-0001"
+      ],
+      "related_questions": [
+        "رگوله یعنی چی؟",
+        "حسابم بیمه‌ست؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0073",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "title": "کانال رسمی تلگرام آکادمی",
+      "language": "fa",
+      "chunk_text": "مدرس تصریح می‌کند تنها کانال رسمی تلگرام او با آیدی sobhanforex است و آن را حرف‌به‌حرف هجی می‌کند. او هشدار می‌دهد کانال‌های زیادی به نام او ساخته شده که با گذاشتن عکس پروفایل او کلاهبرداری می‌کنند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_04.md",
+        "source_location": "بخش ۸",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۴",
+        "section": "بخش ۸",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "تنها کانال رسمی من سبحان سمدی، آیدی سبحان‌فارکس: S-O-B-H-A-N-F-O-R-E-X … هزار تا کانال به اسم من وجود داره در صورتی که اصلاً من نیستم."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z",
+      "summary": "کانال رسمی تلگرام: sobhanforex",
+      "warnings": [
+        "نشانی اینستاگرام و سایت رسمی هنوز ثبت نشده است (RQ-0016)."
+      ],
+      "validity": {
+        "source_lesson": "دوره مقدماتی جلسه ۴",
+        "confirm_before_use": true
+      },
+      "keywords": [
+        "کانال رسمی",
+        "تلگرام",
+        "sobhanforex",
+        "کلاهبرداری"
+      ],
+      "related_concepts": [
+        "ACA-INT-0021"
+      ],
+      "related_questions": [
+        "کانال رسمی شما کدومه؟",
+        "آیدی تلگرامتون چیه؟",
+        "این کانال مال شماست؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0074",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "title": "لینک معرف بروکر و مزایای آن",
+      "language": "fa",
+      "chunk_text": "مدرس می‌گوید در انتهای همین ویدیو لینک بروکر معرفی‌شده را قرار داده است و صریحاً توضیح می‌دهد که دانشجو می‌تواند مستقل هم بروکر را جست‌وجو و ثبت‌نام کند. تفاوت در این است که با ثبت‌نام از طریق لینک، معرف دانشجو خود مدرس می‌شود و در نتیجه: مدیر حساب او مدیر حساب دانشجو می‌شود و صفر تا صد راهنمایی می‌کند؛ مدرس می‌تواند مشکلات را از طریق مدیر حساب پیگیری کند؛ و امکاناتی مثل تخفیف معاملاتی و ریبیت اعمال می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_04.md",
+        "source_location": "بخش ۹",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۴",
+        "section": "بخش ۹",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "شما همین الان می‌تونید برید داخل اینترنت، بروکر رو سرچ کنید و جداگانه ثبت‌نام بکنید، یا می‌تونید از طریق لینکی که گذاشتم ثبت‌نام بکنید. … مدیر حساب خود من، مدیر حساب شما می‌شه … تخفیف معاملاتی و rebate."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z",
+      "summary": "ثبت‌نام با لینک معرف: مدیر حساب مشترک، پیگیری مشکلات و تخفیف/ریبیت.",
+      "warnings": [
+        "این یک رابطه‌ی معرف (افیلیت) است و مدرس خودش آن را شفاف اعلام می‌کند؛ ثبت‌نام مستقیم هم از نظر او بلامانع است."
+      ],
+      "keywords": [
+        "لینک معرف",
+        "ریبیت",
+        "تخفیف معاملاتی",
+        "مدیر حساب"
+      ],
+      "related_concepts": [
+        "BRK-FACT-0001"
+      ],
+      "related_questions": [
+        "حتماً باید با لینک شما ثبت‌نام کنم؟",
+        "ریبیت چیه؟",
+        "مدیر حساب چیکار می‌کنه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0075",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "مراحل ثبت‌نام در بروکر",
+      "language": "fa",
+      "chunk_text": "برای ثبت‌نام، دانشجو از طریق لینک وارد سایت بروکر می‌شود و فرم را پر می‌کند: کشور (ایران)، نام و نام خانوادگی کامل، شماره تلفن، آدرس ایمیل و رمز عبور. پس از ثبت‌نام وارد داشبورد معاملاتی می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_04.md",
+        "source_location": "بخش ۱۰",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۴",
+        "section": "بخش ۱۰",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "این فرم ثبت‌نامه … از کشور ایران هستم. نام و نام‌خانوادگی خودتون رو کامل کنید. … شماره تلفن، آدرس ایمیل و رمز عبور."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z",
+      "steps": [
+        "روی لینک ثبت‌نام کلیک کنید و وارد سایت بروکر شوید.",
+        "کشور را ایران انتخاب کنید.",
+        "نام و نام خانوادگی کامل را وارد کنید.",
+        "شماره تلفن و آدرس ایمیل را وارد کنید.",
+        "رمز عبور را تعیین و ثبت‌نام را تکمیل کنید.",
+        "وارد داشبورد معاملاتی شوید."
+      ],
+      "keywords": [
+        "ثبت‌نام",
+        "فرم",
+        "بروکر",
+        "داشبورد"
+      ],
+      "related_concepts": [
+        "ACA-INT-0076",
+        "ACA-INT-0078"
+      ],
+      "related_questions": [
+        "چطور توی بروکر ثبت‌نام کنم؟",
+        "موقع ثبت‌نام چی وارد کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0076",
+      "object_type": "RULE",
+      "domain": "academy",
+      "title": "ایمیل ثبت‌نام باید ایمیلی باشد که مرتب چک می‌شود",
+      "language": "fa",
+      "chunk_text": "مدرس تأکید می‌کند ایمیلی که در بروکر ثبت می‌کنید باید ایمیلی باشد که مرتب به آن سر می‌زنید، چون اطلاع‌رسانی‌های مهم بروکر — مثلاً تعطیلی بازار در یک روز خاص — از همان مسیر می‌آید.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_04.md",
+        "source_location": "بخش ۱۰",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۴",
+        "section": "بخش ۱۰",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "ایمیلی که دارید به بروکر ثبت می‌کنید، ایمیلی باشه که بتوانید مرتباً به ایمیلتون سر بزنید. … چون خیلی وقتا یک سری اخبار مهم میاد. مثلاً شاید بروکر داره بهت اطلاع‌رسانی می‌کنه که هفته دیگه دوشنبه تعطیل مارکت."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z",
+      "rule": "ایمیل ثبت‌شده در بروکر باید فعال و تحت پیگیری منظم باشد.",
+      "keywords": [
+        "ایمیل",
+        "اطلاع‌رسانی",
+        "تعطیلی بازار"
+      ],
+      "related_questions": [
+        "چه ایمیلی بدم؟",
+        "بروکر چطور خبر می‌ده؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0077",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "title": "داشبورد معاملاتی بروکر",
+      "language": "fa",
+      "chunk_text": "پس از ثبت‌نام، داشبورد معاملاتی در دسترس قرار می‌گیرد. بخش‌های اصلی آن عبارت‌اند از: حساب‌ها، پرداخت‌ها (واریز و برداشت)، بازارها و ابزارها. دانلود پلتفرم متاتریدر هم از همین داشبورد انجام می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_04.md",
+        "source_location": "بخش ۱۱",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۴",
+        "section": "بخش ۱۱",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "حساب‌ها رو داریم، پرداخت‌ها رو داریم (واریز و برداشت)، بازارها رو داریم، ابزارها رو داریم."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z",
+      "keywords": [
+        "داشبورد",
+        "کابین معاملاتی",
+        "پرداخت‌ها"
+      ],
+      "related_questions": [
+        "داشبورد بروکر چیه؟",
+        "واریز رو از کجا بزنم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0078",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "title": "دسترسی به سایت بروکر و موضوع فیلترشکن",
+      "language": "fa",
+      "chunk_text": "برای باز کردن سایت بروکر، مدرس می‌گوید فیلترشکن باید فعال باشد و تأکید می‌کند نوع آن اهمیتی ندارد و لازم نیست IP ثابت باشد — برخلاف چیزی که کاربران ارز دیجیتال به آن عادت دارند. توجه: در جلسه‌ی دوم گفته شده بود فیلترشکن الزامی نیست؛ آن جمله ناظر بر اتصال پلتفرم به سرور بروکر بود و این یکی ناظر بر باز کردن وب‌سایت بروکر. این تفکیک توسط مالک پروژه تأیید شده است (CONF-0003 حل شد، تصمیم D-0003).",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_04.md",
+        "source_location": "بخش ۱۰",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۴",
+        "section": "بخش ۱۰",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "شما فیلترشکن باید فعال باشه. چه فیلترشکنی؟ … اصلاً اهمیت نداره چه فیلترشکنی. … امروز با چه فیلترشکنی هستی، فردا با چه فیلترشکنی هستی."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z",
+      "conflicts": [
+        "CONF-0003"
+      ],
+      "related_concepts": [
+        "ACA-CLR-0001"
+      ],
+      "keywords": [
+        "فیلترشکن",
+        "IP ثابت",
+        "سایت بروکر"
+      ],
+      "related_questions": [
+        "برای بروکر فیلترشکن لازمه؟",
+        "IP ثابت می‌خواد؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0079",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "دانلود متاتریدر ۴ از داشبورد بروکر",
+      "language": "fa",
+      "chunk_text": "در داشبورد بروکر، از گزینه‌ی «بیشتر» و در پایین صفحه، نسخه‌های متاتریدر ۴ در دسترس است: نسخه‌ی ویندوز، نسخه‌ی اندروید و نسخه‌ی iOS. دانلود و نصب از همان‌جا انجام می‌شود. توجه: دوره‌ی مقدماتی آکادمی روی متاتریدر ۴ نمایش داده می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_04.md",
+        "source_location": "بخش ۱۲",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۴",
+        "section": "بخش ۱۲",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "می‌ایم توی گزینه \"بیشتر\"، پایین صفحه رو نگاه کنید، نوشته \"متاتریدر ۴\" - download … این متاتریدر ۴ برای گوشی‌های اندرویده، این برای گوشی‌های iOS هست."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z",
+      "steps": [
+        "وارد داشبورد بروکر شوید.",
+        "گزینه‌ی «بیشتر» را باز کنید و تا پایین صفحه بروید.",
+        "نسخه‌ی متناسب با سیستم خود را انتخاب کنید (ویندوز، اندروید یا iOS).",
+        "فایل را دانلود و نصب کنید."
+      ],
+      "keywords": [
+        "دانلود متاتریدر",
+        "متاتریدر ۴",
+        "اندروید",
+        "iOS"
+      ],
+      "related_concepts": [
+        "MT-PROC-0001",
+        "ACA-RULE-0001"
+      ],
+      "related_questions": [
+        "متاتریدر رو از کجا دانلود کنم؟",
+        "نسخه موبایل داره؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0080",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "اتصال متاتریدر ۴ به بروکر (گام‌به‌گام)",
+      "language": "fa",
+      "chunk_text": "پس از نصب متاتریدر، باید آن را به حساب بروکر وصل کرد. شماره‌ی حساب از کابین معاملاتی برداشته می‌شود و در پلتفرم، از مسیر File بروکر جست‌وجو و حساب موجود وارد می‌شود. رمز عبور همان رمزی است که هنگام ثبت‌نام در بروکر تعیین شده است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_04.md",
+        "source_location": "بخش ۱۳",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۴",
+        "section": "بخش ۱۳",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "اول از همه بریم داخل کابین معاملاتی‌مون … روش یه کلیک کنید. خودش اتوماتیک حساب کپی می‌شه. … گزینه \"File\" … \"Open an Account\" … \"Add New Broker\" … اسم بروکر … Next … \"Existing Trade Account\" … Login … Password … Finish."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z",
+      "steps": [
+        "وارد کابین معاملاتی بروکر شوید و روی حساب موردنظر کلیک کنید تا شماره‌ی حساب کپی شود.",
+        "متاتریدر ۴ را باز کنید.",
+        "از منوی بالا، File را بزنید.",
+        "گزینه‌ی Open an Account را انتخاب کنید.",
+        "در پایین پنجره، Add New Broker را پیدا کنید.",
+        "نام بروکر را جست‌وجو کنید و سرور مربوط (دمو یا ریل) را انتخاب کنید.",
+        "Next را بزنید و سپس Existing Trade Account را انتخاب کنید.",
+        "شماره‌ی حساب را در Login و رمز عبور بروکر را در Password وارد کنید.",
+        "Finish را بزنید و وضعیت اتصال را در پایین-راست بررسی کنید."
+      ],
+      "warnings": [
+        "سرور دمو و ریل جدا هستند؛ سرور متناسب با نوع حساب خود را انتخاب کنید."
+      ],
+      "keywords": [
+        "اتصال متاتریدر",
+        "Open an Account",
+        "Add New Broker",
+        "Login"
+      ],
+      "related_concepts": [
+        "MT4-PROC-0001",
+        "ACA-INT-0081"
+      ],
+      "related_questions": [
+        "چطور متاتریدر رو به بروکر وصل کنم؟",
+        "شماره حسابم رو کجا وارد کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0081",
+      "object_type": "TROUBLESHOOTING",
+      "domain": "academy",
+      "title": "بررسی وضعیت اتصال متاتریدر",
+      "language": "fa",
+      "chunk_text": "پس از اتصال، وضعیت در پایین صفحه‌ی متاتریدر نمایش داده می‌شود. سبز بودن یعنی اتصال درست برقرار شده است. اگر قرمز بود و پیام No Connection نشان داده شد، به گفته‌ی مدرس یعنی یکی از مراحل درست انجام نشده و باید مراحل را دوباره طبق ویدیو انجام داد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_04.md",
+        "source_location": "بخش ۱۳",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۴",
+        "section": "بخش ۱۳",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "این پایین سبزه. این به معنای اینه که متاتریدر به درستی به بروکر متصل شده. اگر این پایین شما No Connection زده بود و تماماً قرمز بود، به معنای اینه که شما یکی از این مراحل رو درست انجام ندادید."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z",
+      "symptoms": [
+        "نمایش No Connection در پایین صفحه",
+        "قرمز بودن نوار وضعیت اتصال"
+      ],
+      "causes": [
+        "اشتباه در انتخاب سرور بروکر (دمو به‌جای ریل یا برعکس).",
+        "اشتباه در شماره حساب یا رمز عبور.",
+        "ناقص انجام دادن یکی از مراحل اتصال."
+      ],
+      "resolutions": [
+        "مراحل اتصال را از ابتدا و به‌ترتیب تکرار کنید.",
+        "درست بودن نام سرور و نوع حساب را بررسی کنید.",
+        "شماره حساب و رمز عبور را دوباره از کابین بروکر بردارید.",
+        "در صورت ادامه، از پشتیبانی بروکر یا مدیر حساب کمک بگیرید."
+      ],
+      "keywords": [
+        "No Connection",
+        "وضعیت اتصال",
+        "عیب‌یابی"
+      ],
+      "related_concepts": [
+        "MT-TRBL-0005",
+        "ACA-INT-0080"
+      ],
+      "related_questions": [
+        "چرا وصل نمی‌شه؟",
+        "پایین صفحه قرمزه یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0082",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "ثبت اولین معامله پس از اتصال",
+      "language": "fa",
+      "chunk_text": "پس از اتصال موفق، قیمت‌ها در پلتفرم نمایش داده می‌شوند و برای هر خرید یا فروش کافی است از گزینه‌ی New Order استفاده شود. مدرس تأکید می‌کند که «با چه دیدگاهی» معامله کنید موضوع درس‌های بعدی است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_04.md",
+        "source_location": "بخش ۱۴",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۴",
+        "section": "بخش ۱۴",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "هر معامله خرید یا فروشی که می‌خواید داشته باشید، کافیه بیایید تو گزینه New Order بزنید و خریدتونو انجام بدید. با چه دیدگاهی، چطور خرید یا فروش خودتون رو انجام بدید."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z",
+      "steps": [
+        "نماد موردنظر را انتخاب کنید.",
+        "گزینه‌ی New Order را باز کنید.",
+        "حجم و در صورت نیاز حد ضرر و حد سود را وارد کنید.",
+        "معامله را ثبت کنید."
+      ],
+      "warnings": [
+        "ثبت معامله بدون داشتن چارچوب و استراتژی، همان چیزی است که در جلسات قبل «قمار» نامیده شد."
+      ],
+      "keywords": [
+        "New Order",
+        "اولین معامله"
+      ],
+      "related_concepts": [
+        "MT4-PROC-0003",
+        "ACA-PSY-0002"
+      ],
+      "related_questions": [
+        "چطور اولین معامله‌مو باز کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0083",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "رسالت مدرس: سود دانشجو از سود او کم نمی‌کند",
+      "language": "fa",
+      "chunk_text": "مدرس موضع خودش را چنین بیان می‌کند: رسالتش تربیت معامله‌گر و رساندن دانشجو به سود مستمر است، و رسیدن دانشجو به سود یک دلار هم از سود او کم نمی‌کند بلکه انرژی‌اش به او برمی‌گردد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_04.md",
+        "source_location": "بخش ۳",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۴",
+        "section": "بخش ۳",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "رسالت من سبحان سمدی اینه که شما توی این مارکت به سود مستمر برسید. چون شما به سود برسید، یک دلار از سود من کم نمی‌شه. بلکه این انرژی‌اش به من برمی‌گرده."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_OPERATIONS",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T15:48:44Z",
+      "updated_at": "2026-09-05T15:48:44Z",
+      "keywords": [
+        "رسالت",
+        "سود مستمر",
+        "آموزش"
+      ],
+      "related_questions": [
+        "چرا رایگان آموزش می‌دید؟"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "report_type": "validation",
+  "version": "v014",
+  "generated_at": "2026-09-05T14:54:57Z",
+  "stats": {
+    "files": 18,
+    "objects": 249,
+    "by_kind": {
+      "knowledge_object": 16,
+      "conflict_record": 1,
+      "review_item": 1
+    },
+    "by_domain": {
+      "psychology": 27,
+      "metatrader": 103,
+      "general_trading": 49,
+      "academy": 62,
+      "mentor_qa": 1,
+      "brokers": 1,
+      "meta": 6
+    },
+    "by_approval": {
+      "PENDING_VERIFICATION": 173,
+      "REVIEW_REQUIRED": 7,
+      "PENDING_REVIEW": 44,
+      "APPROVED": 9
+    }
+  },
+  "errors": 0,
+  "warnings": 3,
+  "findings": [
+    {
+      "level": "WARNING",
+      "where": "knowledge_base/review_queue/open_items.json :: RQ-0015",
+      "message": "object_ids references unknown id CONF-0002"
+    },
+    {
+      "level": "WARNING",
+      "where": "knowledge_base/academy/intro/lesson_01.json :: ACA-INT-0006",
+      "message": "conflicts references unknown id CONF-0002"
+    },
+    {
+      "level": "WARNING",
+      "where": "knowledge_base/academy/intro/lesson_01.json :: ACA-INT-0007",
+      "message": "conflicts references unknown id CONF-0002"
+    }
+  ]
+}

@@ -1,0 +1,869 @@
+{
+  "collection_id": "academy_eq_lesson_03",
+  "domain": "academy",
+  "title": "دوره‌ی رایگان هوش هیجانی (EQ) — بخش سوم از چهار بخش",
+  "description": "پنج مؤلفه‌ی تست، خودپنداره و سه بخش آن، جدول «با کدام حال معامله نکن»، مسئولیت‌پذیری، خودبیانگری، بین فردی، فرمول پنج‌گامی تصمیم‌گیری، کنترل تکانش و تمرین دفتر تصمیمات.",
+  "version": "v001",
+  "generated_at": "2026-09-05T22:30:33Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "raw_sources/academy/eq/eq_lesson_3.md",
+    "raw_sources/academy/eq/eq_lesson_3.ingest.json"
+  ],
+  "notes": [
+    "ACA-EQ-0029 عملی‌ترین قاعده‌ی کل لایه‌ی روان‌شناسی است: با کدام حال معامله نشود.",
+    "مؤلفه‌ی «مدیریت استرس» نام برده شد ولی تدریس نشد؛ از دانش عمومی پر نشد (RQ-0036).",
+    "آستانه‌های نمره (۶۰/۸۰/۶۵) مربوط به همین تست‌اند و با validity زمان‌مند شدند.",
+    "تمرین انتخاب نماد فقط به‌عنوان روش تصمیم‌گیری ثبت شد و با ACA-RULE-0003 حصار شد.",
+    "نقل‌قول کیوساکی بدون منبع دقیق است و غیرمستقیم نقل می‌شود."
+  ],
+  "objects": [
+    {
+      "id": "ACA-EQ-0025",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "پنج مؤلفه‌ی اصلی هوش هیجانی (ساختار تست)",
+      "language": "fa",
+      "chunk_text": "تست هوش هیجانی یک **نمره‌ی کل** می‌دهد و زیر آن، پنج مؤلفه‌ی اصلی سنجیده می‌شود:\n۱. **خودپنداره (Self-Perception)**\n۲. **خودبیانگری (Self-Expression)**\n۳. **بین فردی (Interpersonal)**\n۴. **تصمیم‌گیری**\n۵. **مدیریت استرس**\nمدرس دوباره همان قاعده‌ی بخش اول را تکرار می‌کند: **۵۰ درصد از افزایش هوش هیجانی، فقط شناخت همین پنج مؤلفه است** (`ACA-EQ-0015`).\n⚠️ **دو نکته که صادقانه ثبت می‌شود:**\n• در ترنسکریپت، جدول متن پاک‌سازی‌شده فقط چهار مؤلفه را فهرست کرده و خودبیانگری را جا انداخته؛ نسخه‌ی ساختاریافته هر پنج مورد را دارد و خود درس هم خودبیانگری را به‌عنوان بخش مستقل تدریس می‌کند. فهرست پنج‌تایی ثبت شد.\n• **مدیریت استرس** نام برده شده اما در این بخش توضیح داده نشده است؛ احتمالاً در بخش چهارم می‌آید (`RQ-0036`). مربی برای این مؤلفه از دانش عمومی جای خالی را پر نمی‌کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "پنج مؤلفه اصلی هوش هیجانی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "پنج مؤلفه اصلی هوش هیجانی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "هوش هیجانی شامل پنج مؤلفه اصلی است … ۵۰ درصد از افزایش هوش هیجانی، فقط شناخت همین پنج مؤلفه است."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "warnings": [
+        "مؤلفه‌ی مدیریت استرس در این بخش تدریس نشده؛ مربی آن را از خودش کامل نمی‌کند."
+      ],
+      "keywords": [
+        "پنج مؤلفه",
+        "خودپنداره",
+        "خودبیانگری",
+        "بین فردی",
+        "تصمیم‌گیری",
+        "مدیریت استرس",
+        "نمره کل"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0015",
+        "ACA-EQ-0024",
+        "ACA-EQ-0026",
+        "ACA-EQ-0032",
+        "ACA-EQ-0036",
+        "ACA-EQ-0037"
+      ],
+      "related_questions": [
+        "نمره‌ی تستم یعنی چی؟",
+        "هوش هیجانی چند بخش داره؟",
+        "مؤلفه‌های تست چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0026",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "مؤلفه‌ی خودپنداره و سه بخش آن",
+      "language": "fa",
+      "chunk_text": "**خودپنداره (Self-Perception)** یعنی رابطه‌ی فرد با خودش، و سه بخش دارد:\n• **عزت نفس** — خود را دوست داشتن و باور به خود (`ACA-EQ-0027`)\n• **خودشکوفایی** — شناخت رسالت و هدف زندگی (`ACA-EQ-0028`)\n• **خودآگاهی هیجانی** — آگاهی از احساسات خود (`ACA-EQ-0029`)\n**آستانه‌ی نمره در این مؤلفه:** بالای ۶۰ خوب، بالای ۸۰ عالی.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "مؤلفه اول: خودپنداره",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "مؤلفه اول: خودپنداره",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "خودپنداره شامل سه بخش است: عزت نفس، خودشکوفایی، خودآگاهی هیجانی. بالای ۶۰ = خوب، بالای ۸۰ = عالی"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "validity": {
+        "time_bound": true,
+        "as_of": "تست هوش هیجانی سایت آکادمی در زمان ضبط دوره",
+        "note": "این آستانه‌ها مربوط به همین تست است و آستانه‌ی عمومی نیست."
+      },
+      "keywords": [
+        "خودپنداره",
+        "Self-Perception",
+        "عزت نفس",
+        "خودشکوفایی",
+        "خودآگاهی"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0025",
+        "ACA-EQ-0027",
+        "ACA-EQ-0028",
+        "ACA-EQ-0029"
+      ],
+      "related_questions": [
+        "خودپنداره یعنی چی؟",
+        "نمره‌ی خودپنداره‌م چنده یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0027",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "عزت نفس — و اینکه چطور با دست خود به خود ضرر می‌زنیم",
+      "language": "fa",
+      "chunk_text": "**عزت نفس یعنی:** خودت را دوست داشته باشی، به خودت ایمان داشته باشی، و باور داشته باشی که **لیاقت موفقیت را داری**.\nجمله‌ی کلیدی مدرس: «خیلی از افراد با دست خودشان به خودشان ضرر می‌زنند، چون عزت نفس پایینی دارند.»\n**نشانه‌های عزت نفس پایین:** خودش را باور ندارد · دنبال الگوهای شکست می‌گردد · فکر می‌کند حتماً باید شکست بخورد تا موفق شود · منتظر تأیید دیگران می‌ماند.\n**نشانه‌های عزت نفس بالا:** خود را دوست دارد · مسئولیت‌پذیر است · بدون منتظر ماندن اقدام می‌کند.\n**آستانه‌ی نمره:** بالای ۶۰ خوب، بالای ۸۰ عالی.\n💡 **کاربرد برای مربی:** دانشجویی که می‌گوید «من نمی‌تونم»، «من بدشانسم» یا مدام دنبال تأیید است، ممکن است مسئله‌اش تکنیکال نباشد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "عزت نفس",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "عزت نفس",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "خیلی از افراد با دست خودشان به خودشان ضرر می‌زنند، چون عزت نفس پایینی دارند."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "validity": {
+        "time_bound": true,
+        "as_of": "تست هوش هیجانی سایت آکادمی در زمان ضبط دوره",
+        "note": "این آستانه‌ها مربوط به همین تست است و آستانه‌ی عمومی نیست."
+      },
+      "keywords": [
+        "عزت نفس",
+        "باور به خود",
+        "الگوی شکست",
+        "تأیید دیگران"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0026",
+        "ACA-EQ-0031",
+        "ACA-EQ-0022",
+        "PSY-PAT-0023"
+      ],
+      "related_questions": [
+        "عزت نفس یعنی چی؟",
+        "من به خودم باور ندارم",
+        "چرا همیشه خرابش می‌کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0028",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "خودشکوفایی — دانستن رسالت و هدف",
+      "language": "fa",
+      "chunk_text": "**خودشکوفایی یعنی:** دقیقاً بدانی رسالت و هدف زندگی‌ات چیست.\nمدرس نکته‌ی تکان‌دهنده‌ای اضافه می‌کند: بسیاری از افراد تا ۸۰ یا ۹۰ سالگی هنوز نمی‌دانند چرا به این دنیا آمده‌اند.\n**آستانه‌ی نمره:** بالای ۶۵ بسیار خوب.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "خودشکوفایی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "خودشکوفایی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "خودشکوفایی یعنی: دقیقاً بدانی رسالت و هدف زندگی‌ات چیست. نمره بالای ۶۵ = بسیار خوب"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "validity": {
+        "time_bound": true,
+        "as_of": "تست هوش هیجانی سایت آکادمی در زمان ضبط دوره",
+        "note": "این آستانه‌ها مربوط به همین تست است و آستانه‌ی عمومی نیست."
+      },
+      "keywords": [
+        "خودشکوفایی",
+        "رسالت",
+        "هدف زندگی",
+        "۶۵"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0026",
+        "ACA-EQ-0012"
+      ],
+      "related_questions": [
+        "خودشکوفایی یعنی چی؟",
+        "هدفم رو نمی‌دونم"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0029",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "خودآگاهی هیجانی: با کدام حال معامله نکن",
+      "language": "fa",
+      "chunk_text": "مدرس این را **یکی از مهم‌ترین بخش‌ها برای یک معامله‌گر** می‌داند: بدانی الان چه احساسی داری، و بدانی آن احساس روی معاملاتت اثر می‌گذارد.\n**جدول صریح درس — حال، و اقدام متناظر:**\n• **ترس** → معامله نکن\n• **ناراحتی** → معامله نکن\n• **هیجان زیاد** → معامله نکن\n• **خشم** → معامله نکن\n• **آرامش** → می‌توانی معامله کنی\nجمله‌ی کلیدی: «اگر آگاهی داشته باشی، می‌توانی منطقی به احساساتت نگاه کنی.»\n💡 این عملی‌ترین قاعده‌ی کل لایه‌ی روان‌شناسی است: پیش از هر معامله یک پرسش — «الان چه حالی دارم؟» — و اگر جواب یکی از چهار مورد اول بود، امروز معامله نمی‌شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "خودآگاهی هیجانی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "خودآگاهی هیجانی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "ترس → معامله نکن · ناراحتی → معامله نکن · هیجان زیاد → معامله نکن · خشم → معامله نکن · آرامش → می‌توانی معامله کنی"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "rule": "پیش از معامله حال خود را نام‌گذاری کن؛ با ترس، ناراحتی، هیجان زیاد یا خشم معامله نکن — فقط با آرامش.",
+      "steps": [
+        "پیش از باز کردن پلتفرم بپرس: الان چه حالی دارم؟",
+        "حال را نام ببر (ترس، ناراحتی، هیجان، خشم، آرامش).",
+        "اگر یکی از چهار حالت اول بود، امروز معامله نکن.",
+        "اگر آرامش بود، طبق پلن پیش برو."
+      ],
+      "keywords": [
+        "خودآگاهی هیجانی",
+        "معامله نکن",
+        "ترس",
+        "خشم",
+        "آرامش",
+        "قبل از معامله"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0008",
+        "ACA-EQ-0019",
+        "ACA-EQ-0039",
+        "ACA-EXP-0030",
+        "PSY-PAT-0021",
+        "PSY-RULE-0001"
+      ],
+      "related_questions": [
+        "امروز معامله کنم یا نه؟",
+        "عصبانی‌ام، ترید کنم؟",
+        "بعد از ضرر چیکار کنم؟",
+        "چطور بفهمم آماده‌ی معامله‌ام؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0030",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "احساسات مثبت گاز است، احساسات منفی ترمز",
+      "language": "fa",
+      "chunk_text": "استعاره‌ی مدرس برای نقش احساسات:\n• **احساسات مثبت = گاز موفقیت** — شادمانی، مسئولیت‌پذیری، امیدواری.\n• **احساسات منفی = ترمز شما** — ترس از شکست، سرخوردگی، ناامیدی.\nاحساسات مثبت شما را به سمت موفقیت پیش می‌برند و احساسات منفی مانند ترمز عمل می‌کنند.\n💡 نکته‌ی مهم در همین استعاره: ترمز خرابی نیست، **کندی** است. یعنی مسئله این نیست که احساس منفی داری، مسئله این است که با پای روی ترمز می‌خواهی جلو بروی.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "احساسات مثبت و منفی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "احساسات مثبت و منفی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "احساسات مثبت شما را به سمت موفقیت پیش می‌برند و احساسات منفی مانند ترمز عمل می‌کنند."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "keywords": [
+        "گاز",
+        "ترمز",
+        "احساس مثبت",
+        "احساس منفی",
+        "امیدواری"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0029",
+        "ACA-EQ-0033",
+        "ACA-EQ-0021"
+      ],
+      "related_questions": [
+        "احساسات چه اثری روی معامله داره؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0031",
+      "object_type": "RULE",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "مسئولیت‌پذیری: «من ضرر کردم»، نه «بازار به من ضرر زد»",
+      "language": "fa",
+      "chunk_text": "یکی از مهم‌ترین ویژگی‌های هوش هیجانی بالا از نگاه مدرس:\n• مسئولیت زندگی خودت باش.\n• تقصیر را به گردن دیگران نینداز.\n• اگر ضرر کردی، بپذیر: **«من ضرر کردم»** — نه «بازار به من ضرر زد».\n• منتظر تغییر دیگران نمان؛ خودت تغییر کن.\nجمله‌ی مدرس: «زمانی که مسئولیت‌پذیر کار خود باشی، تخت‌گاز پیش می‌روی.»\n💡 **چرا این فقط اخلاقی نیست:** تا وقتی علت ضرر بیرون از خودت باشد، هیچ چیزی برای اصلاح کردن وجود ندارد. پذیرش مسئولیت تنها چیزی است که اصلاح را ممکن می‌کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "مسئولیت‌پذیری",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "مسئولیت‌پذیری",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "اگر ضرر کردی، بپذیر: «من ضرر کردم» نه اینکه «بازار به من ضرر زد» … زمانی که مسئولیت‌پذیر کار خود باشی، تخت‌گاز پیش می‌روی."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 1.0,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "rule": "معامله‌گر مسئولیت نتیجه را می‌پذیرد؛ بازار، بروکر یا دیگران مقصر ضرر معرفی نمی‌شوند.",
+      "keywords": [
+        "مسئولیت‌پذیری",
+        "پذیرش ضرر",
+        "مقصر",
+        "بازار"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0027",
+        "ACA-EQ-0035",
+        "ACA-EQ-0007",
+        "ACA-EXP-0009",
+        "PSY-PAT-0014"
+      ],
+      "related_questions": [
+        "بازار پولمو خورد",
+        "بروکر مقصره",
+        "چرا همیشه من ضرر می‌کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0032",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "مؤلفه‌ی خودبیانگری و سه بخش آن",
+      "language": "fa",
+      "chunk_text": "**خودبیانگری (Self-Expression)** یعنی رابطه‌ی فرد با بیرون از خودش، و سه بخش دارد:\n• **شادمانی** — حال خوب داشتن (`ACA-EQ-0033`)\n• **خودابرازی** — توانایی بیان درست احساسات (`ACA-EQ-0034`)\n• **استقلال** — وابسته نبودن به دیگران (`ACA-EQ-0035`)",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "خودبیانگری (Self-Expression)",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "خودبیانگری (Self-Expression)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "خودبیانگری شامل سه بخش است: شادمانی، خودابرازی، استقلال"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "keywords": [
+        "خودبیانگری",
+        "Self-Expression",
+        "شادمانی",
+        "خودابرازی",
+        "استقلال"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0025",
+        "ACA-EQ-0033",
+        "ACA-EQ-0034",
+        "ACA-EQ-0035"
+      ],
+      "related_questions": [
+        "خودبیانگری یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0033",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "شادمانی: حال خوب، پیش‌نیاز موفقیت است نه پاداش آن",
+      "language": "fa",
+      "chunk_text": "پرسش کلیدی مدرس: **آیا می‌شود بدون حال خوب به موفقیت رسید؟** پاسخ او: خیر.\nو نتیجه‌ای که می‌گیرد مهم است: **تلاش کردن برای حال خوب، خودش یک اقدام هوشمندانه است** — یعنی حال خوب یک تجمل نیست، بخشی از کار است. «تا زمانی که حالمون خوب باشه، می‌تونیم برای موفقیت قدم برداریم.»\nمدرس نقل‌قولی از **رابرت کیوساکی** هم می‌آورد: اگر نتوانی یک میلیون تومان را مدیریت کنی، نمی‌توانی یک میلیارد تومان را مدیریت کنی.\n⚠️ این نقل‌قول در درس بدون ذکر منبع دقیق آمده؛ مربی آن را به‌صورت «نقل‌قولی که مدرس می‌آورد» بیان می‌کند، نه عین جمله‌ی مستند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "شادمانی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "شادمانی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "آیا می‌شود بدون حال خوب، به موفقیت رسید؟ خیر. تلاش کردن برای حال خوب، خودش یک اقدام هوشمندانه است."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "warnings": [
+        "نقل‌قول کیوساکی به‌صورت غیرمستقیم نقل می‌شود، نه به‌عنوان جمله‌ی مستند."
+      ],
+      "keywords": [
+        "شادمانی",
+        "حال خوب",
+        "کیوساکی",
+        "مدیریت پول"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0032",
+        "ACA-EQ-0030",
+        "ACA-EQ-0029"
+      ],
+      "related_questions": [
+        "حالم خوب نیست، ترید کنم؟",
+        "حال خوب چه ربطی به موفقیت داره؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0034",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "خودابرازی — و چرا معامله‌گران بیشتر به آن نیاز دارند",
+      "language": "fa",
+      "chunk_text": "**خودابرازی:** توانایی بیان درست احساسات — خوشحالی، ناراحتی، خشم و بقیه.\nتأکید ویژه‌ی مدرس درباره‌ی معامله‌گران: **چون معامله‌گران بیشتر با مانیتور سروکار دارند تا با آدم‌ها، باید بیشتر روی این موضوع کار کنند تا روابط زندگی‌شان تحت تأثیر قرار نگیرد.**\n💡 این یکی از معدود جاهایی است که دوره صریحاً هزینه‌ی شغلی معامله‌گری روی زندگی شخصی را نام می‌برد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "خودابرازی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "خودابرازی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "معامله‌گران چون بیشتر با مانیتور سروکار دارند تا با افراد، باید بیشتر روی این موضوع کار کنند تا روابط زندگیشان تحت تأثیر قرار نگیرد."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "keywords": [
+        "خودابرازی",
+        "بیان احساسات",
+        "روابط",
+        "انزوا"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0032",
+        "ACA-EQ-0036",
+        "PSY-PAT-0023"
+      ],
+      "related_questions": [
+        "ترید روی رابطه‌هام اثر گذاشته",
+        "چرا گوشه‌گیر شدم؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0035",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "استقلال: خالق نتایج زندگی خودم هستم",
+      "language": "fa",
+      "chunk_text": "سه جمله‌ای که مدرس برای استقلال می‌آورد:\n• من وابسته به هیچ‌کس نیستم.\n• من خالق مسئولیت و نتایج زندگی خودم هستم.\n• منتظر تغییرات بیرونی نباش.\nاین ادامه‌ی مستقیم قاعده‌ی «انگیزه‌ی قائم به ذات» بخش دوم (`ACA-EQ-0022`) و مسئولیت‌پذیری همین بخش (`ACA-EQ-0031`) است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "استقلال",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "استقلال",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "من وابسته به هیچ‌کس نیستم. من خالق مسئولیت و نتایج زندگی خودم هستم. منتظر تغییرات بیرونی نباش."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "keywords": [
+        "استقلال",
+        "وابستگی",
+        "خالق نتایج"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0022",
+        "ACA-EQ-0031",
+        "ACA-EQ-0032"
+      ],
+      "related_questions": [
+        "استقلال یعنی چی؟",
+        "منتظر چی باشم؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0036",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "مؤلفه‌ی بین فردی — و اینکه احساسات مثل ویروس منتقل می‌شوند",
+      "language": "fa",
+      "chunk_text": "**بین فردی (Interpersonal)** سه بخش دارد:\n• **روابط بین فردی** — توانایی ارتباط با دیگران\n• **همدلی** — درک احساسات دیگران\n• **مسئولیت‌پذیری اجتماعی** — توجه به جامعه و قوانین آن\nدو نکته‌ی مدرس:\n• **مغز انسان برای ارتباط با دیگران طراحی شده است**؛ انزوا ممکن است به مرور زمان به روابط آسیب بزند.\n• **احساسات مانند ویروس هستند** — حال خوب شما به دیگران هم منتقل می‌شود.\n💡 این با هشدار خودابرازی (`ACA-EQ-0034`) یک مجموعه است: معامله‌گری شغلی است که به‌طور طبیعی به انزوا می‌کشد، و دوره این را ریسک می‌داند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "مؤلفه دوم: بین فردی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "مؤلفه دوم: بین فردی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "مغز انسان برای ارتباط با دیگران طراحی شده است … احساسات مانند ویروس هستند. حال خوب شما به دیگران هم منتقل می‌شود."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "keywords": [
+        "بین فردی",
+        "همدلی",
+        "روابط",
+        "انزوا",
+        "ویروس احساسات"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0025",
+        "ACA-EQ-0034",
+        "ACA-EQ-0018",
+        "ACA-EQ-0021"
+      ],
+      "related_questions": [
+        "بین فردی یعنی چی؟",
+        "همدلی چه ربطی به ترید داره؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0037",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "مؤلفه‌ی تصمیم‌گیری و فرمول پنج‌گامی تصمیم",
+      "language": "fa",
+      "chunk_text": "**اصل کلیدی مدرس:** اگر نتیجه‌ی متفاوتی می‌خواهی، باید متفاوت قدم برداری.\n**آستانه‌ی نمره:** بالای ۶۰ خوب، بالای ۸۰ عالی.\n**فرمول تصمیم‌گیری دوره** پنج گام دارد و هسته‌اش گام دوم است — نگرفتن تصمیم سریع، یعنی همان کنترل تکانه.\nمدرس اضافه می‌کند: افرادی که تصمیم‌گیرنده‌های ضعیفی هستند، باید خیلی روی خودشان کار کنند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "مؤلفه سوم: تصمیم‌گیری",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "مؤلفه سوم: تصمیم‌گیری",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "بین دو یا چند گزینه هستی · سریع تصمیم نگیر · روی کاغذ بنویس · مزایا و معایب هر گزینه را بنویس · بعد تصمیم بگیر"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "validity": {
+        "time_bound": true,
+        "as_of": "تست هوش هیجانی سایت آکادمی در زمان ضبط دوره",
+        "note": "این آستانه‌ها مربوط به همین تست است و آستانه‌ی عمومی نیست."
+      },
+      "steps": [
+        "تشخیص بده که بین دو یا چند گزینه‌ای.",
+        "سریع تصمیم نگیر — تکانه را کنترل کن.",
+        "روی کاغذ بنویس.",
+        "مزایا و معایب هر گزینه را بنویس.",
+        "بعد تصمیم بگیر."
+      ],
+      "keywords": [
+        "تصمیم‌گیری",
+        "فرمول",
+        "مزایا و معایب",
+        "کاغذ",
+        "تکانه"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0025",
+        "ACA-EQ-0038",
+        "ACA-EQ-0041",
+        "ACA-EQ-0011"
+      ],
+      "related_questions": [
+        "چطور تصمیم بگیرم؟",
+        "بین دو تا گزینه موندم"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0038",
+      "object_type": "EXAMPLE",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "تمرین تصمیم‌گیری — روش، نه توصیه‌ی نماد",
+      "language": "fa",
+      "chunk_text": "مدرس فرمول تصمیم‌گیری را با یک نمونه‌ی آشنا تمرین می‌دهد: «کدام نماد معاملاتی را انتخاب کنم؟» و دو گزینه را کنار هم می‌گذارد؛ سپس مزایا و معایب هرکدام نوشته و مقایسه می‌شود و تصمیم منطقی گرفته می‌شود.\n⚠️ **قاعده‌ی پاسخ (`ACA-RULE-0003`، `D-0015`):** این رکورد **روش تصمیم‌گیری** را آموزش می‌دهد، نه انتخاب نماد. مربی از این مثال برای پیشنهاد یا رد کردن هیچ نمادی استفاده نمی‌کند و اگر دانشجو بپرسد «کدام نماد را معامله کنم؟»، همان فرمول را به او می‌دهد تا خودش تصمیم بگیرد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "تمرین تصمیم‌گیری",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "تمرین تصمیم‌گیری",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "سوال: کدام نماد معاملاتی را انتخاب کنم؟ … مزایا و معایب هرکدام را بنویس، مقایسه کن، تصمیم منطقی بگیر"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "examples": [
+        "به‌جای انتخاب شهودی نماد: دو ستون مزایا و معایب بنویس و بعد تصمیم بگیر."
+      ],
+      "warnings": [
+        "مربی از این مثال برای توصیه یا رد هیچ نماد معاملاتی استفاده نمی‌کند."
+      ],
+      "keywords": [
+        "تمرین",
+        "انتخاب نماد",
+        "مزایا و معایب"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0037",
+        "ACA-RULE-0003",
+        "ACA-SUP-0013"
+      ],
+      "related_questions": [
+        "کدوم نماد رو معامله کنم؟",
+        "طلا بهتره یا جفت‌ارز؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0039",
+      "object_type": "PSYCHOLOGY_PATTERN",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "کنترل تکانش در معامله‌گری — سه موقعیت خطر",
+      "language": "fa",
+      "chunk_text": "**تکانش:** واکنش لحظه‌ای، از کوره در رفتن، تصمیم عجولانه.\nسه موقعیتی که مدرس به‌عنوان خطر نام می‌برد:\n• **سه ضرر پشت سر هم** → می‌خواهی انتقام بگیری.\n• **سود زیاد** → احساس سرخوشی و اعتمادبه‌نفس کاذب.\n• **یک معامله‌ی اشتباه که به سود رسید** → دوباره تکرارش می‌کنی.\nجمله‌ی هشدار مدرس: **«همون یه بار اشتباهی که به سود رسید، ریشه‌ی نابودی حساب می‌شود.»**\n**راه‌حل درس:** آگاهی داشته باش که این ضعف را داری؛ وقتی به سه ضرر رسیدی، بپذیر و دست نگه دار.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "خودداری و کنترل تکانش",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "خودداری و کنترل تکانش",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "همون یه بار اشتباهی که به سود رسید، ریشه‌ی نابودی حساب می‌شود. … وقتی به سه ضرر رسیدی، بپذیر و دست نگه دار."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "symptoms": [
+        "میل به معامله‌ی فوری بعد از سومین ضرر پیاپی",
+        "احساس شکست‌ناپذیری بعد از یک دوره‌ی سودده",
+        "تکرار کاری خارج از پلن چون بار قبل جواب داده بود",
+        "نگرفتن تصمیم روی کاغذ و اقدام لحظه‌ای"
+      ],
+      "keywords": [
+        "تکانش",
+        "سه ضرر",
+        "انتقام",
+        "سرخوشی",
+        "اعتمادبه‌نفس کاذب"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0029",
+        "ACA-EQ-0040",
+        "ACA-EXP-0030",
+        "ACA-EQ-0007",
+        "PSY-PAT-0002",
+        "PSY-PAT-0006",
+        "PSY-PAT-0007",
+        "PSY-PAT-0017"
+      ],
+      "related_questions": [
+        "سه تا ضرر خوردم چیکار کنم؟",
+        "بعد از سود زیاد چی؟",
+        "چرا بی‌محابا معامله می‌کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0040",
+      "object_type": "COMMON_MISTAKE",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "چرا اشتباه را تکرار می‌کنیم: چون یک بار سود داد",
+      "language": "fa",
+      "chunk_text": "توضیح مدرس درباره‌ی سازوکار تکرار اشتباه:\n۱. یک بار خارج از قاعده عمل کردی و اتفاقاً **سود کردی**.\n۲. ذهنت نتیجه می‌گیرد: «این بار هم جواب می‌دهد».\n۳. این بار حساب نابود می‌شود.\n**راه‌حل درس:** آگاهی از این الگو + تعهد به پلن + مسئولیت‌پذیری.\n💡 نکته‌ی مهمی که در این توضیح هست: **سودِ یک معامله، درستی آن را ثابت نمی‌کند.** معامله‌ی خارج از پلن که به سود رسیده، خطرناک‌تر از معامله‌ی خارج از پلنی است که ضرر داده — چون تقویت می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "چرا با وجود اشتباه، دوباره تکرار می‌کنیم؟",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "چرا با وجود اشتباه، دوباره تکرار می‌کنیم؟",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "قبلاً آن اشتباه به ما سود داده است … ذهنت می‌گوید: «این بار هم جواب می‌دهد» ولی این بار حساب نابود می‌شود."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "common_mistakes": [
+        "نتیجه‌ی یک معامله را معیار درستی تصمیم گرفتن.",
+        "تکرار رفتار خارج از پلن چون بار قبل سود داد.",
+        "ثبت نکردن معامله‌ی خارج از پلن در ژورنال چون سودده بوده."
+      ],
+      "keywords": [
+        "تکرار اشتباه",
+        "تقویت",
+        "خارج از پلن",
+        "سود اتفاقی"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0039",
+        "ACA-EQ-0031",
+        "PSY-PAT-0014",
+        "PSY-PAT-0010",
+        "ACA-CLR-0004"
+      ],
+      "related_questions": [
+        "چرا باز همون کارو کردم؟",
+        "اون بار جواب داد، چرا این بار نه؟"
+      ]
+    },
+    {
+      "id": "ACA-EQ-0041",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "category": "دوره‌ی رایگان هوش هیجانی (EQ)",
+      "title": "تمرین دفتر تصمیمات — و اینکه چرا نوشتن معجزه می‌کند",
+      "language": "fa",
+      "chunk_text": "تمرین عملی پایان بخش سوم:\nمدرس تأکید می‌کند: **افراد موفق جهان همه دفتر دارند. با دفترت رفیق شو. نوشتن معجزه می‌کند.**\n💡 این تمرین همان کاری را برای زندگی می‌کند که ژورنال معاملاتی برای معاملات (`PSY-PAT-0010`) — و گام چهارم مهم‌ترین گام است، چون تصمیم گذشته را با فرمول امروز بازآزمایی می‌کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/eq/eq_lesson_3.md",
+        "source_location": "تمرین عملی",
+        "course": "دوره‌ی رایگان هوش هیجانی (EQ) — ۴ بخش",
+        "lesson": "۳",
+        "section": "تمرین عملی",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "دفترت را بردار … افراد موفق جهان همه دفتر دارند. با دفترت رفیق شو. نوشتن معجزه می‌کند."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "TRADING_PSYCHOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T22:30:33Z",
+      "updated_at": "2026-09-05T22:30:33Z",
+      "steps": [
+        "دفترت را بردار.",
+        "تصمیماتی را که در گذشته گرفتی و به موفقیت رسیدی بنویس.",
+        "تصمیماتی را که به اتفاق ناخوشایند منجر شد بنویس.",
+        "ریشه‌ی هر کدام را بررسی کن.",
+        "بپرس: اگر همان لحظه برمی‌گشتی، با فرمول تصمیم‌گیری باز هم همان کار را می‌کردی؟"
+      ],
+      "keywords": [
+        "دفتر",
+        "نوشتن",
+        "تمرین",
+        "تصمیمات گذشته",
+        "ژورنال"
+      ],
+      "related_concepts": [
+        "ACA-EQ-0037",
+        "ACA-EQ-0040",
+        "PSY-PAT-0010",
+        "ACA-CLR-0004"
+      ],
+      "related_questions": [
+        "چه تمرینی انجام بدم؟",
+        "ژورنال بنویسم؟"
+      ]
+    }
+  ]
+}

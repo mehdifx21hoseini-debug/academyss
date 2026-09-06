@@ -1,0 +1,39 @@
+{
+  "report_type": "validation",
+  "version": "v044",
+  "generated_at": "2026-09-05T19:38:02Z",
+  "stats": {
+    "files": 38,
+    "objects": 538,
+    "by_kind": {
+      "knowledge_object": 34,
+      "mentor_qa": 2,
+      "conflict_record": 1,
+      "review_item": 1
+    },
+    "by_domain": {
+      "brokers": 3,
+      "psychology": 27,
+      "metatrader": 102,
+      "general_trading": 49,
+      "mentor_qa": 43,
+      "academy": 308,
+      "meta": 6
+    },
+    "by_approval": {
+      "REVIEW_REQUIRED": 9,
+      "PENDING_VERIFICATION": 172,
+      "PENDING_REVIEW": 317,
+      "APPROVED": 13
+    }
+  },
+  "errors": 0,
+  "warnings": 1,
+  "findings": [
+    {
+      "level": "WARNING",
+      "where": "knowledge_base/mentor_qa/structured/qa_pack_02.json :: MQA-00037",
+      "message": "conflicts references unknown id CONF-0005"
+    }
+  ]
+}

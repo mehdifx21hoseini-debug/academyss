@@ -1,0 +1,545 @@
+{
+  "collection_id": "academy_intro_lesson_12",
+  "domain": "academy",
+  "title": "دوره مقدماتی — جلسه ۱۲: پین‌بار و الگوهای شمعی",
+  "description": "سه لایه‌ی تحلیل قیمت، سه چرخه‌ی بازار، تعریف و ویژگی‌های پین‌بار، اصول معامله با آن، اشتباهات رایج و نسبت آن با الگوهای سنتی شمعی.",
+  "version": "v001",
+  "generated_at": "2026-09-05T17:32:37Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "raw_sources/academy/intro/intro_lesson_12.md",
+    "raw_sources/academy/intro/intro_lesson_12.ingest.json"
+  ],
+  "notes": [
+    "این جلسه همان مبحث پین‌باری است که در جلسه‌ی ۸ وعده داده شده بود.",
+    "سه چرخه‌ی بازار برای سومین بار تکرار شد — شاهد تازه برای CONF-0002.",
+    "عدد «زیر بیست میلیون دلار = دسته پنجم» تکمیل‌کننده‌ی RQ-0014 است اما قطعی ثبت نشد.",
+    "معادل‌سازی کندل پوشاننده با پین‌بار قوی نیازمند تعیین عبارت دقیق است (RQ-0019)."
+  ],
+  "objects": [
+    {
+      "id": "ACA-INT-0190",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "تحلیل قیمت سه بخش دارد: گذشته، حال، لحظه",
+      "language": "fa",
+      "chunk_text": "پیش از ورود به معامله باید دید گذشته‌ی مارکت چطور عمل کرده است. مبنای این کار اصل تکنیکالی «قیمت همیشه تکرار می‌شود» است: اگر قیمت یک بار به سطحی واکنش داده، دوباره به همان سطح می‌رسد و واکنش می‌دهد. بنابراین تحلیل سه لایه دارد: (۱) گذشته — روند قبلی بازار، (۲) حال — قیمت فعلی، و (۳) ادامه‌ی مسیر که لحظه‌به‌لحظه و تیک‌به‌تیک بررسی می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_12.md",
+        "source_location": "بخش «تعریف تحلیل و بررسی قیمت» و بخش ۲",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۲",
+        "section": "بخش «تعریف تحلیل و بررسی قیمت» و بخش ۲",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "ما به عنوان یک تکنیکالیست می‌گیم قیمت همیشه تکرار می‌شه. اگر برای مثال به یک سطح واکنش داده، قیمت باز دوباره به اون سطح خواهد رسید و واکنش خواهد داد. … زمانی که بخوایم پیش بریم دیگه می‌شه لحظه به لحظه که تیک به تیک قیمت رو باید بررسی کنی."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T17:32:37Z",
+      "updated_at": "2026-09-05T17:32:37Z",
+      "summary": "گذشته + حال + بررسی تیک‌به‌تیک؛ پایه‌اش تکرارپذیری قیمت است.",
+      "keywords": [
+        "تکرار قیمت",
+        "گذشته",
+        "تیک به تیک",
+        "سطح"
+      ],
+      "related_concepts": [
+        "ACA-INT-0182",
+        "ACA-INT-0179",
+        "ACA-INT-0059"
+      ],
+      "related_questions": [
+        "از کجا تحلیل رو شروع کنم؟",
+        "چرا گذشته‌ی چارت مهمه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0191",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "سه چرخه‌ی اصلی بازار و روش معامله در هرکدام",
+      "language": "fa",
+      "chunk_text": "مارکت روی سه چرخه می‌چرخد که مدام تکرار می‌شوند: اسپایک (Spike)، کانال قیمتی (Channel) و تریدینگ رنج (Trading Range). رفتار قیمت در هر چرخه فرق می‌کند و روش معامله هم:\n• اسپایک — حرکت شدید و سریع؛ فقط یک‌طرفه معامله می‌شود.\n• کانال قیمتی — حرکت در کانال مشخص؛ می‌توان دوطرفه کار کرد اما باید مایل به جهت کانال بود.\n• تریدینگ رنج — نوسان در یک بازه؛ خرید در کف و فروش در سقف.\nقاعده‌ی اول: پیش از هر تصمیمی مشخص کن در کدام سایکل بازار هستی.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_12.md",
+        "source_location": "بخش «سه چرخه اصلی بازار» و بخش ۳",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۲",
+        "section": "بخش «سه چرخه اصلی بازار» و بخش ۳",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "مارکت بر ۳ تا چرخه است که مدام در حال تکراره: ۱. اسپایک ۲. کانال قیمتی ۳. تریدینگ رنج … تو کانال دو طرفه می‌تونی خرید و فروش کنی اما مایل به سمت کانال باید باشی. تو اسپایک‌ها فقط یک طرف هست. پس اول از همه باید مشخص کنیم در چه سایکلی از بازار هستیم."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T17:32:37Z",
+      "updated_at": "2026-09-05T17:32:37Z",
+      "summary": "اسپایک یک‌طرفه، کانال دوطرفه با تمایل، رنج خرید کف و فروش سقف.",
+      "keywords": [
+        "اسپایک",
+        "کانال قیمتی",
+        "تریدینگ رنج",
+        "سایکل",
+        "چرخه بازار"
+      ],
+      "related_concepts": [
+        "ACA-INT-0006",
+        "ACA-INT-0179",
+        "ACA-INT-0196"
+      ],
+      "related_questions": [
+        "سه چرخه‌ی بازار چیه؟",
+        "تو رنج چطور معامله کنم؟",
+        "اسپایک یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0192",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "همراه شدن با نقدینگی پول‌های سنگین",
+      "language": "fa",
+      "chunk_text": "مدرس تکرار می‌کند که پرایس اکشن بازتاب رفتار انسان‌هاست — هم رفتار معامله‌گر خرد و هم رفتار «پول‌های گنده». هدف آموزش این است که سوار نقدینگی پول‌های بزرگ شوی و همراه موجی بروی که آن‌ها می‌سازند؛ چون اگر برخلاف پول‌های سنگین بجنگی، ضرر می‌کنی. در همین بحث یک عدد هم می‌آورد: پنج میلیون دلار پول به‌حساب نمی‌آید و زیر بیست میلیون دلار در «دسته پنجم» قرار می‌گیریم.\n⚠️ جمله‌ی مربوط به عدد بیست میلیون فشرده بیان شده است؛ به‌عنوان توضیح تکمیلی «دسته پنجم» (جلسه‌ی ۱) ثبت شد و هنوز تعریف قطعی دسته‌بندی نیست (RQ-0014).",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_12.md",
+        "source_location": "بخش «پرایس اکشن و رفتارشناسی»",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۲",
+        "section": "بخش «پرایس اکشن و رفتارشناسی»",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "پرایس اکشن بازتابی از رفتار انسان‌هاست، بازتابی از رفتار من و شما و پول‌های گنده. … پنج میلیون دلار هیچ پولی نیست، زیر بیست میلیون دلار می‌شیم دسته پنجم. … اگر برخلاف پول‌های سنگین بجنگی، ضرر می‌کنی."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T17:32:37Z",
+      "updated_at": "2026-09-05T17:32:37Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "warnings": [
+        "عدد بیست میلیون دلار از یک جمله‌ی فشرده برداشت شده و تعریف قطعی دسته‌بندی نیست (RQ-0014)."
+      ],
+      "keywords": [
+        "پول‌های گنده",
+        "نقدینگی",
+        "دسته پنجم",
+        "بیست میلیون دلار"
+      ],
+      "related_concepts": [
+        "ACA-INT-0009",
+        "ACA-INT-0031",
+        "ACA-INT-0180"
+      ],
+      "related_questions": [
+        "دسته پنجم یعنی چی؟",
+        "چطور با پول‌های بزرگ همراه بشم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0193",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "بدنه و سایه: قدرت و حجم قراردادها",
+      "language": "fa",
+      "chunk_text": "مرور کندل‌شناسی با یک نکته‌ی تازه نسبت به جلسه‌ی ۸: بدنه‌ی بزرگ نشانه‌ی افزایش قراردادها و قدرت بالاست و بدنه‌ی کوچک نشانه‌ی کاهش قراردادها و قدرت پایین. باقی موارد همان است: کندل صعودی یعنی Close بالاتر از Open، کندل نزولی یعنی Close پایین‌تر از Open، دوجی یعنی برابری قدرت خریدار و فروشنده، سایه‌ی بالا قدرت فروشندگان و سایه‌ی پایین قدرت خریداران را نشان می‌دهد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_12.md",
+        "source_location": "بخش «کندل‌شناسی پایه» و بخش ۴",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۲",
+        "section": "بخش «کندل‌شناسی پایه» و بخش ۴",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "بدنه بزرگ: نشان‌دهنده افزایش قراردادها و قدرت بالا. بدنه کوچک: نشان‌دهنده کاهش قراردادها و قدرت پایین. سایه بالا: قدرت فروشندگان را نشان می‌دهد. سایه پایین: قدرت خریداران را نشان می‌دهد."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T17:32:37Z",
+      "updated_at": "2026-09-05T17:32:37Z",
+      "summary": "اندازه‌ی بدنه = حجم قرارداد و قدرت؛ سایه = فشار طرف مقابل.",
+      "keywords": [
+        "بدنه",
+        "سایه",
+        "قرارداد",
+        "قدرت"
+      ],
+      "related_concepts": [
+        "ACA-INT-0134",
+        "ACA-INT-0137",
+        "ACA-INT-0138"
+      ],
+      "related_questions": [
+        "بدنه بزرگ یعنی چی؟",
+        "سایه بالا چی رو نشون می‌ده؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0194",
+      "object_type": "DEFINITION",
+      "domain": "academy",
+      "title": "پین‌بار (Pin Bar) چیست",
+      "language": "fa",
+      "chunk_text": "پین‌بار کندلی است با سایه‌ی بلند در یک جهت و بدنه‌ی کوچک در جهت مخالف، و نشان‌دهنده‌ی تمایل بازار به یک جهت مشخص است.\n• پین‌بار صعودی: سایه‌ی بلند پایین + بدنه در بالا → قدرت خریداران، تمایل به صعود.\n• پین‌بار نزولی: سایه‌ی بلند بالا + بدنه در پایین → قدرت فروشندگان، تمایل به نزول.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_12.md",
+        "source_location": "بخش «پین‌بار (Pin Bar) چیست؟» و بخش ۵",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۲",
+        "section": "بخش «پین‌بار (Pin Bar) چیست؟» و بخش ۵",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "پین‌بار کندلی است که سایه بلندی در یک جهت دارد، بدنه کوچکی در جهت مخالف دارد، نشان‌دهنده تمایل بازار به یک جهت خاص است. پین‌بار صعودی: سایه بلند پایین + بدنه بالا … پین‌بار نزولی: سایه بلند بالا + بدنه پایین"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:32:37Z",
+      "updated_at": "2026-09-05T17:32:37Z",
+      "definition": "پین‌بار: کندلی با سایه‌ی بلند در یک سو و بدنه‌ی کوچک در سوی دیگر، نشانه‌ی تمایل بازار.",
+      "keywords": [
+        "پین بار",
+        "pin bar",
+        "سایه بلند",
+        "بدنه کوچک"
+      ],
+      "related_concepts": [
+        "ACA-INT-0195",
+        "ACA-INT-0137",
+        "ACA-INT-0193"
+      ],
+      "related_questions": [
+        "پین بار چیه؟",
+        "پین بار صعودی و نزولی چه فرقی دارن؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0195",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "چهار ویژگی معتبر بودن پین‌بار",
+      "language": "fa",
+      "chunk_text": "چهار چیزی که اعتبار یک پین‌بار را تعیین می‌کند:\n۱) رنگ بدنه اهمیتی ندارد — آنچه مهم است قدرت خریدار یا فروشنده است.\n۲) طول سایه مهم است — هرچه سایه بلندتر، قدرت بیشتر.\n۳) موقعیت تشکیل — پین‌بار در سطوح مهم (حمایت و مقاومت) ارزش بیشتری دارد.\n۴) نسبت بدنه به سایه — سایه باید حداقل ۲ برابر بدنه باشد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_12.md",
+        "source_location": "بخش «ویژگی‌های پین‌بار» و بخش ۶",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۲",
+        "section": "بخش «ویژگی‌های پین‌بار» و بخش ۶",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱. رنگ بدنه اهمیتی ندارد - مهم قدرت خریدار/فروشنده است ۲. طول سایه تأثیر دارد … ۳. موقعیت تشکیل - در سطوح مهم (حمایت/مقاومت) اهمیت بیشتری دارد ۴. نسبت بدنه به سایه - سایه باید حداقل ۲ برابر بدنه باشد"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:32:37Z",
+      "updated_at": "2026-09-05T17:32:37Z",
+      "summary": "رنگ مهم نیست؛ سایه حداقل دو برابر بدنه؛ موقعیت و طول سایه تعیین‌کننده‌اند.",
+      "keywords": [
+        "نسبت سایه به بدنه",
+        "دو برابر",
+        "حمایت",
+        "مقاومت",
+        "رنگ کندل"
+      ],
+      "related_concepts": [
+        "ACA-INT-0194",
+        "ACA-INT-0196",
+        "ACA-INT-0059"
+      ],
+      "related_questions": [
+        "پین بار معتبر چه شکلیه؟",
+        "رنگ پین بار مهمه؟",
+        "سایه چقدر باید بلند باشه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0196",
+      "object_type": "RULE",
+      "domain": "academy",
+      "title": "پین‌بار سیگنال است، نه استراتژی کامل",
+      "language": "fa",
+      "chunk_text": "تأکید صریح درس: پین‌بار یک سیگنال است، نه یک استراتژی کامل. کاربرد درست آن در کنار سه چیز است: تشخیص چرخه‌ی بازار (اسپایک/کانال/رنج)، سطوح حمایت و مقاومت، و روند کلی بازار. اگر پین‌بار در جهت روند و روی یک سطح مهم تشکیل شود، احتمال موفقیت بالا می‌رود. فرمول درس: سیگنال پین‌بار + تشخیص چرخه + سطح مهم = ورود موفق. مثالی که می‌زند: پین‌بار صعودی در کف یک کانال صعودی.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_12.md",
+        "source_location": "بخش «پین‌بار به عنوان سیگنال» و بخش ۷",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۲",
+        "section": "بخش «پین‌بار به عنوان سیگنال» و بخش ۷",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "پین‌بار یک سیگنال است، نه استراتژی کامل. … سیگنال پین‌بار + تشخیص چرخه + سطح مهم = ورود موفق. مثال: اگر در کف کانال صعودی پین‌بار صعودی دیدید، احتمال صعود زیاد است."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:32:37Z",
+      "updated_at": "2026-09-05T17:32:37Z",
+      "rule": "پین‌بار فقط در کنار تشخیص چرخه‌ی بازار و سطح مهم و روند استفاده شود، نه به‌تنهایی.",
+      "keywords": [
+        "سیگنال",
+        "استراتژی",
+        "چرخه",
+        "سطح مهم"
+      ],
+      "related_concepts": [
+        "ACA-INT-0191",
+        "ACA-INT-0194",
+        "ACA-INT-0197",
+        "ACA-INT-0062"
+      ],
+      "related_questions": [
+        "با دیدن پین بار وارد بشم؟",
+        "پین بار به تنهایی کافیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0197",
+      "object_type": "RULE",
+      "domain": "academy",
+      "title": "چهار اصل معامله با پین‌بار",
+      "language": "fa",
+      "chunk_text": "چهار اصلی که درس برای معامله با پین‌بار می‌گذارد:\n۱) با روند نجنگ — اگر روند صعودی است، پین‌بارهای نزولی را نادیده بگیر.\n۲) در سطوح مهم — پین‌بار روی حمایت یا مقاومت ارزش بیشتری دارد.\n۳) تأیید با کندل بعدی — منتظر بمان تا کندل بعدی جهت را تأیید کند.\n۴) مدیریت ریسک — همیشه حد ضرر مشخص کن.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_12.md",
+        "source_location": "بخش «اصول مهم در معامله با پین‌بار» و بخش ۶",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۲",
+        "section": "بخش «اصول مهم در معامله با پین‌بار» و بخش ۶",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱. با روند نجنگ … ۲. در سطوح مهم … ۳. تأیید با کندل بعدی - منتظر بمان تا کندل بعدی جهت را تأیید کند ۴. مدیریت ریسک - همیشه حد ضرر مشخص کنید"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:32:37Z",
+      "updated_at": "2026-09-05T17:32:37Z",
+      "rule": "پین‌بار خلاف روند نادیده گرفته شود؛ فقط روی سطوح مهم اعتبار دارد؛ کندل بعدی باید جهت را تأیید کند؛ و ورود بدون حد ضرر انجام نشود.",
+      "keywords": [
+        "با روند نجنگ",
+        "تأیید",
+        "حد ضرر",
+        "سطوح"
+      ],
+      "related_concepts": [
+        "ACA-INT-0196",
+        "ACA-INT-0158",
+        "ACA-INT-0172",
+        "ACA-INT-0153"
+      ],
+      "related_questions": [
+        "چطور با پین بار معامله کنم؟",
+        "منتظر تأیید بمونم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0198",
+      "object_type": "COMMON_MISTAKE",
+      "domain": "academy",
+      "title": "چهار اشتباه رایج در کار با پین‌بار",
+      "language": "fa",
+      "chunk_text": "چهار اشتباهی که درس نام می‌برد: معامله کردن با پین‌بار به‌تنهایی و بدون تأیید؛ نادیده گرفتن روند و معامله خلاف آن؛ توجه نکردن به موقعیت تشکیل (پین‌بار در هر جایی معتبر نیست)؛ و ورود بدون حد ضرر.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_12.md",
+        "source_location": "بخش ۸",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۲",
+        "section": "بخش ۸",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "۱. معامله با پین‌بار به تنهایی: نیاز به تأیید دارد ۲. نادیده گرفتن روند: با روند کار کنید ۳. توجه نکردن به موقعیت: پین‌بار در هر جایی معتبر نیست ۴. نادیده گرفتن حد ضرر: همیشه حد ضرر بگذارید"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:32:37Z",
+      "updated_at": "2026-09-05T17:32:37Z",
+      "common_mistakes": [
+        "ورود فقط با دیدن پین‌بار و بدون کندل تأیید",
+        "معامله خلاف روند اصلی",
+        "بی‌توجهی به اینکه پین‌بار روی چه سطحی تشکیل شده",
+        "باز کردن معامله بدون حد ضرر"
+      ],
+      "keywords": [
+        "اشتباه رایج",
+        "تأیید",
+        "روند",
+        "حد ضرر"
+      ],
+      "related_concepts": [
+        "ACA-INT-0197",
+        "ACA-INT-0175",
+        "PSY-PAT-0004"
+      ],
+      "related_questions": [
+        "اشتباه رایج تو پین بار چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0199",
+      "object_type": "COMPARISON",
+      "domain": "academy",
+      "title": "الگوهای سنتی شمعی در برابر پین‌بار",
+      "language": "fa",
+      "chunk_text": "موضع درس: الگوهای سنتی شمعی همه در مفهوم پین‌بار خلاصه می‌شوند و لازم نیست ده‌ها اسم حفظ شود. جدول معادل‌ها به روایت درس: ستاره صبحگاهی و چکش ← پین‌بار صعودی؛ ستاره شامگاهی و مرد دارآویز ← پین‌بار نزولی؛ پوشاننده صعودی ← پین‌بار صعودی قوی؛ پوشاننده نزولی ← پین‌بار نزولی قوی. مزیتی که می‌گوید: سادگی، بی‌نیازی از حفظ کردن اسامی، و نمایش مستقیم قدرت خریدار و فروشنده.\n⚠️ نکته‌ی آموزشی مهم: منظور درس یکی بودن *شکل* این الگوها نیست — کندل پوشاننده بدنه‌ی بزرگ دارد و با قاعده‌ی «سایه حداقل ۲ برابر بدنه» (ACA-INT-0195) جور درنمی‌آید. آنچه یکی است، *خواندن قدرت خریدار و فروشنده* از روی کندل است. مربی باید همین را آموزش دهد و نگوید کندل پوشاننده یک پین‌بار است (RQ-0019).",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_12.md",
+        "source_location": "بخش «تفاوت پین‌بار با الگوهای سنتی» و بخش ۹",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۲",
+        "section": "بخش «تفاوت پین‌بار با الگوهای سنتی» و بخش ۹",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "الگوهایی مثل ستاره صبحگاهی، ستاره شامگاهی، پوشاننده صعودی/نزولی همه در پین‌بار خلاصه می‌شوند. … مزیت پین‌بار: یادگیری یک مفهوم به جای ده‌ها اسم مختلف."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T17:32:37Z",
+      "updated_at": "2026-09-05T17:32:37Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "comparison": {
+        "ستاره صبحگاهی": {
+          "معادل در درس": "پین‌بار صعودی"
+        },
+        "ستاره شامگاهی": {
+          "معادل در درس": "پین‌بار نزولی"
+        },
+        "چکش": {
+          "معادل در درس": "پین‌بار صعودی"
+        },
+        "مرد دارآویز": {
+          "معادل در درس": "پین‌بار نزولی"
+        },
+        "پوشاننده صعودی": {
+          "معادل در درس": "پین‌بار صعودی قوی",
+          "توضیح": "شکل کندل یکی نیست؛ خواندن قدرت خریدار مشترک است"
+        },
+        "پوشاننده نزولی": {
+          "معادل در درس": "پین‌بار نزولی قوی",
+          "توضیح": "شکل کندل یکی نیست؛ خواندن قدرت فروشنده مشترک است"
+        }
+      },
+      "warnings": [
+        "کندل پوشاننده با قاعده‌ی «سایه حداقل ۲ برابر بدنه» هم‌خوان نیست؛ مربی نباید آن را شکلاً پین‌بار معرفی کند. در انتظار تعیین عبارت دقیق توسط مدرس (RQ-0019)."
+      ],
+      "keywords": [
+        "ستاره صبحگاهی",
+        "پوشاننده",
+        "چکش",
+        "مرد دارآویز",
+        "الگوهای شمعی"
+      ],
+      "related_concepts": [
+        "ACA-INT-0194",
+        "ACA-INT-0195",
+        "ACA-INT-0063"
+      ],
+      "related_questions": [
+        "الگوهای شمعی کلاسیک رو باید یاد بگیرم؟",
+        "کندل پوشاننده همون پین باره؟",
+        "چکش چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0200",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "جمع‌بندی جلسه‌ی دوازدهم",
+      "language": "fa",
+      "chunk_text": "هفت جمله‌ی پایانی درس: پرایس اکشن بازتاب رفتار انسان‌هاست؛ بازار سه چرخه‌ی اصلی دارد (اسپایک، کانال، رنج)؛ پین‌بار سیگنال تمایل بازار است؛ سایه‌ی بلند یعنی قدرت بالا؛ بدنه یعنی خالص حرکت قیمت؛ با روند کار کن نه برخلاف آن؛ و پین‌بار به‌تنهایی کافی نیست — به چرخه و سطح توجه کن. جمله‌ی آخر جمع‌بندی: همیشه حد ضرر بگذار.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_12.md",
+        "source_location": "بخش «جمع‌بندی نکات کلیدی» و بخش ۱۰",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۱۲",
+        "section": "بخش «جمع‌بندی نکات کلیدی» و بخش ۱۰",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "پرایس اکشن = بازتاب رفتار انسان‌ها … سه چرخه اصلی: اسپایک، کانال، رنج … پین‌بار = سیگنال تمایل بازار … با روند کار کن، نه برخلاف آن … پین‌بار به تنهایی کافی نیست، به چرخه و سطح توجه کن … همیشه حد ضرر بگذار"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "NOT_APPLICABLE",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.95,
+      "version": "v001",
+      "created_at": "2026-09-05T17:32:37Z",
+      "updated_at": "2026-09-05T17:32:37Z",
+      "summary": "چرخه را تشخیص بده، پین‌بار را در سطح و هم‌جهت روند بخوان، و حد ضرر بگذار.",
+      "keywords": [
+        "جمع‌بندی",
+        "پین بار",
+        "چرخه",
+        "روند"
+      ],
+      "related_concepts": [
+        "ACA-INT-0191",
+        "ACA-INT-0196",
+        "ACA-INT-0197",
+        "ACA-INT-0189"
+      ],
+      "related_questions": [
+        "خلاصه‌ی جلسه‌ی پین بار چیه؟"
+      ]
+    }
+  ]
+}

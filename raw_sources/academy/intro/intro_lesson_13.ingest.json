@@ -1,0 +1,842 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "intro_lesson_13",
+  "course": "intro",
+  "lesson": "13",
+  "title": "روندها و نحوه شناسایی آن‌ها",
+  "original_filename": "intro_lesson_13.md",
+  "raw_file": "raw_sources/academy/intro/intro_lesson_13.md",
+  "ingested_at": "2026-09-05T17:35:45Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 132,
+    "filler_cues": 0,
+    "speech_cues": 132,
+    "speech_ratio": 1.0,
+    "words": 1121,
+    "unique_words": 352,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "|---|---|",
+        "count": 8
+      },
+      {
+        "text": "- حرکت کند",
+        "count": 3
+      },
+      {
+        "text": "عنوان درس: آموزش مقدماتی - روندها (ترندها) در بازار و نحوه شناسایی آنها (بخش سیزدهم)",
+        "count": 2
+      },
+      {
+        "text": "اینگاد ویتراست، سلام به شما عزیزان.",
+        "count": 2
+      },
+      {
+        "text": "- اصلاح کند",
+        "count": 2
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "cues": [
+    {
+      "index": 1,
+      "start": null,
+      "end": null,
+      "text": "# TRANSCRIPT — آموزش مقدماتی، بخش سیزدهم"
+    },
+    {
+      "index": 2,
+      "start": null,
+      "end": null,
+      "text": "عنوان درس: آموزش مقدماتی - روندها (ترندها) در بازار و نحوه شناسایی آنها (بخش سیزدهم)"
+    },
+    {
+      "index": 3,
+      "start": null,
+      "end": null,
+      "text": "منبع: متن پاک‌سازی‌شده و ساختاریافته‌ی ارسالی مالک پروژه (۲۰۲۶-۰۹-۰۵)"
+    },
+    {
+      "index": 5,
+      "start": null,
+      "end": null,
+      "text": "## متن پاک‌سازی‌شده"
+    },
+    {
+      "index": 7,
+      "start": null,
+      "end": null,
+      "text": "اینگاد ویتراست، سلام به شما عزیزان."
+    },
+    {
+      "index": 9,
+      "start": null,
+      "end": null,
+      "text": "ترند از اون مواردیه که از این محتوا به بعد داخل چارت دقیقاً می‌تونید پیاده کنید کانسپتی که دارم بهتون آموزش می‌دم و نتیجه‌اش رو ببینید. پس از همین اول کار دوست دارم که دفترت بغل دستت باشه و دیگه خارج از این که من بخوام بهت بگم بنویس، خودت اتوماتیک یادداشت‌برداری کن."
+    },
+    {
+      "index": 11,
+      "start": null,
+      "end": null,
+      "text": "### انواع روندها در بازار"
+    },
+    {
+      "index": 13,
+      "start": null,
+      "end": null,
+      "text": "بازار مالی یا کلن قیمت، سه تا روند دارد. خیلی ساده بخوایم معامله‌ای صحبت کنیم:"
+    },
+    {
+      "index": 15,
+      "start": null,
+      "end": null,
+      "text": "۱. روند صعودی (Bullish)"
+    },
+    {
+      "index": 16,
+      "start": null,
+      "end": null,
+      "text": "۲. روند نزولی (Bearish)"
+    },
+    {
+      "index": 17,
+      "start": null,
+      "end": null,
+      "text": "۳. روند خنثی / رنج (Range)"
+    },
+    {
+      "index": 19,
+      "start": null,
+      "end": null,
+      "text": "در روندهای خنثی، خریدار یا فروشنده بی‌تصمیم است و نمی‌داند قیمت قرار است بره بالا یا پایین. به خاطر همین نوع رفتار معامله‌گران متفاوت می‌شود."
+    },
+    {
+      "index": 21,
+      "start": null,
+      "end": null,
+      "text": "### سه چرخه اصلی بازار (ساختار حرفه‌ای)"
+    },
+    {
+      "index": 23,
+      "start": null,
+      "end": null,
+      "text": "در مباحث حرفه‌ای‌تر، بازار را به سه چرخه تقسیم می‌کنیم:"
+    },
+    {
+      "index": 25,
+      "start": null,
+      "end": null,
+      "text": "۱. اسپایک (Spike) - شروع‌کننده روند"
+    },
+    {
+      "index": 26,
+      "start": null,
+      "end": null,
+      "text": "۲. کانال قیمتی (Channel) - بعد از اولین اصلاح"
+    },
+    {
+      "index": 27,
+      "start": null,
+      "end": null,
+      "text": "۳. تریدینگ رنج (Trading Range) - چرخه آخر"
+    },
+    {
+      "index": 29,
+      "start": null,
+      "end": null,
+      "text": "این چرخه‌ها مدام در بازار تکرار می‌شوند."
+    },
+    {
+      "index": 31,
+      "start": null,
+      "end": null,
+      "text": "### اجزای یک روند"
+    },
+    {
+      "index": 33,
+      "start": null,
+      "end": null,
+      "text": "یک روند شامل:"
+    },
+    {
+      "index": 35,
+      "start": null,
+      "end": null,
+      "text": "- اکستنشن (Extension): گام‌های حرکتی رو به بالا یا پایین"
+    },
+    {
+      "index": 36,
+      "start": null,
+      "end": null,
+      "text": "- اصلاح (Correction / Pullback): برگشت موقت قیمت"
+    },
+    {
+      "index": 38,
+      "start": null,
+      "end": null,
+      "text": "در یک روند صعودی، قیمت از نقطه A به B نمی‌رود بدون اصلاح. باید:"
+    },
+    {
+      "index": 40,
+      "start": null,
+      "end": null,
+      "text": "- حرکت کند"
+    },
+    {
+      "index": 41,
+      "start": null,
+      "end": null,
+      "text": "- اصلاح کند"
+    },
+    {
+      "index": 42,
+      "start": null,
+      "end": null,
+      "text": "- حرکت کند"
+    },
+    {
+      "index": 43,
+      "start": null,
+      "end": null,
+      "text": "- اصلاح کند"
+    },
+    {
+      "index": 44,
+      "start": null,
+      "end": null,
+      "text": "- حرکت کند"
+    },
+    {
+      "index": 46,
+      "start": null,
+      "end": null,
+      "text": "قانون: اکستنشن قیمت باید بزرگ‌تر از اصلاح باشد."
+    },
+    {
+      "index": 48,
+      "start": null,
+      "end": null,
+      "text": "### تشخیص روند صعودی (Bullish)"
+    },
+    {
+      "index": 50,
+      "start": null,
+      "end": null,
+      "text": "روند صعودی تا زمانی صعودی است که:"
+    },
+    {
+      "index": 52,
+      "start": null,
+      "end": null,
+      "text": "| شرط | توضیح |"
+    },
+    {
+      "index": 53,
+      "start": null,
+      "end": null,
+      "text": "|---|---|"
+    },
+    {
+      "index": 54,
+      "start": null,
+      "end": null,
+      "text": "| سقف بالاتر (Higher High) | سقف فعلی > سقف قبلی |"
+    },
+    {
+      "index": 55,
+      "start": null,
+      "end": null,
+      "text": "| کف بالاتر (Higher Low) | کف فعلی > کف قبلی |"
+    },
+    {
+      "index": 57,
+      "start": null,
+      "end": null,
+      "text": "نکته: روند صعودی یعنی قیمت همواره بتواند سقف بالاتر و کف بالاتر بزند."
+    },
+    {
+      "index": 59,
+      "start": null,
+      "end": null,
+      "text": "ضعف در روند صعودی: وقتی که قیمت دیگر نتواند سقف بالاتر بزند یا کف پایین‌تر بزند."
+    },
+    {
+      "index": 61,
+      "start": null,
+      "end": null,
+      "text": "### تشخیص روند نزولی (Bearish)"
+    },
+    {
+      "index": 63,
+      "start": null,
+      "end": null,
+      "text": "روند نزولی تا زمانی نزولی است که:"
+    },
+    {
+      "index": 65,
+      "start": null,
+      "end": null,
+      "text": "| شرط | توضیح |"
+    },
+    {
+      "index": 66,
+      "start": null,
+      "end": null,
+      "text": "|---|---|"
+    },
+    {
+      "index": 67,
+      "start": null,
+      "end": null,
+      "text": "| سقف پایین‌تر (Lower High) | سقف فعلی < سقف قبلی |"
+    },
+    {
+      "index": 68,
+      "start": null,
+      "end": null,
+      "text": "| کف پایین‌تر (Lower Low) | کف فعلی < کف قبلی |"
+    },
+    {
+      "index": 70,
+      "start": null,
+      "end": null,
+      "text": "### روند خنثی / رنج (Range)"
+    },
+    {
+      "index": 72,
+      "start": null,
+      "end": null,
+      "text": "خریدار و فروشنده هر دو بی‌تصمیم هستند. قیمت در یک محدوده مشخص بالا و پایین می‌رود."
+    },
+    {
+      "index": 74,
+      "start": null,
+      "end": null,
+      "text": "مثال: قیمت بین دو سطح مقاومت و حمایت در نوسان است. شکست هر کدام از این سطوح، شروع روند جدید را نشان می‌دهد."
+    },
+    {
+      "index": 76,
+      "start": null,
+      "end": null,
+      "text": "### پایان روند"
+    },
+    {
+      "index": 78,
+      "start": null,
+      "end": null,
+      "text": "نکته کلیدی: آخرین جایی که قیمت اصلاح کرده، برای ما بسیار مهم است."
+    },
+    {
+      "index": 80,
+      "start": null,
+      "end": null,
+      "text": "شکست آخرین کف (در روند صعودی):"
+    },
+    {
+      "index": 82,
+      "start": null,
+      "end": null,
+      "text": "- اگر آخرین کف شکسته شود، پایان روند صعودی است"
+    },
+    {
+      "index": 83,
+      "start": null,
+      "end": null,
+      "text": "- می‌تواند شروع روند جدید باشد"
+    },
+    {
+      "index": 85,
+      "start": null,
+      "end": null,
+      "text": "در روند نزولی: شکست آخرین سقف، پایان روند نزولی را نشان می‌دهد."
+    },
+    {
+      "index": 87,
+      "start": null,
+      "end": null,
+      "text": "### قدرت روند (مومنتوم)"
+    },
+    {
+      "index": 89,
+      "start": null,
+      "end": null,
+      "text": "مومنتوم یعنی سرعت و شتاب حرکت قیمت."
+    },
+    {
+      "index": 91,
+      "start": null,
+      "end": null,
+      "text": "| نوع روند | ویژگی |"
+    },
+    {
+      "index": 92,
+      "start": null,
+      "end": null,
+      "text": "|---|---|"
+    },
+    {
+      "index": 93,
+      "start": null,
+      "end": null,
+      "text": "| قوی | شیب تند، سرعت بالا، اصلاح کم |"
+    },
+    {
+      "index": 94,
+      "start": null,
+      "end": null,
+      "text": "| متوسط | شیب ملایم‌تر، اصلاح بیشتر |"
+    },
+    {
+      "index": 95,
+      "start": null,
+      "end": null,
+      "text": "| ضعیف | اصلاح عمیق، عدم توانایی در ادامه حرکت |"
+    },
+    {
+      "index": 97,
+      "start": null,
+      "end": null,
+      "text": "مهم: شیب خط روند، قدرت خریداران یا فروشندگان را نشان می‌دهد. هر چه شیب تندتر باشد، قدرت بیشتری در آن جهت وجود دارد."
+    },
+    {
+      "index": 99,
+      "start": null,
+      "end": null,
+      "text": "### نکات کلیدی برای تمرین"
+    },
+    {
+      "index": 101,
+      "start": null,
+      "end": null,
+      "text": "۱. روی نمودار خودت، سقف و کف‌ها را رسم کن"
+    },
+    {
+      "index": 102,
+      "start": null,
+      "end": null,
+      "text": "۲. تشخیص بده که روند فعلی صعودی است، نزولی است یا خنثی"
+    },
+    {
+      "index": 103,
+      "start": null,
+      "end": null,
+      "text": "۳. آخرین نقطه اصلاح را پیدا کن"
+    },
+    {
+      "index": 104,
+      "start": null,
+      "end": null,
+      "text": "۴. ببین قیمت به کدام سمت شکسته شده"
+    },
+    {
+      "index": 105,
+      "start": null,
+      "end": null,
+      "text": "۵. با روند کار کن، نه برخلاف آن"
+    },
+    {
+      "index": 107,
+      "start": null,
+      "end": null,
+      "text": "## موارد نیازمند بررسی (طبق متن ارسالی)"
+    },
+    {
+      "index": 109,
+      "start": null,
+      "end": null,
+      "text": "موردی برای بررسی پیدا نشد."
+    },
+    {
+      "index": 111,
+      "start": null,
+      "end": null,
+      "text": "## متن ساختاریافته (STRUCTURED TRANSCRIPT)"
+    },
+    {
+      "index": 113,
+      "start": null,
+      "end": null,
+      "text": "عنوان درس: آموزش مقدماتی - روندها (ترندها) در بازار و نحوه شناسایی آنها (بخش سیزدهم)"
+    },
+    {
+      "index": 115,
+      "start": null,
+      "end": null,
+      "text": "### ۱. مقدمه"
+    },
+    {
+      "index": 117,
+      "start": null,
+      "end": null,
+      "text": "اینگاد ویتراست، سلام به شما عزیزان."
+    },
+    {
+      "index": 119,
+      "start": null,
+      "end": null,
+      "text": "ترند از اون مواردیه که از این محتوا به بعد داخل چارت دقیقاً می‌تونید پیاده کنید کانسپتی که دارم بهتون آموزش می‌دم و نتیجه‌اش رو ببینید. دفترت بغل دستت باشه و یادداشت‌برداری کن."
+    },
+    {
+      "index": 121,
+      "start": null,
+      "end": null,
+      "text": "### ۲. انواع روندها"
+    },
+    {
+      "index": 123,
+      "start": null,
+      "end": null,
+      "text": "| نوع روند | توضیح |"
+    },
+    {
+      "index": 124,
+      "start": null,
+      "end": null,
+      "text": "|---|---|"
+    },
+    {
+      "index": 125,
+      "start": null,
+      "end": null,
+      "text": "| صعودی (Bullish) | قیمت در حال افزایش |"
+    },
+    {
+      "index": 126,
+      "start": null,
+      "end": null,
+      "text": "| نزولی (Bearish) | قیمت در حال کاهش |"
+    },
+    {
+      "index": 127,
+      "start": null,
+      "end": null,
+      "text": "| خنثی / رنج (Range) | قیمت در یک محدوده نوسان دارد |"
+    },
+    {
+      "index": 129,
+      "start": null,
+      "end": null,
+      "text": "### ۳. سه چرخه اصلی بازار (ساختار حرفه‌ای)"
+    },
+    {
+      "index": 131,
+      "start": null,
+      "end": null,
+      "text": "در تحلیل حرفه‌ای، بازار شامل سه چرخه متوالی است:"
+    },
+    {
+      "index": 133,
+      "start": null,
+      "end": null,
+      "text": "اسپایک → کانال قیمتی → تریدینگ رنج → (تکرار)"
+    },
+    {
+      "index": 135,
+      "start": null,
+      "end": null,
+      "text": "| چرخه | توضیح |"
+    },
+    {
+      "index": 136,
+      "start": null,
+      "end": null,
+      "text": "|---|---|"
+    },
+    {
+      "index": 137,
+      "start": null,
+      "end": null,
+      "text": "| اسپایک | حرکت سریع و شدید قیمت، شروع روند |"
+    },
+    {
+      "index": 138,
+      "start": null,
+      "end": null,
+      "text": "| کانال قیمتی | حرکت در یک کانال با اصلاح‌های منظم |"
+    },
+    {
+      "index": 139,
+      "start": null,
+      "end": null,
+      "text": "| تریدینگ رنج | نوسان در یک محدوده بدون جهت مشخص |"
+    },
+    {
+      "index": 141,
+      "start": null,
+      "end": null,
+      "text": "### ۴. اجزای یک روند"
+    },
+    {
+      "index": 143,
+      "start": null,
+      "end": null,
+      "text": "هر روند از دو بخش تشکیل شده است:"
+    },
+    {
+      "index": 145,
+      "start": null,
+      "end": null,
+      "text": "۱. اکستنشن (Extension): حرکت اصلی در جهت روند"
+    },
+    {
+      "index": 146,
+      "start": null,
+      "end": null,
+      "text": "۲. اصلاح (Correction / Pullback): برگشت موقت خلاف جهت روند"
+    },
+    {
+      "index": 148,
+      "start": null,
+      "end": null,
+      "text": "قانون طلایی: اکستنشن باید بزرگ‌تر از اصلاح باشد."
+    },
+    {
+      "index": 150,
+      "start": null,
+      "end": null,
+      "text": "### ۵. تشخیص روند صعودی (Bullish)"
+    },
+    {
+      "index": 152,
+      "start": null,
+      "end": null,
+      "text": "روند صعودی = Higher High + Higher Low"
+    },
+    {
+      "index": 154,
+      "start": null,
+      "end": null,
+      "text": "| مفهوم | معنی |"
+    },
+    {
+      "index": 155,
+      "start": null,
+      "end": null,
+      "text": "|---|---|"
+    },
+    {
+      "index": 156,
+      "start": null,
+      "end": null,
+      "text": "| Higher High (سقف بالاتر) | سقف فعلی > سقف قبلی |"
+    },
+    {
+      "index": 157,
+      "start": null,
+      "end": null,
+      "text": "| Higher Low (کف بالاتر) | کف فعلی > کف قبلی |"
+    },
+    {
+      "index": 159,
+      "start": null,
+      "end": null,
+      "text": "نکته: تا زمانی که قیمت بتواند سقف و کف بالاتر بزند، روند صعودی است."
+    },
+    {
+      "index": 161,
+      "start": null,
+      "end": null,
+      "text": "ضعف روند صعودی: وقتی قیمت نتواند سقف بالاتر بزند یا کف پایین‌تر بزند."
+    },
+    {
+      "index": 163,
+      "start": null,
+      "end": null,
+      "text": "### ۶. تشخیص روند نزولی (Bearish)"
+    },
+    {
+      "index": 165,
+      "start": null,
+      "end": null,
+      "text": "روند نزولی = Lower High + Lower Low"
+    },
+    {
+      "index": 167,
+      "start": null,
+      "end": null,
+      "text": "| مفهوم | معنی |"
+    },
+    {
+      "index": 168,
+      "start": null,
+      "end": null,
+      "text": "|---|---|"
+    },
+    {
+      "index": 169,
+      "start": null,
+      "end": null,
+      "text": "| Lower High (سقف پایین‌تر) | سقف فعلی < سقف قبلی |"
+    },
+    {
+      "index": 170,
+      "start": null,
+      "end": null,
+      "text": "| Lower Low (کف پایین‌تر) | کف فعلی < کف قبلی |"
+    },
+    {
+      "index": 172,
+      "start": null,
+      "end": null,
+      "text": "### ۷. روند خنثی / رنج (Range)"
+    },
+    {
+      "index": 174,
+      "start": null,
+      "end": null,
+      "text": "ویژگی‌ها:"
+    },
+    {
+      "index": 176,
+      "start": null,
+      "end": null,
+      "text": "- قیمت بین حمایت و مقاومت در نوسان است"
+    },
+    {
+      "index": 177,
+      "start": null,
+      "end": null,
+      "text": "- خریدار و فروشنده هر دو بی‌تصمیم هستند"
+    },
+    {
+      "index": 178,
+      "start": null,
+      "end": null,
+      "text": "- شکست هر سطح، شروع روند جدید است"
+    },
+    {
+      "index": 180,
+      "start": null,
+      "end": null,
+      "text": "### ۸. پایان روند - نقطه کلیدی"
+    },
+    {
+      "index": 182,
+      "start": null,
+      "end": null,
+      "text": "قانون اصلی: آخرین جایی که قیمت اصلاح کرده، برای ما بسیار مهم است."
+    },
+    {
+      "index": 184,
+      "start": null,
+      "end": null,
+      "text": "در روند صعودی:"
+    },
+    {
+      "index": 186,
+      "start": null,
+      "end": null,
+      "text": "- اگر آخرین کف شکسته شود → پایان روند صعودی"
+    },
+    {
+      "index": 187,
+      "start": null,
+      "end": null,
+      "text": "- این نقطه می‌تواند شروع روند جدید باشد"
+    },
+    {
+      "index": 189,
+      "start": null,
+      "end": null,
+      "text": "در روند نزولی:"
+    },
+    {
+      "index": 191,
+      "start": null,
+      "end": null,
+      "text": "- اگر آخرین سقف شکسته شود → پایان روند نزولی"
+    },
+    {
+      "index": 193,
+      "start": null,
+      "end": null,
+      "text": "### ۹. قدرت روند (مومنتوم)"
+    },
+    {
+      "index": 195,
+      "start": null,
+      "end": null,
+      "text": "مومنتوم = سرعت و شتاب حرکت قیمت"
+    },
+    {
+      "index": 197,
+      "start": null,
+      "end": null,
+      "text": "| نوع روند | ویژگی‌ها |"
+    },
+    {
+      "index": 198,
+      "start": null,
+      "end": null,
+      "text": "|---|---|"
+    },
+    {
+      "index": 199,
+      "start": null,
+      "end": null,
+      "text": "| قوی | شیب تند، سرعت بالا، اصلاح کم |"
+    },
+    {
+      "index": 200,
+      "start": null,
+      "end": null,
+      "text": "| متوسط | شیب ملایم، اصلاح بیشتر |"
+    },
+    {
+      "index": 201,
+      "start": null,
+      "end": null,
+      "text": "| ضعیف | اصلاح عمیق، عدم توانایی در ادامه حرکت |"
+    },
+    {
+      "index": 203,
+      "start": null,
+      "end": null,
+      "text": "نکته: هر چه شیب خط روند تندتر باشد، قدرت بیشتری در آن جهت وجود دارد."
+    },
+    {
+      "index": 205,
+      "start": null,
+      "end": null,
+      "text": "### ۱۰. تمرین عملی"
+    },
+    {
+      "index": 207,
+      "start": null,
+      "end": null,
+      "text": "۱. روی نمودار خودت سقف و کف‌ها را رسم کن"
+    },
+    {
+      "index": 208,
+      "start": null,
+      "end": null,
+      "text": "۲. نوع روند فعلی را مشخص کن (صعودی/نزولی/رنج)"
+    },
+    {
+      "index": 209,
+      "start": null,
+      "end": null,
+      "text": "۳. آخرین نقطه اصلاح را پیدا کن"
+    },
+    {
+      "index": 210,
+      "start": null,
+      "end": null,
+      "text": "۴. ببین قیمت به کدام سمت شکسته شده"
+    },
+    {
+      "index": 211,
+      "start": null,
+      "end": null,
+      "text": "۵. با روند کار کن، نه برخلاف آن"
+    }
+  ]
+}

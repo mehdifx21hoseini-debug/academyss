@@ -1,0 +1,50 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "intro_lesson_17",
+  "course": "intro",
+  "lesson": "17",
+  "title": "جمع‌بندی دوره مقدماتی و معرفی مسیر پیش رو",
+  "original_filename": "intro_lesson_17.md",
+  "raw_file": "raw_sources/academy/intro/intro_lesson_17_01.md",
+  "ingested_at": "2026-09-05T18:42:21Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 121,
+    "filler_cues": 0,
+    "speech_cues": 121,
+    "speech_ratio": 1.0,
+    "words": 1577,
+    "unique_words": 707,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "عنوان درس: جمع‌بندی دوره مقدماتی - سخن پایانی و معرفی مسیر پیش رو",
+        "count": 2
+      },
+      {
+        "text": "۱. درک تیک به تیک قیمت (تکنیکال)",
+        "count": 2
+      },
+      {
+        "text": "۲. تسلط به روان خود (سایکولوژی)",
+        "count": 2
+      },
+      {
+        "text": "۳. استراتژی مکتوب",
+        "count": 2
+      },
+      {
+        "text": "| بخش | موضوع |",
+        "count": 2
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "report_type": "transcript_quality",
+  "version": "v001"
+}

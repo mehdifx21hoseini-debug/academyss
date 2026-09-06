@@ -1,0 +1,50 @@
+{
+  "ingest_type": "academy_course_transcript",
+  "slug": "eq_lesson_3",
+  "course": "eq",
+  "lesson": "3",
+  "title": "هوش هیجانی (EQ) در معامله‌گری و زندگی — بخش سوم",
+  "original_filename": "eq_03.md",
+  "raw_file": "raw_sources/academy/eq/eq_lesson_3.md",
+  "ingested_at": "2026-09-05T22:27:03Z",
+  "ingester": "tools/ingest_transcript.py",
+  "metrics": {
+    "cues": 223,
+    "filler_cues": 0,
+    "speech_cues": 223,
+    "speech_ratio": 1.0,
+    "words": 1322,
+    "unique_words": 520,
+    "repetition_artifact_words": 0,
+    "repetition_artifact_ratio": 0.0,
+    "repetition_runs": [],
+    "duration_seconds": 0,
+    "duration_hhmm": "00:00",
+    "top_repeated_lines": [
+      {
+        "text": "بخش\tتوضیح",
+        "count": 6
+      },
+      {
+        "text": "نمره‌ها:",
+        "count": 3
+      },
+      {
+        "text": "بالای ۶۰ = خوب",
+        "count": 3
+      },
+      {
+        "text": "بالای ۸۰ = عالی",
+        "count": 3
+      },
+      {
+        "text": "سه بخش:",
+        "count": 3
+      }
+    ]
+  },
+  "verdict": "USABLE",
+  "verdict_reason": "کیفیت برای پردازش کافی است.",
+  "report_type": "transcript_quality",
+  "version": "v001"
+}

@@ -1,0 +1,1168 @@
+{
+  "collection_id": "academy_intro_lesson_05",
+  "domain": "academy",
+  "title": "دوره مقدماتی — جلسه ۵: آشنایی کامل با متاتریدر ۴",
+  "description": "مرجع کامل کار با متاتریدر ۴ از زبان مدرس: تایم‌فریم‌ها، انواع چارت، تنظیمات نمایش، تمپلیت، ابزارهای تحلیلی، فیبوناچی به‌عنوان خط‌کش ریسک به ریوارد، ترمینال، ثبت و مدیریت معامله، تاریخچه، هشدار و کلیدهای میان‌بر.",
+  "version": "v001",
+  "generated_at": "2026-09-05T16:04:39Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "raw_sources/academy/intro/intro_lesson_05.md",
+    "raw_sources/academy/intro/intro_lesson_05.ingest.json"
+  ],
+  "notes": [
+    "این جلسه بسیاری از رکوردهای دامنه‌ی metatrader را که تا امروز MODEL_DRAFT بودند تأیید متقاطع می‌کند (RQ-0007).",
+    "استفاده از فیبوناچی به‌عنوان ابزار، ناقض موضع جلسه‌ی سوم نیست؛ رکورد ACA-INT-0098 این تفکیک را روشن می‌کند.",
+    "جمله‌ی مربوط به Open Offline طبق تصمیم مالک پروژه (D-0004) حذف شد و هیچ رکوردی از آن ساخته نمی‌شود.",
+    "اعداد سواپ در این جلسه وابسته به نماد و بروکر است و به‌عنوان نرخ عمومی ثبت نشد."
+  ],
+  "objects": [
+    {
+      "id": "ACA-INT-0084",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "متاتریدر چیست و دستور معامله چه مسیری طی می‌کند",
+      "language": "fa",
+      "chunk_text": "متاتریدر پلتفرمی است که همه‌ی اقدام‌های معامله‌گر — باز و بسته کردن معامله، گذاشتن حد ضرر و حد سود و هر تنظیم دیگر — از طریق آن انجام می‌شود. زنجیره‌ی دستور چنین است: معامله‌گر دستور را در متاتریدر می‌دهد، متاتریدر آن را به بروکر می‌رساند و بروکر به‌عنوان واسط، آن را به بانک‌ها و تأمین‌کننده‌ی نقدینگی (LP) منتقل می‌کند. پلتفرم‌های دیگری مثل سی‌تریدر و نینجاتریدر هم وجود دارند، اما رایج‌ترین پلتفرم جهان متاتریدر است و دو نسخه دارد: ۴ و ۵.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۱",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۱",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "یک پلتفرمی هست به نام متاتریدر … رایج‌ترین پلتفرمی که تو جهان هست، متاتریدره … میاد دستور شما رو به بروکر می‌رسونه … و اون LP (تأمین‌کننده نقدینگی) … متاتریدر دو تا نسخه داره."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BOTH",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "definition": "متاتریدر: پلتفرم معاملاتی که دستور معامله‌گر را به بروکر و از آنجا به بازار می‌رساند.",
+      "keywords": [
+        "متاتریدر",
+        "پلتفرم",
+        "LP",
+        "سی تریدر",
+        "نینجا تریدر"
+      ],
+      "related_concepts": [
+        "MT-CONC-0014",
+        "ACA-INT-0069"
+      ],
+      "related_questions": [
+        "متاتریدر چیه؟",
+        "چه پلتفرم‌هایی هست؟",
+        "دستور من چطور به بازار می‌رسه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0085",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "تایم‌فریم‌ها در متاتریدر ۴",
+      "language": "fa",
+      "chunk_text": "تایم‌فریم یعنی هر کندل حاصل چه بازه‌ی زمانی است. متاتریدر ۴ این تایم‌فریم‌ها را دارد: M1 (یک دقیقه)، M5 (پنج دقیقه)، M15 (پانزده دقیقه)، M30 (سی دقیقه)، H1 (یک ساعت)، H4 (چهار ساعت)، Daily (یک روز)، Weekly (یک هفته) و Monthly (یک ماه). با پایان هر بازه، کندل جدید ساخته می‌شود؛ مثلاً همه‌ی کندل‌های یک روز معاملاتی در یک کندل دیلی خلاصه می‌شوند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۲",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۲",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "M1، M5، M15، M30، H1، H4، Daily، Weekly، Monthly … هر کدوم از این کندل‌ها حاصل یک دقیقه است … کل این کندل‌ها توی یک کندل دیلی خلاصه شده‌اند."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "definition": "تایم‌فریم: بازه‌ی زمانی‌ای که هر کندل نماینده‌ی آن است.",
+      "keywords": [
+        "تایم فریم",
+        "M5",
+        "H1",
+        "Daily",
+        "کندل"
+      ],
+      "related_concepts": [
+        "MT-CONC-0012",
+        "MT-CMP-0003"
+      ],
+      "related_questions": [
+        "تایم فریم یعنی چی؟",
+        "M5 یعنی چی؟",
+        "متاتریدر ۴ چه تایم‌فریم‌هایی داره؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0086",
+      "object_type": "OPERATIONAL_FACT",
+      "domain": "academy",
+      "title": "تایم‌فریم شخصی مدرس: M5 و دی‌تریدینگ",
+      "language": "fa",
+      "chunk_text": "مدرس می‌گوید تایم‌فریم معاملاتی خودش پنج دقیقه (M5) است و دی‌تریدر است. او تأکید می‌کند این انتخاب شخصی است و افراد مختلف روی تایم‌فریم‌های متفاوتی کار می‌کنند — یکی یک‌ساعته، یکی روزانه.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۲",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۲",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "یکی مثل من پنج دقیقه هست. من پنج دقیقه هستم و دیلی تریدر هستم."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "warnings": [
+        "این انتخاب شخصی مدرس است و توصیه‌ی عمومی برای انتخاب تایم‌فریم محسوب نمی‌شود."
+      ],
+      "keywords": [
+        "M5",
+        "دی تریدر",
+        "تایم فریم شخصی"
+      ],
+      "related_questions": [
+        "شما چه تایم‌فریمی کار می‌کنید؟",
+        "من چه تایم‌فریمی انتخاب کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0087",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "سه نوع نمودار و چرایی انتخاب کندل‌استیک",
+      "language": "fa",
+      "chunk_text": "سیر تحول نمودار به روایت مدرس: ابتدا لاین‌چارت بوده که فقط یک خط قیمت می‌داد؛ بعد بارچارت آمد که کف و سقف و باز و بسته شدن را نشان می‌داد؛ و در نهایت کندل‌استیک که امروز کل جهان با آن کار می‌کند. دلیل انتخاب کندل‌استیک این است که قدرت خریدار و فروشنده و عرضه و تقاضا همگی در خود کندل دیده می‌شوند. متدولوژی آکادمی با کندل‌استیک کار می‌کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۳",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۳",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "قیمت اول از همه لاین‌چارت بوده … بارچارت اومد … و در نهایت اومد کندل‌استیک … کندل‌استیک به ما قدرت خریدار و فروشنده، عرضه و تقاضا - همه این‌ها تو همین کندله. پس ما با کندل‌استیک کار داریم."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "keywords": [
+        "کندل استیک",
+        "بارچارت",
+        "لاین چارت"
+      ],
+      "related_concepts": [
+        "MT-PROC-0005",
+        "ACA-INT-0053"
+      ],
+      "related_questions": [
+        "کدوم نوع چارت رو انتخاب کنم؟",
+        "چرا کندل استیک؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0088",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "زوم مناسب نمودار",
+      "language": "fa",
+      "chunk_text": "با دکمه‌های زوم این و زوم اوت (یا کلیدهای + و −) می‌توان تعداد کندل‌های قابل مشاهده را تغییر داد. هرچه بیشتر زوم اوت کنید کندل‌های بیشتری دیده می‌شود و در حد نهایی، دکمه خاکستری و غیرفعال می‌شود. زوم درست یعنی تعداد مناسبی کندل ببینید که همه‌چیز درست دیده شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۴",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۴",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "این دکمه‌ها زوم اوت و زوم این هستن … اگر بیش از حد زوم اوت کنی، خاکستری می‌شه، یعنی غیرفعال شده. زوم درست نمودار یعنی تعداد مناسبی از کندل‌ها رو ببینم."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "steps": [
+        "از دکمه‌های زوم روی نوار ابزار یا کلیدهای + و − استفاده کنید.",
+        "تعداد کندل نمایش‌داده‌شده را تا حدی تنظیم کنید که ساختار حرکت قیمت خوانا باشد."
+      ],
+      "keywords": [
+        "زوم",
+        "zoom in",
+        "zoom out"
+      ],
+      "related_concepts": [
+        "MT-PROC-0005"
+      ],
+      "related_questions": [
+        "چطور چارت رو بزرگ کنم؟",
+        "چند تا کندل ببینم بهتره؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0089",
+      "object_type": "RULE",
+      "domain": "academy",
+      "title": "موضع عملی درباره‌ی افزودن اندیکاتور در پلتفرم",
+      "language": "fa",
+      "chunk_text": "مدرس مسیر افزودن اندیکاتور در متاتریدر را نشان می‌دهد اما توصیه‌اش این است که کنار گذاشته شود: به گفته‌ی او اندیکاتور جذاب است ولی «سایه» است، و هر چیزی که لازم است در خود نمودار و در تیک‌به‌تیک قیمت وجود دارد. این همان موضعی است که در جلسه‌ی سوم به‌صورت مبسوط توضیح داده شد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۵",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۵",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "من تمام مسیر اندیکاتور رفتم، همه اینا رو بریز دور … خیلی خوشگله اما سایه‌ست. هر آن چیزی که ما می‌خواهیم تو خود نموداره."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "rule": "در متدولوژی آکادمی، تحلیل بر خود نمودار انجام می‌شود، نه بر اندیکاتور.",
+      "keywords": [
+        "اندیکاتور",
+        "سایه قیمت",
+        "نمودار"
+      ],
+      "related_concepts": [
+        "ACA-INT-0063",
+        "ACA-INT-0065",
+        "MT-PROC-0004"
+      ],
+      "related_questions": [
+        "اندیکاتور نصب کنم؟",
+        "چرا اندیکاتور نمی‌ذارید؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0090",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "مرتب کردن چند نمودار با Arrange Windows",
+      "language": "fa",
+      "chunk_text": "با گزینه‌ی Arrange Windows می‌توان همه‌ی نمودارهای باز را کنار هم مرتب کرد تا با یک نگاه وضعیت چند نماد دیده شود. عنوان بالای هر چارت، نماد و تایم‌فریم آن را نشان می‌دهد (مثلاً EURUSD M5).",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۶",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۶",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "این گزینه چیه؟ Arrange Windows … می‌گه تمام نمودارهایی که اون پایین باز هست رو مرتب کن."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "steps": [
+        "چارت‌های موردنظر را باز کنید.",
+        "گزینه‌ی Arrange Windows را از نوار ابزار یا منوی Window بزنید.",
+        "نماد و تایم‌فریم هر چارت را از عنوان بالای آن بخوانید."
+      ],
+      "keywords": [
+        "arrange windows",
+        "چیدمان چارت"
+      ],
+      "related_concepts": [
+        "MT-PROC-0007"
+      ],
+      "related_questions": [
+        "چطور چند چارت رو کنار هم ببینم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0091",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "دو گزینه‌ی مهم نمایش: Chart Shift و Auto Scroll",
+      "language": "fa",
+      "chunk_text": "دو گزینه‌ی نوار ابزار که مدرس روی آن‌ها تأکید می‌کند: ۱) Shift end of the chart from right border — فاصله‌ای در سمت راست آخرین کندل باز می‌کند که رسم خطوط را آسان‌تر می‌کند و بهتر است همیشه فعال باشد. ۲) Scroll the chart to the end on tick incoming — اگر فعال باشد، با هر تیک جدید چارت به آخرین قیمت می‌پرد؛ اگر غیرفعال باشد می‌توانید گذشته‌ی بازار را بررسی کنید. قاعده‌ی عملی: برای بررسی گذشته آن را خاموش کنید، برای پایش لحظه‌ای روشن.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۶",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۶",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "Shift end of the chart from right border. وقتی فعال باشه، یک فاصله می‌ده که کمک می‌کنه برای رسم بهتر خطوط. همیشه بهتره فعال باشه. … Scroll the chart to the end on tick incoming … اگر بخوام گذشته بازار رو بررسی کنم، این تیک رو برمی‌دارم."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "steps": [
+        "گزینه‌ی Chart Shift را فعال کنید تا فضای رسم در سمت راست باز شود.",
+        "برای بررسی گذشته‌ی بازار، Auto Scroll را غیرفعال کنید.",
+        "برای پایش لحظه‌ای قیمت، Auto Scroll را فعال کنید."
+      ],
+      "keywords": [
+        "chart shift",
+        "auto scroll",
+        "نمایش چارت"
+      ],
+      "related_concepts": [
+        "MT-PROC-0005"
+      ],
+      "related_questions": [
+        "چرا چارتم می‌پره جلو؟",
+        "چطور برم گذشته بازار رو ببینم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0092",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "تنظیمات نمودار و ترجیحات نمایشی آکادمی",
+      "language": "fa",
+      "chunk_text": "با راست‌کلیک روی چارت و انتخاب Properties (یا کلید F8) پنجره‌ی تنظیمات باز می‌شود. در تب Color رنگ‌های نمودار قابل تغییر است و در تب Common تنظیمات نمایش. ترجیحات اعلام‌شده‌ی مدرس: نوع نمودار روی Candlestick باشد، گزینه‌ی Ask Line فعال باشد و Period Separator (جداکننده‌ی دوره‌ها) هم فعال باشد. او انتخاب رنگ‌ها را به دلایل روان‌شناختی و شرایط کار در شب و روز مهم می‌داند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۷",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۷",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "راست کلیک کنی، آخرین گزینه Properties (یا F8) رو بزن … در قسمت Common: Candlestick رو انتخاب کنید … Ask Line رو فعال کنید … Period Separator رو فعال کنید."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "steps": [
+        "روی چارت راست‌کلیک کنید و Properties را بزنید (یا F8).",
+        "در تب Color رنگ‌های دلخواه را انتخاب کنید.",
+        "در تب Common نوع نمودار را Candlestick بگذارید.",
+        "گزینه‌ی Show Ask line را فعال کنید.",
+        "گزینه‌ی Period separators را فعال کنید.",
+        "OK را بزنید."
+      ],
+      "keywords": [
+        "F8",
+        "properties",
+        "ask line",
+        "period separator",
+        "رنگ چارت"
+      ],
+      "related_concepts": [
+        "MT-PROC-0005",
+        "MT-CONC-0001"
+      ],
+      "related_questions": [
+        "چطور رنگ چارت رو عوض کنم؟",
+        "خط Ask رو چطور نشون بدم؟",
+        "تنظیمات چارت شما چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0093",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "ذخیره و بارگذاری تنظیمات با Template",
+      "language": "fa",
+      "chunk_text": "برای اینکه تنظیمات چارت روی چارت‌های دیگر هم اعمال شود، از Template استفاده می‌شود: Save Template تنظیمات فعلی را ذخیره می‌کند، Load Template آن را روی چارت دیگر اعمال می‌کند و Remove Template حذفش می‌کند. مدرس نمونه‌ی نام‌گذاری را «US» می‌گذارد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۸",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۸",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "MetaTrader … برای شما یک راه حل گذاشته به اسم Template … Save Template … Load Template … Remove Template … یه اسم برایش انتخاب کن (مثلاً US)."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "steps": [
+        "چارت را مطابق سلیقه تنظیم کنید.",
+        "از نوار ابزار روی Template بزنید و Save Template را انتخاب کنید.",
+        "نامی برای تمپلیت انتخاب و ذخیره کنید.",
+        "روی چارت جدید، Template و سپس نام ذخیره‌شده را بزنید."
+      ],
+      "keywords": [
+        "template",
+        "قالب چارت",
+        "ذخیره تنظیمات"
+      ],
+      "related_concepts": [
+        "MT-PROC-0006"
+      ],
+      "related_questions": [
+        "چطور تنظیمات چارتم رو روی بقیه چارت‌ها بذارم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0094",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "ابزارهای تحلیلی متاتریدر",
+      "language": "fa",
+      "chunk_text": "ابزارهایی که مدرس معرفی می‌کند: Mouse Pointer برای جابه‌جایی نمودار؛ Crosshair که قیمت و تاریخ و ساعت نقطه‌ی زیر نشانگر را نشان می‌دهد؛ Vertical Line برای علامت‌گذاری زمانی؛ Horizontal Line برای رسم سطوح حمایت و مقاومت؛ Trendline برای خط روند؛ و Rectangle که مدرس می‌گوید زیاد از آن برای مشخص کردن نواحی و سطوح استفاده می‌کند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۹",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۹",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "Mouse Pointer … Crosshair … Vertical Line … Horizontal Line … Trendline … من خیلی با مستطیل کار می‌کنم. برای مشخص کردن نواحی و سطوح."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "steps": [
+        "ابزار موردنظر را از نوار ابزار یا منوی Insert انتخاب کنید.",
+        "روی چارت کلیک کنید تا شیء رسم شود.",
+        "برای سطوح از خط افقی و برای نواحی از مستطیل استفاده کنید."
+      ],
+      "keywords": [
+        "crosshair",
+        "خط افقی",
+        "خط روند",
+        "مستطیل",
+        "ابزار تحلیلی"
+      ],
+      "related_concepts": [
+        "MT-PROC-0008",
+        "ACA-INT-0054"
+      ],
+      "related_questions": [
+        "چطور خط بکشم؟",
+        "ناحیه رو چطور مشخص کنم؟",
+        "کراس‌هیر چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0095",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "کار با خطوط: ویرایش، قفل، Ray و حذف",
+      "language": "fa",
+      "chunk_text": "برای ویرایش هر خط، دوبار روی آن کلیک کنید تا انتخاب شود، سپس راست‌کلیک و Properties. در تب Style رنگ، ضخامت و نوع خط تغییر می‌کند و می‌توان خط را قفل کرد تا جابه‌جا نشود. برای خط روند، گزینه‌ی Ray تعیین می‌کند خط تا بی‌نهایت ادامه پیدا کند یا فقط بین دو نقطه بماند. حذف با راست‌کلیک و Delete انجام می‌شود و برای حذف همه از Delete All استفاده می‌شود. کلید Ctrl+Z آخرین اقدام را برمی‌گرداند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۹",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۹",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "دوبار روش کلیک کن … راست کلیک کنی و Properties … می‌تونی قفلش کنی تا تکون نخوره … اگر گزینه Ray فعال باشه، تا بی‌نهایت ادامه پیدا می‌کنه … Ctrl+Z: آخرین اقدام رو برمی‌گردونه."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "steps": [
+        "روی خط دوبار کلیک کنید تا انتخاب شود.",
+        "راست‌کلیک و Properties را بزنید.",
+        "در تب Style رنگ، ضخامت و نوع خط را تنظیم کنید.",
+        "برای ثابت نگه داشتن، گزینه‌ی قفل را فعال کنید.",
+        "برای خط روند، وضعیت Ray را مشخص کنید.",
+        "برای حذف، راست‌کلیک و Delete (یا Delete All) را بزنید."
+      ],
+      "keywords": [
+        "ray",
+        "قفل خط",
+        "delete all",
+        "Ctrl+Z"
+      ],
+      "related_concepts": [
+        "MT-PROC-0008"
+      ],
+      "related_questions": [
+        "چطور خطم رو قفل کنم؟",
+        "همه خط‌ها رو چطور پاک کنم؟",
+        "Ray یعنی چی؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0096",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "شخصی‌سازی نوار ابزار",
+      "language": "fa",
+      "chunk_text": "اگر ابزاری در نوار ابزار دیده نمی‌شود، روی علامت «»» سمت راست نوار راست‌کلیک کنید و Customize را بزنید؛ از همان‌جا می‌توان ابزارها را اضافه یا حذف کرد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۹",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۹",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "روی علامت چین (>>) سمت راست راست کلیک کن. Customize رو بزن. می‌تونی ابزارهایی که نیاز داری رو اضافه یا کم کنی."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "steps": [
+        "روی نشانه‌ی «»» در انتهای نوار ابزار راست‌کلیک کنید.",
+        "گزینه‌ی Customize را انتخاب کنید.",
+        "ابزارهای موردنیاز را اضافه یا حذف کنید."
+      ],
+      "keywords": [
+        "customize",
+        "نوار ابزار",
+        "toolbar"
+      ],
+      "related_questions": [
+        "ابزارم توی نوار ابزار نیست"
+      ]
+    },
+    {
+      "id": "ACA-INT-0097",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "تنظیم فیبوناچی به‌عنوان ابزار ریسک به ریوارد",
+      "language": "fa",
+      "chunk_text": "مدرس از فیبوناچی رتریسمنت نه به‌عنوان سیستم سیگنال‌دهی، بلکه به‌عنوان ابزار اندازه‌گیری ریسک به ریوارد استفاده می‌کند. برای این کار ابزار را روی چارت می‌اندازد، دوبار کلیک، راست‌کلیک و Fibonacci Properties را باز می‌کند و سطوح را چنین نام‌گذاری می‌کند: Level 0 = Entry، Level 1 = -SL، و سطوح ۲ تا ۶ = TP1 تا TP5.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۱۰",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۱۰",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "من با فیبوناچی رتریسمنت کار دارم. برای اینکه فیبوناچی رو به شکل ریسک به ریوارد برای خودت تنظیم کنی … Level 0: Entry / Level 1: -SL / Level 2: TP1 … Level 6: TP5"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "steps": [
+        "ابزار Fibonacci Retracement را انتخاب و روی چارت رسم کنید.",
+        "دوبار روی آن کلیک کنید، سپس راست‌کلیک و Fibonacci Properties را بزنید.",
+        "در تب Levels، سطح ۰ را Entry نام‌گذاری کنید.",
+        "سطح بعدی را -SL بگذارید.",
+        "سطوح بعدی را به‌ترتیب TP1 تا TP5 نام‌گذاری کنید.",
+        "تنظیمات را ذخیره کنید تا برای همه‌ی فیبوناچی‌های بعدی اعمال شود."
+      ],
+      "keywords": [
+        "فیبوناچی",
+        "ریسک به ریوارد",
+        "TP",
+        "SL",
+        "retracement"
+      ],
+      "related_concepts": [
+        "ACA-INT-0098",
+        "GEN-DEF-0017"
+      ],
+      "related_questions": [
+        "فیبوناچی رو چطور تنظیم کنم؟",
+        "ریسک به ریوارد رو روی چارت چطور ببینم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0098",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "تفاوت فیبوناچی به‌عنوان ابزار با سیستم معاملاتی فیبوناچی",
+      "language": "fa",
+      "chunk_text": "ممکن است به‌نظر برسد استفاده از فیبوناچی با موضع جلسه‌ی سوم در تضاد است، اما این‌طور نیست. آنچه مدرس نقد می‌کند، سیستم‌های سیگنال‌دهی مبتنی بر فیبوناچی است — یعنی این فرض که قیمت حتماً روی درصد مشخصی واکنش می‌دهد. آنچه خودش استفاده می‌کند، همان ابزار به‌عنوان خط‌کش اندازه‌گیری فاصله‌ی ورود تا حد ضرر و اهداف است. ابزار، سیستم نیست.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۱۰ (در تطبیق با جلسه ۳)",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۱۰ (در تطبیق با جلسه ۳)",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "ما حالا تا حدی باهاش کار داریم ولی نه به این شکل که … میان صد درصد یک روند رو فرض می‌گیرن که قیمت توی ۷۲۸۶ واکنش می‌ده. [جلسه ۳] … من با فیبوناچی رتریسمنت کار دارم [جلسه ۵]"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "summary": "فیبوناچی به‌عنوان خط‌کش ریسک به ریوارد مجاز است؛ به‌عنوان سیستم سیگنال‌دهی نه.",
+      "keywords": [
+        "فیبوناچی",
+        "ابزار",
+        "سیستم معاملاتی",
+        "رفع ابهام"
+      ],
+      "related_concepts": [
+        "ACA-INT-0063",
+        "ACA-INT-0097"
+      ],
+      "related_questions": [
+        "مگه نگفتید فیبوناچی کار نمی‌کنید؟",
+        "فیبوناچی مجازه یا نه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0099",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "Market Watch و افزودن نماد",
+      "language": "fa",
+      "chunk_text": "پنجره‌ی Market Watch فهرست نمادهای در دسترس و قیمت لحظه‌ای آن‌ها را نشان می‌دهد. برای افزودن نماد جدید (فارکس، CFD، سهام یا کریپتو) کافی است روی این پنجره راست‌کلیک و گزینه‌ی Symbols را باز کنید.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۱۱",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۱۱",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "مارکت واتش رو وقتی روش کلیک کنیم، تمام نمادهایی که اون پایین باز هستند رو به شما نمایش می‌ده … افزودن نماد: راست کلیک → Symbols."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "steps": [
+        "پنجره‌ی Market Watch را باز کنید (Ctrl+M).",
+        "روی فهرست راست‌کلیک کنید و Symbols را انتخاب کنید.",
+        "نماد موردنظر را پیدا و اضافه کنید."
+      ],
+      "keywords": [
+        "market watch",
+        "symbols",
+        "افزودن نماد"
+      ],
+      "related_concepts": [
+        "MT4-PROC-0002",
+        "MT-PROC-0021"
+      ],
+      "related_questions": [
+        "چطور نماد اضافه کنم؟",
+        "مارکت واچ چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0100",
+      "object_type": "DEFINITION",
+      "domain": "academy",
+      "title": "اسپرد از نگاه این درس",
+      "language": "fa",
+      "chunk_text": "مدرس اسپرد را همان کارمزدی می‌داند که معامله‌گر به بروکر می‌پردازد و اضافه می‌کند که بسیاری از بروکرها علاوه بر اسپرد، کمیسیون هم دریافت می‌کنند. او تصریح می‌کند اسپرد از حسابی به حساب دیگر متفاوت است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۱۱",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۱۱",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "اسپرد دقیقاً همون کارمزدی‌ست که شما به عنوان کارمزد به بروکر می‌پردازید … خیلی از بروکرها نه تنها اسپرد از شما می‌گیرن، بلکه کمیسیون هم می‌گیرن … هر حسابی می‌تونه با هر حسابی متفاوت باشه."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BROKER_DEPENDENT",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "definition": "اسپرد: هزینه‌ای که هنگام معامله به بروکر پرداخت می‌شود و بین حساب‌ها متفاوت است.",
+      "keywords": [
+        "اسپرد",
+        "کارمزد",
+        "کمیسیون"
+      ],
+      "related_concepts": [
+        "MT-CONC-0002",
+        "GEN-DEF-0003",
+        "GEN-CONC-0006"
+      ],
+      "related_questions": [
+        "اسپرد چیه؟",
+        "اسپرد حساب من چقدره؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0101",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "پنجره‌ی ترمینال و مفاهیم حساب",
+      "language": "fa",
+      "chunk_text": "ترمینال بخش اصلی کار روزمره است و مفاهیم حساب در آن دیده می‌شود: بالانس یعنی موجودی حساب؛ اکویتی یعنی بالانس به‌علاوه یا منهای سود و زیان شناور؛ مارجین یعنی سرمایه‌ای که درگیر معاملات شده؛ فری مارجین یعنی سرمایه‌ی آزاد؛ و مارجین لول نسبت میان این‌هاست. تب‌های اصلی ترمینال: Trade، Account History، Alerts و Mailbox.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۱۲",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۱۲",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "بالانس: موجودی حساب رو نشون می‌ده. اکویتی: بالانس به اضافه یا منهای سود/ضرر شناور. مارجین: میزان سرمایه‌ای که درگیر معاملات شده. فری مارجین: سرمایه آزاد. مارجین لول: نسبت مارجین به اکویتی."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "keywords": [
+        "ترمینال",
+        "بالانس",
+        "اکویتی",
+        "مارجین",
+        "فری مارجین"
+      ],
+      "related_concepts": [
+        "MT-PROC-0023",
+        "GEN-DEF-0009",
+        "MT-CONC-0007"
+      ],
+      "related_questions": [
+        "بالانس و اکویتی چه فرقی دارن؟",
+        "مارجین لول چیه؟",
+        "ترمینال کجاست؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0102",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "باز کردن معامله در متاتریدر ۴",
+      "language": "fa",
+      "chunk_text": "دو راه برای باز کردن معامله: پنجره‌ی New Order (یا کلید F9) و حالت One Click Trading که با راست‌کلیک روی چارت فعال می‌شود و سریع‌تر است. در پنجره‌ی سفارش، نماد (Symbol)، حجم (Volume) و جهت (Buy یا Sell) مشخص می‌شود. با نگه داشتن نشانگر روی معامله‌ی باز، سطوح حد سود و حد ضرر و میزان سود یا زیان نمایش داده می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۱۳",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۱۳",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "New Order: از طریق دکمه New Order یا F9. … One Click Trading: راست کلیک → One Click Trading. خیلی سریع‌تره. … Symbol … Volume … Buy/Sell."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "steps": [
+        "نماد موردنظر را انتخاب کنید.",
+        "کلید F9 را بزنید یا New Order را باز کنید.",
+        "حجم (Volume) را وارد کنید.",
+        "Buy یا Sell را انتخاب کنید.",
+        "برای ورود سریع‌تر، One Click Trading را از راست‌کلیک روی چارت فعال کنید."
+      ],
+      "keywords": [
+        "new order",
+        "F9",
+        "one click trading",
+        "buy",
+        "sell"
+      ],
+      "related_concepts": [
+        "MT4-PROC-0003",
+        "MT-PROC-0009"
+      ],
+      "related_questions": [
+        "چطور معامله باز کنم؟",
+        "معامله یک‌کلیکی چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0103",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "مدیریت معامله‌ی باز",
+      "language": "fa",
+      "chunk_text": "برای مدیریت معامله‌ی باز: دوبار کلیک روی معامله پنجره‌ی مربوط را باز می‌کند. از همان‌جا می‌توان معامله را بست (Close)، حد ضرر و حد سود را تنظیم کرد، یا با Modify Order حجم را کاهش داد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۱۳",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۱۳",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "بستن معامله: روی معامله دوبار کلیک کن → Close. کاهش حجم: Modify Order → تغییر حجم. حد ضرر و حد سود: دوبار کلیک روی معامله → تنظیم SL و TP."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "steps": [
+        "در تب Trade روی معامله دوبار کلیک کنید.",
+        "برای بستن، گزینه‌ی Close را بزنید.",
+        "برای تعیین یا تغییر SL و TP، مقادیر را وارد و Modify را بزنید.",
+        "برای بستن جزئی، حجم کمتر وارد کنید."
+      ],
+      "keywords": [
+        "بستن معامله",
+        "modify",
+        "SL",
+        "TP"
+      ],
+      "related_concepts": [
+        "MT4-PROC-0004",
+        "MT4-PROC-0010",
+        "MT-PROC-0010"
+      ],
+      "related_questions": [
+        "چطور معامله رو ببندم؟",
+        "چطور حد ضرر بذارم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0104",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "تاریخچه‌ی معاملات و گزارش‌گیری",
+      "language": "fa",
+      "chunk_text": "در تب Account History همه‌ی معاملات بسته‌شده با تاریخ و قیمت ورود و خروج، حجم، سود یا زیان و سواپ دیده می‌شود. با راست‌کلیک می‌توان Save as Report یا Save as Detailed Report گرفت. همچنین با راست‌کلیک روی ستون Profit می‌توان نمایش سود را بین پیپ و دلار تغییر داد؛ مدرس نمایش دلاری را ترجیح می‌دهد چون بار روانی کمتری دارد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۱۴",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۱۴",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "توی Account History می‌تونی همه معاملات بسته‌شده رو ببینی … راست کلیک روی ستون Profit → می‌تونی انتخاب کنی سود به صورت پیپ یا دلار نمایش داده بشه. من ترجیح می‌دم به دلار باشه چون بار روانی کمتری داره."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "steps": [
+        "به تب Account History بروید.",
+        "بازه‌ی زمانی موردنظر را با راست‌کلیک انتخاب کنید.",
+        "برای گزارش، Save as Report یا Save as Detailed Report را بزنید.",
+        "برای تغییر واحد نمایش سود، روی ستون Profit راست‌کلیک کنید."
+      ],
+      "keywords": [
+        "account history",
+        "گزارش",
+        "پیپ",
+        "دلار"
+      ],
+      "related_concepts": [
+        "MT4-PROC-0008",
+        "PSY-PAT-0008"
+      ],
+      "related_questions": [
+        "گزارش معاملاتم رو چطور بگیرم؟",
+        "سود رو به دلار ببینم یا پیپ؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0105",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "سواپ در تاریخچه‌ی معاملات",
+      "language": "fa",
+      "chunk_text": "سواپ همان بهره‌ی شبانه است: اگر معامله بیش از یک روز باز بماند، ممکن است سواپ به حساب اضافه یا از آن کسر شود و مقدارش در تاریخچه دیده می‌شود. مدرس مثالی از طلا می‌زند که پس از سه روز، سمت خرید مقداری کسر و سمت فروش مقدار کمتری داشته است — اما تصریح می‌کند این وابسته به نماد است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۱۴",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۱۴",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "سواپ (Swap): بهره شبانه … مثلاً طلا بعد از سه روز، خریدش ۲۰ دلار کم می‌کنه، فروشش ۴ دلار. این بستگی به نماد معاملاتی داره."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "BROKER_DEPENDENT",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "warnings": [
+        "اعداد این مثال مربوط به نماد و بروکر خاص در زمان ضبط است و نباید به‌عنوان نرخ سواپ عمومی ارائه شود؛ نرخ سواپ را باید در مشخصات نماد پلتفرم خود دانشجو دید."
+      ],
+      "validity": {
+        "time_sensitive": true,
+        "broker_specific": true
+      },
+      "keywords": [
+        "سواپ",
+        "بهره شبانه",
+        "طلا"
+      ],
+      "related_concepts": [
+        "MT-CONC-0008",
+        "GEN-DEF-0011"
+      ],
+      "related_questions": [
+        "سواپ چقدره؟",
+        "چرا از حسابم کم شد؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0106",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "تنظیم هشدار قیمتی (Alert)",
+      "language": "fa",
+      "chunk_text": "با Alert می‌توان به متاتریدر گفت وقتی قیمت به سطح مشخصی رسید هشدار بدهد. مسیر: راست‌کلیک روی چارت و Trading > Alert، یا از تب Alerts در ترمینال. در تنظیمات آن می‌توان قیمت هدف، تعداد دفعات هشدار، صدای پخش‌شونده و تاریخ انقضا را مشخص کرد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۱۵",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۱۵",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "می‌تونی به متاتریدر دستور بدی که وقتی قیمت به یک سطح خاص رسید، بهت هشدار بده … قیمت هدف، چند بار هشدار بده، چه صدایی پخش بشه، تاریخ انقضا."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "steps": [
+        "از تب Alerts در ترمینال یا راست‌کلیک روی چارت، Alert را باز کنید.",
+        "قیمت هدف و شرط را وارد کنید.",
+        "تعداد تکرار، صدا و تاریخ انقضا را تنظیم کنید.",
+        "ذخیره کنید."
+      ],
+      "keywords": [
+        "alert",
+        "هشدار قیمت"
+      ],
+      "related_concepts": [
+        "MT-PROC-0012"
+      ],
+      "related_questions": [
+        "چطور برای یه قیمت هشدار بذارم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0107",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "منوهای بالای متاتریدر ۴",
+      "language": "fa",
+      "chunk_text": "مرور منوهای اصلی: File شامل New Chart، Open Offline، Save as Picture و Profiles؛ View شامل Language، Toolbar، Status Bar و پنجره‌های Market Watch، Terminal، Data Window و Navigator؛ Insert همان ابزارهای تحلیلی؛ Charts شامل زوم، تایم‌فریم و نوع چارت؛ Tools شامل Options و History Center؛ Window برای مرتب‌سازی پنجره‌ها؛ و Help.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۱۶",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۱۶",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "File: New Chart … Save as Picture … Profiles … View: Language … Insert … Charts … Tools: Options, History Center. Window … Help."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "keywords": [
+        "منو",
+        "File",
+        "View",
+        "Tools",
+        "History Center"
+      ],
+      "related_concepts": [
+        "MT-PROC-0017",
+        "MT4-PROC-0006"
+      ],
+      "related_questions": [
+        "منوهای متاتریدر چیکار می‌کنن؟",
+        "History Center کجاست؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0108",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "کلیدهای میان‌بر متاتریدر ۴",
+      "language": "fa",
+      "chunk_text": "کلیدهای میان‌بری که مدرس معرفی می‌کند: Ctrl+M برای Market Watch، Ctrl+T برای Terminal، Ctrl+D برای Data Window، Ctrl+G برای شبکه (Grid)، Ctrl+L برای حجم (Volume)، F8 برای Properties، F9 برای New Order، Ctrl+Z برای بازگرداندن آخرین اقدام، و کلیدهای + و − برای زوم.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_05.md",
+        "source_location": "بخش ۱۶",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۵",
+        "section": "بخش ۱۶",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "Ctrl+M: Market Watch / Ctrl+T: Terminal / Ctrl+D: Data Window / Ctrl+G: Grid / Ctrl+L: Volume / F8: Properties / F9: New Order / Ctrl+Z: Undo"
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT4_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T16:04:39Z",
+      "updated_at": "2026-09-05T16:04:39Z",
+      "steps": [
+        "Ctrl+M — باز کردن Market Watch",
+        "Ctrl+T — باز کردن Terminal",
+        "Ctrl+D — باز کردن Data Window",
+        "Ctrl+G — نمایش یا حذف شبکه",
+        "Ctrl+L — نمایش حجم",
+        "F8 — تنظیمات چارت",
+        "F9 — پنجره‌ی سفارش جدید",
+        "Ctrl+Z — بازگرداندن آخرین اقدام"
+      ],
+      "keywords": [
+        "شورت کات",
+        "کلید میانبر",
+        "F9",
+        "F8",
+        "Ctrl+M"
+      ],
+      "related_concepts": [
+        "MT-CONC-0014"
+      ],
+      "related_questions": [
+        "کلیدهای میانبر متاتریدر چیه؟"
+      ]
+    }
+  ]
+}

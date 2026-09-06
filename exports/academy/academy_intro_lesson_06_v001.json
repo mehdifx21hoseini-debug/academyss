@@ -1,0 +1,474 @@
+{
+  "collection_id": "academy_intro_lesson_06",
+  "domain": "academy",
+  "title": "دوره مقدماتی — جلسه ۶: آشنایی با متاتریدر ۵",
+  "description": "تفاوت‌های متاتریدر ۵ با نسخه‌ی چهار از نگاه آکادمی: ورود، باز کردن نمودار، منوها، تمپلیت، دو گزینه‌ی Trade Level و Trade History، و انتخاب بین دو نسخه.",
+  "version": "v001",
+  "generated_at": "2026-09-05T16:21:50Z",
+  "pipeline_stage": "STRUCTURED",
+  "source_files": [
+    "raw_sources/academy/intro/intro_lesson_06.md",
+    "raw_sources/academy/intro/intro_lesson_06.ingest.json"
+  ],
+  "notes": [
+    "این جلسه فقط تفاوت‌ها را پوشش می‌دهد؛ باقی مطالب به جلسه‌ی ۵ (متاتریدر ۴) ارجاع داده شده است.",
+    "جمله‌ی «Trade Level را متاتریدر ۴ نداشت» به‌عنوان تفاوت پلتفرمی ثبت نشد؛ متاتریدر ۴ تنظیم هم‌ارز آن را در Tools > Options > Charts دارد و تفاوت در مسیر دسترسی است.",
+    "توصیه‌ی این جلسه (اول MT4، بعد MT5، انتخاب با دانشجو) با قاعده‌ی ACA-RULE-0001 هم‌راستاست."
+  ],
+  "objects": [
+    {
+      "id": "ACA-INT-0110",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "نسبت متاتریدر ۵ به متاتریدر ۴ از نگاه آکادمی",
+      "language": "fa",
+      "chunk_text": "به گفته‌ی مدرس، متاتریدر ۵ تقریباً همان متاتریدر ۴ است: شکل و ظاهرش تفاوت دارد و چند ابزار کارآمد به آن اضافه شده است. به همین دلیل آموزش نسخه‌ی پنج کوتاه است و فقط به تفاوت‌ها می‌پردازد؛ باقی مطالب همان چیزی است که در آموزش نسخه‌ی چهار گفته شد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_06.md",
+        "source_location": "بخش ۳",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۶",
+        "section": "بخش ۳",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "نسخه پنجم تقریباً یعنی همون نسخه چهاره، فقط شکل و شمایل تفاوت پیدا کرده و چند تا ابزار کارآمد از نگاه من بهش اضافه شده."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "VERSION_DEPENDENT",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T16:21:50Z",
+      "updated_at": "2026-09-05T16:21:50Z",
+      "keywords": [
+        "متاتریدر ۵",
+        "متاتریدر ۴",
+        "تفاوت"
+      ],
+      "related_concepts": [
+        "MT-CMP-0001",
+        "MT-CMP-0002",
+        "ACA-INT-0084"
+      ],
+      "related_questions": [
+        "فرق متاتریدر ۴ و ۵ چیه؟",
+        "متاتریدر ۵ خیلی فرق داره؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0111",
+      "object_type": "RULE",
+      "domain": "academy",
+      "title": "توصیه‌ی آکادمی برای انتخاب بین متاتریدر ۴ و ۵",
+      "language": "fa",
+      "chunk_text": "توصیه‌ی مدرس این است: اول آموزش متاتریدر ۴ را کامل ببین، بعد متاتریدر ۵ را هم نصب کن و خودت ببین با کدام راحت‌تری و با کدام بهتر ارتباط می‌گیری. یعنی آکادمی هیچ‌کدام را تحمیل نمی‌کند و انتخاب نهایی با خود دانشجوست.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_06.md",
+        "source_location": "بخش ۳",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۶",
+        "section": "بخش ۳",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "از شما عزیز می‌خوام برای این که کامل آگاه بشید، نسخه چهار رو کامل آموزش ببینید و نسخه پنج رو هم نصب کنید و ببینید خودتون کدوم باهاش بیشتر راحت هستید."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "ACADEMY_METHODOLOGY",
+      "platform_scope": "VERSION_DEPENDENT",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T16:21:50Z",
+      "updated_at": "2026-09-05T16:21:50Z",
+      "rule": "اول متاتریدر ۴ را کامل بیاموز، سپس متاتریدر ۵ را نصب کن و پلتفرم راحت‌تر را خودت انتخاب کن.",
+      "keywords": [
+        "انتخاب پلتفرم",
+        "متاتریدر ۴",
+        "متاتریدر ۵"
+      ],
+      "related_concepts": [
+        "ACA-RULE-0001",
+        "MT-CMP-0011"
+      ],
+      "related_questions": [
+        "متاتریدر ۴ کار کنم یا ۵؟",
+        "کدوم پلتفرم بهتره؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0112",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "ورود به حساب در متاتریدر ۵",
+      "language": "fa",
+      "chunk_text": "مراحل اتصال متاتریدر ۵ به حساب بروکر: از منوی File گزینه‌ی Open an Account را باز کنید، سرور بروکر را انتخاب کنید، مشخص کنید حساب دمو است یا ریل، سپس شماره‌ی حساب و رمز عبور را وارد کنید. اتصال موفق با سبز شدن وضعیت در پایین صفحه معلوم می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_06.md",
+        "source_location": "بخش ۴",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۶",
+        "section": "بخش ۴",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "تو گزینه File، تو گزینه Open an Account رو کلیک می‌کنید … سرور متاتریدر رو انتخاب می‌کنید، دمو یا ریل بروکری که هستید رو می‌زنید، و شماره حساب و پسورد رو که بزنید، در نهایت اتصال پیدا می‌کنه … ما سبز هستیم."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T16:21:50Z",
+      "updated_at": "2026-09-05T16:21:50Z",
+      "steps": [
+        "منوی File را باز کنید و Open an Account را بزنید.",
+        "سرور بروکر را انتخاب کنید.",
+        "نوع حساب (دمو یا ریل) را مشخص کنید.",
+        "شماره حساب و رمز عبور را وارد کنید.",
+        "وضعیت اتصال را در پایین صفحه بررسی کنید (سبز = متصل)."
+      ],
+      "keywords": [
+        "ورود",
+        "open an account",
+        "سرور",
+        "متاتریدر ۵"
+      ],
+      "related_concepts": [
+        "MT5-PROC-0001",
+        "ACA-INT-0080"
+      ],
+      "related_questions": [
+        "چطور توی متاتریدر ۵ وارد بشم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0113",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "باز کردن نمودار و کار با Market Watch در متاتریدر ۵",
+      "language": "fa",
+      "chunk_text": "دو راه برای باز کردن نمودار وجود دارد: از Market Watch، یا از منوی File و گزینه‌ی New Chart. پنجره‌ی Market Watch از منوی View یا با کلید Ctrl+M باز می‌شود. با Hide All فقط نمادهای انتخابی می‌مانند و با Show All همه‌ی نمادها نمایش داده می‌شوند.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_06.md",
+        "source_location": "بخش ۵",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۶",
+        "section": "بخش ۵",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "از Market Watch اقدام کنیم … تو گزینه File، New Chart رو بزنیم … یا Ctrl+M رو بزنی … Hide All می‌کنیم … Show All رو بزنیم، تمامی نمادها به ما نمایش داده می‌شه."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.9,
+      "version": "v001",
+      "created_at": "2026-09-05T16:21:50Z",
+      "updated_at": "2026-09-05T16:21:50Z",
+      "steps": [
+        "Market Watch را از View یا با Ctrl+M باز کنید.",
+        "برای پاک‌سازی فهرست، Hide All را بزنید.",
+        "برای دیدن همه‌ی نمادها، Show All را بزنید.",
+        "برای باز کردن چارت، نماد را انتخاب کنید یا از File > New Chart استفاده کنید."
+      ],
+      "keywords": [
+        "market watch",
+        "new chart",
+        "Ctrl+M",
+        "show all",
+        "hide all"
+      ],
+      "related_concepts": [
+        "MT5-PROC-0002",
+        "MT-PROC-0021"
+      ],
+      "related_questions": [
+        "چطور چارت باز کنم؟",
+        "نمادها رو چطور نشون بدم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0114",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "منوهای متاتریدر ۵",
+      "language": "fa",
+      "chunk_text": "منوی View در متاتریدر ۵ شامل Language، Color Theme، Toolbar، Symbols، Market Watch، Data Window و Navigator است. منوی Insert همان ابزارهای تحلیلی نسخه‌ی چهار را دارد. منوی Chart تایم‌فریم‌ها، Template و گزینه‌های Auto Scroll و Chart Shift را در خود دارد. گزینه‌ی Color Theme در نسخه‌ی چهار وجود ندارد.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_06.md",
+        "source_location": "بخش ۶",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۶",
+        "section": "بخش ۶",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "تو گزینه View دقیقاً: Language، Color Theme، Toolbar … Symbols، Market Watch، Data Window، Navigator … تو قسمت Insert دقیقاً همه همونه … تو گزینه Chart … Auto Scroll، Chart Shift."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T16:21:50Z",
+      "updated_at": "2026-09-05T16:21:50Z",
+      "keywords": [
+        "منو",
+        "view",
+        "insert",
+        "chart",
+        "color theme"
+      ],
+      "related_concepts": [
+        "MT-PROC-0017",
+        "ACA-INT-0107",
+        "ACA-INT-0091"
+      ],
+      "related_questions": [
+        "منوهای متاتریدر ۵ چیه؟",
+        "تم رنگی رو کجا عوض کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0115",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "ذخیره و بارگذاری Template در متاتریدر ۵",
+      "language": "fa",
+      "chunk_text": "در متاتریدر ۵ مسیر تمپلیت با نسخه‌ی چهار فرق دارد: از منوی View به Templates بروید و Save Template را بزنید تا تنظیمات فعلی با نامی دلخواه ذخیره شود؛ برای اعمال روی چارت دیگر، همان نام را از Load انتخاب کنید. همان رنگ‌بندی و تنظیماتی که در آموزش متاتریدر ۴ گفته شد، اینجا هم قابل اعمال است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_06.md",
+        "source_location": "بخش ۷",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۶",
+        "section": "بخش ۷",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "چطور Template رو Save کنیم؟ از مسیر: View → Templates → Save Template … و اگر بخوام دوباره بیارم، Load رو می‌زنم."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T16:21:50Z",
+      "updated_at": "2026-09-05T16:21:50Z",
+      "steps": [
+        "چارت را مطابق تنظیمات دلخواه بچینید.",
+        "از منوی View گزینه‌ی Templates را باز کنید.",
+        "Save Template را بزنید و نامی انتخاب کنید.",
+        "برای اعمال روی چارت دیگر، از همان مسیر Load و نام ذخیره‌شده را انتخاب کنید."
+      ],
+      "keywords": [
+        "template",
+        "قالب",
+        "متاتریدر ۵"
+      ],
+      "related_concepts": [
+        "ACA-INT-0093",
+        "MT-PROC-0006"
+      ],
+      "related_questions": [
+        "تمپلیت رو توی متاتریدر ۵ کجا ذخیره کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0116",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "Trade Level: نمایش یا پنهان کردن خطوط معامله روی چارت",
+      "language": "fa",
+      "chunk_text": "با راست‌کلیک روی چارت متاتریدر ۵، گزینه‌ی Trade Level در دسترس است. کارکردی که مدرس توضیح می‌دهد این است: با این گزینه می‌توان خطوط مربوط به معامله‌ی باز (نقطه‌ی ورود، حد ضرر و حد سود) را روی چارت نمایش داد یا پنهان کرد، بدون اینکه خود معامله بسته شود. فایده‌اش این است که وقتی معامله‌ای باز دارید ولی می‌خواهید همان نماد را بدون شلوغی خطوط بررسی کنید، چارت تمیز دیده می‌شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_06.md",
+        "source_location": "بخش ۸",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۶",
+        "section": "بخش ۸",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "وقتی راست کلیک روی صفحه بکنی … یک گزینه Trade Level داریم … بعضی وقتا شما معاملت بازه، ولی می‌خوای همون نماد رو بدون در نظر گرفتن خط و خطوطی که روی نمودار رسم می‌شه، بررسی کنی. و این Trade Level به شما این کمک رو می‌کنه."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.75,
+      "version": "v001",
+      "created_at": "2026-09-05T16:21:50Z",
+      "updated_at": "2026-09-05T16:21:50Z",
+      "verification_note": "بیان درس در این بخش دوپهلوست («نشون می‌ده» و «بدون نمایش معامله») و برداشت انجام‌شده، کارکرد کلیدِ روشن/خاموش کردن نمایش خطوط معامله است. همچنین جمله‌ی «این را متاتریدر ۴ نداشت» به‌عنوان تفاوت پلتفرمی ثبت نشد، چون متاتریدر ۴ تنظیم هم‌ارز آن را در Tools > Options > Charts دارد و تفاوت در مسیر دسترسی است، نه در وجود قابلیت.",
+      "steps": [
+        "روی چارت راست‌کلیک کنید.",
+        "گزینه‌ی Trade Level را انتخاب کنید تا نمایش خطوط معامله روشن یا خاموش شود."
+      ],
+      "warnings": [
+        "پنهان کردن خطوط، معامله را نمی‌بندد و تأثیری بر حد ضرر و حد سود ندارد."
+      ],
+      "keywords": [
+        "trade level",
+        "خطوط معامله",
+        "چارت تمیز"
+      ],
+      "related_questions": [
+        "چطور خطوط معامله رو از چارت بردارم؟",
+        "Trade Level چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0117",
+      "object_type": "PROCEDURE",
+      "domain": "academy",
+      "title": "Trade History: نمایش معاملات گذشته روی چارت",
+      "language": "fa",
+      "chunk_text": "با راست‌کلیک روی چارت متاتریدر ۵ و فعال کردن Trade History، معاملات گذشته مستقیماً روی نمودار نمایش داده می‌شوند: نقطه‌ی ورود خرید یا فروش و سطوح مربوط، و با نگه داشتن نشانگر جزئیات هم دیده می‌شود. مدرس این را نسبت به روش متاتریدر ۴ ساده‌تر می‌داند، جایی که برای دیدن همان اطلاعات باید معامله را از Account History روی چارت می‌کشیدید. کاربرد اصلی‌اش بازبینی و تحلیل عملکرد گذشته است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_06.md",
+        "source_location": "بخش ۸",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۶",
+        "section": "بخش ۸",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "توی متاتریدر ۵ شما به جای این که برید تو Account History و معامله رو انتخاب کنید و بکشید، کافیه راست کلیک کنید و Trade History رو فعال کنید … کمک می‌کنه به شما که وقتی می‌خوای خودت رو آنالیز کنی."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": false,
+      "confidence": 0.85,
+      "version": "v001",
+      "created_at": "2026-09-05T16:21:50Z",
+      "updated_at": "2026-09-05T16:21:50Z",
+      "steps": [
+        "روی چارت راست‌کلیک کنید.",
+        "گزینه‌ی Trade History را فعال کنید.",
+        "نقاط ورود و خروج معاملات گذشته را روی نمودار بررسی کنید."
+      ],
+      "keywords": [
+        "trade history",
+        "بازبینی معاملات",
+        "نقطه ورود"
+      ],
+      "related_concepts": [
+        "MT5-PROC-0012",
+        "ACA-INT-0104",
+        "PSY-PAT-0010"
+      ],
+      "related_questions": [
+        "معاملات قبلیم رو روی چارت چطور ببینم؟",
+        "برای بازبینی معاملات چیکار کنم؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0118",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "منوی Tools در متاتریدر ۵",
+      "language": "fa",
+      "chunk_text": "منوی Tools شامل New Order برای ثبت سفارش، Task Manager، دسترسی به MQL5 Market و Options (تنظیمات عمومی) است. معامله‌ی یک‌کلیکی هم مثل نسخه‌ی چهار با راست‌کلیک روی چارت در دسترس است.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_06.md",
+        "source_location": "بخش ۹",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۶",
+        "section": "بخش ۹",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "تو قسمت Tools بریم: New Order برای سفارش باز کردن، یا راست کلیک می‌کنی، اینجا One Click Trading Order رو داری می‌بینی … Task Manager رو داریم می‌بینیم … MQL5 Market هم که برای بحث خودشه."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "MT5_ONLY",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T16:21:50Z",
+      "updated_at": "2026-09-05T16:21:50Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "keywords": [
+        "tools",
+        "new order",
+        "task manager",
+        "MQL5 market",
+        "options"
+      ],
+      "related_concepts": [
+        "MT-PROC-0017",
+        "MT-PROC-0009",
+        "ACA-RULE-0002"
+      ],
+      "related_questions": [
+        "منوی Tools چی داره؟",
+        "MQL5 Market چیه؟"
+      ]
+    },
+    {
+      "id": "ACA-INT-0119",
+      "object_type": "CONCEPT",
+      "domain": "academy",
+      "title": "سرعت متاتریدر ۴ در برابر ۵ و تأثیر اینترنت",
+      "language": "fa",
+      "chunk_text": "بر اساس گزارش‌هایی که مدرس از دانشجویان گرفته، سرعت کار متاتریدر ۵ برای بسیاری بیشتر از نسخه‌ی چهار بوده است؛ اما او تأکید می‌کند این موضوع برای هر شخص، هر اینترنت و هر موقعیت جغرافیایی متفاوت است و برای خودش هر دو نسخه بهترین سرعت اتصال را دارند. توصیه‌اش این است که هر کس خودش هر دو را با اینترنت و سیستم خودش تست کند. آنچه در نهایت اهمیت دارد این است که معامله درست باز و درست بسته شود.",
+      "source": {
+        "source_type": "ACADEMY_COURSE_TRANSCRIPT",
+        "source_ref": "raw_sources/academy/intro/intro_lesson_06.md",
+        "source_location": "بخش ۱۰",
+        "course": "دوره مقدماتی — معاملگری حرکات قیمت",
+        "lesson": "۶",
+        "section": "بخش ۱۰",
+        "author": "سبحان صمدی",
+        "verbatim_quote": "سرعت کار نسبت به گزارشی که من از خیلی‌هاتون می‌گیرم، متا ۵ بیشتر از متا ۴ه. اما این نکته‌ای که دارم بهتون می‌گم برای هر شخصی و برای هر اینترنتی می‌تونه متفاوت باشه … شماها هم باید خودتون این بررسی رو داشته باشید."
+      },
+      "authority_level": "ACADEMY_PRIMARY",
+      "methodology_scope": "PLATFORM_OPERATION",
+      "platform_scope": "VERSION_DEPENDENT",
+      "approval_status": "PENDING_REVIEW",
+      "lifecycle_status": "PENDING_REVIEW",
+      "verification_required": true,
+      "confidence": 0.8,
+      "version": "v001",
+      "created_at": "2026-09-05T16:21:50Z",
+      "updated_at": "2026-09-05T16:21:50Z",
+      "verification_note": "برداشت از متن درس؛ پیش از تبدیل به پاسخ رسمی، تأیید مدرس لازم است.",
+      "warnings": [
+        "این یک مقایسه‌ی تجربی است، نه اندازه‌گیری فنی؛ نتیجه به اینترنت و موقعیت کاربر بستگی دارد."
+      ],
+      "keywords": [
+        "سرعت",
+        "اینترنت",
+        "کانکشن",
+        "انتخاب پلتفرم"
+      ],
+      "related_concepts": [
+        "ACA-INT-0111",
+        "MT-TRBL-0005"
+      ],
+      "related_questions": [
+        "متاتریدر ۵ سریع‌تره؟",
+        "کدوم نسخه با اینترنت من بهتره؟"
+      ]
+    }
+  ]
+}

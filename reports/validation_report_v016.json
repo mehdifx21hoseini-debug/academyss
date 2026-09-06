@@ -1,0 +1,38 @@
+{
+  "report_type": "validation",
+  "version": "v016",
+  "generated_at": "2026-09-05T15:13:40Z",
+  "stats": {
+    "files": 19,
+    "objects": 276,
+    "by_kind": {
+      "knowledge_object": 17,
+      "conflict_record": 1,
+      "review_item": 1
+    },
+    "by_domain": {
+      "psychology": 27,
+      "metatrader": 103,
+      "general_trading": 49,
+      "academy": 89,
+      "mentor_qa": 1,
+      "brokers": 1,
+      "meta": 6
+    },
+    "by_approval": {
+      "PENDING_VERIFICATION": 173,
+      "REVIEW_REQUIRED": 7,
+      "PENDING_REVIEW": 70,
+      "APPROVED": 9
+    }
+  },
+  "errors": 1,
+  "warnings": 0,
+  "findings": [
+    {
+      "level": "ERROR",
+      "where": "knowledge_base/academy/intro/lesson_02.json :: ACA-INT-0036",
+      "message": "object_type PROCEDURE requires non-empty 'steps'"
+    }
+  ]
+}
