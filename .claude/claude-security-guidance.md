@@ -59,3 +59,24 @@ plugin's built-in checklist. Full policy: `.claude/skills/mentorai-security/SKIL
 - Flag any HTTP request whose target host is derived from user input (server-side request
   forgery), including link previews and document ingestion for the knowledge base.
 - Flag disabled TLS verification or a pinned-off certificate check anywhere.
+
+## Dependencies
+
+- Flag a new dependency whose name is a near-miss of a popular package, or that is added
+  without a stated reason. Supply-chain typosquatting is a real risk here: this system holds
+  full Telegram account sessions.
+- **`httpx2` is not one of them.** It is the HTTP client that the official `anthropic` SDK
+  is built on and declares itself, so it is present in every environment that installs
+  `anthropic`, with or without our `pyproject.toml` naming it. Verified from primary
+  sources: `Requires-Dist: httpx2<3,>=2.0.0` in anthropic's own dist METADATA, ~61
+  references in `anthropic/_base_client.py`, and PyPI listing it under
+  `github.com/pydantic/httpx2` (Tom Christie, BSD-3-Clause).
+  Reasoning and evidence: `docs/ARCHITECTURE_DECISIONS.md` -> ADR-024.
+  The claim is enforced by `mentorai/tests/test_dependencies.py`, which fails if the SDK
+  ever stops declaring it — at which point the decision must be revisited.
+  Do not propose replacing it with `httpx`: `httpx` is a dev-only dependency here, is not in
+  the production image, and is **not** declared by `anthropic`, so an assertion that it is
+  evaluates to False.
+- The project has **no hash-pinned lockfile yet**; versions use `>=`. This is a real gap and
+  is worth flagging on any change to the build, until a lockfile exists and is tested against
+  the actual image.
