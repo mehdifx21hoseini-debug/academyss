@@ -26,6 +26,14 @@ SOURCE_NOTE = (
 )
 DECISION_NOTE = "این اعداد شرط بررسی‌اند، نه تضمین پذیرش. تصمیم نهایی با تیم آکادمی است."
 
+# از کجا آمدن اعداد صریح گفته می‌شود، و هیچ‌کدام «خطا» نیست: متاتریدر خودش این
+# اعداد را حساب و چاپ می‌کند و دانشجو هم همان‌ها را در ترمینالش می‌بیند، پس وقتی
+# خلاصه هست همان ملاک است؛ محاسبه‌ی مستقیم برای گزارشی می‌ماند که خلاصه ندارد.
+ORIGIN_NOTES = {
+    "report_summary": "این اعداد را خودِ گزارش متاتریدر نوشته است.",
+    "computed": "این اعداد از روی سطرهای معامله‌ی همین فایل محاسبه شده‌اند.",
+}
+
 
 @dataclass(frozen=True)
 class Finding:
@@ -109,9 +117,6 @@ def render(metrics: StatementMetrics) -> str:
     marks = {"ok": "✅", "warn": "⚠️", "fail": "❌", "unknown": "❔"}
     lines = [f"{marks.get(f.level, '•')} {f.text}" for f in review(metrics)]
 
-    if metrics.source == "report_summary":
-        lines.append(
-            "❔ سطرهای معامله در فایل پیدا نشد؛ این عدد همان است که خودِ گزارش نوشته، نه محاسبه‌ی ما."
-        )
+    lines.append(ORIGIN_NOTES.get(metrics.source, ""))
     lines.append(DECISION_NOTE)
-    return "\n".join(lines)
+    return "\n".join(line for line in lines if line)

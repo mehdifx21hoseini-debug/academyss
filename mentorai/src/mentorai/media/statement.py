@@ -39,7 +39,9 @@ TRADE_TYPES = frozenset(
 )
 BALANCE_TYPES = frozenset({"balance", "credit", "واریز", "موجودی"})
 
-_NORMALISE = re.compile(r"[\s  _.:/\\-]+")
+# پرانتز و درصد هم حذف می‌شوند: برچسب «Profit Trades (% of total):» در گزارش
+# انگلیسی و «معاملات سودآور - درصد از کل:» در فارسی، باید به یک کلید برسند.
+_NORMALISE = re.compile(r"[\s  \u200c\u200e\u200f_.:/\\()%-]+")
 # سلولی که بیش از این کشیده شده باشد، گزارش نیست؛ سقف جلوی سطر بسیار بلند را می‌گیرد.
 MAX_COLSPAN = 64
 
@@ -188,11 +190,15 @@ def _classify(row: list[str], roles: dict[str, int]) -> Row | None:
     if profit is None:
         return None
 
-    type_text = _key(row[roles["type"]]) if "type" in roles and len(row) > roles["type"] else ""
+    has_type = "type" in roles and len(row) > roles["type"]
+    type_text = _key(row[roles["type"]]) if has_type else ""
     if type_text in BALANCE_TYPES:
         return Row(kind="balance", net=profit, type_text=type_text)
-    if type_text and type_text not in TRADE_TYPES:
-        # نوع ناشناخته یعنی این سطر معامله نیست — مثلاً سطر جمع‌بندی.
+    if has_type and type_text not in TRADE_TYPES:
+        # ستون نوع هست ولی مقدارش معامله نیست — سطر جمع‌بندی، سطر خالی، یا
+        # سطر بخش دیگری از گزارش. خالی بودن هم «معامله نیست»: گزارش متاتریدر ۴
+        # جمع ستون‌ها را در سطری با همین شکل می‌نویسد و اگر معامله شمرده شود،
+        # سود ناخالص دقیقاً به‌اندازه‌ی سود خالص اضافه می‌آید.
         return None
 
     net = profit
@@ -203,21 +209,87 @@ def _classify(row: list[str], roles: dict[str, int]) -> Row | None:
     return Row(kind="trade", net=net, type_text=type_text)
 
 
-def _summary_pairs(tables: list[list[list[str]]]) -> dict[str, str]:
-    """جفت‌های «برچسب: مقدار» که خودِ گزارش نوشته.
+# برچسب‌های خلاصه‌ی گزارش، به انگلیسی و فارسی. کلیدها به شکل نرمال‌شده‌اند.
+#
+# متاتریدر خودش این اعداد را حساب و چاپ می‌کند. خواندنشان از دوباره‌حساب‌کردن
+# مطمئن‌تر است: نه به چیدمان ستون‌ها وابسته است، نه به اینکه کدام بخش گزارش
+# معامله‌ی واقعی است — و متاتریدر ۵ سه بخش دارد (پوزیشن، سفارش، معامله) که
+# شمردن هر سه با هم، هر عددی را چند برابر می‌کند.
+SUMMARY_LABELS: dict[str, tuple[str, ...]] = {
+    "gross_profit": ("grossprofit", "سودناخالص"),
+    "gross_loss": ("grossloss", "زیانناخالص"),
+    "net_profit": ("totalnetprofit", "کلسودخالص"),
+    "profit_factor": ("profitfactor", "ضریبسود"),
+    "total_trades": ("totaltrades", "کلمعاملهها"),
+    "profit_trades": ("profittradesoftotal", "معاملاتسودآوردرصدازکل"),
+    "loss_trades": ("losstradesoftotal", "معاملاتبازیاندرصدازکل"),
+    "max_drawdown": ("maximaldrawdown", "ماکسیممدرادونبالانس", "balancedrawdownmaximal"),
+    "deposit": ("depositwithdrawal",),
+}
+_LABEL_LOOKUP = {name: field for field, names in SUMMARY_LABELS.items() for name in names}
 
-    این‌ها فقط وقتی استفاده می‌شوند که سطر معامله‌ای پیدا نشود، ولی همیشه نگه داشته
-    می‌شوند تا بشود عدد محاسبه‌شده را با عدد خود گزارش مقایسه کرد.
+# «۴۷۵٫۵۶ (۴٫۵۷٪)» → درصد داخل پرانتز.
+_PERCENT = re.compile(r"\(\s*(-?[\d,. ]+)\s*%\s*\)")
+
+
+def _summary_pairs(tables: list[list[list[str]]]) -> dict[str, str]:
+    """مقدارهای خلاصه‌ی گزارش، بر اساس برچسبشان.
+
+    مقدار، **اولین سلول ناخالی بعد از برچسب** است و نه سلول بغلی: متاتریدر ۴
+    برچسب و مقدار را با colspan می‌نویسد، پس بینشان سلول خالی می‌افتد.
     """
-    pairs: dict[str, str] = {}
+    found: dict[str, str] = {}
     for table in tables:
         for row in table:
-            for index, cell in enumerate(row[:-1]):
-                label = _key(cell.rstrip(":"))
-                value = row[index + 1].strip()
-                if label and value and label not in pairs and parse_number(value) is not None:
-                    pairs[label] = value
-    return pairs
+            for index, cell in enumerate(row):
+                field = _LABEL_LOOKUP.get(_key(cell))
+                if field is None or field in found:
+                    continue
+                value = next((c.strip() for c in row[index + 1 :] if c.strip()), "")
+                if value:
+                    found[field] = value
+    return found
+
+
+def _leading_number(text: str | None) -> float | None:
+    """عدد پیش از پرانتز. «۲۷٫۸۰ (۴٫۱۴٪)» → ۲۷٫۸۰"""
+    if not text:
+        return None
+    return parse_number(text.split("(")[0])
+
+
+def _from_summary(summary: dict[str, str]) -> StatementMetrics | None:
+    """اعداد را از خلاصه‌ی خود گزارش بردار، یا None اگر خلاصه‌ای نبود."""
+    factor = parse_number(summary.get("profit_factor"))
+    gross_profit = parse_number(summary.get("gross_profit"))
+    gross_loss = parse_number(summary.get("gross_loss"))
+    if factor is None and (gross_profit is None or gross_loss is None):
+        return None
+
+    if factor is None and gross_profit is not None and gross_loss:
+        factor = round(gross_profit / abs(gross_loss), 3)
+
+    drawdown = summary.get("max_drawdown", "")
+    percent = _PERCENT.search(drawdown)
+    # شمارش‌ها به شکل «۲۳ (۴۷٫۹۲٪)» نوشته می‌شوند: عدد اول تعداد است و پرانتز درصد.
+    trades = _leading_number(summary.get("total_trades"))
+    wins = _leading_number(summary.get("profit_trades"))
+    losses = _leading_number(summary.get("loss_trades"))
+
+    return StatementMetrics(
+        source="report_summary",
+        trades=int(trades) if trades is not None else 0,
+        wins=int(wins) if wins is not None else 0,
+        losses=int(losses) if losses is not None else 0,
+        gross_profit=abs(gross_profit) if gross_profit is not None else 0.0,
+        gross_loss=abs(gross_loss) if gross_loss is not None else 0.0,
+        net_profit=parse_number(summary.get("net_profit")) or 0.0,
+        profit_factor=factor,
+        initial_deposit=parse_number(summary.get("deposit")),
+        max_drawdown_abs=_leading_number(drawdown),
+        max_drawdown_pct=parse_number(percent.group(1)) if percent else None,
+        reported=summary,
+    )
 
 
 def _drawdown(rows: list[Row], initial: float | None) -> tuple[float | None, float | None]:
@@ -256,7 +328,14 @@ def analyse_tables(tables: list[list[list[str]]]) -> StatementMetrics | None:
     """
     if not tables:
         return None
+
+    # خلاصه‌ی خود گزارش اولویت دارد. متاتریدر همین اعداد را حساب و چاپ می‌کند و
+    # دانشجو هم همان‌ها را در ترمینالش می‌بیند؛ دوباره‌حساب‌کردن فقط جای تازه‌ای
+    # برای اختلاف می‌سازد. محاسبه از سطرها می‌ماند برای گزارشی که خلاصه ندارد.
     reported = _summary_pairs(tables)
+    from_summary = _from_summary(reported)
+    if from_summary is not None:
+        return from_summary
 
     for table in tables:
         found = _header_index(table)
@@ -291,15 +370,8 @@ def analyse_tables(tables: list[list[list[str]]]) -> StatementMetrics | None:
             reported=reported,
         )
 
-    # سطر معامله‌ای نبود. اگر خود گزارش پروفیت فکتور نوشته، همان را برمی‌داریم و
-    # صریح علامت می‌زنیم که محاسبه‌ی ما نیست.
-    factor = next(
-        (parse_number(reported[k]) for k in ("profitfactor", "پروفیتفکتور") if k in reported),
-        None,
-    )
-    if factor is None:
-        return None
-    return StatementMetrics(source="report_summary", profit_factor=factor, reported=reported)
+    # نه خلاصه‌ای بود و نه سطر معامله‌ای. یعنی این فایل گزارش حساب نیست.
+    return None
 
 
 def analyse(html: str) -> StatementMetrics | None:
