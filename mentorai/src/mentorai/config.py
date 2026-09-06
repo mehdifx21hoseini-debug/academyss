@@ -12,6 +12,11 @@ from zoneinfo import ZoneInfo
 from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# مقادیر مجاز `embedding_model`. رشته‌ی خالی یعنی مسیر برداری اصلاً اجرا نشود.
+# «hashing-test-only» همان نامی است که `HashingEmbedder` اعلام می‌کند؛ تستی نگه
+# می‌دارد که این دو از هم جدا نیفتند.
+KNOWN_EMBEDDING_MODELS = frozenset({"", "hashing-test-only"})
+
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
@@ -34,6 +39,19 @@ class Settings(BaseSettings):
 
     send_rate_per_minute: float = Field(default=6.0, gt=0, le=20)
     send_burst: int = Field(default=2, ge=1, le=5)
+
+    # مدل تعبیه‌سازی برای بازیابی برداری. خالی یعنی بازیابی فقط متنی، و این پیش‌فرض
+    # عمدی است: تا وقتی مدل واقعی انتخاب نشده، بردار بی‌معنی نتیجه را بدتر می‌کند نه
+    # بهتر (ADR-019). تنها مقدار شناخته‌شده‌ی دیگر، بردارساز آزمایشی است.
+    embedding_model: str = ""
+
+    @field_validator("embedding_model")
+    @classmethod
+    def _known_embedding_model(cls, v: str) -> str:
+        if v not in KNOWN_EMBEDDING_MODELS:
+            known = ", ".join(sorted(x or "«خالی»" for x in KNOWN_EMBEDDING_MODELS))
+            raise ValueError(f"مدل تعبیه‌سازی ناشناخته: {v!r}. مقادیر مجاز: {known}")
+        return v
 
     log_level: str = "INFO"
 
