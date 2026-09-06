@@ -70,16 +70,20 @@ MT5 = [
       related_concepts=["MT-CONC-0009", "MT-TRBL-0001"],
       related_questions=["چطور حد ضرر بذارم؟", "چطور حد ضرر رو جابه‌جا کنم؟"]),
     o("MT5-PROC-0005", P, "مشاهده‌ی مشخصات نماد در متاتریدر ۵",
-      "پنجره‌ی Specification اطلاعات کلیدی هر نماد را نشان می‌دهد: اندازه‌ی قرارداد، حداقل و حداکثر حجم، "
-      "گام حجم، Tick Size و Tick Value، سطح استاپ (Stops Level)، نرخ سواپ، ساعات معاملاتی و نوع اجرا. "
-      "این مقادیر بین بروکرها متفاوت است و مرجع پاسخ به سؤال‌های «چقدر» و «چه ساعتی» همین پنجره است.",
+      "پنجره‌ی Specification اطلاعات کلیدی هر نماد را نشان می‌دهد: Sector و Industry، Digits، "
+      "Contract size، Spread، Stops level، ارز مارجین و ارز سود، حالت محاسبه، نوع اجرا، GTC mode، "
+      "Filling، حداقل و حداکثر حجم و گام حجم، Last Trade، جدول ساعات معاملاتی (Sessions) و بخش "
+      "Margin rates با ارزش دلاری هر لات. "
+      "این مقادیر بین بروکرها و بین نمادها متفاوت است و مرجع پاسخ به سؤال‌های «چقدر» و «چه ساعتی» همین پنجره است. "
+      "⚠️ ردیف‌های Tick Size و Tick Value و نرخ سواپ در این پنجره برای نمادهای Forex این بروکر دیده نشدند.",
       S, 0.8, category="نمادها",
       steps=["در Market Watch روی نماد راست‌کلیک کنید.",
              "گزینه‌ی Specification را انتخاب کنید.",
-             "مقادیر موردنیاز (Contract size، Volume limits، Stops level، Swap، Trading hours) را بخوانید."],
+             "مقادیر موردنیاز (Contract size، Minimal/Maximal volume، Volume step، Stops level، Sessions و Margin rates) را بخوانید."],
       keywords=["specification", "مشخصات نماد", "stops level", "tick value"],
       related_concepts=["MT-CONC-0004", "MT-CONC-0005", "MT-CONC-0009"],
-      related_questions=["اندازه قرارداد طلا چقدره؟", "حداقل حجم چقدره؟", "ساعت معاملاتی نماد رو کجا ببینم؟"]),
+      related_questions=["اندازه قرارداد طلا چقدره؟", "حداقل حجم چقدره؟", "ساعت معاملاتی نماد رو کجا ببینم؟"],
+      verified="فهرست کامل پنجره‌ی Specification متاتریدر ۵ برای XPTUSD@ دیده شد و متن رکورد با همان ترتیب واقعی بازنویسی شد. ادعای Tick Size و Tick Value و نرخ سواپ حذف شد چون در پنجره نبودند؛ Last Trade و بخش Margin rates اضافه شدند."),
     o("MT5-PROC-0006", P, "گزارش تاریخچه‌ی معاملات در متاتریدر ۵",
       "تاریخچه‌ی معاملات در تب History از Toolbox نمایش داده می‌شود و می‌توان از آن گزارش گرفت. "
       "در متاتریدر ۵ نمایش تاریخچه بین حالت‌های Positions، Orders و Deals قابل تغییر است.",
