@@ -218,7 +218,9 @@ def test_summary_is_used_only_when_no_rows_are_found_and_is_marked() -> None:
     assert metrics is not None
     assert metrics.source == "report_summary"
     assert metrics.profit_factor == pytest.approx(1.62)
-    assert "خودِ گزارش متاتریدر نوشته" in review.render(metrics)
+    # از کجا آمدن عدد در خود رکورد ثبت می‌شود و در پنل دیده می‌شود؛ داخل پیام
+    # دانشجو نمی‌آید، چون آنجا حرف اضافه است.
+    assert "گزارش" not in review.render(metrics)
 
 
 # ---------------------------------------------- شکل واقعی گزارش‌ها
@@ -378,8 +380,8 @@ def test_the_reply_explains_what_the_profit_factor_means() -> None:
     text = review.render(metrics)
 
     assert "۰٫۶۲" in text
-    assert "به‌ازای هر ۱ واحد زیان" in text, "باید بگوید این عدد یعنی چه"
-    assert "مجموع زیان‌ها از مجموع سودها بیشتر" in text, "زیر ۱ یعنی حساب رو به کاهش"
+    assert "به‌ازای هر ۱ واحد ضرر" in text, "باید بگوید این عدد یعنی چه"
+    assert "ضررها از سودها جلو زدن" in text, "زیر ۱ یعنی حساب رو به کاهش"
     assert "۱٫۵" in text, "معیار منتور باید گفته شود"
 
 
@@ -416,11 +418,34 @@ def test_a_healthy_drawdown_does_not_get_the_recovery_path() -> None:
     assert "مطلوب" in text
 
 
-def test_the_reply_greets_and_hands_back_to_the_mentor() -> None:
-    text = review.render(statement.StatementMetrics(source="computed", profit_factor=1.6))
+def test_the_reply_follows_the_mentor_answer_structure() -> None:
+    """ساختار تأییدشده: سلام، تأیید آنچه درست بوده، اصلاح، و بستن با انرژی."""
+    text = review.render(
+        statement.StatementMetrics(source="computed", trades=40, profit_factor=1.6)
+    )
 
     assert text.startswith(review.GREETING)
-    assert "منتورتان" in text, "تصمیم نهایی کار منتور است، نه این پاسخ"
+    assert "قدم درستیه" in text, "بخش تأیید نباید حذف شود"
+    assert text.endswith(review.CLOSING_GOOD)
+
+
+def test_even_a_bad_statement_opens_with_something_true_and_positive() -> None:
+    """رکورد «اول تحسین، بعد اصلاح» می‌گوید این بخش در بدترین نتیجه هم می‌آید."""
+    text = review.render(
+        statement.StatementMetrics(
+            source="computed",
+            trades=106,
+            wins=21,
+            losses=85,
+            profit_factor=0.62,
+            max_drawdown_pct=44.39,
+            net_profit=-616.51,
+        )
+    )
+
+    assert "قدم درستیه" in text
+    assert text.index("قدم درستیه") < text.index("۰٫۶۲"), "تحسین باید پیش از اصلاح بیاید"
+    assert text.endswith(review.CLOSING_HARD)
 
 
 def test_a_losing_result_is_worded_not_signed() -> None:
@@ -430,7 +455,8 @@ def test_a_losing_result_is_worded_not_signed() -> None:
     )
     text = review.render(metrics)
 
-    assert "زیان" in text
+    assert "ضرر داده" in text
+    assert "زیان" not in text, "واژه‌ی محاوره‌ای منتورها «ضرر» است"
     assert "-۶۱۶" not in text and "-616" not in text
 
 

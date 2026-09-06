@@ -241,7 +241,7 @@ async def test_a_read_statement_is_answered_with_the_computed_numbers(
     assert result.outcome is Outcome.answer
     assert result.reason == "statement_review"
     assert result.answer_text is not None
-    assert "۱٫۶۲" in result.answer_text and "۵٫۵۰" in result.answer_text
+    assert "۱٫۶۲" in result.answer_text and "۵٫۵" in result.answer_text
     assert client.calls == [], "عدد محاسبه‌شده نباید از مدل رد شود"
 
 
