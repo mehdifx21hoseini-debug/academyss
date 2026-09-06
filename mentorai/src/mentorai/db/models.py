@@ -614,3 +614,38 @@ class MessageMedia(Base):
     extracted_text: Mapped[str | None] = mapped_column(Text)
     metrics: Mapped[dict[str, object] | None] = mapped_column(JSONB)
     created_at: Mapped[datetime] = _created_at()
+
+
+class ModelUsage(Base):
+    """هر فراخوانی مدل، با هزینه‌اش.
+
+    `ai_runs` فقط مسیر پاسخ را ثبت می‌کند و شناسه‌ی پیام در آن اجباری است؛ توصیف
+    تصویر و استخراج حافظه در آن جا نمی‌شوند. تا وقتی این جدول نبود، هر سقف هزینه‌ای
+    فقط بخشی از خرج را می‌دید و بقیه بی‌صدا از کنارش رد می‌شد.
+
+    هزینه به میکرودلار (یک‌میلیونیم دلار) و به‌صورت عدد صحیح ذخیره می‌شود، نه اعشاری:
+    جمع زدن اعشار شناور روی هزاران سطر خطا انباشته می‌کند، و این عدد قرار است پایه‌ی
+    تصمیم «ادامه بده یا متوقف شو» باشد.
+    """
+
+    __tablename__ = "model_usage"
+    __table_args__ = (
+        CheckConstraint(
+            "purpose in ('answer', 'image_description', 'memory_extraction')",
+            name="ck_model_usage_purpose",
+        ),
+        CheckConstraint("cost_micros >= 0", name="ck_model_usage_cost_nonnegative"),
+        Index("ix_model_usage_occurred_at", "occurred_at"),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    purpose: Mapped[str] = mapped_column(String(24), nullable=False)
+    model: Mapped[str] = mapped_column(String(120), nullable=False)
+    input_tokens: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    output_tokens: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    cache_read_tokens: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    cost_micros: Mapped[int] = mapped_column(BigInteger, nullable=False)
+    # آیا قیمت این مدل شناخته‌شده بود. اگر نه، با گران‌ترین قیمت جدول حساب شده و این
+    # پرچم می‌گوید عدد یک برآورد محافظه‌کارانه است، نه هزینه‌ی واقعی.
+    priced: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
+    occurred_at: Mapped[datetime] = _created_at()

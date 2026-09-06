@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from mentorai.ai import budget
 from mentorai.ai.client import ModelCall, ModelClient
 from mentorai.ai.decision import deterministic_trigger
 from mentorai.ai.prompt import SYSTEM_PROMPT, build_user_content
@@ -47,6 +48,7 @@ class SilenceReason(enum.StrEnum):
     model_error = "model_error"
     model_flagged = "model_flagged"
     low_confidence = "low_confidence"
+    budget_exhausted = "budget_exhausted"
     empty_answer = "empty_answer"
 
 
@@ -266,12 +268,38 @@ async def handle_message(
             outcome=Outcome.silence, reason=SilenceReason.no_sources.value, ai_run_id=run.id
         )
 
+    # سقف هزینه پیش از فراخوانی بررسی می‌شود. اگر پر باشد، همان سکوتی رخ می‌دهد که
+    # هر شکست دیگری: پیام خوانده‌نشده می‌ماند و منتور خودش می‌بیندش (ADR-026).
+    if not (await budget.check(session, purpose=budget.Purpose.answer)).may_call:
+        run = await _record(
+            session,
+            message=message,
+            outcome=Outcome.silence,
+            reason=SilenceReason.budget_exhausted.value,
+            hits=hits,
+        )
+        return RunResult(
+            outcome=Outcome.silence,
+            reason=SilenceReason.budget_exhausted.value,
+            ai_run_id=run.id,
+        )
+
     history = await _recent_history(session, message.conversation_id, message.id)
     conversation = await session.get_one(Conversation, message.conversation_id)
     memories = memory_store.render(await memory_store.load_active(session, conversation.student_id))
     call = await model_client.complete(
         system=SYSTEM_PROMPT,
         user=build_user_content(question=question, hits=hits, history=history, memories=memories),
+    )
+    # ثبت مصرف بی‌قیدوشرط است، حتی وقتی فراخوانی خطا داد: توکن مصرف‌شده حتی در
+    # پاسخ ناقص هم پول است.
+    await budget.record(
+        session,
+        purpose=budget.Purpose.answer,
+        model=call.model,
+        input_tokens=call.input_tokens,
+        output_tokens=call.output_tokens,
+        cache_read_tokens=call.cache_read_tokens,
     )
 
     if call.answer is None:

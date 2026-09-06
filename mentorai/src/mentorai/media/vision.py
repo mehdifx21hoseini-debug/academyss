@@ -11,7 +11,7 @@
 
 from __future__ import annotations
 
-from mentorai.ai.client import VisionClient
+from mentorai.ai.client import RawCall, VisionClient
 
 # تلگرام عکس را jpeg می‌فرستد؛ بقیه برای فایل‌های تصویری‌اند که به‌عنوان سند می‌آیند.
 ALLOWED_TYPES = frozenset({"image/jpeg", "image/png", "image/webp", "image/gif"})
@@ -46,21 +46,25 @@ def is_supported(media_type: str | None, size_bytes: int | None) -> bool:
 
 async def describe(
     client: VisionClient, *, image: bytes, media_type: str
-) -> tuple[str | None, str | None]:
-    """(توصیف، خطا). هر دو None نمی‌شوند و هر دو پر هم نمی‌شوند.
+) -> tuple[str | None, str | None, RawCall | None]:
+    """(توصیف، خطا، فراخوانی). دو مورد اول هر دو None نمی‌شوند و هر دو پر هم نمی‌شوند.
 
     توصیف None یعنی تصویر خوانده نشد، و در لایه‌ی بالاتر به ارجاع به منتور ختم می‌شود.
+
+    مورد سوم فراخوانی مدل است، یا None اگر اصلاً فراخوانی‌ای انجام نشد. این ماژول
+    عمداً خودش چیزی در پایگاه داده ثبت نمی‌کند — نشستی ندارد و نباید داشته باشد —
+    پس مصرف را برمی‌گرداند تا لایه‌ی بالاتر ثبتش کند (ADR-026).
     """
     if not is_supported(media_type, len(image)):
-        return None, "قالب یا حجم تصویر پشتیبانی نمی‌شود"
+        return None, "قالب یا حجم تصویر پشتیبانی نمی‌شود", None
 
     call = await client.describe_image(
         system=SYSTEM, prompt=PROMPT, image=image, media_type=media_type
     )
     if call.text is None:
-        return None, call.error or "مدل توصیفی برنگرداند"
+        return None, call.error or "مدل توصیفی برنگرداند", call
 
     text = call.text.strip()
     if not text:
-        return None, "توصیف خالی بود"
-    return text[:MAX_DESCRIPTION_CHARS], None
+        return None, "توصیف خالی بود", call
+    return text[:MAX_DESCRIPTION_CHARS], None, call

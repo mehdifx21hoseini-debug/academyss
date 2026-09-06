@@ -105,12 +105,19 @@ class MemoryExtractor:
     def model(self) -> str:
         return self._client.model
 
-    async def extract(self, turns: Sequence[tuple[str, str]]) -> list[Candidate]:
+    async def extract(
+        self, turns: Sequence[tuple[str, str]]
+    ) -> tuple[list[Candidate], RawCall | None]:
+        """(یافته‌ها، فراخوانی). فراخوانی None یعنی اصلاً مدل صدا زده نشد.
+
+        مصرف برگردانده می‌شود تا لایه‌ی بالاتر — که نشست پایگاه داده دارد — ثبتش
+        کند و سقف هزینه این خرج را هم ببیند (ADR-026).
+        """
         if not turns:
-            return []
+            return [], None
         call = await self._client.raw(
             system=SYSTEM_PROMPT,
             user=build_user_content(turns),
             schema=EXTRACTION_SCHEMA,
         )
-        return parse(call)
+        return parse(call), call

@@ -20,7 +20,8 @@ from telethon.sessions import StringSession
 from telethon.tl.functions.account import UpdateStatusRequest
 
 from mentorai import escalation
-from mentorai.ai.client import VisionClient
+from mentorai.ai import budget
+from mentorai.ai.client import RawCall, VisionClient
 from mentorai.config import get_settings
 from mentorai.conversation import assistant_may_answer
 from mentorai.db.crypto import decrypt_session
@@ -48,6 +49,10 @@ class _Attachment:
     mime: str | None
     size_bytes: int | None
     sha256: str | None
+    # فراخوانی مدل برای توصیف تصویر، اگر انجام شده باشد. خواندن فایل عمداً بیرون از
+    # هر تراکنشی انجام می‌شود، پس مصرف اینجا حمل می‌شود تا در همان نشستی ثبت شود که
+    # خود پیام ثبت می‌شود (ADR-026).
+    model_call: RawCall | None = None
 
 
 class AccountGateway:
@@ -170,8 +175,9 @@ class AccountGateway:
                 sha256=None,
             )
 
+        model_call: RawCall | None = None
         if media_type == "photo":
-            extraction = await self._read_image(data, mime or "image/jpeg")
+            extraction, model_call = await self._read_image(data, mime or "image/jpeg")
         elif media_type in ("voice", "audio", "video_note"):
             extraction = await self._read_voice(data, mime or "audio/ogg", name or "voice.ogg")
         else:
@@ -179,28 +185,39 @@ class AccountGateway:
 
         return _Attachment(
             extraction=extraction,
+            model_call=model_call,
             mime=mime,
             size_bytes=len(data),
             sha256=media_store.fingerprint(data),
         )
 
-    async def _read_image(self, data: bytes, mime: str) -> media_extract.Extraction:
+    async def _read_image(
+        self, data: bytes, mime: str
+    ) -> tuple[media_extract.Extraction, RawCall | None]:
         """توصیف تصویر، یا رد شدن.
 
         در حالت «فقط دریافت» هیچ مدلی در دسترس نیست و تصویر رد می‌شود؛ یعنی همان
         رفتار قبلی: به منتور می‌رود.
         """
         if self._vision is None:
-            return media_extract.Extraction(
-                kind="rejected", refused=media_extract.Refusal.unsupported_format
+            return (
+                media_extract.Extraction(
+                    kind="rejected", refused=media_extract.Refusal.unsupported_format
+                ),
+                None,
             )
-        description, error = await vision.describe(self._vision, image=data, media_type=mime)
+        description, error, call = await vision.describe(
+            self._vision, image=data, media_type=mime
+        )
         if description is None:
             log.warning("image_not_read", account=self.slug, reason=error)
-            return media_extract.Extraction(
-                kind="rejected", refused=media_extract.Refusal.unreadable
+            return (
+                media_extract.Extraction(
+                    kind="rejected", refused=media_extract.Refusal.unreadable
+                ),
+                call,
             )
-        return media_extract.Extraction(kind="image", text=description)
+        return media_extract.Extraction(kind="image", text=description), call
 
     async def _read_voice(self, data: bytes, mime: str, filename: str) -> media_extract.Extraction:
         """رونویسی ویس، یا رد شدن.
@@ -274,6 +291,19 @@ class AccountGateway:
             if result.is_duplicate:
                 log.info("duplicate_delivery", account=self.slug, chat_id=inbound.chat_id)
                 return
+
+            # مصرف توصیف تصویر، در همان نشست. پیش از بررسی تکراری بودن انجام
+            # نمی‌شود چون فراخوانی مدل قبلاً رخ داده و پولش خرج شده — چه پیام
+            # تکراری باشد چه نه.
+            if attachment is not None and attachment.model_call is not None:
+                await budget.record(
+                    session,
+                    purpose=budget.Purpose.image_description,
+                    model=attachment.model_call.model,
+                    input_tokens=attachment.model_call.input_tokens,
+                    output_tokens=attachment.model_call.output_tokens,
+                    cache_read_tokens=attachment.model_call.cache_read_tokens,
+                )
 
             if attachment is not None and result.message_id is not None:
                 await media_store.record(

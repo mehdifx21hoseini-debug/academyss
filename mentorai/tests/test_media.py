@@ -573,7 +573,7 @@ async def test_an_image_is_described_not_judged() -> None:
     from mentorai.media import vision
 
     client = ScriptedClient(raw_text="چارت EURUSD در تایم چهار ساعته با دو خط افقی.")
-    text, error = await vision.describe(client, image=b"fake-bytes", media_type="image/jpeg")
+    text, error, _ = await vision.describe(client, image=b"fake-bytes", media_type="image/jpeg")
 
     assert error is None
     assert text == "چارت EURUSD در تایم چهار ساعته با دو خط افقی."
@@ -588,7 +588,7 @@ async def test_an_unsupported_image_type_never_reaches_the_model() -> None:
     from mentorai.media import vision
 
     client = ScriptedClient(raw_text="نباید فراخوانی شود")
-    text, error = await vision.describe(client, image=b"x", media_type="image/tiff")
+    text, error, _ = await vision.describe(client, image=b"x", media_type="image/tiff")
 
     assert text is None and error is not None
     assert client.calls == []
@@ -600,7 +600,7 @@ async def test_an_oversized_image_never_reaches_the_model() -> None:
 
     client = ScriptedClient(raw_text="نباید فراخوانی شود")
     payload = b"x" * (vision.MAX_IMAGE_BYTES + 1)
-    text, _ = await vision.describe(client, image=payload, media_type="image/jpeg")
+    text, _, _call = await vision.describe(client, image=payload, media_type="image/jpeg")
 
     assert text is None
     assert client.calls == []
@@ -611,7 +611,7 @@ async def test_a_model_failure_reading_an_image_is_not_a_description() -> None:
     from mentorai.media import vision
 
     client = ScriptedClient(error="APITimeoutError")
-    text, error = await vision.describe(client, image=b"x", media_type="image/png")
+    text, error, _ = await vision.describe(client, image=b"x", media_type="image/png")
 
     assert text is None and error is not None
 
