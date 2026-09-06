@@ -63,7 +63,8 @@ MT4 = [
              "دکمه‌ی AutoTrading در نوار ابزار را فعال کنید."],
       keywords=["expert advisor", "MQL4", "autotrading"],
       related_concepts=["MT-TRBL-0010", "MT-CONC-0015"],
-      related_questions=["اکسپرت متاتریدر ۴ رو چطور نصب کنم؟"]),
+      related_questions=["اکسپرت متاتریدر ۴ رو چطور نصب کنم؟"],
+      verified="دکمه‌ی AutoTrading در نوار ابزار متاتریدر ۴ دیده شد — تفکیک نام دکمه میان دو پلتفرم را تأیید می‌کند. پوشه‌ی MQL4 در پوشه‌ی داده هم دیده شد. تیک Allow live trading در تصاویر نبود."),
     o("MT4-PROC-0006", P, "بارگذاری داده‌های تاریخی با History Center",
       "متاتریدر ۴ داده‌های تاریخی را به‌صورت خودکار و کامل دانلود نمی‌کند. برای بک‌تست یا مشاهده‌ی گذشته‌ی "
       "دورتر باید از History Center استفاده کرد. مقدار داده‌ی نگهداری‌شده هم به تنظیم Max bars in history "
@@ -140,7 +141,8 @@ MT4 = [
              "مقادیر Contract size، Digits، Stops level، Swap و Trade sessions را بخوانید."],
       keywords=["symbol properties", "specification", "مشخصات نماد"],
       related_concepts=["MT-CONC-0005", "MT-CONC-0009", "MT5-PROC-0005"],
-      related_questions=["اندازه قرارداد رو توی متاتریدر ۴ کجا ببینم؟", "حداقل حجم نماد چقدره؟"]),
+      related_questions=["اندازه قرارداد رو توی متاتریدر ۴ کجا ببینم؟", "حداقل حجم نماد چقدره؟"],
+      verified="پنجره‌ی «EURJPY@ contract specification» در متاتریدر ۴ دیده شد با Contract size برابر ۱۰۰۰۰۰، Digits برابر ۳، Stops level برابر ۱۵، Execution برابر Market و GTC mode برابر «Pendings are good till cancel». مقادیر Swap و ساعات معاملاتی پایین‌تر از بخش قابل مشاهده بودند."),
     o("MT4-PROC-0012", P, "تنظیم حداکثر انحراف مجاز قیمت در متاتریدر ۴",
       "در حساب‌های Instant Execution، پنجره‌ی سفارش متاتریدر ۴ گزینه‌ی «Enable maximum deviation from "
       "quoted price» دارد. با فعال کردن آن و تعیین مقدار بر حسب پیپ، اگر قیمت تا آن حد تغییر کند سفارش "

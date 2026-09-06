@@ -1,7 +1,7 @@
 {
   "report_type": "validation",
-  "version": "v072",
-  "generated_at": "2026-09-06T10:15:59Z",
+  "version": "v071",
+  "generated_at": "2026-09-06T10:15:34Z",
   "stats": {
     "files": 49,
     "objects": 734,
@@ -22,8 +22,8 @@
     },
     "by_approval": {
       "REVIEW_REQUIRED": 9,
-      "PENDING_VERIFICATION": 150,
-      "APPROVED": 107,
+      "PENDING_VERIFICATION": 152,
+      "APPROVED": 105,
       "PENDING_REVIEW": 418
     }
   },

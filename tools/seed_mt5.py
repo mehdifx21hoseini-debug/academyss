@@ -56,7 +56,8 @@ MT5 = [
       warnings=["حجم پیش‌فرض پنجره را بدون بررسی تغییر ندهید؛ ورود با حجم اشتباه یکی از پرتکرارترین خطاهاست."],
       keywords=["new order", "F9", "pending order", "stop limit"],
       related_concepts=["MT5-CONC-0003", "MT5-PROC-0008"],
-      related_questions=["چطور معامله باز کنم؟", "سفارش معلق چطور بذارم؟", "Buy Stop Limit چیه؟"]),
+      related_questions=["چطور معامله باز کنم؟", "سفارش معلق چطور بذارم؟", "Buy Stop Limit چیه؟"],
+      verified="پنجره‌ی New Order متاتریدر ۵ دیده شد: پنل کناری با Market Execution، Limit Order، Stop Order و Stop Limit Order؛ فیلدهای Symbol، Volume، Stop Loss، Take Profit، Fill policy و Comment؛ و دکمه‌های «Sell by Market» و «Buy by Market». متن رکورد با همین برچسب‌ها اصلاح شد. میان‌بُر F9 در تصاویر نبود."),
     o("MT5-PROC-0004", P, "تنظیم یا تغییر حد ضرر و حد سود روی معامله‌ی باز (متاتریدر ۵)",
       "برای افزودن یا تغییر SL/TP روی یک پوزیشن باز، از تب Trade در پنجره‌ی Toolbox استفاده می‌شود.",
       S, 0.85, category="مدیریت معامله",
@@ -104,17 +105,19 @@ MT5 = [
       verified="دکمه‌ی نوار ابزار «Algo Trading» است نه AutoTrading و اصلاح شد؛ در Tools > Options > Experts گزینه‌ی «Allow algorithmic trading» و در Navigator شاخه‌ی «Expert Advisors» دیده شد."),
     o("MT5-PROC-0008", P, "تنظیم انحراف مجاز و نوع پر شدن سفارش (Deviation و Filling)",
       "در پنجره‌ی New Order متاتریدر ۵ دو تنظیم مهم وجود دارد: Deviation که حداکثر انحراف قابل قبول قیمت را "
-      "مشخص می‌کند، و Filling type که تعیین می‌کند سفارش در صورت نبود حجم کافی چه رفتاری داشته باشد: "
+      "مشخص می‌کند، و نوع پر شدن سفارش — در پنجره‌ی New Order با برچسب «Fill policy» و در Specification "
+      "نماد با برچسب «Filling» — که تعیین می‌کند سفارش در صورت نبود حجم کافی چه رفتاری داشته باشد: "
       "Fill or Kill (یا کامل اجرا شود یا لغو)، Immediate or Cancel (بخش موجود اجرا و بقیه لغو) و "
       "Return (بخش موجود اجرا و باقی‌مانده به‌صورت سفارش باقی می‌ماند). گزینه‌های در دسترس را بروکر تعیین می‌کند.",
       S, 0.75, category="معامله",
       steps=["پنجره‌ی New Order را باز کنید (F9).",
              "در صورت نمایش گزینه‌ی Deviation، مقدار مجاز را بر حسب پوینت وارد کنید.",
-             "نوع Filling را از فهرست انتخاب کنید.",
+             "نوع پر شدن سفارش را از فهرست Fill policy انتخاب کنید.",
              "سفارش را ثبت و نتیجه را در تب Journal بررسی کنید."],
       keywords=["deviation", "filling", "fill or kill", "IOC"],
       related_concepts=["MT-CONC-0010", "MT-TRBL-0009"],
-      related_questions=["Fill or Kill یعنی چی؟", "Deviation رو چقدر بذارم؟"]),
+      related_questions=["Fill or Kill یعنی چی؟", "Deviation رو چقدر بذارم؟"],
+      verified="برچسب «Fill policy» با مقدار Fill or Kill در پنجره‌ی New Order و برچسب «Filling» با همان مقدار در Specification نماد دیده شد؛ نام‌گذاری رکورد اصلاح شد. فیلد Deviation در این حساب Market Execution نمایش داده نمی‌شد — که با قید خودِ رکورد («در صورت نمایش») هم‌خوان است."),
     o("MT5-PROC-0009", P, "استفاده از عمق بازار (Depth of Market)",
       "عمق بازار سفارش‌های خرید و فروش در سطوح مختلف قیمت را نشان می‌دهد و امکان ثبت سریع سفارش از داخل "
       "همان پنجره را می‌دهد. نمایش داده‌های واقعی عمق بازار به ارائه‌ی آن از سوی بروکر بستگی دارد.",
