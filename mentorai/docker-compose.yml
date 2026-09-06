@@ -17,8 +17,26 @@ services:
       timeout: 3s
       retries: 20
 
-  gateway:
+  # کل سیستم: دریافت پیام، ساخت پیش‌نویس، ربات کنترل، و ارسال.
+  #
+  # `run-worker` عمداً تنها فرایند بلندمدت است. هر فرایندی که به یک حساب وصل شود یک
+  # اتصال تازه با همان نشست می‌سازد، و دو اتصال هم‌زمان روی یک نشست هم ترافیک اضافه
+  # است و هم برای تلگرام سیگنال. یک حساب، یک فرایند (ADR-020).
+  app:
     build: .
+    command: ["mentorai", "run-worker"]
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # فقط برای دستورهای تک‌باره: مهاجرت، ورود حساب، وارد کردن دانش، ساخت کاربر پنل.
+  # پروفایل دارد تا با `docker compose up` بالا نیاید — اگر بالا بیاید، اتصال دوم
+  # همان حساب می‌شود. `docker compose run` خودش پروفایلش را فعال می‌کند.
+  cli:
+    build: .
+    profiles: ["tools"]
     env_file: .env
     # خروجی پایگاه دانش فقط-خواندنی سوار می‌شود تا `kb-import` روی هر سیستم‌عاملی یک
     # دستور ساده باشد و به مسیردهی دستی نیاز نداشته باشد.
@@ -27,18 +45,6 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    restart: unless-stopped
-
-  # بدون کارگر، دروازه پیام را می‌گیرد و کار را در صف می‌گذارد و همان‌جا می‌ماند:
-  # نه پیش‌نویسی ساخته می‌شود و نه ربات کنترل بالا می‌آید. این سرویس اختیاری نیست.
-  worker:
-    build: .
-    command: ["mentorai", "run-worker"]
-    env_file: .env
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
 
   # فقط روی لوکال‌هاست باز می‌شود. پنل باید پشت یک پروکسی با HTTPS بیاید، وگرنه
   # کوکی نشست که علامت secure دارد اصلاً ذخیره نمی‌شود و ورود کار نمی‌کند.

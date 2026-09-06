@@ -70,7 +70,7 @@ Copy-Item .env.example .env
 `SESSION_ENCRYPTION_KEY` بگذارید:
 
 ```powershell
-docker compose run --rm gateway python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+docker compose run --rm cli python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
 ```
 
 برای همین مرحله `TELEGRAM_API_ID=1` و `TELEGRAM_API_HASH=x` کافی است؛ به تلگرام وصل
@@ -79,8 +79,8 @@ docker compose run --rm gateway python -c "from cryptography.fernet import Ferne
 
 ```powershell
 docker compose up -d db
-docker compose run --rm gateway python -m alembic upgrade head
-docker compose run --rm gateway mentorai kb-import --file /kb/mentorai_kb_latest.csv
+docker compose run --rm cli python -m alembic upgrade head
+docker compose run --rm cli mentorai kb-import --file /kb/mentorai_kb_latest.csv
 ```
 
 انتظار: `ساخته شد: 641`. خروجی پایگاه دانش از قبل روی `/kb` سوار شده، پس مسیردهی
@@ -89,13 +89,13 @@ docker compose run --rm gateway mentorai kb-import --file /kb/mentorai_kb_latest
 کیفیت بازیابی را همین‌جا اندازه بگیرید — همان عددی که در `ADR-019` آمده:
 
 ```powershell
-docker compose run --rm gateway mentorai kb-eval --cases /kb/mentorai_eval_latest.csv --k 5
+docker compose run --rm cli mentorai kb-eval --cases /kb/mentorai_eval_latest.csv --k 5
 ```
 
 و پنل:
 
 ```powershell
-docker compose run --rm -it gateway mentorai panel-user --username boss --display-name "مدیر" --role admin
+docker compose run --rm -it cli mentorai panel-user --username boss --display-name "مدیر" --role admin
 docker compose up -d panel
 ```
 
@@ -103,7 +103,7 @@ docker compose up -d panel
 `http://localhost:8000`. روی `localhost` کار می‌کند چون مرورگرها آن را امن حساب
 می‌کنند؛ روی هر آدرس دیگری بدون HTTPS ورود کار نخواهد کرد و این عمدی است.
 
-`gateway` و `worker` در این مرحله بالا نمی‌آیند: هر دو به حساب تلگرام نیاز دارند.
+سرویس `app` در این مرحله بالا نمی‌آید: به حساب تلگرام نیاز دارد.
 
 توقف با `docker compose down`. داده می‌ماند؛ `docker compose down -v` داده را هم پاک
 می‌کند.
@@ -117,8 +117,8 @@ docker compose up -d panel
 cd mentorai
 cp .env.example .env            # مقادیر واقعی را پر کنید
 docker compose up -d db
-docker compose run --rm gateway python -m alembic upgrade head
-docker compose run --rm gateway mentorai kb-import --file /kb/mentorai_kb_latest.csv
+docker compose run --rm cli python -m alembic upgrade head
+docker compose run --rm cli mentorai kb-import --file /kb/mentorai_kb_latest.csv
 ```
 
 انتظار: `ساخته شد: 641`.
@@ -127,33 +127,34 @@ docker compose run --rm gateway mentorai kb-import --file /kb/mentorai_kb_latest
 منفی است:
 
 ```bash
-docker compose run --rm gateway mentorai add-account \
+docker compose run --rm cli mentorai add-account \
     --slug mentor-a --mentor-name "نام منتور" --phone "+98..."
-docker compose run --rm -it gateway mentorai login --slug mentor-a
+docker compose run --rm -it cli mentorai login --slug mentor-a
 ```
 
 کسانی را که دانشجو نیستند استثنا کنید، **پیش از** بالا آوردن دروازه:
 
 ```bash
-docker compose run --rm gateway mentorai exclude-chat \
+docker compose run --rm cli mentorai exclude-chat \
     --slug mentor-a --peer-id 123456789 --reason "همکار"
 ```
 
 حالا سیستم را بالا بیاورید:
 
 ```bash
-docker compose up -d gateway worker
+docker compose up -d app
 ```
 
-کارگر اختیاری نیست. بدون آن دروازه پیام را می‌گیرد و در صف می‌گذارد و همان‌جا می‌ماند:
-نه پیش‌نویسی ساخته می‌شود و نه ربات کنترل بالا می‌آید.
+⚠️ فقط همین یک سرویس. `app` خودش دریافت، ساخت پیش‌نویس، ربات کنترل و ارسال را با هم
+انجام می‌دهد. اگر فرایند دومی هم به همان حساب وصل شود، دو اتصال هم‌زمان روی یک نشست
+می‌شود — هم ترافیک اضافه و هم سیگنال برای تلگرام (ADR-020).
 
 پنل را بسازید و پشت HTTPS بگذارید:
 
 ```bash
-docker compose run --rm -it gateway mentorai panel-user \
+docker compose run --rm -it cli mentorai panel-user \
     --username mentor_a --display-name "نام منتور" --role mentor --slug mentor-a
-docker compose run --rm -it gateway mentorai panel-user \
+docker compose run --rm -it cli mentorai panel-user \
     --username boss --display-name "مدیر" --role admin
 docker compose up -d panel
 ```

@@ -127,18 +127,19 @@ mentorai kb-eval --cases ../exports/core/mentorai_eval_latest.csv --k 5
 ```bash
 cp .env.example .env          # مقادیر واقعی را پر کنید
 docker compose up -d db
-docker compose run --rm gateway python -m alembic upgrade head
+docker compose run --rm cli python -m alembic upgrade head
 
 # یک‌بار برای هر منتور
-docker compose run --rm gateway mentorai add-account \
+docker compose run --rm cli mentorai add-account \
     --slug mentor-a --mentor-name "نام منتور" --phone "+98..."
-docker compose run --rm -it gateway mentorai login --slug mentor-a
+docker compose run --rm -it cli mentorai login --slug mentor-a
 
-docker compose up -d gateway worker
+docker compose up -d app
 ```
 
-کارگر اختیاری نیست: بدون آن دروازه پیام را می‌گیرد و کار را در صف می‌گذارد و همان‌جا
-می‌ماند — نه پیش‌نویسی ساخته می‌شود و نه ربات کنترل بالا می‌آید.
+⚠️ فقط همین یک سرویس. `app` خودش دریافت، ساخت پیش‌نویس، ربات کنترل و ارسال را با هم
+انجام می‌دهد. اگر فرایند دومی هم به همان حساب وصل شود، دو اتصال هم‌زمان روی یک نشست
+می‌شود — هم ترافیک اضافه و هم سیگنال برای تلگرام (ADR-020).
 
 ورود عمداً دستی و تعاملی است. ورود مکرر خودش برای تلگرام سیگنال منفی است، پس این
 دستور نباید در راه‌اندازی خودکار قرار بگیرد.
