@@ -19,7 +19,7 @@
 <p class="muted">پیامی ثبت نشده است.</p>
 {% else %}
 <ol class="thread">
-{% for message, run in timeline %}
+{% for message, run, media in timeline %}
   <li class="msg {{ message.sender }}">
     <div class="msg-head">
       <span class="who-tag">{{ sender_label(message.sender) }}</span>
@@ -29,6 +29,22 @@
       <p class="body">{{ message.text }}</p>
     {% else %}
       <p class="body muted">[{{ message.media_type or 'بدون متن' }}]</p>
+    {% endif %}
+
+    {% if media %}
+      <div class="why">
+        {% if media.kind == 'rejected' %}
+          <strong>فایل خوانده نشد.</strong> {{ media_refusal(media.refusal) }}
+        {% elif media.kind == 'statement' %}
+          <strong>استیتمنت خوانده شد.</strong> اعدادش در پاسخ دستیار آمده.
+        {% elif media.kind == 'image' %}
+          <strong>سیستم در تصویر این را دید:</strong>
+          <p class="body">{{ media.extracted_text }}</p>
+        {% elif media.extracted_text %}
+          <strong>متن خوانده‌شده از فایل:</strong>
+          <p class="body">{{ media.extracted_text }}</p>
+        {% endif %}
+      </div>
     {% endif %}
 
     {% if run %}

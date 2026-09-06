@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from mentorai.ai.client import ScriptedClient
 from mentorai.ai.runtime import SilenceReason, handle_message
 from mentorai.ai.schema import ModelAnswer
+from mentorai.config import get_settings
 from mentorai.db.models import AiRun, Escalation, MentorAccount, Message, Outcome, Sender
 from mentorai.knowledge.embeddings import HashingEmbedder
 from mentorai.knowledge.ingest import ingest_csv
@@ -258,6 +259,50 @@ async def test_a_statement_answer_creates_no_escalation(
     await session.commit()
 
     assert list((await session.execute(select(Escalation))).scalars()) == []
+
+
+async def test_an_image_is_read_but_not_answered_until_the_owner_turns_it_on(
+    session: AsyncSession, account: MentorAccount, knowledge: None, embedder: HashingEmbedder
+) -> None:
+    """توصیف تصویر ذخیره می‌شود تا سنجیده شود، ولی پاسخی از آن ساخته نمی‌شود."""
+    message = await _incoming(session, account, "این ورودم درسته؟", media_type="photo")
+    await _with_media(session, message, kind="image", text="چارت EURUSD تایم ۴ ساعته")
+
+    result = await handle_message(
+        session, message, model_client=ScriptedClient(_confident()), embedder=embedder
+    )
+    await session.commit()
+
+    assert result.outcome is Outcome.silence
+    assert result.reason == SilenceReason.unsupported_media.value
+    row = await media_store.load(session, message.id)
+    assert row is not None and row.extracted_text == "چارت EURUSD تایم ۴ ساعته"
+
+
+async def test_image_answers_use_the_description_once_enabled(
+    session: AsyncSession,
+    account: MentorAccount,
+    knowledge: None,
+    embedder: HashingEmbedder,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """با روشن شدن کلید، توصیف تصویر همان چیزی است که جست‌وجو رویش انجام می‌شود."""
+    get_settings.cache_clear()
+    monkeypatch.setenv("ANSWER_FROM_IMAGES", "true")
+    get_settings.cache_clear()
+    try:
+        message = await _incoming(session, account, None, media_type="photo")
+        await _with_media(session, message, kind="image", text="دوره مقدماتی چند جلسه است؟")
+        client = ScriptedClient(_confident())
+
+        result = await handle_message(session, message, model_client=client, embedder=embedder)
+        await session.commit()
+
+        assert result.outcome is Outcome.answer
+        assert client.calls, "مدل باید با توصیف تصویر فراخوانی می‌شد"
+    finally:
+        monkeypatch.delenv("ANSWER_FROM_IMAGES", raising=False)
+        get_settings.cache_clear()
 
 
 async def test_a_trading_plan_still_goes_to_the_mentor(

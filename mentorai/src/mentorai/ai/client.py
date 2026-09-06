@@ -7,6 +7,7 @@ error برمی‌گردد. دلیلش این است که جهت شکست در ا
 
 from __future__ import annotations
 
+import base64
 import json
 import time
 from dataclasses import dataclass
@@ -80,6 +81,20 @@ class ModelClient(Protocol):
     async def complete(self, *, system: str, user: str) -> ModelCall: ...
 
 
+class VisionClient(Protocol):
+    """خواندن تصویر. عمداً جدا از `ModelClient` است.
+
+    هر مصرف‌کننده‌ی پاسخ متنی لازم نیست تصویر هم بخواند، و مسیر دریافت هم فقط همین
+    یکی را لازم دارد؛ جدا نگه داشتنشان یعنی هیچ‌کدام مجبور به پیاده‌سازی دیگری نیست.
+    """
+
+    model: str
+
+    async def describe_image(
+        self, *, system: str, prompt: str, image: bytes, media_type: str
+    ) -> RawCall: ...
+
+
 class AnthropicClient:
     """کلاینت واقعی.
 
@@ -124,22 +139,64 @@ class AnthropicClient:
                 error=f"{type(exc).__name__}: {exc}",
             )
 
-        latency_ms = int((time.monotonic() - started) * 1000)
-        usage: Any = getattr(response, "usage", None)
-        input_tokens = int(getattr(usage, "input_tokens", 0) or 0)
-        output_tokens = int(getattr(usage, "output_tokens", 0) or 0)
-        cache_read_tokens = int(getattr(usage, "cache_read_input_tokens", 0) or 0)
+        return self._finish(response, started)
 
+    def _finish(self, response: Any, started: float) -> RawCall:
+        """اندازه‌گیری‌ها و متن پاسخ، مشترک بین همه‌ی فراخوانی‌ها."""
+        usage: Any = getattr(response, "usage", None)
         body = next((b.text for b in response.content if b.type == "text"), None)
         return RawCall(
             text=body,
             model=self.model,
-            latency_ms=latency_ms,
-            input_tokens=input_tokens,
-            output_tokens=output_tokens,
-            cache_read_tokens=cache_read_tokens,
+            latency_ms=int((time.monotonic() - started) * 1000),
+            input_tokens=int(getattr(usage, "input_tokens", 0) or 0),
+            output_tokens=int(getattr(usage, "output_tokens", 0) or 0),
+            cache_read_tokens=int(getattr(usage, "cache_read_input_tokens", 0) or 0),
             error=None if body is not None else "پاسخ مدل هیچ بلوک متنی نداشت",
         )
+
+    async def describe_image(
+        self, *, system: str, prompt: str, image: bytes, media_type: str
+    ) -> RawCall:
+        """تصویر را توصیف کن. مثل بقیه‌ی این ماژول، هرگز استثنا پرتاب نمی‌کند.
+
+        خروجی متن آزاد است نه ساختار: توصیف تصویر شکل ثابتی ندارد، و تحمیل یک طرح
+        روی آن فقط مدل را وادار به پر کردن فیلدهایی می‌کند که در تصویر نیستند.
+        """
+        started = time.monotonic()
+        # تصویر پیش از متن می‌آید: مدل باید اول ببیند، بعد بخواند چه خواسته‌ای دارد.
+        messages: Any = [
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image",
+                        "source": {
+                            "type": "base64",
+                            "media_type": media_type,
+                            "data": base64.standard_b64encode(image).decode("ascii"),
+                        },
+                    },
+                    {"type": "text", "text": prompt},
+                ],
+            }
+        ]
+        try:
+            response = await self._client.messages.create(
+                model=self.model,
+                max_tokens=self._max_tokens,
+                system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
+                messages=messages,
+                output_config={"effort": self.effort},
+            )
+        except Exception as exc:  # noqa: BLE001 - هر شکستی به سکوت ختم می‌شود
+            return RawCall(
+                text=None,
+                model=self.model,
+                latency_ms=int((time.monotonic() - started) * 1000),
+                error=f"{type(exc).__name__}: {exc}",
+            )
+        return self._finish(response, started)
 
     async def complete(self, *, system: str, user: str) -> ModelCall:
         raw = await self.raw(system=system, user=user, schema=JSON_SCHEMA)
@@ -172,6 +229,19 @@ class ScriptedClient:
         self._error = error
         self._raw_text = raw_text
         self.calls: list[tuple[str, str]] = []
+
+    async def describe_image(
+        self, *, system: str, prompt: str, image: bytes, media_type: str
+    ) -> RawCall:
+        self.calls.append((system, prompt))
+        return RawCall(
+            text=self._raw_text,
+            model=self.model,
+            latency_ms=1,
+            input_tokens=10,
+            output_tokens=5,
+            error=self._error,
+        )
 
     async def raw(self, *, system: str, user: str, schema: dict[str, object]) -> RawCall:
         self.calls.append((system, user))

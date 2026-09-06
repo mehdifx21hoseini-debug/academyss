@@ -53,6 +53,7 @@ async def _session_dependency() -> AsyncIterator[AsyncSession]:
 def _template_globals() -> dict[str, object]:
     return {
         "silence_reason": labels.silence_reason,
+        "media_refusal": labels.media_refusal,
         "conversation_status": labels.conversation_status,
         "sender_label": labels.sender,
         "source_class": labels.source_class,

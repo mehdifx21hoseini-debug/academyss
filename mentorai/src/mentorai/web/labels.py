@@ -43,8 +43,20 @@ AUTHORITY: dict[str, str] = {
 }
 
 
+MEDIA_REFUSALS = {
+    "too_large": "حجمش از سقف بیشتر بود.",
+    "unsupported_format": "قالبش پشتیبانی نمی‌شود.",
+    "unreadable": "باز نشد یا خوانا نبود.",
+    "empty": "خالی بود.",
+}
+
+
 def silence_reason(code: str) -> str:
     return SILENCE_REASONS.get(code, code)
+
+
+def media_refusal(code: str | None) -> str:
+    return MEDIA_REFUSALS.get(code or "", "دلیلش ثبت نشده.")
 
 
 def conversation_status(code: str) -> str:

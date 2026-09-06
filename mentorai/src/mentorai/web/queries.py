@@ -20,6 +20,7 @@ from mentorai.db.models import (
     Escalation,
     KnowledgeDocument,
     Message,
+    MessageMedia,
     Outcome,
     Student,
 )
@@ -178,19 +179,23 @@ async def conversation_rows(
 
 async def messages_with_runs(
     session: AsyncSession, conversation_id: int, *, limit: int = 100
-) -> list[tuple[Message, AiRun | None]]:
-    """پیام‌ها به‌همراه اجرای هوش مصنوعی مربوط به هرکدام.
+) -> list[tuple[Message, AiRun | None, MessageMedia | None]]:
+    """پیام‌ها، اجرای هوش مصنوعی هرکدام، و آنچه از فایلشان خوانده شد.
+
+    فایل هم می‌آید چون بدون آن، پیامِ دارای عکس یا سند در پنل فقط یک برچسب خالی است
+    و معلوم نمی‌شود سیستم چه فهمیده — که دقیقاً همان چیزی است که باید سنجیده شود.
 
     دسترسی پیش از این تابع و از راه لایه‌ی دسترسی بررسی می‌شود.
     """
     stmt = (
-        select(Message, AiRun)
+        select(Message, AiRun, MessageMedia)
         .outerjoin(AiRun, AiRun.message_id == Message.id)
+        .outerjoin(MessageMedia, MessageMedia.message_id == Message.id)
         .where(Message.conversation_id == conversation_id)
         .order_by(Message.sent_at, Message.id)
         .limit(limit)
     )
-    return [(m, r) for m, r in (await session.execute(stmt)).all()]
+    return [(m, r, media) for m, r, media in (await session.execute(stmt)).all()]
 
 
 async def open_escalation_rows(
