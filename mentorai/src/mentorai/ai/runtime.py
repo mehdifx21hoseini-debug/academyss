@@ -152,7 +152,7 @@ def _statement_answer(metrics: StatementMetrics) -> str:
     دادنشان از مدل فقط یک جای تازه برای تغییر عدد می‌سازد، بدون اینکه چیزی اضافه کند.
     منتور در حالت پیش‌نویس متن را می‌بیند و هر جا لازم بود اصلاحش می‌کند.
     """
-    return "بررسی استیتمنت:\n\n" + review.render(metrics)
+    return review.render(metrics)
 
 
 async def _media_silence(session: AsyncSession, message: Message) -> RunResult:

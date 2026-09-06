@@ -218,7 +218,9 @@ def test_summary_is_used_only_when_no_rows_are_found_and_is_marked() -> None:
     assert metrics is not None
     assert metrics.source == "report_summary"
     assert metrics.profit_factor == pytest.approx(1.62)
-    assert "خودِ گزارش متاتریدر نوشته" in review.render(metrics)
+    # از کجا آمدن عدد در خود رکورد ثبت می‌شود و در پنل دیده می‌شود؛ داخل پیام
+    # دانشجو نمی‌آید، چون آنجا حرف اضافه است.
+    assert "گزارش" not in review.render(metrics)
 
 
 # ---------------------------------------------- شکل واقعی گزارش‌ها
@@ -372,42 +374,90 @@ def test_a_report_without_a_summary_is_still_computed_from_its_rows() -> None:
 # ------------------------------------------------------------------ سنجش
 
 
-def test_profit_factor_below_the_academy_threshold_fails() -> None:
-    metrics = statement.StatementMetrics(source="computed", profit_factor=1.2)
-    findings = review.review(metrics)
-
-    assert any(f.level == "fail" and "۱٫۳۵" in f.text for f in findings)
-
-
-def test_ideal_drawdown_band_is_named() -> None:
-    metrics = statement.StatementMetrics(source="computed", profit_factor=1.5, max_drawdown_pct=5.5)
+def test_the_reply_explains_what_the_profit_factor_means() -> None:
+    """عدد بدون معنی‌اش، برای دانشجو چیزی نیست."""
+    metrics = statement.StatementMetrics(source="computed", trades=10, profit_factor=0.62)
     text = review.render(metrics)
 
-    assert "مطلوب" in text
-    assert review.DECISION_NOTE in text, "سنجش نباید به‌جای تیم آکادمی تصمیم بگیرد"
+    assert "۰٫۶۲" in text
+    assert "به‌ازای هر ۱ واحد ضرر" in text, "باید بگوید این عدد یعنی چه"
+    assert "ضررها از سودها جلو زدن" in text, "زیر ۱ یعنی حساب رو به کاهش"
+    assert "۱٫۵" in text, "معیار منتور باید گفته شود"
 
 
-def test_drawdown_over_the_cap_fails() -> None:
-    metrics = statement.StatementMetrics(
-        source="computed", profit_factor=2.0, max_drawdown_pct=14.0
+def test_the_reply_uses_the_mentor_review_target_not_the_investment_plan_one() -> None:
+    """دو عدد تأییدشده برای دو کار متفاوت‌اند و نباید جابه‌جا شوند.
+
+    «۱٫۳۵» شرط پذیرش در طرح جذب سرمایه است؛ بررسی عمومی استیتمنت معیار خودش را
+    دارد و آن «بالای ۱٫۵» است.
+    """
+    text = review.render(statement.StatementMetrics(source="computed", profit_factor=1.4))
+
+    assert "۱٫۵" in text
+    assert "۱٫۳۵" not in text
+
+
+def test_a_heavy_drawdown_gets_the_academy_recovery_path() -> None:
+    """مسیر توقف و بازگشت، رکورد تأییدشده‌ی آکادمی برای دراوداون سنگین است."""
+    text = review.render(
+        statement.StatementMetrics(source="computed", profit_factor=0.6, max_drawdown_pct=44.39)
     )
-    assert any(f.level == "fail" for f in review.review(metrics))
+
+    assert "متوقف کنید" in text
+    assert "بک‌تست" in text
+    assert "فوروارد تست" in text
 
 
-# ------------------------------------------------------------------ آفیس
+def test_a_healthy_drawdown_does_not_get_the_recovery_path() -> None:
+    """توصیه‌ی توقف معامله فقط جایی گفته می‌شود که رکورد آکادمی برایش نوشته شده."""
+    text = review.render(
+        statement.StatementMetrics(source="computed", profit_factor=2.0, max_drawdown_pct=5.5)
+    )
+
+    assert "متوقف کنید" not in text
+    assert "مطلوب" in text
 
 
-def test_xlsx_statement_is_analysed_like_any_other() -> None:
-    rows = [
-        ["Ticket", "Type", "Size", "Profit"],
-        ["1", "buy", "0.10", "80.00"],
-        ["2", "sell", "0.10", "-40.00"],
-    ]
-    result = extract(xlsx(rows), filename="report.xlsx")
+def test_the_reply_follows_the_mentor_answer_structure() -> None:
+    """ساختار تأییدشده: سلام، تأیید آنچه درست بوده، اصلاح، و بستن با انرژی."""
+    text = review.render(
+        statement.StatementMetrics(source="computed", trades=40, profit_factor=1.6)
+    )
 
-    assert result.kind == "statement"
-    assert result.metrics is not None
-    assert result.metrics.profit_factor == pytest.approx(2.0)
+    assert text.startswith(review.GREETING)
+    assert "قدم درستیه" in text, "بخش تأیید نباید حذف شود"
+    assert text.endswith(review.CLOSING_GOOD)
+
+
+def test_even_a_bad_statement_opens_with_something_true_and_positive() -> None:
+    """رکورد «اول تحسین، بعد اصلاح» می‌گوید این بخش در بدترین نتیجه هم می‌آید."""
+    text = review.render(
+        statement.StatementMetrics(
+            source="computed",
+            trades=106,
+            wins=21,
+            losses=85,
+            profit_factor=0.62,
+            max_drawdown_pct=44.39,
+            net_profit=-616.51,
+        )
+    )
+
+    assert "قدم درستیه" in text
+    assert text.index("قدم درستیه") < text.index("۰٫۶۲"), "تحسین باید پیش از اصلاح بیاید"
+    assert text.endswith(review.CLOSING_HARD)
+
+
+def test_a_losing_result_is_worded_not_signed() -> None:
+    """علامت منفی پیش از ارقام فارسی در متن راست‌به‌چپ جابه‌جا می‌شود."""
+    metrics = statement.StatementMetrics(
+        source="computed", trades=3, wins=1, losses=2, profit_factor=0.6, net_profit=-616.51
+    )
+    text = review.render(metrics)
+
+    assert "ضرر داده" in text
+    assert "زیان" not in text, "واژه‌ی محاوره‌ای منتورها «ضرر» است"
+    assert "-۶۱۶" not in text and "-616" not in text
 
 
 def test_an_xlsx_statement_is_read_from_its_summary() -> None:
@@ -443,17 +493,6 @@ def test_an_xlsx_statement_is_read_from_its_summary() -> None:
     assert metrics.profit_factor == pytest.approx(0.621)
     assert metrics.max_drawdown_pct == pytest.approx(44.39)
     assert metrics.net_profit == pytest.approx(-616.51)
-
-
-def test_a_losing_result_is_worded_not_signed() -> None:
-    """علامت منفی پیش از ارقام فارسی در متن راست‌به‌چپ جابه‌جا می‌شود."""
-    metrics = statement.StatementMetrics(
-        source="computed", trades=3, wins=1, losses=2, profit_factor=0.6, net_profit=-616.51
-    )
-    text = review.render(metrics)
-
-    assert "زیان" in text
-    assert "-۶۱۶" not in text and "-616" not in text
 
 
 def test_xlsx_that_is_a_plan_comes_back_as_text() -> None:
