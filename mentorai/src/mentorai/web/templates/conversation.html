@@ -40,6 +40,9 @@
         {% elif media.kind == 'image' %}
           <strong>سیستم در تصویر این را دید:</strong>
           <p class="body">{{ media.extracted_text }}</p>
+        {% elif media.kind == 'voice' %}
+          <strong>رونویسی ویس:</strong>
+          <p class="body">{{ media.extracted_text }}</p>
         {% elif media.extracted_text %}
           <strong>متن خوانده‌شده از فایل:</strong>
           <p class="body">{{ media.extracted_text }}</p>

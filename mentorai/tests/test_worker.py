@@ -18,6 +18,8 @@ from mentorai.conversation import escalate
 from mentorai.db.models import Conversation, Draft, MentorAccount, Message, ReplyMode, Sender
 from mentorai.knowledge.embeddings import HashingEmbedder
 from mentorai.knowledge.ingest import ingest_csv
+from mentorai.media import store as media_store
+from mentorai.media.extract import Extraction
 from mentorai.telegram.normalize import build_inbound
 from mentorai.telegram.safety import AccountGate, TokenBucket
 from mentorai.telegram.store import record_inbound
@@ -29,9 +31,13 @@ NOON = datetime(2026, 9, 2, 12, 0, tzinfo=UTC)
 class RecordingNotifier:
     def __init__(self) -> None:
         self.sent: list[tuple[str, str]] = []
+        # پرسشی که کنار پیش‌نویس به منتور نشان داده می‌شود، جدا نگه داشته می‌شود:
+        # منتور نباید پاسخی را تأیید کند که سؤالش را ندیده است.
+        self.questions: list[str] = []
 
     async def notify(self, *, account: MentorAccount, draft: Draft, question: str) -> int | None:
         self.sent.append((account.slug, draft.proposed_text))
+        self.questions.append(question)
         return 12345
 
 
@@ -140,6 +146,55 @@ async def test_draft_mode_creates_a_draft_and_sends_nothing(
     assert channel.sent == [], "در حالت پیش‌نویس هیچ چیزی به دانشجو نمی‌رود"
     assert channel.reads == [], "و پیام خوانده علامت نمی‌خورد"
     assert notifier.sent == [("mentor-a", "دوره مقدماتی شانزده جلسه دارد.")]
+
+
+async def test_the_mentor_sees_what_was_heard_in_a_voice_message(
+    session: AsyncSession,
+    account: MentorAccount,
+    kb: None,
+    embedder: HashingEmbedder,
+) -> None:
+    """ویس متن ندارد. بدون رونویسی، منتور پیش‌نویسی می‌بیند بدون سؤالش."""
+    inbound = build_inbound(
+        account_slug=account.slug,
+        chat_id=901,
+        message_id=8,
+        sender_user_id=901,
+        username=None,
+        first_name="دانشجو",
+        last_name=None,
+        raw_text=None,
+        media_type="voice",
+        reply_to_message_id=None,
+        sent_at=NOON,
+        is_private=True,
+        is_outgoing=False,
+    )
+    stored = await record_inbound(session, account, inbound, sender=Sender.student)
+    assert stored.message_id is not None
+    await media_store.record(
+        session,
+        message_id=stored.message_id,
+        extraction=Extraction(kind="voice", text="دوره مقدماتی چیست؟"),
+    )
+    await session.commit()
+
+    notifier = RecordingNotifier()
+    outcome = await process_message(
+        session,
+        stored.message_id,
+        model_client=ScriptedClient(_answer()),
+        embedder=embedder,
+        channels={"mentor-a": FakeChannel()},
+        gates={"mentor-a": _gate()},
+        notifier=notifier,
+        sleep=False,
+    )
+    await session.commit()
+
+    assert outcome.outcome == "drafted"
+    assert "دوره مقدماتی چیست؟" in notifier.questions[0]
+    assert "ویس دانشجو" in notifier.questions[0]
 
 
 async def test_auto_mode_sends_directly(

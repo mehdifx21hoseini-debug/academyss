@@ -261,6 +261,56 @@ async def test_a_statement_answer_creates_no_escalation(
     assert list((await session.execute(select(Escalation))).scalars()) == []
 
 
+async def test_a_transcribed_voice_is_answered_like_any_other_question(
+    session: AsyncSession, account: MentorAccount, knowledge: None, embedder: HashingEmbedder
+) -> None:
+    """بعد از رونویسی، ویس دیگر فایل نیست؛ یک سؤال متنی است."""
+    message = await _incoming(session, account, None, media_type="voice")
+    await _with_media(session, message, kind="voice", text="دوره مقدماتی چند جلسه است؟")
+    client = ScriptedClient(_confident())
+
+    result = await handle_message(session, message, model_client=client, embedder=embedder)
+    await session.commit()
+
+    assert result.outcome is Outcome.answer
+    assert client.calls, "مدل باید با متن رونویسی فراخوانی می‌شد"
+    assert "دوره مقدماتی چند جلسه است؟" in client.calls[0][1]
+
+
+async def test_a_voice_without_a_transcript_goes_to_the_mentor(
+    session: AsyncSession, account: MentorAccount, knowledge: None, embedder: HashingEmbedder
+) -> None:
+    message = await _incoming(session, account, None, media_type="voice")
+    await _with_media(session, message, kind="voice", text="")
+
+    result = await handle_message(
+        session, message, model_client=ScriptedClient(_confident()), embedder=embedder
+    )
+    await session.commit()
+
+    assert result.outcome is Outcome.silence
+    assert result.reason == SilenceReason.unsupported_media.value
+
+
+async def test_a_voice_transcript_still_hits_the_deterministic_rules(
+    session: AsyncSession, account: MentorAccount, knowledge: None, embedder: HashingEmbedder
+) -> None:
+    """قاعده‌ی قطعی روی متن پیام اجرا می‌شود، پس ویسی که درباره‌ی پول است هم می‌گیرد.
+
+    اینجا خود پیام کپشن مالی دارد؛ اگر روزی رونویسی هم به قاعده‌ها داده شود، این تست
+    همان جای درست را نگه می‌دارد.
+    """
+    message = await _incoming(session, account, "رسید واریزم", media_type="voice")
+    await _with_media(session, message, kind="voice", text="سلام حالت چطوره")
+    client = ScriptedClient(_confident())
+
+    result = await handle_message(session, message, model_client=client, embedder=embedder)
+    await session.commit()
+
+    assert result.reason == "rule_money"
+    assert client.calls == []
+
+
 async def test_an_image_is_read_but_not_answered_until_the_owner_turns_it_on(
     session: AsyncSession, account: MentorAccount, knowledge: None, embedder: HashingEmbedder
 ) -> None:

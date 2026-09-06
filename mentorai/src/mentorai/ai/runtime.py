@@ -180,6 +180,14 @@ async def _handle_media(
     ذخیره و در پنل دیده می‌شود تا مالک کیفیتش را بسنجد و بعد تصمیم بگیرد (ADR-022).
     """
     row = await media_store.load(session, message.id)
+    if row is not None and row.kind == "voice":
+        # ویسِ رونویسی‌شده دیگر فایل نیست؛ یک سؤال متنی است و از همان مسیر
+        # آزموده‌شده رد می‌شود. رونویسی بد هم به پاسخ غلط ختم نمی‌شود: سندی پیدا
+        # نمی‌شود و سیستم ساکت می‌ماند.
+        if not row.extracted_text:
+            return await _media_silence(session, message), None
+        return None, row.extracted_text
+
     if row is not None and row.kind == "image":
         if not get_settings().answer_from_images or not row.extracted_text:
             return await _media_silence(session, message), None

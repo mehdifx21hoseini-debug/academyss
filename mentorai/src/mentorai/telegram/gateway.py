@@ -29,7 +29,7 @@ from mentorai.db.session import session_scope
 from mentorai.jobs import queue
 from mentorai.media import extract as media_extract
 from mentorai.media import store as media_store
-from mentorai.media import vision
+from mentorai.media import vision, voice
 from mentorai.telegram.normalize import build_inbound, detect_media_type, skip_reason
 from mentorai.telegram.store import excluded_peer_ids, record_inbound
 
@@ -73,6 +73,8 @@ class AccountGateway:
         # بدون این، عکس فقط ثبت می‌شود و خوانده نمی‌شود. حالت «فقط دریافت» عمداً
         # هیچ فراخوانی مدلی ندارد.
         self._vision = vision_client
+        # None یعنی هیچ سرویس رونویسی‌ای پیکربندی نشده و ویس به منتور می‌رود.
+        self._transcriber = voice.build_transcriber()
 
     @property
     def client(self) -> TelegramClient:
@@ -109,7 +111,7 @@ class AccountGateway:
         نشده و طبق ADR-017 به منتور می‌روند. حجم **پیش از** دانلود بررسی می‌شود؛ بعد
         از دانلود دیگر دیر است.
         """
-        if media_type not in ("document", "photo"):
+        if media_type not in ("document", "photo", "voice", "audio", "video_note"):
             return None
         handle = getattr(message, "file", None)
         if handle is None:
@@ -120,6 +122,17 @@ class AccountGateway:
         # به مسیر فایل‌سیستم تبدیل نمی‌شود.
         name = getattr(handle, "name", None)
         size = int(getattr(handle, "size", 0) or 0)
+        if media_type in ("voice", "audio", "video_note") and not voice.is_supported(
+            mime or "audio/ogg", size
+        ):
+            return _Attachment(
+                extraction=media_extract.Extraction(
+                    kind="rejected", refused=media_extract.Refusal.unsupported_format
+                ),
+                mime=mime,
+                size_bytes=size or None,
+                sha256=None,
+            )
         if media_type == "photo" and not vision.is_supported(mime or "image/jpeg", size):
             return _Attachment(
                 extraction=media_extract.Extraction(
@@ -159,6 +172,8 @@ class AccountGateway:
 
         if media_type == "photo":
             extraction = await self._read_image(data, mime or "image/jpeg")
+        elif media_type in ("voice", "audio", "video_note"):
+            extraction = await self._read_voice(data, mime or "audio/ogg", name or "voice.ogg")
         else:
             extraction = media_extract.extract(data, filename=name, mime=mime)
 
@@ -186,6 +201,25 @@ class AccountGateway:
                 kind="rejected", refused=media_extract.Refusal.unreadable
             )
         return media_extract.Extraction(kind="image", text=description)
+
+    async def _read_voice(self, data: bytes, mime: str, filename: str) -> media_extract.Extraction:
+        """رونویسی ویس، یا رد شدن.
+
+        بدون سرویس پیکربندی‌شده هیچ صدایی جایی نمی‌رود و ویس مثل قبل به منتور می‌رسد.
+        """
+        if self._transcriber is None:
+            return media_extract.Extraction(
+                kind="rejected", refused=media_extract.Refusal.unsupported_format
+            )
+        text, error = await voice.transcribe(
+            self._transcriber, audio=data, media_type=mime, filename=filename
+        )
+        if text is None:
+            log.warning("voice_not_transcribed", account=self.slug, reason=error)
+            return media_extract.Extraction(
+                kind="rejected", refused=media_extract.Refusal.unreadable
+            )
+        return media_extract.Extraction(kind="voice", text=text)
 
     async def _keep_offline(self) -> None:
         while True:
