@@ -1,0 +1,36 @@
+{
+  "patterns": [
+    {
+      "rule_name": "mentorai_hardcoded_credential",
+      "substrings": ["sobhan1404", "DEFAULT_PASS", "DEFAULT_USER"],
+      "reminder": "Hardcoded credential. MENTORAI stores no credential in source. Read it from the environment or a secret manager and verify it server-side."
+    },
+    {
+      "rule_name": "mentorai_telegram_secret",
+      "regex": "(?i)(bot[0-9]{6,}:[A-Za-z0-9_-]{30,}|api_hash\\s*=\\s*[\"'][0-9a-f]{32}[\"']|StringSession\\s*\\(\\s*[\"'][A-Za-z0-9+/=]{40,})",
+      "reminder": "Telegram credential literal (bot token, api_hash or MTProto session string). These grant full access to the account or bot. Load from the secret manager, never commit, never log."
+    },
+    {
+      "rule_name": "mentorai_client_side_auth",
+      "regex": "(?i)(localStorage|sessionStorage)\\s*\\.\\s*(get|set)Item\\s*\\(\\s*[\"'][^\"']*(admin|auth|logged|pass|token|role)",
+      "reminder": "Authentication or role state in browser storage. A viewer can edit it. Enforce the check server-side and keep the session in an HttpOnly cookie."
+    },
+    {
+      "rule_name": "mentorai_sql_string_build",
+      "regex": "(?i)(execute|executemany|query|raw)\\s*\\(\\s*(f[\"']|[\"'][^\"']*[\"']\\s*[+%]|`[^`]*\\$\\{)",
+      "reminder": "SQL built by string interpolation. Telegram message text reaches these queries. Use parameterized queries."
+    },
+    {
+      "rule_name": "mentorai_pii_logging",
+      "regex": "(?i)(logger|log|console)\\s*\\.\\s*(info|warn|warning|error)\\s*\\([^)]*(message_text|msg\\.text|update\\.message|phone|full_name|telegram_user)",
+      "reminder": "PII or message content in a log at INFO or above. Log the internal student ID instead."
+    },
+    {
+      "rule_name": "mentorai_secret_in_env_file",
+      "substrings": ["TELEGRAM_BOT_TOKEN=", "TELEGRAM_API_HASH=", "OPENAI_API_KEY=", "ANTHROPIC_API_KEY=", "DATABASE_URL=postgres"],
+      "paths": ["**/*.py", "**/*.ts", "**/*.js", "**/*.md", "**/*.yml", "**/*.yaml", "**/*.json"],
+      "exclude_paths": ["**/.env.example", "**/*.example", "**/docs/**"],
+      "reminder": "Secret assignment outside .env.example. Keep real values out of the repository entirely."
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% set active = 'conversations' %}
+{% block title %}مکالمه‌ها{% endblock %}
+{% block content %}
+<h1>مکالمه‌ها</h1>
+{% if not rows %}
+<p class="muted">هنوز مکالمه‌ای ثبت نشده است.</p>
+{% else %}
+<table>
+  <thead>
+    <tr>
+      <th>دانشجو</th>
+      <th>وضعیت</th>
+      <th>دستیار</th>
+      <th>ارجاع باز</th>
+      <th>آخرین فعالیت</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for row in rows %}
+    <tr>
+      <td><a href="/conversations/{{ row.id }}">{{ row.student_name or 'بدون نام' }}</a></td>
+      <td>{{ conversation_status(row.status) }}</td>
+      <td>{{ 'روشن' if row.assistant_enabled else 'خاموش' }}</td>
+      <td>{{ digits(row.open_escalations) if row.open_escalations else '—' }}</td>
+      <td class="num-cell">{{ datetime_label(row.updated_at) }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endif %}
+{% endblock %}

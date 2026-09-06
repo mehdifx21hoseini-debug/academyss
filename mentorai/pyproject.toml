@@ -1,0 +1,66 @@
+[project]
+name = "mentorai"
+version = "0.1.0"
+description = "AI mentoring assistant for Sobhan Samadi Academy, answering inside Telegram"
+requires-python = ">=3.12"
+dependencies = [
+    "anthropic>=1.0",
+    "telethon>=1.36",
+    "sqlalchemy[asyncio]>=2.0.30",
+    "asyncpg>=0.29",
+    "pgvector>=0.2.5",
+    "alembic>=1.13",
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "cryptography>=42.0",
+    "structlog>=24.1",
+    "fastapi>=0.115",
+    "uvicorn[standard]>=0.30",
+    "jinja2>=3.1",
+    "argon2-cffi>=23.1",
+    "python-multipart>=0.0.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.2", "pytest-asyncio>=0.23", "ruff>=0.5", "mypy>=1.10", "httpx>=0.27"]
+
+[project.scripts]
+mentorai = "mentorai.cli:main"
+
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+# موتور پایگاه داده در سطح جلسه ساخته می‌شود، پس تست‌ها و fixtureها باید در همان
+# حلقه‌ی رویداد اجرا شوند؛ وگرنه اتصال به حلقه‌ی دیگری چسبیده می‌ماند.
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+testpaths = ["tests"]
+
+[tool.ruff]
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src"]
+
+# Telethon نشانگر تایپ منتشر نمی‌کند. به‌جای خاموش کردن سراسری بررسی، فقط همین
+# کتابخانه استثنا می‌شود تا بقیه‌ی کد زیر بررسی کامل بماند.
+[[tool.mypy.overrides]]
+module = ["telethon.*"]
+ignore_missing_imports = true
+
+# قالب‌های Jinja داخل بسته‌اند و باید همراه بسته نصب شوند، وگرنه پنل روی سرور
+# قالبی برای رندر پیدا نمی‌کند.
+[tool.setuptools.package-data]
+mentorai = ["web/templates/*.html", "web/static/*.css"]
