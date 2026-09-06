@@ -63,7 +63,11 @@ async def knowledge(session: AsyncSession, tmp_path: Path, embedder: HashingEmbe
 
 
 async def _incoming(
-    session: AsyncSession, account: MentorAccount, body: str, message_id: int = 1
+    session: AsyncSession,
+    account: MentorAccount,
+    body: str | None,
+    message_id: int = 1,
+    media_type: str | None = None,
 ) -> Message:
     inbound = build_inbound(
         account_slug=account.slug,
@@ -74,7 +78,7 @@ async def _incoming(
         first_name="دانشجو",
         last_name=None,
         raw_text=body,
-        media_type=None,
+        media_type=media_type,
         reply_to_message_id=None,
         sent_at=datetime(2026, 9, 2, 12, 0, tzinfo=UTC),
         is_private=True,
@@ -118,6 +122,78 @@ async def test_sensitive_topic_is_silent_and_never_calls_the_model(
     assert result.outcome is Outcome.silence
     assert result.reason == "rule_money"
     assert client.calls == [], "مدل نباید فراخوانی می‌شد"
+
+
+async def test_message_with_a_file_is_never_answered_from_its_caption(
+    session: AsyncSession, account: MentorAccount, knowledge: None, embedder: HashingEmbedder
+) -> None:
+    """خطرناک‌ترین حالت: کپشنی که بدون دیدن فایل کاملاً قابل پاسخ به نظر می‌رسد.
+
+    متن این پیام دقیقاً همان سؤالی است که تست بالا با اطمینان جواب می‌گیرد. تنها
+    تفاوت، وجود عکس است — و همان باید کافی باشد که پاسخ تولید نشود.
+    """
+    message = await _incoming(session, account, "دوره مقدماتی چند جلسه است؟", media_type="photo")
+    client = ScriptedClient(_confident())
+
+    result = await handle_message(session, message, model_client=client, embedder=embedder)
+    await session.commit()
+
+    assert result.outcome is Outcome.silence
+    assert result.reason == SilenceReason.unsupported_media.value
+    assert client.calls == [], "مدل نباید فراخوانی می‌شد"
+
+
+@pytest.mark.parametrize("media_type", ["voice", "photo", "document", "video_note"])
+async def test_media_without_text_is_silent_with_the_media_reason(
+    session: AsyncSession,
+    account: MentorAccount,
+    knowledge: None,
+    embedder: HashingEmbedder,
+    media_type: str,
+) -> None:
+    message = await _incoming(session, account, None, media_type=media_type)
+
+    result = await handle_message(
+        session, message, model_client=ScriptedClient(_confident()), embedder=embedder
+    )
+    await session.commit()
+
+    assert result.outcome is Outcome.silence
+    assert result.reason == SilenceReason.unsupported_media.value
+
+
+async def test_media_silence_still_records_an_escalation(
+    session: AsyncSession, account: MentorAccount, knowledge: None, embedder: HashingEmbedder
+) -> None:
+    """سکوت برای دانشجو نامرئی است؛ اگر ارجاع ثبت نشود، فایل بی‌پاسخ گم می‌شود."""
+    message = await _incoming(session, account, "استیتمنتمو ببین", media_type="document")
+
+    await handle_message(
+        session, message, model_client=ScriptedClient(_confident()), embedder=embedder
+    )
+    await session.commit()
+
+    escalations = list((await session.execute(select(Escalation))).scalars())
+    assert len(escalations) == 1
+    assert escalations[0].message_id == message.id
+    assert escalations[0].reason == SilenceReason.unsupported_media.value
+
+
+async def test_deterministic_rule_outranks_the_media_gate(
+    session: AsyncSession, account: MentorAccount, knowledge: None, embedder: HashingEmbedder
+) -> None:
+    """عکس رسید واریز، ارجاع مالی است نه صرفاً «فایلی که خوانده نمی‌شود».
+
+    هر دو به سکوت می‌رسند، ولی دلیل ثبت‌شده همان چیزی است که منتور باید ببیند.
+    """
+    message = await _incoming(session, account, "رسید واریزم", media_type="photo")
+
+    result = await handle_message(
+        session, message, model_client=ScriptedClient(_confident()), embedder=embedder
+    )
+    await session.commit()
+
+    assert result.reason == "rule_money"
 
 
 async def test_no_sources_is_silent_and_never_calls_the_model(

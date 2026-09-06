@@ -35,6 +35,7 @@ class SilenceReason(enum.StrEnum):
     rule_complaint = "rule_complaint"
     rule_account = "rule_account"
     rule_explicit_human_request = "rule_explicit_human_request"
+    unsupported_media = "unsupported_media"
     no_sources = "no_sources"
     model_error = "model_error"
     model_flagged = "model_flagged"
@@ -156,6 +157,22 @@ async def handle_message(
             session, message=message, outcome=Outcome.silence, reason=reason, hits=[]
         )
         return RunResult(outcome=Outcome.silence, reason=reason, ai_run_id=run.id)
+
+    # پیامی که فایل همراه دارد — عکس، ویس، سند — از روی متنش پاسخ داده نمی‌شود.
+    # کپشن معمولاً به خود فایل ارجاع می‌دهد («این ورودم درسته؟»)، پس پاسخ دادن به
+    # کپشن یعنی پاسخ دادن به سؤالی که دیده نشده است. تا وقتی خواندن فایل ساخته
+    # نشده (ADR-017)، این مسیر به منتور می‌رود.
+    if message.media_type is not None:
+        run = await _record(
+            session,
+            message=message,
+            outcome=Outcome.silence,
+            reason=SilenceReason.unsupported_media.value,
+            hits=[],
+        )
+        return RunResult(
+            outcome=Outcome.silence, reason=SilenceReason.unsupported_media.value, ai_run_id=run.id
+        )
 
     hits = await search(session, question, embedder=embedder)
     if not hits:

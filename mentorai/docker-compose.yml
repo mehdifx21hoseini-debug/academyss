@@ -25,5 +25,30 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # بدون کارگر، دروازه پیام را می‌گیرد و کار را در صف می‌گذارد و همان‌جا می‌ماند:
+  # نه پیش‌نویسی ساخته می‌شود و نه ربات کنترل بالا می‌آید. این سرویس اختیاری نیست.
+  worker:
+    build: .
+    command: ["mentorai", "run-worker"]
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # فقط روی لوکال‌هاست باز می‌شود. پنل باید پشت یک پروکسی با HTTPS بیاید، وگرنه
+  # کوکی نشست که علامت secure دارد اصلاً ذخیره نمی‌شود و ورود کار نمی‌کند.
+  panel:
+    build: .
+    command:
+      ["python", "-m", "uvicorn", "mentorai.web.app:app", "--host", "0.0.0.0", "--port", "8000"]
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
+
 volumes:
   db_data:

@@ -28,7 +28,7 @@ from mentorai.db.models import (
     PanelUser,
 )
 from mentorai.db.session import session_scope
-from mentorai.knowledge.embeddings import HashingEmbedder
+from mentorai.knowledge.embeddings import EmbeddingProvider, HashingEmbedder
 from mentorai.knowledge.evaluate import EvalCase, evaluate
 from mentorai.knowledge.ingest import ingest_csv
 from mentorai.telegram.gateway import AccountGateway
@@ -176,12 +176,16 @@ async def cmd_panel_user(args: argparse.Namespace) -> int:
     return 0
 
 
-def _embedder() -> HashingEmbedder:
-    """ارائه‌دهنده‌ی بردار.
+def _embedder() -> EmbeddingProvider | None:
+    """بردارساز فعال، یا None اگر بازیابی فقط متنی باشد.
 
-    فعلاً فقط بردارساز آزمایشی موجود است. مدل واقعی هنوز انتخاب نشده و انتخابش باید با
-    اندازه‌گیری روی همان مجموعه‌ی ارزیابی انجام شود، نه پیش از آن.
+    بردارساز آزمایشی عمداً پیش‌فرض نیست. روی همین مجموعه‌ی ارزیابی اندازه گرفته شد و
+    ترکیب رتبه با بردار بی‌معنی از جستجوی متنیِ تنها **بدتر** درآمد. دلیلش در خود RRF
+    است: نامزدهای تصادفی مسیر برداری هم امتیاز می‌گیرند و سند درستِ مسیر متنی را پایین
+    می‌برند. اعداد و تصمیم در ADR-019.
     """
+    if not get_settings().embedding_model:
+        return None
     return HashingEmbedder()
 
 
@@ -275,7 +279,6 @@ async def cmd_run_worker(_: argparse.Namespace) -> int:
     """
     from mentorai.ai.client import AnthropicClient
     from mentorai.control.bot import ControlBot
-    from mentorai.knowledge.embeddings import HashingEmbedder
     from mentorai.telegram.channel import TelethonChannel
     from mentorai.telegram.safety import AccountGate, TokenBucket
     from mentorai.worker import run_forever
@@ -315,7 +318,7 @@ async def cmd_run_worker(_: argparse.Namespace) -> int:
         run_forever(
             worker_id="worker-1",
             model_client=AnthropicClient(),
-            embedder=HashingEmbedder(),
+            embedder=_embedder(),
             channels=channels,
             gates=gates,
             notifier=bot,
