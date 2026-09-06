@@ -47,6 +47,16 @@ def _fa(value: float, digits: int = 2) -> str:
     return text.translate(str.maketrans("0123456789", "۰۱۲۳۴۵۶۷۸۹"))
 
 
+def _net(value: float) -> str:
+    """برایند خالص با واژه، نه با علامت منفی.
+
+    علامت منفیِ لاتین پیش از ارقام فارسی، در متن راست‌به‌چپ جای ثابتی ندارد و
+    ممکن است آن‌طرف عدد بیفتد — یعنی سود و زیان جابه‌جا خوانده شود. واژه این
+    ابهام را ندارد.
+    """
+    return f"{_fa(abs(value))} {'زیان' if value < 0 else 'سود'}"
+
+
 def review(metrics: StatementMetrics) -> list[Finding]:
     findings: list[Finding] = []
 
@@ -101,7 +111,7 @@ def review(metrics: StatementMetrics) -> list[Finding]:
                 f"{_fa(metrics.trades, 0)} معامله بررسی شد؛ "
                 f"{_fa(metrics.wins, 0)} سود و {_fa(metrics.losses, 0)} زیان"
                 + (f"، نرخ برد {_fa((rate or 0) * 100, 1)} درصد" if rate is not None else "")
-                + f"، برایند خالص {_fa(metrics.net_profit)}.",
+                + f"، برایند خالص {_net(metrics.net_profit)}.",
             )
         )
 

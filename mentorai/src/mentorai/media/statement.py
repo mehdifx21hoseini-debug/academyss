@@ -267,7 +267,10 @@ def _from_summary(summary: dict[str, str]) -> StatementMetrics | None:
         return None
 
     if factor is None and gross_profit is not None and gross_loss:
-        factor = round(gross_profit / abs(gross_loss), 3)
+        factor = gross_profit / abs(gross_loss)
+    # خروجی اکسل متاتریدر عدد را با شش رقم اعشار می‌نویسد؛ به همان دقتی گرد می‌شود
+    # که مسیر محاسبه می‌دهد، وگرنه یک عدد در دو مسیر دو شکل دارد.
+    factor = round(factor, 3) if factor is not None else None
 
     drawdown = summary.get("max_drawdown", "")
     percent = _PERCENT.search(drawdown)
