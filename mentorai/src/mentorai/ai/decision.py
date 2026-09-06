@@ -51,8 +51,6 @@ RULES: dict[EscalationTrigger, tuple[str, ...]] = {
         "عودت",
         "پولم",
         "پول من",
-        "قیمت",
-        "هزینه",
         "شهریه",
         "تخفیف",
         "اقساط",
@@ -80,6 +78,48 @@ RULES: dict[EscalationTrigger, tuple[str, ...]] = {
 }
 
 
+# واژه‌هایی که تنها آمدنشان معنی مالی ندارد.
+#
+# «قیمت» هم قیمت دوره است و هم پرایس اکشن؛ «هزینه» هم شهریه است و هم هزینه‌ی هر
+# معامله. تا پیش از این هر دو تنها در فهرست مالی بودند و ۱۵ پرسش کاملاً آموزشی
+# پایگاه دانش را برای همیشه به منتور می‌سپردند — از جمله «فشردگی قیمت چیه؟» و
+# «چرا حد ضررم با قیمت بدتری خورد؟» که سیستم پاسخ درستشان را در رتبه‌ی اول پیدا
+# می‌کند و دور می‌ریخت (ADR-028).
+#
+# حالا فقط وقتی ارجاع می‌سازند که کنارشان چیزی از خود آکادمی باشد.
+PRICE_WORDS: tuple[str, ...] = (
+    # شکل‌های پسونددار لازم نیست نوشته شوند: `contains_phrase` پسوندهای فارسی را
+    # خودش می‌پذیرد، پس «هزینه» عبارتِ «هزینه‌ی دوره» را هم می‌گیرد (نیم‌فاصله در
+    # نرمال‌سازی حذف می‌شود) و «قیمت» عبارتِ «قیمت‌ها» را. ولی «ارز» پسوند نیست،
+    # پس «رمز» همچنان «رمزارز» را نمی‌گیرد.
+    "قیمت",
+    "هزینه",
+    "مبلغ",
+)
+
+ACADEMY_WORDS: tuple[str, ...] = (
+    "دوره",
+    "کلاس",
+    "اشتراک",
+    "پکیج",
+    "منتورینگ",
+    "ثبت نام",
+    "ثبتنام",
+    "عضویت",
+)
+
+
+def _is_academy_price_question(normalized: str) -> bool:
+    """پرسش مالی درباره‌ی خود آکادمی، نه درباره‌ی بازار.
+
+    هر دو طرف لازم است: واژه‌ی قیمت به‌تنهایی در گفتگوی معامله‌گری روزمره است، و
+    واژه‌ی آکادمی به‌تنهایی هم همین‌طور.
+    """
+    return any(contains_phrase(normalized, w) for w in PRICE_WORDS) and any(
+        contains_phrase(normalized, w) for w in ACADEMY_WORDS
+    )
+
+
 def deterministic_trigger(message_text: str) -> EscalationTrigger | None:
     """اگر پیام یکی از موضوعات همیشه-انسانی را لمس کند، همان را برگردان.
 
@@ -93,5 +133,9 @@ def deterministic_trigger(message_text: str) -> EscalationTrigger | None:
         return None
     for trigger in EscalationTrigger:
         if any(contains_phrase(normalized, phrase) for phrase in RULES[trigger]):
+            return trigger
+        # قاعده‌ی جفتی دقیقاً در جایگاه مالی بررسی می‌شود تا ترتیب قطعی بماند:
+        # یک پیام همیشه همان دلیل را می‌دهد.
+        if trigger is EscalationTrigger.money and _is_academy_price_question(normalized):
             return trigger
     return None
