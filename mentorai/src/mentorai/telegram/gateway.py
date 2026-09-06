@@ -31,7 +31,13 @@ from mentorai.jobs import queue
 from mentorai.media import extract as media_extract
 from mentorai.media import store as media_store
 from mentorai.media import vision, voice
-from mentorai.telegram.normalize import build_inbound, detect_media_type, skip_reason
+from mentorai.memory import job as memory_job
+from mentorai.telegram.normalize import (
+    InboundMessage,
+    build_inbound,
+    detect_media_type,
+    skip_reason,
+)
 from mentorai.telegram.store import excluded_peer_ids, record_inbound
 
 log = structlog.get_logger(__name__)
@@ -280,7 +286,17 @@ class AccountGateway:
         # دانلود و خواندن فایل بیرون از هر تراکنش انجام می‌شود. نگه داشتن یک اتصال
         # پایگاه داده در طول یک انتقال شبکه، استخر اتصال را زیر بار واقعی خالی می‌کند.
         attachment = await self._read_attachment(message, inbound.media_type)
+        await self.persist(inbound, attachment)
 
+    async def persist(
+        self, inbound: InboundMessage, attachment: _Attachment | None = None
+    ) -> None:
+        """ثبت پیام و تصمیم درباره‌ی کارهایی که باید ساخته شوند.
+
+        از `_on_message` جدا شده تا بدون تلگرام قابل آزمودن باشد: تا وقتی این منطق
+        داخل کنترل‌کننده‌ی رویداد بود، آزمودنش یعنی جعل کردن کل شیء رویداد Telethon،
+        و در عمل یعنی آزموده نشدن. رفتار عوض نشده؛ فقط مرز جابه‌جا شده.
+        """
         async with session_scope() as session:
             account = await session.get_one(MentorAccount, self.account_id)
             # پیام خروجی، پاسخ خود منتور است. ثبتش هم تاریخچه‌ی مکالمه را کامل می‌کند
@@ -288,13 +304,14 @@ class AccountGateway:
             sender = Sender.mentor if inbound.is_outgoing else Sender.student
             result = await record_inbound(session, account, inbound, sender=sender)
 
-            if result.is_duplicate:
-                log.info("duplicate_delivery", account=self.slug, chat_id=inbound.chat_id)
-                return
-
-            # مصرف توصیف تصویر، در همان نشست. پیش از بررسی تکراری بودن انجام
-            # نمی‌شود چون فراخوانی مدل قبلاً رخ داده و پولش خرج شده — چه پیام
-            # تکراری باشد چه نه.
+            # مصرف توصیف تصویر **پیش از** بررسی تکراری بودن ثبت می‌شود، چون
+            # فراخوانی مدل پیش از رسیدن به اینجا انجام شده و پولش خرج شده — چه این
+            # تحویل تکراری باشد چه نه. اگر بعد از `return` بیاید، خرج تحویل‌های
+            # تکراری از سقف پنهان می‌ماند.
+            #
+            # ⚠️ خودِ توصیف دوباره‌ی یک تصویر تکراری اتلاف است. تشخیص تکراری عمداً
+            # با درج اتمی انجام می‌شود و آن پس از دانلود است، پس رفعش یک بررسی
+            # ارزان پیش از دانلود می‌خواهد. اینجا فقط پولش شمرده می‌شود.
             if attachment is not None and attachment.model_call is not None:
                 await budget.record(
                     session,
@@ -304,6 +321,10 @@ class AccountGateway:
                     output_tokens=attachment.model_call.output_tokens,
                     cache_read_tokens=attachment.model_call.cache_read_tokens,
                 )
+
+            if result.is_duplicate:
+                log.info("duplicate_delivery", account=self.slug, chat_id=inbound.chat_id)
+                return
 
             if attachment is not None and result.message_id is not None:
                 await media_store.record(
@@ -327,6 +348,22 @@ class AccountGateway:
                     session,
                     "answer_message",
                     {"conversation_id": result.conversation_id, "message_id": result.message_id},
+                )
+
+            # استخراج حافظه عمداً به فعال بودن دستیار گره نخورده است: `recent_turns`
+            # پیام‌های منتور را هم برچسب می‌زند، یعنی از ابتدا برای مکالمه‌ای هم که
+            # منتور در دستش دارد طراحی شده. واقعیت‌های دانشجو در آن مکالمه هم گفته
+            # می‌شوند (ADR-027).
+            #
+            # هر پیام یک فراخوانی مدل نمی‌سازد؛ `should_extract` هر پنج پیام دانشجو
+            # یک بار اجازه می‌دهد، و سقف هزینه داخل خود کار دوباره بررسی می‌شود.
+            if sender is Sender.student and await memory_job.should_extract(
+                session, result.conversation_id
+            ):
+                await queue.enqueue(
+                    session,
+                    memory_job.JOB_KIND,
+                    {"conversation_id": result.conversation_id},
                 )
 
         log.info(
