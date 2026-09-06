@@ -35,7 +35,10 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U mentorai"
+          # نام پایگاه داده صریح است، وگرنه pg_isready سراغ پایگاهی هم‌نام کاربر
+          # می‌رود که وجود ندارد و لاگ سرویس پر از FATAL می‌شود. سرویس بدون آن
+          # هم سالم اعلام می‌شد؛ این فقط نویز را برمی‌دارد.
+          --health-cmd "pg_isready -U mentorai -d mentorai_test"
           --health-interval 5s
           --health-timeout 3s
           --health-retries 20
@@ -92,8 +95,11 @@ jobs:
           python -m alembic downgrade base
           python -m alembic upgrade head
 
+      # عمداً `python -m pytest` و نه `pytest`. آن یکی پوشه‌ی جاری را در مسیر
+      # ایمپورت نمی‌گذارد، و تست‌هایی که از `tests.test_sender` چیزی می‌گیرند
+      # هنگام جمع‌آوری شکست می‌خورند. همان دستوری که README می‌گوید.
       - name: Tests
-        run: pytest -q
+        run: python -m pytest -q
 
   build:
     name: docker image builds from the lock
@@ -104,8 +110,10 @@ jobs:
 
       # ساخت واقعی تصویر. این تنها جایی است که مسیر
       # `pip install --require-hashes` روی همان تصویر پایه‌ی تولید آزموده می‌شود.
+      # working-directory پیش‌فرض این فایل «mentorai» است و روی این کار هم اعمال
+      # می‌شود، پس زمینه‌ی ساخت همین‌جاست، نه mentorai/mentorai.
       - name: Build image
-        run: docker build -t mentorai:ci mentorai
+        run: docker build -t mentorai:ci .
 
       - name: The entrypoint runs inside the image
         run: docker run --rm mentorai:ci mentorai --help
