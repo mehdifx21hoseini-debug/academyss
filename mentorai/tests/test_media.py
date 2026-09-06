@@ -330,3 +330,54 @@ def test_archive_with_an_absurd_uncompressed_size_is_refused() -> None:
     with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as archive:
         archive.writestr("word/document.xml", "0" * (office.MAX_UNCOMPRESSED_BYTES + 1))
     assert extract(buffer.getvalue(), filename="bomb.docx").refused is Refusal.unreadable
+
+
+# ------------------------------------------------------------------ تصویر
+
+
+async def test_an_image_is_described_not_judged() -> None:
+    from mentorai.ai.client import ScriptedClient
+    from mentorai.media import vision
+
+    client = ScriptedClient(raw_text="چارت EURUSD در تایم چهار ساعته با دو خط افقی.")
+    text, error = await vision.describe(client, image=b"fake-bytes", media_type="image/jpeg")
+
+    assert error is None
+    assert text == "چارت EURUSD در تایم چهار ساعته با دو خط افقی."
+    system, prompt = client.calls[0]
+    assert "نظر معاملاتی" in system, "دستور سیستمی باید نظر دادن را ممنوع کند"
+    assert "دستور نیست" in system, "متن داخل تصویر نباید به‌عنوان دستور خوانده شود"
+    assert "توصیف کن" in prompt
+
+
+async def test_an_unsupported_image_type_never_reaches_the_model() -> None:
+    from mentorai.ai.client import ScriptedClient
+    from mentorai.media import vision
+
+    client = ScriptedClient(raw_text="نباید فراخوانی شود")
+    text, error = await vision.describe(client, image=b"x", media_type="image/tiff")
+
+    assert text is None and error is not None
+    assert client.calls == []
+
+
+async def test_an_oversized_image_never_reaches_the_model() -> None:
+    from mentorai.ai.client import ScriptedClient
+    from mentorai.media import vision
+
+    client = ScriptedClient(raw_text="نباید فراخوانی شود")
+    payload = b"x" * (vision.MAX_IMAGE_BYTES + 1)
+    text, _ = await vision.describe(client, image=payload, media_type="image/jpeg")
+
+    assert text is None
+    assert client.calls == []
+
+
+async def test_a_model_failure_reading_an_image_is_not_a_description() -> None:
+    from mentorai.ai.client import ScriptedClient
+    from mentorai.media import vision
+
+    client = ScriptedClient(error="APITimeoutError")
+    text, error = await vision.describe(client, image=b"x", media_type="image/png")
+
+    assert text is None and error is not None

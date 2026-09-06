@@ -53,6 +53,11 @@ class Settings(BaseSettings):
             raise ValueError(f"مدل تعبیه‌سازی ناشناخته: {v!r}. مقادیر مجاز: {known}")
         return v
 
+    # آیا دستیار از روی توصیف تصویر پاسخ بسازد یا نه. پیش‌فرض خاموش است: تصویر
+    # خوانده و ذخیره می‌شود تا منتور کیفیتش را ببیند، ولی تا تأیید مالک، پاسخی از
+    # آن ساخته نمی‌شود (ADR-022).
+    answer_from_images: bool = False
+
     log_level: str = "INFO"
 
     @field_validator("timezone")

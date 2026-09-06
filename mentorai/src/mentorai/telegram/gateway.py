@@ -20,6 +20,7 @@ from telethon.sessions import StringSession
 from telethon.tl.functions.account import UpdateStatusRequest
 
 from mentorai import escalation
+from mentorai.ai.client import VisionClient
 from mentorai.config import get_settings
 from mentorai.conversation import assistant_may_answer
 from mentorai.db.crypto import decrypt_session
@@ -28,6 +29,7 @@ from mentorai.db.session import session_scope
 from mentorai.jobs import queue
 from mentorai.media import extract as media_extract
 from mentorai.media import store as media_store
+from mentorai.media import vision
 from mentorai.telegram.normalize import build_inbound, detect_media_type, skip_reason
 from mentorai.telegram.store import excluded_peer_ids, record_inbound
 
@@ -49,7 +51,9 @@ class _Attachment:
 
 
 class AccountGateway:
-    def __init__(self, account: MentorAccount) -> None:
+    def __init__(
+        self, account: MentorAccount, *, vision_client: VisionClient | None = None
+    ) -> None:
         settings = get_settings()
         if account.session_encrypted is None:
             raise ValueError(f"حساب {account.slug} هنوز وارد نشده است")
@@ -66,6 +70,9 @@ class AccountGateway:
             app_version=account.app_version,
         )
         self._offline_task: asyncio.Task[None] | None = None
+        # بدون این، عکس فقط ثبت می‌شود و خوانده نمی‌شود. حالت «فقط دریافت» عمداً
+        # هیچ فراخوانی مدلی ندارد.
+        self._vision = vision_client
 
     @property
     def client(self) -> TelegramClient:
@@ -102,7 +109,7 @@ class AccountGateway:
         نشده و طبق ADR-017 به منتور می‌روند. حجم **پیش از** دانلود بررسی می‌شود؛ بعد
         از دانلود دیگر دیر است.
         """
-        if media_type != "document":
+        if media_type not in ("document", "photo"):
             return None
         handle = getattr(message, "file", None)
         if handle is None:
@@ -113,6 +120,15 @@ class AccountGateway:
         # به مسیر فایل‌سیستم تبدیل نمی‌شود.
         name = getattr(handle, "name", None)
         size = int(getattr(handle, "size", 0) or 0)
+        if media_type == "photo" and not vision.is_supported(mime or "image/jpeg", size):
+            return _Attachment(
+                extraction=media_extract.Extraction(
+                    kind="rejected", refused=media_extract.Refusal.unsupported_format
+                ),
+                mime=mime,
+                size_bytes=size or None,
+                sha256=None,
+            )
         if size > media_extract.MAX_BYTES:
             return _Attachment(
                 extraction=media_extract.Extraction(
@@ -141,12 +157,35 @@ class AccountGateway:
                 sha256=None,
             )
 
+        if media_type == "photo":
+            extraction = await self._read_image(data, mime or "image/jpeg")
+        else:
+            extraction = media_extract.extract(data, filename=name, mime=mime)
+
         return _Attachment(
-            extraction=media_extract.extract(data, filename=name, mime=mime),
+            extraction=extraction,
             mime=mime,
             size_bytes=len(data),
             sha256=media_store.fingerprint(data),
         )
+
+    async def _read_image(self, data: bytes, mime: str) -> media_extract.Extraction:
+        """توصیف تصویر، یا رد شدن.
+
+        در حالت «فقط دریافت» هیچ مدلی در دسترس نیست و تصویر رد می‌شود؛ یعنی همان
+        رفتار قبلی: به منتور می‌رود.
+        """
+        if self._vision is None:
+            return media_extract.Extraction(
+                kind="rejected", refused=media_extract.Refusal.unsupported_format
+            )
+        description, error = await vision.describe(self._vision, image=data, media_type=mime)
+        if description is None:
+            log.warning("image_not_read", account=self.slug, reason=error)
+            return media_extract.Extraction(
+                kind="rejected", refused=media_extract.Refusal.unreadable
+            )
+        return media_extract.Extraction(kind="image", text=description)
 
     async def _keep_offline(self) -> None:
         while True:

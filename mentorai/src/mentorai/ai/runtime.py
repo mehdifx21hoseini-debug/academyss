@@ -17,6 +17,7 @@ from mentorai.ai.client import ModelCall, ModelClient
 from mentorai.ai.decision import deterministic_trigger
 from mentorai.ai.prompt import SYSTEM_PROMPT, build_user_content
 from mentorai.ai.schema import PROMPT_VERSION
+from mentorai.config import get_settings
 from mentorai.db.models import AiRun, Conversation, Escalation, Message, Outcome, Sender
 from mentorai.knowledge.embeddings import EmbeddingProvider
 from mentorai.knowledge.retrieval import Hit, search
@@ -154,13 +155,38 @@ def _statement_answer(metrics: StatementMetrics) -> str:
     return "اعداد استیتمنت، از روی خود سطرهای معامله:\n\n" + review.render(metrics)
 
 
-async def _handle_media(session: AsyncSession, message: Message) -> RunResult:
-    """نتیجه‌ی پیامی که فایل دارد.
+async def _media_silence(session: AsyncSession, message: Message) -> RunResult:
+    run = await _record(
+        session,
+        message=message,
+        outcome=Outcome.silence,
+        reason=SilenceReason.unsupported_media.value,
+        hits=[],
+    )
+    return RunResult(
+        outcome=Outcome.silence, reason=SilenceReason.unsupported_media.value, ai_run_id=run.id
+    )
+
+
+async def _handle_media(
+    session: AsyncSession, message: Message
+) -> tuple[RunResult | None, str | None]:
+    """نتیجه‌ی پیامی که فایل دارد، یا پرسشی که باید با آن ادامه داد.
 
     فقط استیتمنتی که خوانده شده و اعدادش در آمده پاسخ می‌گیرد. پلن و هر فایل
     خوانده‌نشده به منتور می‌رود: بررسی پلن معاملاتی قضاوت کارشناسی است، نه بازیابی.
+
+    تصویر خوانده می‌شود ولی تا روشن شدن `ANSWER_FROM_IMAGES` پاسخ نمی‌گیرد. توصیفش
+    ذخیره و در پنل دیده می‌شود تا مالک کیفیتش را بسنجد و بعد تصمیم بگیرد (ADR-022).
     """
     row = await media_store.load(session, message.id)
+    if row is not None and row.kind == "image":
+        if not get_settings().answer_from_images or not row.extracted_text:
+            return await _media_silence(session, message), None
+        caption = (message.text or "").strip()
+        described = f"[توصیف تصویری که دانشجو فرستاده]\n{row.extracted_text}"
+        return None, f"{caption}\n{described}" if caption else described
+
     metrics: StatementMetrics | None = None
     if row is not None and row.kind == "statement" and row.metrics:
         # ساختار ذخیره‌شده که با کد امروز نخواند None برمی‌گرداند، و همین پیام هم
@@ -168,16 +194,7 @@ async def _handle_media(session: AsyncSession, message: Message) -> RunResult:
         metrics = StatementMetrics.from_dict(row.metrics)
 
     if metrics is None:
-        run = await _record(
-            session,
-            message=message,
-            outcome=Outcome.silence,
-            reason=SilenceReason.unsupported_media.value,
-            hits=[],
-        )
-        return RunResult(
-            outcome=Outcome.silence, reason=SilenceReason.unsupported_media.value, ai_run_id=run.id
-        )
+        return await _media_silence(session, message), None
 
     answer = _statement_answer(metrics)
     run = await _record(
@@ -189,8 +206,11 @@ async def _handle_media(session: AsyncSession, message: Message) -> RunResult:
         confidence=1.0,
         response_text=answer,
     )
-    return RunResult(
-        outcome=Outcome.answer, reason=STATEMENT_REASON, ai_run_id=run.id, answer_text=answer
+    return (
+        RunResult(
+            outcome=Outcome.answer, reason=STATEMENT_REASON, ai_run_id=run.id, answer_text=answer
+        ),
+        None,
     )
 
 
@@ -219,7 +239,11 @@ async def handle_message(
     # کپشن یعنی پاسخ دادن به سؤالی که دیده نشده است (ADR-017). تنها استثنا فایلی
     # است که واقعاً خوانده شده باشد.
     if message.media_type is not None:
-        return await _handle_media(session, message)
+        outcome, from_image = await _handle_media(session, message)
+        if outcome is not None:
+            return outcome
+        # تنها راه رسیدن به اینجا: تصویری که خوانده شده و پاسخ‌دهی از تصویر روشن است.
+        question = from_image or question
 
     hits = await search(session, question, embedder=embedder)
     if not hits:

@@ -293,7 +293,9 @@ async def cmd_run_worker(_: argparse.Namespace) -> int:
         print("هیچ حساب فعال و واردشده‌ای وجود ندارد", file=sys.stderr)
         return 1
 
-    gateways = [AccountGateway(a) for a in accounts]
+    # همان کلاینت هم برای پاسخ و هم برای خواندن تصویر. سرویس تازه‌ای در کار نیست.
+    model_client = AnthropicClient()
+    gateways = [AccountGateway(a, vision_client=model_client) for a in accounts]
     for gateway in gateways:
         await gateway.start()
 
@@ -321,7 +323,7 @@ async def cmd_run_worker(_: argparse.Namespace) -> int:
     tasks = [
         run_forever(
             worker_id="worker-1",
-            model_client=AnthropicClient(),
+            model_client=model_client,
             embedder=_embedder(),
             channels=channels,
             gates=gates,
