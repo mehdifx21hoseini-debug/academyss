@@ -218,7 +218,155 @@ def test_summary_is_used_only_when_no_rows_are_found_and_is_marked() -> None:
     assert metrics is not None
     assert metrics.source == "report_summary"
     assert metrics.profit_factor == pytest.approx(1.62)
-    assert "خودِ گزارش نوشته" in review.render(metrics)
+    assert "خودِ گزارش متاتریدر نوشته" in review.render(metrics)
+
+
+# ---------------------------------------------- شکل واقعی گزارش‌ها
+
+
+MT4_TOTALS_ROWS = (
+    # سطر جمع ستون‌ها: ستون «نوع» خالی است و عدد در ستون سود می‌نشیند.
+    '<tr><td colspan="10">&nbsp;</td><td>0.00</td><td>0.00</td><td>0.00</td>'
+    "<td>37.80</td></tr>"
+    '<tr><td colspan="12">Closed P/L:</td><td colspan="2">37.80</td></tr>'
+    # بخش «معاملات باز» جمع خودش را دارد، با همان شکل و عدد صفر.
+    '<tr><td colspan="10">&nbsp;</td><td>0.00</td><td>0.00</td><td>0.00</td>'
+    "<td>0.00</td></tr>"
+)
+
+
+def test_mt4_totals_rows_are_not_counted_as_trades() -> None:
+    """اشکالی که روی گزارش واقعی پیدا شد.
+
+    متاتریدر ۴ زیر جدول، سطر جمع ستون‌ها را با همان تعداد سلول می‌نویسد و ستون
+    «نوع» را خالی می‌گذارد. اگر معامله شمرده شود، سود ناخالص دقیقاً به‌اندازه‌ی سود
+    خالص اضافه می‌آید و پروفیت فکتور بی‌معنی بالا می‌رود.
+    """
+    html = mt4_report([("buy", "100.00"), ("sell", "-50.00")]).replace(
+        "</table>", MT4_TOTALS_ROWS + "</table>"
+    )
+    metrics = statement.analyse(html)
+
+    assert metrics is not None
+    assert metrics.trades == 2, "سطرهای جمع نباید معامله شمرده شوند"
+    assert metrics.gross_profit == pytest.approx(100.0)
+    assert metrics.profit_factor == pytest.approx(2.0)
+
+
+def mt5_report(*, persian: bool) -> bytes:
+    """گزارش متاتریدر ۵ با ساختار واقعی: سه بخش، و خلاصه در پایان.
+
+    خروجی واقعی ترمینال UTF-16 است، پس نمونه هم همان است.
+    """
+    labels = (
+        (
+            "کل سود خالص:",
+            "سود ناخالص:",
+            "زیان ناخالص:",
+            "ضریب سود:",
+            "کل معامله‌ها:",
+            "معاملات سودآور - درصد از کل:",
+            "معاملات با زیان - درصد از کل:",
+            "ماکسیمم درادون بالانس:",
+        )
+        if persian
+        else (
+            "Total Net Profit:",
+            "Gross Profit:",
+            "Gross Loss:",
+            "Profit Factor:",
+            "Total Trades:",
+            "Profit Trades (% of total):",
+            "Loss Trades (% of total):",
+            "Balance Drawdown Maximal:",
+        )
+    )
+    values = (
+        "1,021.95",
+        "2,090.59",
+        "-1,068.64",
+        "1.96",
+        "27",
+        "16 (59.26%)",
+        "11 (40.74%)",
+        "475.56 (4.57%)",
+    )
+    summary = "".join(
+        f"<tr><td>{label}</td><td>{value}</td></tr>"
+        for label, value in zip(labels, values, strict=True)
+    )
+    # سه بخش، هر کدام با سطرهایی که ستون «نوع» دارند و buy/sell هستند: اگر همه با
+    # هم شمرده شوند، هر عدد چند برابر می‌شود.
+    section = (
+        "<tr><td>زمان</td><td>پوزیشن</td><td>نماد</td><td>نوع</td><td>حجم</td>"
+        "<td>قیمت</td><td>سود</td></tr>"
+        "<tr><td>2026.07.22</td><td>1</td><td>US30</td><td>buy</td><td>1.00</td>"
+        "<td>52306</td><td>101.52</td></tr>"
+        "<tr><td>2026.07.23</td><td>2</td><td>US30</td><td>sell</td><td>1.00</td>"
+        "<td>51612</td><td>-40.00</td></tr>"
+    )
+    html = (
+        "<html><body><table>"
+        "<tr><td>پوزیشن ها</td></tr>"
+        + section
+        + "<tr><td>سفارش‌ها</td></tr>"
+        + section
+        + "<tr><td>معاملات</td></tr>"
+        + section
+        + "<tr><td>نتایج</td></tr>"
+        + summary
+        + "</table></body></html>"
+    )
+    return html.encode("utf-16")
+
+
+@pytest.mark.parametrize("persian", [True, False])
+def test_mt5_sections_are_not_merged_into_one_trade_list(persian: bool) -> None:
+    """اشکال دوم روی گزارش واقعی.
+
+    متاتریدر ۵ پوزیشن‌ها و سفارش‌ها و معامله‌ها را در یک جدول پشت هم می‌نویسد و هر
+    سه ستون «نوع» با buy/sell دارند. شمردن هر سه با هم، روی گزارش واقعی ۲۷ معامله
+    را ۸۲ تا و پروفیت فکتور ۱٫۹۶ را ۲۲٫۶ نشان داد. خلاصه‌ی خود گزارش این ابهام را
+    ندارد.
+    """
+    result = extract(mt5_report(persian=persian), filename="ReportHistory.html")
+
+    assert result.kind == "statement"
+    metrics = result.metrics
+    assert metrics is not None
+    assert metrics.source == "report_summary"
+    assert metrics.trades == 27
+    assert metrics.wins == 16 and metrics.losses == 11
+    assert metrics.profit_factor == pytest.approx(1.96)
+    assert metrics.gross_profit == pytest.approx(2090.59)
+    assert metrics.gross_loss == pytest.approx(1068.64)
+    assert metrics.max_drawdown_pct == pytest.approx(4.57)
+
+
+def test_a_utf16_report_is_read() -> None:
+    """خروجی واقعی متاتریدر ۵ در UTF-16 است، نه UTF-8."""
+    result = extract(mt5_report(persian=True), filename="ReportHistory.html")
+    assert result.refused is None and result.metrics is not None
+
+
+def test_the_report_summary_wins_over_recomputing_from_rows() -> None:
+    """وقتی گزارش خودش عدد دارد، همان ملاک است.
+
+    متاتریدر این اعداد را خودش حساب و چاپ می‌کند و دانشجو هم همان‌ها را در
+    ترمینالش می‌بیند؛ دوباره‌حساب‌کردن فقط جای تازه‌ای برای اختلاف می‌سازد.
+    """
+    metrics = extract(mt5_report(persian=True), filename="r.html").metrics
+    assert metrics is not None
+    # از روی دو سطرِ هر بخش، محاسبه‌ی مستقیم عدد کاملاً دیگری می‌داد.
+    assert metrics.profit_factor == pytest.approx(1.96)
+
+
+def test_a_report_without_a_summary_is_still_computed_from_its_rows() -> None:
+    """گزارشی که خلاصه ندارد نباید رد شود؛ مسیر محاسبه سر جایش می‌ماند."""
+    metrics = statement.analyse(mt4_report([("buy", "60.00"), ("sell", "-30.00")]))
+    assert metrics is not None
+    assert metrics.source == "computed"
+    assert metrics.profit_factor == pytest.approx(2.0)
 
 
 # ------------------------------------------------------------------ سنجش
