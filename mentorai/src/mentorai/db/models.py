@@ -594,7 +594,8 @@ class MessageMedia(Base):
     __tablename__ = "message_media"
     __table_args__ = (
         CheckConstraint(
-            "kind in ('statement', 'plan', 'image', 'rejected')", name="ck_message_media_kind"
+            "kind in ('statement', 'plan', 'image', 'voice', 'rejected')",
+            name="ck_message_media_kind",
         ),
         CheckConstraint(
             "(kind = 'rejected') = (refusal is not null)", name="ck_message_media_refusal"

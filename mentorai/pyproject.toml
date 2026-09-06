@@ -14,6 +14,9 @@ dependencies = [
     "pydantic-settings>=2.3",
     "cryptography>=42.0",
     "structlog>=24.1",
+    # کلاینت HTTP برای سرویس رونویسی. با anthropic هم می‌آید؛ صریح نوشته می‌شود
+    # تا وابستگی مستقیم ما به وابستگی غیرمستقیم آن گره نخورد.
+    "httpx2>=2.0",
     "fastapi>=0.115",
     "uvicorn[standard]>=0.30",
     "jinja2>=3.1",

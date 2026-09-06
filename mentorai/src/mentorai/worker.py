@@ -32,6 +32,7 @@ from mentorai.db.models import (
 from mentorai.db.session import session_scope
 from mentorai.jobs import queue
 from mentorai.knowledge.embeddings import EmbeddingProvider
+from mentorai.media import store as media_store
 from mentorai.memory import job as memory_job
 from mentorai.telegram.safety import AccountGate
 from mentorai.telegram.sender import OutboundChannel, SendStatus, deliver_answer
@@ -59,6 +60,38 @@ class DraftNotifier(Protocol):
 class JobOutcome:
     outcome: str
     detail: str | None = None
+
+
+# آنچه در فایل پیام دیده شد، همان‌طور که به منتور نشان داده می‌شود.
+_MEDIA_LABELS = {
+    "voice": "🎙 ویس دانشجو، رونویسی‌شده",
+    "image": "🖼 آنچه در تصویر دیده شد",
+    "plan": "📄 متن خوانده‌شده از فایل",
+}
+
+
+async def _mentor_question(session: AsyncSession, message: Message) -> str:
+    """پرسشی که منتور کنار پیش‌نویس می‌بیند.
+
+    برای پیام دارای فایل، متن پیام تنها کافی نیست: ویس اصلاً متن ندارد و منتور
+    نباید پاسخی را تأیید کند که سؤالش را ندیده است.
+    """
+    text = (message.text or "").strip()
+    if message.media_type is None:
+        return text
+
+    row = await media_store.load(session, message.id)
+    if row is None:
+        return text or f"[{message.media_type}]"
+    if row.kind == "statement":
+        extra = "📊 استیتمنت خوانده شد؛ اعدادش در پاسخ آمده."
+    elif row.kind == "rejected":
+        extra = f"📎 فایل خوانده نشد ({row.refusal})."
+    elif row.extracted_text:
+        extra = f"{_MEDIA_LABELS.get(row.kind, '📎 محتوای فایل')}:\n{row.extracted_text}"
+    else:
+        extra = f"[{message.media_type}]"
+    return f"{text}\n\n{extra}" if text else extra
 
 
 async def process_message(
@@ -109,7 +142,7 @@ async def process_message(
         )
         if notifier is not None:
             draft.control_message_id = await notifier.notify(
-                account=account, draft=draft, question=message.text or ""
+                account=account, draft=draft, question=await _mentor_question(session, message)
             )
         return JobOutcome("drafted", str(draft.id))
 

@@ -381,3 +381,90 @@ async def test_a_model_failure_reading_an_image_is_not_a_description() -> None:
     text, error = await vision.describe(client, image=b"x", media_type="image/png")
 
     assert text is None and error is not None
+
+
+# ------------------------------------------------------------------ ویس
+
+
+class _FakeTranscriber:
+    """رونویس آزمایشی. به شبکه دست نمی‌زند."""
+
+    model = "test-transcriber"
+
+    def __init__(self, text: str | None = None, error: str | None = None) -> None:
+        self._text = text
+        self._error = error
+        self.calls: list[str] = []
+
+    async def transcribe(
+        self, *, audio: bytes, filename: str, media_type: str
+    ) -> tuple[str | None, str | None]:
+        self.calls.append(media_type)
+        return self._text, self._error
+
+
+async def test_a_transcript_is_normalised_the_same_way_typed_text_is() -> None:
+    """اگر نگارش رونویسی با پایگاه دانش یکی نباشد، هیچ‌وقت همدیگر را پیدا نمی‌کنند."""
+    from mentorai.media import voice
+
+    # «ي» و «ك» عربی، همان چیزی که سرویس‌های رونویسی اغلب برمی‌گردانند.
+    fake = _FakeTranscriber(text="  دوره مقدماتي چند جلسه است؟  ")
+    text, error = await voice.transcribe(fake, audio=b"ogg", media_type="audio/ogg")
+
+    assert error is None
+    assert text is not None
+    assert "ي" not in text and "ك" not in text
+    assert text.startswith("دوره مقدماتی")
+
+
+async def test_an_unsupported_audio_type_never_reaches_the_service() -> None:
+    from mentorai.media import voice
+
+    fake = _FakeTranscriber(text="نباید فراخوانی شود")
+    text, error = await voice.transcribe(fake, audio=b"x", media_type="audio/flac")
+
+    assert text is None and error is not None
+    assert fake.calls == []
+
+
+async def test_oversized_audio_never_reaches_the_service() -> None:
+    from mentorai.media import voice
+
+    fake = _FakeTranscriber(text="نباید فراخوانی شود")
+    payload = b"x" * (voice.MAX_AUDIO_BYTES + 1)
+    text, _ = await voice.transcribe(fake, audio=payload, media_type="audio/ogg")
+
+    assert text is None
+    assert fake.calls == []
+
+
+@pytest.mark.parametrize("returned", ["", "  ", "اه"])
+async def test_an_empty_or_tiny_transcript_is_not_a_question(returned: str) -> None:
+    """سکوت و نویز رونویسی می‌شوند به چیزی که سؤال نیست؛ نباید وارد مسیر پاسخ شود."""
+    from mentorai.media import voice
+
+    text, error = await voice.transcribe(
+        _FakeTranscriber(text=returned), audio=b"ogg", media_type="audio/ogg"
+    )
+    assert text is None and error is not None
+
+
+async def test_a_service_failure_is_not_a_transcript() -> None:
+    from mentorai.media import voice
+
+    text, error = await voice.transcribe(
+        _FakeTranscriber(error="ConnectTimeout"), audio=b"ogg", media_type="audio/ogg"
+    )
+    assert text is None and error is not None
+
+
+def test_no_transcriber_is_configured_by_default() -> None:
+    """تا وقتی مالک سرویسی انتخاب نکرده، هیچ صدایی از این سیستم بیرون نمی‌رود."""
+    from mentorai.config import get_settings
+    from mentorai.media import voice
+
+    get_settings.cache_clear()
+    try:
+        assert voice.build_transcriber() is None
+    finally:
+        get_settings.cache_clear()
