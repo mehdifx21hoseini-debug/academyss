@@ -649,3 +649,70 @@ class ModelUsage(Base):
     # پرچم می‌گوید عدد یک برآورد محافظه‌کارانه است، نه هزینه‌ی واقعی.
     priced: Mapped[bool] = mapped_column(Boolean, nullable=False, server_default=text("true"))
     occurred_at: Mapped[datetime] = _created_at()
+
+
+class DeliveryStatus(enum.StrEnum):
+    """چرخه‌ی عمر یک پیام خروجی.
+
+    `sending` عمداً یک حالت پایدار است، نه یک لحظه‌ی گذرا: پیش از تماس با تلگرام
+    تثبیت می‌شود تا اگر فرایند وسط کار بمیرد، سطر در همین حالت بماند و **هیچ‌وقت
+    دوباره فرستاده نشود**. بازگرداندنش به `pending` یعنی احتمال ارسال دوباره به
+    دانشجو (ADR-030).
+    """
+
+    pending = "pending"
+    sending = "sending"
+    sent = "sent"
+    failed = "failed"
+    abandoned = "abandoned"
+
+
+class Delivery(Base):
+    """صندوق خروج: پیامی که تصمیمش گرفته شده و باید فرستاده شود.
+
+    وجودش برای این است که ارسال به تلگرام برگشت‌ناپذیر است و نمی‌تواند داخل
+    تراکنشی باشد که ممکن است برگردد. تصمیم در یک تراکنش تثبیت می‌شود، ارسال بیرون
+    از هر تراکنشی انجام می‌شود، و نتیجه در تراکنش دوم ثبت می‌شود.
+
+    یکتایی روی `answered_message_id` کلید بی‌همتاسازی است: برای یک پیام دانشجو
+    بیش از یک تحویل ساخته نمی‌شود، و این تضمین در خود پایگاه داده است نه در کد.
+    """
+
+    __tablename__ = "deliveries"
+    __table_args__ = (
+        CheckConstraint(
+            "status in ('pending', 'sending', 'sent', 'failed', 'abandoned')",
+            name="ck_delivery_status",
+        ),
+        UniqueConstraint("answered_message_id", name="uq_delivery_answered_message"),
+        Index(
+            "ix_deliveries_pending",
+            "run_after",
+            postgresql_where=text("status = 'pending'"),
+        ),
+        Index(
+            "ix_deliveries_claimed_at",
+            "claimed_at",
+            postgresql_where=text("status = 'sending'"),
+        ),
+    )
+
+    id: Mapped[int] = mapped_column(BigInteger, primary_key=True, autoincrement=True)
+    conversation_id: Mapped[int] = mapped_column(
+        ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False
+    )
+    answered_message_id: Mapped[int] = mapped_column(
+        ForeignKey("messages.id", ondelete="CASCADE"), nullable=False
+    )
+    body: Mapped[str] = mapped_column(Text, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, server_default="pending")
+    attempts: Mapped[int] = mapped_column(Integer, nullable=False, server_default="0")
+    max_attempts: Mapped[int] = mapped_column(Integer, nullable=False, server_default="5")
+    telegram_message_id: Mapped[int | None] = mapped_column(BigInteger)
+    last_error: Mapped[str | None] = mapped_column(Text)
+    run_after: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    claimed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = _created_at()

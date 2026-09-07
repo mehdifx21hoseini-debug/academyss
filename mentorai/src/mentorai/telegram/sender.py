@@ -17,7 +17,7 @@ from typing import Protocol
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from mentorai.db.models import Conversation, MentorAccount, Message, Sender
+from mentorai.db.models import Conversation, Message, Sender
 from mentorai.telegram.safety import AccountGate, human_delay_seconds
 
 
@@ -48,12 +48,10 @@ class OutboundChannel(Protocol):
     async def send(self, chat_id: int, body: str) -> int: ...
 
 
-async def deliver_answer(
-    session: AsyncSession,
+async def push(
     *,
-    account: MentorAccount,
-    conversation: Conversation,
-    answered_message: Message,
+    chat_id: int,
+    answered_telegram_message_id: int,
     body: str,
     gate: AccountGate,
     channel: OutboundChannel,
@@ -61,6 +59,10 @@ async def deliver_answer(
     sleep: bool = True,
 ) -> SendResult:
     """پاسخ را بفرست، یا اگر اجازه نیست هیچ کاری نکن.
+
+    **هیچ نشست پایگاه داده‌ای نمی‌گیرد و هیچ چیزی نمی‌نویسد.** این عمدی است: ارسال
+    به تلگرام برگشت‌ناپذیر است و نباید داخل تراکنشی باشد که ممکن است برگردد
+    (`ADR-030`). ثبت نتیجه کار فراخوانی‌کننده است، در تراکنشی جدا.
 
     ترتیب عمدی است: اول دروازه، بعد سقف نرخ، بعد علامت خوانده‌شدن، بعد تایپ و تأخیر،
     و آخر ارسال. اگر در هر مرحله‌ی پیش از ارسال متوقف شویم، دانشجو هیچ چیزی ندیده.
@@ -79,25 +81,40 @@ async def deliver_answer(
     try:
         # علامت خوانده‌شدن دقیقاً تا همین پیام. پیام‌های بعدی که هنوز جواب نگرفته‌اند
         # خوانده‌نشده می‌مانند و منتور در تلگرام خودش می‌بیندشان.
-        await channel.mark_read(conversation.telegram_chat_id, answered_message.telegram_message_id)
-        await channel.set_typing(conversation.telegram_chat_id)
+        await channel.mark_read(chat_id, answered_telegram_message_id)
+        await channel.set_typing(chat_id)
         if sleep:
             await asyncio.sleep(human_delay_seconds(len(body)))
-        telegram_message_id = await channel.send(conversation.telegram_chat_id, body)
+        telegram_message_id = await channel.send(chat_id, body)
     except FloodWait as exc:
+        # تلگرام صریحاً رد کرده، پس **می‌دانیم** پیامی نرفته. تنها شکستی که
+        # تلاش دوباره‌اش امن است.
         gate.note_flood_wait(exc.seconds, now=moment)
         return SendResult(status=SendStatus.blocked, reason="flood_wait")
     except Exception as exc:  # noqa: BLE001 - شکست ارسال نباید کارگر را بکشد
+        # نتیجه نامعلوم است: شاید تلگرام پیام را گرفته و پاسخش به ما نرسیده.
         return SendResult(status=SendStatus.failed, reason=f"{type(exc).__name__}: {exc}")
 
+    return SendResult(status=SendStatus.sent, telegram_message_id=telegram_message_id)
+
+
+def record_sent(
+    session: AsyncSession,
+    *,
+    conversation: Conversation,
+    answered_message: Message,
+    body: str,
+    telegram_message_id: int,
+    now: datetime | None = None,
+) -> None:
+    """اثر یک ارسال موفق در پایگاه داده. در تراکنشی جدا از خود ارسال."""
     session.add(
         Message(
             conversation_id=conversation.id,
             telegram_message_id=telegram_message_id,
             sender=Sender.assistant.value,
             text=body,
-            sent_at=moment,
+            sent_at=now or datetime.now(UTC),
         )
     )
     conversation.last_answered_message_id = answered_message.telegram_message_id
-    return SendResult(status=SendStatus.sent, telegram_message_id=telegram_message_id)

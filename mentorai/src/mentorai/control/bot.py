@@ -30,7 +30,7 @@ from mentorai.db.models import AuditLog, Conversation, Draft, MentorAccount
 from mentorai.db.session import session_scope
 from mentorai.telegram.safety import AccountGate
 from mentorai.telegram.sender import OutboundChannel
-from mentorai.worker import send_approved_draft
+from mentorai.worker import send_draft_now
 
 log = structlog.get_logger(__name__)
 
@@ -47,6 +47,23 @@ def _render(question: str, proposed: str) -> str:
         f"{proposed}\n\n"
         "برای اصلاح، همین پیام را ریپلای کنید و متن درست را بنویسید."
     )
+
+
+# وضعیت تحویل، به زبانی که منتور بفهمد. کلید ناشناخته خودش نمایش داده می‌شود تا
+# چیزی پنهان نماند.
+_SEND_FAILURE = {
+    "blocked": "فعلاً ارسال ممکن نیست (ساعات سکوت، سقف نرخ، یا محدودیت تلگرام). دوباره تلاش می‌شود.",
+    "failed": "نتیجه‌ی ارسال نامعلوم ماند. عمداً دوباره فرستاده نمی‌شود؛ لطفاً خودتان بررسی کنید.",
+    "abandoned": "ارسال رها شد چون نتیجه‌اش نامعلوم بود. لطفاً خودتان بررسی کنید.",
+    "pending": "در صف ارسال است.",
+    "sending": "در حال ارسال است.",
+    "no_final_text": "متنی برای ارسال نیست.",
+    "already_queued": "قبلاً در صف ارسال قرار گرفته.",
+}
+
+
+def _failure_text(status: str) -> str:
+    return _SEND_FAILURE.get(status, status)
 
 
 class ControlBot:
@@ -280,14 +297,11 @@ class ControlBot:
             await event.edit("🚫 رد شد. پیام دانشجو خوانده‌نشده ماند و منتظر پاسخ شماست.")
             return
 
-        async with session_scope() as session:
-            outcome = await send_approved_draft(
-                session, draft_id, channels=self._channels, gates=self._gates
-            )
-        if outcome.outcome == "sent":
+        result = await send_draft_now(draft_id, channels=self._channels, gates=self._gates)
+        if result == "sent":
             await event.edit("✅ ارسال شد.")
         else:
-            await event.edit(f"⚠️ ارسال نشد: {outcome.outcome} {outcome.detail or ''}".strip())
+            await event.edit(f"⚠️ ارسال نشد. {_failure_text(result)}")
 
     async def _on_reply(self, event: events.NewMessage.Event) -> None:
         """ریپلای روی پیام پیش‌نویس، یعنی منتور متن را اصلاح کرده."""
@@ -317,12 +331,7 @@ class ControlBot:
                 return
             draft_id = draft.id
 
-        async with session_scope() as session:
-            outcome = await send_approved_draft(
-                session, draft_id, channels=self._channels, gates=self._gates
-            )
+        result = await send_draft_now(draft_id, channels=self._channels, gates=self._gates)
         await event.reply(
-            "✅ نسخه شما ارسال شد."
-            if outcome.outcome == "sent"
-            else f"⚠️ ارسال نشد: {outcome.outcome} {outcome.detail or ''}".strip()
+            "✅ نسخه شما ارسال شد." if result == "sent" else f"⚠️ ارسال نشد. {_failure_text(result)}"
         )

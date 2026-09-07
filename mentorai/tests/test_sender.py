@@ -2,6 +2,9 @@
 
 مهم‌ترین چیزی که اینجا سنجیده می‌شود: وقتی ارسال انجام نمی‌شود، هیچ اثری در تلگرام
 گذاشته نمی‌شود — نه علامت خوانده‌شدن، نه نشانگر تایپ (ADR-009).
+
+`push` عمداً هیچ نشستی نمی‌گیرد و چیزی نمی‌نویسد؛ ثبت نتیجه کار `record_sent` است
+در تراکنشی جدا (ADR-030). صندوق خروج و ماشین حالتش در `test_delivery.py`.
 """
 
 from __future__ import annotations
@@ -15,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from mentorai.db.models import Conversation, MentorAccount, Message, Sender
 from mentorai.telegram.normalize import build_inbound
 from mentorai.telegram.safety import AccountGate, TokenBucket
-from mentorai.telegram.sender import FloodWait, SendStatus, deliver_answer
+from mentorai.telegram.sender import FloodWait, SendStatus, push, record_sent
 from mentorai.telegram.store import record_inbound
 
 NOON = datetime(2026, 9, 2, 12, 0, tzinfo=UTC)
@@ -82,20 +85,27 @@ async def test_answer_is_sent_and_recorded(session: AsyncSession, scenario) -> N
     account, conversation, message = scenario
     channel = FakeChannel()
 
-    result = await deliver_answer(
-        session,
-        account=account,
-        conversation=conversation,
-        answered_message=message,
+    result = await push(
+        chat_id=conversation.telegram_chat_id,
+        answered_telegram_message_id=message.telegram_message_id,
         body="شانزده جلسه.",
         gate=_gate(),
         channel=channel,
         now=NOON,
         sleep=False,
     )
+    assert result.status is SendStatus.sent
+    assert result.telegram_message_id is not None
+    record_sent(
+        session,
+        conversation=conversation,
+        answered_message=message,
+        body="شانزده جلسه.",
+        telegram_message_id=result.telegram_message_id,
+        now=NOON,
+    )
     await session.commit()
 
-    assert result.status is SendStatus.sent
     assert channel.sent == [(700, "شانزده جلسه.")]
     senders = list(
         (await session.execute(text("select sender from messages order by id"))).scalars()
@@ -108,16 +118,23 @@ async def test_read_receipt_stops_at_the_answered_message(session: AsyncSession,
     account, conversation, message = scenario
     channel = FakeChannel()
 
-    await deliver_answer(
-        session,
-        account=account,
-        conversation=conversation,
-        answered_message=message,
+    result = await push(
+        chat_id=conversation.telegram_chat_id,
+        answered_telegram_message_id=message.telegram_message_id,
         body="پاسخ",
         gate=_gate(),
         channel=channel,
         now=NOON,
         sleep=False,
+    )
+    assert result.telegram_message_id is not None
+    record_sent(
+        session,
+        conversation=conversation,
+        answered_message=message,
+        body="پاسخ",
+        telegram_message_id=result.telegram_message_id,
+        now=NOON,
     )
     await session.commit()
 
@@ -138,11 +155,9 @@ async def test_blocked_account_leaves_no_trace_in_telegram(
     account, conversation, message = scenario
     channel = FakeChannel()
 
-    result = await deliver_answer(
-        session,
-        account=account,
-        conversation=conversation,
-        answered_message=message,
+    result = await push(
+        chat_id=conversation.telegram_chat_id,
+        answered_telegram_message_id=message.telegram_message_id,
         body="پاسخ",
         gate=_gate(**gate_kwargs),
         channel=channel,
@@ -162,11 +177,9 @@ async def test_flood_wait_backs_off_the_whole_account(session: AsyncSession, sce
     gate = _gate()
     channel = FakeChannel(fail_with=FloodWait(30))
 
-    result = await deliver_answer(
-        session,
-        account=account,
-        conversation=conversation,
-        answered_message=message,
+    result = await push(
+        chat_id=conversation.telegram_chat_id,
+        answered_telegram_message_id=message.telegram_message_id,
         body="پاسخ",
         gate=gate,
         channel=channel,
@@ -186,11 +199,9 @@ async def test_send_failure_does_not_record_an_assistant_message(
     account, conversation, message = scenario
     channel = FakeChannel(fail_with=RuntimeError("network"))
 
-    result = await deliver_answer(
-        session,
-        account=account,
-        conversation=conversation,
-        answered_message=message,
+    result = await push(
+        chat_id=conversation.telegram_chat_id,
+        answered_telegram_message_id=message.telegram_message_id,
         body="پاسخ",
         gate=_gate(),
         channel=channel,

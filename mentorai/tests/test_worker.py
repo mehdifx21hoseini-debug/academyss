@@ -23,7 +23,7 @@ from mentorai.media.extract import Extraction
 from mentorai.telegram.normalize import build_inbound
 from mentorai.telegram.safety import AccountGate, TokenBucket
 from mentorai.telegram.store import record_inbound
-from mentorai.worker import process_message, send_approved_draft
+from mentorai.worker import drain_deliveries, process_message, send_draft_now
 
 NOON = datetime(2026, 9, 2, 12, 0, tzinfo=UTC)
 
@@ -220,7 +220,15 @@ async def test_auto_mode_sends_directly(
     )
     await session.commit()
 
-    assert outcome.outcome == "sent"
+    # ارسال دیگر داخل همان تراکنش انجام نمی‌شود؛ فقط در صندوق خروج قرار می‌گیرد.
+    assert outcome.outcome == "queued"
+    assert channel.sent == [], "پیش از خالی شدن صندوق خروج نباید چیزی رفته باشد"
+
+    await drain_deliveries(
+        channels={"mentor-a": channel}, gates={"mentor-a": _gate()}, sleep=False
+    )
+    session.expire_all()
+
     assert channel.sent == [(900, "دوره مقدماتی شانزده جلسه دارد.")]
     assert channel.reads == [(900, 7)]
 
@@ -247,7 +255,7 @@ async def test_switching_mode_needs_no_code_change(
         notifier=None,
         sleep=False,
     )
-    assert outcome.outcome == "sent"
+    assert outcome.outcome == "queued"
 
 
 async def test_silence_leaves_no_trace_and_creates_no_draft(
@@ -336,20 +344,19 @@ async def test_approved_draft_is_sent_from_the_mentor_account(
     await session.commit()
 
     draft = (await session.execute(select(Draft))).scalar_one()
-    await drafts.approve(session, draft.id, by="mentor-a")
-    outcome = await send_approved_draft(
-        session,
-        draft.id,
-        channels={"mentor-a": channel},
-        gates={"mentor-a": _gate()},
-        sleep=False,
-    )
+    draft_id = draft.id
+    await drafts.approve(session, draft_id, by="mentor-a")
     await session.commit()
+    result = await send_draft_now(
+        draft_id, channels={"mentor-a": channel}, gates={"mentor-a": _gate()}, sleep=False
+    )
+    # نتیجه در نشست دیگری نوشته شده؛ این نشست باید دوباره بخواند.
+    session.expire_all()
 
-    assert outcome.outcome == "sent"
+    assert result == "sent"
     assert channel.sent == [(900, "دوره مقدماتی شانزده جلسه دارد.")]
     assert channel.reads == [(900, 7)], "علامت خوانده‌شدن تا همان پیام پاسخ‌داده‌شده"
-    assert (await session.get_one(Draft, draft.id)).status == "sent"
+    assert (await session.get_one(Draft, draft_id)).status == "sent"
 
 
 async def test_edited_draft_sends_the_mentor_text(
@@ -373,10 +380,12 @@ async def test_edited_draft_sends_the_mentor_text(
     await session.commit()
 
     draft = (await session.execute(select(Draft))).scalar_one()
-    await drafts.edit(session, draft.id, by="mentor-a", body="متن اصلاح‌شده منتور")
-    await send_approved_draft(
-        session, draft.id, channels={"mentor-a": channel}, gates={"mentor-a": _gate()}, sleep=False
-    )
+    draft_id = draft.id
+    await drafts.edit(session, draft_id, by="mentor-a", body="متن اصلاح‌شده منتور")
     await session.commit()
+    await send_draft_now(
+        draft_id, channels={"mentor-a": channel}, gates={"mentor-a": _gate()}, sleep=False
+    )
+    session.expire_all()
 
     assert channel.sent == [(900, "متن اصلاح‌شده منتور")]

@@ -14,9 +14,10 @@ from datetime import UTC, datetime, timedelta
 from typing import Protocol
 
 import structlog
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from mentorai import drafts, escalation
+from mentorai import delivery, drafts, escalation
 from mentorai.ai.client import ModelClient
 from mentorai.ai.runtime import handle_message
 from mentorai.conversation import assistant_may_answer
@@ -24,6 +25,7 @@ from mentorai.db.models import (
     AiRun,
     Conversation,
     Draft,
+    DraftStatus,
     MentorAccount,
     Message,
     Outcome,
@@ -35,7 +37,7 @@ from mentorai.knowledge.embeddings import EmbeddingProvider
 from mentorai.media import store as media_store
 from mentorai.memory import job as memory_job
 from mentorai.telegram.safety import AccountGate
-from mentorai.telegram.sender import OutboundChannel, SendStatus, deliver_answer
+from mentorai.telegram.sender import OutboundChannel, SendStatus, push, record_sent
 
 log = structlog.get_logger(__name__)
 
@@ -146,36 +148,39 @@ async def process_message(
             )
         return JobOutcome("drafted", str(draft.id))
 
-    channel = channels.get(account.slug)
-    gate = gates.get(account.slug)
-    if channel is None or gate is None:
+    if account.slug not in channels or account.slug not in gates:
         return JobOutcome("no_channel", account.slug)
 
-    send = await deliver_answer(
+    # ارسال اینجا انجام **نمی‌شود**. این تابع داخل یک تراکنش اجرا می‌شود و ارسال
+    # به تلگرام برگشت‌ناپذیر است؛ فقط یک سطر در صندوق خروج ساخته می‌شود و پس از
+    # تثبیت تراکنش، بیرون از آن فرستاده می‌شود (ADR-030).
+    delivery_id = await delivery.enqueue(
         session,
-        account=account,
-        conversation=conversation,
-        answered_message=message,
+        conversation_id=conversation.id,
+        answered_message_id=message.id,
         body=result.answer_text,
-        gate=gate,
-        channel=channel,
-        sleep=sleep,
     )
-    return JobOutcome(send.status.value, send.reason)
+    if delivery_id is None:
+        # از قبل تحویلی برای این پیام وجود داشت. قید یکتایی جلوی پاسخ دوم را گرفت.
+        return JobOutcome("already_queued")
+    return JobOutcome("queued", str(delivery_id))
 
 
-async def send_approved_draft(
+async def queue_approved_draft(
     session: AsyncSession,
     draft_id: int,
     *,
     channels: Mapping[str, OutboundChannel],
     gates: Mapping[str, AccountGate],
-    sleep: bool = True,
-) -> JobOutcome:
-    """پیش‌نویسی که منتور تأیید یا ویرایش کرده را بفرست."""
+) -> tuple[JobOutcome, int | None]:
+    """پیش‌نویس تأییدشده را در صندوق خروج بگذار. اینجا هیچ چیزی فرستاده نمی‌شود.
+
+    شناسه‌ی تحویل برگردانده می‌شود تا فراخوانی‌کننده — پس از تثبیت این تراکنش —
+    همان را بفرستد و نتیجه‌ی واقعی را به منتور بگوید.
+    """
     draft = await session.get_one(Draft, draft_id)
     if draft.final_text is None:
-        return JobOutcome("no_final_text")
+        return JobOutcome("no_final_text"), None
 
     conversation = await session.get_one(Conversation, draft.conversation_id)
     account = await session.get_one(MentorAccount, conversation.account_id)
@@ -183,27 +188,148 @@ async def send_approved_draft(
     run = await session.get_one(AiRun, draft.ai_run_id)
     answered_message = await session.get_one(Message, run.message_id)
 
-    channel = channels.get(account.slug)
-    gate = gates.get(account.slug)
-    if channel is None or gate is None:
+    if account.slug not in channels or account.slug not in gates:
         await drafts.mark_failed(session, draft_id)
-        return JobOutcome("no_channel", account.slug)
+        return JobOutcome("no_channel", account.slug), None
 
-    send = await deliver_answer(
+    delivery_id = await delivery.enqueue(
         session,
-        account=account,
-        conversation=conversation,
-        answered_message=answered_message,
+        conversation_id=conversation.id,
+        answered_message_id=answered_message.id,
         body=draft.final_text,
+    )
+    if delivery_id is None:
+        return JobOutcome("already_queued"), None
+    return JobOutcome("queued", str(delivery_id)), delivery_id
+
+
+async def deliver_claimed(
+    claimed: delivery.Claimed,
+    *,
+    channels: Mapping[str, OutboundChannel],
+    gates: Mapping[str, AccountGate],
+    sleep: bool = True,
+) -> SendStatus:
+    """یک تحویل برداشته‌شده را بفرست و نتیجه‌اش را ثبت کن.
+
+    ارسال **بیرون از هر تراکنشی** انجام می‌شود؛ ثبت نتیجه در تراکنشی جدا. اگر
+    فرایند بین این دو بمیرد، سطر در `sending` می‌ماند و `abandon_stale` بعداً
+    رهایش می‌کند — هرگز دوباره فرستاده نمی‌شود.
+    """
+    channel = channels.get(claimed.account_slug)
+    gate = gates.get(claimed.account_slug)
+    if channel is None or gate is None:
+        async with session_scope() as session:
+            await delivery.abandon(session, claimed.id, f"کانالی برای {claimed.account_slug} نیست")
+        return SendStatus.failed
+
+    send = await push(
+        chat_id=claimed.telegram_chat_id,
+        answered_telegram_message_id=claimed.answered_telegram_message_id,
+        body=claimed.body,
         gate=gate,
         channel=channel,
         sleep=sleep,
     )
-    if send.status is SendStatus.sent:
-        await drafts.mark_sent(session, draft_id)
+
+    async with session_scope() as session:
+        if send.status is SendStatus.sent and send.telegram_message_id is not None:
+            conversation = await session.get_one(Conversation, claimed.conversation_id)
+            answered = await session.get_one(Message, claimed.answered_message_id)
+            record_sent(
+                session,
+                conversation=conversation,
+                answered_message=answered,
+                body=claimed.body,
+                telegram_message_id=send.telegram_message_id,
+            )
+            await delivery.mark_sent(
+                session, claimed.id, telegram_message_id=send.telegram_message_id
+            )
+            await _settle_draft(session, claimed.answered_message_id, sent=True)
+        elif send.status is SendStatus.blocked:
+            # می‌دانیم چیزی نرفته — سقف نرخ، ساعات سکوت، یا FloodWait. امن است.
+            await delivery.retry_later(session, claimed.id, error=send.reason or "blocked")
+        else:
+            # نامعلوم. شاید رفته باشد. هرگز دوباره فرستاده نمی‌شود.
+            await delivery.abandon(session, claimed.id, send.reason or "unknown")
+            await _settle_draft(session, claimed.answered_message_id, sent=False)
+    return send.status
+
+
+async def _settle_draft(session: AsyncSession, answered_message_id: int, *, sent: bool) -> None:
+    """پیش‌نویس مربوط به این پیام را هم‌راستا کن، اگر پیش‌نویسی بوده."""
+    run = (
+        await session.execute(select(AiRun).where(AiRun.message_id == answered_message_id))
+    ).scalar_one_or_none()
+    if run is None:
+        return
+    draft = (
+        await session.execute(select(Draft).where(Draft.ai_run_id == run.id))
+    ).scalar_one_or_none()
+    if draft is None or draft.status in (DraftStatus.sent.value, DraftStatus.failed.value):
+        return
+    if sent:
+        await drafts.mark_sent(session, draft.id)
     else:
-        await drafts.mark_failed(session, draft_id)
-    return JobOutcome(send.status.value, send.reason)
+        await drafts.mark_failed(session, draft.id)
+
+
+async def send_draft_now(
+    draft_id: int,
+    *,
+    channels: Mapping[str, OutboundChannel],
+    gates: Mapping[str, AccountGate],
+    sleep: bool = True,
+) -> str:
+    """پیش‌نویس تأییدشده را در صندوق خروج بگذار و همان‌جا بفرست.
+
+    سه مرحله‌ی جدا و عمدی: تراکنش اول تصمیم را تثبیت می‌کند، ارسال بیرون از هر
+    تراکنشی انجام می‌شود، تراکنش دوم نتیجه را ثبت می‌کند (`ADR-030`). منتور
+    همچنان نتیجه‌ی واقعی را می‌بیند، نه «در صف گذاشته شد».
+
+    اگر کارگر زودتر همان تحویل را برداشته باشد، وضعیت نهایی از خود سطر خوانده
+    می‌شود — دوباره فرستاده نمی‌شود.
+    """
+    async with session_scope() as session:
+        outcome, delivery_id = await queue_approved_draft(
+            session, draft_id, channels=channels, gates=gates
+        )
+    if delivery_id is None:
+        return f"{outcome.outcome} {outcome.detail or ''}".strip()
+
+    async with session_scope() as session:
+        claimed = await delivery.claim(session, delivery_id)
+
+    if claimed is not None:
+        status = await deliver_claimed(claimed, channels=channels, gates=gates, sleep=sleep)
+        return status.value
+
+    async with session_scope() as session:
+        return await delivery.status_of(session, delivery_id) or "unknown"
+
+
+async def drain_deliveries(
+    *,
+    channels: Mapping[str, OutboundChannel],
+    gates: Mapping[str, AccountGate],
+    sleep: bool = True,
+    limit: int = 20,
+) -> int:
+    """صندوق خروج را خالی کن.
+
+    هر برداشتن در تراکنش خودش تثبیت می‌شود **پیش از** ارسال، و ثبت نتیجه در
+    تراکنشی دیگر پس از آن. هیچ ارسالی داخل تراکنش نیست.
+    """
+    delivered = 0
+    for _ in range(limit):
+        async with session_scope() as session:
+            claimed = await delivery.claim_next(session)
+        if claimed is None:
+            break
+        await deliver_claimed(claimed, channels=channels, gates=gates, sleep=sleep)
+        delivered += 1
+    return delivered
 
 
 async def run_forever(
@@ -221,11 +347,19 @@ async def run_forever(
             job = await queue.claim(session, worker_id=worker_id, kinds=HANDLED_KINDS)
 
         if job is None:
+            # صف کار خالی است؛ حالا صندوق خروج. ارسال عمداً پس از پردازش می‌آید تا
+            # پیام تازه زودتر تصمیمش گرفته شود.
+            await drain_deliveries(channels=channels, gates=gates)
+
             if datetime.now(UTC) - last_sweep > STALE_LOCK_AFTER:
                 async with session_scope() as session:
                     freed = await queue.release_stale(session, older_than=STALE_LOCK_AFTER)
                 if freed:
                     log.warning("stale_jobs_released", count=freed)
+                # تحویل‌هایی که کارگرشان وسط ارسال مرده. هرگز دوباره فرستاده
+                # نمی‌شوند؛ فقط رها و بلند اعلام می‌شوند تا آدمی نگاه کند.
+                async with session_scope() as session:
+                    await delivery.abandon_stale(session)
                 last_sweep = datetime.now(UTC)
             await asyncio.sleep(IDLE_SLEEP_SECONDS)
             continue
@@ -252,6 +386,8 @@ async def run_forever(
                     )
                 await queue.complete(session, job.id)
             log.info("job_done", job_id=job.id, outcome=outcome.outcome, detail=outcome.detail)
+            # پاسخی که همین الان تصمیمش گرفته شد نباید تا خالی شدن صف کار منتظر بماند.
+            await drain_deliveries(channels=channels, gates=gates)
         except Exception as exc:  # noqa: BLE001 - یک کار خراب نباید کارگر را بکشد
             log.exception("job_failed", job_id=job.id)
             with contextlib.suppress(Exception):
