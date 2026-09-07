@@ -23,7 +23,7 @@ from mentorai.media.extract import Extraction
 from mentorai.telegram.normalize import build_inbound
 from mentorai.telegram.safety import AccountGate, TokenBucket
 from mentorai.telegram.store import record_inbound
-from mentorai.worker import drain_deliveries, process_message, send_draft_now
+from mentorai.worker import drain_deliveries, notify_draft, process_message, send_draft_now
 
 NOON = datetime(2026, 9, 2, 12, 0, tzinfo=UTC)
 
@@ -145,6 +145,10 @@ async def test_draft_mode_creates_a_draft_and_sends_nothing(
     assert outcome.outcome == "drafted"
     assert channel.sent == [], "در حالت پیش‌نویس هیچ چیزی به دانشجو نمی‌رود"
     assert channel.reads == [], "و پیام خوانده علامت نمی‌خورد"
+
+    # اعلان پس از تثبیت تراکنش فرستاده می‌شود، نه داخلش (ADR-031).
+    assert outcome.detail is not None
+    await notify_draft(int(outcome.detail), notifier)
     assert notifier.sent == [("mentor-a", "دوره مقدماتی شانزده جلسه دارد.")]
 
 
@@ -193,6 +197,12 @@ async def test_the_mentor_sees_what_was_heard_in_a_voice_message(
     await session.commit()
 
     assert outcome.outcome == "drafted"
+    assert notifier.questions == [], "اعلان نباید داخل تراکنش فرستاده شده باشد"
+
+    # همان ترتیبی که حلقه‌ی کارگر دارد: اول تثبیت، بعد اعلان (ADR-031).
+    assert outcome.detail is not None
+    await notify_draft(int(outcome.detail), notifier)
+
     assert "دوره مقدماتی چیست؟" in notifier.questions[0]
     assert "ویس دانشجو" in notifier.questions[0]
 
@@ -389,3 +399,37 @@ async def test_edited_draft_sends_the_mentor_text(
     session.expire_all()
 
     assert channel.sent == [(900, "متن اصلاح‌شده منتور")]
+
+
+async def test_the_control_message_id_survives_the_notification(
+    session: AsyncSession,
+    account: MentorAccount,
+    kb: None,
+    incoming: Message,
+    embedder: HashingEmbedder,
+) -> None:
+    """شکستی که می‌بندد: منتور روی کارت پیش‌نویس ریپلای بزند و هیچ اتفاقی نیفتد.
+
+    اجازه‌سنجی ریپلای از روی `control_message_id` انجام می‌شود. حالا که اعلان
+    بیرون از تراکنش ساخت پیش‌نویس فرستاده می‌شود، ذخیره‌ی این شناسه در تراکنشی
+    جداست و می‌تواند بی‌صدا از قلم بیفتد.
+    """
+    notifier = RecordingNotifier()
+    outcome = await process_message(
+        session,
+        incoming.id,
+        model_client=ScriptedClient(_answer()),
+        embedder=embedder,
+        channels={"mentor-a": FakeChannel()},
+        gates={"mentor-a": _gate()},
+        notifier=notifier,
+        sleep=False,
+    )
+    await session.commit()
+    assert outcome.detail is not None
+
+    assert await notify_draft(int(outcome.detail), notifier) is True
+
+    session.expire_all()
+    draft = await session.get_one(Draft, int(outcome.detail))
+    assert draft.control_message_id == 12345

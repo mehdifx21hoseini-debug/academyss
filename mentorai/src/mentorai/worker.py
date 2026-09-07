@@ -142,10 +142,9 @@ async def process_message(
             conversation_id=conversation.id,
             proposed_text=result.answer_text,
         )
-        if notifier is not None:
-            draft.control_message_id = await notifier.notify(
-                account=account, draft=draft, question=await _mentor_question(session, message)
-            )
+        # اعلان به ربات کنترل اینجا فرستاده **نمی‌شود**. آن هم یک ارسال تلگرامی
+        # است و اینجا داخل تراکنش هستیم؛ اگر تراکنش برگردد، منتور کارتی می‌بیند
+        # که پیش‌نویسش وجود ندارد. پس از تثبیت فرستاده می‌شود (ADR-031).
         return JobOutcome("drafted", str(draft.id))
 
     if account.slug not in channels or account.slug not in gates:
@@ -164,6 +163,42 @@ async def process_message(
         # از قبل تحویلی برای این پیام وجود داشت. قید یکتایی جلوی پاسخ دوم را گرفت.
         return JobOutcome("already_queued")
     return JobOutcome("queued", str(delivery_id))
+
+
+async def notify_draft(draft_id: int, notifier: DraftNotifier) -> bool:
+    """پیش‌نویس تازه را به منتور نشان بده. **پس از** تثبیت تراکنش ساخت آن.
+
+    سه مرحله مثل مسیر تحویل: خواندن آنچه لازم است، ارسال بیرون از هر تراکنشی،
+    و ثبت شناسه‌ی پیام کنترلی در تراکنشی جدا (`ADR-031`).
+
+    شکست اعلان پیش‌نویس را از بین نمی‌برد؛ در پنل و با `/pending` دیده می‌شود.
+    """
+    async with session_scope() as session:
+        draft = await session.get(Draft, draft_id)
+        if draft is None:
+            return False
+        conversation = await session.get_one(Conversation, draft.conversation_id)
+        account = await session.get_one(MentorAccount, conversation.account_id)
+        run = await session.get_one(AiRun, draft.ai_run_id)
+        message = await session.get_one(Message, run.message_id)
+        question = await _mentor_question(session, message)
+
+    try:
+        control_message_id = await notifier.notify(
+            account=account, draft=draft, question=question
+        )
+    except Exception:  # noqa: BLE001 - شکست اعلان نباید کارگر را بکشد
+        log.exception("draft_notify_failed", draft_id=draft_id)
+        return False
+
+    if control_message_id is None:
+        return False
+
+    async with session_scope() as session:
+        stored = await session.get(Draft, draft_id)
+        if stored is not None:
+            stored.control_message_id = control_message_id
+    return True
 
 
 async def queue_approved_draft(
@@ -386,6 +421,10 @@ async def run_forever(
                     )
                 await queue.complete(session, job.id)
             log.info("job_done", job_id=job.id, outcome=outcome.outcome, detail=outcome.detail)
+
+            # اعلان و ارسال، هر دو بیرون از تراکنش بالا و پس از تثبیت آن.
+            if outcome.outcome == "drafted" and notifier is not None and outcome.detail:
+                await notify_draft(int(outcome.detail), notifier)
             # پاسخی که همین الان تصمیمش گرفته شد نباید تا خالی شدن صف کار منتظر بماند.
             await drain_deliveries(channels=channels, gates=gates)
         except Exception as exc:  # noqa: BLE001 - یک کار خراب نباید کارگر را بکشد
