@@ -716,3 +716,24 @@ class Delivery(Base):
     claimed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     created_at: Mapped[datetime] = _created_at()
+
+
+class WorkerHeartbeat(Base):
+    """آخرین باری که هر کارگر زنده بوده.
+
+    پنل و کارگر دو فرایند جدا هستند؛ پنل نمی‌تواند مستقیم بپرسد کارگر زنده است یا
+    نه. تنها مسیر مشترکشان پایگاه داده است، پس کارگر هر چند ثانیه اینجا امضا
+    می‌گذارد و سلامت از کهنگی همین امضا خوانده می‌شود (`ADR-032`).
+
+    یک سطر به‌ازای هر کارگر، نه یک سطر به‌ازای هر تپش: تاریخچه‌ی تپش‌ها ارزشی
+    ندارد و فقط جدول را بزرگ می‌کند.
+    """
+
+    __tablename__ = "worker_heartbeats"
+
+    worker_id: Mapped[str] = mapped_column(String(64), primary_key=True)
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    # حساب‌هایی که این کارگر به آن‌ها وصل است. هیچ داده‌ی شخصی‌ای اینجا نمی‌آید.
+    detail: Mapped[dict[str, object]] = mapped_column(JSONB, nullable=False, server_default="{}")

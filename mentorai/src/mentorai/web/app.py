@@ -21,12 +21,12 @@ from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, Form, HTTPException, Request, Response, status
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from mentorai import access, escalation
+from mentorai import access, escalation, health
 from mentorai.access import NotPermitted, Principal, Role
 from mentorai.db.models import AuditLog, PanelUser
 from mentorai.db.session import get_sessionmaker
@@ -153,6 +153,13 @@ def _render(request: Request, name: str, viewer: Viewer | None, **context: objec
     )
 
 
+_HEALTH_LABEL = {
+    health.Level.ok: "سالم",
+    health.Level.degraded: "نیازمند رسیدگی",
+    health.Level.down: "خراب",
+}
+
+
 def _register_routes(app: FastAPI) -> None:
     @app.exception_handler(LoginRequired)
     async def _login_required(request: Request, _: Exception) -> Response:
@@ -165,6 +172,41 @@ def _register_routes(app: FastAPI) -> None:
         response = _render(request, "not_found.html", None)
         response.status_code = status.HTTP_404_NOT_FOUND
         return response
+
+    # ---------------------------------------------------------------------
+    # سلامت (ADR-032)
+    #
+    # این دو مسیر عمداً بدون احراز هویت‌اند تا یک ناظر بیرونی بتواند صدایشان بزند،
+    # و دقیقاً به همین دلیل **هیچ جزئیاتی** برنمی‌گردانند: نه تعداد، نه نام، نه
+    # پیام خطا. جزئیات پشت ورود است.
+    # ---------------------------------------------------------------------
+
+    @app.get("/healthz")
+    async def liveness() -> JSONResponse:
+        """آیا خود فرایند زنده است. به پایگاه داده دست نمی‌زند."""
+        return JSONResponse({"status": "ok"})
+
+    @app.get("/readyz")
+    async def readiness(session: SessionDep) -> JSONResponse:
+        """آیا آماده‌ی سرویس دادن است. فقط ok یا نه، بدون هیچ جزئیاتی."""
+        report = await health.snapshot(session)
+        code = status.HTTP_200_OK if report.ready else status.HTTP_503_SERVICE_UNAVAILABLE
+        return JSONResponse({"status": report.level.value}, status_code=code)
+
+    @app.get("/health.json")
+    async def health_detail(session: SessionDep, viewer: ViewerDep) -> JSONResponse:
+        """جزئیات کامل، پشت ورود. هیچ داده‌ی شخصی‌ای در آن نیست."""
+        report = await health.snapshot(session)
+        return JSONResponse(
+            {
+                "status": report.level.value,
+                "checks": [
+                    {"name": c.name, "status": c.level.value, "detail": c.detail}
+                    for c in report.checks
+                ],
+                "facts": report.facts,
+            }
+        )
 
     @app.get("/login", response_class=HTMLResponse)
     async def login_form(request: Request) -> HTMLResponse:
@@ -219,7 +261,15 @@ def _register_routes(app: FastAPI) -> None:
     @app.get("/", response_class=HTMLResponse)
     async def dashboard(request: Request, session: SessionDep, viewer: ViewerDep) -> HTMLResponse:
         kpis = await queries.kpis(session, viewer.principal)
-        return _render(request, "dashboard.html", viewer, kpis=kpis)
+        report = await health.snapshot(session)
+        return _render(
+            request,
+            "dashboard.html",
+            viewer,
+            kpis=kpis,
+            health=report,
+            health_label=_HEALTH_LABEL[report.level],
+        )
 
     @app.get("/conversations", response_class=HTMLResponse)
     async def conversation_list(

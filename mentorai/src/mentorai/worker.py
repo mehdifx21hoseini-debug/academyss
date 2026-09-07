@@ -17,7 +17,7 @@ import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from mentorai import delivery, drafts, escalation
+from mentorai import delivery, drafts, escalation, health
 from mentorai.ai.client import ModelClient
 from mentorai.ai.runtime import handle_message
 from mentorai.conversation import assistant_may_answer
@@ -385,6 +385,11 @@ async def run_forever(
             # صف کار خالی است؛ حالا صندوق خروج. ارسال عمداً پس از پردازش می‌آید تا
             # پیام تازه زودتر تصمیمش گرفته شود.
             await drain_deliveries(channels=channels, gates=gates)
+
+            # امضای زنده بودن. پنل و کارگر دو فرایندند و تنها مسیر مشترکشان
+            # پایگاه داده است؛ بدون این، مرگ کارگر تا صبح دیده نمی‌شود (ADR-032).
+            async with session_scope() as session:
+                await health.beat(session, worker_id, detail={"accounts": sorted(channels)})
 
             if datetime.now(UTC) - last_sweep > STALE_LOCK_AFTER:
                 async with session_scope() as session:
