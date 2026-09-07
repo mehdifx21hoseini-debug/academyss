@@ -84,13 +84,48 @@ function Find-DataFolder {
     if ($found.Count -eq 0) { throw "Found $root but no terminal inside it has an MQL5\Experts folder." }
     if ($found.Count -eq 1) { return $found[0] }
 
-    #--- more than one: prefer the one that already has SS Replay in it
-    $withUs = $found | Where-Object { Test-Path (Join-Path $_ "MQL5\Experts\SSReplay") }
+    #+------------------------------------------------------------------+
+    #| @() AROUND THE PIPELINE, and it is not decoration.               |
+    #|                                                                  |
+    #| Where-Object that matches exactly ONE thing returns that thing,  |
+    #| not a list containing it. A String. Its .Count is 1, so the test |
+    #| below passed - and [0] then indexed the STRING and returned its  |
+    #| first character.                                                 |
+    #|                                                                  |
+    #| This installed 118 files into a folder called "C" on a machine   |
+    #| that had two terminals, reported success, and left MetaEditor    |
+    #| compiling against a data folder with none of them in it. The     |
+    #| report even printed "data folder   C" and nothing was watching   |
+    #| for it - which is why the check at the bottom exists now.        |
+    #+------------------------------------------------------------------+
+    $withUs = @($found | Where-Object { Test-Path (Join-Path $_ "MQL5\Experts\SSReplay") })
     if ($withUs.Count -eq 1) { return $withUs[0] }
 
     Say "More than one MetaTrader data folder was found:"
     foreach ($f in $found) { Say "   $f" }
+    if ($withUs.Count -gt 1) {
+        Say "and more than one of them already has SS Replay in it."
+    }
     throw "Run it again naming the one you use:  .\ssr_setup.ps1 -Terminal ""<path>"""
+}
+
+#+------------------------------------------------------------------+
+#| NOTHING GETS COPIED SOMEWHERE THAT IS NOT A TERMINAL.            |
+#|                                                                  |
+#| The last line of defence, deliberately dumb: whatever path was   |
+#| worked out above, it has to be absolute and it has to contain    |
+#| MQL5\Experts, or nothing is written at all. A wrong install that |
+#| says it worked costs far more than a refusal that says why.      |
+#+------------------------------------------------------------------+
+function Assert-DataFolder([string]$p) {
+    if ([string]::IsNullOrWhiteSpace($p)) { throw "The MetaTrader data folder came back empty." }
+    if ($p.Length -lt 4) { throw "The MetaTrader data folder came back as '$p', which cannot be right." }
+    if (-not [System.IO.Path]::IsPathRooted($p)) { throw "'$p' is not a full path." }
+    if (-not (Test-Path -LiteralPath $p)) { throw "'$p' does not exist." }
+    if (-not (Test-Path -LiteralPath (Join-Path $p "MQL5\Experts"))) {
+        throw "'$p' has no MQL5\Experts inside it, so it is not a MetaTrader data folder."
+    }
+    return $p
 }
 
 function Find-MetaEditor([string]$data) {
@@ -129,7 +164,7 @@ function Build-String([string]$mql5) {
 #| INSTALL                                                          |
 #+------------------------------------------------------------------+
 function Do-Install {
-    $data = Find-DataFolder
+    $data = Assert-DataFolder (Find-DataFolder)
     $mql5 = Join-Path $data "MQL5"
     Head "WHERE"
     Say "  data folder   $data"
@@ -279,7 +314,7 @@ function Get-Targets {
 #| log is mostly the terminal talking to its broker.                |
 #+------------------------------------------------------------------+
 function Do-Collect {
-    $data = Find-DataFolder
+    $data = Assert-DataFolder (Find-DataFolder)
     $mql5 = Join-Path $data "MQL5"
     Head "WHERE"
     Say "  data folder   $data"
