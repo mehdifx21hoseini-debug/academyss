@@ -185,6 +185,7 @@ function Do-Install {
     } else {
         $url = "https://github.com/$REPO/archive/refs/heads/$Branch.zip"
         Say "  $url"
+        Say "  downloading about 21 MB - this is the slow part, give it a minute"
         $zipPath = Join-Path $tmp "src.zip"
         try {
             [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
@@ -393,9 +394,20 @@ function Do-Collect {
 #+------------------------------------------------------------------+
 #| MAIN                                                             |
 #+------------------------------------------------------------------+
-[void]$RPT.Add("SS Replay setup report")
-[void]$RPT.Add((Get-Date).ToString("yyyy-MM-dd HH:mm:ss") + "   mode=" + $(if ($Collect) { "collect" } else { "install" }))
-[void]$RPT.Add("windows " + [Environment]::OSVersion.Version + "   powershell " + $PSVersionTable.PSVersion)
+#+------------------------------------------------------------------+
+#| SAY SOMETHING BEFORE DOING ANYTHING.                             |
+#|                                                                  |
+#| These three lines used to go into the report buffer and not to   |
+#| the screen, so the first thing a person saw was the WHERE block  |
+#| after the terminal folder had been hunted down. On a machine     |
+#| where that hunt is slow, or the script never loaded at all, the  |
+#| window looked identical: empty. "Did it start?" and "did it      |
+#| finish?" need different answers, so it now says hello first.     |
+#+------------------------------------------------------------------+
+Say "SS Replay setup report"
+Say ((Get-Date).ToString("yyyy-MM-dd HH:mm:ss") + "   mode=" + $(if ($Collect) { "collect" } else { "install" }))
+Say ("windows " + [Environment]::OSVersion.Version + "   powershell " + $PSVersionTable.PSVersion)
+Say "working..."
 
 $failed = $false
 try {
