@@ -2422,7 +2422,18 @@ void OnStart()
          cacct.OnSessionStart(rsym, (int)SymbolInfoInteger(rsym, SYMBOL_DIGITS),
                               SymbolInfoDouble(rsym, SYMBOL_POINT), 0);
 
+         //+------------------------------------------------------------------+
+         //| THE GROUP IS NOT OPTIONAL HERE, and the first version of this    |
+         //| stage left it out. ReadState returns false the moment there is  |
+         //| no primary controller, so the panel saw a zeroed state, counted |
+         //| no trades, and correctly decided there was nothing to confirm.  |
+         //| Four checks failed against a feature that was working.          |
+         //+------------------------------------------------------------------+
+         CSSRReplayGroup cgroup;
+         cgroup.Add(GetPointer(ctrl));
+
          CSSRGroupPort cport;
+         cport.Attach(GetPointer(cgroup));
          cport.AttachAccount(GetPointer(cacct));
 
          CSSRPanel cp;
@@ -2448,7 +2459,26 @@ void OnStart()
          cacct.Close(ct);
          cacct.Open(SSR_ORDER_BUY, 0.10, 0.0, 0.0);   // and one left open
 
+         //+------------------------------------------------------------------+
+         //| THE TEST CHECKS ITS OWN EYES FIRST.                              |
+         //|                                                                  |
+         //| Everything below depends on the panel being able to SEE the two  |
+         //| trades. When it could not - a group that was never attached -    |
+         //| four checks failed and blamed a feature that was working. A      |
+         //| precondition that is not asserted is a precondition that will    |
+         //| one day be reported as a defect somewhere else.                  |
+         //+------------------------------------------------------------------+
          cp.Render();
+         SSRUiState cs;
+         cp.StateInto(cs);
+         if(!Check("28 the panel can see the trades it is about to protect",
+                   cs.closed_trades == 1 && cs.open_positions == 1,
+                   StringFormat("panel sees %d closed, %d open - the account "
+                                "holds 1 and 1", cs.closed_trades,
+                                cs.open_positions)))
+            Print("  -> everything below this line is measuring the wiring, "
+                  "not the confirmation");
+
          cp.Dispatch("reset");
          Check("28 the first press does NOT reset, it asks",
                cp.ResetIsArmed(),
