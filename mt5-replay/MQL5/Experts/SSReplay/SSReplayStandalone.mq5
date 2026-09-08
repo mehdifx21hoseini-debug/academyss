@@ -2088,15 +2088,47 @@ void ReportSpreadOnce()
    long recorded = g_ctrl.SpreadBarsRecorded();
    long fixedn   = g_ctrl.SpreadBarsFixed();
    long total    = recorded + fixedn;
-   if(total < 500)                    // too early to draw a conclusion
+
+   //+------------------------------------------------------------------+
+   //| TWO HOURS OF REPLAY, OR TWENTY SECONDS OF WAITING.               |
+   //|                                                                  |
+   //| The first version waited for five hundred bars. At the default    |
+   //| speed that is seventeen minutes of sitting in front of a log      |
+   //| watching for a line - which is not a diagnostic, it is a chore,   |
+   //| and a chore nobody performs is a diagnostic that does not exist.  |
+   //| A hundred and twenty bars settles "does this history carry a      |
+   //| spread at all" beyond any doubt.                                  |
+   //|                                                                  |
+   //| The second condition is the one that matters more. Bars are only  |
+   //| counted when ticks are SYNTHESISED from them, so a session        |
+   //| replaying real ticks would count none, wait for ever, and print   |
+   //| nothing at all - leaving somebody watching for a line that can    |
+   //| never come. After twenty seconds it stops waiting and says which  |
+   //| of the two it is.                                                 |
+   //+------------------------------------------------------------------+
+   if(total < 120 && g_timer_ticks < 500)
       return;
 
    g_spread_reported = true;
 
+   if(total == 0)
+     {
+      if(g_ctrl.EffectiveFidelity() == SSR_FIDELITY_FULL_TICK)
+         Print("[spread] this session is replaying the broker's REAL ticks, so "
+               "the spread on every one of them is the broker's own and "
+               "nothing here has to supply it. The bar spread setting does "
+               "not apply and is not being used.");
+      else
+         Print("[spread] no bar has been replayed yet - press Play, or raise "
+               "the speed, and this line will answer itself.");
+      return;
+     }
+
    if(g_ctrl.SpreadMode() == SSR_SPREAD_FIXED)
      {
-      PrintFormat("[spread] fixed at %.0f points on every bar, because that is "
-                  "what was asked for", CfgSpread());
+      PrintFormat("[spread] fixed at %.0f points on every one of %d bars, "
+                  "because that is what was asked for",
+                  CfgSpread(), (int)total);
       return;
      }
 
@@ -2114,6 +2146,8 @@ void ReportSpreadOnce()
                "widest %.1f points. The other %d had none and used %.0f.",
                (int)recorded, (int)total, g_ctrl.SpreadAverage(),
                g_ctrl.SpreadWidest(), (int)fixedn, CfgSpread());
+   PrintFormat("[spread] send THAT line - it is the one that says whether this "
+               "history can show you a release at all.");
   }
 
 //+------------------------------------------------------------------+
