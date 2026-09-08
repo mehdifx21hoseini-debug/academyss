@@ -89,52 +89,98 @@ struct SSRKeyBinding
    bool              listed;   // false for duplicates like the numpad
   };
 
+//+------------------------------------------------------------------+
+//| ONE LINE PER KEY, AND NO TOTAL WRITTEN ANYWHERE.                 |
+//|                                                                  |
+//| The first version of this sized the array to eighteen and then   |
+//| declared twenty bindings. MQL5 does not check that at compile    |
+//| time; it ran, and died with "array out of range" the first time  |
+//| anything asked what a key did - which took the panel with it.    |
+//|                                                                  |
+//| A count kept by hand beside a list kept by hand is the same      |
+//| drift this table was built to end, one level down. So there is   |
+//| no count: Add grows the array itself, and the only number in     |
+//| the file is the one it returns at the end.                       |
+//+------------------------------------------------------------------+
+void SSRAddKey(SSRKeyBinding &out[], int &i, const int vk, const string label,
+               const ENUM_SSR_CMD cmd, const string what, const bool listed)
+  {
+   if(ArraySize(out) <= i && ArrayResize(out, i + 8) <= i)
+      return;                         // out of memory; the key is dropped
+   out[i].vk     = vk;
+   out[i].label  = label;
+   out[i].cmd    = cmd;
+   out[i].what   = what;
+   out[i].listed = listed;
+   i++;
+  }
+
 int SSRKeyBindings(SSRKeyBinding &out[])
   {
-   ArrayResize(out, 18);
+   ArrayResize(out, 0);
    int i = 0;
 
-   out[i].vk = SSR_VK_SPACE;  out[i].label = "Space";  out[i].cmd = SSR_CMD_TOGGLE;
-   out[i].what = "play / pause";                       out[i].listed = true;  i++;
-   out[i].vk = SSR_VK_RIGHT;  out[i].label = "Right";  out[i].cmd = SSR_CMD_STEP_FWD;
-   out[i].what = "one candle forward";                 out[i].listed = true;  i++;
-   out[i].vk = SSR_VK_LEFT;   out[i].label = "Left";   out[i].cmd = SSR_CMD_STEP_BACK;
-   out[i].what = "one candle back";                    out[i].listed = true;  i++;
-   out[i].vk = SSR_VK_PGDN;   out[i].label = "PgDn";   out[i].cmd = SSR_CMD_STEP_FWD_10;
-   out[i].what = "ten candles forward";                out[i].listed = true;  i++;
-   out[i].vk = SSR_VK_PGUP;   out[i].label = "PgUp";   out[i].cmd = SSR_CMD_STEP_BACK_10;
-   out[i].what = "ten candles back";                   out[i].listed = true;  i++;
-   out[i].vk = SSR_VK_PLUS;   out[i].label = "+ / -";  out[i].cmd = SSR_CMD_SPEED_UP;
-   out[i].what = "faster / slower";                    out[i].listed = true;  i++;
-   out[i].vk = SSR_VK_MINUS;  out[i].label = "-";      out[i].cmd = SSR_CMD_SPEED_DOWN;
-   out[i].what = "slower";                             out[i].listed = false; i++;
-   out[i].vk = SSR_VK_NUMPLUS; out[i].label = "Num +"; out[i].cmd = SSR_CMD_SPEED_UP;
-   out[i].what = "faster";                             out[i].listed = false; i++;
-   out[i].vk = SSR_VK_NUMMIN; out[i].label = "Num -";  out[i].cmd = SSR_CMD_SPEED_DOWN;
-   out[i].what = "slower";                             out[i].listed = false; i++;
+   //--- TRANSPORT
+   SSRAddKey(out, i, SSR_VK_SPACE, "Space",
+             SSR_CMD_TOGGLE,
+             "play / pause", true);
+   SSRAddKey(out, i, SSR_VK_RIGHT, "Right",
+             SSR_CMD_STEP_FWD,
+             "one candle forward", true);
+   SSRAddKey(out, i, SSR_VK_LEFT, "Left",
+             SSR_CMD_STEP_BACK,
+             "one candle back", true);
+   SSRAddKey(out, i, SSR_VK_PGDN, "PgDn",
+             SSR_CMD_STEP_FWD_10,
+             "ten candles forward", true);
+   SSRAddKey(out, i, SSR_VK_PGUP, "PgUp",
+             SSR_CMD_STEP_BACK_10,
+             "ten candles back", true);
+   SSRAddKey(out, i, SSR_VK_PLUS, "+ / -",
+             SSR_CMD_SPEED_UP,
+             "faster / slower", true);
+   SSRAddKey(out, i, SSR_VK_MINUS, "-",
+             SSR_CMD_SPEED_DOWN,
+             "slower", false);
+   SSRAddKey(out, i, SSR_VK_NUMPLUS, "Num +",
+             SSR_CMD_SPEED_UP,
+             "faster", false);
+   SSRAddKey(out, i, SSR_VK_NUMMIN, "Num -",
+             SSR_CMD_SPEED_DOWN,
+             "slower", false);
 
    //--- TRADING. R puts the stop and target on the chart, Tab takes
    //--- the trade they describe: the two keys a hand rests on while
    //--- the candles are moving.
-   out[i].vk = SSR_VK_R;      out[i].label = "R";      out[i].cmd = SSR_CMD_LINES_TOGGLE;
-   out[i].what = "stop and target lines on / off";     out[i].listed = true;  i++;
-   out[i].vk = SSR_VK_TAB;    out[i].label = "Tab";    out[i].cmd = SSR_CMD_OPEN_LINES;
-   out[i].what = "TAKE THE TRADE the lines describe";  out[i].listed = true;  i++;
-   out[i].vk = SSR_VK_X;      out[i].label = "X";      out[i].cmd = SSR_CMD_LINES_FLIP;
-   out[i].what = "flip them: long <-> short";          out[i].listed = true;  i++;
-   out[i].vk = SSR_VK_L;      out[i].label = "L";      out[i].cmd = SSR_CMD_LINES_TOGGLE;
-   out[i].what = "same as R";                          out[i].listed = false; i++;
+   SSRAddKey(out, i, SSR_VK_R, "R",
+             SSR_CMD_LINES_TOGGLE,
+             "stop and target lines on / off", true);
+   SSRAddKey(out, i, SSR_VK_TAB, "Tab",
+             SSR_CMD_OPEN_LINES,
+             "TAKE THE TRADE the lines describe", true);
+   SSRAddKey(out, i, SSR_VK_X, "X",
+             SSR_CMD_LINES_FLIP,
+             "flip them: long <-> short", true);
+   SSRAddKey(out, i, SSR_VK_L, "L",
+             SSR_CMD_LINES_TOGGLE,
+             "same as R", false);
 
-   out[i].vk = SSR_VK_J;      out[i].label = "J";      out[i].cmd = SSR_CMD_JUMP;
-   out[i].what = "jump to a time";                     out[i].listed = true;  i++;
-   out[i].vk = SSR_VK_B;      out[i].label = "B";      out[i].cmd = SSR_CMD_BOOKMARK;
-   out[i].what = "bookmark here";                      out[i].listed = true;  i++;
-   out[i].vk = SSR_VK_S;      out[i].label = "S";      out[i].cmd = SSR_CMD_SESSIONS;
-   out[i].what = "saved sessions";                     out[i].listed = true;  i++;
-   out[i].vk = SSR_VK_F;      out[i].label = "F";      out[i].cmd = SSR_CMD_FOLLOW;
-   out[i].what = "bring the charts back to now";       out[i].listed = true;  i++;
-   out[i].vk = SSR_VK_D;      out[i].label = "D";      out[i].cmd = SSR_CMD_FIDELITY_CYCLE;
-   out[i].what = "tick detail";                        out[i].listed = true;  i++;
+   //--- NAVIGATION AND VIEW
+   SSRAddKey(out, i, SSR_VK_J, "J",
+             SSR_CMD_JUMP,
+             "jump to a time", true);
+   SSRAddKey(out, i, SSR_VK_B, "B",
+             SSR_CMD_BOOKMARK,
+             "bookmark here", true);
+   SSRAddKey(out, i, SSR_VK_S, "S",
+             SSR_CMD_SESSIONS,
+             "saved sessions", true);
+   SSRAddKey(out, i, SSR_VK_F, "F",
+             SSR_CMD_FOLLOW,
+             "bring the charts back to now", true);
+   SSRAddKey(out, i, SSR_VK_D, "D",
+             SSR_CMD_FIDELITY_CYCLE,
+             "tick detail", true);
 
    //+------------------------------------------------------------------+
    //| RESET MOVED OFF R, and off every letter.                         |
@@ -144,11 +190,13 @@ int SSRKeyBindings(SSRKeyBinding &out[])
    //| zero" - where it cannot be caught by a finger reaching for the   |
    //| lines. It still asks before it does anything.                    |
    //+------------------------------------------------------------------+
-   out[i].vk = SSR_VK_0;      out[i].label = "0";      out[i].cmd = SSR_CMD_RESET;
-   out[i].what = "start the session over (asks first)"; out[i].listed = true; i++;
+   SSRAddKey(out, i, SSR_VK_0, "0",
+             SSR_CMD_RESET,
+             "start the session over (asks first)", true);
 
-   out[i].vk = SSR_VK_H;      out[i].label = "H";      out[i].cmd = SSR_CMD_KEYS;
-   out[i].what = "this list";                          out[i].listed = true;  i++;
+   SSRAddKey(out, i, SSR_VK_H, "H",
+             SSR_CMD_KEYS,
+             "this list", true);
 
    ArrayResize(out, i);
    return i;

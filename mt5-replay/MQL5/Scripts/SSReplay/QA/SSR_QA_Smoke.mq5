@@ -353,13 +353,35 @@ void OnStart()
    //| defect this project produces, so it gets its own stage: jump an  |
    //| hour, and ask the SYMBOL - not the engine - what it received.    |
    //+------------------------------------------------------------------+
+   //+------------------------------------------------------------------+
+   //| WHEN IT FAILS, SAY WHERE THE BARS WENT.                          |
+   //|                                                                  |
+   //| "272 -> 132" is a fact and not a diagnosis. Bars can only leave  |
+   //| a custom symbol from one end or the other, so the first and last |
+   //| times before and after separate the three possible stories: the  |
+   //| write was refused, the series was rebuilt from the ticks and     |
+   //| lost its head, or the terminal trimmed its own cache. Without    |
+   //| them the next round trip is spent asking for them.                |
+   //+------------------------------------------------------------------+
    int  jump_before = Bars(rsym, PERIOD_M1);
+   datetime jb_first = (datetime)SeriesInfoInteger(rsym, PERIOD_M1, SERIES_FIRSTDATE);
+   datetime jb_last  = (datetime)SeriesInfoInteger(rsym, PERIOD_M1, SERIES_LASTBAR_DATE);
    long jump_target = ctrl.Now() + 60 * SSR_MSC_PER_MIN;
    if(jump_target < win_end)
      {
-      ctrl.JumpTo(jump_target);
+      bool jump_ok = ctrl.JumpTo(jump_target);
       Sleep(300);
       int jump_after = Bars(rsym, PERIOD_M1);
+      datetime ja_first = (datetime)SeriesInfoInteger(rsym, PERIOD_M1, SERIES_FIRSTDATE);
+      datetime ja_last  = (datetime)SeriesInfoInteger(rsym, PERIOD_M1, SERIES_LASTBAR_DATE);
+      if(jump_after < jump_before)
+         PrintFormat("  ->  the series LOST bars. before %d [%s .. %s], "
+                     "after %d [%s .. %s], the engine said ok=%d. A later first "
+                     "date means the head was dropped; an earlier last date "
+                     "means the tail was.",
+                     jump_before, TimeToString(jb_first), TimeToString(jb_last),
+                     jump_after,  TimeToString(ja_first), TimeToString(ja_last),
+                     (jump_ok ? 1 : 0));
       //--- and say which case was actually exercised. The swallowed
       //--- write only happens on a REUSED seed, so a pass on a fresh
       //--- symbol proves the healthy path and nothing more. A test that
