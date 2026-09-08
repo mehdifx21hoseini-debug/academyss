@@ -95,14 +95,20 @@ public:
       //--- which nothing in this tree calls any more, so it was green
       //--- over this card until it was taught to read the widgets - and
       //--- the first thing it then found was the line below, at 64.
+      //--- THESE THREE LINES NAME KEYS, so they go stale the moment a
+      //--- binding moves - and R moved, from reset to the lines, in the
+      //--- build that added the key card. A stale line here is worse
+      //--- than none: the user tries it, nothing happens, and they
+      //--- conclude the tool is broken rather than the sentence.
+      //--- H opens the generated list, which cannot go stale at all.
       m_w.Label("l1", x + 12, y + 32,
-                "Playing. SPACE pauses, arrows step one candle, R restarts.",
+                "Playing. SPACE pauses, arrows step one candle at a time.",
                 SSR_C_TEXT, SSR_FS_SMALL);
       m_w.Label("l2", x + 12, y + 48,
-                "Press L to put stop and target lines on the chart, drag them.",
+                "R puts the stop and target on the chart. Drag them, Tab buys.",
                 SSR_C_TEXT, SSR_FS_SMALL);
       m_w.Label("l3", x + 12, y + 64,
-                "Then Buy or Sell on the panel. All virtual - never a broker.",
+                "H lists every key. All virtual - nothing reaches a broker.",
                 SSR_C_TEXT, SSR_FS_SMALL);
       m_w.Label("l4", x + 12, y + 84,
                 "Shown once. Delete MQL5/Files/SSReplay/seen.txt for it again.",

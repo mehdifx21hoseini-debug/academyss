@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v85 2026-09-08  spread-says"
+#define SSR_BUILD "v86 2026-09-08  keys"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

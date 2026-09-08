@@ -42,6 +42,7 @@
 #include "SSR_Widgets.mqh"
 #include "SSR_ReplayPort.mqh"
 #include "SSR_Keys.mqh"
+#include "SSR_KeyCard.mqh"
 
 #define SSR_SLOTS 64
 
@@ -106,6 +107,8 @@ private:
    //--- Reset, armed and waiting for a second press
    ulong             m_reset_armed_ms;   // 0 = not armed
    string            m_reset_warning;    // what it would destroy
+
+   CSSRKeyCard       m_keys;             // the shortcut list, on the chart
    int               m_tag_x, m_tag_y, m_tag_w, m_tag_h;  // where it is
    bool              m_place_loaded; // the file has been read at least once
 
@@ -261,6 +264,7 @@ public:
 
    void              Destroy(void)
      {
+      m_keys.Destroy();
       if(m_chart == 0)
          return;
       m_w.RemoveAll();
@@ -478,7 +482,7 @@ public:
       //--- coming back from closed: the caption was hidden by hand, so
       //--- it has to be shown by hand. HideBody does not own these.
       m_w.Remove("reopen");
-      string cap[] = {"bg","hdr","title","capinfo","collapse","move","close"};
+      string cap[] = {"bg","hdr","title","capinfo","collapse","move","close","keys"};
       for(int ci = 0; ci < ArraySize(cap); ci++)
          m_w.Hide(cap[ci], false);
 
@@ -568,6 +572,11 @@ private:
       Text(1, "capinfo", x + 92, y + 5, right,
            SSRStateColor(m_state.status), SSR_FS_SMALL);
 
+      //--- A GUIDE NOBODY CAN FIND IS NOT A GUIDE. H opens the key list,
+      //--- but nobody knows that until they have read the key list, so
+      //--- there is a way in that needs no key at all.
+      m_w.Button("keys", x + W - 82, y + 3, 18, SSR_HEADER_H - 5, "?",
+                 m_keys.IsUp());
       m_w.Button("move", x + W - 62, y + 3, 18, SSR_HEADER_H - 5, "[]");
       m_w.Button("collapse", x + W - 42, y + 3, 18, SSR_HEADER_H - 5,
                  m_collapsed ? "+" : "-");
@@ -1449,6 +1458,16 @@ public:
          case SSR_CMD_LINES_FLIP:
             return m_port.FlipLines();
 
+         //--- TAB TAKES THE TRADE. The same verb the panel's own button
+         //--- runs, so a key and a click cannot come to mean different
+         //--- things - which is the rule this whole layer is built on.
+         case SSR_CMD_OPEN_LINES:
+            return m_port.OpenFromLines();
+
+         case SSR_CMD_KEYS:
+            m_keys.Toggle(m_chart);
+            return true;
+
          case SSR_CMD_SPEED_UP:
            {
             int i = SSRSpeedLadderIndex(m_state.speed_x100);
@@ -1771,6 +1790,7 @@ public:
       else if(what == "spup")     c = SSR_CMD_SPEED_UP;
       else if(what == "spdn")     c = SSR_CMD_SPEED_DOWN;
       else if(what == "collapse") c = SSR_CMD_COLLAPSE;
+      else if(what == "keys")     c = SSR_CMD_KEYS;
 
       if(what == "openln")
         {

@@ -33,6 +33,7 @@
 #include <SSReplay/Trading/SSR_Journal.mqh>
 #include <SSReplay/Trading/SSR_ShotBook.mqh>
 #include <SSReplay/Ui/SSR_FirstRun.mqh>
+#include <SSReplay/Ui/SSR_KeyCard.mqh>
 #include <SSReplay/Report/SSR_ClassReport.mqh>
 #include <SSReplay/Data/SSR_Calendar.mqh>
 #include <SSReplay/Chart/SSR_CalendarLines.mqh>
@@ -2518,6 +2519,103 @@ void OnStart()
 
          cp.Destroy();
          ChartClose(cchart);
+        }
+   }
+
+   //+------------------------------------------------------------------+
+   //| 29. THE KEYS, AND THE LIST THE USER IS SHOWN OF THEM.            |
+   //|                                                                  |
+   //| The guide is generated from the same table the keyboard reads,   |
+   //| so the checks here are the ones a generated list can still fail: |
+   //| that the table and the lookup agree, that no two keys shadow one |
+   //| another, and that nothing on the card is cut off by MetaTrader.  |
+   //|                                                                  |
+   //| A guide that names a key which does nothing is worse than no     |
+   //| guide, because it is believed.                                   |
+   //+------------------------------------------------------------------+
+   {
+      SSRKeyBinding kb[];
+      int kn = SSRKeyBindings(kb);
+      Check("29 there are bindings at all", kn > 0,
+            StringFormat("%d declared", kn));
+
+      //--- the lookup and the table cannot disagree
+      int wrong = 0;
+      for(int i = 0; i < kn; i++)
+         if(SSRKeyToCommand(kb[i].vk) != kb[i].cmd)
+            wrong++;
+      Check("29 every declared key resolves to the command beside it",
+            wrong == 0,
+            StringFormat("%d of %d disagree with the lookup", wrong, kn));
+
+      //--- A KEY DECLARED TWICE IS A KEY THAT SILENTLY LOSES. The first
+      //--- row wins the lookup and the second is dead, while the card
+      //--- keeps advertising it.
+      int dupes = 0;
+      for(int i = 0; i < kn; i++)
+         for(int j = i + 1; j < kn; j++)
+            if(kb[i].vk == kb[j].vk)
+               dupes++;
+      Check("29 no key is declared twice", dupes == 0,
+            StringFormat("%d collision(s) - the second one would never run",
+                         dupes));
+
+      //--- nothing on the card is cut off. MetaTrader stops an object's
+      //--- text at 63 characters, and a line that ends mid-word reads as
+      //--- a broken tool.
+      int toolong = 0;
+      string worst = "";
+      for(int i = 0; i < kn; i++)
+        {
+         if(StringLen(kb[i].what) > 63 || StringLen(kb[i].label) > 63)
+           { toolong++; worst = kb[i].what; }
+        }
+      Check("29 no line on the card is cut off by MetaTrader",
+            toolong == 0,
+            StringFormat("%d over 63 characters [%s]", toolong, worst));
+
+      //--- THE KEYS THE USER ASKED FOR
+      Check("29 R puts the stop and target lines on the chart",
+            SSRKeyToCommand(SSR_VK_R) == SSR_CMD_LINES_TOGGLE,
+            "the hand that is trading owns R");
+      Check("29 Tab takes the trade the lines describe",
+            SSRKeyToCommand(SSR_VK_TAB) == SSR_CMD_OPEN_LINES,
+            "one key, from lines drawn to position open");
+      Check("29 reset is still reachable, and off every letter",
+            SSRKeyToCommand(SSR_VK_0) == SSR_CMD_RESET &&
+            SSRKeyToCommand(SSR_VK_R) != SSR_CMD_RESET,
+            "a finger reaching for the lines must not destroy the session");
+      Check("29 and H opens the list",
+            SSRKeyToCommand(SSR_VK_H) == SSR_CMD_KEYS, "");
+
+      //--- the card itself
+      long kchart = ChartOpen(rsym, PERIOD_M1);
+      if(Check("29 a chart for the key card", kchart != 0, rsym))
+        {
+         CSSRKeyCard kc;
+         Check("29 the card goes up", kc.Toggle(kchart) && kc.IsUp(),
+               "generated from the bindings, not typed out beside them");
+
+         int listed = 0;
+         for(int i = 0; i < kn; i++)
+            if(kb[i].listed)
+               listed++;
+         int drawn = 0;
+         int total = ObjectsTotal(kchart, -1, -1);
+         for(int i = 0; i < total; i++)
+            if(StringFind(ObjectName(kchart, i, -1, -1), "SSRK_k") == 0)
+               drawn++;
+         Check("29 and carries a row for every listed binding",
+               drawn == listed * 2,
+               StringFormat("%d objects for %d rows - each row is a key and "
+                            "a description", drawn, listed));
+
+         Check("29 pressing it again takes it away",
+               !kc.Toggle(kchart) && !kc.IsUp(),
+               "a card you cannot close is a card in the way");
+
+         kc.Destroy();
+         ChartClose(kchart);
         }
    }
 
