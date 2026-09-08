@@ -219,6 +219,7 @@ public:
          out.equity         = m_acct.Equity();
          out.floating       = m_acct.FloatingPL();
          out.open_positions = m_acct.OpenCount();
+         out.closed_trades  = m_acct.ClosedCount();
          out.risk_percent   = m_risk_percent;
          out.stop_points    = m_stop_points;
          out.can_trade      = (m_acct.Bid() > 0.0);

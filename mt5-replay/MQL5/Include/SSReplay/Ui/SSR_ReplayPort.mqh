@@ -80,6 +80,10 @@ struct SSRUiState
    double             equity;
    double             floating;
    int                open_positions;
+   //--- ONLY EVER USED TO SAY WHAT A RESET WOULD DESTROY. A confirm
+   //--- that says "are you sure" and nothing else makes the user guess
+   //--- what they are about to lose, and they guess low.
+   int                closed_trades;
    double             risk_percent;    // what the trade buttons will risk
    double             stop_points;     // and the stop they size against
    double             tp_points;       // 0 when no target is set
@@ -193,7 +197,7 @@ struct SSRUiState
       prop_on = false; prop_state = 0; prop_state_name = ""; prop_headline = "";
       prop_rules = ""; prop_progress = 0.0; prop_floor = 0.0; prop_days = 0;
       balance = 0.0; equity = 0.0; floating = 0.0;
-      open_positions = 0; risk_percent = 0.0; stop_points = 0.0;
+      open_positions = 0; closed_trades = 0; risk_percent = 0.0; stop_points = 0.0;
       trade_symbol = ""; can_trade = false; tp_points = 0.0;
       strategy_text = "";
       pos_rows = 0;

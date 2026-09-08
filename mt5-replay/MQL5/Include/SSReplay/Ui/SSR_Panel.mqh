@@ -102,6 +102,10 @@ private:
    int               m_tab;
    string            m_tag_sent;    // the last text handed to the port
    bool              m_tag_focus;   // the tag box has the keyboard
+
+   //--- Reset, armed and waiting for a second press
+   ulong             m_reset_armed_ms;   // 0 = not armed
+   string            m_reset_warning;    // what it would destroy
    int               m_tag_x, m_tag_y, m_tag_w, m_tag_h;  // where it is
    bool              m_place_loaded; // the file has been read at least once
 
@@ -185,6 +189,7 @@ public:
        m_track_drag(false), m_track_x(0), m_track_y(0), m_track_w(0),
        m_last_drag_paint(0), m_corner(0),
        m_tab(SSR_TAB_TRADE), m_tag_sent(""), m_tag_focus(false),
+       m_reset_armed_ms(0), m_reset_warning(""),
        m_tag_x(0), m_tag_y(0), m_tag_w(0), m_tag_h(0), m_place_loaded(false),
        m_renders(0), m_writes(0)
      { m_state.Init(); ClearCache(); }
@@ -616,8 +621,12 @@ private:
                  false, m_state.CanStep());                       bx += bw + gp;
       m_w.Button("step10",  bx, y, bw, SSR_BTN_H, ">>",
                  false, m_state.CanStep());                       bx += bw + gp;
-      m_w.Button("reset",   bx, y, bw, SSR_BTN_H, "Reset",
-                 false, m_state.connected);
+      //--- the SAME button, asking. A second control appearing where a
+      //--- finger is already moving is how a confirmation gets pressed
+      //--- by accident, which is worse than not having one.
+      bool armed = ResetArmed();
+      m_w.Button("reset",   bx, y, bw, SSR_BTN_H, (armed ? "Reset?" : "Reset"),
+                 armed, m_state.connected);
       return y + SSR_BTN_H + SSR_GAP;
      }
 
@@ -1167,6 +1176,26 @@ private:
       m_w.Rect("status", x + 1, y, W - 2, SSR_STATUS_H,
                SSR_C_STATUS, SSR_C_GROUP_EDGE);
 
+      //+------------------------------------------------------------------+
+      //| THE WARNING TAKES THE WHOLE STRIP, and the balance waits.        |
+      //|                                                                  |
+      //| Squeezed in beside four other numbers it would read as one more  |
+      //| number. It is a question, it is on screen for four seconds, and  |
+      //| for those four seconds it is the only thing the strip is for.    |
+      //+------------------------------------------------------------------+
+      if(ResetArmed())
+        {
+         Text(50, "stbal", x + SSR_PAD, y + 4, m_reset_warning,
+              SSR_C_STOP, SSR_FS_SMALL);
+         m_w.Hide("stflt",  true);
+         m_w.Hide("stopen", true);
+         m_w.Hide("stfid",  true);
+         return;
+        }
+      m_w.Hide("stflt",  false);
+      m_w.Hide("stopen", false);
+      m_w.Hide("stfid",  false);
+
       Text(50, "stbal", x + SSR_PAD, y + 4,
            StringFormat("Balance %s", Money(m_state.balance)), SSR_C_TEXT_DIM,
            SSR_FS_SMALL);
@@ -1298,6 +1327,14 @@ public:
    //--- that in one run instead of three.
    bool              Execute(const ENUM_SSR_CMD cmd)
      {
+      //--- ANYTHING ELSE CANCELS. An arming that survives the user doing
+      //--- something else is a landmine: press Reset, change your mind,
+      //--- step forward twice, press Reset again meaning to arm it - and
+      //--- the session is gone. One line, at the one place every command
+      //--- passes through.
+      if(cmd != SSR_CMD_RESET)
+         DisarmReset();
+
       bool ok = ExecuteInner(cmd);
       if(cmd != SSR_CMD_NONE)
         {
@@ -1318,6 +1355,74 @@ public:
       return ok;
      }
 
+   //+------------------------------------------------------------------+
+   //| RESET DESTROYS THE SESSION, SO IT ASKS ONCE.                     |
+   //|                                                                  |
+   //| Every trade taken, every screenshot, the whole equity curve - one |
+   //| press of a button beside Play, or one R typed by somebody who     |
+   //| thought a text box had the keyboard. There was no way back and    |
+   //| nothing asked.                                                    |
+   //|                                                                  |
+   //| NOT A DIALOG. A modal window is not something MetaTrader gives a  |
+   //| program on a chart, and faking one with objects would put a trap  |
+   //| in front of the user the moment a repaint lost a click. The       |
+   //| button arms instead: the first press turns it into "Reset?" and   |
+   //| says what would go, the second press within a few seconds does    |
+   //| it, and anything else at all disarms it.                          |
+   //|                                                                  |
+   //| IT DOES NOT ASK WHEN THERE IS NOTHING TO LOSE. A confirmation     |
+   //| over an empty session is pure friction, and friction that fires   |
+   //| when it need not is how people learn to press twice without       |
+   //| reading - which is the same as having no confirmation at all.     |
+   //+------------------------------------------------------------------+
+   bool              ResetWithConfirm(void)
+     {
+      int trades = m_state.closed_trades + m_state.open_positions;
+
+      //--- nothing was traded: reset is just "go back to the start"
+      if(trades <= 0)
+        {
+         DisarmReset();
+         return m_port.Reset();
+        }
+
+      ulong now = GetTickCount64();
+      if(m_reset_armed_ms > 0 && now - m_reset_armed_ms <= SSR_CONFIRM_MS)
+        {
+         DisarmReset();
+         return m_port.Reset();
+        }
+
+      //--- arm, and say exactly what is at stake rather than "are you sure"
+      m_reset_armed_ms = now;
+      m_reset_warning  = StringFormat(
+                            "Reset deletes %d closed and %d open - press again",
+                            m_state.closed_trades, m_state.open_positions);
+      Render();
+      return true;                    // asked, which is not a refusal
+     }
+
+   void              DisarmReset(void)
+     {
+      m_reset_armed_ms = 0;
+      m_reset_warning  = "";
+     }
+
+   //--- true while the button is waiting for its second press. Checked
+   //--- on every repaint, so the arming expires on its own even if the
+   //--- user simply walks away from the screen.
+   bool              ResetArmed(void)
+     {
+      if(m_reset_armed_ms == 0)
+         return false;
+      if(GetTickCount64() - m_reset_armed_ms > SSR_CONFIRM_MS)
+        {
+         DisarmReset();
+         return false;
+        }
+      return true;
+     }
+
    bool              ExecuteInner(const ENUM_SSR_CMD cmd)
      {
       if(m_port == NULL)
@@ -1329,7 +1434,7 @@ public:
             return (m_state.IsRunning() ? m_port.Pause() : m_port.Play());
          case SSR_CMD_PLAY:      return m_port.Play();
          case SSR_CMD_PAUSE:     return m_port.Pause();
-         case SSR_CMD_RESET:     return m_port.Reset();
+         case SSR_CMD_RESET:     return ResetWithConfirm();
          case SSR_CMD_STEP_FWD:    return m_port.StepBars(1);
          case SSR_CMD_STEP_FWD_10: return m_port.StepBars(10);
          case SSR_CMD_STEP_BACK:   return m_port.StepBack(1);
@@ -1677,6 +1782,11 @@ public:
 
       if(c == SSR_CMD_NONE)
         {
+         //--- a trade button is "something else" too, and the most
+         //--- important kind: nobody should place an order and find the
+         //--- Reset beside it still waiting for one more press
+         DisarmReset();
+
          //--- the trade controls have no keyboard equivalent, so they
          //--- are not commands: they are buttons, handled here
          TradeButton(what);
@@ -1853,6 +1963,11 @@ public:
      }
 
    void              StateInto(SSRUiState &out) { out = m_state; }
+
+   //--- read-only, for the test that proves the confirmation actually
+   //--- holds a press back rather than merely relabelling a button
+   bool              ResetIsArmed(void)     { return ResetArmed(); }
+   string            ResetWarningText(void) { return m_reset_warning; }
   };
 
 #endif // SSR_PANEL_MQH

@@ -2400,6 +2400,97 @@ void OnStart()
       }
    }
 
+   //+------------------------------------------------------------------+
+   //| 28. RESET ASKS BEFORE IT DESTROYS A SESSION.                     |
+   //|                                                                  |
+   //| One press of a button beside Play, or one R typed by somebody     |
+   //| who thought a text box had the keyboard, and every trade, every   |
+   //| screenshot and the whole equity curve were gone with nothing      |
+   //| asked and no way back.                                            |
+   //|                                                                  |
+   //| The checks that matter are not "the label changed". They are     |
+   //| that the FIRST press does not reset, that something else in      |
+   //| between cancels the arming, and that an empty session is not     |
+   //| made to answer a question about nothing.                          |
+   //+------------------------------------------------------------------+
+   {
+      long cchart = ChartOpen(rsym, PERIOD_M1);
+      if(Check("28 a chart for the confirm test", cchart != 0, rsym))
+        {
+         CSSRTradingEngine cacct;
+         cacct.SetBalance(10000.0);
+         cacct.OnSessionStart(rsym, (int)SymbolInfoInteger(rsym, SYMBOL_DIGITS),
+                              SymbolInfoDouble(rsym, SYMBOL_POINT), 0);
+
+         CSSRGroupPort cport;
+         cport.AttachAccount(GetPointer(cacct));
+
+         CSSRPanel cp;
+         cp.Create(cchart, GetPointer(cport), "SSRC_");
+
+         //--- NOTHING TRADED YET: the question would be about nothing
+         cp.Render();
+         cp.Dispatch("reset");
+         Check("28 an empty session is not asked to confirm",
+               !cp.ResetIsArmed(),
+               "a confirmation over nothing teaches people to press twice "
+               "without reading, which is the same as having none");
+
+         //--- now give it something to lose
+         MqlTick t[1];
+         double cpt = SymbolInfoDouble(rsym, SYMBOL_POINT);
+         if(cpt <= 0.0) cpt = 0.00001;
+         double cbase = SymbolInfoDouble(rsym, SYMBOL_BID);
+         if(cbase <= 0.0) cbase = 10000.0 * cpt;
+         t[0].bid = cbase; t[0].ask = cbase + 10.0 * cpt; t[0].time_msc = 1000;
+         cacct.OnTicks(t, 1);
+         long ct = cacct.Open(SSR_ORDER_BUY, 0.10, 0.0, 0.0);
+         cacct.Close(ct);
+         cacct.Open(SSR_ORDER_BUY, 0.10, 0.0, 0.0);   // and one left open
+
+         cp.Render();
+         cp.Dispatch("reset");
+         Check("28 the first press does NOT reset, it asks",
+               cp.ResetIsArmed(),
+               "this is the whole feature - a label that changes while the "
+               "reset still happens is worse than no confirmation");
+         Check("28 and it says what would be lost, not just 'are you sure'",
+               StringFind(cp.ResetWarningText(), "1 closed") >= 0 &&
+               StringFind(cp.ResetWarningText(), "1 open") >= 0,
+               "[" + cp.ResetWarningText() + "] - asked to guess, people "
+               "guess low");
+
+         cp.Render();
+         Check("28 and the button on the chart shows the question",
+               ObjectGetString(cchart, "SSRC_reset", OBJPROP_TEXT) == "Reset?",
+               "[" + ObjectGetString(cchart, "SSRC_reset", OBJPROP_TEXT) + "]");
+
+         //--- SOMETHING ELSE CANCELS IT
+         cp.Dispatch("step");
+         Check("28 doing anything else disarms it",
+               !cp.ResetIsArmed(),
+               "an arming that survives the user changing their mind is a "
+               "landmine: the NEXT press meant to arm it would destroy the "
+               "session instead");
+
+         cp.Render();
+         Check("28 and the button goes back to saying Reset",
+               ObjectGetString(cchart, "SSRC_reset", OBJPROP_TEXT) == "Reset",
+               "[" + ObjectGetString(cchart, "SSRC_reset", OBJPROP_TEXT) + "]");
+
+         //--- and the second press goes through
+         cp.Dispatch("reset");
+         bool armed_again = cp.ResetIsArmed();
+         cp.Dispatch("reset");
+         Check("28 a second press within the window carries it out",
+               armed_again && !cp.ResetIsArmed(),
+               "armed on the first press, consumed by the second");
+
+         cp.Destroy();
+         ChartClose(cchart);
+        }
+   }
+
    ctrl.Release();
    Cleanup(rsym);
    Done();

@@ -137,6 +137,11 @@
 #define SSR_SIDE_W         104     // the always-visible button column
 #define SSR_TAB_H          21
 #define SSR_STATUS_H       18
+
+//--- how long a destructive button stays armed after its first press.
+//--- Long enough to read the line that appeared, short enough that it
+//--- cannot still be armed when the user comes back to the keyboard.
+#define SSR_CONFIRM_MS     4000
 #define SSR_TRACK_H        16      // the speed groove and its thumb
 
 //--- how many tabs, and which sheet each index is
