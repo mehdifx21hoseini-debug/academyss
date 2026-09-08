@@ -2076,15 +2076,32 @@ void OnStart()
    //| 26. EXECUTION HONESTY.                                           |
    //|                                                                  |
    //| Every one of these passed before the behaviour it checks existed,|
-   //| because a stop that always filled at its own level and a bar      |
-   //| context that belonged to a different minute both look like a      |
-   //| working replay from outside. Driven straight through the engine   |
-   //| with hand-made ticks: no chart, no data, nothing to be flaky.     |
+   //| because a stop that always filled at its own level and a bar     |
+   //| context that belonged to a different minute both look like a     |
+   //| working replay from outside. Driven straight through the engine  |
+   //| with hand-made ticks: no chart, no data, nothing to be flaky.    |
+   //|                                                                  |
+   //| EVERY PRICE IS BUILT FROM THE INSTRUMENT, never typed in.        |
+   //|                                                                  |
+   //| The first version of this stage wrote 1.10000 and 1.09900 as if  |
+   //| every chart were EURUSD. Run on an index with one digit, both    |
+   //| normalise to the same number: the gap was not a gap, nothing was |
+   //| closed, and four checks failed while reporting "filled 0, stop   |
+   //| was 1". A test that only works on the instrument its author had  |
+   //| open is not a test, it is a coincidence.                         |
    //+------------------------------------------------------------------+
    {
       int    dg = (int)SymbolInfoInteger(origin, SYMBOL_DIGITS);
       double pt = SymbolInfoDouble(origin, SYMBOL_POINT);
       if(pt <= 0.0) pt = 0.00001;
+
+      //--- somewhere real to work from, and a fallback that is still
+      //--- large compared with a point when the terminal has no price
+      double base = SymbolInfoDouble(origin, SYMBOL_BID);
+      if(base <= 0.0) base = 10000.0 * pt;
+      base = NormalizeDouble(base, dg);
+
+      double spread = 10.0 * pt;      // a plausible one, in points
 
       //--- 26a. A STOP IS A MARKET ORDER ONCE IT IS TOUCHED.
       {
@@ -2093,16 +2110,17 @@ void OnStart()
          ex.OnSessionStart(origin, dg, pt, 0);
 
          MqlTick t[1];
-         t[0].bid = 1.10000; t[0].ask = 1.10010; t[0].time_msc = 1000;
+         t[0].bid = base; t[0].ask = base + spread; t[0].time_msc = 1000;
          ex.OnTicks(t, 1);
 
-         double sl = 1.09900;
+         double sl = NormalizeDouble(base - 100.0 * pt, dg);
          long tk = ex.Open(SSR_ORDER_BUY, 0.10, sl, 0.0);
          Check("26a a position to gap through", tk > 0, ex.LastError());
 
          //--- the gap: the next tick is far below the stop, which is
          //--- exactly what a weekend open or a release looks like
-         t[0].bid = 1.09500; t[0].ask = 1.09510; t[0].time_msc = 2000;
+         double gap = NormalizeDouble(base - 500.0 * pt, dg);
+         t[0].bid = gap; t[0].ask = gap + spread; t[0].time_msc = 2000;
          ex.OnTicks(t, 1);
 
          SSRVirtualPosition gp;
@@ -2111,16 +2129,19 @@ void OnStart()
             if(ex.At(i, gp) && gp.ticket == tk) { found = true; break; }
 
          Check("26a the gap closed it", found && gp.IsClosed(),
-               "a stop below the price must not survive the tick");
+               StringFormat("stop %s, price gapped to %s",
+                            DoubleToString(sl, dg), DoubleToString(gap, dg)));
          Check("26a and NOT at the stop price",
                found && gp.close_price < sl - pt * 0.5,
                StringFormat("filled %s, stop was %s - a stop that always fills "
                             "at its own level flatters every loss",
-                            DoubleToString(gp.close_price, dg),
+                            DoubleToString(found ? gp.close_price : 0.0, dg),
                             DoubleToString(sl, dg)));
          Check("26a it filled where the price actually was",
-               found && MathAbs(gp.close_price - 1.09500) < pt,
-               DoubleToString(found ? gp.close_price : 0.0, dg));
+               found && MathAbs(gp.close_price - gap) < pt,
+               StringFormat("filled %s, the gap was to %s",
+                            DoubleToString(found ? gp.close_price : 0.0, dg),
+                            DoubleToString(gap, dg)));
       }
 
       //--- 26b. SLIPPAGE REACHES AN EXIT, not just an entry.
@@ -2134,14 +2155,15 @@ void OnStart()
          ex.OnSessionStart(origin, dg, pt, 0);
 
          MqlTick t[1];
-         t[0].bid = 1.10000; t[0].ask = 1.10010; t[0].time_msc = 1000;
+         t[0].bid = base; t[0].ask = base + spread; t[0].time_msc = 1000;
          ex.OnTicks(t, 1);
 
-         double sl = 1.09900;
+         double sl = NormalizeDouble(base - 100.0 * pt, dg);
          long tk = ex.Open(SSR_ORDER_BUY, 0.10, sl, 0.0);
 
-         //--- touched exactly, no gap: the difference can only be slippage
-         t[0].bid = sl; t[0].ask = sl + 0.00010; t[0].time_msc = 2000;
+         //--- touched EXACTLY, no gap: the difference between the fill
+         //--- and the stop can then only be slippage
+         t[0].bid = sl; t[0].ask = sl + spread; t[0].time_msc = 2000;
          ex.OnTicks(t, 1);
 
          SSRVirtualPosition sp;
@@ -2165,20 +2187,24 @@ void OnStart()
          //--- a bar from an hour ago whose range holds both levels
          MqlRates stale;
          stale.time  = (datetime)0;
-         stale.open  = 1.10000; stale.high = 1.10500;
-         stale.low   = 1.09000; stale.close = 1.10000;
+         stale.open  = base;
+         stale.high  = NormalizeDouble(base + 500.0 * pt, dg);
+         stale.low   = NormalizeDouble(base - 1000.0 * pt, dg);
+         stale.close = base;
          stale.tick_volume = 1; stale.spread = 1; stale.real_volume = 0;
          ex.OnBarContext(stale, true);
 
          MqlTick t[1];
-         t[0].bid = 1.10000; t[0].ask = 1.10010;
+         t[0].bid = base; t[0].ask = base + spread;
          t[0].time_msc = SSR_MSC_PER_HOUR;          // an hour past that bar
          ex.OnTicks(t, 1);
 
-         long tk = ex.Open(SSR_ORDER_BUY, 0.10, 1.09800, 1.10200);
+         double sl = NormalizeDouble(base - 200.0 * pt, dg);
+         double tp = NormalizeDouble(base + 200.0 * pt, dg);
+         long tk = ex.Open(SSR_ORDER_BUY, 0.10, sl, tp);
 
          //--- the target, and only the target, is reached
-         t[0].bid = 1.10200; t[0].ask = 1.10210;
+         t[0].bid = tp; t[0].ask = tp + spread;
          t[0].time_msc = SSR_MSC_PER_HOUR + 1000;
          ex.OnTicks(t, 1);
 
@@ -2226,17 +2252,27 @@ void OnStart()
          dst.Attach(GetPointer(ex));
 
          MqlTick t[1];
-         t[0].bid = 1.10000; t[0].ask = 1.10010; t[0].time_msc = 1000;
+         t[0].bid = base; t[0].ask = base + spread; t[0].time_msc = 1000;
          ex.OnTicks(t, 1);
 
-         //--- one loser, then a second trade opened seconds later
-         long a = ex.Open(SSR_ORDER_BUY, 0.10, 1.09900, 0.0);
-         t[0].bid = 1.09890; t[0].ask = 1.09900; t[0].time_msc = 61000;
+         //--- one loser, then a second trade opened seconds later at a
+         //--- deliberately different size and stop distance
+         double sl_a = NormalizeDouble(base - 100.0 * pt, dg);
+         long a = ex.Open(SSR_ORDER_BUY, 0.10, sl_a, 0.0);
+
+         double px_b = NormalizeDouble(base - 110.0 * pt, dg);
+         t[0].bid = px_b; t[0].ask = px_b + spread; t[0].time_msc = 61000;
          ex.OnTicks(t, 1);
 
-         long b = ex.Open(SSR_ORDER_BUY, 0.50, 1.09800, 0.0);
-         t[0].bid = 1.09790; t[0].ask = 1.09800; t[0].time_msc = 121000;
+         double sl_b = NormalizeDouble(px_b - 300.0 * pt, dg);
+         long b = ex.Open(SSR_ORDER_BUY, 0.50, sl_b, 0.0);
+
+         double px_c = NormalizeDouble(sl_b - 10.0 * pt, dg);
+         t[0].bid = px_c; t[0].ask = px_c + spread; t[0].time_msc = 121000;
          ex.OnTicks(t, 1);
+
+         if(a == 0 || b == 0)
+            No("26e both trades opened", ex.LastError());
 
          SSRStatistics ds;
          ds.Init();                      // ComputeFor does this too; saying it
@@ -2252,8 +2288,6 @@ void OnStart()
                ds.risk_samples == 2 && ds.risk_spread_pct > 0.0,
                StringFormat("%.0f%% spread over %d trades",
                             ds.risk_spread_pct, ds.risk_samples));
-         if(a == 0 || b == 0)
-            No("26e both trades opened", ex.LastError());
       }
    }
 
