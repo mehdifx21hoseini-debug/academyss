@@ -2291,6 +2291,115 @@ void OnStart()
       }
    }
 
+   //+------------------------------------------------------------------+
+   //| 27. THE SPREAD COMES FROM THE BAR.                               |
+   //|                                                                  |
+   //| One number for a whole session is the assumption that costs a    |
+   //| trader most, because the spread is never wider than at the       |
+   //| moments people most want to practise. Every M1 bar carries the   |
+   //| spread the broker recorded for that minute, so the widening is   |
+   //| already in the data and no model has to invent it.               |
+   //|                                                                  |
+   //| Driven through the synthesiser directly, with bars built here,   |
+   //| so the check does not depend on whether THIS terminal's history  |
+   //| happens to carry a spread - which is a real possibility and is   |
+   //| exactly what the last check below is about.                      |
+   //+------------------------------------------------------------------+
+   {
+      int    dg = (int)SymbolInfoInteger(origin, SYMBOL_DIGITS);
+      double pt = SymbolInfoDouble(origin, SYMBOL_POINT);
+      if(pt <= 0.0) pt = 0.00001;
+      double base = SymbolInfoDouble(origin, SYMBOL_BID);
+      if(base <= 0.0) base = 10000.0 * pt;
+      base = NormalizeDouble(base, dg);
+
+      CSSRTickSynthesizer sy;
+      sy.Configure(dg, pt);
+      sy.SetSpreadPoints(20);            // the fallback constant
+      sy.SetTicksPerBar(8);
+
+      //--- a quiet minute and a release minute, told apart by nothing
+      //--- but the number the broker wrote on them
+      MqlRates quiet, wide, none;
+      quiet.time = (datetime)60;  quiet.open = base;
+      quiet.high = NormalizeDouble(base + 50.0 * pt, dg);
+      quiet.low  = NormalizeDouble(base - 50.0 * pt, dg);
+      quiet.close = base; quiet.tick_volume = 10; quiet.real_volume = 0;
+      quiet.spread = 8;
+
+      wide = quiet; wide.time = (datetime)120; wide.spread = 240;
+      none = quiet; none.time = (datetime)180; none.spread = 0;
+
+      MqlTick tk[];
+      ArrayResize(tk, 64);
+
+      sy.SetSpreadMode(SSR_SPREAD_RECORDED);
+      int nq = sy.Synthesize(quiet, tk, 0);
+      double sq = (nq > 0 ? (tk[0].ask - tk[0].bid) / pt : -1.0);
+
+      int nw = sy.Synthesize(wide, tk, 0);
+      double sw = (nw > 0 ? (tk[0].ask - tk[0].bid) / pt : -1.0);
+
+      int nn = sy.Synthesize(none, tk, 0);
+      double sn = (nn > 0 ? (tk[0].ask - tk[0].bid) / pt : -1.0);
+
+      Check("27 a quiet bar is replayed at the spread it recorded",
+            MathAbs(sq - 8.0) < 0.5,
+            StringFormat("%.1f pt on a bar that recorded 8", sq));
+      Check("27 and a release minute is replayed WIDE",
+            MathAbs(sw - 240.0) < 0.5 && sw > sq * 5.0,
+            StringFormat("%.1f pt on a bar that recorded 240 - one number for "
+                         "the whole session would have said %.1f here", sw, sq));
+      Check("27 a bar with no recorded spread falls back, it does not go free",
+            MathAbs(sn - 20.0) < 0.5,
+            StringFormat("%.1f pt, the configured fallback is 20 - a bar with "
+                         "spread 0 is a bar with no data, not a free entry", sn));
+
+      Check("27 and the session can say which of the two it used",
+            sy.BarsWithRecordedSpread() == 2 && sy.BarsWithFixedSpread() == 1,
+            StringFormat("%d recorded, %d fixed - a feature that quietly did "
+                         "nothing on this history must be able to say so",
+                         (int)sy.BarsWithRecordedSpread(),
+                         (int)sy.BarsWithFixedSpread()));
+      Check("27 and how wide it got",
+            MathAbs(sy.WidestRecordedSpread() - 240.0) < 0.5,
+            StringFormat("widest %.1f, average %.1f",
+                         sy.WidestRecordedSpread(), sy.AverageRecordedSpread()));
+
+      //--- FIXED must still mean fixed, or the mode is decoration
+      sy.ResetSpreadCounters();
+      sy.SetSpreadMode(SSR_SPREAD_FIXED);
+      int nf = sy.Synthesize(wide, tk, 0);
+      double sf = (nf > 0 ? (tk[0].ask - tk[0].bid) / pt : -1.0);
+      Check("27 asking for a fixed spread still gets one",
+            MathAbs(sf - 20.0) < 0.5 && sy.BarsWithRecordedSpread() == 0,
+            StringFormat("%.1f pt on the same 240-point bar", sf));
+
+      //--- and the trade carries what it paid
+      {
+         CSSRTradingEngine ex;
+         ex.SetBalance(10000.0);
+         ex.OnSessionStart(origin, dg, pt, 0);
+
+         MqlTick t[1];
+         t[0].bid = base; t[0].ask = NormalizeDouble(base + 45.0 * pt, dg);
+         t[0].time_msc = 1000;
+         ex.OnTicks(t, 1);
+
+         long tk2 = ex.Open(SSR_ORDER_BUY, 0.10,
+                            NormalizeDouble(base - 500.0 * pt, dg), 0.0);
+         SSRVirtualPosition sp;
+         bool found = false;
+         for(int i = 0; i < ex.Total(); i++)
+            if(ex.At(i, sp) && sp.ticket == tk2) { found = true; break; }
+
+         Check("27 a trade records the spread it was entered at",
+               found && MathAbs(sp.spread_at_entry - 45.0) < 1.0,
+               StringFormat("%.1f pt recorded on the position, market was 45",
+                            found ? sp.spread_at_entry : -1.0));
+      }
+   }
+
    ctrl.Release();
    Cleanup(rsym);
    Done();

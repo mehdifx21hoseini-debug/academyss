@@ -109,6 +109,14 @@ private:
 
    //--- the price a market order actually gets: the wrong side of the
    //--- spread, then slippage against you. Never in your favour.
+   //--- the live spread, in points. Zero when there is no price yet.
+   double            SpreadPoints(void)
+     {
+      if(m_bid <= 0.0 || m_ask <= 0.0 || m_point <= 0.0)
+         return 0.0;
+      return (m_ask - m_bid) / m_point;
+     }
+
    double            FillPrice(const bool is_long, const bool opening)
      {
       double slip = m_exec.slippage_points * m_point;
@@ -219,6 +227,7 @@ private:
 
       if(closing)
         {
+         m_pos[i].spread_at_exit = SpreadPoints();
          m_pos[i].volume      = 0.0;
          m_pos[i].close_price = Norm(price);
          m_pos[i].close_msc   = m_now_msc;
@@ -342,6 +351,7 @@ private:
             m_pos[i].risk_at_entry =
                m_risk.RiskOf(m_pos[i].volume,
                              MathAbs(m_pos[i].open_price - m_pos[i].sl));
+         m_pos[i].spread_at_entry = SpreadPoints();
          m_pos[i].commission += m_exec.commission_per_lot * m_pos[i].volume;
          m_balance           -= m_exec.commission_per_lot * m_pos[i].volume;
 
@@ -739,6 +749,7 @@ public:
       if(m_pos[i].sl > 0.0)
          m_pos[i].risk_at_entry =
             m_risk.RiskOf(volume, MathAbs(m_pos[i].open_price - m_pos[i].sl));
+      m_pos[i].spread_at_entry = SpreadPoints();
       m_pos[i].commission = m_exec.commission_per_lot * volume;
       m_balance          -= m_pos[i].commission;
       return m_pos[i].ticket;
@@ -1057,7 +1068,11 @@ public:
                 "request_msc|request_type|open_price|open_msc|sl|tp|"
                 "trail_points|trail_peak|close_price|close_msc|reason|"
                 "commission|swap|profit|mae|mfe|ambiguous|risk_at_entry|"
-                "swap_locked|swap_from_msc|tag|note");
+                "swap_locked|swap_from_msc|tag|note|"
+                //--- APPENDED, never inserted: a reader that predates
+                //--- these two fields stops at `note` and is unharmed,
+                //--- and a file that predates them restores as zero
+                "spread_at_entry|spread_at_exit");
       for(int i = 0; i < m_count; i++)
         {
          string r = "";
@@ -1089,6 +1104,8 @@ public:
          r = SSRPackAdd(r, IntegerToString(m_pos[i].swap_from_msc));
          r = SSRPackAdd(r, m_pos[i].tag);
          r = SSRPackAdd(r, m_pos[i].note);
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].spread_at_entry, 2));
+         r = SSRPackAdd(r, DoubleToString(m_pos[i].spread_at_exit, 2));
          f.Set("pos", r);
 
          //--- and its legs, which are what a rewind needs to undo the
@@ -1191,6 +1208,10 @@ public:
          m_pos[k].swap_from_msc  = SSRFieldLong(c, 25, SSR_INVALID_TIME);
          m_pos[k].tag            = SSRField(c, 26);
          m_pos[k].note           = SSRField(c, 27);
+         //--- zero on a file written before these existed, which is the
+         //--- honest answer: that session did not record its spread
+         m_pos[k].spread_at_entry = SSRFieldDouble(c, 28);
+         m_pos[k].spread_at_exit  = SSRFieldDouble(c, 29);
 
          if(m_pos[k].ambiguous)
             m_ambiguous_count++;

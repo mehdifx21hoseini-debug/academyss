@@ -70,7 +70,8 @@ input int             InpWarmupBars = 1000;                 // Warmup bars for H
 input ENUM_TIMEFRAMES InpChartTf    = PERIOD_M5;            // Replay chart timeframe
 input int             InpSlot       = 1;                    // Replay slot
 input int             InpTicksPerBar = 8;                   // Ticks per M1 bar (synthetic)
-input double          InpSpreadPoints = 20;                 // Simulated spread, in points
+input double          InpSpreadPoints = 20;                 // Spread when the bar has none, in points
+input ENUM_SSR_SPREAD InpSpreadMode  = SSR_SPREAD_RECORDED; // Spread: from the bar, or the number above
 input int             InpPumpMs     = 40;                   // Engine tick interval (ms)
 //--- 1x means ONE M5 CANDLE EVERY FIVE REAL MINUTES. Pressing Play and
 //--- watching nothing happen for twenty seconds is not a slow replay,
@@ -441,6 +442,7 @@ int OpenExtraStreams(const long win_start, const long win_end,
       g_ctrl2[built].SetLog(GetPointer(g_ssr_log));
       g_ctrl2[built].SetSymbolSpec(digits, point);
       g_ctrl2[built].SetSpreadPoints(InpSpreadPoints);
+      g_ctrl2[built].SetSpreadMode(InpSpreadMode);
       g_ctrl2[built].SetTicksPerBar(InpTicksPerBar);
       g_ctrl2[built].SetWarmupBars(InpWarmupBars);
       g_ctrl2[built].SetDataMode(SSR_DATA_BROKER);
@@ -1017,6 +1019,7 @@ bool BuildSession(string origin, const bool on_replay,
    g_ctrl.SetLog(GetPointer(g_ssr_log));
    g_ctrl.SetSymbolSpec(digits, point);
    g_ctrl.SetSpreadPoints(CfgSpread());
+   g_ctrl.SetSpreadMode(InpSpreadMode);
    g_ctrl.SetTicksPerBar(InpTicksPerBar);
    g_ctrl.SetWarmupBars(InpWarmupBars);
    g_ctrl.SetDataMode(SSR_DATA_BROKER);
@@ -2063,6 +2066,57 @@ void OnDeinit(const int reason)
 //| The pump. Real elapsed time in, replay time out.                 |
 //+------------------------------------------------------------------+
 //+------------------------------------------------------------------+
+//| DID THE RECORDED SPREAD ACTUALLY EXIST? Answered once, out loud. |
+//|                                                                  |
+//| The spread now comes from the bar the broker recorded rather      |
+//| than from one number, which is the truthful source and is also   |
+//| a source that can simply be absent: plenty of M1 history carries |
+//| a spread of zero, and some brokers never wrote one at all.       |
+//|                                                                  |
+//| A feature that quietly does nothing on this user's data is worse |
+//| than one that is off, because the statement still says "spread   |
+//| paid" and the number is the fallback constant. So the session    |
+//| counts what it used and says so, once, after enough bars to know.|
+//+------------------------------------------------------------------+
+bool g_spread_reported = false;
+
+void ReportSpreadOnce()
+  {
+   if(g_spread_reported)
+      return;
+
+   long recorded = g_ctrl.SpreadBarsRecorded();
+   long fixedn   = g_ctrl.SpreadBarsFixed();
+   long total    = recorded + fixedn;
+   if(total < 500)                    // too early to draw a conclusion
+      return;
+
+   g_spread_reported = true;
+
+   if(g_ctrl.SpreadMode() == SSR_SPREAD_FIXED)
+     {
+      PrintFormat("[spread] fixed at %.0f points on every bar, because that is "
+                  "what was asked for", CfgSpread());
+      return;
+     }
+
+   if(recorded == 0)
+     {
+      PrintFormat("[spread] NO bar in the first %d carried a recorded spread, so "
+                  "every tick used the fixed %.0f points. This history has no "
+                  "spread in it - the replay is not wrong, it simply has "
+                  "nothing wider to show you around a release.",
+                  (int)total, CfgSpread());
+      return;
+     }
+
+   PrintFormat("[spread] from the data on %d of the first %d bars: average %.1f, "
+               "widest %.1f points. The other %d had none and used %.0f.",
+               (int)recorded, (int)total, g_ctrl.SpreadAverage(),
+               g_ctrl.SpreadWidest(), (int)fixedn, CfgSpread());
+  }
+
+//+------------------------------------------------------------------+
 //| VITALS - one line, everything, once a second.                    |
 //|                                                                  |
 //| Three releases were spent guessing why "the candles do not move" |
@@ -2215,6 +2269,8 @@ void OnTimer()
    g_timer_ticks++;
    if(g_timer_ticks == 1 && g_flight.IsOpen())
       g_flight.Event("OnTimer fired for the first time");
+
+   ReportSpreadOnce();
 
    //+------------------------------------------------------------------+
    //| WAITING FOR THE USER TO PLACE THE LINE.                          |

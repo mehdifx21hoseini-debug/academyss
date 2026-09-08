@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v81 2026-09-08  it-ran"
+#define SSR_BUILD "v82 2026-09-08  spread"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

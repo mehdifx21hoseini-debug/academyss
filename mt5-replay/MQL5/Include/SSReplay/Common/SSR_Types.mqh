@@ -66,6 +66,38 @@ enum ENUM_SSR_FIDELITY
   };
 
 //+------------------------------------------------------------------+
+//| WHERE THE SPREAD COMES FROM.                                     |
+//|                                                                  |
+//| A synthesised tick has no spread of its own - one has to be put  |
+//| on it. Using one number for the whole session is the assumption  |
+//| that costs a trader the most, because the spread is never wider  |
+//| than at the moments people most want to practise: the seconds    |
+//| around a release, the first minute of a session, the rollover.   |
+//| A replay with a flat spread makes exactly those entries look     |
+//| cheaper than they were.                                          |
+//|                                                                  |
+//| The answer is already in the data. Every M1 bar MetaTrader       |
+//| stores carries the spread the broker recorded for that minute,   |
+//| so RECORDED needs no model, no calendar and no number invented   |
+//| here - and it widens for every cause at once, including the ones |
+//| nobody thought to model.                                         |
+//|                                                                  |
+//| FIXED stays, because a bar can arrive with no spread on it and   |
+//| because comparing a strategy at one constant spread is a         |
+//| legitimate thing to want.                                        |
+//+------------------------------------------------------------------+
+enum ENUM_SSR_SPREAD
+  {
+   SSR_SPREAD_RECORDED = 0,      // the spread the broker recorded for that bar
+   SSR_SPREAD_FIXED              // one number, every bar
+  };
+
+string SSRSpreadModeName(const ENUM_SSR_SPREAD m)
+  {
+   return (m == SSR_SPREAD_FIXED ? "fixed" : "recorded");
+  }
+
+//+------------------------------------------------------------------+
 //| Where the bytes come from. The engine never branches on this -   |
 //| it exists for reporting and for provider selection at wiring     |
 //| time, never inside the replay loop.                              |

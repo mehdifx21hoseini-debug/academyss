@@ -649,6 +649,15 @@ public:
      }
 
    void              SetSpreadPoints(const double p) { m_synth.SetSpreadPoints(p); }
+   void              SetSpreadMode(const ENUM_SSR_SPREAD m) { m_synth.SetSpreadMode(m); }
+   ENUM_SSR_SPREAD   SpreadMode(void)   { return m_synth.SpreadMode(); }
+
+   //--- what the spread actually did this session, read from the bars
+   //--- that were replayed rather than from the setting that asked
+   long              SpreadBarsRecorded(void) { return m_synth.BarsWithRecordedSpread(); }
+   long              SpreadBarsFixed(void)    { return m_synth.BarsWithFixedSpread(); }
+   double            SpreadAverage(void)      { return m_synth.AverageRecordedSpread(); }
+   double            SpreadWidest(void)       { return m_synth.WidestRecordedSpread(); }
    void              SetTicksPerBar(const int n)     { m_synth.SetTicksPerBar(n); }
    void              SetWarmupBars(const long n)     { m_warmup_bars = (n < 0 ? 0 : n); }
 

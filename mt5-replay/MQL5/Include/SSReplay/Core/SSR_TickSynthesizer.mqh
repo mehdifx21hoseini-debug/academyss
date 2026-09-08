@@ -32,11 +32,46 @@ private:
    double            m_spread_abs;
    int               m_ticks_per_bar;
 
+   //--- where the spread comes from, and what actually happened
+   ENUM_SSR_SPREAD   m_spread_mode;
+   long              m_bars_recorded;   // bars that carried their own spread
+   long              m_bars_fixed;      // bars that fell back to the constant
+   double            m_spread_sum_pts;  // over the recorded ones only
+   double            m_spread_max_pts;
+
    double            Norm(const double v) { return NormalizeDouble(v, m_digits); }
+
+   //+------------------------------------------------------------------+
+   //| The spread for THIS bar, and a note of where it came from.       |
+   //|                                                                  |
+   //| A bar with spread 0 is not a zero-spread minute - it is a bar    |
+   //| whose spread the terminal did not store. Treating that as zero   |
+   //| would hand the trader free entries, so it falls back to the      |
+   //| configured constant and is counted separately, because "the      |
+   //| recorded spread was used" and "there was none to use" are the    |
+   //| difference between a measured session and an assumed one.        |
+   //+------------------------------------------------------------------+
+   double            SpreadFor(const MqlRates &bar)
+     {
+      if(m_spread_mode == SSR_SPREAD_RECORDED && bar.spread > 0)
+        {
+         double pts = (double)bar.spread;
+         m_bars_recorded++;
+         m_spread_sum_pts += pts;
+         if(pts > m_spread_max_pts)
+            m_spread_max_pts = pts;
+         return pts * m_point;
+        }
+      m_bars_fixed++;
+      return m_spread_abs;
+     }
 
 public:
                      CSSRTickSynthesizer(void)
-     : m_digits(5), m_point(0.00001), m_spread_abs(0.0), m_ticks_per_bar(8) {}
+     : m_digits(5), m_point(0.00001), m_spread_abs(0.0), m_ticks_per_bar(8),
+       m_spread_mode(SSR_SPREAD_RECORDED),
+       m_bars_recorded(0), m_bars_fixed(0),
+       m_spread_sum_pts(0.0), m_spread_max_pts(0.0) {}
 
    void              Configure(const int digits, const double point)
      {
@@ -46,6 +81,26 @@ public:
 
    void              SetSpreadPoints(const double points) { m_spread_abs = points * m_point; }
    void              SetSpreadAbs(const double abs)       { m_spread_abs = abs; }
+
+   void              SetSpreadMode(const ENUM_SSR_SPREAD m) { m_spread_mode = m; }
+   ENUM_SSR_SPREAD   SpreadMode(void)      { return m_spread_mode; }
+
+   //--- what the session actually did, so nothing about the spread is
+   //--- reported from the setting rather than from what happened
+   long              BarsWithRecordedSpread(void) { return m_bars_recorded; }
+   long              BarsWithFixedSpread(void)    { return m_bars_fixed; }
+   double            AverageRecordedSpread(void)
+     {
+      return (m_bars_recorded > 0 ? m_spread_sum_pts / (double)m_bars_recorded : 0.0);
+     }
+   double            WidestRecordedSpread(void)   { return m_spread_max_pts; }
+   void              ResetSpreadCounters(void)
+     {
+      m_bars_recorded  = 0;
+      m_bars_fixed     = 0;
+      m_spread_sum_pts = 0.0;
+      m_spread_max_pts = 0.0;
+     }
 
    //--- 4 is the minimum that can express O/H/L/C without losing an extreme
    void              SetTicksPerBar(const int n) { m_ticks_per_bar = (n < 4 ? 4 : n); }
@@ -64,6 +119,8 @@ public:
       int n = m_ticks_per_bar;
       if(ArraySize(out) < offset + n)
          return 0;
+
+      double spread = SpreadFor(bar);
 
       double k0 = bar.open;
       double k1, k2;
@@ -90,7 +147,7 @@ public:
          out[idx].time_msc    = base_msc + (long)((double)i * (double)span_msc / (double)MathMax(n - 1, 1));
          out[idx].time        = SSRToTime(out[idx].time_msc);
          out[idx].bid         = Norm(p);
-         out[idx].ask         = Norm(p + m_spread_abs);
+         out[idx].ask         = Norm(p + spread);
          out[idx].last        = out[idx].bid;
          out[idx].volume      = 1;
          out[idx].volume_real = 1.0;
@@ -101,7 +158,7 @@ public:
       //--- replayed bar would not match the source bar
       int last = offset + n - 1;
       out[last].bid  = Norm(bar.close);
-      out[last].ask  = Norm(bar.close + m_spread_abs);
+      out[last].ask  = Norm(bar.close + spread);
       out[last].last = out[last].bid;
       return n;
      }
@@ -117,7 +174,7 @@ public:
       out[offset].time_msc    = SSRToMsc(bar.time) + SSR_MSC_PER_MIN - 1;
       out[offset].time        = SSRToTime(out[offset].time_msc);
       out[offset].bid         = Norm(bar.close);
-      out[offset].ask         = Norm(bar.close + m_spread_abs);
+      out[offset].ask         = Norm(bar.close + SpreadFor(bar));
       out[offset].last        = out[offset].bid;
       out[offset].volume      = 1;
       out[offset].volume_real = 1.0;

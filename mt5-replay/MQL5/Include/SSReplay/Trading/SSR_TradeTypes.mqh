@@ -209,6 +209,18 @@ struct SSRVirtualPosition
    double             mae;            // worst adverse move, in price
    double             mfe;            // best favourable move, in price
 
+   //+------------------------------------------------------------------+
+   //| WHAT THE SPREAD COST, on this trade, in points.                  |
+   //|                                                                  |
+   //| Recorded rather than derived, because by the time the statement  |
+   //| is written the minute is gone. A trade taken at four times the   |
+   //| session's usual spread is not a worse trade in the numbers - it  |
+   //| is a worse trade in the reason - and that is only visible if the |
+   //| spread it was taken at is kept beside it.                        |
+   //+------------------------------------------------------------------+
+   double             spread_at_entry;  // points, at the fill
+   double             spread_at_exit;   // points, at the final exit
+
    //--- THE HONESTY FLAG. True when this outcome rests on an assumed
    //--- order of prices inside a bar rather than on observed ticks.
    bool               ambiguous;
@@ -246,6 +258,7 @@ struct SSRVirtualPosition
       commission = 0.0; swap = 0.0; profit = 0.0;
       swap_locked = 0.0; swap_from_msc = SSR_INVALID_TIME; leg_count = 0;
       mae = 0.0; mfe = 0.0; risk_at_entry = 0.0;
+      spread_at_entry = 0.0; spread_at_exit = 0.0;
       ambiguous = false;
       tag = ""; note = "";
      }

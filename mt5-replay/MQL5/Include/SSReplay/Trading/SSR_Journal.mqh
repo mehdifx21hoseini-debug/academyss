@@ -1174,6 +1174,25 @@ public:
               "identical risk every time; above 50&#37; the win rate and the "
               "expectancy are describing different-sized bets",
               (st.risk_spread_pct > 50.0 ? "r" : ""));
+      Measure(h, "Average spread paid",
+              (st.spread_samples > 0
+               ? DoubleToString(st.avg_spread_points, 1) + " pt over " +
+                 IntegerToString(st.spread_samples) + " trades"
+               : "not recorded"),
+              "the spread each trade was ENTERED at, averaged. Replayed from "
+              "what the broker recorded for that minute, so it widens around "
+              "releases and at the open exactly as it did on the day");
+      Measure(h, "Widest spread entered at",
+              (st.spread_samples > 0
+               ? DoubleToString(st.worst_spread_points, 1) + " pt"
+               : "-"),
+              "the single worst moment this session bought or sold into");
+      Measure(h, "Trades taken at double the average spread",
+              IntegerToString(st.wide_spread_trades),
+              "wide is measured against THIS session's own average, because "
+              "forty points is nothing on an index and ruinous on a major. "
+              "These are the entries to look at first",
+              (st.wide_spread_trades > 0 ? "amb" : ""));
       Measure(h, "Straight back in after a loss", IntegerToString(st.revenge_trades),
               "trades opened within two replay minutes of the previous trade "
               "closing at a loss",

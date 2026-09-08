@@ -99,6 +99,13 @@ struct SSRStatistics
    int               risk_samples;        // trades that number came from
    int               revenge_trades;      // opened straight after a loss
 
+   //--- WHAT THE SPREAD COST. A session can be beaten by its entries
+   //--- rather than by its exits, and this is where that shows.
+   double            avg_spread_points;   // paid on entry, over trades that recorded one
+   double            worst_spread_points; // the widest one entered at
+   int               spread_samples;      // trades that recorded a spread
+   int               wide_spread_trades;  // entered at twice the average or more
+
    //--- DATA QUALITY. Not decoration: these decide whether the numbers
    //--- above may be quoted on their own.
    int               ambiguous_trades;
@@ -120,6 +127,8 @@ struct SSRStatistics
       avg_mae = 0.0; avg_mfe = 0.0;
       avg_hold_sec = 0.0; time_in_market_pct = 0.0; recovery_factor = 0.0;
       risk_spread_pct = 0.0; risk_samples = 0; revenge_trades = 0;
+      avg_spread_points = 0.0; worst_spread_points = 0.0;
+      spread_samples = 0; wide_spread_trades = 0;
       ambiguous_trades = 0; ambiguous_pct = 0.0;
       margin_modelled = false; trades_without_stop = 0;
      }
@@ -391,6 +400,7 @@ public:
       double risk_sq_sum   = 0.0;
       long   prev_close    = SSR_INVALID_TIME;   // of the trade before, in open order
       bool   prev_was_loss = false;
+      double spread_sum    = 0.0;
 
       int total = m_acct.Total();
       for(int i = 0; i < total; i++)
@@ -489,6 +499,15 @@ public:
             (p.open_msc - prev_close) <= SSR_REVENGE_WINDOW_MSC)
             out.revenge_trades++;
 
+         //--- the spread this one was entered at
+         if(p.spread_at_entry > 0.0)
+           {
+            spread_sum += p.spread_at_entry;
+            out.spread_samples++;
+            if(p.spread_at_entry > out.worst_spread_points)
+               out.worst_spread_points = p.spread_at_entry;
+           }
+
          prev_close    = p.close_msc;
          prev_was_loss = (net < 0.0);
         }
@@ -536,6 +555,31 @@ public:
          //--- measure exists to show.
          double span = (double)(last_close - first_open);
          out.time_in_market_pct = 100.0 * (double)hold_sum_msc / span;
+        }
+
+      //+------------------------------------------------------------------+
+      //| A SECOND PASS, and only for this one measure.                    |
+      //|                                                                  |
+      //| "Wide" has no absolute meaning - forty points is nothing on an   |
+      //| index and ruinous on a major - so it is defined against THIS     |
+      //| session's own average, which is not known until the first pass   |
+      //| has finished. Counting them needs the answer the first pass      |
+      //| produced, so it runs again over the same closed trades.          |
+      //+------------------------------------------------------------------+
+      if(out.spread_samples > 0)
+        {
+         out.avg_spread_points = spread_sum / (double)out.spread_samples;
+         double wide = out.avg_spread_points * 2.0;
+         for(int i = 0; i < total; i++)
+           {
+            SSRVirtualPosition p;
+            if(!m_acct.At(i, p) || !p.IsClosed())
+               continue;
+            if(tag != "" && p.tag != tag)
+               continue;
+            if(p.spread_at_entry >= wide && p.spread_at_entry > 0.0)
+               out.wide_spread_trades++;
+           }
         }
 
       if(out.risk_samples > 1)
