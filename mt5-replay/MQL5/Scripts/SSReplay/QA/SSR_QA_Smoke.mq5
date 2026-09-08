@@ -2222,7 +2222,7 @@ void OnStart()
          ex.SetBalance(10000.0);
          ex.OnSessionStart(origin, dg, pt, 0);
 
-         CSSRStatistics dst;
+         CSSRStatsEngine dst;
          dst.Attach(GetPointer(ex));
 
          MqlTick t[1];
@@ -2239,7 +2239,8 @@ void OnStart()
          ex.OnTicks(t, 1);
 
          SSRStatistics ds;
-         dst.ComputeFor("", ds);
+         ds.Init();                      // ComputeFor does this too; saying it
+         dst.ComputeFor("", ds);         // here is what stops the warning
 
          Check("26e holding time is measured",
                ds.trades == 2 && ds.avg_hold_sec > 0.0,
