@@ -428,6 +428,15 @@ void OnStart()
       int jump_after = Bars(rsym, PERIOD_M1);
       datetime ja_first = (datetime)SeriesInfoInteger(rsym, PERIOD_M1, SERIES_FIRSTDATE);
       datetime ja_last  = (datetime)SeriesInfoInteger(rsym, PERIOD_M1, SERIES_LASTBAR_DATE);
+      //--- and say whether the HEAD survived, which is the part that was
+      //--- being lost. The count alone cannot tell a jump that added
+      //--- forty bars from one that added forty and dropped a hundred.
+      Check("a jump keeps the history that was already there",
+            ja_first <= jb_first,
+            StringFormat("series starts at %s, started at %s - every "
+                         "indicator on the replay chart reads this history",
+                         TimeToString(ja_first), TimeToString(jb_first)));
+
       if(jump_after < jump_before)
          Log(StringFormat("  ->  the series LOST bars. before %d [%s .. %s], "
                      "after %d [%s .. %s], the engine said ok=%d. A later first "

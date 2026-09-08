@@ -77,6 +77,24 @@ public:
    //+------------------------------------------------------------------+
    virtual bool      NeedsWarmup(const long from_msc, const long to_msc) { return true; }
 
+   //+------------------------------------------------------------------+
+   //| The oldest instant the sink can still show, or -1 when it has no |
+   //| way to know.                                                     |
+   //|                                                                  |
+   //| Core does not assume a sink keeps everything it was given. The   |
+   //| MT5 one demonstrably does not: after a jump writes bars into a   |
+   //| custom symbol that already carries ticks, the terminal rebuilds  |
+   //| the series and the warmup - which exists as bars and has no      |
+   //| ticks behind it - is gone. Measured on a real terminal: 272 bars |
+   //| starting at 14:50 became 132 starting at 18:10, which is exactly |
+   //| where the tick stream began.                                     |
+   //|                                                                  |
+   //| A sink that cannot answer says so rather than guessing, and the  |
+   //| caller then does nothing rather than repairing something it      |
+   //| cannot see.                                                      |
+   //+------------------------------------------------------------------+
+   virtual long      OldestMsc(void) { return -1; }
+
    //--- lifecycle notifications; a sink may ignore any of them
    virtual void      OnStateChanged(const ENUM_SSR_STATE from, const ENUM_SSR_STATE to) {}
    virtual void      OnSeek(const long msc) {}

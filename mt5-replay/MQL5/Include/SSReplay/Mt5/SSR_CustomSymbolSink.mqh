@@ -219,6 +219,18 @@ public:
    //+------------------------------------------------------------------+
    //| Warmup history, in bulk. Bars, not ticks - see the header note.  |
    //+------------------------------------------------------------------+
+   //--- what the terminal will actually show, asked of the terminal
+   virtual long      OldestMsc(void) override
+     {
+      string sym = m_mgr.Symbol();
+      if(sym == "")
+         return -1;
+      datetime first = (datetime)SeriesInfoInteger(sym, PERIOD_M1, SERIES_FIRSTDATE);
+      if(first <= 0)
+         return -1;
+      return SSRToMsc(first);
+     }
+
    virtual bool      SeedBars(const MqlRates &bars[], const int count) override
      {
       if(!m_prepared)

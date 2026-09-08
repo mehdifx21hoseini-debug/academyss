@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v89 2026-09-08  qa-live"
+#define SSR_BUILD "v90 2026-09-08  warmup"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

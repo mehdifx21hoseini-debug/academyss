@@ -907,6 +907,66 @@ public:
       return true;
      }
 
+   //+------------------------------------------------------------------+
+   //| PUT THE WARMUP BACK IF THE SINK THREW IT AWAY.                   |
+   //|                                                                  |
+   //| Measured, not theorised: a forward jump left the replay symbol   |
+   //| holding 132 bars from 18:10 where it had held 272 from 14:50,    |
+   //| and 18:10 is exactly where the tick stream began. The tail was   |
+   //| correct and the engine reported success. What vanished was the   |
+   //| warmup - the only part of the series that exists as bars with no |
+   //| ticks behind it.                                                 |
+   //|                                                                  |
+   //| That is a real loss and not a cosmetic one. Every indicator on   |
+   //| the replay chart reads that history: a moving average that had   |
+   //| two hundred bars behind it has four after a jump, and the trader |
+   //| is looking at a line that means nothing.                         |
+   //|                                                                  |
+   //| THE GUARD IS NOT TOUCHED. The range re-read here is entirely in  |
+   //| the past - warmup ends before the session starts, which is long  |
+   //| before wherever the jump landed - so it is already inside the    |
+   //| horizon and needs no widening. Re-arming would move the horizon  |
+   //| backwards in the middle of a session, which is the one thing     |
+   //| this class must never do by accident.                            |
+   //|                                                                  |
+   //| A sink that cannot say what it holds gets left alone.            |
+   //+------------------------------------------------------------------+
+   void              RepairWarmupIfLost(void)
+     {
+      if(m_warmup_bars <= 0 || m_timeline.warmup_first_msc <= 0)
+         return;
+      if(m_source == NULL || m_sink == NULL)
+         return;
+
+      long oldest = m_sink.OldestMsc();
+      if(oldest < 0)
+         return;                          // the sink cannot see; do nothing
+      if(oldest <= m_timeline.warmup_first_msc)
+         return;                          // still there
+
+      CSSRBarProvider *bp = m_source.Bars();
+      if(bp == NULL)
+         return;
+
+      long lo = m_timeline.warmup_first_msc;
+      long hi = m_timeline.start_msc - 1;
+      MqlRates seed[];
+      int n = bp.ReadBars(m_state.symbol, lo, hi, seed);
+      if(n <= 0)
+         return;
+      n = m_guard.FilterRates(seed, n);
+      if(n <= 0)
+         return;
+      if(!m_sink.SeedBars(seed, n))
+         return;
+
+      if(m_log != NULL && m_log.IsWarn())
+         m_log.Warn(StringFormat("the sink dropped the warmup (oldest was %s, "
+                                 "should be %s); %d bars written back",
+                                 SSRFormatMsc(oldest),
+                                 SSRFormatMsc(m_timeline.warmup_first_msc), n));
+     }
+
    //--- transport ---------------------------------------------------
    bool              Play(void)
      {
@@ -1343,6 +1403,11 @@ public:
            }
 
       m_sink.OnSeek(target);
+
+      //--- the bulk write above is what costs the warmup, so the check
+      //--- goes here rather than somewhere tidier
+      RepairWarmupIfLost();
+
       Publish();
 
       if(m_clock.IsCompleted())
