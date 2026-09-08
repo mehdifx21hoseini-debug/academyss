@@ -93,11 +93,34 @@ void Unstash(const string path)
       FileMove(path + ".qabak", 0, path, FILE_REWRITE);
   }
 
+//+------------------------------------------------------------------+
+//| EVERY LINE GOES TO A FILE AS WELL AS TO THE LOG.                 |
+//|                                                                  |
+//| The Experts tab is where these land, and getting them OUT of it  |
+//| has cost a round trip nearly every time: select, scroll, copy,   |
+//| hope nothing was missed. The tab is not a deliverable.            |
+//|                                                                  |
+//| So the run writes itself down. One file, plain text, the same    |
+//| lines in the same order - and the last thing printed is where to |
+//| find it. Nobody has to select anything again.                    |
+//+------------------------------------------------------------------+
+#define SSR_QA_RESULT_FILE  "SSReplay\\qa-result.txt"
+
+string g_out[];
+int    g_out_n = 0;
+
+void Log(const string line)
+  {
+   Print(line);
+   if(ArrayResize(g_out, g_out_n + 1) > g_out_n)
+      g_out[g_out_n++] = line;
+  }
+
 void Ok(const string what, const string detail)
-  { g_pass++; PrintFormat("  PASS  %-34s %s", what, detail); }
+  { g_pass++; Log(StringFormat("  PASS  %-34s %s", what, detail)); }
 
 void No(const string what, const string detail)
-  { g_fail++; PrintFormat("  FAIL  %-34s %s", what, detail); }
+  { g_fail++; Log(StringFormat("  FAIL  %-34s %s", what, detail)); }
 
 bool Check(const string what, const bool cond, const string detail)
   {
@@ -108,9 +131,9 @@ bool Check(const string what, const bool cond, const string detail)
 //+------------------------------------------------------------------+
 void OnStart()
   {
-   PrintFormat("=== SS Replay smoke test === build %s", SSR_BUILD);
+   Log(StringFormat("=== SS Replay smoke test === build %s", SSR_BUILD));
    string origin = (InpSymbol == "" ? _Symbol : InpSymbol);
-   PrintFormat("symbol %s", origin);
+   Log(StringFormat("symbol %s", origin));
 
    //--- 1. history -------------------------------------------------
    int have = Bars(origin, PERIOD_M1);
@@ -118,7 +141,7 @@ void OnStart()
              StringFormat("%d bars local, %d needed",
                           have, InpReplayBars + InpWarmupBars)))
      {
-      Print("  -> the EA downloads this automatically; run it once, or press "
+      Log("  -> the EA downloads this automatically; run it once, or press "
             "Home on an M1 chart.");
       Done();
       return;
@@ -141,8 +164,8 @@ void OnStart()
 
    long span_min = (win_end - win_start) / SSR_MSC_PER_MIN;
    if(in_window > 0 && span_min > in_window * 2)
-      PrintFormat("  NOTE  window spans %d minutes for %d bars - it crosses a "
-                  "market-closed gap. Play skips it.", (int)span_min, in_window);
+      Log(StringFormat("  NOTE  window spans %d minutes for %d bars - it crosses a "
+                  "market-closed gap. Play skips it.", (int)span_min, in_window));
 
    //--- 3. the data source -----------------------------------------
    CSSRMt5DataSource src;
@@ -153,7 +176,7 @@ void OnStart()
    CSSRCustomSymbolSink sink;
    sink.SetSlot(InpSlot);
    string rsym = SSRReplaySymbolName(origin, InpSlot);
-   PrintFormat("  ..    replay symbol will be %s", rsym);
+   Log(StringFormat("  ..    replay symbol will be %s", rsym));
 
    //--- 5. the controller: load, seed, and REPLAY ------------------
    CSSRReplayController ctrl;
@@ -297,9 +320,9 @@ void OnStart()
          //--- every bar fits on screen, so there is no "away" to come
          //--- back from. Reporting this as a failure would be the test
          //--- lying about the product.
-         PrintFormat("  NOTE  the view could not be scrolled away (%d bars, "
+         Log(StringFormat("  NOTE  the view could not be scrolled away (%d bars, "
                      "%d visible) - the snap is untested on this screen",
-                     Bars(rsym, PERIOD_M1), (int)away_vis);
+                     Bars(rsym, PERIOD_M1), (int)away_vis));
       else
          Check("the view comes back to the newest bar", back_off < away_off,
                StringFormat("offset %d bars from the end -> %d after Redraw "
@@ -375,13 +398,13 @@ void OnStart()
       datetime ja_first = (datetime)SeriesInfoInteger(rsym, PERIOD_M1, SERIES_FIRSTDATE);
       datetime ja_last  = (datetime)SeriesInfoInteger(rsym, PERIOD_M1, SERIES_LASTBAR_DATE);
       if(jump_after < jump_before)
-         PrintFormat("  ->  the series LOST bars. before %d [%s .. %s], "
+         Log(StringFormat("  ->  the series LOST bars. before %d [%s .. %s], "
                      "after %d [%s .. %s], the engine said ok=%d. A later first "
                      "date means the head was dropped; an earlier last date "
                      "means the tail was.",
                      jump_before, TimeToString(jb_first), TimeToString(jb_last),
                      jump_after,  TimeToString(ja_first), TimeToString(ja_last),
-                     (jump_ok ? 1 : 0));
+                     (jump_ok ? 1 : 0)));
       //--- and say which case was actually exercised. The swallowed
       //--- write only happens on a REUSED seed, so a pass on a fresh
       //--- symbol proves the healthy path and nothing more. A test that
@@ -398,8 +421,8 @@ void OnStart()
                             "covered by this run")));
      }
    else
-      PrintFormat("  NOTE  no room ahead to test a jump (%d minutes left)",
-                  (int)((win_end - ctrl.Now()) / SSR_MSC_PER_MIN));
+      Log(StringFormat("  NOTE  no room ahead to test a jump (%d minutes left)",
+                  (int)((win_end - ctrl.Now()) / SSR_MSC_PER_MIN)));
 
    //+------------------------------------------------------------------+
    //| 10. THE BLACK BOX ITSELF.                                        |
@@ -1632,8 +1655,8 @@ void OnStart()
          else
             //--- NOT a failure of this product. Reported as a NOTE so the
             //--- run is honest about which half it could not measure.
-            PrintFormat("  NOTE  %-34s %s", "no calendar on this terminal",
-                        cal.Note());
+            Log(StringFormat("  NOTE  %-34s %s", "no calendar on this terminal",
+                        cal.Note()));
         }
       else
         {
@@ -1694,10 +1717,10 @@ void OnStart()
                high = i;
            }
          if(high < 0)
-            PrintFormat("  NOTE  %-34s %s", "no isolated high-impact event",
+            Log(StringFormat("  NOTE  %-34s %s", "no isolated high-impact event",
                         "the pause path was not exercised this run - the "
                         "window holds no high-impact release with twelve "
-                        "clear minutes in front of it");
+                        "clear minutes in front of it"));
          else
            {
             SSRCalendarItem it;
@@ -2499,7 +2522,7 @@ void OnStart()
                    StringFormat("panel sees %d closed, %d open - the account "
                                 "holds 1 and 1", cs.closed_trades,
                                 cs.open_positions)))
-            Print("  -> everything below this line is measuring the wiring, "
+            Log("  -> everything below this line is measuring the wiring, "
                   "not the confirmation");
 
          cp.Dispatch("reset");
@@ -2730,20 +2753,51 @@ void Cleanup(const string rsym)
      {
       SymbolSelect(rsym, false);
       if(!CustomSymbolDelete(rsym))
-         PrintFormat("  NOTE  %s could not be deleted (%d) - run SSR_Z_Cleanup",
-                     rsym, GetLastError());
+         Log(StringFormat("  NOTE  %s could not be deleted (%d) - run SSR_Z_Cleanup",
+                     rsym, GetLastError()));
      }
   }
 
 void Done(void)
   {
-   PrintFormat("=== %d passed, %d FAILED ===", g_pass, g_fail);
+   Log(StringFormat("=== %d passed, %d FAILED ===", g_pass, g_fail));
    if(g_fail == 0)
-      Print("The pipeline works end to end. If the tool still looks dead on a "
+      Log("The pipeline works end to end. If the tool still looks dead on a "
             "chart, the problem is the VIEW - speed too low, or a chart too "
             "short for the panel - not the engine.");
    else
-      Print("Send this whole block. The first FAIL is the layer to fix; "
-            "everything below it is a consequence.");
+      Log("The first FAIL is the layer to fix; everything below it is a "
+            "consequence.");
+
+   //+------------------------------------------------------------------+
+   //| AND WRITE IT DOWN, so nobody has to select it out of a log pane.  |
+   //|                                                                  |
+   //| ANSI rather than Unicode on purpose: this file exists to be sent, |
+   //| and a UTF-16 text file is the one that arrives full of null bytes |
+   //| and has to be converted before anyone can read a line of it. That |
+   //| is exactly the friction this is here to remove.                   |
+   //|                                                                  |
+   //| The path is the LAST thing printed, because the line that tells   |
+   //| you where the answer is has to be the one still on screen.        |
+   //+------------------------------------------------------------------+
+   FolderCreate("SSReplay");
+   int h = FileOpen(SSR_QA_RESULT_FILE, FILE_WRITE | FILE_TXT | FILE_ANSI);
+   if(h == INVALID_HANDLE)
+     {
+      PrintFormat("could not write %s (err %d) - copy the block above instead",
+                  SSR_QA_RESULT_FILE, GetLastError());
+      return;
+     }
+   FileWriteString(h, StringFormat("SS Replay smoke test  %s\r\n",
+                                   TimeToString(TimeLocal(), TIME_DATE | TIME_MINUTES)));
+   FileWriteString(h, StringFormat("build %s   terminal %s\r\n\r\n",
+                                   SSR_BUILD, TerminalInfoString(TERMINAL_NAME)));
+   for(int i = 0; i < g_out_n; i++)
+      FileWriteString(h, g_out[i] + "\r\n");
+   FileClose(h);
+
+   PrintFormat("--> SEND THIS ONE FILE:  MQL5\\Files\\%s   (%d lines)",
+               SSR_QA_RESULT_FILE, g_out_n);
+   Print("--> Toolbox has a Files tab, or: File menu -> Open Data Folder -> MQL5 -> Files");
   }
 //+------------------------------------------------------------------+

@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v87 2026-09-08  keys-fixed"
+#define SSR_BUILD "v88 2026-09-08  qa-file"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
