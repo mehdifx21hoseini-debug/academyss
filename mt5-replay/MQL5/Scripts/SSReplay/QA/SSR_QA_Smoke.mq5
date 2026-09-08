@@ -106,14 +106,41 @@ void Unstash(const string path)
 //+------------------------------------------------------------------+
 #define SSR_QA_RESULT_FILE  "SSReplay\\qa-result.txt"
 
-string g_out[];
-int    g_out_n = 0;
+int g_fh    = INVALID_HANDLE;
+int g_out_n = 0;
+
+//+------------------------------------------------------------------+
+//| WRITTEN AS IT HAPPENS, not collected and written at the end.      |
+//|                                                                  |
+//| A run that ends normally is the easy case. The runs that have     |
+//| actually cost time this week are the ones that DID NOT end: an    |
+//| array overrun that killed the program mid-stage, and a stage that |
+//| hung and never returned. Both left an empty file and a log pane   |
+//| somebody had to read by hand - which is the exact chore the file  |
+//| was added to remove, failing in the one case that needed it.      |
+//|                                                                  |
+//| So the handle is opened first and every line is flushed. Whatever |
+//| the run does next, the file already holds everything up to the    |
+//| last thing that worked, and the last line in it names the place   |
+//| it stopped.                                                       |
+//+------------------------------------------------------------------+
+void LogOpen(void)
+  {
+   FolderCreate("SSReplay");
+   g_fh = FileOpen(SSR_QA_RESULT_FILE, FILE_WRITE | FILE_TXT | FILE_ANSI);
+   if(g_fh == INVALID_HANDLE)
+      PrintFormat("could not open %s (err %d) - the log pane is the only copy",
+                  SSR_QA_RESULT_FILE, GetLastError());
+  }
 
 void Log(const string line)
   {
    Print(line);
-   if(ArrayResize(g_out, g_out_n + 1) > g_out_n)
-      g_out[g_out_n++] = line;
+   g_out_n++;
+   if(g_fh == INVALID_HANDLE)
+      return;
+   FileWriteString(g_fh, line + "\r\n");
+   FileFlush(g_fh);                  // survive a stop, a crash, a hang
   }
 
 void Ok(const string what, const string detail)
@@ -131,7 +158,11 @@ bool Check(const string what, const bool cond, const string detail)
 //+------------------------------------------------------------------+
 void OnStart()
   {
+   LogOpen();
    Log(StringFormat("=== SS Replay smoke test === build %s", SSR_BUILD));
+   Log(StringFormat("terminal %s   %s",
+                    TerminalInfoString(TERMINAL_NAME),
+                    TimeToString(TimeLocal(), TIME_DATE | TIME_MINUTES)));
    string origin = (InpSymbol == "" ? _Symbol : InpSymbol);
    Log(StringFormat("symbol %s", origin));
 
@@ -2769,32 +2800,11 @@ void Done(void)
       Log("The first FAIL is the layer to fix; everything below it is a "
             "consequence.");
 
-   //+------------------------------------------------------------------+
-   //| AND WRITE IT DOWN, so nobody has to select it out of a log pane.  |
-   //|                                                                  |
-   //| ANSI rather than Unicode on purpose: this file exists to be sent, |
-   //| and a UTF-16 text file is the one that arrives full of null bytes |
-   //| and has to be converted before anyone can read a line of it. That |
-   //| is exactly the friction this is here to remove.                   |
-   //|                                                                  |
-   //| The path is the LAST thing printed, because the line that tells   |
-   //| you where the answer is has to be the one still on screen.        |
-   //+------------------------------------------------------------------+
-   FolderCreate("SSReplay");
-   int h = FileOpen(SSR_QA_RESULT_FILE, FILE_WRITE | FILE_TXT | FILE_ANSI);
-   if(h == INVALID_HANDLE)
+   if(g_fh != INVALID_HANDLE)
      {
-      PrintFormat("could not write %s (err %d) - copy the block above instead",
-                  SSR_QA_RESULT_FILE, GetLastError());
-      return;
+      FileClose(g_fh);
+      g_fh = INVALID_HANDLE;
      }
-   FileWriteString(h, StringFormat("SS Replay smoke test  %s\r\n",
-                                   TimeToString(TimeLocal(), TIME_DATE | TIME_MINUTES)));
-   FileWriteString(h, StringFormat("build %s   terminal %s\r\n\r\n",
-                                   SSR_BUILD, TerminalInfoString(TERMINAL_NAME)));
-   for(int i = 0; i < g_out_n; i++)
-      FileWriteString(h, g_out[i] + "\r\n");
-   FileClose(h);
 
    PrintFormat("--> SEND THIS ONE FILE:  MQL5\\Files\\%s   (%d lines)",
                SSR_QA_RESULT_FILE, g_out_n);
