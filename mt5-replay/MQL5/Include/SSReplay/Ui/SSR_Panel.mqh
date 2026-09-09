@@ -657,18 +657,21 @@ private:
 
       //--- the bar. Twenty cells, each one clickable, because a click is
       //--- the only input a chart we are not attached to can give us.
+      //--- the track gives up its right-hand quarter so "1h in 12m" can
+      //--- sit BESIDE it instead of on a line of its own. Twenty cells
+      //--- across 180 px is still four clicks wider than a finger needs.
       m_track_x = bx + 92;
       m_track_y = y + 2;
-      m_track_w = (x + W - SSR_PAD) - m_track_x;
+      m_track_w = (x + W - SSR_PAD - 92) - m_track_x;
       m_w.TrackSegments("spdseg", m_track_x, m_track_y, m_track_w, 14,
                         SSRSpeedLadderIndex(m_state.speed_x100),
                         SSR_SPEED_LADDER_SIZE);
 
       //--- "5x" is a number. "1h in 12m" is something you can plan an
       //--- afternoon around, so the panel says both.
-      Text(6, "spdmean", x + W - SSR_PAD - 96, y + SSR_ROW_H + 1,
+      Text(6, "spdmean", x + W - SSR_PAD - 88, y + 5,
            SSRSpeedMeaning(m_state.speed_x100), SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      return y + SSR_ROW_H + 14;
+      return y + SSR_ROW_H + 2;
      }
 
    //================================================================
@@ -781,6 +784,7 @@ private:
                       "sizerow","hintrow","setuprow","posempty","posmore",
                       "taglbl","poshint","trlbl","trdn","trup","troff",
                       "st1","st2","st3","st4","st5","st6","stmt",
+                      "spreadrow","traderr",
                       "pv0","pv1","pv2","pvbg","pvfg","pvrst",
                       "g3_fr","g3_lb","g3_lg",
                       "ses1","ses2","ses3","ses4","ses5",
@@ -804,17 +808,17 @@ private:
    void              SheetTrade(const int x, const int y, const int w)
      {
       //--- risk
-      m_w.Group("g1", x, y, w, 40, "Risk");
-      Text(10, "risklbl", x + 8, y + 14, "Risk per trade", SSR_C_TEXT_DIM);
+      m_w.Group("g1", x, y, w, 36, "Risk");
+      Text(10, "risklbl", x + 8, y + 13, "Risk per trade", SSR_C_TEXT_DIM);
       //--- the money answers "how much is that", and it sits with the
       //--- label rather than between the steppers, where it used to run
       //--- underneath the + button
-      Text(19, "riskmon", x + 88, y + 14,
+      Text(19, "riskmon", x + 88, y + 13,
            Money(m_state.balance * m_state.risk_percent / 100.0), SSR_C_TEXT_DIM);
-      m_w.Button("riskdn", x + w - 84, y + 11, 16, 16, "-");
-      Text(11, "riskval", x + w - 62, y + 14,
+      m_w.Button("riskdn", x + w - 84, y + 10, 16, 16, "-");
+      Text(11, "riskval", x + w - 62, y + 13,
            StringFormat("%.2f %%", m_state.risk_percent), SSR_C_TEXT);
-      m_w.Button("riskup", x + w - 18, y + 11, 16, 16, "+");
+      m_w.Button("riskup", x + w - 18, y + 10, 16, 16, "+");
 
       //+------------------------------------------------------------------+
       //| WHICH SETUP IS THIS?                                             |
@@ -828,8 +832,8 @@ private:
       //| Read on the way into a trade, not on edit: the same one-read      |
       //| rule the setup panel follows, for the same reason.                |
       //+------------------------------------------------------------------+
-      m_w.Label("taglbl", x + 8, y + 46, "Setup", SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      m_tag_x = x + 48; m_tag_y = y + 42; m_tag_w = w - 56; m_tag_h = 18;
+      m_w.Label("taglbl", x + 8, y + 42, "Setup", SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      m_tag_x = x + 48; m_tag_y = y + 38; m_tag_w = w - 56; m_tag_h = 18;
       m_w.Edit("tagbox", m_tag_x, m_tag_y, m_tag_w, m_tag_h, m_state.trade_tag, false);
       m_w.Hide("tagbox", false);
 
@@ -841,14 +845,14 @@ private:
       //| chart is chosen by structure, and structure is the entire        |
       //| reason a person practises on a replay.                           |
       //+------------------------------------------------------------------+
-      int gy = y + 66;
-      m_w.Group("g2", x, gy, w, 106, "Stop & target");
+      int gy = y + 60;
+      m_w.Group("g2", x, gy, w, 92, "Stop & target");
 
       if(!m_state.lines_armed)
         {
-         m_w.Button("armbtn", x + 8, gy + 14, w - 16, SSR_BTN_H,
+         m_w.Button("armbtn", x + 8, gy + 13, w - 16, SSR_BTN_H,
                     "Place SL / TP lines on the chart", false, m_state.can_trade);
-         Text(12, "hintrow", x + 8, gy + 42,
+         Text(12, "hintrow", x + 8, gy + 40,
               m_state.can_trade
               ? "Then drag them. Buy / Sell would open with no stop until you do."
               : "Waiting for the first price.",
@@ -857,23 +861,23 @@ private:
       else
         {
          //--- the side is read from the geometry, never asked for
-         Text(12, "setuprow", x + 8, gy + 13,
+         Text(12, "setuprow", x + 8, gy + 12,
               m_state.line_long ? "LONG setup - stop below, target above"
                                 : "SHORT setup - stop above, target below",
               m_state.line_long ? SSR_C_RUN : SSR_C_STOP, SSR_FS_SMALL);
 
-         Text(13, "slrow", x + 8, gy + 26,
+         Text(13, "slrow", x + 8, gy + 24,
               StringFormat("Stop      %s      %s",
                            Price(m_state.sl_price),
                            Money(-m_state.risk_money, true)), SSR_C_TEXT);
-         Text(14, "tprow", x + 8, gy + 39,
+         Text(14, "tprow", x + 8, gy + 36,
               StringFormat("Target    %s      %s",
                            Price(m_state.tp_price),
                            Money(m_state.reward_money, true)), SSR_C_TEXT);
-         Text(15, "rrrow", x + w - 96, gy + 26,
+         Text(15, "rrrow", x + w - 96, gy + 24,
               m_state.rr > 0.0 ? StringFormat("%.2f R", m_state.rr) : "- R",
               SSR_C_TEXT_DIM);
-         Text(16, "sizerow", x + w - 96, gy + 39,
+         Text(16, "sizerow", x + w - 96, gy + 36,
               m_state.lot_from_risk > 0.0
               ? StringFormat("%.2f lot", m_state.lot_from_risk)
               : "no size",
@@ -882,7 +886,7 @@ private:
          //--- WHY it cannot be placed, in the words of the drag that
          //--- fixes it. "Invalid" is not something a person can act on.
          if(m_state.order_why != "")
-            Text(12, "setuprow", x + 8, gy + 13, m_state.order_why,
+            Text(12, "setuprow", x + 8, gy + 12, m_state.order_why,
                  SSR_C_STOP, SSR_FS_SMALL);
 
          //--- ONE press opens what the lines describe. The side is not
@@ -894,7 +898,7 @@ private:
          //| describes, named. A button that reads "Open LONG" and places a    |
          //| buy stop is a button that lied to the person who pressed it.      |
          //+------------------------------------------------------------------+
-         m_w.ButtonC("openln", x + 8, gy + 52, w - 16, 22,
+         m_w.ButtonC("openln", x + 8, gy + 46, w - 16, 22,
                      m_state.lot_from_risk > 0.0
                      ? (m_state.entry_armed
                         ? StringFormat("Place %s  %.2f lot",
@@ -911,40 +915,47 @@ private:
                      : (m_state.line_long ? SSR_C_BUY_EDGE : SSR_C_SELL_EDGE),
                      SSR_C_DEAL_TEXT, SSR_FS_TITLE);
          int bw3 = (w - 28) / 3;
-         m_w.Button("flipbtn", x + 8, gy + 78, bw3, 18, "Flip  X");
-         m_w.Button("enbtn",   x + 14 + bw3, gy + 78, bw3, 18,
+         m_w.Button("flipbtn", x + 8, gy + 70, bw3, 18, "Flip  X");
+         m_w.Button("enbtn",   x + 14 + bw3, gy + 70, bw3, 18,
                     m_state.entry_armed ? "At market" : "Entry line");
-         m_w.Button("clrbtn",  x + 20 + bw3 * 2, gy + 78, bw3, 18, "Remove");
+         m_w.Button("clrbtn",  x + 20 + bw3 * 2, gy + 70, bw3, 18, "Remove");
         }
 
       //--- the deal buttons. The side the lines did not draw is dimmed,
       //--- so the chart and the dialog cannot disagree.
-      int dy = gy + 112;
+      int dy = gy + 96;
       int dw = (w - SSR_GAP) / 2;
       bool dim_buy  = !m_state.can_trade ||
                       (m_state.lines_armed && !m_state.line_long);
       bool dim_sell = !m_state.can_trade ||
                       (m_state.lines_armed &&  m_state.line_long);
 
-      m_w.ButtonC("buy", x, dy, dw, 26,
+      m_w.ButtonC("buy", x, dy, dw, 24,
                   StringFormat("Buy  %s", Price(m_state.ask)),
                   dim_buy ? SSR_C_DEAL_DIM : SSR_C_BUY,
                   dim_buy ? SSR_C_DEAL_DIM : SSR_C_BUY_EDGE,
                   SSR_C_DEAL_TEXT, SSR_FS_TITLE);
-      m_w.ButtonC("sell", x + dw + SSR_GAP, dy, dw, 26,
+      m_w.ButtonC("sell", x + dw + SSR_GAP, dy, dw, 24,
                   StringFormat("Sell  %s", Price(m_state.bid)),
                   dim_sell ? SSR_C_DEAL_DIM : SSR_C_SELL,
                   dim_sell ? SSR_C_DEAL_DIM : SSR_C_SELL_EDGE,
                   SSR_C_DEAL_TEXT, SSR_FS_TITLE);
 
-      Text(17, "spreadrow", x, dy + 30,
-           StringFormat("Spread %.1f pt", m_state.spread_points),
-           SSR_C_TEXT_DIM, SSR_FS_SMALL);
-
-      //--- a refused order says why, where the order was refused
-      if(m_port != NULL && m_port.TradeError() != "")
-         Text(18, "traderr", x + 84, dy + 30, m_port.TradeError(),
-              SSR_C_STOP, SSR_FS_SMALL);
+      //+------------------------------------------------------------------+
+      //| THE SPREAD AND THE REFUSAL LIVE IN THE STATUS STRIP NOW.         |
+      //|                                                                  |
+      //| Both were rows under the deal buttons, and between them they     |
+      //| cost the sheet twenty-eight pixels for two things nobody         |
+      //| PRESSES. The panel needed 414 px and the default MetaTrader      |
+      //| window with the Toolbox open gives 363, so every one of those    |
+      //| users lost the whole tabbed half of the panel to compact mode -  |
+      //| measured on this project's own smoke test, twice.                |
+      //|                                                                  |
+      //| The rule that came out of it: the sheet holds what you OPERATE,  |
+      //| the strip holds what you CONSULT and what the panel needs to     |
+      //| tell you. The strip already did exactly this for the reset       |
+      //| confirmation.                                                     |
+      //+------------------------------------------------------------------+
      }
 
    //----------------------------------------------------------------
@@ -952,7 +963,7 @@ private:
    //----------------------------------------------------------------
    void              SheetPositions(const int x, const int y, const int w)
      {
-      m_w.Group("g1", x, y, w, 138, "Open positions");
+      m_w.Group("g1", x, y, w, 134, "Open positions");
 
       if(m_state.pos_rows <= 0)
         {
@@ -1010,7 +1021,7 @@ private:
            }
          //--- the cap is a display cap; when it hides trades, say so
          if(m_state.open_positions > m_state.pos_rows)
-            Text(30, "posmore", x + 8, y + 118,
+            Text(30, "posmore", x + 8, y + 116,
                  StringFormat("+%d more - Close all still closes everything",
                               m_state.open_positions - m_state.pos_rows),
                  SSR_C_HOLD, SSR_FS_SMALL);
@@ -1022,14 +1033,14 @@ private:
       //--- reach the log - and a button that does nothing visible is a
       //--- button the user reports as broken.
       if(m_port != NULL && m_port.TradeError() != "")
-         Text(31, "poshint", x + 8, y + 132, m_port.TradeError(),
+         Text(31, "poshint", x + 8, y + 119, m_port.TradeError(),
               SSR_C_STOP, SSR_FS_SMALL);
       else
-         Text(31, "poshint", x + 8, y + 132,
+         Text(31, "poshint", x + 8, y + 119,
               "H halves   B stop to entry   X closes, or cancels an order",
               SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
-      int by = y + 144;
+      int by = y + 138;
       int bw = (w - SSR_GAP) / 2;
       m_w.Button("be",   x, by, bw, SSR_BTN_H, "Break-even all",
                  false, m_state.open_positions > 0);
@@ -1038,7 +1049,7 @@ private:
 
       //--- the trailing distance, in points, applied to what is open now
       //--- AND to whatever opens next
-      int ty = by + SSR_BTN_H + 8;
+      int ty = by + SSR_BTN_H + 4;
       Text(32, "trlbl", x + 8, ty + 3,
            StringFormat("Trailing stop   %s",
                         m_state.trail_points > 0.0
@@ -1196,30 +1207,50 @@ private:
         {
          Text(50, "stbal", x + SSR_PAD, y + 4, m_reset_warning,
               SSR_C_STOP, SSR_FS_SMALL);
-         m_w.Hide("stflt",  true);
-         m_w.Hide("stopen", true);
-         m_w.Hide("stfid",  true);
+         m_w.Hide("stflt",   true);
+         m_w.Hide("stopen",  true);
+         m_w.Hide("stspread",true);
+         m_w.Hide("stfid",   true);
          return;
         }
-      m_w.Hide("stflt",  false);
-      m_w.Hide("stopen", false);
-      m_w.Hide("stfid",  false);
+      m_w.Hide("stflt",   false);
+      m_w.Hide("stopen",  false);
+      m_w.Hide("stspread",false);
+      m_w.Hide("stfid",   false);
+
+      //--- A REFUSED ORDER TAKES THE STRIP, like the reset question. It
+      //--- is the answer to something the user just pressed, and it is
+      //--- worth more for those seconds than five standing numbers.
+      if(m_port != NULL && m_port.TradeError() != "")
+        {
+         Text(50, "stbal", x + SSR_PAD, y + 4, m_port.TradeError(),
+              SSR_C_STOP, SSR_FS_SMALL);
+         m_w.Hide("stflt",   true);
+         m_w.Hide("stopen",  true);
+         m_w.Hide("stspread",true);
+         m_w.Hide("stfid",   true);
+         return;
+        }
 
       Text(50, "stbal", x + SSR_PAD, y + 4,
-           StringFormat("Balance %s", Money(m_state.balance)), SSR_C_TEXT_DIM,
+           StringFormat("Bal %s", Money(m_state.balance)), SSR_C_TEXT_DIM,
            SSR_FS_SMALL);
-      Text(51, "stflt", x + 132, y + 4,
-           StringFormat("Floating %s", Money(m_state.floating, true)),
+      Text(51, "stflt", x + 116, y + 4,
+           StringFormat("Float %s", Money(m_state.floating, true)),
            m_state.floating >= 0.0 ? SSR_C_RUN : SSR_C_STOP, SSR_FS_SMALL);
-      Text(52, "stopen", x + 244, y + 4,
+      Text(52, "stopen", x + 218, y + 4,
            StringFormat("%d open", m_state.open_positions),
            SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
       //--- SHOW WHAT IS RUNNING, NOT WHAT WAS ASKED FOR. A tool that
       //--- displays the request while emitting something else is the
       //--- quiet dishonesty this whole product exists to avoid.
+      Text(54, "stspread", x + 268, y + 4,
+           StringFormat("sp %.1f", m_state.spread_points),
+           SSR_C_TEXT_DIM, SSR_FS_SMALL);
+
       bool degraded = (m_state.fidelity_effective != m_state.fidelity);
-      Text(53, "stfid", x + 306, y + 4,
+      Text(53, "stfid", x + 330, y + 4,
            SSRFidelityName(m_state.fidelity_effective) + (degraded ? " !" : ""),
            degraded ? SSR_C_HOLD : SSRFidelityColor(m_state.fidelity_effective),
            SSR_FS_SMALL);
@@ -1246,7 +1277,7 @@ private:
                       "spdlbl","spdn","spdbox","spdval","spup","spdmean",
                       "tab0","tab1","tab2","tab3","tabline",
                       "follow","lines","bookmark","jump","sessions","fidelity",
-                      "status","stbal","stflt","stopen","stfid"};
+                      "status","stbal","stflt","stopen","stspread","stfid"};
       for(int i = 0; i < ArraySize(ids); i++)
          m_w.Hide(ids[i], hidden);
       for(int t = 0; t < SSR_SPEED_LADDER_SIZE; t++)

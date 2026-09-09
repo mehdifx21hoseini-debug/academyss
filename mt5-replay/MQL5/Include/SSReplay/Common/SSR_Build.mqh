@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v97 2026-09-09  twice"
+#define SSR_BUILD "v98 2026-09-09  dark"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

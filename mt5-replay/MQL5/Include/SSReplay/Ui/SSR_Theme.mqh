@@ -2,19 +2,24 @@
 //|                                                    SSR_Theme.mqh |
 //|                          SS Replay - Panel Theme & Metrics (UI)  |
 //|                                                                  |
-//|  A CLASSIC WINDOWS DIALOG, not a web app and not a terminal.     |
-//|  Light face, framed group boxes, square corners, no gradients,   |
-//|  no animation. The chart is the subject; this is the instrument  |
-//|  panel bolted beside it.                                         |
+//|  AN INSTRUMENT THAT BELONGS TO THE CHART IT SITS ON.             |
 //|                                                                  |
-//|  WHY LIGHT, AND WHY NOT PURE WHITE                               |
-//|  The user's chart is DARK. A pure-white panel on a dark chart    |
-//|  glares: the eye keeps re-adapting every time it moves between   |
-//|  the two, and after an hour of replay that is a headache rather  |
-//|  than a preference. So the face is a warm-grey 236 rather than   |
-//|  255, the wells are 246 rather than white, and the panel carries |
-//|  a dark outer border so it reads as a WINDOW sitting on the      |
-//|  chart instead of a hole burned through it.                      |
+//|  This was a light Windows dialog for ninety builds. The argument |
+//|  written here for it was sound and aimed at the wrong target: a  |
+//|  PURE WHITE panel on a dark chart glares, the eye re-adapts on   |
+//|  every glance, and an hour of replay becomes a headache. All     |
+//|  true. The conclusion - therefore make it warm grey 236 - solved |
+//|  the glare by making the panel a foreign object instead, a       |
+//|  Windows 95 dialog taped to a black chart.                       |
+//|                                                                  |
+//|  Dark answers the same complaint properly. Nothing glares, and   |
+//|  the panel reads as part of the instrument rather than a window  |
+//|  somebody left open on top of it.                                |
+//|                                                                  |
+//|  ELEVATION, NOT BORDERS. The face is lifted off the chart, the   |
+//|  caption is lifted off the face, and wells are sunk below it.    |
+//|  Three steps, each about eight points of luminance - enough to   |
+//|  read as depth, not enough to look striped.                      |
 //|                                                                  |
 //|  ONE TYPEFACE                                                    |
 //|  There used to be two: Segoe UI for text and Consolas for        |
@@ -25,71 +30,78 @@
 //|  separate name pointing at the same face, so if a terminal ever  |
 //|  proves otherwise it is one line to split them again.            |
 //|                                                                  |
-//|  Colour carries meaning and nothing else - green means running   |
-//|  or long, amber means degraded, red means stopped or short.      |
-//|  Decoration never borrows those three.                           |
+//|  COLOUR CARRIES MEANING AND NOTHING ELSE - green means running   |
+//|  or long, amber means degraded, red means stopped or short. On a |
+//|  dark face those three had to be lifted well above their print   |
+//|  values to stay legible; they are still the only saturated       |
+//|  things here apart from the deal buttons, and decoration never   |
+//|  borrows them. There is exactly one accent and it is not any of  |
+//|  them.                                                           |
 //+------------------------------------------------------------------+
 #ifndef SSR_THEME_MQH
 #define SSR_THEME_MQH
 
 #include "../Common/SSR_Types.mqh"
 
-//--- surfaces
-#define SSR_C_PANEL        C'236,236,236'   // dialog face
-#define SSR_C_PANEL_EDGE   C'88,92,98'      // outer frame, dark on a dark chart
-#define SSR_C_HEADER       C'222,224,227'   // caption strip
-#define SSR_C_WELL         C'246,246,246'   // sunken areas: lists, tracks
-#define SSR_C_WELL_EDGE    C'150,154,160'
-#define SSR_C_GROUP_EDGE   C'196,196,196'   // group-box hairline
-#define SSR_C_STATUS       C'228,228,228'   // status strip
+//--- surfaces. Three steps of elevation: chart, face, caption; wells
+//--- go the other way, below the face, because they are holes.
+#define SSR_C_PANEL        C'26,29,35'      // the face, lifted off the chart
+#define SSR_C_PANEL_EDGE   C'58,64,75'      // outer frame
+#define SSR_C_HEADER       C'35,39,47'      // caption strip, lifted again
+#define SSR_C_WELL         C'18,20,25'      // sunken areas: lists, tracks
+#define SSR_C_WELL_EDGE    C'46,51,61'
+#define SSR_C_GROUP_EDGE   C'44,49,59'      // group-box hairline
+#define SSR_C_STATUS       C'21,23,29'      // status strip
 
 //--- text
-#define SSR_C_TEXT         C'16,16,16'      // primary
-#define SSR_C_TEXT_DIM     C'82,86,92'      // labels, units
-#define SSR_C_TEXT_FAINT   C'146,150,156'   // disabled
+#define SSR_C_TEXT         C'233,236,242'   // primary
+#define SSR_C_TEXT_DIM     C'149,157,171'   // labels, units
+#define SSR_C_TEXT_FAINT   C'95,102,115'    // disabled
 
 //--- controls
-#define SSR_C_BTN          C'225,225,225'
-#define SSR_C_BTN_EDGE     C'173,173,173'
-#define SSR_C_BTN_TEXT     C'16,16,16'
-#define SSR_C_BTN_ON       C'204,228,247'   // engaged toggle - the Windows blue
-#define SSR_C_BTN_ON_TEXT  C'0,60,110'
-#define SSR_C_BTN_ON_EDGE  C'0,84,153'
+#define SSR_C_BTN          C'44,49,59'
+#define SSR_C_BTN_EDGE     C'64,70,83'
+#define SSR_C_BTN_TEXT     C'226,231,239'
+#define SSR_C_BTN_ON       C'29,66,108'     // engaged toggle, accent-tinted
+#define SSR_C_BTN_ON_TEXT  C'166,206,252'
+#define SSR_C_BTN_ON_EDGE  C'58,126,198'
 
 //--- tabs
-#define SSR_C_TAB          C'220,220,220'
-#define SSR_C_TAB_ON       C'236,236,236'   // same as the face: the sheet
-#define SSR_C_TAB_EDGE     C'168,172,178'
+#define SSR_C_TAB          C'32,36,44'
+#define SSR_C_TAB_ON       C'26,29,35'      // same as the face: the sheet
+#define SSR_C_TAB_EDGE     C'52,58,69'
 
 //--- semantic. Separate from the accent on purpose: state must never
-//--- be confusable with styling.
-#define SSR_C_RUN          C'28,122,69'     // PLAYING / LONG
-#define SSR_C_HOLD         C'163,90,0'      // PAUSED / degraded
-#define SSR_C_STOP         C'176,58,46'     // ERROR / leak / SHORT
-#define SSR_C_IDLE         C'110,114,120'   // IDLE / READY
+//--- be confusable with styling. Lifted for a dark face - the print
+//--- values these started from read as mud at 26,29,35.
+#define SSR_C_RUN          C'63,191,122'    // PLAYING / LONG
+#define SSR_C_HOLD         C'227,164,60'    // PAUSED / degraded
+#define SSR_C_STOP         C'233,92,82'     // ERROR / leak / SHORT
+#define SSR_C_IDLE         C'126,134,147'   // IDLE / READY
 
-//--- the deal buttons, which are the only saturated things here
-#define SSR_C_BUY          C'46,139,87'
-#define SSR_C_BUY_EDGE     C'34,105,65'
-#define SSR_C_SELL         C'192,57,43'
-#define SSR_C_SELL_EDGE    C'148,41,30'
+//--- the deal buttons, which are the loudest things here and should be
+#define SSR_C_BUY          C'33,148,93'
+#define SSR_C_BUY_EDGE     C'48,188,118'
+#define SSR_C_SELL         C'197,57,53'
+#define SSR_C_SELL_EDGE    C'237,87,79'
 #define SSR_C_DEAL_TEXT    C'255,255,255'
-#define SSR_C_DEAL_DIM     C'182,186,190'   // the side the lines did not draw
+#define SSR_C_DEAL_DIM     C'52,57,67'      // the side the lines did not draw
 
 //--- the trackbar
-#define SSR_C_TRACK        C'228,230,233'
-#define SSR_C_TRACK_EDGE   C'138,143,149'
-#define SSR_C_TRACK_FILL   C'27,116,187'
-#define SSR_C_THUMB        C'246,246,248'
-#define SSR_C_THUMB_EDGE   C'111,114,118'
-#define SSR_C_TICK         C'168,173,179'
+#define SSR_C_TRACK        C'18,20,25'
+#define SSR_C_TRACK_EDGE   C'52,58,69'
+#define SSR_C_TRACK_FILL   C'58,126,198'
+#define SSR_C_THUMB        C'216,222,232'
+#define SSR_C_THUMB_EDGE   C'118,126,141'
+#define SSR_C_TICK         C'70,77,90'
 
 //--- the one accent, used sparingly
-#define SSR_C_ACCENT       C'20,64,120'
+#define SSR_C_ACCENT       C'88,158,236'
 
-//--- the SL/TP lines on the chart
-#define SSR_C_LINE_SL      C'192,57,43'
-#define SSR_C_LINE_TP      C'46,139,87'
+//--- the SL/TP lines on the chart. These sit on the CHART, not on the
+//--- panel, so they answer to the candles rather than to the face.
+#define SSR_C_LINE_SL      C'233,92,82'
+#define SSR_C_LINE_TP      C'63,191,122'
 
 //--- type. ONE face - see the header.
 #define SSR_FONT           "Tahoma"
@@ -117,17 +129,17 @@
 //| the status bar, where it looks like a rendering fault rather than |
 //| a number nobody updated. Positions now ends at 193, Trade at 218. |
 //+------------------------------------------------------------------+
-#define SSR_SHEET_H        222
+#define SSR_SHEET_H        186
 #define SSR_PANEL_W        420
 //--- ADDED UP BY THE COMPILER, not by me. The sum above was a comment
 //--- for eleven builds and the two rows v69 added went straight past
 //--- the end of it; written this way, a taller sheet moves the frame
 //--- with it and there is no second number to forget.
-#define SSR_PANEL_H        (23 + 32 + 27 + 33 + 21 + SSR_SHEET_H + 18 + 14)
-//--- CAPTION 23 + CLOCK/PROGRESS 32 + TRANSPORT 27 + SPEED 33
+#define SSR_PANEL_H        (23 + 32 + 27 + 21 + 21 + SSR_SHEET_H + 18 + 8)
+//--- CAPTION 23 + CLOCK/PROGRESS 32 + TRANSPORT 27 + SPEED 21
 //--- + STATUS 18 + MARGIN 7. Everything a person touches while the
 //--- replay runs, and nothing they only consult.
-#define SSR_PANEL_COMPACT_H 140
+#define SSR_PANEL_COMPACT_H 128
 #define SSR_PAD            8
 #define SSR_ROW_H          19
 #define SSR_HEADER_H       20
