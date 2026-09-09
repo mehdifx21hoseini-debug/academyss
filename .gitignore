@@ -1,0 +1,8 @@
+#--- BUILD OUTPUT, NOT SOURCE.
+#
+# tools/ssr_package.sh rebuilds SSReplay-<build>.zip from the tree at any
+# time, so committing one stores four megabytes to say what the tree
+# already says. Forty-eight of them were tracked up to v79 and the habit
+# was dropped when the packager landed; this is that decision written
+# down, so the next build does not drift back into the repo.
+SSReplay-v*.zip
