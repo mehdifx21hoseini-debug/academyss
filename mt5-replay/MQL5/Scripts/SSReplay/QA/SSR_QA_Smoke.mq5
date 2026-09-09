@@ -4417,6 +4417,228 @@ void OnStart()
         }
    }
 
+   //+------------------------------------------------------------------+
+   //| 40. NOTHING IS DRAWN OVER ANYTHING ELSE, MEASURED.               |
+   //|                                                                  |
+   //| Every column in this panel was placed by arithmetic in somebody's |
+   //| head. The Positions row is what that is worth: its note column    |
+   //| sat nineteen pixels from the money column and would have printed  |
+   //| straight through it - and nobody saw that for four builds only    |
+   //| because a second bug stopped the note being drawn at all.         |
+   //|                                                                  |
+   //| So the labels are MEASURED, with the real face at the real point  |
+   //| size on the machine the user is on, which is the only place the   |
+   //| question has an answer: the same label is a different width at    |
+   //| 100% and at 150% display scaling.                                 |
+   //|                                                                  |
+   //| Every sheet, because a collision only exists on the sheet that    |
+   //| draws both halves of it.                                          |
+   //+------------------------------------------------------------------+
+   {
+      Step("40 measuring every label");
+
+      Stash(SSR_PANEL_FILE);
+
+      long lchart = ChartOpen(rsym, PERIOD_M1);
+      if(Check("40 a chart to measure on", lchart != 0, rsym))
+        {
+         //--- a probe first: if this terminal cannot measure text, every
+         //--- check below would pass by measuring nothing
+         uint pw = 0, ph = 0;
+         bool can_measure = (TextSetFont(SSR_FONT, -80, 0, 0) &&
+                             TextGetSize("Close all", pw, ph) && pw > 0);
+
+         if(!can_measure)
+           {
+            Note("40 nothing was measured",
+                 "TextGetSize failed on this terminal, so the overlap test "
+                 "would have passed by having no boxes to compare");
+            ChartClose(lchart);
+           }
+         else
+           {
+            CSSRTradingEngine lacct;
+            lacct.SetBalance(10000.0);
+            lacct.OnSessionStart(rsym,
+                                 (int)SymbolInfoInteger(rsym, SYMBOL_DIGITS),
+                                 SymbolInfoDouble(rsym, SYMBOL_POINT), 0);
+            MqlTick lt[1];
+            double lpt = SymbolInfoDouble(rsym, SYMBOL_POINT);
+            if(lpt <= 0.0) lpt = 0.00001;
+            double lbase = SymbolInfoDouble(rsym, SYMBOL_BID);
+            if(lbase <= 0.0) lbase = 10000.0 * lpt;
+            lt[0].bid = lbase; lt[0].ask = lbase + 10.0 * lpt;
+            lt[0].time_msc = 1000; lt[0].last = lbase;
+            lt[0].volume = 1; lt[0].flags = 0;
+            lacct.OnTicks(lt, 1);
+            //--- a position with NO STOP, so the note column is populated:
+            //--- the empty case is the one that never collided
+            lacct.Open(SSR_ORDER_BUY, 0.10, 0.0, 0.0);
+
+            CSSRReplayGroup lgroup;
+            lgroup.Add(GetPointer(ctrl));
+            CSSRGroupPort lport;
+            lport.Attach(GetPointer(lgroup));
+            lport.AttachAccount(GetPointer(lacct));
+
+            CSSRPanel lp;
+            lp.Create(lchart, GetPointer(lport), "SSRL_");
+            lp.Render();
+
+            if(lp.IsCompact())
+              {
+               Note("40 only the compact panel was measured",
+                    StringFormat("this chart is %d px and has no sheets - "
+                                 "close the Toolbox (Ctrl+T) and re-run to "
+                                 "measure all five",
+                                 (int)ChartGetInteger(lchart,
+                                                CHART_HEIGHT_IN_PIXELS)));
+               string cw = "";
+               int chits = LabelOverlaps(lchart, "SSRL_", cw);
+               Check("40 the compact panel draws nothing over anything",
+                     chits == 0,
+                     (chits == 0 ? "no overlapping labels"
+                                 : StringFormat("%d pair(s), worst: %s",
+                                                chits, cw)));
+              }
+            else
+              {
+               //--- the sheet a collision is on is the sheet that draws
+               //--- both halves of it, so every one gets its own pass
+               string tabs[] = {"tab0", "tab1", "tab2", "tab3"};
+               for(int t = 0; t < ArraySize(tabs); t++)
+                 {
+                  lp.Dispatch(tabs[t]);
+                  lp.Render();
+                  string sw = "";
+                  int hits = LabelOverlaps(lchart, "SSRL_", sw);
+                  Check(StringFormat("40 sheet %d draws nothing over anything",
+                                     t),
+                        hits == 0,
+                        (hits == 0
+                         ? "measured, no overlapping labels"
+                         : StringFormat("%d pair(s), worst: %s", hits, sw)));
+                 }
+
+               //+------------------------------------------------------------------+
+               //| AND THE ROW THAT STARTED IT, SPECIFICALLY.                       |
+               //|                                                                  |
+               //| A position with no stop draws all four columns of a Positions    |
+               //| row at once: the position, the note, the money and the buttons.   |
+               //| That combination is the one that collided, and it is the one a    |
+               //| general sweep would miss if the sheet happened to be empty.        |
+               //+------------------------------------------------------------------+
+               lp.Dispatch("tab1");
+               lp.Render();
+               int nx, ny, nw, nh, mx, my, mw, mh;
+               bool got = (LabelBox(lchart, "SSRL_pn0", nx, ny, nw, nh) &&
+                           LabelBox(lchart, "SSRL_pl0", mx, my, mw, mh));
+               if(Check("40 the no-stop note and the money are both drawn",
+                        got, "a row with no stop draws every column it has"))
+                  Check("40 and the note stops before the money starts",
+                        nx + nw <= mx,
+                        StringFormat("note ends at %d, money starts at %d "
+                                     "(%d px %s)", nx + nw, mx,
+                                     (int)MathAbs(mx - (nx + nw)),
+                                     (nx + nw <= mx ? "clear" : "OVER")));
+              }
+
+            //+------------------------------------------------------------------+
+            //| A PANEL ON A CHART WITH ROOM IS ENTIRELY ON THAT CHART.          |
+            //|                                                                  |
+            //| The clamp only kept the CAPTION reachable - a rule written for a  |
+            //| panel dragged off the bottom and applied to the right edge too.   |
+            //| So a panel nudged right on a wide chart stayed hanging off it,    |
+            //| with close, collapse, corner, ? and K all past the edge.          |
+            //+------------------------------------------------------------------+
+            int lcw = (int)ChartGetInteger(lchart, CHART_WIDTH_IN_PIXELS);
+            lp.Destroy();
+
+            CSSRSessionFile far;
+            if(far.Create(SSR_PANEL_FILE))
+              {
+               far.Section("panel");
+               far.SetInt("x", 7000);   // inside the sanity bound, far right
+               far.SetInt("y", 10);
+               far.Close();
+              }
+            CSSRPanel lp2;
+            lp2.Create(lchart, GetPointer(lport), "SSRL_");
+            lp2.Render();
+            if(lcw >= SSR_PANEL_W)
+               Check("40 a panel from far off the right edge is pulled fully back",
+                     lp2.X() + SSR_PANEL_W <= lcw,
+                     StringFormat("x %d + %d panel = %d, on a %d px chart",
+                                  lp2.X(), SSR_PANEL_W,
+                                  lp2.X() + SSR_PANEL_W, lcw));
+            else
+               Note("40 the right-edge clamp was not measured",
+                    StringFormat("this chart is %d px and the panel is %d - "
+                                 "narrower than the panel is the one case "
+                                 "the clamp cannot fix", lcw, SSR_PANEL_W));
+            lp2.Destroy();
+
+            lacct.CloseAll();
+            ChartClose(lchart);
+           }
+        }
+
+      Unstash(SSR_PANEL_FILE);
+
+      //+------------------------------------------------------------------+
+      //| 40b. THE PLANNING LINES SAY WHICH IS WHICH.                      |
+      //|                                                                  |
+      //| A red one, a green one and an amber one, and nothing written on   |
+      //| any of them: which was the stop and which the target was carried  |
+      //| by COLOUR ALONE. A trader who cannot separate this red from this  |
+      //| green was being asked to drag one below the price and one above   |
+      //| it, with no way to tell them apart but hovering each in turn -     |
+      //| and a tooltip is not a second channel, it is the same channel      |
+      //| behind a delay.                                                   |
+      //+------------------------------------------------------------------+
+      long gchart = ChartOpen(rsym, PERIOD_M1);
+      if(Check("40 a chart for the planning lines", gchart != 0, rsym))
+        {
+         CSSRTradeLines gl;
+         gl.Attach(gchart, (int)SymbolInfoInteger(rsym, SYMBOL_DIGITS),
+                   SymbolInfoDouble(rsym, SYMBOL_POINT),
+                   SSR_C_LINE_SL, SSR_C_LINE_TP);
+         double gp = SymbolInfoDouble(rsym, SYMBOL_BID);
+         if(gp <= 0.0) gp = 1.0;
+         double gpt = SymbolInfoDouble(rsym, SYMBOL_POINT);
+         if(gpt <= 0.0) gpt = 0.00001;
+
+         //--- Arm takes a PRICE, a stop DISTANCE in points and an R:R -
+         //--- not two prices. Read before writing, after four guesses
+         //--- in this project that each cost a compile.
+         bool armed = gl.Arm(gp, 100.0, 2.0);
+         if(Check("40 the lines arm", armed,
+                  StringFormat("entry %.5f, 100 pt stop, 2R target", gp)))
+           {
+            string sl_txt = "", tp_txt = "";
+            int found = 0;
+            int gtot = ObjectsTotal(gchart, -1, OBJ_HLINE);
+            for(int i = 0; i < gtot; i++)
+              {
+               string nm = ObjectName(gchart, i, -1, OBJ_HLINE);
+               string tx = ObjectGetString(gchart, nm, OBJPROP_TEXT);
+               if(StringFind(tx, "STOP") >= 0)   { sl_txt = tx; found++; }
+               if(StringFind(tx, "TARGET") >= 0) { tp_txt = tx; found++; }
+              }
+            Check("40 the stop and the target carry their names, not just "
+                  "their colours",
+                  found >= 2,
+                  (found >= 2
+                   ? "\"" + sl_txt + "\" and \"" + tp_txt + "\""
+                   : StringFormat("%d of 2 named - the chart draws object "
+                                  "descriptions, and these two had none",
+                                  found)));
+           }
+         gl.Clear();
+         ChartClose(gchart);
+        }
+   }
+
    ctrl.Release();
    Cleanup(rsym);
    Done();
@@ -4430,6 +4652,108 @@ void OnStart()
 //| - so nothing here is a shape the product does not already have.  |
 //| Equity sits at `start` every day but the last, which lands on    |
 //| `final_equity`, so each case breaks exactly one rule.             |
+//+------------------------------------------------------------------+
+//| WHAT A LABEL ACTUALLY OCCUPIES, IN PIXELS, ON THIS TERMINAL.     |
+//|                                                                  |
+//| Every column in this panel was placed by arithmetic in somebody's |
+//| head - "that's about four pixels a character, so 128 is clear of  |
+//| the price". The Positions row is the proof that it does not work: |
+//| its note column sat nineteen pixels from the money column and     |
+//| would have printed straight through it, and nobody saw that for   |
+//| four builds because the note had a second bug that stopped it      |
+//| being drawn at all.                                               |
+//|                                                                  |
+//| TextGetSize answers with the real face at the real point size on  |
+//| the machine the user is on, which is the only place the question  |
+//| has an answer: the same label is a different width at 100% and at |
+//| 150% display scaling.                                             |
+//|                                                                  |
+//| Negative size means tenths of a point and follows the OS scaling, |
+//| which is exactly what OBJPROP_FONTSIZE does.                      |
+//+------------------------------------------------------------------+
+bool LabelBox(const long chart, const string name,
+              int &lx, int &ly, int &lw, int &lh)
+  {
+   if(ObjectFind(chart, name) < 0)
+      return false;
+   if(ObjectGetInteger(chart, name, OBJPROP_TYPE) != OBJ_LABEL)
+      return false;
+   string txt = ObjectGetString(chart, name, OBJPROP_TEXT);
+   if(txt == "")
+      return false;                    // nothing drawn, nothing to collide
+
+   string font = ObjectGetString(chart, name, OBJPROP_FONT);
+   int    fs   = (int)ObjectGetInteger(chart, name, OBJPROP_FONTSIZE);
+   if(font == "" || fs <= 0)
+      return false;
+
+   uint tw = 0, th = 0;
+   if(!TextSetFont(font, -fs * 10, 0, 0))
+      return false;
+   if(!TextGetSize(txt, tw, th))
+      return false;
+
+   lx = (int)ObjectGetInteger(chart, name, OBJPROP_XDISTANCE);
+   ly = (int)ObjectGetInteger(chart, name, OBJPROP_YDISTANCE);
+   lw = (int)tw;
+   lh = (int)th;
+   return true;
+  }
+
+//+------------------------------------------------------------------+
+//| Measure every label of one panel and report the worst overlap.   |
+//|                                                                  |
+//| Returns the number of overlapping PAIRS, and names the worst one. |
+//| Two labels overlap when their boxes intersect by more than the    |
+//| tolerance - one pixel, because a face's reported width and its    |
+//| painted extent can differ by that much and a test that cries at   |
+//| one pixel is a test people switch off.                            |
+//+------------------------------------------------------------------+
+int LabelOverlaps(const long chart, const string prefix, string &worst)
+  {
+   string names[];
+   int    xs[], ys[], ws[], hs[];
+   int    n = 0;
+   int    total = ObjectsTotal(chart, -1, OBJ_LABEL);
+   ArrayResize(names, total); ArrayResize(xs, total);
+   ArrayResize(ys, total);    ArrayResize(ws, total);
+   ArrayResize(hs, total);
+
+   for(int i = 0; i < total; i++)
+     {
+      string nm = ObjectName(chart, i, -1, OBJ_LABEL);
+      if(StringFind(nm, prefix) != 0)
+         continue;
+      int lx, ly, lw, lh;
+      if(!LabelBox(chart, nm, lx, ly, lw, lh))
+         continue;
+      names[n] = nm; xs[n] = lx; ys[n] = ly; ws[n] = lw; hs[n] = lh;
+      n++;
+     }
+
+   int hits = 0, deepest = 0;
+   worst = "";
+   for(int a = 0; a < n; a++)
+      for(int b = a + 1; b < n; b++)
+        {
+         int ox = MathMin(xs[a] + ws[a], xs[b] + ws[b]) - MathMax(xs[a], xs[b]);
+         int oy = MathMin(ys[a] + hs[a], ys[b] + hs[b]) - MathMax(ys[a], ys[b]);
+         if(ox <= 1 || oy <= 1)
+            continue;
+         hits++;
+         if(ox > deepest)
+           {
+            deepest = ox;
+            worst = StringFormat("%s [%d..%d] over %s [%d..%d], %d px",
+                                 StringSubstr(names[a], StringLen(prefix)),
+                                 xs[a], xs[a] + ws[a],
+                                 StringSubstr(names[b], StringLen(prefix)),
+                                 xs[b], xs[b] + ws[b], ox);
+           }
+        }
+   return hits;
+  }
+
 //+------------------------------------------------------------------+
 void PropCase(const string what, const double start, const double target_pct,
               const double daily_pct, const double total_pct,

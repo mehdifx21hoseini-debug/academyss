@@ -444,12 +444,58 @@ public:
       int ch = (int)ChartGetInteger(m_chart, CHART_HEIGHT_IN_PIXELS);
       if(cw <= 0 || ch <= 0)
          return;                       // not measured yet; leave it alone
-      //--- always leave the caption reachable, so a panel pushed off the
-      //--- bottom can still be grabbed and dragged back
-      if(m_x > cw - 60)        m_x = cw - 60;
-      if(m_y > ch - SSR_HEADER_H - 4) m_y = ch - SSR_HEADER_H - 4;
+
+      //+------------------------------------------------------------------+
+      //| WHEN THE CHART CAN HOLD THE WHOLE PANEL, IT HOLDS THE WHOLE ONE. |
+      //|                                                                  |
+      //| This clamped only to "the caption is still reachable" - a rule    |
+      //| written for a panel dragged off the bottom, and applied to the    |
+      //| right edge as well. So a panel nudged right on a chart with       |
+      //| plenty of room stayed hanging off it, with X, collapse, corner,   |
+      //| ? and K all past the edge: every control in the caption, gone,    |
+      //| on a chart that had room for all of them.                        |
+      //|                                                                  |
+      //| The reachability rule is the FALLBACK now, for the case it was    |
+      //| written for: a chart too small for the panel at all.              |
+      //+------------------------------------------------------------------+
+      if(cw >= W)
+        {
+         if(m_x > cw - W) m_x = cw - W;
+        }
+      else if(m_x > cw - 60)
+         m_x = cw - 60;                // narrower than the panel: see below
+
+      if(ch >= H)
+        {
+         if(m_y > ch - H) m_y = ch - H;
+        }
+      else if(m_y > ch - SSR_HEADER_H - 4)
+         m_y = ch - SSR_HEADER_H - 4;
+
       if(m_x < 0) m_x = 0;
       if(m_y < 0) m_y = 0;
+     }
+
+   //+------------------------------------------------------------------+
+   //| A CHART NARROWER THAN THE PANEL IS A LIMIT, NOT A BUG.           |
+   //|                                                                  |
+   //| MQL5 has no layout engine and no way to scale an object, so a     |
+   //| 420 px panel cannot become a 340 px panel: every sheet's columns  |
+   //| are laid out in pixels from both edges, and there is no width at  |
+   //| which they all still clear each other. Compact mode answers a     |
+   //| chart that is too SHORT because the answer there is to drop       |
+   //| whole rows; there is no equivalent for too NARROW, because the    |
+   //| thing that would have to be dropped is half of every row.          |
+   //|                                                                  |
+   //| So it is said rather than hidden. A four-chart grid on a laptop   |
+   //| is a real setup, and a user whose close button is off the edge     |
+   //| deserves to be told why instead of concluding the panel is         |
+   //| broken.                                                            |
+   //+------------------------------------------------------------------+
+   bool              TooNarrow(void)
+     {
+      int cw = (int)ChartGetInteger(m_chart, CHART_WIDTH_IN_PIXELS);
+      return (cw > 0 && cw < SSR_PANEL_W);
      }
 
 
@@ -782,7 +828,7 @@ private:
    //================================================================
    void              DrawCaption(const int x, const int y, const int W)
      {
-      m_w.Rect("hdr", x + 1, y + 1, W - 2, SSR_HEADER_H, SSR_C_HEADER, SSR_C_HEADER);
+      m_w.Rect("hdr", x + 1, y + 1, W - 2, SSR_HEADER_H, SSR_C_HEADER, SSR_C_GROUP_EDGE);
       Text(0, "title", x + SSR_PAD, y + 4, "SS Replay", SSR_C_ACCENT, SSR_FS_TITLE);
 
       //+------------------------------------------------------------------+
@@ -1371,16 +1417,29 @@ private:
 
             Text(80 + r, "pr" + t, x + 8, ry + 3, m_state.pos_text[r],
                  SSR_C_TEXT);
-            Text(104 + r, "pn" + t, x + 8 + 128, ry + 3, note,
+            //+------------------------------------------------------------------+
+            //| THE NOTE'S COLUMN, WHICH IT DID NOT HAVE.                        |
+            //|                                                                  |
+            //| It sat at x+136 and the P/L column starts at x+w-140, which on    |
+            //| a 295 px sheet is x+155 - nineteen pixels for "  no stop". The    |
+            //| overlap was invisible only because the note was never drawn at    |
+            //| all (it shared an object with the close button, see above), so    |
+            //| fixing that bug would have printed one over the other.            |
+            //|                                                                  |
+            //| The row now has four columns that do not touch: the position at   |
+            //| x+8, the note at x+120 - clear of the widest "SELL 100.00 @       |
+            //| 1.23456" - the money at x+w-116, and the three buttons.           |
+            //+------------------------------------------------------------------+
+            Text(104 + r, "pn" + t, x + 120, ry + 3, note,
                  (m_state.pos_no_stop[r] ? SSR_C_STOP : SSR_C_TEXT_FAINT),
                  SSR_FS_SMALL);
             //--- a pending has no result yet, and 0.00 beside real
             //--- positions reads as break-even rather than as "not yet"
             if(m_state.pos_pending[r])
-               Text(92 + r, "pl" + t, x + w - 140, ry + 3, "waiting",
+               Text(92 + r, "pl" + t, x + w - 116, ry + 3, "waiting",
                     SSR_C_HOLD);
             else
-               Text(92 + r, "pl" + t, x + w - 140, ry + 3,
+               Text(92 + r, "pl" + t, x + w - 116, ry + 3,
                     Money(m_state.pos_pl[r], true),
                     m_state.pos_pl[r] >= 0.0 ? SSR_C_RUN : SSR_C_STOP);
 
@@ -1740,6 +1799,26 @@ private:
       //--- and only for as long as a warning is worth a balance: this is
       //--- the answer to a keypress, not a standing condition, and the
       //--- five numbers it displaces are wanted the rest of the time
+      //--- a chart too narrow for the panel is a standing condition, not
+      //--- an answer to a keypress, so it stands: the four numbers it
+      //--- displaces are all off the right-hand edge anyway
+      if(TooNarrow())
+        {
+         Text(50, "stbal", x + SSR_PAD, y + 4,
+              //--- 59 characters at a three-digit width, and TooNarrow
+              //--- cannot fire at four: MetaTrader draws 63
+              StringFormat("chart is %d px, panel needs %d - controls "
+                           "are off the edge",
+                           (int)ChartGetInteger(m_chart, CHART_WIDTH_IN_PIXELS),
+                           SSR_PANEL_W),
+              SSR_C_HOLD, SSR_FS_SMALL);
+         m_w.Hide("stflt",   true);
+         m_w.Hide("stopen",  true);
+         m_w.Hide("stspread",true);
+         m_w.Hide("stfid",   true);
+         return;
+        }
+
       if(m_pro_why != "" && GetTickCount() - m_pro_said < SSR_CONFIRM_MS)
         {
          Text(50, "stbal", x + SSR_PAD, y + 4, m_pro_why,

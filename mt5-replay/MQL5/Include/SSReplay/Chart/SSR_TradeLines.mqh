@@ -117,6 +117,23 @@ private:
       ObjectSetInteger(m_chart, n, OBJPROP_STYLE,   STYLE_DASHDOT);
       ObjectSetString (m_chart, n, OBJPROP_TOOLTIP, tip);
       //+------------------------------------------------------------------+
+      //| THE WORD, NOT ONLY THE COLOUR.                                   |
+      //|                                                                  |
+      //| These three lines were a red one, a green one and an amber one    |
+      //| with nothing written on them. Which is the stop and which is the  |
+      //| target was carried by colour ALONE - and a trader who cannot      |
+      //| separate this red from this green was being asked to drag one of  |
+      //| them below the price and one above it with no way to tell them    |
+      //| apart except by hovering each one in turn.                        |
+      //|                                                                  |
+      //| The recorded position levels have said their name since they      |
+      //| shipped, through Level(). These did not, because they were built  |
+      //| by a different function that only set the tooltip - and a tooltip |
+      //| is not a second channel, it is the same channel behind a delay.   |
+      //+------------------------------------------------------------------+
+      ObjectSetString (m_chart, n, OBJPROP_TEXT, tip);
+
+      //+------------------------------------------------------------------+
       //| SELECTED, SO THE FIRST TOUCH DRAGS IT.                           |
       //|                                                                  |
       //| A MetaTrader object has to be selected before it can be moved,   |

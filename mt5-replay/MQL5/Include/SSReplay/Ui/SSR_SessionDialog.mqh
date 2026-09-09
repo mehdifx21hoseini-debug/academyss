@@ -111,7 +111,7 @@ public:
       int x = m_x, y = m_y;
       m_w.Rect("bg", x, y, SSR_SD_W, SSR_SD_H, SSR_C_PANEL, SSR_C_PANEL_EDGE);
       m_w.Rect("hdr", x + 1, y + 1, SSR_SD_W - 2, SSR_HEADER_H,
-               SSR_C_HEADER, SSR_C_HEADER);
+               SSR_C_HEADER, SSR_C_GROUP_EDGE);
       m_w.Label("title", x + SSR_PAD, y + 5,
                 (m_mode == SSR_SD_CONFIRM_SAVE ? "OVERWRITE SESSION?" : "SESSIONS"),
                 SSR_C_ACCENT, SSR_FS_TITLE);

@@ -52,17 +52,110 @@
 //--- buttons floating on the chart with nothing behind them.
 //--- Twelve points higher, with an edge bright enough to close it.
 #define SSR_C_PANEL        C'38,42,51'      // the face, lifted off the chart
-#define SSR_C_PANEL_EDGE   C'92,100,116'    // outer frame
-#define SSR_C_HEADER       C'50,55,67'      // caption strip, lifted again
+#define SSR_C_PANEL_EDGE   C'108,116,130'   // outer frame - see A18
+#define SSR_C_HEADER       C'33,36,44'      // caption strip, RECESSED - see below
 #define SSR_C_WELL         C'24,27,33'      // sunken areas: lists, tracks
 #define SSR_C_WELL_EDGE    C'70,77,90'
 #define SSR_C_GROUP_EDGE   C'62,68,81'      // group-box hairline
 #define SSR_C_STATUS       C'31,34,42'      // status strip
 
+//+------------------------------------------------------------------+
+//| EVERY ONE OF THESE WAS MEASURED, AND ELEVEN OF THEM FAILED.      |
+//|                                                                  |
+//| Phase 9 computed the WCAG contrast ratio of every foreground     |
+//| this panel draws against every surface it draws it on. Eleven of |
+//| thirty-eight pairs were below 4.5:1 - the threshold for text     |
+//| this small - and the worst was the build tag at 2.06:1, which is |
+//| the one label a user is asked to read off a screenshot.          |
+//|                                                                  |
+//| THE CAPTION WAS THE PROBLEM SURFACE. Five of the eleven were     |
+//| "on the header": it was the lightest thing in the panel, so      |
+//| every colour on it had the least room. It is RECESSED now, like  |
+//| the status strip at the other end, and the body is the lifted    |
+//| part between them - which fixed five failures without changing   |
+//| a single foreground colour.                                      |
+//|                                                                  |
+//| THERE IS ROOM FOR TWO READABLE GREYS BELOW WHITE, NOT THREE.     |
+//|                                                                  |
+//| Solved numerically: the dimmest grey that clears 4.5:1 on this   |
+//| panel is about 149, and TEXT_DIM was already 149. A third tier   |
+//| below TEXT_DIM is, by definition, below the readable floor. So   |
+//| the ramp was re-spread rather than extended - 233 / 186 / 149,   |
+//| three visibly distinct steps, all of them readable, instead of   |
+//| four steps of which the last was decoration.                     |
+//|                                                                  |
+//| THE PAIRS ARE DECLARED HERE, BESIDE THE TOKENS, and audit A18    |
+//| reads these lines. There is no way to derive which colour is     |
+//| drawn on which surface without a layout engine, so the list is   |
+//| kept by hand - and it is kept HERE, where changing a token and   |
+//| forgetting the pair means editing two lines that touch.          |
+//|                                                                  |
+//| `text` is held to 4.5:1 (WCAG AA, small text). `ui` is held to   |
+//| 3.0:1 (WCAG 1.4.11, non-text components: borders and fills that  |
+//| carry meaning rather than words).                                |
+//+------------------------------------------------------------------+
+//--- SSR_CONTRAST: SSR_C_TEXT on SSR_C_PANEL text
+//--- SSR_CONTRAST: SSR_C_TEXT on SSR_C_HEADER text
+//--- SSR_CONTRAST: SSR_C_TEXT on SSR_C_STATUS text
+//--- SSR_CONTRAST: SSR_C_TEXT on SSR_C_WELL text
+//--- SSR_CONTRAST: SSR_C_TEXT on SSR_C_TAB text
+//--- SSR_CONTRAST: SSR_C_TEXT on SSR_C_TAB_ON text
+//--- SSR_CONTRAST: SSR_C_TEXT_DIM on SSR_C_PANEL text
+//--- SSR_CONTRAST: SSR_C_TEXT_DIM on SSR_C_HEADER text
+//--- SSR_CONTRAST: SSR_C_TEXT_DIM on SSR_C_STATUS text
+//--- SSR_CONTRAST: SSR_C_TEXT_DIM on SSR_C_WELL text
+//--- SSR_CONTRAST: SSR_C_TEXT_DIM on SSR_C_TAB text
+//--- SSR_CONTRAST: SSR_C_TEXT_DIM on SSR_C_TAB_ON text
+//--- SSR_CONTRAST: SSR_C_TEXT_FAINT on SSR_C_PANEL text
+//--- SSR_CONTRAST: SSR_C_TEXT_FAINT on SSR_C_HEADER text
+//--- SSR_CONTRAST: SSR_C_TEXT_FAINT on SSR_C_STATUS text
+//--- SSR_CONTRAST: SSR_C_TEXT_FAINT on SSR_C_WELL text
+//--- SSR_CONTRAST: SSR_C_TEXT_FAINT on SSR_C_TAB text
+//--- SSR_CONTRAST: SSR_C_IDLE on SSR_C_PANEL text
+//--- SSR_CONTRAST: SSR_C_IDLE on SSR_C_HEADER text
+//--- SSR_CONTRAST: SSR_C_IDLE on SSR_C_STATUS text
+//--- SSR_CONTRAST: SSR_C_RUN on SSR_C_PANEL text
+//--- SSR_CONTRAST: SSR_C_RUN on SSR_C_HEADER text
+//--- SSR_CONTRAST: SSR_C_RUN on SSR_C_STATUS text
+//--- SSR_CONTRAST: SSR_C_RUN on SSR_C_WELL text
+//--- SSR_CONTRAST: SSR_C_HOLD on SSR_C_PANEL text
+//--- SSR_CONTRAST: SSR_C_HOLD on SSR_C_HEADER text
+//--- SSR_CONTRAST: SSR_C_HOLD on SSR_C_STATUS text
+//--- SSR_CONTRAST: SSR_C_HOLD on SSR_C_WELL text
+//--- SSR_CONTRAST: SSR_C_STOP on SSR_C_PANEL text
+//--- SSR_CONTRAST: SSR_C_STOP on SSR_C_HEADER text
+//--- SSR_CONTRAST: SSR_C_STOP on SSR_C_STATUS text
+//--- SSR_CONTRAST: SSR_C_STOP on SSR_C_WELL text
+//--- SSR_CONTRAST: SSR_C_STOP on SSR_C_TAB text
+//--- SSR_CONTRAST: SSR_C_ACCENT on SSR_C_PANEL text
+//--- SSR_CONTRAST: SSR_C_ACCENT on SSR_C_HEADER text
+//--- SSR_CONTRAST: SSR_C_ACCENT on SSR_C_WELL text
+//--- SSR_CONTRAST: SSR_C_BTN_TEXT on SSR_C_BTN text
+//--- SSR_CONTRAST: SSR_C_BTN_ON_TEXT on SSR_C_BTN_ON text
+//--- SSR_CONTRAST: SSR_C_PRIMARY_TEXT on SSR_C_PRIMARY text
+//--- SSR_CONTRAST: SSR_C_DEAL_TEXT on SSR_C_BUY text
+//--- SSR_CONTRAST: SSR_C_DEAL_TEXT on SSR_C_SELL text
+//--- SSR_CONTRAST: SSR_C_DEAL_TEXT on SSR_C_DEAL_DIM text
+//--- the edges that carry a STATE rather than a shape: armed, primary,
+//--- and the frame that says where the panel ends.
+//---
+//--- PANEL_EDGE is measured against the FACE, not against the chart,
+//--- because the chart's background belongs to the user and cannot be
+//--- audited. It is the line that closes the surface - the v100 lesson
+//--- was that a face barely above the chart stops reading as a surface
+//--- at all - so the pair that matters is the one this file owns. At
+//--- 2.42:1 it was a frame that only worked because the chart behind it
+//--- happened to be darker.
+//--- SSR_CONTRAST: SSR_C_BTN_ON_EDGE on SSR_C_PANEL ui
+//--- SSR_CONTRAST: SSR_C_PRIMARY_EDGE on SSR_C_PANEL ui
+//--- SSR_CONTRAST: SSR_C_PANEL_EDGE on SSR_C_PANEL ui
+//--- SSR_CONTRAST: SSR_C_THUMB on SSR_C_TRACK ui
+//--- SSR_CONTRAST: SSR_C_TRACK_FILL on SSR_C_TRACK ui
+
 //--- text
 #define SSR_C_TEXT         C'233,236,242'   // primary
-#define SSR_C_TEXT_DIM     C'149,157,171'   // labels, units
-#define SSR_C_TEXT_FAINT   C'95,102,115'    // disabled
+#define SSR_C_TEXT_DIM     C'186,193,205'   // labels, units
+#define SSR_C_TEXT_FAINT   C'149,154,162'   // disabled - the READABLE floor
 
 //--- controls
 #define SSR_C_BTN          C'58,64,77'
@@ -82,11 +175,11 @@
 //--- values these started from read as mud at 26,29,35.
 #define SSR_C_RUN          C'63,191,122'    // PLAYING / LONG
 #define SSR_C_HOLD         C'227,164,60'    // PAUSED / degraded
-#define SSR_C_STOP         C'233,92,82'     // ERROR / leak / SHORT
-#define SSR_C_IDLE         C'126,134,147'   // IDLE / READY
+#define SSR_C_STOP         C'237,118,110'   // ERROR / leak / SHORT
+#define SSR_C_IDLE         C'148,154,165'   // IDLE / READY
 
 //--- the deal buttons, which are the loudest things here and should be
-#define SSR_C_BUY          C'33,148,93'
+#define SSR_C_BUY          C'30,133,84'
 #define SSR_C_BUY_EDGE     C'48,188,118'
 #define SSR_C_SELL         C'197,57,53'
 #define SSR_C_SELL_EDGE    C'237,87,79'
@@ -124,13 +217,13 @@
 //| where the theme could not reach it. A design system that any      |
 //| file may opt out of is a suggestion, not a system.                |
 //+------------------------------------------------------------------+
-#define SSR_C_LINE_SL      C'233,92,82'
+#define SSR_C_LINE_SL      C'237,118,110'
 #define SSR_C_LINE_TP      C'63,191,122'
 #define SSR_C_LINE_ENTRY   C'214,168,60'    // the pending entry line
 #define SSR_C_LINE_LONG    C'88,158,236'    // a long position's own level
 #define SSR_C_LINE_SHORT   C'227,164,60'    // a short's
 #define SSR_C_TRADE_WIN    C'63,191,122'    // closed-trade history on the chart
-#define SSR_C_TRADE_LOSS   C'233,92,82'
+#define SSR_C_TRADE_LOSS   C'237,118,110'
 
 //--- the start line the setup panel is about, and its two buttons
 #define SSR_C_PICK_LINE    C'227,164,60'
@@ -138,9 +231,9 @@
 
 //--- calendar lines, by impact. Severity, so it answers to the
 //--- semantic set rather than inventing a third palette.
-#define SSR_C_NEWS_HIGH    C'233,92,82'
+#define SSR_C_NEWS_HIGH    C'237,118,110'
 #define SSR_C_NEWS_MED     C'227,164,60'
-#define SSR_C_NEWS_LOW     C'126,134,147'
+#define SSR_C_NEWS_LOW     C'148,154,165'
 
 //--- type. ONE face - see the header.
 #define SSR_FONT           "Tahoma"

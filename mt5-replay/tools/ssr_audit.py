@@ -1106,7 +1106,84 @@ def audit_a17():
                        "panel goes dark." % m.group(0))
 
 
-for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13, audit_a14, audit_a15, audit_a16, audit_a17):
+def audit_a18():
+    """Contrast, computed rather than eyeballed.
+
+    Eleven of thirty-eight foreground/surface pairs were below WCAG AA when
+    this was first run, and the worst was the build tag at 2.06:1 - the one
+    label a user is asked to read off a screenshot. None of that was visible
+    by looking; two greys that both look grey on a dark panel can be four
+    times apart in contrast and neither will draw attention to itself.
+
+    The pairs are declared in SSR_Theme.mqh, beside the tokens, as
+    "SSR_CONTRAST: <fg> on <bg> <text|ui>" lines. There is no way to derive
+    which colour is drawn on which surface without a layout engine, so the
+    list is kept by hand - and it is kept where changing a token and
+    forgetting its pair means editing two lines that touch.
+
+    text -> 4.5:1  (WCAG AA; this panel's type is 7-9 pt, which is small)
+    ui   -> 3.0:1  (WCAG 1.4.11; borders and fills that carry meaning)
+    """
+    theme = None
+    for path in FILES:
+        if os.path.basename(path) == "SSR_Theme.mqh":
+            theme = path
+            break
+    if theme is None:
+        return
+
+    src = FILES[theme]
+    tok = {}
+    for m in re.finditer(r"#define\s+(SSR_C_\w+)\s+C'(\d+),(\d+),(\d+)'", src):
+        tok[m.group(1)] = (int(m.group(2)), int(m.group(3)), int(m.group(4)))
+
+    def channel(v):
+        v /= 255.0
+        return v / 12.92 if v <= 0.03928 else ((v + 0.055) / 1.055) ** 2.4
+
+    def luminance(c):
+        return (0.2126 * channel(c[0]) + 0.7152 * channel(c[1])
+                + 0.0722 * channel(c[2]))
+
+    def contrast(a, b):
+        la, lb = luminance(a), luminance(b)
+        if la < lb:
+            la, lb = lb, la
+        return (la + 0.05) / (lb + 0.05)
+
+    pair = re.compile(r"SSR_CONTRAST:\s+(SSR_C_\w+)\s+on\s+(SSR_C_\w+)\s+(text|ui)")
+    declared = 0
+    for n, line in enumerate(src.split("\n"), 1):
+        m = pair.search(line)
+        if not m:
+            continue
+        declared += 1
+        fg, bg, kind = m.group(1), m.group(2), m.group(3)
+        if fg not in tok or bg not in tok:
+            report("A18", theme, n,
+                   "this pair names %s, which is not a colour token in this "
+                   "file. A pair that cannot be resolved is a pair that is "
+                   "not being checked."
+                   % (fg if fg not in tok else bg))
+            continue
+        want = 4.5 if kind == "text" else 3.0
+        got = contrast(tok[fg], tok[bg])
+        if got < want:
+            report("A18", theme, n,
+                   "%s on %s is %.2f:1 and needs %.1f:1. Two greys that both "
+                   "look grey on a dark panel can be four times apart in "
+                   "contrast, and neither of them will tell you."
+                   % (fg[6:], bg[6:], got, want))
+
+    #--- a table that quietly emptied would pass forever
+    if declared < 20:
+        report("A18", theme, 1,
+               "only %d contrast pairs are declared. This audit passes by "
+               "having nothing to check, which is the failure mode every "
+               "table like this eventually has." % declared)
+
+
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13, audit_a14, audit_a15, audit_a16, audit_a17, audit_a18):
     fn()
 
 if findings:

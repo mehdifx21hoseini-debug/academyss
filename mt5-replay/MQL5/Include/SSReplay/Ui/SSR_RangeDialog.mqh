@@ -149,7 +149,7 @@ public:
 
       int x = m_x, y = m_y, W = SSR_DLG_W;
       m_w.Rect("bg", x, y, W, SSR_DLG_H, SSR_C_PANEL, SSR_C_PANEL_EDGE);
-      m_w.Rect("hdr", x + 1, y + 1, W - 2, SSR_HEADER_H, SSR_C_HEADER, SSR_C_HEADER);
+      m_w.Rect("hdr", x + 1, y + 1, W - 2, SSR_HEADER_H, SSR_C_HEADER, SSR_C_GROUP_EDGE);
       m_w.Label("title", x + SSR_PAD, y + 5, "NEW SESSION", SSR_C_ACCENT, SSR_FS_TITLE);
       m_w.Button("close", x + W - 24, y + 3, 18, SSR_HEADER_H - 5, "x");
 

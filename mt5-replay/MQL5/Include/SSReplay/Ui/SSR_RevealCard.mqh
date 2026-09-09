@@ -82,7 +82,7 @@ public:
       m_w.Rect("bg", x, y, SSR_REVEAL_W, SSR_REVEAL_H,
                SSR_C_PANEL, SSR_C_PANEL_EDGE);
       m_w.Rect("hdr", x + 1, y + 1, SSR_REVEAL_W - 2, SSR_HEADER_H,
-               SSR_C_HEADER, SSR_C_HEADER);
+               SSR_C_HEADER, SSR_C_GROUP_EDGE);
       m_w.Label("title", x + 12, y + 5, "SESSION COMPLETE",
                 SSR_C_TEXT, SSR_FS_TITLE);
       m_w.Chip("chip", x + SSR_REVEAL_W - 58, y + 4, "BLIND",

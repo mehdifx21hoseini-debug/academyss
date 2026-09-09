@@ -276,12 +276,63 @@ note named as worth building: **a taller sheet on a tall chart**.
   sheets every session has and cannot reach this one.
 - 39 clean, 17 audits silent.
 
-### Phase 9 — Responsive + accessibility
-- Pro mode breakpoint at 720 px.
-- Contrast pass on every token against the face.
-- Second channel for every colour-carried state (audit table in
-  `accessibility.md`).
-- **Open gap: no user text-size control.** Documented, not faked.
+### Phase 9 — Responsive + accessibility ✅ complete
+
+- **The contrast pass was the phase, and it failed.** This plan said "contrast
+  pass on every token against the face", and `accessibility.md` already claimed
+  the palette "was chosen against `SSR_C_PANEL` for exactly this". Computing it
+  found **11 of 38 foreground/surface pairs below 4.5:1**, the worst being the
+  build tag at **2.06:1** — the one label a user is asked to read off a
+  screenshot. Nobody could see it: two greys that both look grey on a dark
+  panel can be four times apart in contrast, and neither of them tells you.
+- **The caption was the problem surface**, not the foregrounds. Five of the
+  eleven were "on the header" — it was the lightest thing in the panel, so
+  every colour on it had the least room. It is **recessed** now, like the
+  status strip at the other end, which fixed five failures without changing a
+  single foreground colour.
+- **There is room for two readable greys below white, not three.** The dimmest
+  grey that clears 4.5:1 here is about 149, and `TEXT_DIM` was already 149 — a
+  third tier below it is by definition below the readable floor. The ramp was
+  **re-spread** (233 / 186 / 149) rather than extended: three visibly distinct
+  steps, all readable, instead of four of which the last was decoration.
+- **Audit A18 enforces it on every run.** The pairs are declared in
+  `SSR_Theme.mqh` beside the tokens, so changing a token and forgetting its
+  pair means editing two lines that touch. A18 also fails if fewer than twenty
+  pairs are declared — a table that quietly empties passes forever.
+- **Second channel: two real gaps found and closed.** The stop, target and
+  entry lines were a red one, a green one and an amber one with **nothing
+  written on them** — which is the stop and which the target was carried by
+  colour alone, and a trader who cannot separate this red from this green was
+  being asked to drag one below the price and one above it. They had a
+  tooltip, and a tooltip is not a second channel: it is the same channel behind
+  a delay. The recorded position levels had said their name since they shipped;
+  the *draggable* ones were built by a different function that only set the
+  tooltip.
+- **Nothing is drawn over anything else — measured.** Every column in this
+  panel was placed by arithmetic in somebody's head. The Positions row is what
+  that is worth: its note column sat nineteen pixels from the money column and
+  would have printed straight through it, invisible for four builds only
+  because a *second* bug stopped the note being drawn at all. **Stage 40**
+  measures every label with `TextGetSize`, at the real face and point size on
+  the machine the user is on, and fails if any two overlap — on all five
+  sheets.
+- **Width responsiveness.** On a chart with room the panel is now pulled fully
+  back on; the old clamp kept only the *caption* reachable, a rule written for
+  a panel dragged off the bottom and applied to the right edge too, so a panel
+  nudged right on a wide chart hung off it with every caption control past the
+  edge. A chart **narrower** than the panel is a stated limit — there is no
+  width at which every sheet's columns still clear each other — and the status
+  strip says so rather than letting the user conclude the panel is broken.
+- **The 720 px "Pro breakpoint" was retired, not implemented.** Phase 3b
+  settled that: taking space is asked for, never triggered by a measurement.
+- **Open gap, still open: no user text-size control.** MQL5 sizes are
+  per-object; a scale factor would have to multiply every metric and every
+  hand-placed column offset, with no layout engine to reflow what no longer
+  fits. Phase 9 did not close it. What it shipped is the *instrument* —
+  `OBJPROP_FONTSIZE` follows the OS display scaling, so stage 40 can now prove
+  whether the panel still holds together at 150%, instead of a promise that it
+  does.
+- 39 clean, **18** audits silent.
 
 ### Phase 10 — Localization
 - `SSR_Strings.mqh` catalogue; every draw site calls `T(key)`.

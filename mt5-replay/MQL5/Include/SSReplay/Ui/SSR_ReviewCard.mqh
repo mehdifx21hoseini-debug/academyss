@@ -113,7 +113,7 @@ public:
 
       m_w.Rect("bg", m_x, m_y, SSR_RV_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
       m_w.Rect("hdr", m_x + 1, m_y + 1, SSR_RV_W - 2, SSR_HEADER_H,
-               SSR_C_HEADER, SSR_C_HEADER);
+               SSR_C_HEADER, SSR_C_GROUP_EDGE);
       m_w.Label("title", m_x + 12, m_y + 5, "SESSION REVIEW",
                 SSR_C_TEXT, SSR_FS_TITLE);
 
