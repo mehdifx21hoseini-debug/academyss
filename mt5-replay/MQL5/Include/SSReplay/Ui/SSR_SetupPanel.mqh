@@ -194,6 +194,8 @@ private:
                          const bool force = false)
      {
       int ry = m_y + 30 + r * SSR_SETUP_ROW;
+      if(id == m_menu)
+         m_menu_y = ry;                 // where this field's list drops from
       m_w.Label("l" + id, m_x + 12, ry + 5, label, SSR_C_TEXT, SSR_FS_BODY);
       if(boxed)
          m_w.Edit("e" + id, m_x + SSR_SETUP_W - SSR_SETUP_FIELD_W - 12, ry,
@@ -220,6 +222,26 @@ private:
    //| line and the button that begins the session.                     |
    //+------------------------------------------------------------------+
    int               m_step;            // 0 settings, 1 where to start
+
+   //+------------------------------------------------------------------+
+   //| A LIST YOU CAN SEE BEATS A BUTTON YOU CLICK UNTIL IT AGREES.     |
+   //|                                                                  |
+   //| Timeframe, blind mode and the prop presets were cycling buttons:  |
+   //| press, read what it says now, press again. Reaching M30 from M1   |
+   //| took five presses and five labels, and nowhere on the screen was  |
+   //| there a list of what the choices even were.                       |
+   //|                                                                  |
+   //| MetaTrader has no combo box, so this is one built from what it    |
+   //| does have: the field opens a column of buttons drawn LAST, which  |
+   //| is what puts them on top - creation order is the only z-order     |
+   //| there is here.                                                    |
+   //+------------------------------------------------------------------+
+   string            m_menu;            // which field is open, "" = none
+   int               m_menu_y;          // where its list drops from
+
+   //--- dragging the panel by its caption, the way a window moves
+   bool              m_drag;
+   int               m_drag_dx, m_drag_dy;
 
    double            Num(const string id, const double fallback)
      {
@@ -364,6 +386,31 @@ private:
       m_force_prop = false;
      }
 
+   int               PresetNames(string &out[])
+     {
+      int n = ArraySize(m_presets);
+      ArrayResize(out, n);
+      for(int i = 0; i < n; i++)
+         out[i] = m_presets[i].name;
+      return n;
+     }
+
+   //--- apply a preset by index, which is what a list needs; CyclePreset
+   //--- is now just "the next one" expressed through it
+   void              ApplyPreset(const int i)
+     {
+      if(i < 0 || i >= ArraySize(m_presets))
+         return;
+      m_preset_i = i;
+      m_v.prop_on     = m_presets[i].on;
+      m_v.prop_target = m_presets[i].target;
+      m_v.prop_daily  = m_presets[i].daily;
+      m_v.prop_total  = m_presets[i].total;
+      m_force_prop = true;
+      Render();
+      m_force_prop = false;
+     }
+
    string            PresetName(void)
      {
       if(m_preset_i < 0 || m_preset_i >= ArraySize(m_presets))
@@ -375,7 +422,8 @@ public:
                      CSSRSetupPanel(void)
      : m_chart(0), m_open(false), m_x(14), m_y(28),
        m_start_text(""), m_tf_i(1), m_preset_i(0), m_force_prop(false),
-       m_start_y(0), m_first_paint(true), m_step(0)
+       m_start_y(0), m_first_paint(true), m_step(0), m_menu(""),
+       m_menu_y(0), m_drag(false), m_drag_dx(0), m_drag_dy(0)
      { m_v.Init(); }
 
                     ~CSSRSetupPanel(void) { Destroy(); }
@@ -389,6 +437,13 @@ public:
       m_chart = chart_id;
       m_v     = defaults;
       m_w.Attach(chart_id, "SSRS_");
+      //--- SWEEP EVERY PREFIX, not just this panel's. Each part of this
+      //--- product draws under its own - SSRP_, SSRK_, SSRF_, SSR_LINE_ -
+      //--- so clearing SSRS_ left every OTHER part's leftovers exactly
+      //--- where they were. That is why "something from before is still
+      //--- there" survived two builds that both claimed to have fixed it.
+      SSRPurgeChart(chart_id, SSR_PICK_LINE);
+      LoadPlace();
       //--- PURGE FIRST. A previous run - or a previous BUILD, which is
       //--- worse because it laid things out differently - leaves its
       //--- objects on this chart under the same names, and a stale one
@@ -453,12 +508,76 @@ public:
                 value, c, SSR_FS_BODY);
      }
 
+   int               MenuOptions(const string id, string &out[])
+     {
+      if(id == "tf")
+        {
+         ArrayResize(out, ArraySize(SSR_SETUP_TFS));
+         for(int i = 0; i < ArraySize(SSR_SETUP_TFS); i++)
+            out[i] = SSRSetupTfName(SSR_SETUP_TFS[i]);
+         return ArraySize(out);
+        }
+      if(id == "bl")
+        {
+         ArrayResize(out, 3);
+         out[0] = SSRSetupBlindName(SSR_BLIND_OFF);
+         out[1] = SSRSetupBlindName(SSR_BLIND_STANDARD);
+         out[2] = SSRSetupBlindName(SSR_BLIND_FULL);
+         return 3;
+        }
+      if(id == "pon")
+        {
+         ArrayResize(out, 2);
+         out[0] = "off"; out[1] = "on";
+         return 2;
+        }
+      if(id == "pre")
+         return PresetNames(out);
+      ArrayResize(out, 0);
+      return 0;
+     }
+
+   void              MenuClear(void)
+     {
+      m_w.Remove("mbg");
+      for(int i = 0; i < 32; i++)
+         m_w.Remove("m" + IntegerToString(i));
+     }
+
+   void              DrawMenu(void)
+     {
+      if(m_menu == "")
+         return;
+      string opts[];
+      int n = MenuOptions(m_menu, opts);
+      if(n <= 0)
+        { m_menu = ""; return; }
+
+      int fx = m_x + SSR_SETUP_W - SSR_SETUP_FIELD_W - 12;
+      int ih = SSR_SETUP_ROW - 4;
+      int fy = m_menu_y + ih + 1;
+
+      //--- a list that runs off the bottom has choices on it nobody can
+      //--- reach, so it opens upwards instead
+      int ch = (int)ChartGetInteger(m_chart, CHART_HEIGHT_IN_PIXELS);
+      if(ch > 0 && fy + n * ih + 4 > ch)
+         fy = m_menu_y - n * ih - 3;
+
+      m_w.Rect("mbg", fx - 2, fy - 2, SSR_SETUP_FIELD_W + 4, n * ih + 4,
+               SSR_C_WELL, SSR_C_PRIMARY_EDGE);
+      for(int i = 0; i < n; i++)
+         m_w.Button("m" + IntegerToString(i), fx, fy + i * ih,
+                    SSR_SETUP_FIELD_W, ih, opts[i]);
+     }
+
    void              Render(void)
      {
       if(!m_open || m_chart == 0)
          return;
+      MenuClear();
       if(m_step == 0) RenderSettings();
       else            RenderStart();
+      DrawMenu();                       // last, because last is on top
      }
 
    void              RenderSettings(void)
@@ -562,6 +681,79 @@ public:
      }
 
    //+------------------------------------------------------------------+
+   //| DRAG IT BY ITS CAPTION, the way every other window on the screen |
+   //| moves. The main panel has done this since v40; this one had no   |
+   //| way to be moved at all, so a setup form that landed over the     |
+   //| candles you were trying to read stayed there.                    |
+   //|                                                                  |
+   //| Chart scrolling is suspended for the duration, or the price      |
+   //| behind the panel travels with it.                                |
+   //+------------------------------------------------------------------+
+   bool              OnChartEvent(const int id, const long lparam,
+                                  const double dparam, const string sparam)
+     {
+      if(!m_open || id != CHARTEVENT_MOUSE_MOVE)
+         return false;
+
+      int  mx   = (int)lparam;
+      int  my   = (int)dparam;
+      bool down = (StringToInteger(sparam) & 1) != 0;
+
+      if(!down)
+        {
+         if(m_drag)
+           {
+            m_drag = false;
+            ChartSetInteger(m_chart, CHART_MOUSE_SCROLL, true);
+            SavePlace();
+           }
+         return false;
+        }
+
+      if(!m_drag &&
+         mx >= m_x && mx <= m_x + SSR_SETUP_W &&
+         my >= m_y && my <= m_y + 26)
+        {
+         m_drag    = true;
+         m_drag_dx = mx - m_x;
+         m_drag_dy = my - m_y;
+         ChartSetInteger(m_chart, CHART_MOUSE_SCROLL, false);
+         return true;
+        }
+
+      if(m_drag)
+        {
+         m_x = mx - m_drag_dx;
+         m_y = my - m_drag_dy;
+         if(m_x < 0) m_x = 0;
+         if(m_y < 0) m_y = 0;
+         //--- always leave the caption reachable
+         int cw = (int)ChartGetInteger(m_chart, CHART_WIDTH_IN_PIXELS);
+         int ch = (int)ChartGetInteger(m_chart, CHART_HEIGHT_IN_PIXELS);
+         if(cw > 0 && m_x > cw - 80) m_x = cw - 80;
+         if(ch > 0 && m_y > ch - 30) m_y = ch - 30;
+         Render();
+         ChartRedraw(m_chart);
+         return true;
+        }
+      return false;
+     }
+
+   //--- where the user left it, so it opens there next time
+   void              SavePlace(void)
+     {
+      GlobalVariableSet("SSR_SETUP_X", (double)m_x);
+      GlobalVariableSet("SSR_SETUP_Y", (double)m_y);
+     }
+   void              LoadPlace(void)
+     {
+      if(GlobalVariableCheck("SSR_SETUP_X")) m_x = (int)GlobalVariableGet("SSR_SETUP_X");
+      if(GlobalVariableCheck("SSR_SETUP_Y")) m_y = (int)GlobalVariableGet("SSR_SETUP_Y");
+      if(m_x < 0) m_x = 0;
+      if(m_y < 0) m_y = 0;
+     }
+
+   //+------------------------------------------------------------------+
    //| Poll. Returns "go", "here" or "" - the same latch-consuming      |
    //| shape the main panel uses, for the same reason: a button pressed |
    //| on a chart this program may not own leaves no event behind.      |
@@ -601,27 +793,47 @@ public:
 
       //--- the cycling buttons act immediately, because the value they
       //--- show IS the setting; nothing to confirm
-      if(m_w.Pressed("btf"))
+      //--- a chosen option, if a list is open. Checked BEFORE the fields
+      //--- so a click that lands on a list item is not also read as a
+      //--- click on whatever the list is covering.
+      if(m_menu != "")
         {
-         m_tf_i = (m_tf_i + 1) % ArraySize(SSR_SETUP_TFS);
-         m_v.chart_tf = SSR_SETUP_TFS[m_tf_i];
-         Render();
+         string opts[];
+         int n = MenuOptions(m_menu, opts);
+         for(int i = 0; i < n; i++)
+            if(m_w.Pressed("m" + IntegerToString(i)))
+              {
+               Choose(m_menu, i);
+               m_menu = "";
+               Render();
+               return "";
+              }
         }
-      if(m_w.Pressed("bbl"))
-        {
-         if(m_v.blind == SSR_BLIND_OFF)           m_v.blind = SSR_BLIND_STANDARD;
-         else if(m_v.blind == SSR_BLIND_STANDARD) m_v.blind = SSR_BLIND_FULL;
-         else                                     m_v.blind = SSR_BLIND_OFF;
-         Render();
-        }
-      if(m_w.Pressed("bpre"))
-         CyclePreset();
-      if(m_w.Pressed("bpon"))
-        {
-         m_v.prop_on = !m_v.prop_on;
-         Render();
-        }
+
+      //--- the fields. Pressing the open one closes it, which is what a
+      //--- second click on a combo box does everywhere else.
+      if(m_w.Pressed("btf"))  { m_menu = (m_menu == "tf"  ? "" : "tf");  Render(); }
+      if(m_w.Pressed("bbl"))  { m_menu = (m_menu == "bl"  ? "" : "bl");  Render(); }
+      if(m_w.Pressed("bpre")) { m_menu = (m_menu == "pre" ? "" : "pre"); Render(); }
+      if(m_w.Pressed("bpon")) { m_menu = (m_menu == "pon" ? "" : "pon"); Render(); }
       return "";
+     }
+
+   //--- one place that turns "the third item" into a setting
+   void              Choose(const string id, const int i)
+     {
+      if(id == "tf" && i >= 0 && i < ArraySize(SSR_SETUP_TFS))
+        { m_tf_i = i; m_v.chart_tf = SSR_SETUP_TFS[i]; return; }
+      if(id == "bl")
+        {
+         m_v.blind = (i == 1 ? SSR_BLIND_STANDARD
+                             : (i == 2 ? SSR_BLIND_FULL : SSR_BLIND_OFF));
+         return;
+        }
+      if(id == "pon")
+        { m_v.prop_on = (i == 1); return; }
+      if(id == "pre")
+         ApplyPreset(i);
      }
 
    //+------------------------------------------------------------------+

@@ -154,6 +154,11 @@
 //--- + STATUS 18 + MARGIN 7. Everything a person touches while the
 //--- replay runs, and nothing they only consult.
 #define SSR_PANEL_COMPACT_H 128
+//--- the orange line the setup panel is about. Named here rather than
+//--- in the expert so a chart sweep can keep it while removing
+//--- everything else this product drew.
+#define SSR_PICK_LINE      "SSR_PICK_LINE"
+
 #define SSR_PAD            8
 #define SSR_ROW_H          19
 #define SSR_HEADER_H       20

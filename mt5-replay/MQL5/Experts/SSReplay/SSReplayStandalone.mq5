@@ -503,7 +503,6 @@ string ReadStashedOrigin(void)
   }
 
 #define SSR_PICK_STASH  "SSR_PICK_HANDOFF"
-#define SSR_PICK_LINE   "SSR_PICK_LINE"
 #define SSR_PICK_GO     "SSR_PICK_GO"
 #define SSR_PICK_INFO   "SSR_PICK_INFO"
 #define SSR_PICK_HERE   "SSR_PICK_HERE"
@@ -2768,6 +2767,12 @@ void RunHostCommand(const ENUM_SSR_CMD cmd)
 void OnChartEvent(const int id, const long &lparam,
                   const double &dparam, const string &sparam)
   {
+   //--- THE SETUP PANEL GETS ITS MOUSE FIRST, and before the g_ready
+   //--- gate: it exists precisely when the session is NOT ready yet, so
+   //--- gating it on readiness is gating it on never.
+   if(g_setup_ui.IsOpen() && g_setup_ui.OnChartEvent(id, lparam, dparam, sparam))
+      return;
+
    if(!g_ready)
       return;
 

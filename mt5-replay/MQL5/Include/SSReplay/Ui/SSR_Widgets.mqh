@@ -327,6 +327,22 @@ public:
       return n;
      }
 
+   //+------------------------------------------------------------------+
+   //| Purge is not the same as "purge MY objects".                     |
+   //|                                                                  |
+   //| Every part of this product draws under its own prefix - SSRS_ for |
+   //| setup, SSRP_ for the panel, SSRK_ for the key card, SSRF_ for the |
+   //| first-run card, SSR_LINE_ and SSR_CAL_ on the chart itself. A     |
+   //| panel clearing SSRS_ therefore leaves every OTHER part's leftovers|
+   //| exactly where they were, which is why "there is something         |
+   //| underneath from before" survived two builds that both claimed to  |
+   //| have fixed it: I purged one prefix and the ghost belonged to      |
+   //| another.                                                          |
+   //|                                                                  |
+   //| Everything we have ever drawn begins with SSR. One sweep, and one |
+   //| name kept out of it - the start line belongs to the user's        |
+   //| choice, not to a previous run.                                    |
+   //+------------------------------------------------------------------+
    int               CountOwned(void)
      {
       int n = 0;
@@ -337,6 +353,30 @@ public:
       return n;
      }
   };
+
+//+------------------------------------------------------------------+
+//| Free, because it is not any one widget set's business: it removes |
+//| what EVERY prefix left behind on a chart.                         |
+//+------------------------------------------------------------------+
+int SSRPurgeChart(const long chart, const string keep = "")
+  {
+   int removed = 0;
+   int total   = ObjectsTotal(chart, -1, -1);
+   for(int i = total - 1; i >= 0; i--)
+     {
+      string nm = ObjectName(chart, i, -1, -1);
+      if(StringFind(nm, "SSR") != 0)
+         continue;
+      if(keep != "" && nm == keep)
+         continue;
+      if(ObjectDelete(chart, nm))
+         removed++;
+     }
+   if(removed > 0)
+      PrintFormat("[ui] swept %d object(s) a previous run left on this chart",
+                  removed);
+   return removed;
+  }
 
 #endif // SSR_WIDGETS_MQH
 //+------------------------------------------------------------------+
