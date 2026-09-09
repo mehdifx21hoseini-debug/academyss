@@ -145,6 +145,21 @@ struct SSRUiState
    bool               pos_pending[5];
 
    //+------------------------------------------------------------------+
+   //| EXECUTION TRANSPARENCY, PER POSITION.                            |
+   //|                                                                  |
+   //| The statistics have counted "trades without a stop" since Phase 9 |
+   //| and reported it after the session, which is the one moment it     |
+   //| cannot be acted on. A position with no stop is a decision the     |
+   //| trader can still change WHILE it is open, so the row says so.     |
+   //|                                                                  |
+   //| The spread each position was entered at is the number that says   |
+   //| whether a fill was realistic. It is recorded on every fill and    |
+   //| has never been shown anywhere but the exported statement.         |
+   //+------------------------------------------------------------------+
+   bool               pos_no_stop[5];
+   double             pos_spread[5];
+
+   //+------------------------------------------------------------------+
    //| THE STOP AND TARGET ARE LINES, NOT NUMBERS.                      |
    //|                                                                  |
    //| The panel used to carry two steppers in points. A stop typed in  |
@@ -203,7 +218,8 @@ struct SSRUiState
       pos_rows = 0;
       for(int pi = 0; pi < 5; pi++)
         { pos_ticket[pi] = 0; pos_text[pi] = ""; pos_pl[pi] = 0.0;
-          pos_pending[pi] = false; }
+          pos_pending[pi] = false; pos_no_stop[pi] = false;
+          pos_spread[pi] = 0.0; }
       for(int i = 0; i < 5; i++)
         { pos_ticket[i] = 0; pos_text[i] = ""; pos_pl[i] = 0.0; }
       lines_armed = false; sl_price = 0.0; tp_price = 0.0; line_long = true;

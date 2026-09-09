@@ -358,6 +358,10 @@ public:
                                 (SSRIsLong(vp.type) ? "BUY" : "SELL"),
                                 vp.volume,
                                 DoubleToString(vp.open_price, out.price_digits));
+            //--- both read straight off the position: no derivation, and
+            //--- nothing here decides what they MEAN
+            out.pos_no_stop[r] = (vp.sl <= 0.0);
+            out.pos_spread[r]  = vp.spread_at_entry;
             //--- MoneyFor returns a magnitude; the sign comes from which
             //--- way the price moved relative to the side
             double px    = (SSRIsLong(vp.type) ? out.bid : out.ask);

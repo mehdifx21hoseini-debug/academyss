@@ -3409,6 +3409,76 @@ void OnStart()
         }
    }
 
+   //+------------------------------------------------------------------+
+   //| 35. EXECUTION TRANSPARENCY REACHES THE ROW.                      |
+   //|                                                                  |
+   //| Two facts the engine has always recorded and never showed while  |
+   //| they could still be acted on: whether a position has a stop, and |
+   //| the spread it was entered at.                                     |
+   //|                                                                  |
+   //| Driven through the port, because a field the ENGINE fills and    |
+   //| the PANEL reads is only proved by the thing in between.           |
+   //+------------------------------------------------------------------+
+   {
+      CSSRTradingEngine ex2;
+      ex2.SetBalance(10000.0);
+      int    dg2 = (int)SymbolInfoInteger(origin, SYMBOL_DIGITS);
+      double pt2 = SymbolInfoDouble(origin, SYMBOL_POINT);
+      if(pt2 <= 0.0) pt2 = 0.00001;
+      ex2.OnSessionStart(origin, dg2, pt2, 0);
+
+      double b2 = SymbolInfoDouble(origin, SYMBOL_BID);
+      if(b2 <= 0.0) b2 = 10000.0 * pt2;
+      b2 = NormalizeDouble(b2, dg2);
+
+      MqlTick t2[1];
+      t2[0].bid = b2; t2[0].ask = b2 + 30.0 * pt2; t2[0].time_msc = 1000;
+      ex2.OnTicks(t2, 1);
+
+      //--- one WITH a stop, one without
+      double sl2 = NormalizeDouble(b2 - 200.0 * pt2, dg2);
+      long   with_stop = ex2.Open(SSR_ORDER_BUY, 0.10, sl2, 0.0);
+      long   no_stop   = ex2.Open(SSR_ORDER_BUY, 0.10, 0.0, 0.0);
+      Check("35 two positions to inspect", with_stop > 0 && no_stop > 0,
+            ex2.LastError());
+
+      //--- built the way the rest of this suite builds one: the port
+      //--- takes what it needs, one Attach at a time. There is no Init
+      //--- taking five pointers - I wrote one from memory and the
+      //--- compiler said so, which is the third time this session a
+      //--- signature guessed from a fragment has cost a build.
+      CSSRGroupPort port2;
+      port2.AttachAccount(GetPointer(ex2));
+
+      SSRUiState st2;
+      st2.Init();
+      if(Check("35 the panel can read them", port2.ReadState(st2) &&
+               st2.pos_rows >= 2,
+               StringFormat("%d row(s)", st2.pos_rows)))
+        {
+         int i_with = -1, i_without = -1;
+         for(int i = 0; i < st2.pos_rows; i++)
+           {
+            if(st2.pos_ticket[i] == with_stop) i_with    = i;
+            if(st2.pos_ticket[i] == no_stop)   i_without = i;
+           }
+         Check("35 a trade WITHOUT a stop is flagged on its own row",
+               i_without >= 0 && st2.pos_no_stop[i_without],
+               "the statistics have counted these since Phase 9 and reported "
+               "them after the session - the one moment nothing can be done");
+         Check("35 and one WITH a stop is not",
+               i_with >= 0 && !st2.pos_no_stop[i_with],
+               "a warning that is always on is a warning nobody reads");
+         Check("35 the spread it was entered at reaches the row",
+               i_with >= 0 && st2.pos_spread[i_with] > 0.0,
+               StringFormat("%.1f pt recorded on the row, market was 30 - the "
+                            "number that says whether the fill was realistic, "
+                            "and it has never been visible outside the "
+                            "exported statement", st2.pos_spread[i_with]));
+        }
+      ex2.CloseAll();
+   }
+
    ctrl.Release();
    Cleanup(rsym);
    Done();

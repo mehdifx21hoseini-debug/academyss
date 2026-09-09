@@ -125,6 +125,27 @@ private:
    //| Consumed on the way out, so it can never run twice.              |
    //+------------------------------------------------------------------+
    ENUM_SSR_CMD      m_pending_cmd;
+
+   //+------------------------------------------------------------------+
+   //| WHAT ACTUALLY HAPPENED ON THE FILL.                              |
+   //|                                                                  |
+   //| A refusal has said why since v98. A SUCCESS has never said        |
+   //| anything - the position simply appears, and the two numbers that  |
+   //| decide whether it was a realistic fill (the spread it was entered |
+   //| at, and the price against the one that was showing) are recorded  |
+   //| on the position and shown nowhere until the session is exported.  |
+   //|                                                                  |
+   //| A toast rather than the status strip, for the reason the toast    |
+   //| primitive exists: the strip carries standing state and the one    |
+   //| armed-destructive question. A fill is neither, and evicting the   |
+   //| balance to announce one would be the wrong trade.                 |
+   //|                                                                  |
+   //| Detected by the panel from a ticket it has not seen before. No    |
+   //| engine change, no event, no second place that knows about fills.  |
+   //+------------------------------------------------------------------+
+   long              m_last_ticket;      // the newest ticket already announced
+   string            m_toast_text;
+   uint              m_toast_until;
    int               m_tag_x, m_tag_y, m_tag_w, m_tag_h;  // where it is
    bool              m_place_loaded; // the file has been read at least once
 
@@ -204,6 +225,7 @@ public:
        m_saved_quick_nav(1), m_saved_key_control(1),
        m_saved(false), m_collapsed(false), m_closed(false), m_compact(false),
        m_pending_cmd(SSR_CMD_NONE),
+       m_last_ticket(0), m_toast_text(""), m_toast_until(0),
        m_dragging(false),
        m_drag_dx(0), m_drag_dy(0),
        m_track_drag(false), m_track_x(0), m_track_y(0), m_track_w(0),
@@ -574,6 +596,41 @@ public:
       //+------------------------------------------------------------------+
       if(m_keys.IsUp())
          m_keys.Show(m_chart);
+
+      //+------------------------------------------------------------------+
+      //| A NEW TICKET IS A FILL NOBODY HAS BEEN TOLD ABOUT.                |
+      //|                                                                  |
+      //| Only rows the panel can see, so a fill past the fifth row goes    |
+      //| unannounced. That is honest: the row it would describe is not on  |
+      //| screen either, and a toast about a position the user cannot see   |
+      //| would be an alert with nowhere to look.                           |
+      //+------------------------------------------------------------------+
+      for(int pi = 0; pi < m_state.pos_rows; pi++)
+        {
+         long tk = m_state.pos_ticket[pi];
+         if(tk <= m_last_ticket || m_state.pos_pending[pi])
+            continue;
+         m_last_ticket = tk;
+         m_toast_text  = m_state.pos_text[pi] +
+                         (m_state.pos_spread[pi] > 0.0
+                          ? StringFormat("   spread %.1f pt",
+                                         m_state.pos_spread[pi])
+                          : "");
+         if(m_state.pos_no_stop[pi])
+            m_toast_text += "   NO STOP";
+         m_toast_until = GetTickCount() + 4000;
+        }
+
+      if(m_toast_text != "" && GetTickCount() < m_toast_until)
+         m_w.Toast("fill", x + SSR_PAD, y + H - SSR_STATUS_H - 24,
+                   W - 2 * SSR_PAD, m_toast_text,
+                   (m_state.pos_no_stop[0] ? SSR_C_HOLD : SSR_C_RUN));
+      else
+        {
+         m_w.ToastClear("fill");
+         if(m_toast_text != "" && GetTickCount() >= m_toast_until)
+            m_toast_text = "";
+        }
 
       //--- and the palette after even that: it is the frontmost thing
       //--- this panel can put on a chart, so it is drawn last of all.
@@ -1111,8 +1168,31 @@ private:
            {
             int ry = y + 14 + r * 20;
             string t = IntegerToString(r);
+            //+------------------------------------------------------------------+
+            //| A TRADE WITH NO STOP SAYS SO, WHILE IT CAN STILL BE FIXED.       |
+            //|                                                                  |
+            //| The statistics have counted "trades without a stop" since Phase   |
+            //| 9 and reported it AFTER the session - the one moment nothing can  |
+            //| be done about it. On an open row it is still a decision.          |
+            //|                                                                  |
+            //| Words, not a colour: "no stop" is readable by somebody who cannot |
+            //| tell this red from the profit column's green.                     |
+            //|                                                                  |
+            //| The spread it was entered at rides beside it, because that is the |
+            //| number that says whether the fill was realistic, and it has never |
+            //| been visible anywhere but the exported statement.                 |
+            //+------------------------------------------------------------------+
+            string note = "";
+            if(!m_state.pos_pending[r] && m_state.pos_no_stop[r])
+               note = "  no stop";
+            else if(!m_state.pos_pending[r] && m_state.pos_spread[r] > 0.0)
+               note = StringFormat("  sp %.1f", m_state.pos_spread[r]);
+
             Text(20 + r, "pr" + t, x + 8, ry + 3, m_state.pos_text[r],
                  SSR_C_TEXT);
+            Text(35 + r, "px" + t, x + 8 + 128, ry + 3, note,
+                 (m_state.pos_no_stop[r] ? SSR_C_STOP : SSR_C_TEXT_FAINT),
+                 SSR_FS_SMALL);
             //--- a pending has no result yet, and 0.00 beside real
             //--- positions reads as break-even rather than as "not yet"
             if(m_state.pos_pending[r])
@@ -1408,7 +1488,8 @@ private:
                       "spdlbl","spdn","spdbox","spdval","spup","spdmean",
                       "tab0","tab1","tab2","tab3","tabline",
                       "follow","lines","bookmark","jump","sessions","fidelity",
-                      "status","stbal","stflt","stopen","stspread","stfid"};
+                      "status","stbal","stflt","stopen","stspread","stfid",
+                      "fill","fill_bg","fill_ac"};
       for(int i = 0; i < ArraySize(ids); i++)
          m_w.Hide(ids[i], hidden);
       for(int t = 0; t < SSR_SPEED_LADDER_SIZE; t++)

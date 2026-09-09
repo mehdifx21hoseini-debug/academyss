@@ -95,11 +95,29 @@ the Analysis surface will have established how a sheet asks for space.
   on its own so a failure names it, and four mode combinations are asserted.
 - 39 clean, 17 audits silent.
 
-### Phase 5 — Trading / position UX
-- Trade and Positions merge into one sheet with a section switch.
-- Execution transparency row: spread at entry, slippage applied, fill type.
-- **`SSR_TradeLines` is not rewritten.** Chart-side behaviour is untouched.
-- **Risk: medium.** Guarded by six existing smoke checks.
+### Phase 5 — Trading / position UX ✅ complete
+- **THE MERGE WAS DROPPED, and the reason is arithmetic.** Trade content is
+  180 px of a 186 px sheet and Positions is 183. A "merge" that fits would be
+  a section switch inside one tab — which is what a tab already is. Renaming
+  two tabs into one tab with two sections is not a UX improvement, so the
+  effort went where it buys something.
+- **Done: execution transparency, on the row, while it can still be acted on.**
+  `pos_no_stop` and `pos_spread` now travel through the port. A position with
+  no stop says **"no stop"** in words on its own row — the statistics have
+  counted these since Phase 9 and reported them *after* the session, which is
+  the one moment nothing can be done. Otherwise the row carries the spread it
+  was entered at, which decides whether a fill was realistic and has never
+  been visible outside the exported statement.
+- **Done: a fill toast.** A refusal has said why since v98; a success said
+  nothing. The `Toast` primitive from Phase 2 gets its first consumer, and the
+  status strip keeps carrying standing state instead of being evicted to
+  announce a fill. Detected from a ticket the panel has not seen — no engine
+  change, no event, no second place that knows about fills.
+- **`SSR_TradeLines` untouched**, as promised. All six of its smoke checks
+  still pass unchanged.
+- **Test: stage 35** drives both facts through the port, because a field the
+  engine fills and the panel reads is only proved by the thing in between.
+- 39 clean, 17 audits silent.
 
 ### Phase 6 — Training
 - Blind as a chosen mode with a persistent chip and a **REVEAL** step (F6).
