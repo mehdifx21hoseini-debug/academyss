@@ -98,6 +98,14 @@
 //--- the one accent, used sparingly
 #define SSR_C_ACCENT       C'88,158,236'
 
+//--- THE PRIMARY ACTION. Exactly one control on this panel earns it:
+//--- Play/Pause, which is pressed hundreds of times in a session while
+//--- everything beside it is pressed once or twice. Seven identical
+//--- buttons in a row told the hand nothing about which was which.
+#define SSR_C_PRIMARY      C'40,102,174'
+#define SSR_C_PRIMARY_EDGE C'88,158,236'
+#define SSR_C_PRIMARY_TEXT C'240,247,255'
+
 //--- the SL/TP lines on the chart. These sit on the CHART, not on the
 //--- panel, so they answer to the candles rather than to the face.
 #define SSR_C_LINE_SL      C'233,92,82'

@@ -34,6 +34,7 @@
 #ifndef SSR_PANEL_MQH
 #define SSR_PANEL_MQH
 
+#include "../Common/SSR_Build.mqh"
 #include "../Common/SSR_Types.mqh"
 #include "../Common/SSR_Time.mqh"
 #include "../Common/SSR_FlightRecorder.mqh"
@@ -561,6 +562,23 @@ private:
       m_w.Rect("hdr", x + 1, y + 1, W - 2, SSR_HEADER_H, SSR_C_HEADER, SSR_C_HEADER);
       Text(0, "title", x + SSR_PAD, y + 4, "SS Replay", SSR_C_ACCENT, SSR_FS_TITLE);
 
+      //+------------------------------------------------------------------+
+      //| WHICH BUILD IS THIS?                                             |
+      //|                                                                  |
+      //| Two screenshots arrived one minute apart showing two different   |
+      //| builds of this panel, and neither of them said so. MetaTrader    |
+      //| keeps a running expert's compiled code in memory, so a chart      |
+      //| that was already open goes on drawing the old panel until it is  |
+      //| reattached - and there was no way to tell from the picture.       |
+      //| The smoke test has printed its build since v79; the thing people |
+      //| actually photograph never did.                                    |
+      //+------------------------------------------------------------------+
+      string tag = SSR_BUILD;
+      int sp = StringFind(tag, " ");
+      if(sp > 0) tag = StringSubstr(tag, 0, sp);
+      Text(55, "build", x + SSR_PAD + 58, y + 6, tag,
+           SSR_C_TEXT_FAINT, SSR_FS_SMALL);
+
       //--- the caption says WHAT IS RUNNING, in one line: state, symbol,
       //--- and whether the identity is hidden. It is the first thing a
       //--- screenshot has to answer.
@@ -569,7 +587,7 @@ private:
          right += "   " + m_state.trade_symbol;
       if(m_state.blind)
          right += "   [BLIND]";
-      Text(1, "capinfo", x + 92, y + 5, right,
+      Text(1, "capinfo", x + 96, y + 5, right,
            SSRStateColor(m_state.status), SSR_FS_SMALL);
 
       //--- A GUIDE NOBODY CAN FIND IS NOT A GUIDE. H opens the key list,
@@ -611,30 +629,53 @@ private:
    //================================================================
    int               DrawTransport(const int x, const int y, const int W)
      {
-      int n  = 7;
-      int gp = 4;
-      int bw = (W - 2 * SSR_PAD - (n - 1) * gp) / n;
-      int bx = x + SSR_PAD;
+      //+------------------------------------------------------------------+
+      //| SEVEN IDENTICAL BUTTONS TOLD THE HAND NOTHING.                   |
+      //|                                                                  |
+      //| Play/Pause is pressed hundreds of times in a session. Reset is   |
+      //| pressed once, and the rest of the time it must NOT be pressed.   |
+      //| They were the same size, the same colour, and four pixels apart. |
+      //|                                                                  |
+      //| Now the primary action is five times the width of a step and     |
+      //| the only blue thing in the row, the steps stay quiet either side |
+      //| of it, and Reset is pushed off to the right across a gap four    |
+      //| times wider than the others - far enough that a finger reaching  |
+      //| for >> does not land on it.                                      |
+      //+------------------------------------------------------------------+
+      int gp   = 4;
+      int sepw = 16;                        // the gap that protects Reset
+      int rw   = 60;                        // Reset
+      int nw   = 30;                        // a step
+      int fw   = 28;                        // rewind to the start
+      int pw   = (W - 2 * SSR_PAD) - (fw + nw * 4 + rw + gp * 5 + sepw);
+      int bx   = x + SSR_PAD;
 
-      m_w.Button("restart", bx, y, bw, SSR_BTN_H, "|<",
-                 false, m_state.connected);                       bx += bw + gp;
-      m_w.Button("back10",  bx, y, bw, SSR_BTN_H, "<<",
-                 false, m_state.CanStep());                       bx += bw + gp;
-      m_w.Button("back",    bx, y, bw, SSR_BTN_H, "<",
-                 false, m_state.CanStep());                       bx += bw + gp;
-      m_w.Button("toggle",  bx, y, bw, SSR_BTN_H,
-                 m_state.IsRunning() ? "Pause" : "Play",
-                 m_state.IsRunning(),
-                 m_state.CanPlay() || m_state.IsRunning());        bx += bw + gp;
-      m_w.Button("step",    bx, y, bw, SSR_BTN_H, ">",
-                 false, m_state.CanStep());                       bx += bw + gp;
-      m_w.Button("step10",  bx, y, bw, SSR_BTN_H, ">>",
-                 false, m_state.CanStep());                       bx += bw + gp;
+      m_w.Button("restart", bx, y, fw, SSR_BTN_H, "|<",
+                 false, m_state.connected);                       bx += fw + gp;
+      m_w.Button("back10",  bx, y, nw, SSR_BTN_H, "<<",
+                 false, m_state.CanStep());                       bx += nw + gp;
+      m_w.Button("back",    bx, y, nw, SSR_BTN_H, "<",
+                 false, m_state.CanStep());                       bx += nw + gp;
+
+      //--- the one primary control on the panel
+      bool can_toggle = (m_state.CanPlay() || m_state.IsRunning());
+      m_w.ButtonC("toggle", bx, y, pw, SSR_BTN_H,
+                  m_state.IsRunning() ? "Pause" : "Play",
+                  can_toggle ? SSR_C_PRIMARY      : SSR_C_BTN,
+                  can_toggle ? SSR_C_PRIMARY_EDGE : SSR_C_BTN_EDGE,
+                  can_toggle ? SSR_C_PRIMARY_TEXT : SSR_C_TEXT_FAINT,
+                  SSR_FS_TITLE);                                  bx += pw + gp;
+
+      m_w.Button("step",    bx, y, nw, SSR_BTN_H, ">",
+                 false, m_state.CanStep());                       bx += nw + gp;
+      m_w.Button("step10",  bx, y, nw, SSR_BTN_H, ">>",
+                 false, m_state.CanStep());                       bx += nw + sepw;
+
       //--- the SAME button, asking. A second control appearing where a
       //--- finger is already moving is how a confirmation gets pressed
       //--- by accident, which is worse than not having one.
       bool armed = ResetArmed();
-      m_w.Button("reset",   bx, y, bw, SSR_BTN_H, (armed ? "Reset?" : "Reset"),
+      m_w.Button("reset",   bx, y, rw, SSR_BTN_H, (armed ? "Reset?" : "Reset"),
                  armed, m_state.connected);
       return y + SSR_BTN_H + SSR_GAP;
      }

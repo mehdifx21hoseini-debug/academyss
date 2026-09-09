@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v98 2026-09-09  dark"
+#define SSR_BUILD "v99 2026-09-09  primary"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
