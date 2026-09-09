@@ -155,6 +155,19 @@ bool Check(const string what, const bool cond, const string detail)
    return cond;
   }
 
+void Note(const string what, const string detail)
+  { Log(StringFormat("  NOTE  %-34s %s", what, detail)); }
+
+//--- an object nobody can see is not on the panel, whether it was
+//--- never created or drawn and then hidden. The panel hides by
+//--- OBJPROP_TIMEFRAMES, so both cases answer the same question here.
+bool QVisible(const long ch, const string nm)
+  {
+   if(ObjectFind(ch, nm) < 0)
+      return false;
+   return (ObjectGetInteger(ch, nm, OBJPROP_TIMEFRAMES) != OBJ_NO_PERIODS);
+  }
+
 //+------------------------------------------------------------------+
 void OnStart()
   {
@@ -1211,7 +1224,7 @@ void OnStart()
    }
 
    //+------------------------------------------------------------------+
-   //| 18. EVERY CONTROL IS INSIDE THE PANEL.                           |
+   //| 18. EVERY CONTROL IS INSIDE THE PANEL - IN WHICHEVER MODE IT IS. |
    //|                                                                  |
    //| The frame height is a constant with the sheet heights added up in |
    //| a COMMENT beside it, and v69 put two new rows on two sheets. Both |
@@ -1220,41 +1233,49 @@ void OnStart()
    //| rendering fault rather than as a number nobody updated.            |
    //|                                                                  |
    //| So it is measured, not reasoned about. The panel is built on a    |
-   //| real chart, every tab is opened, and every object it drew is      |
-   //| asked where its bottom edge is. Nothing here knows a single       |
-   //| layout number: the frame itself is read from the background       |
-   //| rectangle the panel drew, so a future row is caught by the same   |
-   //| test without editing it.                                          |
+   //| real chart and every object it drew is asked where its bottom     |
+   //| edge is. Nothing here knows a single layout number: the frame     |
+   //| itself is read from the background rectangle the panel drew, so   |
+   //| a future row is caught by the same test without editing it.       |
+   //|                                                                  |
+   //| WHICH MODE gets measured is not this test's choice. The panel     |
+   //| reads the chart it is standing on, and on a terminal with the     |
+   //| Toolbox open there is no room for the tabs. For two builds this   |
+   //| stage FAILED there and told the user to rearrange their windows;  |
+   //| that is a test declining to test what the product really does on  |
+   //| that screen. Now it measures whichever mode it was given, holds   |
+   //| both to the same invariant, and says plainly which one went       |
+   //| unmeasured.                                                       |
    //+------------------------------------------------------------------+
    {
       long pchart = ChartOpen(rsym, PERIOD_M1);
       int  pch    = (int)ChartGetInteger(pchart, CHART_HEIGHT_IN_PIXELS);
-      if(pchart == 0)
-         No("a chart for the layout test", "ChartOpen refused");
-      else if(pch > 0 && pch < SSR_PANEL_H + 24)
-        {
-         //--- NOT a pass. The panel drops the tabs on a short chart, so
-         //--- there would be no sheet to measure and a silent "ok" here
-         //--- would be the most misleading line in the whole report.
-         No("the layout can be measured",
-            StringFormat("this chart is %d px tall and the panel needs %d - "
-                         "it would run in compact mode, with no sheet to "
-                         "measure. Close the Toolbox (Ctrl+T) and re-run.",
-                         pch, SSR_PANEL_H + 24));
-         ChartClose(pchart);
-        }
-      else
+      if(Check("a chart for the layout test", pchart != 0, rsym))
         {
          CSSRPanel pnl;
          pnl.Create(pchart, NULL, "SSRQ_");
+         pnl.Render();
+
+         bool compact = pnl.IsCompact();
+         Check("the panel picked the mode this chart can hold",
+               compact == (pch > 0 && pch < SSR_PANEL_H + 24),
+               StringFormat("%s mode on a chart %d px tall - the full panel "
+                            "needs %d",
+                            (compact ? "compact" : "full"), pch,
+                            SSR_PANEL_H + 24));
 
          int   worst_bottom = 0;
          string worst_name  = "";
          int   frame_top = 0, frame_bottom = 0;
 
-         for(int t = 0; t < 4; t++)
+         //--- the tab strip only exists in full mode, so only full mode
+         //--- has four layouts to walk. Compact has exactly one, and it
+         //--- is measured by the same code against the same invariant.
+         int sheets = (compact ? 1 : 4);
+         for(int t = 0; t < sheets; t++)
            {
-            pnl.Dispatch("tab" + IntegerToString(t));
+            if(!compact)
+               pnl.Dispatch("tab" + IntegerToString(t));
             pnl.Render();
 
             int n = ObjectsTotal(pchart, -1, -1);
@@ -1293,6 +1314,50 @@ void OnStart()
                                (int)MathAbs(frame_bottom - worst_bottom),
                                (worst_bottom <= frame_bottom ? "spare"
                                 : "OVER - raise SSR_SHEET_H")));
+
+         if(compact)
+           {
+            //+---------------------------------------------------------+
+            //| COMPACT IS A MODE, NOT AN ERROR.                        |
+            //|                                                         |
+            //| For two builds this stage FAILED on any terminal with   |
+            //| the Toolbox open, and told the user to rearrange their   |
+            //| windows. That is a test refusing to test the thing the   |
+            //| product actually does on that screen. The panel drops    |
+            //| what is CONSULTED and keeps what is OPERATED - so that   |
+            //| is what gets measured here, and the full-tab layout      |
+            //| says out loud that it went unmeasured.                   |
+            //+---------------------------------------------------------+
+            Check("the compact panel fits the chart it shrank for",
+                  pch > 0 && frame_bottom <= pch,
+                  StringFormat("frame ends at %d on a %d px chart - a panel "
+                               "that shrinks and still hangs off the bottom "
+                               "has shrunk for nothing",
+                               frame_bottom, pch));
+
+            string driven[] = {"toggle","step","back","restart","spdbox","status"};
+            string missing  = "";
+            for(int i = 0; i < ArraySize(driven); i++)
+               if(!QVisible(pchart, "SSRQ_" + driven[i]))
+                  missing += (missing == "" ? "" : ",") + driven[i];
+            Check("and kept everything the replay is driven with",
+                  missing == "",
+                  (missing == ""
+                   ? "clock, transport, speed and status all on the chart"
+                   : "MISSING " + missing + " - compact must cost the user "
+                     "reading, never control"));
+
+            Check("and dropped only what is consulted",
+                  !QVisible(pchart, "SSRQ_tab0") &&
+                  !QVisible(pchart, "SSRQ_tabline"),
+                  "the tab strip and its sheet are gone; they come back the "
+                  "moment there is room");
+
+            Note("the four tab sheets were not measured",
+                 StringFormat("this chart is %d px and compact mode has no "
+                              "sheet - close the Toolbox (Ctrl+T) and re-run "
+                              "to measure them", pch));
+           }
 
          pnl.Destroy();
          ChartClose(pchart);

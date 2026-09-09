@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v90 2026-09-08  warmup"
+#define SSR_BUILD "v91 2026-09-09  compact"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

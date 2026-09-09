@@ -1988,6 +1988,11 @@ public:
    //--- holds a press back rather than merely relabelling a button
    bool              ResetIsArmed(void)     { return ResetArmed(); }
    string            ResetWarningText(void) { return m_reset_warning; }
+
+   //--- read-only, for the layout test. Which mode the panel is in is
+   //--- decided by the chart it is standing on, so a test cannot pick
+   //--- it - it can only ask which one it got and measure THAT one.
+   bool              IsCompact(void)        { return m_compact; }
   };
 
 #endif // SSR_PANEL_MQH
