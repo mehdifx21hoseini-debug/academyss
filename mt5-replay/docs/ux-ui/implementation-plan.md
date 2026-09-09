@@ -46,8 +46,30 @@ This document set. No code changed.
   and `SSR_Palette.mqh`. `Ctrl+K` opens, `↑↓` choose, `Enter` runs, `Esc`
   closes. Smoke stage 33, thirteen checks — including that **no command
   invents a verb**, asserted over the whole table at once.
-- **Still open in this phase:** Pro panel mode, and the caption becoming a
-  status line with mode chips. Neither is started.
+- **Done: the caption is a status line.** Identity · build · state · mode
+  chips (fidelity, BLIND, PROP), plus a `K` button so the palette is
+  reachable without knowing the key. Fidelity MOVED out of the status strip:
+  it is a mode, not a number, and it was sitting among four numbers
+  pretending to be a fifth. The symbol is no longer repeated - MetaTrader
+  writes it in the chart's own corner, and repeating it would defeat Blind
+  mode. New smoke check measures that the chips clear the buttons, which is
+  the one row the frame test cannot police.
+- **Still open: Pro panel mode.** Deliberately not started - see below.
+
+### Phase 3b — Pro panel mode  ◻ deferred, with a reason
+
+Compact and Standard are height-driven and tested. Pro was specified as
+"Standard plus a persistent rail", but the rail is already always visible in
+Standard - so that version of Pro adds nothing a user would notice.
+
+The version worth building is a **taller sheet on a tall chart**: Positions
+showing more than five rows, Stats showing more than ten of the forty-three
+measures. That is a real capability gain, but it means `SSR_SHEET_H` stops
+being a constant, every sheet has to ask how much room it has, and the layout
+test needs a second branch to measure the tall case.
+
+That is a phase, not a corner of one. It is scheduled after Phase 7, where
+the Analysis surface will have established how a sheet asks for space.
 
 ### Phase 4 — Setup / onboarding
 - Quick-start screen (F1) ahead of the wizard.

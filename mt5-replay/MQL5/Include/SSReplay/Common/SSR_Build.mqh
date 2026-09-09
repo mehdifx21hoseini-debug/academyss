@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v105 2026-09-09  palette"
+#define SSR_BUILD "v106 2026-09-09  chips"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

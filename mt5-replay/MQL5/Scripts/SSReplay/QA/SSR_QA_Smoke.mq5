@@ -1541,6 +1541,32 @@ void OnStart()
               }
            }
 
+         //+------------------------------------------------------------------+
+         //| The caption is the one row the frame test cannot police: its    |
+         //| controls are laid out from BOTH ends, so "inside the frame"     |
+         //| stays true right up to the moment a chip lands on a button.     |
+         //| Measured here from the objects themselves.                       |
+         //+------------------------------------------------------------------+
+         int chip_end = 0;
+         string chips[] = {"SSRQ_chfid_bg", "SSRQ_chblind_bg", "SSRQ_chprop_bg"};
+         for(int ci = 0; ci < ArraySize(chips); ci++)
+            if(ObjectFind(pchart, chips[ci]) >= 0)
+              {
+               int ce = (int)ObjectGetInteger(pchart, chips[ci], OBJPROP_XDISTANCE) +
+                        (int)ObjectGetInteger(pchart, chips[ci], OBJPROP_XSIZE);
+               if(ce > chip_end) chip_end = ce;
+              }
+         int btn_start = 0;
+         if(ObjectFind(pchart, "SSRQ_palette") >= 0)
+            btn_start = (int)ObjectGetInteger(pchart, "SSRQ_palette",
+                                              OBJPROP_XDISTANCE);
+         Check("the caption's chips clear its buttons",
+               chip_end > 0 && btn_start > 0 && chip_end <= btn_start,
+               StringFormat("chips end at %d, buttons start at %d (%d px %s)",
+                            chip_end, btn_start, btn_start - chip_end,
+                            (chip_end <= btn_start ? "clear"
+                             : "OVERLAP - a mode is printed under a button")));
+
          if(Check("the panel drew a frame to measure against",
                   frame_bottom > frame_top && worst_name != "",
                   StringFormat("frame %d..%d px", frame_top, frame_bottom)))

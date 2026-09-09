@@ -182,6 +182,25 @@ string SSRFidelityName(const ENUM_SSR_FIDELITY f)
    return "UNKNOWN";
   }
 
+//+------------------------------------------------------------------+
+//| The same three modes, short enough for a chip.                   |
+//|                                                                  |
+//| A chip is a badge, not a sentence. "SYNTHETIC TICK" is 94 px of  |
+//| a caption row that has 138 to give three modes, so the long form |
+//| stays where there is room to read it - the Session sheet and the |
+//| statement - and this is what sits in the corner of a screenshot. |
+//+------------------------------------------------------------------+
+string SSRFidelityShort(const ENUM_SSR_FIDELITY f)
+  {
+   switch(f)
+     {
+      case SSR_FIDELITY_FULL_TICK:      return "FULL";
+      case SSR_FIDELITY_SYNTHETIC_TICK: return "SYNTH";
+      case SSR_FIDELITY_BAR:            return "BAR";
+     }
+   return "?";
+  }
+
 string SSRDataModeName(const ENUM_SSR_DATA_MODE m)
   {
    switch(m)

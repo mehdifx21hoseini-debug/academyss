@@ -500,7 +500,10 @@ public:
       //--- coming back from closed: the caption was hidden by hand, so
       //--- it has to be shown by hand. HideBody does not own these.
       m_w.Remove("reopen");
-      string cap[] = {"bg","hdr","title","capinfo","collapse","move","close","keys"};
+      string cap[] = {"bg","hdr","title","build","capinfo","collapse","move",
+                      "close","keys","palette",
+                      "chfid","chfid_bg","chblind","chblind_bg",
+                      "chprop","chprop_bg"};
       for(int ci = 0; ci < ArraySize(cap); ci++)
          m_w.Hide(cap[ci], false);
 
@@ -604,8 +607,6 @@ private:
       //| keeps a running expert's compiled code in memory, so a chart      |
       //| that was already open goes on drawing the old panel until it is  |
       //| reattached - and there was no way to tell from the picture.       |
-      //| The smoke test has printed its build since v79; the thing people |
-      //| actually photograph never did.                                    |
       //+------------------------------------------------------------------+
       string tag = SSR_BUILD;
       int sp = StringFind(tag, " ");
@@ -613,16 +614,71 @@ private:
       Text(55, "build", x + SSR_PAD + 58, y + 6, tag,
            SSR_C_TEXT_FAINT, SSR_FS_SMALL);
 
-      //--- the caption says WHAT IS RUNNING, in one line: state, symbol,
-      //--- and whether the identity is hidden. It is the first thing a
-      //--- screenshot has to answer.
+      //+------------------------------------------------------------------+
+      //| THE CAPTION IS A STATUS LINE, NOT A TITLE BAR.                   |
+      //|                                                                  |
+      //| It answers, in one glance and in one row: what is running, on    |
+      //| what, and under which MODES. A screenshot of this panel has to    |
+      //| be readable without the person who took it explaining it, and     |
+      //| "[BLIND]" appended to a sentence was not that.                    |
+      //|                                                                  |
+      //| Modes are CHIPS - text on a tinted plate - because a mode         |
+      //| carried by colour alone is a mode a colour-blind trader cannot    |
+      //| read. Numbers stay in the status strip at the bottom; this row    |
+      //| carries only state. Fidelity MOVED here for exactly that reason:  |
+      //| it is a mode, not a measurement, and it was sitting among four    |
+      //| numbers pretending to be a fifth.                                 |
+      //+------------------------------------------------------------------+
       string right = SSRStateName(m_state.status);
-      if(m_state.trade_symbol != "")
-         right += "   " + m_state.trade_symbol;
-      if(m_state.blind)
-         right += "   [BLIND]";
-      Text(1, "capinfo", x + 96, y + 5, right,
+      Text(1, "capinfo", x + 88, y + 5, right,
            SSRStateColor(m_state.status), SSR_FS_SMALL);
+      //+------------------------------------------------------------------+
+      //| THE SYMBOL IS NOT REPEATED HERE.                                 |
+      //|                                                                  |
+      //| MetaTrader already writes it in the chart's own corner, two      |
+      //| centimetres away, and three chips plus an identity plus a state  |
+      //| plus a symbol do not fit beside five buttons in 420 px - one of  |
+      //| them had to go, and the redundant one is the honest choice.       |
+      //|                                                                  |
+      //| It is also the RIGHT one for Blind mode, which exists precisely  |
+      //| to hide the instrument: a panel announcing the symbol the chart  |
+      //| was told to conceal would defeat the feature it sits beside.      |
+      //+------------------------------------------------------------------+
+
+      //--- chips, laid out left to right from a fixed start. Each one
+      //--- reports the width it took, so adding a mode later moves the
+      //--- next chip instead of landing on top of it.
+      int cx = x + 140;
+      bool degraded = (m_state.fidelity_effective != m_state.fidelity);
+      cx += m_w.Chip("chfid", cx, y + 4,
+                     SSRFidelityShort(m_state.fidelity_effective) +
+                     (degraded ? " !" : ""),
+                     degraded ? SSR_C_HOLD
+                              : SSRFidelityColor(m_state.fidelity_effective),
+                     SSR_C_WELL) + 4;
+
+      if(m_state.blind)
+         cx += m_w.Chip("chblind", cx, y + 4, "BLIND",
+                        SSR_C_HOLD, SSR_C_WELL) + 4;
+      else
+         { m_w.Remove("chblind"); m_w.Remove("chblind_bg"); }
+
+      if(m_state.prop_on)
+         cx += m_w.Chip("chprop", cx, y + 4, "PROP",
+                        SSR_C_ACCENT, SSR_C_WELL) + 4;
+      else
+         { m_w.Remove("chprop"); m_w.Remove("chprop_bg"); }
+
+      //+------------------------------------------------------------------+
+      //| A PALETTE NOBODY CAN FIND IS A KEYBOARD SHORTCUT, NOT A FEATURE. |
+      //|                                                                  |
+      //| Ctrl+K is only discoverable by being told about it. This button  |
+      //| is the way in for somebody who has not been - and it shows the   |
+      //| key on the rows it opens, so it teaches the shortcut it is       |
+      //| standing in for rather than replacing it.                        |
+      //+------------------------------------------------------------------+
+      m_w.Button("palette", x + W - 102, y + 3, 18, SSR_HEADER_H - 5, "K",
+                 m_palette.IsUp());
 
       //--- A GUIDE NOBODY CAN FIND IS NOT A GUIDE. H opens the key list,
       //--- but nobody knows that until they have read the key list, so
@@ -1951,6 +2007,16 @@ public:
       else if(what == "spdn")     c = SSR_CMD_SPEED_DOWN;
       else if(what == "collapse") c = SSR_CMD_COLLAPSE;
       else if(what == "keys")     c = SSR_CMD_KEYS;
+
+      //--- the palette is opened here rather than through a command,
+      //--- because it is a SURFACE, not a verb: routing it through the
+      //--- host would be a command whose only effect is to draw a way
+      //--- of choosing commands.
+      if(what == "palette")
+        {
+         m_palette.Toggle(m_chart);
+         return SSR_CMD_NONE;
+        }
 
       if(what == "openln")
         {
