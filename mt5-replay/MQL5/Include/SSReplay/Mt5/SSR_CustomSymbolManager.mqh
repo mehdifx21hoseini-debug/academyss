@@ -393,6 +393,29 @@ public:
       bool ok = CustomSymbolDelete(m_symbol);
       m_created = false;
 
+      //+------------------------------------------------------------------+
+      //| AND A BEAT AFTER THE DELETE, FOR THE SAME REASON.                |
+      //|                                                                  |
+      //| Create() calls Destroy() and then asks for the SAME NAME back    |
+      //| microseconds later. Deleting a custom symbol tears down its      |
+      //| history under bases\Custom, and the recreate was landing on top   |
+      //| of that while it was still happening.                             |
+      //|                                                                  |
+      //| The symptom was a symbol that worked exactly once. On a second   |
+      //| run the clock advanced, the engine emitted its ticks, and the M1 |
+      //| series did not gain a single bar - while a JUMP, which writes    |
+      //| rates rather than ticks, landed its bars in the same run. Every  |
+      //| passing run I have seen swept no leftover; every failing one     |
+      //| deleted one first.                                                |
+      //|                                                                  |
+      //| That is a correlation across four runs, not a proof. It is also  |
+      //| the same lesson as the line above it, twenty lines away, and the |
+      //| test one flight up now replays a symbol twice in a row so this   |
+      //| stops being something only the user's terminal can discover.      |
+      //+------------------------------------------------------------------+
+      if(ok)
+         SSRPause(120);
+
       //--- a symbol that was never there is not a failure
       Succeed();
       return ok;

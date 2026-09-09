@@ -3044,6 +3044,64 @@ void OnStart()
         }
    }
 
+   //+------------------------------------------------------------------+
+   //| 31. THE SAME SYMBOL REPLAYS TWICE IN A ROW.                      |
+   //|                                                                  |
+   //| The thing this suite has never done is run twice. The user has,   |
+   //| every time, and the pattern in their reports is that a symbol     |
+   //| works ONCE: the first run passes and the next one advances its    |
+   //| clock, emits its ticks and gains no candle - while a jump, which  |
+   //| writes rates rather than ticks, lands its bars in that same run.  |
+   //|                                                                  |
+   //| Create() destroys the old replay symbol and asks for the SAME     |
+   //| NAME back microseconds later, on top of a bases\Custom teardown   |
+   //| that has not finished. The manager now waits after the delete.    |
+   //|                                                                  |
+   //| This is the check that makes it fail HERE when it is wrong,       |
+   //| rather than on a terminal I cannot reach: tear the session down   |
+   //| and load the same slot again, then ask the same question the      |
+   //| first pass asked - do candles appear.                             |
+   //+------------------------------------------------------------------+
+   {
+      Step("31 tearing the session down to replay it again");
+      ctrl.Release();
+
+      bool again = ctrl.Load(origin, win_start, win_end);
+      if(Check("31 the same symbol loads a second time", again,
+               ctrl.LastErrorText()))
+        {
+         int  bars_before = Bars(rsym, PERIOD_M1);
+         ctrl.Play();
+         ctrl.SetSpeedX100(6000);
+         for(int i = 0; i < 40 && !IsStopped(); i++)
+            ctrl.Pump(1000);
+
+         int  bars_after = bars_before;
+         int  waited     = 0;
+         for(int w = 0; w < 20 && bars_after <= bars_before; w++)
+           {
+            MqlRates poke[];
+            CopyRates(rsym, PERIOD_M1, 0, 1, poke);
+            bars_after = Bars(rsym, PERIOD_M1);
+            if(bars_after > bars_before)
+               break;
+            Sleep(50);
+            waited += 50;
+           }
+
+         Check("31 and its candles still build from its own ticks",
+               bars_after > bars_before,
+               StringFormat("%d -> %d bars on the second run%s%s",
+                            bars_before, bars_after,
+                            (waited > 0
+                             ? StringFormat(" (took %d ms)", waited) : ""),
+                            (bars_after > bars_before
+                             ? " - a symbol that only works once is a symbol "
+                               "nobody can use twice"
+                             : TickVerdict(sink))));
+        }
+   }
+
    ctrl.Release();
    Cleanup(rsym);
    Done();

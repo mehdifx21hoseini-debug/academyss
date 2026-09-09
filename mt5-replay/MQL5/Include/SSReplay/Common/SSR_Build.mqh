@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v96 2026-09-09  ticks"
+#define SSR_BUILD "v97 2026-09-09  twice"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
