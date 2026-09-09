@@ -109,6 +109,8 @@ void Unstash(const string path)
 int    g_fh    = INVALID_HANDLE;
 int    g_out_n = 0;
 string g_path  = "";
+uint   g_t0    = 0;
+uint   g_tlast = 0;
 
 //+------------------------------------------------------------------+
 //| WRITTEN AS IT HAPPENS, not collected and written at the end.      |
@@ -144,6 +146,8 @@ string g_path  = "";
 //+------------------------------------------------------------------+
 void LogOpen(void)
   {
+   g_t0    = GetTickCount();
+   g_tlast = g_t0;
    FolderCreate("SSReplay");
    g_path = SSR_QA_RESULT_FILE;
    g_fh   = FileOpen(g_path, FILE_WRITE | FILE_TXT | FILE_ANSI |
@@ -169,12 +173,46 @@ void LogOpen(void)
      }
   }
 
+//+------------------------------------------------------------------+
+//| AND PUT ON THE CHART, WHERE SOMEBODY IS ACTUALLY LOOKING.        |
+//|                                                                  |
+//| Three rounds have now been spent on "it got stuck", with no way   |
+//| to say WHERE. The file flushes per line, so it holds the answer   |
+//| - but only if it could be opened, and only if somebody thinks to  |
+//| go and read a partial file that looks like a failure.             |
+//|                                                                  |
+//| The chart costs nothing and needs no thinking. The last check to  |
+//| finish sits in the corner the whole run. If it stops changing,    |
+//| that line is the last thing that worked, and the stage after it   |
+//| is the one to look at. One glance replaces a round trip.          |
+//|                                                                  |
+//| The elapsed second count beside it separates the two things that  |
+//| look identical from outside: a run that is SLOW keeps counting,   |
+//| a run that is DEAD does not.                                      |
+//+------------------------------------------------------------------+
 void Log(const string line)
   {
    Print(line);
    g_out_n++;
+
+   //--- a check that took real time says so, so the file is a profile
+   //--- as well as a report and "which stage is slow" is answerable
+   //--- from it without asking anyone to time anything by hand
+   uint now = GetTickCount();
+   uint dt  = now - g_tlast;
+   g_tlast  = now;
+
+   Comment(StringFormat("SS Replay smoke test   %s\n"
+                        "line %d, %d seconds in\n%s\n\n"
+                        "If this stops changing, THIS is where it stopped.",
+                        SSR_BUILD, g_out_n, (int)((now - g_t0) / 1000), line));
+
    if(g_fh == INVALID_HANDLE)
       return;
+   if(dt > 3000 && g_out_n > 1)
+      FileWriteString(g_fh, StringFormat("  SLOW  the step before this one "
+                                         "took %.1f seconds\r\n",
+                                         dt / 1000.0));
    FileWriteString(g_fh, line + "\r\n");
    FileFlush(g_fh);                  // survive a stop, a crash, a hang
   }

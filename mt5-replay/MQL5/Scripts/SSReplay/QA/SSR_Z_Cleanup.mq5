@@ -17,13 +17,19 @@ string g_syms[] = {"SSRA1", "SSRA2", "SSRA2N", "SSRA3", "SSRB1", "SSRB1H",
                    "SSRD1", "SSRD2", "SSRD3", "SSRD4"};
 
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| IT LIVES IN QA NOW, NOT AMONG THE SPIKES.                        |
+//|                                                                  |
+//| The engine prints "run SSR_Z_Cleanup" when a replay symbol will   |
+//| not delete, and the script it named sat in Spike/ between         |
+//| SSR_D4_RewindCost and SSR_C3_IpcChannel. An instruction pointing  |
+//| into a folder of thirteen developer probes is an instruction      |
+//| nobody follows.                                                   |
+//+------------------------------------------------------------------+
 void OnStart()
   {
-   //--- Cleanup is the first thing run before every spike round, which
-   //--- makes it the cheapest possible place to answer "is the code in
-   //--- this terminal the code that was sent?" - before six scripts run
-   //--- and produce a result file about the wrong build.
    Print("=== SSR_Z_Cleanup  ssr=", SSR_BUILD, " ===");
+   Comment("SSR_Z_Cleanup running...");
 
    int closed = 0;
 
@@ -124,5 +130,16 @@ void OnStart()
       Print("[Cleanup] result files kept - set InpDeleteResults to remove them");
 
    Print("[Cleanup] NOTE: remove leftover history manually from <DataFolder>\\bases\\Custom if needed");
+
+   //--- on the chart as well. The whole reason this script gets run is
+   //--- that something looked stuck, and the Experts tab is the place
+   //--- the person in that situation is least likely to be looking.
+   Comment(StringFormat("SSR_Z_Cleanup  %s\n"
+                        "%d chart(s) closed, %d replay symbol(s) deleted, "
+                        "%d stuck%s\n\n"
+                        "Stuck means a chart of it is still open, or it is "
+                        "still shown in Market Watch (right-click it, Hide).",
+                        SSR_BUILD, closed, dropped, stuck,
+                        (stuck > 0 ? ":" + stuck_list : "")));
   }
 //+------------------------------------------------------------------+
