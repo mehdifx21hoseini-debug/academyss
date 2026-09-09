@@ -273,6 +273,34 @@ void Note(const string what, const string detail)
 void Step(const string where)
   { Log("  ..    " + where); }
 
+//+------------------------------------------------------------------+
+//| WHAT THE TERMINAL DID WITH THE TICKS WE GAVE IT.                 |
+//|                                                                  |
+//| "200 -> 200 bars" says the candles did not appear and stops       |
+//| there, which leaves three very different faults looking the same: |
+//| the engine never emitted, CustomTicksAdd refused, or the terminal |
+//| took every tick and built nothing from them. Only the third is a  |
+//| swallowed write, and only the numbers tell them apart.            |
+//+------------------------------------------------------------------+
+string TickVerdict(CSSRCustomSymbolSink &sink)
+  {
+   CSSRCustomSymbolManager *mgr = sink.Manager();
+   if(mgr == NULL)
+      return "";
+   SSRSymbolStats st;
+   mgr.StatsInto(st);
+   if(st.ticks_calls <= 0)
+      return "; the engine offered NO ticks to the terminal at all";
+   return StringFormat("; %d call(s) offered ticks, the terminal took %d and "
+                       "refused %d%s",
+                       (int)st.ticks_calls, (int)st.ticks_added,
+                       (int)st.ticks_rejected,
+                       (st.ticks_rejected == 0 && st.ticks_added > 0
+                        ? " - so it accepted every tick and built no bar from "
+                          "them, which is a swallowed write, not a refusal"
+                        : ""));
+  }
+
 //--- an object nobody can see is not on the panel, whether it was
 //--- never created or drawn and then hidden. The panel hides by
 //--- OBJPROP_TIMEFRAMES, so both cases answer the same question here.
@@ -475,11 +503,12 @@ void OnStart()
    Check("the replay CLOCK advanced", after_msc > before_msc,
          StringFormat("%s -> %s", SSRFormatMsc(before_msc), SSRFormatMsc(after_msc)));
    Check("new CANDLES appeared", after_bars > before_bars,
-         StringFormat("%d -> %d bars in %s%s", before_bars, after_bars, rsym,
+         StringFormat("%d -> %d bars in %s%s%s", before_bars, after_bars, rsym,
                       (waited_ms > 0
                        ? StringFormat(" (the series took %d ms to rebuild)",
                                       waited_ms)
-                       : "")));
+                       : ""),
+                      (after_bars > before_bars ? "" : TickVerdict(sink))));
 
    //+------------------------------------------------------------------+
    //| 7. THE CHART FOLLOWS.                                            |
@@ -584,7 +613,8 @@ void OnStart()
    Check("step forward advances the clock", after_clock > step_clock,
          StringFormat("%s -> %s", SSRFormatMsc(step_clock), SSRFormatMsc(after_clock)));
    Check("step forward reaches the series", step_after > step_before,
-         StringFormat("%d -> %d bars after 250ms", step_before, step_after));
+         StringFormat("%d -> %d bars after 250ms%s", step_before, step_after,
+                      (step_after > step_before ? "" : TickVerdict(sink))));
 
    //+------------------------------------------------------------------+
    //| 9. A JUMP PUTS ITS BARS IN THE SYMBOL.                           |
