@@ -131,6 +131,7 @@ StringSubstr
 StringToDouble
 StringToInteger
 StringToTime
+StringToLower
 StringToUpper
 StringTrimLeft
 StringTrimRight
