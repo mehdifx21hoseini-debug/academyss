@@ -206,6 +206,21 @@ private:
 
    bool              m_first_paint;
 
+   //+------------------------------------------------------------------+
+   //| TWO STEPS, NOT ONE LONG FORM.                                    |
+   //|                                                                  |
+   //| Seventeen rows and the START button in the same breath asked a   |
+   //| person to check every number and choose the moment to begin in   |
+   //| one glance, with the one irreversible control sitting under the  |
+   //| last text box they were typing in. The form was also 566 px tall |
+   //| and printed a note in the log when the chart could not hold it.  |
+   //|                                                                  |
+   //| Step 1 is settings and nothing else - it cannot start anything.  |
+   //| Step 2 shows back what was chosen, and only there is the orange  |
+   //| line and the button that begins the session.                     |
+   //+------------------------------------------------------------------+
+   int               m_step;            // 0 settings, 1 where to start
+
    double            Num(const string id, const double fallback)
      {
       string t = m_w.EditText("e" + id);
@@ -360,7 +375,7 @@ public:
                      CSSRSetupPanel(void)
      : m_chart(0), m_open(false), m_x(14), m_y(28),
        m_start_text(""), m_tf_i(1), m_preset_i(0), m_force_prop(false),
-       m_start_y(0), m_first_paint(true)
+       m_start_y(0), m_first_paint(true), m_step(0)
      { m_v.Init(); }
 
                     ~CSSRSetupPanel(void) { Destroy(); }
@@ -374,8 +389,14 @@ public:
       m_chart = chart_id;
       m_v     = defaults;
       m_w.Attach(chart_id, "SSRS_");
+      //--- PURGE FIRST. A previous run - or a previous BUILD, which is
+      //--- worse because it laid things out differently - leaves its
+      //--- objects on this chart under the same names, and a stale one
+      //--- at coordinates this build never uses reads as a control that
+      //--- has fallen out of the panel.
       m_w.RemoveAll();
       m_first_paint = true;
+      m_step        = 0;
 
       m_tf_i = 1;
       for(int i = 0; i < ArraySize(SSR_SETUP_TFS); i++)
@@ -386,7 +407,7 @@ public:
 
       //--- A PANEL TALLER THAN THE CHART IS A PANEL WITH ITS START
       //--- BUTTON OFF THE BOTTOM, and nothing on screen says why.
-      int need = 28 + 30 + 17 * SSR_SETUP_ROW + 84 + 16;
+      int need = 28 + 30 + 17 * SSR_SETUP_ROW + 44 + 16;
       int have = (int)ChartGetInteger(chart_id, CHART_HEIGHT_IN_PIXELS);
       if(have > 0 && have < need)
          PrintFormat("[setup] this chart is %d pixels tall and the setup "
@@ -422,18 +443,33 @@ public:
    //| rewriting them would delete what the user is halfway through     |
    //| typing - the classic way a settings form loses an answer.        |
    //+------------------------------------------------------------------+
+   //--- a read-only row on the confirm step: what step 1 was told
+   void              Recap(const string id, const int r, const string label,
+                          const string value, const color c = SSR_C_TEXT)
+     {
+      int ry = m_y + 30 + r * SSR_SETUP_ROW;
+      m_w.Label("l" + id, m_x + 12, ry + 5, label, SSR_C_TEXT_DIM, SSR_FS_BODY);
+      m_w.Label("v" + id, m_x + SSR_SETUP_W - SSR_SETUP_FIELD_W - 12, ry + 5,
+                value, c, SSR_FS_BODY);
+     }
+
    void              Render(void)
      {
       if(!m_open || m_chart == 0)
          return;
+      if(m_step == 0) RenderSettings();
+      else            RenderStart();
+     }
 
+   void              RenderSettings(void)
+     {
       int rows = 17;
-      //--- 76 left the start caption two pixels outside the frame it is
-      //--- printed in, at every row count this panel has ever had
-      int h    = 30 + rows * SSR_SETUP_ROW + 84;
+      int h    = 30 + rows * SSR_SETUP_ROW + 44;
       m_w.Rect("frame", m_x, m_y, SSR_SETUP_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
-      m_w.Label("title", m_x + 12, m_y + 9, "SS REPLAY  -  SETUP",
+      m_w.Label("title", m_x + 12, m_y + 9, "SS REPLAY  -  SETTINGS",
                 SSR_C_TEXT, SSR_FS_BODY);
+      m_w.Label("stepn", m_x + SSR_SETUP_W - 52, m_y + 10, "step 1 of 2",
+                SSR_C_TEXT_FAINT, SSR_FS_SMALL);
 
       int r = 0;
       m_w.Label("h1", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5, "ACCOUNT",
@@ -466,17 +502,63 @@ public:
                 SSR_C_TEXT_DIM, SSR_FS_SMALL); r++;
       Row("ses",  r++, "Save as",          m_v.session_name,                    true);
 
-      //--- the two buttons, and the line the whole panel is about
+      //--- NOTHING ON THIS STEP CAN START A REPLAY. That is the point.
       int by = m_y + 30 + r * SSR_SETUP_ROW + 8;
-      m_w.ButtonC("go", m_x + 12, by, SSR_SETUP_W - 24, 26,
-                  "START REPLAY HERE", SSR_C_BUY, SSR_C_BUY_EDGE,
-                  SSR_C_DEAL_TEXT, SSR_FS_BODY);
-      m_w.Button("here", m_x + 12, by + 30, SSR_SETUP_W - 24, 22,
+      m_w.ButtonC("next", m_x + 12, by, SSR_SETUP_W - 24, 26,
+                  "Next  -  choose where to start",
+                  SSR_C_PRIMARY, SSR_C_PRIMARY_EDGE,
+                  SSR_C_PRIMARY_TEXT, SSR_FS_BODY);
+     }
+
+   void              RenderStart(void)
+     {
+      int rows = 9;
+      int h    = 30 + rows * SSR_SETUP_ROW + 92;
+      m_w.Rect("frame", m_x, m_y, SSR_SETUP_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
+      m_w.Label("title", m_x + 12, m_y + 9, "SS REPLAY  -  WHERE TO START",
+                SSR_C_TEXT, SSR_FS_BODY);
+      m_w.Label("stepn", m_x + SSR_SETUP_W - 52, m_y + 10, "step 2 of 2",
+                SSR_C_TEXT_FAINT, SSR_FS_SMALL);
+
+      //--- read back what step 1 was told, so the confirmation is one
+      //--- and not a press into the dark
+      int r = 0;
+      m_w.Label("h1", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5, "YOU CHOSE",
+                SSR_C_TEXT_DIM, SSR_FS_SMALL); r++;
+      Recap("bal2",  r++, "Balance",   DoubleToString(m_v.balance, 2));
+      Recap("risk2", r++, "Risk",      StringFormat("%.2f %%", m_v.risk_percent));
+      Recap("spd2",  r++, "Speed",     StringFormat("%.0fx", m_v.speed));
+      Recap("tf2",   r++, "Timeframe", SSRSetupTfName(m_v.chart_tf) +
+                                       (m_v.extra_tfs != "" ? " +" + m_v.extra_tfs : ""));
+      Recap("bl2",   r++, "Blind mode", SSRSetupBlindName(m_v.blind),
+            m_v.blind ? SSR_C_HOLD : SSR_C_TEXT_DIM);
+      Recap("pon2",  r++, "Evaluation",
+            m_v.prop_on ? StringFormat("%.1f / %.1f / %.1f %%", m_v.prop_target,
+                                       m_v.prop_daily, m_v.prop_total)
+                        : "off",
+            m_v.prop_on ? SSR_C_RUN : SSR_C_TEXT_DIM);
+      Recap("ses2",  r++, "Save as",
+            m_v.session_name == "" ? "not saved" : m_v.session_name,
+            m_v.session_name == "" ? SSR_C_TEXT_DIM : SSR_C_TEXT);
+
+      m_w.Label("h2", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5,
+                "THE REPLAY BEGINS AT THE ORANGE LINE",
+                SSR_C_TEXT_DIM, SSR_FS_SMALL); r++;
+
+      int by = m_y + 30 + r * SSR_SETUP_ROW + 4;
+      m_w.Button("here", m_x + 12, by, SSR_SETUP_W - 24, 22,
                  "Bring the line to this view");
-      m_start_y = by + 58;
+      m_start_y = by + 26;
       m_w.Label("startlbl", m_x + 12, m_start_y,
                 (m_start_text == "" ? "Drag the orange line" : m_start_text),
                 SSR_C_HOLD, SSR_FS_SMALL);
+
+      //--- the irreversible one, on its own, with the way back beside it
+      int gy = by + 42;
+      m_w.Button("back", m_x + 12, gy, 74, 26, "Back");
+      m_w.ButtonC("go", m_x + 92, gy, SSR_SETUP_W - 104, 26,
+                  "START REPLAY HERE", SSR_C_BUY, SSR_C_BUY_EDGE,
+                  SSR_C_DEAL_TEXT, SSR_FS_BODY);
      }
 
    //+------------------------------------------------------------------+
@@ -488,6 +570,31 @@ public:
      {
       if(!m_open)
          return "";
+
+      //--- STEP CHANGES REPAINT FROM SCRATCH. The edit boxes only get
+      //--- their text written on a first paint - otherwise a repaint
+      //--- would delete what somebody is halfway through typing - so a
+      //--- step that comes back to a cleared chart has to be told that
+      //--- this paint IS a first one, or the boxes come back empty.
+      if(m_w.Pressed("next"))
+        {
+         ReadAll();
+         m_step = 1;
+         m_w.RemoveAll();
+         m_first_paint = true;
+         Render();
+         m_first_paint = false;
+         return "";
+        }
+      if(m_w.Pressed("back"))
+        {
+         m_step = 0;
+         m_w.RemoveAll();
+         m_first_paint = true;
+         Render();
+         m_first_paint = false;
+         return "";
+        }
 
       if(m_w.Pressed("go"))    { ReadAll(); return "go";   }
       if(m_w.Pressed("here"))  { return "here"; }

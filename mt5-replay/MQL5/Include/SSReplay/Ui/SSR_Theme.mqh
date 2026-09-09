@@ -45,13 +45,19 @@
 
 //--- surfaces. Three steps of elevation: chart, face, caption; wells
 //--- go the other way, below the face, because they are holes.
-#define SSR_C_PANEL        C'26,29,35'      // the face, lifted off the chart
-#define SSR_C_PANEL_EDGE   C'58,64,75'      // outer frame
-#define SSR_C_HEADER       C'35,39,47'      // caption strip, lifted again
-#define SSR_C_WELL         C'18,20,25'      // sunken areas: lists, tracks
-#define SSR_C_WELL_EDGE    C'46,51,61'
-#define SSR_C_GROUP_EDGE   C'44,49,59'      // group-box hairline
-#define SSR_C_STATUS       C'21,23,29'      // status strip
+//--- The first dark build put the face at 26,29,35. On this user's
+//--- chart - which is pure black, as most replay charts are - that is
+//--- four points of luminance above the background: the panel stopped
+//--- reading as a surface at all, and a collapsed one looked like two
+//--- buttons floating on the chart with nothing behind them.
+//--- Twelve points higher, with an edge bright enough to close it.
+#define SSR_C_PANEL        C'38,42,51'      // the face, lifted off the chart
+#define SSR_C_PANEL_EDGE   C'92,100,116'    // outer frame
+#define SSR_C_HEADER       C'50,55,67'      // caption strip, lifted again
+#define SSR_C_WELL         C'24,27,33'      // sunken areas: lists, tracks
+#define SSR_C_WELL_EDGE    C'70,77,90'
+#define SSR_C_GROUP_EDGE   C'62,68,81'      // group-box hairline
+#define SSR_C_STATUS       C'31,34,42'      // status strip
 
 //--- text
 #define SSR_C_TEXT         C'233,236,242'   // primary
@@ -59,17 +65,17 @@
 #define SSR_C_TEXT_FAINT   C'95,102,115'    // disabled
 
 //--- controls
-#define SSR_C_BTN          C'44,49,59'
-#define SSR_C_BTN_EDGE     C'64,70,83'
+#define SSR_C_BTN          C'58,64,77'
+#define SSR_C_BTN_EDGE     C'86,94,110'
 #define SSR_C_BTN_TEXT     C'226,231,239'
 #define SSR_C_BTN_ON       C'29,66,108'     // engaged toggle, accent-tinted
 #define SSR_C_BTN_ON_TEXT  C'166,206,252'
 #define SSR_C_BTN_ON_EDGE  C'58,126,198'
 
 //--- tabs
-#define SSR_C_TAB          C'32,36,44'
-#define SSR_C_TAB_ON       C'26,29,35'      // same as the face: the sheet
-#define SSR_C_TAB_EDGE     C'52,58,69'
+#define SSR_C_TAB          C'44,49,60'
+#define SSR_C_TAB_ON       C'38,42,51'      // same as the face: the sheet
+#define SSR_C_TAB_EDGE     C'70,77,90'
 
 //--- semantic. Separate from the accent on purpose: state must never
 //--- be confusable with styling. Lifted for a dark face - the print
@@ -88,8 +94,8 @@
 #define SSR_C_DEAL_DIM     C'52,57,67'      // the side the lines did not draw
 
 //--- the trackbar
-#define SSR_C_TRACK        C'18,20,25'
-#define SSR_C_TRACK_EDGE   C'52,58,69'
+#define SSR_C_TRACK        C'24,27,33'
+#define SSR_C_TRACK_EDGE   C'70,77,90'
 #define SSR_C_TRACK_FILL   C'58,126,198'
 #define SSR_C_THUMB        C'216,222,232'
 #define SSR_C_THUMB_EDGE   C'118,126,141'
