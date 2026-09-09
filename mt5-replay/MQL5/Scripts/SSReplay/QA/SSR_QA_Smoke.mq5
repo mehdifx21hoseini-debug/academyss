@@ -50,6 +50,7 @@
 #include <SSReplay/Ui/SSR_GroupPort.mqh>
 #include <SSReplay/Ui/SSR_Layout.mqh>
 #include <SSReplay/Ui/SSR_Palette.mqh>
+#include <SSReplay/Ui/SSR_RevealCard.mqh>
 #include <SSReplay/Ui/SSR_Panel.mqh>
 
 input string InpSymbol     = "";     // Symbol (empty = this chart)
@@ -3477,6 +3478,78 @@ void OnStart()
                             "exported statement", st2.pos_spread[i_with]));
         }
       ex2.CloseAll();
+   }
+
+   //+------------------------------------------------------------------+
+   //| 36. A BLIND SESSION ENDS WITH A REVEAL, NOT A DEINIT.            |
+   //|                                                                  |
+   //| Blind mode has restored the chart when the EXPERT WAS REMOVED     |
+   //| since Phase 8, so a trader who wanted to know what they had been  |
+   //| reading had to end the session to find out - losing the chart,    |
+   //| the positions and their own reasoning on the way.                 |
+   //|                                                                  |
+   //| The card marks the moment. What is asserted here is that it       |
+   //| decides WHEN, never WHETHER: the chart still comes back exactly   |
+   //| as it was, which is the promise the whole mode rests on.          |
+   //+------------------------------------------------------------------+
+   {
+      long bchart = ChartOpen(rsym, PERIOD_M1);
+      if(Check("36 a chart for the reveal", bchart != 0, rsym))
+        {
+         bool had_ohlc = (bool)ChartGetInteger(bchart, CHART_SHOW_OHLC);
+
+         //--- FULL, not Standard: Standard deliberately leaves the price
+         //--- scale alone, because "a chart with no price axis is not
+         //--- practice, it is a guessing game". Asserting that OHLC is
+         //--- hidden therefore has to use the level that hides it - my
+         //--- first version of this check asserted Standard would, which
+         //--- would have failed the moment it ran.
+         SSRBlindPolicy pol;
+         pol.Apply(SSR_BLIND_FULL);
+         CSSRBlindMode bl;
+         bl.SetPolicy(pol);
+         bl.Apply(bchart);
+         Check("36 blind hides what the chart announces",
+               bl.IsApplied() &&
+               (bool)ChartGetInteger(bchart, CHART_SHOW_OHLC) == false,
+               "the instrument and the dates are what a blind session is "
+               "practising without");
+
+         CSSRRevealCard card;
+         Check("36 the card is not up until the session finishes",
+               !card.IsUp(), "");
+
+         card.Show(bchart, "4 trade(s), net +18.20");
+         Check("36 it goes up when it does",
+               card.IsUp() && ObjectFind(bchart, "SSRV_reveal") >= 0,
+               "with the one button that lifts the blind");
+         Check("36 and it carries a BLIND chip, not just a colour",
+               ObjectFind(bchart, "SSRV_chip") >= 0,
+               "a mode carried by colour alone is one a colour-blind trader "
+               "cannot read");
+
+         //--- THE POINT: while the card is up, the market is STILL hidden
+         Check("36 the market stays hidden while the card is up",
+               (bool)ChartGetInteger(bchart, CHART_SHOW_OHLC) == false,
+               "a reveal that had already happened would make the button a "
+               "decoration");
+
+         //--- the card asks; the caller answers. It never reveals itself.
+         card.Hide();
+         Check("36 the card never reveals on its own",
+               !card.IsUp() &&
+               (bool)ChartGetInteger(bchart, CHART_SHOW_OHLC) == false,
+               "dismissing the question is not answering it - the host owns "
+               "the blind, and one place decides what revealing means");
+
+         int back = bl.RestoreAll();
+         Check("36 and the reveal puts the chart back exactly as it was",
+               back > 0 && !bl.IsApplied() &&
+               (bool)ChartGetInteger(bchart, CHART_SHOW_OHLC) == had_ohlc,
+               StringFormat("%d chart(s) restored - a mode you cannot leave "
+                            "is a trap, not a feature", back));
+         ChartClose(bchart);
+        }
    }
 
    ctrl.Release();

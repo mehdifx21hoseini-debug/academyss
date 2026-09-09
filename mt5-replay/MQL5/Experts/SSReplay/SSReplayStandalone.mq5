@@ -39,6 +39,7 @@
 #include <SSReplay/Chart/SSR_ChartManager.mqh>
 #include <SSReplay/Chart/SSR_TradeLines.mqh>
 #include <SSReplay/Ui/SSR_Panel.mqh>
+#include <SSReplay/Ui/SSR_RevealCard.mqh>
 #include <SSReplay/Ui/SSR_SetupPanel.mqh>
 #include <SSReplay/Ui/SSR_RangeDialog.mqh>
 #include <SSReplay/Data/SSR_HistoryCatalog.mqh>
@@ -246,6 +247,21 @@ CSSRPublisher        g_publisher;
 //--- instrument is not told about the first (closes T60)
 CSSRPublisher        g_publisher2[SSR_EXTRA_STREAMS];
 CSSRSessionDialog    g_session_dlg;
+
+//+------------------------------------------------------------------+
+//| THE END OF A BLIND SESSION IS A MOMENT, NOT A DEINIT.            |
+//|                                                                  |
+//| Blind mode has restored the chart when the EXPERT WAS REMOVED    |
+//| since Phase 8 - which means a trader who wanted to know what     |
+//| they had been reading had to end the session to find out, losing |
+//| the chart, the positions and their own reasoning on the way.     |
+//|                                                                  |
+//| A training feature with no feedback loop is practice you cannot  |
+//| check. The card marks the moment; OnDeinit still restores        |
+//| whatever happened, so this decides WHEN, never WHETHER.          |
+//+------------------------------------------------------------------+
+CSSRRevealCard       g_reveal;
+bool                 g_revealed = false;
 
 //--- extra streams. Index 0 is g_src/g_sink/g_ctrl above; these are
 //--- the rest, and they exist whether or not they are used because
@@ -2747,7 +2763,40 @@ void OnTimer()
    //|                                                                  |
    //| One condition, read once, so the two cannot drift apart again.    |
    //+------------------------------------------------------------------+
-   bool modal = (g_session_dlg.IsOpen() || g_dialog.IsOpen());
+   //+------------------------------------------------------------------+
+   //| A BLIND SESSION THAT HAS FINISHED STAYS BLIND UNTIL ASKED.       |
+   //|                                                                  |
+   //| Raised once - g_revealed latches - so a card dismissed by the     |
+   //| user does not come back on the next pump and become the thing     |
+   //| they have to dismiss forever.                                     |
+   //|                                                                  |
+   //| The headline is passed IN. This function counts nothing: a host   |
+   //| that decided what a session RESULT means would be the second      |
+   //| place that decides it, and the statistics engine is the first.    |
+   //+------------------------------------------------------------------+
+   if(!g_revealed && g_blind.IsApplied() && !g_reveal.IsUp() &&
+      g_ctrl.Status() == SSR_STATE_COMPLETED)
+     {
+      SSRStatistics st;
+      g_stats.Compute(st);
+      g_reveal.Show(g_panel_chart,
+                    StringFormat("%d trade(s), net %s%.2f",
+                                 st.trades,
+                                 (st.net_profit < 0.0 ? "-" : "+"),
+                                 MathAbs(st.net_profit)));
+     }
+
+   if(g_reveal.IsUp() && g_reveal.Poll())
+     {
+      g_revealed = true;
+      int back = g_blind.RestoreAll();
+      PrintFormat("[host] revealed: %d chart(s) put back exactly as they "
+                  "were before this session", back);
+      g_panel.Render();
+     }
+
+   bool modal = (g_session_dlg.IsOpen() || g_dialog.IsOpen() ||
+                 g_reveal.IsUp());
 
    if(!modal)
      {

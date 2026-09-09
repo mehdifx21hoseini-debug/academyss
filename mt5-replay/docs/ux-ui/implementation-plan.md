@@ -119,10 +119,25 @@ the Analysis surface will have established how a sheet asks for space.
   engine fills and the panel reads is only proved by the thing in between.
 - 39 clean, 17 audits silent.
 
-### Phase 6 — Training
-- Blind as a chosen mode with a persistent chip and a **REVEAL** step (F6).
-- Random practice with a visible seed.
-- **Risk: low** — `SSR_BlindMode::Restore` already exists and is tested.
+### Phase 6 — Training ✅ complete
+- **The chip shipped in v106, the seed in v107.** What was left was the
+  moment.
+- **Done: the reveal.** Blind mode has restored the chart when the EXPERT WAS
+  REMOVED since Phase 8, so a trader who wanted to know what they had been
+  reading had to end the session to find out — losing the chart, the positions
+  and their own reasoning on the way. That is a training feature with no
+  feedback loop.
+- The session finishes, the market **stays hidden**, and a card says so with
+  the one button that lifts it. `CSSRRevealCard` draws the question and never
+  answers it: the host owns the blind, so one place decides what revealing
+  means.
+- **It decides WHEN, never WHETHER.** `OnDeinit` still restores every chart
+  whatever happened, so a user who closes the terminal mid-card gets their
+  settings back exactly as before.
+- **Test: stage 36** asserts the market is still hidden while the card is up,
+  that dismissing the card is not answering it, and that the chart comes back
+  exactly as it was — the promise the whole mode rests on.
+- 39 clean, 17 audits silent.
 
 ### Phase 7 — Review / journal / analytics
 - **Session Review** modal (F5): headline, timeline, per-trade detail with
