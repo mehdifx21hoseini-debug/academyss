@@ -213,6 +213,25 @@ public:
             out.prop_progress   = m_prop.TargetProgress();
             out.prop_floor      = m_prop.Floor();
             out.prop_days       = m_prop.TradingDays();
+
+            //--- the meters. Every fraction is asked for, never worked
+            //--- out here: this port is a wire, and a wire that did
+            //--- arithmetic would be the second place that can be wrong
+            //--- about whether the run is over.
+            out.prop_daily_used    = m_prop.DailyUsed();
+            out.prop_total_used    = m_prop.TotalUsed();
+            out.prop_days_progress = m_prop.DaysProgress();
+            out.prop_deadline_used = m_prop.DeadlineUsed();
+            out.prop_daily_floor   = m_prop.DailyFloor();
+            out.prop_total_floor   = m_prop.TotalFloor();
+            out.prop_profit_pct    = m_prop.ProfitPct();
+            out.prop_target_pct    = pr.profit_target_pct;
+            out.prop_daily_pct     = pr.max_daily_loss_pct;
+            out.prop_total_pct     = pr.max_total_loss_pct;
+            out.prop_days_min      = pr.min_trading_days;
+            out.prop_days_elapsed  = m_prop.TotalDays();
+            out.prop_days_max      = pr.max_days;
+            out.prop_trailing      = pr.trailing;
            }
 
          out.balance        = m_acct.Balance();

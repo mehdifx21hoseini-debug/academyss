@@ -181,7 +181,22 @@ public:
      { return (m_state == SSR_PROP_PASSED || m_state == SSR_PROP_FAILED ||
                m_state == SSR_PROP_VOID); }
 
-   int               TradingDays(void) { return m_trading_days; }
+   //+------------------------------------------------------------------+
+   //| THE NUMBER THE RULE USES, NOT THE ONE THE COUNTER HOLDS.         |
+   //|                                                                  |
+   //| m_trading_days is incremented on the DAY BOUNDARY, so a trader    |
+   //| who has traded today is not counted for today until tomorrow.     |
+   //| Rule 5 knows that and adds the open day back in; this accessor     |
+   //| did not, so the panel showed "2" on the third day of a three-day   |
+   //| minimum - and a trader reading it would believe they could not     |
+   //| pass on a run the evaluation would have passed.                   |
+   //|                                                                  |
+   //| One number, one meaning: the panel, the headline and the exported  |
+   //| statement all read this, so none of them can disagree with the     |
+   //| rule that decides the verdict.                                     |
+   //+------------------------------------------------------------------+
+   int               TradingDays(void)
+     { return m_trading_days + (m_day_traded ? 1 : 0); }
    int               TotalDays(void)   { return m_total_days; }
    double            PeakEquity(void)  { return m_peak_eq; }
 
@@ -198,6 +213,74 @@ public:
       if(got <= 0.0)
          return 0.0;
       return (got >= want ? 1.0 : got / want);
+     }
+
+   //+------------------------------------------------------------------+
+   //| HOW MUCH OF EACH ALLOWANCE IS GONE - 0..1, CLAMPED.              |
+   //|                                                                  |
+   //| These live here for the same reason TargetProgress does: this is  |
+   //| the one place that knows what a daily loss limit MEANS, and a     |
+   //| panel that worked the fraction out from the rules and the equity  |
+   //| would be a second place that can disagree with the first about    |
+   //| whether you failed.                                               |
+   //|                                                                  |
+   //| Measured against CURRENT equity, not the day's low, because that  |
+   //| is what OnClock tests. A meter that answered a different question  |
+   //| from the rule would be worse than no meter: it would be a meter   |
+   //| that reads safe at the moment the run ends.                       |
+   //|                                                                  |
+   //| A rule that is switched off returns 0. Clamped at 1, because a    |
+   //| bar that can exceed its own width is a drawing bug - and by the   |
+   //| time one of these reaches 1 the evaluation has already failed on  |
+   //| it, which is exactly when the meter should be full and red.       |
+   //+------------------------------------------------------------------+
+   double            DailyUsed(void)
+     {
+      if(!m_started || m_rules.max_daily_loss_pct <= 0.0)
+         return 0.0;
+      double room = m_rules.start_balance * m_rules.max_daily_loss_pct / 100.0;
+      if(room <= 0.0)
+         return 0.0;
+      double lost = m_day_open_eq - Equity();
+      if(lost <= 0.0)
+         return 0.0;
+      return (lost >= room ? 1.0 : lost / room);
+     }
+
+   double            TotalUsed(void)
+     {
+      if(!m_started || m_rules.max_total_loss_pct <= 0.0)
+         return 0.0;
+      double room = m_rules.start_balance * m_rules.max_total_loss_pct / 100.0;
+      if(room <= 0.0)
+         return 0.0;
+      double base = (m_rules.trailing ? m_peak_eq : m_rules.start_balance);
+      double lost = base - Equity();
+      if(lost <= 0.0)
+         return 0.0;
+      return (lost >= room ? 1.0 : lost / room);
+     }
+
+   //--- toward the MINIMUM. 1.0 when there is no minimum to reach, so a
+   //--- full bar always means "this rule is satisfied" - the text beside
+   //--- it says which of the two reasons it is.
+   double            DaysProgress(void)
+     {
+      if(m_rules.min_trading_days <= 0)
+         return 1.0;
+      double got = (double)TradingDays();
+      double want = (double)m_rules.min_trading_days;
+      return (got >= want ? 1.0 : got / want);
+     }
+
+   //--- of the deadline. 0 when there is none, which is also what an
+   //--- unstarted run reads - and the text distinguishes them.
+   double            DeadlineUsed(void)
+     {
+      if(!m_started || m_rules.max_days <= 0)
+         return 0.0;
+      double used = (double)m_total_days / (double)m_rules.max_days;
+      return (used >= 1.0 ? 1.0 : used);
      }
 
    double            ProfitPct(void)
@@ -235,7 +318,7 @@ public:
          return StateName() + " - " + m_reason;
       return StringFormat("%+.2f%% of %+.1f%%   day %d   floor %.2f",
                           ProfitPct(), m_rules.profit_target_pct,
-                          m_trading_days, Floor());
+                          TradingDays(), Floor());
      }
 
    //+------------------------------------------------------------------+
@@ -389,7 +472,7 @@ public:
                           "%d trading day(s) of %d elapsed%s",
                           StateName(), m_rules.ToString(),
                           Equity(), m_peak_eq, m_low_eq,
-                          m_trading_days, m_total_days,
+                          TradingDays(), m_total_days,
                           (m_reason == "" ? "" : " | " + m_reason));
      }
   };

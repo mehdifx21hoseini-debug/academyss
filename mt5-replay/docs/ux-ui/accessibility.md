@@ -20,6 +20,8 @@ Every state has a second channel.
 | Disabled | faint text | no border highlight, and the button does not respond |
 | Armed reset | red | the label becomes `Reset?` and the strip names the loss |
 | Follow / detached | — | the Follow button enables only when a chart is behind |
+| Evaluation meter | amber, red at the breach | the percentage used and the floor price, written beside every bar |
+| Evaluation verdict | green / red / amber | the word `PASSED` / `FAILED` / `VOID`, and `Prop !` on the tab itself |
 
 ### 2. Contrast
 Body text on the panel face, and every semantic colour on that face, must clear

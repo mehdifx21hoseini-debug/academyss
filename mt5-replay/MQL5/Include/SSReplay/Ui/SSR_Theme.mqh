@@ -200,12 +200,25 @@
 #define SSR_CONFIRM_MS     4000
 #define SSR_TRACK_H        16      // the speed groove and its thumb
 
-//--- how many tabs, and which sheet each index is
+//+------------------------------------------------------------------+
+//| WHICH SHEET EACH INDEX IS, AND HOW MANY THERE ARE RIGHT NOW.     |
+//|                                                                  |
+//| SSR_TAB_COUNT is the tabs EVERY session has. Prop is a fifth one |
+//| that exists only while an evaluation is configured - a panel     |
+//| that shows an empty scoreboard to everyone who is not being      |
+//| scored is a panel asking a question nobody put to it.            |
+//|                                                                  |
+//| So the count is a question the panel asks its state, not a       |
+//| constant, and SSR_TAB_MAX is only ever used for sweeping objects |
+//| that a shrinking strip has to leave behind.                      |
+//+------------------------------------------------------------------+
 #define SSR_TAB_TRADE      0
 #define SSR_TAB_POSITIONS  1
 #define SSR_TAB_STATS      2
 #define SSR_TAB_SESSION    3
 #define SSR_TAB_COUNT      4
+#define SSR_TAB_PROP       4
+#define SSR_TAB_MAX        5
 
 //+------------------------------------------------------------------+
 //| One colour per replay state. The panel never invents its own.    |

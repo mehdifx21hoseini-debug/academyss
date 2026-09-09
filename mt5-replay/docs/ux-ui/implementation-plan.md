@@ -186,9 +186,56 @@ the Analysis surface will have established how a sheet asks for space.
   quiet at two samples and speaks at three — the same session, one gate.
 - 39 clean, 17 audits silent.
 
-### Phase 8 — Prop evaluation
-- Prop sheet with four meters (F7), present only in that mode.
-- **Risk: low.** Rules are already enforced and tested by five smoke checks.
+### Phase 8 — Prop evaluation ✅ complete
+- **An evaluation has four rules and the panel drew one of them.** The profit
+  target had a bar; the daily loss limit — the rule that ends most real
+  challenges — was a number inside a sentence, `floor 9500.00`, which a
+  trader mid-trade has to subtract from their own equity to use. The whole
+  block was 84 px at the bottom of the Stats sheet.
+- **Done: a Prop tab with one meter per rule.** Profit target, daily loss,
+  drawdown (named trailing or static, because a floor that moves under a
+  trader who thinks it is static is the most expensive surprise in this
+  product), and trading days. The deadline is a line under them, drawn only
+  when there is one.
+- **The tab exists only while an evaluation does** — a panel that shows an
+  empty scoreboard to everyone who is not being scored is asking a question
+  nobody put to it. The strip removes the fifth tab when the evaluation goes,
+  and a user standing on it is moved to Stats: four meters reading zero is
+  not "no evaluation", it is "an evaluation going badly".
+- **The sheet computes nothing.** Every fraction is asked of
+  `CSSRPropEvaluation` — the one place that knows what these rules mean and
+  the same place that decides whether the run is over. `DailyUsed`,
+  `TotalUsed`, `DaysProgress` and `DeadlineUsed` sit beside `TargetProgress`,
+  which already existed for exactly this reason.
+- **Found while writing the meters: the day count lied.** `m_trading_days` is
+  incremented on the day boundary, so a trader who traded today was not
+  counted for today until tomorrow. The rule that decides the verdict adds
+  the open day back in; the accessor the panel read did not — so on the third
+  day of a three-day minimum the panel said **2**, and a trader reading it
+  would believe they could not pass a run the evaluation would have passed.
+  `TradingDays()` now returns what the rule counts, and the headline and the
+  exported statement read the same accessor.
+- **Found while writing the meters: a rule that does not exist is not a rule
+  with room left.** `DailyFloor()` on a challenge with no daily limit returns
+  the equity the day opened at — a fine number, and a catastrophic thing to
+  print under the word "floor", because it tells a trader in profit that they
+  are failing at this instant. Those rows say "no daily limit" now.
+- **Found while writing the meters: the rules line was never fully drawn.**
+  MetaTrader draws 63 characters of `OBJPROP_TEXT` and the line is seventy-odd,
+  so "within 30" has not been on screen for anybody since the evaluation
+  shipped. Clipped explicitly now, with the four rows below carrying every
+  rule in it.
+- **No rule is carried by a bar alone.** Every meter has its percentage and
+  its floor price written beside it: a bar is unreadable to a colour-blind
+  trader, illegible in a screenshot, and meaningless to anyone who has not
+  learned which way is bad.
+- **Test: stage 38.** The check the stage exists for is that **at the exact
+  equity where `OnClock` ends the run, the daily meter reads 1.0** — a bar
+  that says "room left" in the frame the evaluation says FAILED is worse than
+  no bar. It also measures the sheet against the frame the panel drew, at its
+  worst case (a finished run with a deadline), because stage 18 walks the four
+  sheets every session has and cannot reach this one.
+- 39 clean, 17 audits silent.
 
 ### Phase 9 — Responsive + accessibility
 - Pro mode breakpoint at 720 px.

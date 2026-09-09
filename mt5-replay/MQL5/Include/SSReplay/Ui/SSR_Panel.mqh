@@ -47,7 +47,7 @@
 #include "SSR_Palette.mqh"
 #include "SSR_KeyCard.mqh"
 
-#define SSR_SLOTS 64
+#define SSR_SLOTS 80
 
 //+------------------------------------------------------------------+
 //| WHERE THE PANEL LIVES, remembered between sessions.              |
@@ -208,6 +208,26 @@ private:
       if(sign)
          return StringFormat("%s%.2f", (v < 0.0 ? "-" : "+"), MathAbs(v));
       return StringFormat("%.2f", v);
+     }
+
+   //+------------------------------------------------------------------+
+   //| METATRADER STORES OBJPROP_TEXT IN FULL AND DRAWS 63 CHARACTERS.  |
+   //|                                                                  |
+   //| Nothing errors. The end of the line simply is not there, and a    |
+   //| sentence that ends mid-word reads as a bug in the number rather   |
+   //| than a limit on the label. The "~" says the cut was deliberate.   |
+   //|                                                                  |
+   //| The rules line has been over that limit since the evaluation      |
+   //| shipped: "target +8.0%  daily -5.0%  total -10.0% (static)  min   |
+   //| 3 day(s)  within 30" is seventy-odd characters, so "within 30"    |
+   //| was never on the chart for anybody.                               |
+   //+------------------------------------------------------------------+
+   string            Clip(const string s, const int max_chars)
+     {
+      int cap = (max_chars < 62 ? max_chars : 62);
+      if(StringLen(s) <= cap)
+         return s;
+      return StringSubstr(s, 0, cap - 1) + "~";
      }
 
    string            Price(const double v)
@@ -445,8 +465,11 @@ public:
       m_corner    = (f.GetInt("corner", m_corner) & 3);
       m_collapsed = (f.GetInt("collapsed", m_collapsed ? 1 : 0) != 0);
 
+      //--- SSR_TAB_MAX, not TabCount(): the file is read before any state
+      //--- has arrived, so "is there an evaluation" cannot be answered
+      //--- yet. Render clamps it on the first paint that knows.
       int tab = f.GetInt("tab", m_tab);
-      if(tab >= 0 && tab < SSR_TAB_COUNT)
+      if(tab >= 0 && tab < SSR_TAB_MAX)
          m_tab = tab;
       return true;
      }
@@ -578,6 +601,16 @@ public:
       cy = DrawSpeed(x, cy, W);
       if(!m_compact)
         {
+         //+------------------------------------------------------------------+
+         //| A TAB THAT STOPPED EXISTING CANNOT STAY SELECTED.                |
+         //|                                                                  |
+         //| Reset turns the evaluation off, and a user standing on the Prop  |
+         //| tab when it does would be looking at a sheet drawn from a state  |
+         //| that has no evaluation in it - four meters reading zero, which   |
+         //| is not "no evaluation", it is "an evaluation going badly".       |
+         //+------------------------------------------------------------------+
+         if(m_tab >= TabCount())
+            m_tab = SSR_TAB_STATS;
          cy = DrawTabs(x, cy, W);
          DrawSide(x + SSR_PAD, cy + 4);
          DrawSheet(x + SSR_PAD + SSR_SIDE_W + SSR_GAP, cy + 4,
@@ -865,6 +898,13 @@ private:
    //================================================================
    //  TABS
    //================================================================
+   //--- five while an evaluation is running, four otherwise. Asked
+   //--- rather than assumed, because the answer changes mid-session:
+   //--- Reset can turn an evaluation off under a user who is standing
+   //--- on its tab.
+   int               TabCount(void)
+     { return (m_state.prop_on ? SSR_TAB_MAX : SSR_TAB_COUNT); }
+
    string            TabName(const int i)
      {
       switch(i)
@@ -876,14 +916,25 @@ private:
                     : "Positions");
          case SSR_TAB_STATS:     return "Stats";
          case SSR_TAB_SESSION:   return "Session";
+         //--- FAILED is the one word a trader must not have to hunt for,
+         //--- so the strip carries the verdict rather than only the name
+         case SSR_TAB_PROP:
+            return (m_state.prop_state == 3 ? "Prop !"
+                    : (m_state.prop_state == 2 ? "Prop OK" : "Prop"));
         }
       return "";
      }
 
    int               DrawTabs(const int x, const int y, const int W)
      {
-      int tw = 74, tx = x + SSR_PAD;
-      for(int i = 0; i < SSR_TAB_COUNT; i++)
+      //--- narrower once there are five, so the strip still clears the
+      //--- panel edge. Measured, not guessed: 5 x 74 + 4 x 2 is 378 in a
+      //--- 404 px run, which fits - but only just, and a longer tab name
+      //--- would have pushed it out silently.
+      int n  = TabCount();
+      int tw = (W - 2 * SSR_PAD - (n - 1) * 2) / n;
+      int tx = x + SSR_PAD;
+      for(int i = 0; i < n; i++)
         {
          bool on = (i == m_tab);
          m_w.ButtonC("tab" + IntegerToString(i), tx, y, tw, SSR_TAB_H,
@@ -893,6 +944,11 @@ private:
                      on ? SSR_C_TEXT : SSR_C_TEXT_DIM);
          tx += tw + 2;
         }
+      //--- a tab the strip no longer has is REMOVED, not left behind.
+      //--- The panel repaints from state and never clears the chart, so
+      //--- an object nobody redraws is an object that stays forever.
+      for(int i = n; i < SSR_TAB_MAX; i++)
+         m_w.Remove("tab" + IntegerToString(i));
       //--- the sheet edge under the strip, so the tabs read as tabs
       m_w.Rect("tabline", x + SSR_PAD, y + SSR_TAB_H, W - 2 * SSR_PAD, 1,
                SSR_C_TAB_EDGE, SSR_C_TAB_EDGE);
@@ -941,6 +997,7 @@ private:
          case SSR_TAB_POSITIONS: SheetPositions(x, y, w); break;
          case SSR_TAB_STATS:     SheetStats(x, y, w);     break;
          case SSR_TAB_SESSION:   SheetSession(x, y, w);   break;
+         case SSR_TAB_PROP:      SheetProp(x, y, w);      break;
         }
      }
 
@@ -971,14 +1028,26 @@ private:
                       "enbtn",
                       "sizerow","hintrow","setuprow","posempty","posmore",
                       "taglbl","poshint","trlbl","trdn","trup","troff",
-                      "st1","st2","st3","st4","st5","st6","stmt",
+                      "st1","st2","st3","st4","st5","st6","st7","stmt",
                       "spreadrow","traderr",
-                      "pv0","pv1","pv2","pvbg","pvfg","pvrst",
                       "g3_fr","g3_lb","g3_lg",
                       "ses1","ses2","ses3","ses4","ses5",
-                      "ses6","keyhint","spreadrow","traderr"};
+                      "ses6","keyhint","spreadrow","traderr",
+                      "pp_state","pp_rules","pp_head","pp_reset","pp_dl",
+                      "pp_g",
+                      "m0_l","m0_v","m1_l","m1_v","m2_l","m2_v",
+                      "m3_l","m3_v"};
       for(int i = 0; i < ArraySize(ids); i++)
          m_w.Remove(ids[i]);
+      //--- the meters, which are three objects each and named by the
+      //--- primitive rather than by this file
+      for(int m = 0; m < 4; m++)
+        {
+         string mid = "m" + IntegerToString(m);
+         m_w.Remove(mid + "_bg");
+         m_w.Remove(mid + "_fill");
+         m_w.Remove(mid + "_lim");
+        }
       for(int r = 0; r < 5; r++)
         {
          string t = IntegerToString(r);
@@ -1307,64 +1376,172 @@ private:
                  "Save HTML statement", false, m_state.can_trade);
 
       //+------------------------------------------------------------------+
-      //| THE EVALUATION.                                                  |
+      //| THE EVALUATION MOVED OFF THIS SHEET.                             |
       //|                                                                  |
-      //| Drawn only when one is running, because a panel that shows an    |
-      //| empty scoreboard to everyone who is not being scored is a panel  |
-      //| asking a question nobody put to it.                              |
+      //| It was 84 px at the bottom of Stats: one bar for the profit      |
+      //| target, and the three rules that can END the run reduced to a    |
+      //| single "floor" number the trader had to know how to read. Three  |
+      //| of the four rules had no picture at all.                         |
       //|                                                                  |
-      //| The bar is the profit target. The line under it is the floor -   |
-      //| the equity at which the run ends - because a target without the  |
-      //| price of missing it is only half the rule.                       |
+      //| It has its own tab now, and that tab exists only while an        |
+      //| evaluation is configured. The pointer stays here because Stats   |
+      //| is where somebody looking for it will look first.                |
       //+------------------------------------------------------------------+
-      if(!m_state.prop_on)
-        {
-         m_w.Hide("pv0", true);   m_w.Hide("pv1", true);
-         m_w.Hide("pv2", true);   m_w.Hide("pvbg", true);
-         m_w.Hide("pvfg", true);  m_w.Hide("pvrst", true);
-         return;
-        }
+      if(m_state.prop_on)
+         Text(36, "st7", x + 8, y + 146 + SSR_BTN_H + 2,
+              "Evaluation  ->  the Prop tab", SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      else
+         m_w.Remove("st7");
+     }
 
-      int py = y + 146 + SSR_BTN_H + 10;
-      m_w.Group("g3", x, py, w, 84, "Evaluation");
-
+   //----------------------------------------------------------------
+   //  PROP - the four rules that decide the run, one meter each
+   //----------------------------------------------------------------
+   //+------------------------------------------------------------------+
+   //| A RULE WITH NO PICTURE IS A RULE YOU FIND OUT ABOUT AFTERWARDS.  |
+   //|                                                                  |
+   //| An evaluation has four rules and the panel drew one of them. The |
+   //| daily loss limit is the rule that ends most real challenges, and  |
+   //| it was a number in a sentence - "floor 9500.00" - which a trader  |
+   //| mid-trade has to subtract from their equity to use.               |
+   //|                                                                  |
+   //| Four meters, each answering the only question worth asking about  |
+   //| a rule while the candles are moving: HOW MUCH ROOM IS LEFT.       |
+   //|                                                                  |
+   //| THIS SHEET COMPUTES NOTHING. Every fraction arrived from the      |
+   //| evaluation, which is the one place that knows what these rules    |
+   //| mean and the same place that decides whether the run is over. A   |
+   //| meter worked out here could read "safe" in the frame the          |
+   //| evaluation reads "failed", and the trader would believe the bar.  |
+   //|                                                                  |
+   //| EVERY METER HAS ITS NUMBER BESIDE IT. A bar is unreadable to a    |
+   //| colour-blind trader, illegible in a screenshot, and meaningless   |
+   //| to anyone who has not learned which way is bad. The text is the   |
+   //| measurement; the bar is how fast you can read it.                 |
+   //+------------------------------------------------------------------+
+   void              SheetProp(const int x, const int y, const int w)
+     {
       color verdict = SSR_C_TEXT;
       if(m_state.prop_state == 2) verdict = SSR_C_RUN;    // PASSED
       if(m_state.prop_state == 3) verdict = SSR_C_STOP;   // FAILED
       if(m_state.prop_state == 4) verdict = SSR_C_HOLD;   // VOID
 
-      //--- through Text, not Label, so an unchanged verdict is not
-      //--- rewritten ten times a second onto a chart that is already
-      //--- repainting itself with ticks
-      Text(54, "pv0", x + 8, py + 14, m_state.prop_state_name,
-           verdict, SSR_FS_BODY, SSR_FONT);
-      Text(55, "pv1", x + 8, py + 30, m_state.prop_rules,
-           SSR_C_TEXT_DIM, SSR_FS_SMALL, SSR_FONT);
+      Text(60, "pp_state", x, y, m_state.prop_state_name,
+           verdict, SSR_FS_TITLE);
+      //--- clipped, and the four rows below carry every rule in it with
+      //--- a meter, so this line is a recap and not the only copy
+      Text(61, "pp_rules", x, y + 14, Clip(m_state.prop_rules, 62),
+           SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
-      //--- the target bar. Width is the fraction, floored at one pixel
-      //--- so "started" and "nothing yet" do not look identical.
-      int bw = w - 16;
-      int fw = (int)(bw * (m_state.prop_progress < 0.0 ? 0.0
-                           : (m_state.prop_progress > 1.0 ? 1.0
-                              : m_state.prop_progress)));
-      if(m_state.prop_progress > 0.0 && fw < 1)
-         fw = 1;
-      m_w.Rect("pvbg", x + 8, py + 46, bw, 8, SSR_C_WELL, SSR_C_WELL_EDGE);
-      if(fw > 0)
-         m_w.Rect("pvfg", x + 8, py + 46, fw, 8, SSR_C_RUN, SSR_C_RUN);
+      //+------------------------------------------------------------------+
+      //| 25, AND THE SPARE IS FOUR PIXELS AT THE WORST CASE.              |
+      //|                                                                  |
+      //| Worst case is a finished run with a deadline: four rows, the      |
+      //| deadline line, the reason, and the Reset button - 178 px of the   |
+      //| 186 this sheet has. Stage 18 measures the four sheets it can      |
+      //| reach; this one exists only while an evaluation does, so stage    |
+      //| 38 measures it against the same frame rather than trusting the    |
+      //| arithmetic in this comment.                                       |
+      //+------------------------------------------------------------------+
+      int ry = y + 30;
+      int rh = 25;
+
+      //--- 1. the profit target. Filling up is the good direction, so
+      //--- this is the one meter that must NOT go red when it is full.
+      PropRow(62, 0, x, ry, w, "Profit target",
+              (m_state.prop_target_pct > 0.0
+               ? StringFormat("%+.2f%% of %+.1f%%",
+                              m_state.prop_profit_pct, m_state.prop_target_pct)
+               : StringFormat("%+.2f%%   (no target)", m_state.prop_profit_pct)),
+              m_state.prop_progress, SSR_C_RUN, false);
+      ry += rh;
+
+      //--- 2. the daily limit - the rule that ends most real challenges,
+      //--- and the one that had no picture at all until now
+      PropRow(64, 1, x, ry, w, "Daily loss",
+              (m_state.prop_daily_pct > 0.0
+               ? StringFormat("%d%% used   floor %s",
+                              (int)MathRound(m_state.prop_daily_used * 100.0),
+                              Money(m_state.prop_daily_floor))
+               : "no daily limit"),
+              m_state.prop_daily_used, SSR_C_HOLD, true);
+      ry += rh;
+
+      //--- 3. the overall drawdown. The base is named, because a
+      //--- trailing floor that moves under a trader who thinks it is
+      //--- static is the most expensive surprise in this whole product.
+      PropRow(66, 2, x, ry, w,
+              (m_state.prop_total_pct <= 0.0 ? "Drawdown"
+               : (m_state.prop_trailing ? "Drawdown (trailing)"
+                                        : "Drawdown (static)")),
+              (m_state.prop_total_pct > 0.0
+               ? StringFormat("%d%% used   floor %s",
+                              (int)MathRound(m_state.prop_total_used * 100.0),
+                              Money(m_state.prop_total_floor))
+               : "no drawdown limit"),
+              m_state.prop_total_used, SSR_C_HOLD, true);
+      ry += rh;
+
+      //--- 4. the days. Filling up is good again: this is a minimum to
+      //--- REACH, and most people are surprised it exists at all.
+      PropRow(68, 3, x, ry, w, "Trading days",
+              (m_state.prop_days_min > 0
+               ? StringFormat("%d of %d needed",
+                              m_state.prop_days, m_state.prop_days_min)
+               : StringFormat("%d  (no minimum)", m_state.prop_days)),
+              m_state.prop_days_progress, SSR_C_PRIMARY_EDGE, false);
+      ry += rh;
+
+      //--- the deadline, only when there is one. A meter for it would
+      //--- be a fifth bar for a rule most challenges do not set, and an
+      //--- empty bar teaches nobody what it counts.
+      if(m_state.prop_days_max > 0)
+        {
+         Text(70, "pp_dl", x, ry,
+              StringFormat("Day %d of %d elapsed",
+                           m_state.prop_days_elapsed, m_state.prop_days_max),
+              (m_state.prop_deadline_used >= 0.8 ? SSR_C_HOLD : SSR_C_TEXT_DIM),
+              SSR_FS_SMALL);
+         ry += 14;
+        }
       else
-         m_w.Hide("pvfg", true);
+         m_w.Remove("pp_dl");
 
-      Text(56, "pv2", x + 8, py + 58, m_state.prop_headline,
-           verdict, SSR_FS_SMALL, SSR_FONT);
-
-      //--- Reset is offered only once the run is over. Offering it mid
-      //--- run would be a button whose only use is to erase a bad day.
+      //--- why it ended, in the words of whoever ended it
       if(m_state.prop_state >= 2)
-         m_w.Button("pvrst", x + 8, py + 74, bw, SSR_BTN_H - 4,
+        {
+         Text(71, "pp_head", x, ry, Clip(m_state.prop_headline, 44),
+              verdict, SSR_FS_SMALL);
+         ry += 16;
+         //--- Reset is offered only once the run is over. Offering it
+         //--- mid-run would be a button whose only use is to erase a
+         //--- bad day.
+         m_w.Button("pp_reset", x, ry, w, SSR_BTN_H - 4,
                     "Reset evaluation", false, true);
+        }
       else
-         m_w.Hide("pvrst", true);
+        {
+         m_w.Remove("pp_head");
+         m_w.Remove("pp_reset");
+        }
+     }
+
+   //--- one row: name, measurement, bar. Two slots per row, handed in,
+   //--- because a slot chosen inside a loop is a slot that collides
+   //--- with the next sheet the day somebody adds a row.
+   void              PropRow(const int slot, const int idx,
+                             const int x, const int y, const int w,
+                             const string name, const string value,
+                             const double frac, const color fill,
+                             const bool over_is_bad)
+     {
+      string mid = "m" + IntegerToString(idx);
+      Text(slot, mid + "_l", x, y, name, SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      Text(slot + 1, mid + "_v", x + 96, y, value, SSR_C_TEXT, SSR_FS_SMALL);
+      //--- the fraction is passed as the VALUE against a limit of one.
+      //--- The primitive does not divide anything it was not given, and
+      //--- this sheet does not divide anything at all.
+      m_w.Meter(mid, x, y + 12, w, 7, frac, 1.0, fill, over_is_bad);
      }
 
    //----------------------------------------------------------------
@@ -1993,7 +2170,7 @@ public:
            }
          return SSR_CMD_NONE;
         }
-      if(what == "pvrst")
+      if(what == "pp_reset")
         {
          if(m_port != NULL)
             PrintFormat("[panel] reset evaluation -> %s",

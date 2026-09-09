@@ -3776,6 +3776,390 @@ void OnStart()
         }
    }
 
+   //+------------------------------------------------------------------+
+   //| 38. THE METER AND THE RULE READ THE SAME NUMBER.                 |
+   //|                                                                  |
+   //| An evaluation has four rules and the panel drew ONE of them. The |
+   //| daily loss limit - the rule that ends most real challenges - was |
+   //| a number inside a sentence, "floor 9500.00", which a trader       |
+   //| mid-trade has to subtract from their own equity to use.          |
+   //|                                                                  |
+   //| Four meters fix that, and introduce a worse failure than the one  |
+   //| they fix: a bar that is worked out in the panel can read SAFE in  |
+   //| the same frame the evaluation reads FAILED, and a trader will     |
+   //| believe the bar. So the fractions come from the evaluation - the  |
+   //| one place that knows what these rules mean and the same place     |
+   //| that decides whether the run is over - and the check below is     |
+   //| the one that matters: at the equity where the rule fires, the     |
+   //| meter is FULL.                                                    |
+   //+------------------------------------------------------------------+
+   {
+      Step("38 the evaluation meters");
+
+      CSSRTradingEngine  eacct;
+      SSRExecutionModel  eex;
+      eex.Init();
+      eex.use_real_spread = true;
+      eacct.SetExecution(eex);
+      eacct.SetBalance(10000.0);
+
+      SSRPropRules er;
+      er.Init();
+      er.enabled            = true;
+      er.start_balance      = 10000.0;
+      er.profit_target_pct  = 8.0;      // +800
+      er.max_daily_loss_pct = 5.0;      // -500 from the day's open
+      er.max_total_loss_pct = 10.0;     // -1000 from the start, static
+      er.trailing           = false;
+      er.min_trading_days   = 3;
+      er.max_days           = 30;
+
+      CSSRPropEvaluation ev;
+      ev.Attach(GetPointer(eacct));
+      ev.SetRules(er);
+      ev.Reset();
+
+      long eday = 20000;
+      ev.OnClock(eday * SSR_PROP_DAY_MSC + 3600000);   // establishes the day
+
+      Check("38 nothing is used before anything happens",
+            ev.DailyUsed() == 0.0 && ev.TotalUsed() == 0.0 &&
+            ev.TargetProgress() == 0.0,
+            StringFormat("daily %.3f  total %.3f  target %.3f",
+                         ev.DailyUsed(), ev.TotalUsed(), ev.TargetProgress()));
+
+      //--- halfway down the daily allowance, a quarter of the overall one
+      eacct.SetBalance(9750.0);
+      ev.OnClock(eday * SSR_PROP_DAY_MSC + 7200000);
+      bool half = (MathAbs(ev.DailyUsed() - 0.50) < 0.001 &&
+                   MathAbs(ev.TotalUsed() - 0.25) < 0.001);
+      Check("38 the fractions are the rules, not an approximation of them",
+            half,
+            StringFormat("-250 of a 500 daily allowance is %.3f, of a 1000 "
+                         "overall one %.3f", ev.DailyUsed(), ev.TotalUsed()));
+
+      //--- and up, where a loss meter must read empty rather than negative
+      eacct.SetBalance(10400.0);
+      ev.OnClock(eday * SSR_PROP_DAY_MSC + 10800000);
+      bool up = (ev.DailyUsed() == 0.0 && ev.TotalUsed() == 0.0 &&
+                 MathAbs(ev.TargetProgress() - 0.50) < 0.001);
+      Check("38 a session in profit uses none of either allowance",
+            up,
+            StringFormat("daily %.3f  total %.3f  target %.3f of +800",
+                         ev.DailyUsed(), ev.TotalUsed(), ev.TargetProgress()));
+
+      //+------------------------------------------------------------------+
+      //| THE CHECK THIS WHOLE STAGE EXISTS FOR.                           |
+      //|                                                                  |
+      //| Not "the meter is roughly right". At the exact equity where       |
+      //| OnClock ends the run, the bar the trader is looking at must be    |
+      //| full. A meter that reads 0.99 in the frame the evaluation reads    |
+      //| FAILED is a meter that says "you have room" as the run ends.       |
+      //+------------------------------------------------------------------+
+      eacct.SetBalance(9500.0);                      // exactly the daily floor
+      ev.OnClock(eday * SSR_PROP_DAY_MSC + 14400000);
+      bool fired = (ev.State() == SSR_PROP_FAILED);
+      bool full  = (ev.DailyUsed() >= 1.0);
+      Check("38 the meter is full in the frame the rule fires",
+            fired && full,
+            StringFormat("state %s, daily meter %.3f - %s",
+                         SSRPropStateName(ev.State()), ev.DailyUsed(),
+                         (fired && full
+                          ? "the bar and the verdict agree"
+                          : "a bar that says 'room left' as the run ends is "
+                            "worse than no bar")));
+
+      //--- clamped, because a bar that can exceed its own width is a
+      //--- drawing bug and a fraction over 1 would draw one
+      eacct.SetBalance(1000.0);
+      Check("38 neither meter can exceed its own width",
+            ev.DailyUsed() <= 1.0 && ev.TotalUsed() <= 1.0 &&
+            ev.DailyUsed() >= 0.0 && ev.TotalUsed() >= 0.0,
+            StringFormat("daily %.3f  total %.3f at -9000",
+                         ev.DailyUsed(), ev.TotalUsed()));
+
+      //+------------------------------------------------------------------+
+      //| THE DAY COUNT THE PANEL SHOWS IS THE ONE THE RULE USES.          |
+      //|                                                                  |
+      //| m_trading_days is incremented on the DAY BOUNDARY, so a trader   |
+      //| who traded today was not counted for today until tomorrow. The   |
+      //| rule that decides the verdict adds the open day back in; the     |
+      //| accessor the panel reads did not - so on the third day of a       |
+      //| three-day minimum the panel said 2, and a trader reading it       |
+      //| would believe they could not pass a run that would have passed.   |
+      //+------------------------------------------------------------------+
+      CSSRTradingEngine  dacct;
+      dacct.SetExecution(eex);
+      dacct.SetBalance(10000.0);
+      dacct.OnSessionStart(rsym, (int)SymbolInfoInteger(rsym, SYMBOL_DIGITS),
+                           SymbolInfoDouble(rsym, SYMBOL_POINT), 0);
+
+      CSSRPropEvaluation dev;
+      dev.Attach(GetPointer(dacct));
+      dev.SetRules(er);
+      dev.Reset();
+      dev.OnClock(eday * SSR_PROP_DAY_MSC + 3600000);
+
+      Check("38 an untraded day counts for nothing",
+            dev.TradingDays() == 0,
+            StringFormat("%d day(s)", dev.TradingDays()));
+
+      MqlTick dt[1];
+      double dpt = SymbolInfoDouble(rsym, SYMBOL_POINT);
+      if(dpt <= 0.0) dpt = 0.00001;
+      double dbase = SymbolInfoDouble(rsym, SYMBOL_BID);
+      if(dbase <= 0.0) dbase = 10000.0 * dpt;
+      dt[0].time     = (datetime)((eday * SSR_PROP_DAY_MSC) / 1000);
+      dt[0].time_msc = eday * SSR_PROP_DAY_MSC + 7200000;
+      dt[0].bid      = dbase;
+      dt[0].ask      = dbase + 10.0 * dpt;
+      dt[0].last     = dbase;
+      dt[0].volume   = 1;
+      dt[0].flags    = 0;
+      dacct.OnTicks(dt, 1);
+      dacct.Open(SSR_ORDER_BUY, 0.01);
+      dev.OnClock(eday * SSR_PROP_DAY_MSC + 7200000);
+
+      Check("38 a day that was traded counts TODAY, not tomorrow",
+            dev.TradingDays() == 1,
+            StringFormat("%d of %d needed, on the day the trade was taken",
+                         dev.TradingDays(), er.min_trading_days));
+      Check("38 and the days meter reads the same number",
+            MathAbs(dev.DaysProgress() - (1.0 / 3.0)) < 0.001,
+            StringFormat("%.3f toward three days", dev.DaysProgress()));
+
+      //--- the deadline is a fraction too, and is zero when unset
+      Check("38 the deadline is measured against the days elapsed",
+            MathAbs(dev.DeadlineUsed() - (1.0 / 30.0)) < 0.001,
+            StringFormat("day %d of %d is %.3f",
+                         dev.TotalDays(), er.max_days, dev.DeadlineUsed()));
+
+      SSRPropRules nod = er;
+      nod.max_days = 0;
+      dev.SetRules(nod);
+      Check("38 a run with no deadline reports no deadline pressure",
+            dev.DeadlineUsed() == 0.0,
+            StringFormat("%.3f - an empty bar teaches nobody what it counts, "
+                         "so the panel draws none", dev.DeadlineUsed()));
+
+      //+------------------------------------------------------------------+
+      //| A RULE THAT DOES NOT EXIST IS NOT A RULE WITH ROOM LEFT.         |
+      //|                                                                  |
+      //| DailyFloor() on a challenge with no daily limit returns the       |
+      //| equity the day OPENED at - a perfectly good number and a          |
+      //| catastrophic thing to print under the word "floor", because it    |
+      //| tells a trader in profit that they are failing at this instant.   |
+      //| The fraction has to read zero so the panel can tell the two       |
+      //| apart and say "no daily limit" instead.                            |
+      //+------------------------------------------------------------------+
+      SSRPropRules norule = er;
+      norule.max_daily_loss_pct = 0.0;
+      norule.max_total_loss_pct = 0.0;
+      norule.profit_target_pct  = 0.0;
+      dev.SetRules(norule);
+      Check("38 a rule that was never set uses none of an allowance it "
+            "does not have",
+            dev.DailyUsed() == 0.0 && dev.TotalUsed() == 0.0 &&
+            dev.TargetProgress() == 0.0,
+            StringFormat("daily %.3f  total %.3f  target %.3f",
+                         dev.DailyUsed(), dev.TotalUsed(),
+                         dev.TargetProgress()));
+      dev.SetRules(er);
+
+      //+------------------------------------------------------------------+
+      //| AND THE SHEET, ON A REAL CHART.                                  |
+      //+------------------------------------------------------------------+
+      long pchart = ChartOpen(rsym, PERIOD_M1);
+      if(Check("38 a chart for the prop sheet", pchart != 0, rsym))
+        {
+         CSSRReplayGroup pgroup;
+         pgroup.Add(GetPointer(ctrl));
+
+         CSSRGroupPort pport;
+         pport.Attach(GetPointer(pgroup));
+         pport.AttachAccount(GetPointer(dacct));
+
+         CSSRPanel pp;
+         pp.Create(pchart, GetPointer(pport), "SSRE_");
+
+         pp.Render();
+
+         //+------------------------------------------------------------------+
+         //| COMPACT IS A MODE, NOT AN ERROR - the lesson from stage 18.      |
+         //|                                                                  |
+         //| On a terminal with the Toolbox open there is no room for the tab  |
+         //| strip, so there is no fifth tab to find and no sheet to measure.   |
+         //| Asserting one anyway would be this stage failing on a screen      |
+         //| where the product is working. It says out loud what went          |
+         //| unmeasured instead.                                                |
+         //+------------------------------------------------------------------+
+         if(pp.IsCompact())
+           {
+            Note("38 the prop sheet was not measured",
+                 StringFormat("this chart is %d px and compact mode has no "
+                              "tab strip - close the Toolbox (Ctrl+T) and "
+                              "re-run to measure it",
+                              (int)ChartGetInteger(pchart,
+                                                   CHART_HEIGHT_IN_PIXELS)));
+            pp.Destroy();
+            ChartClose(pchart);
+           }
+         else
+           {
+         //--- WITHOUT an evaluation attached there is no fifth tab. A
+         //--- panel that showed an empty scoreboard to everyone who is
+         //--- not being scored would be asking a question nobody put.
+         Check("38 no evaluation, no Prop tab",
+               ObjectFind(pchart, "SSRE_tab3") >= 0 &&
+               ObjectFind(pchart, "SSRE_tab4") < 0,
+               "four tabs, as every session without one has");
+
+         pport.AttachProp(GetPointer(dev));
+         pp.Render();
+         Check("38 an evaluation adds the tab",
+               ObjectFind(pchart, "SSRE_tab4") >= 0,
+               "the fifth tab exists only while there is something to score");
+
+         //+------------------------------------------------------------------+
+         //| MEASURED AT ITS WORST CASE, NOT AT ITS EMPTIEST.                 |
+         //|                                                                  |
+         //| A finished run with a deadline draws everything this sheet can:   |
+         //| four rows, the deadline line, the reason it ended, and the Reset   |
+         //| button. A layout measured while half of it is hidden is a layout   |
+         //| measured on a screen no user is looking at.                        |
+         //+------------------------------------------------------------------+
+         dacct.SetBalance(9000.0);                     // through both floors
+         dev.OnClock(eday * SSR_PROP_DAY_MSC + 18000000);
+         Check("38 the sheet is measured with everything on it",
+               dev.State() == SSR_PROP_FAILED && er.max_days > 0,
+               StringFormat("%s, deadline %d day(s) - the deepest this sheet "
+                            "ever draws", SSRPropStateName(dev.State()),
+                            er.max_days));
+
+         pp.Dispatch("tab4");
+         pp.Render();
+
+         //--- the test checks its own eyes first: four meters, or every
+         //--- assertion below is about a sheet that was never drawn
+         int drawn = 0;
+         for(int m = 0; m < 4; m++)
+            if(ObjectFind(pchart, "SSRE_m" + IntegerToString(m) + "_bg") >= 0)
+               drawn++;
+         if(Check("38 the sheet draws one meter per rule",
+                  drawn == 4, StringFormat("%d of 4", drawn)))
+           {
+            //--- EVERY METER HAS ITS NUMBER BESIDE IT. A bar is
+            //--- unreadable to a colour-blind trader, illegible in a
+            //--- screenshot, and meaningless to anyone who has not
+            //--- learned which way is bad.
+            int labelled = 0;
+            for(int m = 0; m < 4; m++)
+              {
+               string vid = "SSRE_m" + IntegerToString(m) + "_v";
+               if(ObjectFind(pchart, vid) >= 0 &&
+                  ObjectGetString(pchart, vid, OBJPROP_TEXT) != "")
+                  labelled++;
+              }
+            Check("38 no rule is carried by a bar alone",
+                  labelled == 4,
+                  StringFormat("%d of 4 meters have their measurement written "
+                               "beside them", labelled));
+
+            //+------------------------------------------------------------------+
+            //| THE 63-CHARACTER CUT, MEASURED ON THE CHART ITSELF.              |
+            //|                                                                  |
+            //| The rules line has been over that limit since the evaluation      |
+            //| shipped - "within 30" was never on screen for anybody - and       |
+            //| nothing errored. This reads back what the objects actually hold.  |
+            //+------------------------------------------------------------------+
+            int cut = 0, worst_len = 0;
+            string worst_txt = "";
+            int total = ObjectsTotal(pchart, -1, OBJ_LABEL);
+            for(int i = 0; i < total; i++)
+              {
+               string nm = ObjectName(pchart, i, -1, OBJ_LABEL);
+               if(StringFind(nm, "SSRE_") != 0)
+                  continue;
+               string tx = ObjectGetString(pchart, nm, OBJPROP_TEXT);
+               int ln = StringLen(tx);
+               if(ln > worst_len) { worst_len = ln; worst_txt = nm; }
+               if(ln > 63) cut++;
+              }
+            Check("38 nothing the panel draws is cut off by MetaTrader",
+                  cut == 0,
+                  StringFormat("longest label %d of 63 drawn (%s)",
+                               worst_len, worst_txt));
+
+            //+------------------------------------------------------------------+
+            //| THE FRAME, ON THE ONE SHEET STAGE 18 CANNOT REACH.               |
+            //|                                                                  |
+            //| Stage 18 walks the four sheets every session has. This one        |
+            //| exists only while an evaluation does, and its panel there has no   |
+            //| port - so a row past the end of THIS sheet would be drawn over     |
+            //| the status bar and no test would have seen it. Same invariant,     |
+            //| same method: read the frame off the background the panel drew,     |
+            //| so a future row is caught without editing this.                    |
+            //+------------------------------------------------------------------+
+            int f_top = 0, f_bottom = 0, deepest = 0;
+            string deep_name = "";
+            int all = ObjectsTotal(pchart, -1, -1);
+            for(int i = 0; i < all; i++)
+              {
+               string nm = ObjectName(pchart, i, -1, -1);
+               if(StringFind(nm, "SSRE_") != 0)
+                  continue;
+               int oy = (int)ObjectGetInteger(pchart, nm, OBJPROP_YDISTANCE);
+               int oh = (int)ObjectGetInteger(pchart, nm, OBJPROP_YSIZE);
+               //--- a label answers zero for its height and is drawn below
+               //--- its anchor anyway, so it is allowed a line of text
+               if(ObjectGetInteger(pchart, nm, OBJPROP_TYPE) == OBJ_LABEL)
+                  oh = 12;
+               if(nm == "SSRE_bg")
+                 { f_top = oy; f_bottom = oy + oh; continue; }
+               if(oy + oh > deepest)
+                 { deepest = oy + oh; deep_name = nm; }
+              }
+            if(Check("38 the prop panel drew a frame to measure against",
+                     f_bottom > f_top && deep_name != "",
+                     StringFormat("frame %d..%d px", f_top, f_bottom)))
+               Check("38 and the prop sheet stays inside it",
+                     deepest <= f_bottom,
+                     StringFormat("deepest control %s ends at %d, frame ends "
+                                  "at %d (%d px %s)",
+                                  StringSubstr(deep_name, 5), deepest, f_bottom,
+                                  (int)MathAbs(f_bottom - deepest),
+                                  (deepest <= f_bottom
+                                   ? "spare"
+                                   : "OVER - a row past the end is drawn over "
+                                     "the status bar and reads as a rendering "
+                                     "fault")));
+           }
+
+         //+------------------------------------------------------------------+
+         //| A TAB THAT STOPPED EXISTING CANNOT STAY SELECTED.                |
+         //|                                                                  |
+         //| Four meters reading zero is not "no evaluation" - it is "an       |
+         //| evaluation going badly", which is the opposite of the truth.      |
+         //+------------------------------------------------------------------+
+         SSRPropRules off = er;
+         off.enabled = false;
+         dev.SetRules(off);
+         pp.Render();
+         Check("38 the tab goes when the evaluation does",
+               ObjectFind(pchart, "SSRE_tab4") < 0,
+               "an object nobody redraws is an object that stays forever, so "
+               "a shrinking strip has to remove what it leaves behind");
+         Check("38 and the user is not left standing on it",
+               pp.Tab() == SSR_TAB_STATS,
+               StringFormat("tab %d - four meters reading zero would say "
+                            "'going badly', not 'not running'", pp.Tab()));
+
+         pp.Destroy();
+         ChartClose(pchart);
+           }
+        }
+   }
+
    ctrl.Release();
    Cleanup(rsym);
    Done();

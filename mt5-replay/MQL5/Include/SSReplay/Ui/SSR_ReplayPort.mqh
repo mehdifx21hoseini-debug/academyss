@@ -129,7 +129,40 @@ struct SSRUiState
    string             prop_rules;
    double             prop_progress;   // 0..1 toward the profit target
    double             prop_floor;      // the equity level that ends the run
-   int                prop_days;
+   int                prop_days;       // traded days, as the RULE counts them
+
+   //+------------------------------------------------------------------+
+   //| THE FOUR METERS - FRACTIONS, NOT INGREDIENTS.                    |
+   //|                                                                  |
+   //| Every one of these is already 0..1 and already clamped. The panel |
+   //| draws a bar this many pixels wide and never learns what a daily   |
+   //| loss limit is, which is the whole point of the block above: the   |
+   //| meter and the rule that ends the run read the same number, from   |
+   //| the same place, so a bar cannot say "safe" at the moment the      |
+   //| evaluation says "failed".                                         |
+   //|                                                                  |
+   //| The plain numbers beside them are here so no state is carried by  |
+   //| colour or bar length ALONE - a meter is unreadable to a           |
+   //| colour-blind trader and invisible in a screenshot at 60%.         |
+   //+------------------------------------------------------------------+
+   double             prop_daily_used;    // 0..1 of today's allowance
+   double             prop_total_used;    // 0..1 of the overall allowance
+   double             prop_days_progress; // 0..1 toward the minimum days
+   double             prop_deadline_used; // 0..1 of the deadline; 0 = none
+   double             prop_daily_floor;   // the equity that ends the day
+   double             prop_total_floor;   // the equity that ends the run
+   double             prop_profit_pct;    // where the run stands
+   double             prop_target_pct;    // what it is aiming at
+   //--- 0 means THERE IS NO SUCH RULE, which is not the same as a rule
+   //--- with room left. DailyFloor() on a challenge with no daily limit
+   //--- returns the equity the day opened at, and printing that as a
+   //--- floor tells a trader they are failing at this instant.
+   double             prop_daily_pct;
+   double             prop_total_pct;
+   int                prop_days_min;      // what the rule asks for
+   int                prop_days_elapsed;  // calendar days of the run
+   int                prop_days_max;      // 0 = no deadline
+   bool               prop_trailing;      // which base the total floor uses
 
    //--- THE OPEN POSITIONS, as rows the panel can show and act on.
    //--- Five is a display cap, not a trading cap: pos_rows says how
@@ -211,6 +244,13 @@ struct SSRUiState
       order_name = ""; order_why = ""; pending_count = 0;
       prop_on = false; prop_state = 0; prop_state_name = ""; prop_headline = "";
       prop_rules = ""; prop_progress = 0.0; prop_floor = 0.0; prop_days = 0;
+      prop_daily_used = 0.0; prop_total_used = 0.0;
+      prop_days_progress = 0.0; prop_deadline_used = 0.0;
+      prop_daily_floor = 0.0; prop_total_floor = 0.0;
+      prop_profit_pct = 0.0; prop_target_pct = 0.0;
+      prop_daily_pct = 0.0; prop_total_pct = 0.0;
+      prop_days_min = 0; prop_days_elapsed = 0; prop_days_max = 0;
+      prop_trailing = false;
       balance = 0.0; equity = 0.0; floating = 0.0;
       open_positions = 0; closed_trades = 0; risk_percent = 0.0; stop_points = 0.0;
       trade_symbol = ""; can_trade = false; tp_points = 0.0;
