@@ -215,6 +215,12 @@ string          CfgExtraTfs(void){ return g_setup_ready ? g_setup.extra_tfs     
 ENUM_SSR_BLIND  CfgBlind(void)   { return g_setup_ready ? g_setup.blind         : InpBlind; }
 string          CfgSession(void) { return g_setup_ready ? g_setup.session_name  : InpSession; }
 bool            CfgProp(void)    { return g_setup_ready ? g_setup.prop_on       : InpProp; }
+//--- Random and its seed came from the setup form in Phase 4. Same rule
+//--- as every other Cfg: the inputs are the default, what the user chose
+//--- on the chart wins. A form that asks a question nobody reads is worse
+//--- than no form.
+bool            CfgRandom(void)  { return g_setup_ready ? g_setup.random_start  : InpRandom; }
+string          CfgSeed(void)    { return g_setup_ready ? g_setup.seed          : InpSeed; }
 double          CfgPropTgt(void) { return g_setup_ready ? g_setup.prop_target   : InpPropTarget; }
 double          CfgPropDly(void) { return g_setup_ready ? g_setup.prop_daily    : InpPropDaily; }
 double          CfgPropTot(void) { return g_setup_ready ? g_setup.prop_total    : InpPropTotal; }
@@ -887,11 +893,11 @@ bool BuildSession(string origin, const bool on_replay,
    //--- the seed is printed because a session you cannot return to is
    //--- one you cannot learn from.
    long random_start = SSR_INVALID_TIME;
-   if(InpRandom)
+   if(CfgRandom())
      {
       g_catalog.Attach(g_src.History());
       g_picker.Attach(GetPointer(g_catalog));
-      g_picker.SetSeed(SSRSeedFromText(InpSeed));
+      g_picker.SetSeed(SSRSeedFromText(CfgSeed()));
       g_picker.AddSymbolList(InpAlsoSymbols);
       g_picker.AddSymbol(origin);
 
@@ -1108,7 +1114,7 @@ bool BuildSession(string origin, const bool on_replay,
    //--- it - and it must hold nothing beyond it.
    Watch(GetPointer(g_view));
    g_strategies.Attach(GetPointer(g_view), GetPointer(g_acct));
-   g_strategies.SetSeed(InpRandom ? g_picker.Seed() : 1);
+   g_strategies.SetSeed(CfgRandom() ? g_picker.Seed() : 1);
    if(InpRefStrategy)
      {
       g_ref_strategy.Configure(InpStratTf, InpStratLookback, InpStratRisk);
@@ -1227,7 +1233,7 @@ bool BuildSession(string origin, const bool on_replay,
    //--- chosen by seed. Writing the picker's idle value on a hand-picked
    //--- window would make two different sessions look like one.
    g_journal.SetSession(CfgSession(), origin, win_start, win_end,
-                        (InpRandom ? IntegerToString((long)g_picker.Seed())
+                        (CfgRandom() ? IntegerToString((long)g_picker.Seed())
                                    : ""));
    g_gport.AttachStats(GetPointer(g_stats));
    g_gport.AttachStrategies(GetPointer(g_strategies));
@@ -1881,7 +1887,9 @@ int OnInit()
                   "start, because the file already says. Clear 'Session' "
                   "or turn 'Resume' off to pick a new start.", CfgSession());
 
-   if(InpPickStart && !on_replay && InpStart == 0 && !InpRandom && !will_resume)
+   //--- a random session picks its own start, so the orange line would
+   //--- be asking a question that has already been answered
+   if(InpPickStart && !on_replay && InpStart == 0 && !CfgRandom() && !will_resume)
      {
       //--- already chosen (this run, or before the handover)? then the
       //--- picker has nothing left to ask

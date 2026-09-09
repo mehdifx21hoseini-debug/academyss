@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v106 2026-09-09  chips"
+#define SSR_BUILD "v107 2026-09-09  quickstart"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

@@ -1130,6 +1130,8 @@ void OnStart()
       a.prop_target   = 6.5;
       a.prop_daily    = 4.0;
       a.prop_total    = 9.0;
+      a.random_start  = true;
+      a.seed          = "class-2026-09";
 
       if(Check("the setup saves", CSSRSetupPanel::Save(a),
                "MQL5\\Files\\SSReplay\\setup.ini"))
@@ -1143,12 +1145,61 @@ void OnStart()
                b.chart_tf == a.chart_tf && b.extra_tfs == a.extra_tfs &&
                b.blind == a.blind && b.session_name == a.session_name &&
                b.prop_on == a.prop_on && b.prop_target == a.prop_target &&
-               b.prop_daily == a.prop_daily && b.prop_total == a.prop_total,
+               b.prop_daily == a.prop_daily && b.prop_total == a.prop_total &&
+               b.random_start == a.random_start && b.seed == a.seed,
                StringFormat("balance %.2f  tf %s  extra [%s]  blind %s  "
-                            "eval %s  session [%s]",
+                            "eval %s  session [%s]  random %s  seed [%s]",
                             b.balance, SSRSetupTfName(b.chart_tf), b.extra_tfs,
                             SSRSetupBlindName(b.blind),
-                            (b.prop_on ? "on" : "off"), b.session_name));
+                            (b.prop_on ? "on" : "off"), b.session_name,
+                            (b.random_start ? "on" : "off"), b.seed));
+
+         //+------------------------------------------------------------------+
+         //| A SEED THAT DOES NOT SURVIVE IS NOT A SEED.                      |
+         //|                                                                  |
+         //| It is the one field whose entire purpose is to leave this        |
+         //| machine and come back - to a student, into a lesson plan, into   |
+         //| a bug report. Checked on its own so a failure names the seed     |
+         //| rather than being one term in a twelve-way AND.                   |
+         //+------------------------------------------------------------------+
+         Check("34 the seed survives the round trip exactly",
+               b.seed == "class-2026-09",
+               StringFormat("[%s] - the same seed and symbol must give the "
+                            "same session, or coaching, the class report and "
+                            "every 'this is what broke it' are guesses",
+                            b.seed));
+
+         //+------------------------------------------------------------------+
+         //| MODE IS A SHORTCUT OVER SETTINGS THAT ALREADY EXIST.             |
+         //|                                                                  |
+         //| There is no `mode` field, deliberately - a fifth source of truth |
+         //| that has to agree with four others is the one that disagrees.    |
+         //| So the test is that the settings a mode writes are the settings  |
+         //| it reads back, and that the panel opens on what is TRUE rather   |
+         //| than on what was last clicked.                                    |
+         //+------------------------------------------------------------------+
+         SSRSetupValues m;
+         m.Init();
+         Check("34 a fresh setup is Standard",
+               !m.random_start && !m.prop_on && m.blind == SSR_BLIND_OFF,
+               "nothing on until something is chosen");
+
+         m.Init(); m.blind = SSR_BLIND_STANDARD;
+         Check("34 blind alone reads as Blind",
+               m.blind != SSR_BLIND_OFF && !m.prop_on && !m.random_start, "");
+         m.Init(); m.prop_on = true;
+         Check("34 prop alone reads as Prop",
+               m.prop_on && !m.random_start && m.blind == SSR_BLIND_OFF, "");
+         m.Init(); m.random_start = true;
+         Check("34 random alone reads as Random", m.random_start, "");
+
+         //--- and the combination the modes are deliberately not exclusive
+         //--- about: a prop challenge run blind is a real thing to practise
+         m.Init(); m.prop_on = true; m.blind = SSR_BLIND_FULL;
+         Check("34 prop and blind can both be on",
+               m.prop_on && m.blind == SSR_BLIND_FULL,
+               "a challenge practised blind is a real exercise, and the "
+               "caption shows both chips because both settings are on");
         }
       Unstash(SSR_SETUP_FILE);
    }

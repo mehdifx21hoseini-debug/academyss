@@ -115,12 +115,29 @@ struct SSRSetupValues
    double            prop_daily;
    double            prop_total;
 
+   //+------------------------------------------------------------------+
+   //| RANDOM AND ITS SEED.                                             |
+   //|                                                                  |
+   //| Both existed as expert inputs and neither had any UI, which made |
+   //| the most differentiating training feature in this product        |
+   //| reachable only by opening MetaTrader's own inputs dialog.        |
+   //|                                                                  |
+   //| The seed is what makes a random session REPEATABLE - the same    |
+   //| seed and the same symbol give the same window, which is the      |
+   //| whole basis of coaching, of the class report, and of testing a   |
+   //| change against the session that exposed it. A random session you |
+   //| cannot return to is one nobody can learn from.                   |
+   //+------------------------------------------------------------------+
+   bool              random_start;
+   string            seed;
+
    void              Init(void)
      {
       balance = 10000.0; risk_percent = 0.5; spread_points = 20.0;
       speed = 30.0; chart_tf = PERIOD_M5; extra_tfs = ""; blind = SSR_BLIND_OFF;
       session_name = "";
       prop_on = false; prop_target = 8.0; prop_daily = 5.0; prop_total = 10.0;
+      random_start = false; seed = "";
      }
   };
 
@@ -221,7 +238,20 @@ private:
    //| Step 2 shows back what was chosen, and only there is the orange  |
    //| line and the button that begins the session.                     |
    //+------------------------------------------------------------------+
-   int               m_step;            // 0 settings, 1 where to start
+   //+------------------------------------------------------------------+
+   //| FOUR STEPS, AND THE FIRST ONE IS USUALLY THE LAST.                |
+   //|                                                                  |
+   //|   0  QUICK    two clicks and a drag, for the session you have    |
+   //|                already had a hundred times                        |
+   //|   1  SETTINGS the seventeen rows, for when they matter            |
+   //|   2  MODE     what KIND of practice this is                       |
+   //|   3  START    read back what was chosen, and begin                |
+   //|                                                                  |
+   //| An expert who runs the same configuration daily should not walk  |
+   //| a wizard to do it, and a beginner should not meet seventeen rows |
+   //| before they have seen a candle move.                              |
+   //+------------------------------------------------------------------+
+   int               m_step;
 
    //+------------------------------------------------------------------+
    //| A LIST YOU CAN SEE BEATS A BUTTON YOU CLICK UNTIL IT AGREES.     |
@@ -580,14 +610,102 @@ public:
                     SSR_SETUP_FIELD_W, ih, opts[i]);
      }
 
+   //+------------------------------------------------------------------+
+   //| A STEP CHANGE REPAINTS FROM SCRATCH, AND MUST DECLARE ITSELF A   |
+   //| FIRST PAINT.                                                     |
+   //|                                                                  |
+   //| Edit boxes write their text only on a first pass - precisely so  |
+   //| a repaint cannot delete what somebody is halfway through typing. |
+   //| A step arriving at a cleared chart therefore comes back with     |
+   //| EMPTY boxes unless it says it is a first paint.                   |
+   //|                                                                  |
+   //| That was written out three times in Poll() and is now written    |
+   //| once, because the fourth copy is the one that forgets.            |
+   //+------------------------------------------------------------------+
+   void              Repaint(void)
+     {
+      m_w.RemoveAll();
+      m_first_paint = true;
+      Render();
+      m_first_paint = false;
+     }
+
    void              Render(void)
      {
       if(!m_open || m_chart == 0)
          return;
       MenuClear();
-      if(m_step == 0) RenderSettings();
-      else            RenderStart();
+      if(m_step == 0)      RenderQuick();
+      else if(m_step == 1) RenderSettings();
+      else if(m_step == 2) RenderMode();
+      else                 RenderStart();
       DrawMenu();                       // last, because last is on top
+     }
+
+   //+------------------------------------------------------------------+
+   //| STEP 0 - QUICK START.                                            |
+   //|                                                                  |
+   //| Three actions and a way past them. The wizard is still there and |
+   //| still complete; it is simply no longer the only door.            |
+   //|                                                                  |
+   //| "Same as last time" is offered only when there IS a last time -  |
+   //| setup.ini exists - and it says what it will do rather than       |
+   //| promising it: the symbol, timeframe, balance and risk are read   |
+   //| back and printed, so pressing it is a confirmation.               |
+   //+------------------------------------------------------------------+
+   void              RenderQuick(void)
+     {
+      bool have_last    = FileIsExist(SSR_SETUP_FILE);
+      bool have_session = (m_v.session_name != "" &&
+                           FileIsExist("SSReplay\\sessions\\" +
+                                       m_v.session_name + ".ssr"));
+
+      int rows = (have_last ? 1 : 0) + (have_session ? 1 : 0) + 1;
+      int h    = 34 + rows * 46 + 40;
+      m_w.Rect("frame", m_x, m_y, SSR_SETUP_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
+      m_w.Label("title", m_x + 12, m_y + 9, "NEW REPLAY",
+                SSR_C_TEXT, SSR_FS_BODY);
+
+      int by = m_y + 34;
+      if(have_last)
+        {
+         m_w.ButtonC("qlast", m_x + 12, by, SSR_SETUP_W - 24, 26,
+                     "Same as last time",
+                     SSR_C_PRIMARY, SSR_C_PRIMARY_EDGE,
+                     SSR_C_PRIMARY_TEXT, SSR_FS_BODY);
+         m_w.Label("qlastd", m_x + 14, by + 29,
+                   StringFormat("%s  ·  %s  ·  %s  ·  %.2f%% risk",
+                                SSRSetupTfName(m_v.chart_tf),
+                                SSRSetupBlindName(m_v.blind),
+                                DoubleToString(m_v.balance, 2),
+                                m_v.risk_percent),
+                   SSR_C_TEXT_DIM, SSR_FS_SMALL);
+         by += 46;
+        }
+      else
+        { m_w.Remove("qlast"); m_w.Remove("qlastd"); }
+
+      if(have_session)
+        {
+         m_w.Button("qcont", m_x + 12, by, SSR_SETUP_W - 24, 26,
+                    "Continue \"" + m_v.session_name + "\"");
+         m_w.Label("qcontd", m_x + 14, by + 29,
+                   "picks up where that session was left",
+                   SSR_C_TEXT_DIM, SSR_FS_SMALL);
+         by += 46;
+        }
+      else
+        { m_w.Remove("qcont"); m_w.Remove("qcontd"); }
+
+      m_w.Button("qrand", m_x + 12, by, SSR_SETUP_W - 24, 26,
+                 "Random session");
+      m_w.Label("qrandd", m_x + 14, by + 29,
+                "a start you have not seen, with a seed you can share",
+                SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      by += 46;
+
+      m_w.Button("qcust", m_x + 12, by + 4, SSR_SETUP_W - 24, 22,
+                 "Customise...");
      }
 
    void              RenderSettings(void)
@@ -597,7 +715,7 @@ public:
       m_w.Rect("frame", m_x, m_y, SSR_SETUP_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
       m_w.Label("title", m_x + 12, m_y + 9, "SS REPLAY  -  SETTINGS",
                 SSR_C_TEXT, SSR_FS_BODY);
-      m_w.Label("stepn", m_x + SSR_SETUP_W - 52, m_y + 10, "step 1 of 2",
+      m_w.Label("stepn", m_x + SSR_SETUP_W - 52, m_y + 10, "step 1 of 3",
                 SSR_C_TEXT_FAINT, SSR_FS_SMALL);
 
       int r = 0;
@@ -634,19 +752,69 @@ public:
       //--- NOTHING ON THIS STEP CAN START A REPLAY. That is the point.
       int by = m_y + 30 + r * SSR_SETUP_ROW + 8;
       m_w.ButtonC("next", m_x + 12, by, SSR_SETUP_W - 24, 26,
+                  "Next  -  choose the kind of practice",
+                  SSR_C_PRIMARY, SSR_C_PRIMARY_EDGE,
+                  SSR_C_PRIMARY_TEXT, SSR_FS_BODY);
+      m_w.Button("back", m_x + 12, by + 30, SSR_SETUP_W - 24, 20, "Back");
+     }
+
+   //+------------------------------------------------------------------+
+   //| STEP 2 - MODE.                                                   |
+   //|                                                                  |
+   //| The single biggest progressive-disclosure lever in the product:  |
+   //| what is chosen here decides which sheets the session gets. A     |
+   //| Standard session never draws a prop meter, and never has to      |
+   //| explain one.                                                      |
+   //|                                                                  |
+   //| Each one says what it DOES, not what it is called. "Blind" means |
+   //| nothing to somebody who has not used one.                         |
+   //+------------------------------------------------------------------+
+   void              RenderMode(void)
+     {
+      int h = 34 + 4 * 48 + 62;
+      m_w.Rect("frame", m_x, m_y, SSR_SETUP_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
+      m_w.Label("title", m_x + 12, m_y + 9, "SS REPLAY  -  MODE",
+                SSR_C_TEXT, SSR_FS_BODY);
+      m_w.Label("stepn", m_x + SSR_SETUP_W - 52, m_y + 10, "step 2 of 3",
+                SSR_C_TEXT_FAINT, SSR_FS_SMALL);
+
+      string names[] = {"Standard", "Blind", "Prop challenge", "Random practice"};
+      string what[]  = {"practise normally",
+                        "the future stays hidden until you finish",
+                        "rules enforced, progress shown",
+                        "a start you have not seen, with a seed"};
+      int now = ModeNow();
+
+      for(int i = 0; i < 4; i++)
+        {
+         string id = "md" + IntegerToString(i);
+         int    ry = m_y + 34 + i * 48;
+         if(i == now)
+            m_w.ButtonC(id, m_x + 12, ry, SSR_SETUP_W - 24, 26, names[i],
+                        SSR_C_PRIMARY, SSR_C_PRIMARY_EDGE,
+                        SSR_C_PRIMARY_TEXT, SSR_FS_BODY);
+         else
+            m_w.Button(id, m_x + 12, ry, SSR_SETUP_W - 24, 26, names[i]);
+         m_w.Label(id + "d", m_x + 14, ry + 29, what[i],
+                   SSR_C_TEXT_DIM, SSR_FS_SMALL);
+        }
+
+      int by = m_y + 34 + 4 * 48 + 6;
+      m_w.ButtonC("next", m_x + 12, by, SSR_SETUP_W - 24, 26,
                   "Next  -  choose where to start",
                   SSR_C_PRIMARY, SSR_C_PRIMARY_EDGE,
                   SSR_C_PRIMARY_TEXT, SSR_FS_BODY);
+      m_w.Button("back", m_x + 12, by + 30, SSR_SETUP_W - 24, 20, "Back");
      }
 
    void              RenderStart(void)
      {
-      int rows = 9;
+      int rows = 10 + (m_v.random_start ? 2 : 0);
       int h    = 30 + rows * SSR_SETUP_ROW + 92;
       m_w.Rect("frame", m_x, m_y, SSR_SETUP_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
       m_w.Label("title", m_x + 12, m_y + 9, "SS REPLAY  -  WHERE TO START",
                 SSR_C_TEXT, SSR_FS_BODY);
-      m_w.Label("stepn", m_x + SSR_SETUP_W - 52, m_y + 10, "step 2 of 2",
+      m_w.Label("stepn", m_x + SSR_SETUP_W - 52, m_y + 10, "step 3 of 3",
                 SSR_C_TEXT_FAINT, SSR_FS_SMALL);
 
       //--- read back what step 1 was told, so the confirmation is one
@@ -666,9 +834,40 @@ public:
                                        m_v.prop_daily, m_v.prop_total)
                         : "off",
             m_v.prop_on ? SSR_C_RUN : SSR_C_TEXT_DIM);
+      Recap("rnd2",  r++, "Random start",
+            m_v.random_start ? (m_v.seed == "" ? "yes, new seed"
+                                               : "yes, seed " + m_v.seed)
+                             : "no",
+            m_v.random_start ? SSR_C_HOLD : SSR_C_TEXT_DIM);
       Recap("ses2",  r++, "Save as",
             m_v.session_name == "" ? "not saved" : m_v.session_name,
             m_v.session_name == "" ? SSR_C_TEXT_DIM : SSR_C_TEXT);
+
+      //+------------------------------------------------------------------+
+      //| THE SEED, WHERE IT CAN BE COPIED.                                |
+      //|                                                                  |
+      //| An OBJ_EDIT rather than a label, because the point of a seed is  |
+      //| to leave this machine: to a student, into a lesson plan, into a  |
+      //| bug report that says "this is the session that broke it". A      |
+      //| label cannot be selected, and a seed nobody can copy is a        |
+      //| reproducibility feature nobody can use.                          |
+      //|                                                                  |
+      //| Blank means "pick a new one and tell me what it was" - the       |
+      //| expert prints it, and it comes back here next time.               |
+      //+------------------------------------------------------------------+
+      if(m_v.random_start)
+        {
+         m_w.Label("h3", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5,
+                   "SEED  -  the same seed replays the same session",
+                   SSR_C_TEXT_DIM, SSR_FS_SMALL); r++;
+         int sy = m_y + 30 + r * SSR_SETUP_ROW;
+         m_w.Edit("eseed", m_x + 12, sy, SSR_SETUP_W - 24, SSR_SETUP_ROW - 4,
+                  m_v.seed, m_first_paint);
+         m_w.Hide("eseed", false);
+         r++;
+        }
+      else
+        { m_w.Remove("h3"); m_w.Remove("eseed"); }
 
       m_w.Label("h2", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5,
                 "THE REPLAY BEGINS AT THE ORANGE LINE",
@@ -778,23 +977,39 @@ public:
       //--- would delete what somebody is halfway through typing - so a
       //--- step that comes back to a cleared chart has to be told that
       //--- this paint IS a first one, or the boxes come back empty.
+      //--- QUICK START. Each of these lands on the step it makes sense
+      //--- to land on, which for two of them is the last one.
+      if(m_w.Pressed("qlast"))
+        { m_step = 3; Repaint(); return ""; }
+      if(m_w.Pressed("qcont"))
+        { m_step = 3; Repaint(); return ""; }
+      if(m_w.Pressed("qrand"))
+        {
+         ApplyMode(3);                    // random, with a fresh seed
+         m_v.seed = "";
+         m_step = 3; Repaint(); return "";
+        }
+      if(m_w.Pressed("qcust"))
+        { m_step = 1; Repaint(); return ""; }
+
+      //--- MODE. Applied immediately, because the value it shows IS the
+      //--- setting - the same rule the cycling fields have always used.
+      for(int mi = 0; mi < 4; mi++)
+         if(m_w.Pressed("md" + IntegerToString(mi)))
+           { ApplyMode(mi); Repaint(); return ""; }
+
       if(m_w.Pressed("next"))
         {
          ReadAll();
-         m_step = 1;
-         m_w.RemoveAll();
-         m_first_paint = true;
-         Render();
-         m_first_paint = false;
+         m_step++;
+         Repaint();
          return "";
         }
       if(m_w.Pressed("back"))
         {
-         m_step = 0;
-         m_w.RemoveAll();
-         m_first_paint = true;
-         Render();
-         m_first_paint = false;
+         m_step--;
+         if(m_step < 0) m_step = 0;
+         Repaint();
          return "";
         }
 
@@ -829,6 +1044,47 @@ public:
       return "";
      }
 
+   //+------------------------------------------------------------------+
+   //| MODE IS A SHORTCUT, NOT A SETTING.                               |
+   //|                                                                  |
+   //| Choosing one writes the settings that already exist - blind,     |
+   //| prop_on, random_start - and nothing else. There is no `mode`     |
+   //| field, because a fifth source of truth that has to agree with    |
+   //| four others is the thing that eventually disagrees.               |
+   //|                                                                  |
+   //| Which also means the modes are not exclusive by decree: a Prop   |
+   //| challenge run blind is a real thing to practise, and the panel    |
+   //| shows both chips because both settings are on.                    |
+   //+------------------------------------------------------------------+
+   void              ApplyMode(const int m)
+     {
+      switch(m)
+        {
+         case 0:                        // Standard
+            m_v.blind = SSR_BLIND_OFF; m_v.prop_on = false;
+            m_v.random_start = false;   break;
+         case 1:                        // Blind
+            m_v.blind = SSR_BLIND_STANDARD; m_v.prop_on = false;
+            m_v.random_start = false;   break;
+         case 2:                        // Prop
+            m_v.blind = SSR_BLIND_OFF; m_v.prop_on = true;
+            m_v.random_start = false;   break;
+         case 3:                        // Random practice
+            m_v.blind = SSR_BLIND_OFF; m_v.prop_on = false;
+            m_v.random_start = true;    break;
+        }
+     }
+
+   //--- which mode the CURRENT settings add up to, so the step opens on
+   //--- what is true rather than on what was last clicked
+   int               ModeNow(void)
+     {
+      if(m_v.random_start)              return 3;
+      if(m_v.prop_on)                   return 2;
+      if(m_v.blind != SSR_BLIND_OFF)    return 1;
+      return 0;
+     }
+
    //--- one place that turns "the third item" into a setting
    void              Choose(const string id, const int i)
      {
@@ -860,6 +1116,17 @@ public:
       m_v.prop_target   = Num("ptg",  m_v.prop_target);
       m_v.prop_daily    = Num("pdl",  m_v.prop_daily);
       m_v.prop_total    = Num("ptl",  m_v.prop_total);
+
+      //--- the seed box only exists on the start step in random mode, and
+      //--- EditText returns "" for a box that is not there - which would
+      //--- silently wipe a seed the user typed and then stepped back from.
+      //--- Read only when it is on screen.
+      if(m_v.random_start && m_w.Exists("eseed"))
+        {
+         string sd = m_w.EditText("eseed");
+         StringTrimLeft(sd); StringTrimRight(sd);
+         m_v.seed = sd;
+        }
 
       //--- refuse the impossible rather than pass it down. A balance of
       //--- zero produces a risk engine that can size nothing, and the
@@ -900,6 +1167,8 @@ public:
       f.SetDouble("prop_tgt",  v.prop_target,   4);
       f.SetDouble("prop_dly",  v.prop_daily,    4);
       f.SetDouble("prop_tot",  v.prop_total,    4);
+      f.SetInt   ("random",    v.random_start ? 1 : 0);
+      f.Set      ("seed",      v.seed);
       f.Close();
       return true;
      }
@@ -925,6 +1194,8 @@ public:
       v.prop_target   = f.GetDouble("prop_tgt", v.prop_target);
       v.prop_daily    = f.GetDouble("prop_dly", v.prop_daily);
       v.prop_total    = f.GetDouble("prop_tot", v.prop_total);
+      v.random_start  = (f.GetInt("random", v.random_start ? 1 : 0) != 0);
+      v.seed          = f.Get("seed", v.seed);
       return true;
      }
 

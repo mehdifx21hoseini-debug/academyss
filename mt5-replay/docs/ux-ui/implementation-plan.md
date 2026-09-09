@@ -71,14 +71,29 @@ test needs a second branch to measure the tall case.
 That is a phase, not a corner of one. It is scheduled after Phase 7, where
 the Analysis surface will have established how a sheet asks for space.
 
-### Phase 4 — Setup / onboarding
+### Phase 4 — Setup / onboarding ✅ complete
 - Quick-start screen (F1) ahead of the wizard.
 - **Mode** step (F2) deciding which sheets the session gets.
 - Random + **seed** surfaced, copyable.
-- **Risk: medium** — `SSR_SetupPanel` is 944 lines and holds the edit-box
-  first-paint rule.
-- **Test: extend stage 16 — every field survives the round trip through all
-  steps, in both directions.**
+- **Done.** Four steps: QUICK → SETTINGS → MODE → START. Quick start offers
+  "Same as last time" (only when there is one, and it prints what it will do),
+  "Continue <session>" (only when that file exists), "Random session", and
+  "Customise…". Two of the three land straight on START.
+- **Mode is a shortcut, not a setting.** It writes `blind` / `prop_on` /
+  `random_start` and nothing else — there is no `mode` field, because a fifth
+  source of truth that must agree with four others is the one that disagrees.
+  The step opens on what is TRUE, not on what was last clicked, and the modes
+  are deliberately not exclusive: a prop challenge practised blind is a real
+  exercise.
+- **Random and its seed have a UI at last.** The seed is an `OBJ_EDIT`, not a
+  label, because its whole purpose is to leave the machine. Six expert sites
+  now read the form instead of the input — including the one deciding whether
+  the orange line appears, since a random session has already answered that.
+- **`Repaint()` written once.** The first-paint declaration was copied three
+  times in `Poll()`; the fourth copy is the one that forgets.
+- **Test: stage 16 extended** — twelve fields round-trip, the seed is checked
+  on its own so a failure names it, and four mode combinations are asserted.
+- 39 clean, 17 audits silent.
 
 ### Phase 5 — Trading / position UX
 - Trade and Positions merge into one sheet with a section switch.
