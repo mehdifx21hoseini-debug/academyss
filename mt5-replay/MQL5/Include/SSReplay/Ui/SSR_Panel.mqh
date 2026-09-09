@@ -1567,6 +1567,7 @@ public:
          case SSR_CMD_NONE:
          case SSR_CMD_SESSIONS:          // the host owns the session list
          case SSR_CMD_JUMP:              // ...and the range dialog
+         case SSR_CMD_REVIEW:            // ...and the review card
          case SSR_CMD_REPLAY_FROM_HERE:  // ...and this one is not bound yet
             return false;
         }

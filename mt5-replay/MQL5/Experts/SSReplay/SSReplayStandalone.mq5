@@ -40,6 +40,7 @@
 #include <SSReplay/Chart/SSR_TradeLines.mqh>
 #include <SSReplay/Ui/SSR_Panel.mqh>
 #include <SSReplay/Ui/SSR_RevealCard.mqh>
+#include <SSReplay/Ui/SSR_ReviewCard.mqh>
 #include <SSReplay/Ui/SSR_SetupPanel.mqh>
 #include <SSReplay/Ui/SSR_RangeDialog.mqh>
 #include <SSReplay/Data/SSR_HistoryCatalog.mqh>
@@ -262,6 +263,21 @@ CSSRSessionDialog    g_session_dlg;
 //+------------------------------------------------------------------+
 CSSRRevealCard       g_reveal;
 bool                 g_revealed = false;
+
+//+------------------------------------------------------------------+
+//| WHEN THE REVIEW OPENS - decision D2, taken and written down.      |
+//|                                                                  |
+//| Automatically for BLIND and PROP, because the reveal and the      |
+//| verdict ARE the point of those two modes: a blind session with no |
+//| review is practice nobody checked, and a challenge that ends in   |
+//| silence never rehearsed anything.                                 |
+//|                                                                  |
+//| OFFERED for Standard. A trader who wants one more session should  |
+//| not be stopped by a card to read forty-three numbers they did not |
+//| ask for; the palette and the status strip both reach it.          |
+//+------------------------------------------------------------------+
+CSSRReviewCard       g_review;
+bool                 g_reviewed = false;
 
 //--- extra streams. Index 0 is g_src/g_sink/g_ctrl above; these are
 //--- the rest, and they exist whether or not they are used because
@@ -871,6 +887,30 @@ void LoadCalendar(const string origin, const long win_start, const long win_end)
       Print("[news] if a line does not sit on the candle that moved, the "
             "calendar's clock differs from this chart's - set InpNewsShift "
             "once and it is right for every session after.");
+  }
+
+//+------------------------------------------------------------------+
+//| ONE PLACE OPENS THE REVIEW.                                      |
+//|                                                                  |
+//| Three things can ask for it - the reveal, a finished prop        |
+//| challenge, and the command palette - and if each built its own    |
+//| the three would eventually disagree about what a review shows.    |
+//|                                                                  |
+//| THE LATCH IS NOT SET HERE. g_reviewed exists to stop an AUTOMATIC |
+//| card coming back on the next pump and becoming the thing the user  |
+//| dismisses forever, so the two automatic callers set it themselves. |
+//| Latching here as well would mean that asking for the review        |
+//| mid-session silently cancelled the one shown at the end of it -    |
+//| a key that quietly removes a later feature is worse than a key     |
+//| that does nothing.                                                 |
+//+------------------------------------------------------------------+
+void OpenReview(void)
+  {
+   if(g_panel_chart == 0)
+      return;
+   SSRStatistics st;
+   g_stats.Compute(st);
+   g_review.Show(g_panel_chart, st);
   }
 
 bool BuildSession(string origin, const bool on_replay,
@@ -2793,10 +2833,35 @@ void OnTimer()
       PrintFormat("[host] revealed: %d chart(s) put back exactly as they "
                   "were before this session", back);
       g_panel.Render();
+      g_reviewed = true;                 // automatic: once, and only once
+      OpenReview();                      // the reveal leads straight into it
+     }
+
+   //--- a prop challenge that has finished opens its own verdict; a
+   //--- standard session is left alone to start another one
+   if(!g_reviewed && !g_review.IsUp() && !g_reveal.IsUp() && CfgProp() &&
+      g_ctrl.Status() == SSR_STATE_COMPLETED)
+     {
+      g_reviewed = true;                 // automatic: once, and only once
+      OpenReview();
+     }
+
+   if(g_review.IsUp())
+     {
+      string act = g_review.Poll();
+      if(act == "stmt")
+        {
+         string where = "";
+         if(g_journal.ExportHtml("SSReplay-session", 2))
+            PrintFormat("[host] statement -> MQL5\\Files\\%s",
+                        g_journal.LastPath());
+         else
+            PrintFormat("[host] statement refused: %s", g_journal.LastError());
+        }
      }
 
    bool modal = (g_session_dlg.IsOpen() || g_dialog.IsOpen() ||
-                 g_reveal.IsUp());
+                 g_reveal.IsUp() || g_review.IsUp());
 
    if(!modal)
      {
@@ -2823,6 +2888,15 @@ void OnTimer()
 //+------------------------------------------------------------------+
 void RunHostCommand(const ENUM_SSR_CMD cmd)
   {
+   //--- A, and the palette entry, both land here. The card is allowed
+   //--- to be opened mid-session: it reads what has been measured so
+   //--- far, which is the whole point of being able to ask before the
+   //--- session is over.
+   if(cmd == SSR_CMD_REVIEW)
+     {
+      OpenReview();
+      return;
+     }
    if(cmd == SSR_CMD_SESSIONS)
      {
       g_session_dlg.Open();
@@ -2940,6 +3014,28 @@ void RouteEvent(const int id, const long &lparam,
       g_flight.Event(StringFormat("key %d -> %s", (int)lparam,
                                   SSRCmdName(SSRKeyToCommand(lparam))));
 
+   //+------------------------------------------------------------------+
+   //| A CARD THAT IS UP OWNS THE KEYBOARD.                             |
+   //|                                                                  |
+   //| MQL5 has no modality, so "modal" here means somebody decided to   |
+   //| stop forwarding. Without this, Space pressed while the review is  |
+   //| open starts the replay running BEHIND it - and every number on    |
+   //| the card the user is reading quietly stops matching the chart.    |
+   //|                                                                  |
+   //| Checked after the flight recorder, so a swallowed key is still    |
+   //| in the log with the reason it went nowhere.                       |
+   //+------------------------------------------------------------------+
+   if(id == CHARTEVENT_KEYDOWN)
+     {
+      if(g_review.IsUp())
+        {
+         g_review.OnKey(lparam);
+         return;
+        }
+      if(g_reveal.IsUp())
+         return;                       // the one button is the way out
+     }
+
    if(g_panel.OnEvent(id, lparam, dparam, sparam))
       return;
 
@@ -2947,7 +3043,8 @@ void RouteEvent(const int id, const long &lparam,
    if(id == CHARTEVENT_KEYDOWN)
      {
       ENUM_SSR_CMD kc = SSRKeyToCommand(lparam);
-      if(kc == SSR_CMD_SESSIONS || kc == SSR_CMD_JUMP)
+      if(kc == SSR_CMD_SESSIONS || kc == SSR_CMD_JUMP ||
+         kc == SSR_CMD_REVIEW)
         {
          RunHostCommand(kc);
          return;

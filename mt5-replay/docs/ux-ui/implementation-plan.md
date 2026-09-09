@@ -139,12 +139,52 @@ the Analysis surface will have established how a sheet asks for space.
   exactly as it was — the promise the whole mode rests on.
 - 39 clean, 17 audits silent.
 
-### Phase 7 — Review / journal / analytics
-- **Session Review** modal (F5): headline, timeline, per-trade detail with
-  screenshot, observations from measured fields only.
-- Analysis surfaces all 43 statistics.
-- **Risk: low to the engine, high in value.** Everything shown already exists.
-- **Test: assert every observation line has a sample count behind it.**
+### Phase 7 — Review / journal / analytics ✅ complete
+- **The engine measured forty-three things and about ten were reachable.**
+  MAE, MFE, revenge trades, risk dispersion, the spread each trade was
+  entered at and the count of trades placed with **no stop** are the deepest
+  thing this product knows, and a trader closed the session without seeing
+  any of them — they existed only inside an exported HTML file somebody had
+  to remember to produce, find and open.
+- **Done: the session review.** `SSR_Review.mqh` turns an `SSRStatistics`
+  into rows and sentences and stops there; `CSSRReviewCard` decides where
+  they sit. Neither computes anything. A second place that derived even one
+  figure would eventually disagree with the statement, and the statement is
+  what gets sent to a prop firm.
+- **A modal, because this is consulted and not operated** — the rule from
+  v98. Forty-three measures will not fit in a 186 px sheet at any density
+  worth reading.
+- **Paged, because MQL5 cannot clip.** No scrollbar, no clipping rectangle: a
+  list that drew all its rows would paint the surplus over the chart. It
+  draws a window onto them, which is what the Phase 2 `List` primitive was
+  built for.
+- **It never coaches.** An observation states what was counted and stops:
+  "1 of 2 trades opened within two minutes of a loss." Whether that was
+  revenge trading, or a plan followed correctly, is something the trader
+  knows and this program does not. Inventing the interpretation is how a
+  measurement tool turns into a horoscope.
+- **A line with no samples is absent, not zero.** "0 revenge trades" out of
+  one trade is a sample size, not a clean sheet. Under three trades the
+  card shows no sentences at all.
+- **Reachable three ways, opened in one place.** `A`, the command palette
+  entry, and the end of a session all call `OpenReview()`. The `g_reviewed`
+  latch is set by the two *automatic* callers only — latching inside
+  `OpenReview` would have meant that asking for the review mid-session
+  silently cancelled the one shown at the end of it.
+- **An open card owns the keyboard, including the keys it does not use.**
+  Space forwarded to the panel would start the replay running behind the
+  numbers being read, and every one of them would quietly stop matching the
+  chart.
+- **Found by writing the test: the 63-character cut.** Rows were built to fit
+  in 62 and the card prefixes a two-character group marker, so the longest
+  rows would have lost a digit on the chart — silently, and read as a wrong
+  number rather than a missing one. `SSR_REVIEW_ROW_MAX` is 60 now, and
+  stage 37 measures the string that reaches the object, marker included.
+- **Test: stage 37** asserts all 43 measures arrive, that every observation
+  has a count behind it, that none of them contains a coaching word, that
+  two trades support no statement at all, and that risk dispersion stays
+  quiet at two samples and speaks at three — the same session, one gate.
+- 39 clean, 17 audits silent.
 
 ### Phase 8 — Prop evaluation
 - Prop sheet with four meters (F7), present only in that mode.

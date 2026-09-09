@@ -51,6 +51,7 @@
 #include <SSReplay/Ui/SSR_Layout.mqh>
 #include <SSReplay/Ui/SSR_Palette.mqh>
 #include <SSReplay/Ui/SSR_RevealCard.mqh>
+#include <SSReplay/Ui/SSR_ReviewCard.mqh>
 #include <SSReplay/Ui/SSR_Panel.mqh>
 
 input string InpSymbol     = "";     // Symbol (empty = this chart)
@@ -3549,6 +3550,229 @@ void OnStart()
                StringFormat("%d chart(s) restored - a mode you cannot leave "
                             "is a trap, not a feature", back));
          ChartClose(bchart);
+        }
+   }
+
+   //+------------------------------------------------------------------+
+   //| 37. THE REVIEW SAYS ONLY WHAT WAS COUNTED.                       |
+   //|                                                                  |
+   //| The engine measures forty-three things and about ten of them     |
+   //| were reachable without exporting a file. The review card puts    |
+   //| all of them in front of the trader - which makes the danger the  |
+   //| opposite one: a card that has forty-three numbers in it is a     |
+   //| card that looks authoritative, and the temptation is to have it  |
+   //| say what they MEAN.                                              |
+   //|                                                                  |
+   //| So the three things asserted here are the three that keep it     |
+   //| honest: a sentence needs samples behind it, a session too small  |
+   //| to support any sentence gets none, and every row fits inside     |
+   //| the 63 characters MetaTrader will actually draw.                 |
+   //|                                                                  |
+   //| Pure functions on a struct - no engine, no chart, no timing. A   |
+   //| test of an opinion should not be able to fail for a reason that  |
+   //| has nothing to do with the opinion.                              |
+   //+------------------------------------------------------------------+
+   {
+      Step("37 the review card");
+
+      //--- a session with everything wrong with it that CAN be counted
+      SSRStatistics rv;
+      rv.Init();
+      rv.trades              = 8;
+      rv.wins                = 3;
+      rv.losses              = 5;
+      rv.net_profit          = -212.50;
+      rv.win_rate            = 37.5;
+      rv.total_r             = -1.85;
+      rv.max_drawdown        = 318.40;
+      rv.revenge_trades      = 2;
+      rv.risk_spread_pct     = 61.0;
+      rv.risk_samples        = 8;
+      rv.trades_without_stop = 1;
+      rv.spread_samples      = 8;
+      rv.wide_spread_trades  = 3;
+      rv.ambiguous_trades    = 1;
+      rv.stopouts            = 1;
+
+      SSRReviewRow rows[];
+      int rn = SSRReviewRows(rv, rows);
+
+      //--- FORTY-THREE, not "about forty". A row silently dropped by an
+      //--- ArrayResize is exactly the kind of loss nobody notices, and
+      //--- the count is the only thing that would show it.
+      Check("37 every measure the engine computes reaches the card",
+            rn == 43, StringFormat("%d rows", rn));
+
+      //+------------------------------------------------------------------+
+      //| THE 63-CHARACTER CUT IS REAL AND IT IS SILENT.                   |
+      //|                                                                  |
+      //| MetaTrader stores OBJPROP_TEXT and draws the first 63            |
+      //| characters. Nothing errors; the number on the end of the line    |
+      //| just is not there. A card whose LAST COLUMN is the value is a    |
+      //| card where the cut takes the only part that matters.             |
+      //+------------------------------------------------------------------+
+      //--- measured on the string that REACHES THE OBJECT, marker and
+      //--- all - not on the part this file happened to build. Checking
+      //--- the unprefixed line is how a row two characters over the cut
+      //--- passes its own test and still loses a digit on the chart.
+      int over = 0, longest = 0;
+      string worst = "";
+      for(int i = 0; i < rn; i++)
+        {
+         string line = SSRReviewLine(rows[i]);
+         int    len  = StringLen(line) + SSR_REVIEW_PREFIX;
+         if(len > longest) { longest = len; worst = line; }
+         if(len > 63) over++;
+        }
+      Check("37 no row is cut off by MetaTrader",
+            over == 0,
+            StringFormat("longest %d of 63 drawn: \"%s\"", longest, worst));
+
+      //--- and the value is really the value it was handed. A card that
+      //--- recomputed anything would be a second place deciding what a
+      //--- session result means, and the statement is the first.
+      bool carried = false;
+      for(int i = 0; i < rn && !carried; i++)
+         if(rows[i].label == "Net profit")
+            carried = (rows[i].value == "-212.50");
+      Check("37 it reports the engine's number, not one of its own",
+            carried, "net profit -212.50 as the statistics gave it");
+
+      //+------------------------------------------------------------------+
+      //| A SENTENCE COSTS MORE ATTENTION THAN A ROW, SO IT EARNS ONE.     |
+      //+------------------------------------------------------------------+
+      string obs[];
+      int on = SSRReviewObservations(rv, obs);
+      Check("37 a session with something to report gets sentences",
+            on >= 4, StringFormat("%d observation(s)", on));
+
+      //--- EVERY line carries a count. This is the whole rule: an
+      //--- observation is a measurement written out, and a sentence
+      //--- with no number in it is an opinion wearing a measurement's
+      //--- clothes.
+      int bare = 0;
+      string bare_line = "";
+      for(int i = 0; i < on; i++)
+        {
+         bool has_digit = false;
+         int  n = StringLen(obs[i]);
+         for(int c = 0; c < n && !has_digit; c++)
+           {
+            ushort ch = StringGetCharacter(obs[i], c);
+            has_digit = (ch >= '0' && ch <= '9');
+           }
+         if(!has_digit) { bare++; if(bare_line == "") bare_line = obs[i]; }
+        }
+      Check("37 every observation has a count behind it",
+            bare == 0,
+            (bare == 0 ? "no sentence without a number in it"
+                       : "no count: \"" + bare_line + "\""));
+
+      //--- ...and none of them tells the trader what it meant. These are
+      //--- the words a coaching tool would reach for; this one does not
+      //--- know what happened in that session and must not pretend to.
+      string coaching[] = {"should", "avoid", "too many", "poor", "bad",
+                           "revenge trading", "discipline problem", "try to"};
+      int preached = 0;
+      string preach_line = "";
+      for(int i = 0; i < on; i++)
+        {
+         string low = obs[i];
+         StringToLower(low);
+         for(int w = 0; w < ArraySize(coaching); w++)
+            if(StringFind(low, coaching[w]) >= 0)
+              {
+               preached++;
+               if(preach_line == "")
+                  preach_line = obs[i];
+              }
+        }
+      Check("37 and none of them interprets it",
+            preached == 0,
+            (preached == 0 ? "counts, not verdicts"
+                           : "coaching: \"" + preach_line + "\""));
+
+      //+------------------------------------------------------------------+
+      //| THE SAMPLE GATES, ONE AT A TIME.                                 |
+      //|                                                                  |
+      //| Same session, two trades. Nothing about the behaviour changed -  |
+      //| only how much of it there is to look at - and that alone has to  |
+      //| be enough to silence every sentence.                             |
+      //+------------------------------------------------------------------+
+      SSRStatistics tiny = rv;
+      tiny.trades = 2;
+      string tobs[];
+      int tn = SSRReviewObservations(tiny, tobs);
+      Check("37 two trades support no statement about behaviour",
+            tn == 0,
+            StringFormat("%d observation(s) - \"0 revenge trades\" out of "
+                         "two is a sample size, not a clean sheet", tn));
+
+      //--- risk dispersion specifically: wide spread, too few samples
+      SSRStatistics few = rv;
+      few.revenge_trades      = 0;
+      few.trades_without_stop = 0;
+      few.wide_spread_trades  = 0;
+      few.ambiguous_trades    = 0;
+      few.stopouts            = 0;
+      few.risk_samples        = 2;        // below the gate
+      few.risk_spread_pct     = 61.0;     // and screaming
+      string fobs[];
+      int fn = SSRReviewObservations(few, fobs);
+      Check("37 risk dispersion stays quiet under three samples",
+            fn == 0,
+            StringFormat("%d observation(s) from 2 samples", fn));
+
+      few.risk_samples = 3;               // the same session, one gate met
+      fn = SSRReviewObservations(few, fobs);
+      Check("37 and speaks the moment it has them",
+            fn == 1 && StringFind(fobs[0], "61") >= 0,
+            (fn > 0 ? fobs[0] : "nothing at three samples"));
+
+      //+------------------------------------------------------------------+
+      //| PAGING, because MQL5 has no scrollbar and no clipping: a list    |
+      //| that ran off the end would paint its surplus over the chart.     |
+      //+------------------------------------------------------------------+
+      long vchart = ChartOpen(rsym, PERIOD_M1);
+      if(Check("37 a chart for the card", vchart != 0, rsym))
+        {
+         CSSRReviewCard card;
+         Check("37 the card is not up until it is asked for",
+               !card.IsUp(), "");
+
+         card.Show(vchart, rv);
+         Check("37 it goes up with every measure in it",
+               card.IsUp() && card.Rows() == 43 && card.First() == 0,
+               StringFormat("%d rows, %d observations",
+                            card.Rows(), card.Observations()));
+
+         card.Page(-1);
+         Check("37 paging up from the top stays at the top",
+               card.First() == 0,
+               StringFormat("first row %d", card.First()));
+
+         for(int i = 0; i < 12; i++)
+            card.Page(+1);
+         Check("37 and paging past the end stops at the last full page",
+               card.First() == 43 - SSR_RV_SHOWN,
+               StringFormat("first row %d of %d, %d shown",
+                            card.First(), card.Rows(), SSR_RV_SHOWN));
+
+         //--- the keyboard belongs to a card that is up, including the
+         //--- keys it does not use: Space here would start the replay
+         //--- running behind the numbers being read.
+         Check("37 an open card swallows the keys it does not use",
+               card.OnKey(SSR_VK_SPACE) && card.IsUp(),
+               "a modal that forwards Space is a modal in name only");
+         Check("37 and Escape closes it",
+               card.OnKey(SSR_VK_ESCAPE) && !card.IsUp(), "");
+
+         card.Hide();
+         Check("37 closing it leaves nothing on the chart",
+               ObjectFind(vchart, "SSRR2_bg") < 0 &&
+               ObjectFind(vchart, "SSRR2_m0") < 0,
+               "a list drawn without clipping has to clean up its own rows");
+         ChartClose(vchart);
         }
    }
 

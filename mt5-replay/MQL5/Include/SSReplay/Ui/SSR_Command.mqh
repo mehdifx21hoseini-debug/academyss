@@ -98,6 +98,7 @@ int SSRCommands(SSRCommand &out[])
    //--- Session
    SSRAddCommand(out, i, "Bookmark this moment",      "Session", SSR_CMD_BOOKMARK);
    SSRAddCommand(out, i, "Saved sessions",            "Session", SSR_CMD_SESSIONS);
+   SSRAddCommand(out, i, "Session review",            "Session", SSR_CMD_REVIEW);
    SSRAddCommand(out, i, "Export the statement",      "Session", SSR_CMD_NONE, "stmt");
    SSRAddCommand(out, i, "Reset the session",         "Session", SSR_CMD_RESET);
 
