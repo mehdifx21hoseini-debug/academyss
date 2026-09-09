@@ -28,6 +28,10 @@
 #define SSR_TRADE_LINES_MQH
 
 #include "../Common/SSR_Types.mqh"
+//--- colour is ONE system, and it lives in the theme. Included here
+//--- rather than relied on from whoever includes this file: the
+//--- calendar lines compiled only by include-order luck until Phase 2.
+#include "../Ui/SSR_Theme.mqh"
 
 //+------------------------------------------------------------------+
 class CSSRTradeLines
@@ -141,10 +145,10 @@ public:
      : m_chart(0), m_digits(0), m_point(0.0), m_armed(false),
        m_sl_name("SSR_LINE_SL"), m_tp_name("SSR_LINE_TP"),
        m_en_name("SSR_LINE_EN"), m_en_price(0.0), m_en_armed(false),
-       m_en_col(C'214,168,60'),
+       m_en_col(SSR_C_LINE_ENTRY),
        m_sl_price(0.0), m_tp_price(0.0),
-       m_sl_col(clrTomato), m_tp_col(clrMediumSeaGreen),
-       m_long_col(clrDodgerBlue), m_short_col(clrOrange) {}
+       m_sl_col(SSR_C_LINE_SL), m_tp_col(SSR_C_LINE_TP),
+       m_long_col(SSR_C_LINE_LONG), m_short_col(SSR_C_LINE_SHORT) {}
 
                     ~CSSRTradeLines(void) { Clear(); }
 
@@ -497,7 +501,7 @@ public:
       if(ObjectFind(m_chart, base + "_L") >= 0)
          return true;                       // already on the chart
 
-      color won = (net >= 0.0 ? clrMediumSeaGreen : clrTomato);
+      color won = (net >= 0.0 ? SSR_C_TRADE_WIN : SSR_C_TRADE_LOSS);
 
       //+------------------------------------------------------------------+
       //| BIG ENOUGH TO SEE.                                               |

@@ -40,6 +40,7 @@
 #include "../Common/SSR_FlightRecorder.mqh"
 #include "../Common/SSR_SessionFile.mqh"
 #include "SSR_Theme.mqh"
+#include "SSR_Layout.mqh"
 #include "SSR_Widgets.mqh"
 #include "SSR_ReplayPort.mqh"
 #include "SSR_Keys.mqh"

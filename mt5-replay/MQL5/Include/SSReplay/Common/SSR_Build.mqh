@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v103 2026-09-09  steady"
+#define SSR_BUILD "v104 2026-09-09  tokens"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

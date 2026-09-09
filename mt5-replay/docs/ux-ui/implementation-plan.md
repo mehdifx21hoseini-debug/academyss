@@ -21,17 +21,22 @@ This document set. No code changed.
 `product-vision.md`, `information-architecture.md`, `user-flows.md`,
 `keyboard-shortcuts.md` (with the conflict audit), `REVIEW-BEFORE-IMPLEMENTATION.md`.
 
-### Phase 2 — Design system  ◻ next
+### Phase 2 — Design system ✅ complete
 - Split `SSR_Theme.mqh` into tokens and metrics; no literal colour survives
   outside it.
 - Add audit A17: **no `C'r,g,b'` outside the theme**. Measure the false-positive
   rate before wiring it in — an audit that cries wolf is worse than none.
 - Add primitives: `List`, `Meter`, `Chip`, `Toast`. Additive only.
 - Introduce the layout helper (`SSRLayout`) that every new draw site uses.
-- **Risk: low.** Tokens and additive primitives.
-- **Test: layout test must still pass on all four tabs.**
+- **Done.** 16 colours tokenized to zero; A17 added and silent; `List`,
+  `Meter`, `Chip`, `Toast` added; `SSR_Layout.mqh` written; smoke stage 32
+  measures all of it. 39 programs clean, 17 audits silent.
+- **Found on the way:** `SSR_TradeLines` and `SSR_CalendarLines` used theme
+  colours without including the theme — they compiled only by include-order
+  luck. Both now include what they use.
+- **Not yet used by any screen.** Phase 3 is the first consumer.
 
-### Phase 3 — Replay workspace
+### Phase 3 — Replay workspace  ◻ next
 - Panel mode **Pro** (rail + Analysis + palette entry). Compact and Standard
   unchanged.
 - **Command palette** (`Ctrl+K`): `OBJ_EDIT` + filtered `List`, built the way

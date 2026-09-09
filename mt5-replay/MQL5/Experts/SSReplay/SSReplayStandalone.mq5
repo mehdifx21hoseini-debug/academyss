@@ -633,7 +633,7 @@ void ShowPicker(const string sym, const long default_msc)
 
    ObjectDelete(0, SSR_PICK_LINE);
    ObjectCreate(0, SSR_PICK_LINE, OBJ_VLINE, 0, at, 0);
-   ObjectSetInteger(0, SSR_PICK_LINE, OBJPROP_COLOR,      clrOrange);
+   ObjectSetInteger(0, SSR_PICK_LINE, OBJPROP_COLOR,      SSR_C_PICK_LINE);
    ObjectSetInteger(0, SSR_PICK_LINE, OBJPROP_WIDTH,      2);
    ObjectSetInteger(0, SSR_PICK_LINE, OBJPROP_STYLE,      STYLE_SOLID);
    ObjectSetInteger(0, SSR_PICK_LINE, OBJPROP_SELECTABLE, true);
@@ -648,9 +648,9 @@ void ShowPicker(const string sym, const long default_msc)
    ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_YDISTANCE,    26);
    ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_XSIZE,        240);
    ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_YSIZE,        30);
-   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_BGCOLOR,      C'46,139,87');
-   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_BORDER_COLOR, C'34,105,65');
-   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_COLOR,        clrWhite);
+   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_BGCOLOR,      SSR_C_BUY);
+   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_BORDER_COLOR, SSR_C_BUY_EDGE);
+   ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_COLOR,        SSR_C_DEAL_TEXT);
    ObjectSetInteger(0, SSR_PICK_GO, OBJPROP_FONTSIZE,     10);
    ObjectSetString (0, SSR_PICK_GO, OBJPROP_FONT,         SSR_FONT);
    ObjectSetString (0, SSR_PICK_GO, OBJPROP_TEXT,         "START REPLAY HERE");
@@ -662,7 +662,7 @@ void ShowPicker(const string sym, const long default_msc)
    ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_CORNER,     CORNER_LEFT_UPPER);
    ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_XDISTANCE,  14);
    ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_YDISTANCE,  62);
-   ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_COLOR,      clrOrange);
+   ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_COLOR,      SSR_C_PICK_INFO);
    ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_FONTSIZE,   9);
    ObjectSetInteger(0, SSR_PICK_INFO, OBJPROP_SELECTABLE, false);
    ObjectSetString (0, SSR_PICK_INFO, OBJPROP_FONT,       SSR_FONT);
@@ -680,9 +680,9 @@ void ShowPicker(const string sym, const long default_msc)
    ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_YDISTANCE,    26);
    ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_XSIZE,        118);
    ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_YSIZE,        30);
-   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_BGCOLOR,      C'225,225,225');
-   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_BORDER_COLOR, C'120,120,120');
-   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_COLOR,        C'20,20,20');
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_BGCOLOR,      SSR_C_BTN);
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_BORDER_COLOR, SSR_C_BTN_EDGE);
+   ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_COLOR,        SSR_C_BTN_TEXT);
    ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_FONTSIZE,     9);
    ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_STATE,        false);
    ObjectSetInteger(0, SSR_PICK_HERE, OBJPROP_SELECTABLE,   false);
@@ -1167,7 +1167,7 @@ bool BuildSession(string origin, const bool on_replay,
    //--- not in a stepper. They are armed later, once a price exists.
    if(InpTradeLines && g_replay_chart != 0)
       g_lines.Attach(g_replay_chart, digits, point,
-                     clrTomato, clrMediumSeaGreen);
+                     SSR_C_LINE_SL, SSR_C_LINE_TP);
 
    //--- MULTI TIMEFRAME COSTS NOTHING. The engine writes M1 into a
    //--- custom symbol and MetaTrader derives H1 from it; an extra

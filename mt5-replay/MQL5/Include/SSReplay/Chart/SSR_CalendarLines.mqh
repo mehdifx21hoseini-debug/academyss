@@ -21,6 +21,10 @@
 #define SSR_CALENDAR_LINES_MQH
 
 #include "../Common/SSR_Types.mqh"
+//--- colour is ONE system, and it lives in the theme. Included here
+//--- rather than relied on from whoever includes this file: the
+//--- calendar lines compiled only by include-order luck until Phase 2.
+#include "../Ui/SSR_Theme.mqh"
 #include "../Data/SSR_Calendar.mqh"
 
 #define SSR_CAL_PREFIX  "SSR_NEWS_"
@@ -38,10 +42,10 @@ private:
    color             Colour(const int importance)
      {
       if(importance >= (int)CALENDAR_IMPORTANCE_HIGH)
-         return C'196,74,64';
+         return SSR_C_NEWS_HIGH;
       if(importance >= (int)CALENDAR_IMPORTANCE_MODERATE)
-         return C'176,140,60';
-      return C'110,120,130';
+         return SSR_C_NEWS_MED;
+      return SSR_C_NEWS_LOW;
      }
 
    int               Width(const int importance)

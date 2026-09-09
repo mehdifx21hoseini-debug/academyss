@@ -302,6 +302,109 @@ public:
       return Label(id + "_lg", x + 9, y, legend, SSR_C_TEXT_DIM, SSR_FS_SMALL);
      }
 
+   //+------------------------------------------------------------------+
+   //| PHASE 2 PRIMITIVES                                               |
+   //|                                                                  |
+   //| Four shapes the new architecture needs and this set could not     |
+   //| draw. All additive: no existing primitive changed signature, so   |
+   //| every screen built on the old eight still compiles and measures   |
+   //| the same in the layout test.                                      |
+   //+------------------------------------------------------------------+
+
+   //--- A CHIP: a mode that is TRUE right now and must stay visible -
+   //--- BLIND, RANDOM, PROP, the fidelity actually running. Text on a
+   //--- tinted plate, because a mode carried by colour alone is a mode
+   //--- a colour-blind trader cannot read.
+   int               Chip(const string id, const int x, const int y,
+                          const string text, const color fg,
+                          const color bg, const int fs = SSR_FS_SMALL)
+     {
+      int w = 10 + StringLen(text) * 6;
+      Rect(id + "_bg", x, y, w, 14, bg, fg);
+      Label(id, x + 5, y + 2, text, fg, fs);
+      return w;                          // so a row of chips can lay itself out
+     }
+
+   //--- A METER: a value against a LIMIT. Not a progress bar - progress
+   //--- ends at 100% and that is good; a meter can pass its line and
+   //--- that is bad. Prop rules, drawdown, days used. The limit mark is
+   //--- drawn even when the fill is nowhere near it, because the
+   //--- distance to it is the number actually being managed.
+   void              Meter(const string id, const int x, const int y,
+                           const int w, const int h,
+                           const double value, const double limit,
+                           const color fill, const bool over_is_bad = true)
+     {
+      Rect(id + "_bg", x, y, w, h, SSR_C_WELL, SSR_C_WELL_EDGE);
+      double frac = (limit > 0.0 ? value / limit : 0.0);
+      if(frac < 0.0) frac = 0.0;
+      if(frac > 1.0) frac = 1.0;
+      int fw = (int)MathRound((w - 2) * frac);
+      if(fw > 0)
+        {
+         bool breached = (over_is_bad && value >= limit);
+         color c = (breached ? SSR_C_STOP : fill);
+         Rect(id + "_fill", x + 1, y + 1, fw, h - 2, c, c);
+        }
+      else
+         Remove(id + "_fill");
+      Rect(id + "_lim", x + w - 2, y, 2, h, SSR_C_TEXT_DIM, SSR_C_TEXT_DIM);
+     }
+
+   //--- A LIST: rows that can be chosen - the command palette, sessions,
+   //--- trades, statistics. MQL5 has no scrollbar and no clipping, so a
+   //--- list draws a WINDOW onto its data and the caller pages it. A
+   //--- list that drew every row would draw the surplus over the chart.
+   void              List(const string id, const int x, const int y,
+                          const int w, const int row_h,
+                          const string &rows[], const int first,
+                          const int shown, const int selected)
+     {
+      int n = ArraySize(rows);
+      int k = n - first;
+      if(k > shown) k = shown;
+      if(k < 0)     k = 0;
+      Rect(id + "_bg", x - 2, y - 2, w + 4, k * row_h + 4,
+           SSR_C_WELL, SSR_C_PRIMARY_EDGE);
+      for(int i = 0; i < shown; i++)
+        {
+         string rid = id + IntegerToString(i);
+         if(i >= k)
+           { Remove(rid); continue; }
+         int idx = first + i;
+         if(idx == selected)
+            ButtonC(rid, x, y + i * row_h, w, row_h, rows[idx],
+                    SSR_C_BTN_ON, SSR_C_BTN_ON_EDGE, SSR_C_BTN_ON_TEXT,
+                    SSR_FS_BODY);
+         else
+            Button(rid, x, y + i * row_h, w, row_h, rows[idx]);
+        }
+     }
+
+   //--- called before the next paint: a shorter list would otherwise
+   //--- leave its old tail on the chart
+   void              ListClear(const string id, const int shown)
+     {
+      Remove(id + "_bg");
+      for(int i = 0; i < shown; i++)
+         Remove(id + IntegerToString(i));
+     }
+
+   //--- A TOAST: something that HAPPENED, which must not evict the
+   //--- status strip. The strip carries standing state and the one
+   //--- armed-destructive question; a fill confirmation is neither.
+   //--- The caller owns the clock - this only draws.
+   void              Toast(const string id, const int x, const int y,
+                           const int w, const string text, const color accent)
+     {
+      Rect(id + "_bg", x, y, w, 20, SSR_C_HEADER, accent);
+      Rect(id + "_ac", x, y, 3, 20, accent, accent);
+      Label(id, x + 9, y + 4, text, SSR_C_TEXT, SSR_FS_SMALL);
+     }
+
+   void              ToastClear(const string id)
+     { Remove(id + "_bg"); Remove(id + "_ac"); Remove(id); }
+
    //--- teardown -----------------------------------------------------
    void              Hide(const string id, const bool hidden)
      {

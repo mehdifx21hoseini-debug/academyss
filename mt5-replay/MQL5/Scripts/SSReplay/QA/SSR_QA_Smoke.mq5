@@ -48,6 +48,7 @@
 #include <SSReplay/Mt5/SSR_CustomSymbolSink.mqh>
 #include <SSReplay/Chart/SSR_ChartManager.mqh>
 #include <SSReplay/Ui/SSR_GroupPort.mqh>
+#include <SSReplay/Ui/SSR_Layout.mqh>
 #include <SSReplay/Ui/SSR_Panel.mqh>
 
 input string InpSymbol     = "";     // Symbol (empty = this chart)
@@ -868,7 +869,7 @@ void OnStart()
       CSSRTradeLines lines;
       lines.Attach(lchart, (int)SymbolInfoInteger(rsym, SYMBOL_DIGITS),
                    SymbolInfoDouble(rsym, SYMBOL_POINT),
-                   clrTomato, clrMediumSeaGreen);
+                   SSR_C_LINE_SL, SSR_C_LINE_TP);
 
       double lpx = acct.Bid() > 0.0 ? acct.Bid() : 1000.0;
       Check("the planning lines arm", lines.ArmSide(lpx, 500, 2.0, true) &&
@@ -2440,7 +2441,7 @@ void OnStart()
          CSSRTradeLines el;
          el.Attach(ec, (int)SymbolInfoInteger(rsym, SYMBOL_DIGITS),
                    SymbolInfoDouble(rsym, SYMBOL_POINT),
-                   clrTomato, clrMediumSeaGreen);
+                   SSR_C_LINE_SL, SSR_C_LINE_TP);
 
          double base = (acct.Bid() > 0.0 ? acct.Bid() : 1000.0);
          Check("the entry line refuses to exist on its own",
@@ -3119,6 +3120,114 @@ void OnStart()
                              ? " - a symbol that only works once is a symbol "
                                "nobody can use twice"
                              : TickVerdict(sink))));
+        }
+   }
+
+   //+------------------------------------------------------------------+
+   //| 32. THE DESIGN SYSTEM DRAWS WHAT IT SAYS IT DRAWS.               |
+   //|                                                                  |
+   //| Phase 2 added four primitives and a layout helper for phases that |
+   //| have not been built yet. Library code that nothing calls and no   |
+   //| test measures is the "polished placeholder" this redesign is      |
+   //| under orders not to produce, so it is exercised here on a real    |
+   //| chart the moment it exists.                                       |
+   //+------------------------------------------------------------------+
+   {
+      //--- the layout helper first: it is pure arithmetic, so it can be
+      //--- checked exactly rather than approximately
+      SSRFrame ltr; ltr.Init(100, 50, 420, 8, false);
+      SSRFrame rtl; rtl.Init(100, 50, 420, 8, true);
+
+      Check("32 leading starts where reading starts",
+            SSRLead(ltr, 0, 60) == 108 && SSRLead(rtl, 0, 60) == 452,
+            StringFormat("ltr %d, rtl %d - one frame, two reading orders",
+                         SSRLead(ltr, 0, 60), SSRLead(rtl, 0, 60)));
+
+      Check("32 and trailing is the far edge in both",
+            SSRTrail(ltr, 0, 60) == 452 && SSRTrail(rtl, 0, 60) == 108,
+            "a value column stays on the side the eye ends on");
+
+      Check("32 mirroring is symmetric, not approximate",
+            SSRLead(ltr, 37, 84) == SSRTrail(rtl, 37, 84) &&
+            SSRTrail(ltr, 37, 84) == SSRLead(rtl, 37, 84),
+            "lead and trail swap exactly - if they did not, an RTL panel "
+            "would drift by a pixel per control");
+
+      SSRRows rows; rows.Init(200, 24);
+      int r0 = rows.Next(); int r1 = rows.Next(); rows.Skip(6); int r2 = rows.Next();
+      Check("32 rows advance once per row, and say how tall they got",
+            r0 == 200 && r1 == 224 && r2 == 254 && rows.HeightFrom(200) == 78,
+            StringFormat("%d, %d, %d, total %d - the height is ADDED UP, "
+                         "which is the whole reason v69's two new rows went "
+                         "past a frame that was a typed number",
+                         r0, r1, r2, rows.HeightFrom(200)));
+
+      Check("32 columns divide a frame without drifting",
+            SSRColW(ltr, 3) == 131 &&
+            SSRColX(ltr, 0, 3) == 108 && SSRColX(ltr, 2, 3) == 380,
+            StringFormat("3 x %d starting at %d and %d",
+                         SSRColW(ltr, 3), SSRColX(ltr, 0, 3),
+                         SSRColX(ltr, 2, 3)));
+
+      //--- now the primitives, on a real chart
+      long dchart = ChartOpen(rsym, PERIOD_M1);
+      if(Check("32 a chart for the primitives", dchart != 0, rsym))
+        {
+         CSSRWidgets w;
+         w.Attach(dchart, "SSRW_");
+         w.RemoveAll();
+
+         int cw = w.Chip("c1", 20, 20, "BLIND", SSR_C_HOLD, SSR_C_WELL);
+         Check("32 a chip reports the width it took",
+               cw > 0 && ObjectFind(dchart, "SSRW_c1") >= 0,
+               StringFormat("%d px for BLIND - a row of chips needs this to "
+                            "lay the next one out", cw));
+
+         //--- a meter is not a progress bar: it can pass its limit
+         w.Meter("m1", 20, 40, 200, 10, 3.0, 10.0, SSR_C_RUN);
+         bool under = (ObjectFind(dchart, "SSRW_m1_fill") >= 0);
+         w.Meter("m1", 20, 40, 200, 10, 12.0, 10.0, SSR_C_RUN);
+         color over_c = (color)ObjectGetInteger(dchart, "SSRW_m1_fill",
+                                                OBJPROP_BGCOLOR);
+         Check("32 a meter over its limit turns to the stop colour",
+               under && over_c == SSR_C_STOP,
+               "a prop rule that looked the same breached as it did at 30% "
+               "would be a rule nobody could manage");
+         Check("32 and the limit mark is drawn even when nothing reaches it",
+               ObjectFind(dchart, "SSRW_m1_lim") >= 0,
+               "the distance to the limit is the number being managed");
+
+         string opts[] = {"Buy", "Sell", "Close all", "Bookmark", "Jump"};
+         w.List("l1", 20, 60, 120, 18, opts, 0, 3, 1);
+         bool three = (ObjectFind(dchart, "SSRW_l10") >= 0 &&
+                       ObjectFind(dchart, "SSRW_l12") >= 0 &&
+                       ObjectFind(dchart, "SSRW_l13") < 0);
+         Check("32 a list draws a window onto its rows, not all of them",
+               three,
+               "5 rows, 3 shown - MQL5 has no clipping, so a list that drew "
+               "everything would draw it over the chart");
+
+         string sel = ObjectGetString(dchart, "SSRW_l11", OBJPROP_TEXT);
+         Check("32 and the selected row is the selected row",
+               sel == "Sell",
+               StringFormat("row 1 reads [%s]", sel));
+
+         w.ListClear("l1", 3);
+         Check("32 clearing a list takes its tail with it",
+               ObjectFind(dchart, "SSRW_l10") < 0 &&
+               ObjectFind(dchart, "SSRW_l1_bg") < 0,
+               "a shorter list would otherwise leave its old rows behind");
+
+         w.Toast("t1", 20, 140, 220, "Position opened", SSR_C_RUN);
+         Check("32 a toast does not touch the status strip",
+               ObjectFind(dchart, "SSRW_t1") >= 0 &&
+               ObjectFind(dchart, "SSRW_t1_ac") >= 0,
+               "standing state and something that just happened are two "
+               "different messages and must not evict each other");
+         w.ToastClear("t1");
+
+         w.RemoveAll();
+         ChartClose(dchart);
         }
    }
 

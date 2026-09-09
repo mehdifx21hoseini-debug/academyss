@@ -10,7 +10,8 @@ must go silent.  An audit that has never been seen to fire is not evidence.
 Usage:  python3 tools/ssr_audit.py [MQL5_root]
 Exit code 0 when every audit is silent, 1 otherwise.
 """
-import os, re, sys, collections
+import os
+import re, re, sys, collections
 
 ROOT = sys.argv[1] if len(sys.argv) > 1 else os.path.join(os.path.dirname(__file__), "..", "MQL5")
 ROOT = os.path.abspath(ROOT)
@@ -1046,7 +1047,66 @@ def audit_a16():
             i = j + 1
 
 
-for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13, audit_a14, audit_a15, audit_a16):
+def audit_a17():
+    """A colour named anywhere but the theme is a colour the design system
+    cannot change.
+
+    Sixteen of them existed before Phase 2, spread over four files, and one
+    is why the "bring the line to this view" button stayed WHITE for three
+    builds after the panel went dark: it was styled in the expert, where the
+    theme could not reach it.
+
+    This audit is only worth having because the tree was brought to ZERO
+    first. It was measured before it was written - an audit that arrives
+    with sixteen findings teaches people to ignore it, which is worse than
+    not having one at all.
+
+    strip_comments() is deliberately NOT used here: it blanks single-quoted
+    literals, and C'196,74,64' is single-quoted. Comments are stripped by
+    hand instead so the thing being looked for survives.
+    """
+    lit   = re.compile(r"C'\s*\d+\s*,\s*\d+\s*,\s*\d+\s*'")
+    named = re.compile(r"\bclr[A-Z][A-Za-z]+\b")
+    for path in FILES:
+        base = os.path.basename(path)
+        #--- SSR_Theme owns colour. SSR_QA_FontProbe's SUBJECT is colour:
+        #--- it renders text in named greys to measure legibility, so its
+        #--- values are the thing being tested, not styling of a product
+        #--- surface. Two exemptions, both named, neither a wildcard.
+        if base in ("SSR_Theme.mqh", "SSR_QA_FontProbe.mq5"):
+            continue
+        in_block = False
+        for n, line in enumerate(FILES[path].split("\n"), 1):
+            code = line
+            if in_block:
+                end = code.find("*/")
+                if end < 0:
+                    continue
+                code, in_block = code[end + 2:], False
+            start = code.find("/*")
+            while start >= 0:
+                end = code.find("*/", start + 2)
+                if end < 0:
+                    code, in_block = code[:start], True
+                    break
+                code = code[:start] + " " * (end + 2 - start) + code[end + 2:]
+                start = code.find("/*")
+            cut = code.find("//")
+            if cut >= 0:
+                code = code[:cut]
+
+            m = lit.search(code) or named.search(code)
+            #--- clrNONE is the ABSENCE of colour - "do not paint this" -
+            #--- and no token can express that better than the constant.
+            if m and m.group(0) not in ("clrNONE", "clrNone"):
+                report("A17", path, n,
+                       "the colour %s is written here instead of in "
+                       "SSR_Theme.mqh. Give it a token: a colour the theme "
+                       "cannot reach is a colour that stays light when the "
+                       "panel goes dark." % m.group(0))
+
+
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13, audit_a14, audit_a15, audit_a16, audit_a17):
     fn()
 
 if findings:

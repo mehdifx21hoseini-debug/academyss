@@ -112,10 +112,35 @@
 #define SSR_C_PRIMARY_EDGE C'88,158,236'
 #define SSR_C_PRIMARY_TEXT C'240,247,255'
 
-//--- the SL/TP lines on the chart. These sit on the CHART, not on the
-//--- panel, so they answer to the candles rather than to the face.
+//+------------------------------------------------------------------+
+//| CHART-SIDE COLOUR. These sit on the CHART, not on the panel, so  |
+//| they answer to the candles rather than to the face - but they    |
+//| are still tokens, and they still live here.                       |
+//|                                                                  |
+//| They were not, until Phase 2. Sixteen colours were written at     |
+//| their draw sites across four files, and one of them is why the    |
+//| "bring the line to this view" button stayed WHITE for three       |
+//| builds after the panel went dark: it was styled in the expert,    |
+//| where the theme could not reach it. A design system that any      |
+//| file may opt out of is a suggestion, not a system.                |
+//+------------------------------------------------------------------+
 #define SSR_C_LINE_SL      C'233,92,82'
 #define SSR_C_LINE_TP      C'63,191,122'
+#define SSR_C_LINE_ENTRY   C'214,168,60'    // the pending entry line
+#define SSR_C_LINE_LONG    C'88,158,236'    // a long position's own level
+#define SSR_C_LINE_SHORT   C'227,164,60'    // a short's
+#define SSR_C_TRADE_WIN    C'63,191,122'    // closed-trade history on the chart
+#define SSR_C_TRADE_LOSS   C'233,92,82'
+
+//--- the start line the setup panel is about, and its two buttons
+#define SSR_C_PICK_LINE    C'227,164,60'
+#define SSR_C_PICK_INFO    C'227,164,60'
+
+//--- calendar lines, by impact. Severity, so it answers to the
+//--- semantic set rather than inventing a third palette.
+#define SSR_C_NEWS_HIGH    C'233,92,82'
+#define SSR_C_NEWS_MED     C'227,164,60'
+#define SSR_C_NEWS_LOW     C'126,134,147'
 
 //--- type. ONE face - see the header.
 #define SSR_FONT           "Tahoma"
