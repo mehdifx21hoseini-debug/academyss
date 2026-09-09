@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v93 2026-09-09  where"
+#define SSR_BUILD "v94 2026-09-09  sweep"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

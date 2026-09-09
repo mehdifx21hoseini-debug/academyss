@@ -278,6 +278,71 @@ void OnStart()
    string origin = (InpSymbol == "" ? _Symbol : InpSymbol);
    Log(StringFormat("symbol %s", origin));
 
+   //+------------------------------------------------------------------+
+   //| SWEEP OUR OWN LEFTOVERS BEFORE ANYTHING ELSE.                    |
+   //|                                                                  |
+   //| The evidence says a symbol works ONCE. EURUSD@ passed on v90 and |
+   //| has hung on every run since; USDJPY@ passed the first time it    |
+   //| was tried. What a finished run leaves behind is a replay symbol  |
+   //| that would not delete - Cleanup() prints a NOTE about it and     |
+   //| carries on - and every later run then starts on top of it.       |
+   //|                                                                  |
+   //| Telling the user to go and run SSR_Z_Cleanup first is not a fix, |
+   //| it is a chore with a note attached. The suite cleans up after    |
+   //| itself, at the start, where it can still be sure of what it is   |
+   //| looking at.                                                       |
+   //|                                                                  |
+   //| ONLY the slot this run uses - 9 by default, chosen to stay away  |
+   //| from real sessions - so a sweep cannot reach a replay the user   |
+   //| has running on slot 1 while this test runs.                       |
+   //+------------------------------------------------------------------+
+   {
+      //--- the slot this run will actually use, not a 9 typed twice
+      string tail  = SSR_SYMBOL_SUFFIX + IntegerToString(InpSlot);
+      int    shut  = 0, gone = 0, kept = 0;
+      string kept_names = "";
+
+      long id = ChartFirst();
+      while(id >= 0)
+        {
+         long nxt = ChartNext(id);
+         string cs = ChartSymbol(id);
+         if(StringLen(cs) > StringLen(tail) &&
+            StringSubstr(cs, StringLen(cs) - StringLen(tail)) == tail)
+           { ChartClose(id); shut++; }
+         id = nxt;
+        }
+      if(shut > 0)
+         Sleep(300);                 // the terminal needs a beat to let go
+
+      for(int i = SymbolsTotal(false) - 1; i >= 0; i--)
+        {
+         string nm = SymbolName(i, false);
+         if(StringLen(nm) <= StringLen(tail) ||
+            StringSubstr(nm, StringLen(nm) - StringLen(tail)) != tail)
+            continue;
+         SymbolSelect(nm, false);
+         ResetLastError();
+         if(CustomSymbolDelete(nm))
+            gone++;
+         else
+           {
+            kept++;
+            kept_names += StringFormat(" %s(err %d)", nm, GetLastError());
+           }
+        }
+
+      if(shut + gone + kept > 0)
+         Log(StringFormat("  ..    swept %d chart(s) and %d leftover symbol(s)"
+                          "%s", shut, gone,
+                          (kept > 0
+                           ? StringFormat("; %d WOULD NOT GO:%s - this is the "
+                                          "state a hung run leaves and the next "
+                                          "one starts on top of",
+                                          kept, kept_names)
+                           : "")));
+   }
+
    //--- 1. history -------------------------------------------------
    int have = Bars(origin, PERIOD_M1);
    if(!Check("M1 history present", have >= InpReplayBars + InpWarmupBars,
