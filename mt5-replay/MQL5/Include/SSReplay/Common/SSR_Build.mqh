@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v101 2026-09-09  menus"
+#define SSR_BUILD "v102 2026-09-09  modal"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

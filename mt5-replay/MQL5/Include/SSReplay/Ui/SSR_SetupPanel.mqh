@@ -420,7 +420,17 @@ private:
 
 public:
                      CSSRSetupPanel(void)
-     : m_chart(0), m_open(false), m_x(14), m_y(28),
+     //+------------------------------------------------------------------+
+     //| 14,28 PUT IT UNDER METATRADER'S OWN ONE-CLICK TRADING PANEL.     |
+     //|                                                                  |
+     //| That widget lives at the top-left of every chart that has it     |
+     //| switched on, and it is drawn by the terminal, so it always wins. |
+     //| Our first two rows - Balance and its box - came up underneath it |
+     //| and could be neither read nor typed in.                          |
+     //|                                                                  |
+     //| Below it, and inset, where nothing of MetaTrader's own lives.    |
+     //+------------------------------------------------------------------+
+     : m_chart(0), m_open(false), m_x(18), m_y(84),
        m_start_text(""), m_tf_i(1), m_preset_i(0), m_force_prop(false),
        m_start_y(0), m_first_paint(true), m_step(0), m_menu(""),
        m_menu_y(0), m_drag(false), m_drag_dx(0), m_drag_dy(0)

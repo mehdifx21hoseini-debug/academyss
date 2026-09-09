@@ -1656,6 +1656,18 @@ bool BuildSession(string origin, const bool on_replay,
 int OnInit()
   {
    //+------------------------------------------------------------------+
+   //| SWEEP BEFORE THE FIRST FRAME, not when the setup panel opens.     |
+   //|                                                                  |
+   //| The purge landed in the right place and one step too late: the    |
+   //| leftovers were still on the chart for the moment between the      |
+   //| expert starting and the panel being built - "it is fixed, but it  |
+   //| still appears for an instant and then goes". Here there is no     |
+   //| such moment. The start line is kept because it is the user's      |
+   //| choice, not a previous run's rubbish.                             |
+   //+------------------------------------------------------------------+
+   SSRPurgeChart(0, SSR_PICK_LINE);
+
+   //+------------------------------------------------------------------+
    //| THE HANDOVER FLAGS ARE CLEARED BEFORE ANYTHING ELSE RUNS.        |
    //|                                                                  |
    //| A black box recording finally settled what five releases could    |
@@ -2715,9 +2727,21 @@ void OnTimer()
    //| would be gone before anyone read it. Polling first means the      |
    //| longest a click can wait is one pump.                             |
    //+------------------------------------------------------------------+
-   //--- not while a dialog is up: it is modal, and a panel that still
-   //--- answers clicks underneath one is two UIs fighting for one mouse
-   if(!g_session_dlg.IsOpen() && !g_dialog.IsOpen())
+   //+------------------------------------------------------------------+
+   //| MODAL HAS TO MEAN MODAL FOR THE PAINT TOO.                       |
+   //|                                                                  |
+   //| The CLICKS were already held back while a dialog is up - "two    |
+   //| UIs fighting for one mouse" - and the REPAINT was not. MetaTrader |
+   //| has no z-order beyond creation order, so every hundred            |
+   //| milliseconds the panel recreated its objects on top of the dialog |
+   //| the user was reading: the Sessions list came up with Setup, Stop  |
+   //| & target and the deal buttons printed straight through it.        |
+   //|                                                                  |
+   //| One condition, read once, so the two cannot drift apart again.    |
+   //+------------------------------------------------------------------+
+   bool modal = (g_session_dlg.IsOpen() || g_dialog.IsOpen());
+
+   if(!modal)
      {
       ENUM_SSR_CMD host_cmd = g_panel.PollClicks();
       if(host_cmd != SSR_CMD_NONE)
@@ -2725,7 +2749,7 @@ void OnTimer()
      }
 
    uint now_ms = GetTickCount();
-   if(now_ms - g_panel_paint >= 100)
+   if(!modal && now_ms - g_panel_paint >= 100)
      {
       g_panel_paint = now_ms;
       g_panel.Render();

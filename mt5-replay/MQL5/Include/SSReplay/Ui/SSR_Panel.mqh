@@ -544,6 +544,18 @@ public:
       DrawStatus(x, y + H - SSR_STATUS_H - 1, W);
 
       //+------------------------------------------------------------------+
+      //| THE CARD IS DRAWN AFTER THE PANEL, EVERY FRAME.                  |
+      //|                                                                  |
+      //| Same fault as the Sessions dialog and the same cause: creation    |
+      //| order is the only z-order MetaTrader has, so a panel that repaints|
+      //| ten times a second climbs on top of anything opened over it. The  |
+      //| key card is opened FROM this panel and was going straight back    |
+      //| under it.                                                         |
+      //+------------------------------------------------------------------+
+      if(m_keys.IsUp())
+         m_keys.Show(m_chart);
+
+      //+------------------------------------------------------------------+
       //| CREATING AN OBJECT IS NOT SHOWING IT.                            |
       //| On a chart with no incoming ticks - a weekend, a closed market,  |
       //| a paused replay - MetaTrader does not repaint by itself, so the  |
