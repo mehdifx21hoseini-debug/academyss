@@ -64,6 +64,9 @@ enum ENUM_SSR_CMD
 //--- not commands: the two ways out of a text box, so the panel can
 //--- hand the keyboard back without the user hunting for somewhere
 //--- safe to click
+#define SSR_VK_UP      38
+#define SSR_VK_DOWN     40
+#define SSR_VK_K        75
 #define SSR_VK_ESCAPE  27
 #define SSR_VK_ENTER   13
 

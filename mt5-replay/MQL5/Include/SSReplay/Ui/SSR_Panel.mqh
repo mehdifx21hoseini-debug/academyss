@@ -44,6 +44,7 @@
 #include "SSR_Widgets.mqh"
 #include "SSR_ReplayPort.mqh"
 #include "SSR_Keys.mqh"
+#include "SSR_Palette.mqh"
 #include "SSR_KeyCard.mqh"
 
 #define SSR_SLOTS 64
@@ -111,6 +112,19 @@ private:
    string            m_reset_warning;    // what it would destroy
 
    CSSRKeyCard       m_keys;             // the shortcut list, on the chart
+   CSSRPalette       m_palette;          // Ctrl+K: everything, searchable
+
+   //+------------------------------------------------------------------+
+   //| A command chosen with ENTER happens inside a key event, and the  |
+   //| host collects commands from PollClicks. Rather than give the     |
+   //| palette a second way out - which would be the second place a     |
+   //| verb is dispatched from, and the one that gets forgotten - the   |
+   //| command waits here for one pump. The longest it can wait is the  |
+   //| panel's own poll interval.                                       |
+   //|                                                                  |
+   //| Consumed on the way out, so it can never run twice.              |
+   //+------------------------------------------------------------------+
+   ENUM_SSR_CMD      m_pending_cmd;
    int               m_tag_x, m_tag_y, m_tag_w, m_tag_h;  // where it is
    bool              m_place_loaded; // the file has been read at least once
 
@@ -189,6 +203,7 @@ public:
        m_x(12), m_y(24), m_saved_mouse_move(0), m_saved_mouse_scroll(1),
        m_saved_quick_nav(1), m_saved_key_control(1),
        m_saved(false), m_collapsed(false), m_closed(false), m_compact(false),
+       m_pending_cmd(SSR_CMD_NONE),
        m_dragging(false),
        m_drag_dx(0), m_drag_dy(0),
        m_track_drag(false), m_track_x(0), m_track_y(0), m_track_w(0),
@@ -267,6 +282,7 @@ public:
    void              Destroy(void)
      {
       m_keys.Destroy();
+      m_palette.Hide();
       if(m_chart == 0)
          return;
       m_w.RemoveAll();
@@ -555,6 +571,11 @@ public:
       //+------------------------------------------------------------------+
       if(m_keys.IsUp())
          m_keys.Show(m_chart);
+
+      //--- and the palette after even that: it is the frontmost thing
+      //--- this panel can put on a chart, so it is drawn last of all.
+      if(m_palette.IsUp())
+         m_palette.Render();
 
       //+------------------------------------------------------------------+
       //| CREATING AN OBJECT IS NOT SHOWING IT.                            |
@@ -1630,10 +1651,64 @@ public:
    //| Returns a command the HOST must run (the dialogs it owns), or    |
    //| SSR_CMD_NONE. Everything this layer owns is already done.        |
    //+------------------------------------------------------------------+
+   //+------------------------------------------------------------------+
+   //| Run whatever the palette chose, down a path that existed before  |
+   //| the palette did.                                                  |
+   //|                                                                  |
+   //| A command is either an ENUM_SSR_CMD - handed back exactly as a    |
+   //| keypress is - or a panel action string, handed to Dispatch        |
+   //| exactly as a button click is. There is no third path, and there   |
+   //| is no place where a verb is implemented twice.                    |
+   //+------------------------------------------------------------------+
+   ENUM_SSR_CMD      RunChosen(void)
+     {
+      SSRCommand c;
+      if(!m_palette.Chosen(c))
+        { m_palette.Hide(); return SSR_CMD_NONE; }
+      m_palette.Hide();
+
+      if(c.cmd != SSR_CMD_NONE)
+         return c.cmd;                    // the host owns this one
+
+      if(c.action == "buy" || c.action == "sell" ||
+         c.action == "flat" || c.action == "be")
+        {
+         TradeButton(c.action);
+         Render();
+         return SSR_CMD_NONE;
+        }
+      ENUM_SSR_CMD back = Dispatch(c.action);
+      Render();
+      return back;
+     }
+
    ENUM_SSR_CMD      PollClicks(void)
      {
       if(m_chart == 0)
          return SSR_CMD_NONE;
+
+      //+------------------------------------------------------------------+
+      //| THE PALETTE IS POLLED FIRST AND ALONE.                           |
+      //|                                                                  |
+      //| Its rows are buttons on the same chart as the panel's. Polling    |
+      //| the panel as well would read one click twice - once as a command  |
+      //| and once as whatever button the palette happens to be covering.   |
+      //| The same rule the v101 dropdowns follow, for the same reason.     |
+      //+------------------------------------------------------------------+
+      //--- a command Enter chose during a key event, waiting for a pump
+      if(m_pending_cmd != SSR_CMD_NONE)
+        {
+         ENUM_SSR_CMD held = m_pending_cmd;
+         m_pending_cmd = SSR_CMD_NONE;
+         return held;
+        }
+
+      if(m_palette.IsUp())
+        {
+         if(m_palette.Poll())
+            return RunChosen();
+         return SSR_CMD_NONE;
+        }
 
       ENUM_SSR_CMD  for_host = SSR_CMD_NONE;
       bool          acted    = false;
@@ -1928,6 +2003,36 @@ public:
       //| Escape leaves the box, so there is always a way out that does    |
       //| not require finding somewhere safe to click.                     |
       //+------------------------------------------------------------------+
+      //+------------------------------------------------------------------+
+      //| THE PALETTE TAKES KEYS BEFORE ANYTHING ELSE DOES.                |
+      //|                                                                  |
+      //| While it is up it is modal in intent, even though MQL5 has no    |
+      //| modality: Space must type a space into the query, not pause the  |
+      //| replay. So its keys are read first and consumed, and only Esc,   |
+      //| Enter and the arrows mean anything to it - everything else is    |
+      //| MetaTrader typing into the edit box, which is exactly right.     |
+      //+------------------------------------------------------------------+
+      if(id == CHARTEVENT_KEYDOWN && m_palette.IsUp())
+        {
+         bool run = false;
+         if(m_palette.OnKey(lparam, run))
+           {
+            if(run)
+               m_pending_cmd = RunChosen();
+            return true;
+           }
+         return true;                     // typing: claimed, not acted on
+        }
+
+      //--- Ctrl+K opens it. Checked before the key table so a future
+      //--- binding on K cannot shadow the palette by accident.
+      if(id == CHARTEVENT_KEYDOWN && (int)lparam == SSR_VK_K &&
+         TerminalInfoInteger(TERMINAL_KEYSTATE_CONTROL) < 0)
+        {
+         m_palette.Toggle(m_chart);
+         return true;
+        }
+
       if(id == CHARTEVENT_KEYDOWN && m_tag_focus)
         {
          if((int)lparam == SSR_VK_ESCAPE || (int)lparam == SSR_VK_ENTER)

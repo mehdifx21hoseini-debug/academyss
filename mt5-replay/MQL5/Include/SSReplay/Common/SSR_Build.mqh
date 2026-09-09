@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v104 2026-09-09  tokens"
+#define SSR_BUILD "v105 2026-09-09  palette"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

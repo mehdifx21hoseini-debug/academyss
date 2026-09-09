@@ -49,6 +49,7 @@
 #include <SSReplay/Chart/SSR_ChartManager.mqh>
 #include <SSReplay/Ui/SSR_GroupPort.mqh>
 #include <SSReplay/Ui/SSR_Layout.mqh>
+#include <SSReplay/Ui/SSR_Palette.mqh>
 #include <SSReplay/Ui/SSR_Panel.mqh>
 
 input string InpSymbol     = "";     // Symbol (empty = this chart)
@@ -3228,6 +3229,106 @@ void OnStart()
 
          w.RemoveAll();
          ChartClose(dchart);
+        }
+   }
+
+   //+------------------------------------------------------------------+
+   //| 33. THE COMMAND PALETTE.                                         |
+   //|                                                                  |
+   //| A search box that cannot be typed into by a test is still worth  |
+   //| testing: the query is a plain string the palette re-filters on,  |
+   //| so everything except the typing itself can be driven directly.   |
+   //|                                                                  |
+   //| The one thing measured here that no screenshot could show: that  |
+   //| the palette invents no verbs. Every entry resolves to a command  |
+   //| the key table already knows or an action the panel already       |
+   //| dispatches, and this asserts that for all of them at once.       |
+   //+------------------------------------------------------------------+
+   {
+      SSRCommand cmds[];
+      int cn = SSRCommands(cmds);
+      Check("33 there are commands at all", cn > 0,
+            StringFormat("%d declared", cn));
+
+      //--- EVERY entry must resolve to an existing path. A command with
+      //--- neither is a verb invented in a search box.
+      int orphan = 0;
+      string orphan_name = "";
+      for(int i = 0; i < cn; i++)
+         if(cmds[i].cmd == SSR_CMD_NONE && cmds[i].action == "")
+           { orphan++; if(orphan_name == "") orphan_name = cmds[i].label; }
+      Check("33 every command resolves to a path that already existed",
+            orphan == 0,
+            (orphan == 0
+             ? "no command invents a verb - each is a key the table knows or "
+               "a button the panel dispatches"
+             : StringFormat("%d with neither, first is [%s]",
+                            orphan, orphan_name)));
+
+      //--- and no label appears twice, or the second is unreachable
+      int dupes = 0;
+      for(int i = 0; i < cn; i++)
+         for(int j = i + 1; j < cn; j++)
+            if(cmds[i].label == cmds[j].label)
+               dupes++;
+      Check("33 no command is declared twice", dupes == 0,
+            StringFormat("%d duplicate label(s)", dupes));
+
+      //--- the key column comes from the key table, so it cannot lie
+      string k = "";
+      for(int i = 0; i < cn && k == ""; i++)
+         if(cmds[i].cmd == SSR_CMD_TOGGLE)
+            k = SSRCommandKey(cmds[i]);
+      Check("33 a command with a shortcut shows the real one",
+            k == "Space",
+            StringFormat("play/pause reads [%s] - taken from the key table, "
+                         "so a rebinding cannot leave the palette lying", k));
+
+      //--- subsequence matching, which is what makes it usable at speed
+      int hit[];
+      Check("33 an empty query shows everything",
+            SSRCommandFilter(cmds, "", hit) == cn,
+            "opening it is how you find out what there IS");
+      Check("33 letters in order are enough",
+            SSRCommandFilter(cmds, "cep", hit) > 0 &&
+            SSRCommandMatches("Close every position", "cep"),
+            "[cep] finds [Close every position] - a trader mid-session "
+            "types from memory, not from the exact wording");
+      Check("33 and letters out of order are not",
+            !SSRCommandMatches("Close every position", "pec"),
+            "subsequence, not 'contains all these letters somewhere'");
+      Check("33 a query that matches nothing says so",
+            SSRCommandFilter(cmds, "zzqx", hit) == 0,
+            "and the palette shows a line telling you to try fewer letters");
+
+      //--- now on a real chart
+      long pchart2 = ChartOpen(rsym, PERIOD_M1);
+      if(Check("33 a chart for the palette", pchart2 != 0, rsym))
+        {
+         CSSRPalette pal;
+         Check("33 it is not up until it is opened", !pal.IsUp(), "");
+         pal.Show(pchart2);
+         Check("33 it goes up", pal.IsUp() && pal.Matches() == cn,
+               StringFormat("%d commands offered on open", pal.Matches()));
+         Check("33 and something is selected from the start",
+               pal.SelectedLabel() != "",
+               StringFormat("[%s] - Enter always has a target",
+                            pal.SelectedLabel()));
+
+         string was = pal.SelectedLabel();
+         pal.Move(+1);
+         Check("33 the selection moves", pal.SelectedLabel() != was,
+               StringFormat("[%s] -> [%s]", was, pal.SelectedLabel()));
+         pal.Move(-99);
+         Check("33 and cannot be moved off the top",
+               pal.SelectedLabel() != "",
+               "a selection off the end is an Enter that does nothing");
+
+         bool run = false;
+         pal.OnKey(SSR_VK_ESCAPE, run);
+         Check("33 Escape closes it", !pal.IsUp() && !run,
+               "a modal you cannot leave is a modal you open once");
+         ChartClose(pchart2);
         }
    }
 

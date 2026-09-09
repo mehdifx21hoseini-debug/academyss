@@ -36,15 +36,18 @@ This document set. No code changed.
   luck. Both now include what they use.
 - **Not yet used by any screen.** Phase 3 is the first consumer.
 
-### Phase 3 — Replay workspace  ◻ next
+### Phase 3 — Replay workspace  ◧ partly done
 - Panel mode **Pro** (rail + Analysis + palette entry). Compact and Standard
   unchanged.
 - **Command palette** (`Ctrl+K`): `OBJ_EDIT` + filtered `List`, built the way
   the v101 dropdowns already work — drawn last, so it is on top.
 - Caption becomes a status line: symbol · timeframe · fidelity · mode chips.
-- **Risk: medium** — the palette is new input handling on the one chart that
-  receives keys.
-- **Test: new smoke stage — palette opens, filters, runs a verb, closes.**
+- **Done: the command palette.** `SSR_Command.mqh` (28 commands, one table)
+  and `SSR_Palette.mqh`. `Ctrl+K` opens, `↑↓` choose, `Enter` runs, `Esc`
+  closes. Smoke stage 33, thirteen checks — including that **no command
+  invents a verb**, asserted over the whole table at once.
+- **Still open in this phase:** Pro panel mode, and the caption becoming a
+  status line with mode chips. Neither is started.
 
 ### Phase 4 — Setup / onboarding
 - Quick-start screen (F1) ahead of the wizard.

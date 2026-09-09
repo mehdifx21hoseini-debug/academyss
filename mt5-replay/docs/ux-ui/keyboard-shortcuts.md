@@ -46,8 +46,10 @@ reaching for the lines cannot destroy the session.
 
 | Key | Command | Status |
 |---|---|---|
-| `Ctrl+K` | command palette | planned, Phase 3 |
+| `Ctrl+K` | command palette | **shipped, v105** |
 | `Shift+→` / `Shift+←` | ten candles (alias of PgDn/PgUp) | planned |
+| `↑` `↓` | choose, inside the palette | **shipped, v105** |
+| `Enter` | run the selection | **shipped, v105** |
 | `A` | Analysis | planned, Phase 7 |
 | `Esc` | close the top modal | **partially exists** (releases edit focus) |
 
