@@ -170,7 +170,7 @@ public:
 
       FolderCreate(SSR_JOURNAL_DIR);
       string path = SSR_JOURNAL_DIR + "\\" + name + ".csv";
-      int h = FileOpen(path, FILE_WRITE | FILE_TXT | FILE_ANSI);
+      int h = FileOpen(path, FILE_WRITE | FILE_TXT | FILE_ANSI | FILE_SHARE_READ);
       if(h == INVALID_HANDLE)
         { m_last_error = "cannot write " + path; return false; }
       m_last_path = path;
@@ -251,7 +251,7 @@ public:
 
       FolderCreate(SSR_JOURNAL_DIR);
       string path = SSR_JOURNAL_DIR + "\\" + name + ".html";
-      int h = FileOpen(path, FILE_WRITE | FILE_TXT | FILE_ANSI);
+      int h = FileOpen(path, FILE_WRITE | FILE_TXT | FILE_ANSI | FILE_SHARE_READ);
       if(h == INVALID_HANDLE)
         { m_last_error = "cannot write " + path; return false; }
       m_last_path = path;

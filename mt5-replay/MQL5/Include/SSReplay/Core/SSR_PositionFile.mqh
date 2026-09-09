@@ -54,7 +54,7 @@ public:
          return false;
         }
       FolderCreate(SSR_POSITION_DIR);
-      int h = FileOpen(Path(key), FILE_WRITE | FILE_TXT | FILE_ANSI);
+      int h = FileOpen(Path(key), FILE_WRITE | FILE_TXT | FILE_ANSI | FILE_SHARE_READ);
       if(h == INVALID_HANDLE)
         {
          m_last_error = "cannot open " + Path(key);

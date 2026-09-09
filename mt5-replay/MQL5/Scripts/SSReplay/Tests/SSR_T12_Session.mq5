@@ -139,7 +139,7 @@ void OnStart()
                SSRPackAdd("", "a|b"));
 
       //--- A NEWER FORMAT IS REFUSED, not read as best we can
-      int h = FileOpen("SSReplay\\test_future.ssr", FILE_WRITE|FILE_TXT|FILE_ANSI);
+      int h = FileOpen("SSReplay\\test_future.ssr", FILE_WRITE|FILE_TXT|FILE_ANSI | FILE_SHARE_READ);
       if(h != INVALID_HANDLE)
         {
          FileWriteString(h, "# SS Replay session file\r\n");
@@ -153,7 +153,7 @@ void OnStart()
             StringFind(fut.LastError(), "newer build") >= 0, fut.LastError());
 
       //--- and something that is not one of ours at all
-      h = FileOpen("SSReplay\\test_junk.ssr", FILE_WRITE|FILE_TXT|FILE_ANSI);
+      h = FileOpen("SSReplay\\test_junk.ssr", FILE_WRITE|FILE_TXT|FILE_ANSI | FILE_SHARE_READ);
       if(h != INVALID_HANDLE)
         { FileWriteString(h, "hello world\r\n"); FileClose(h); }
       CSSRSessionFile junk;

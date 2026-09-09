@@ -106,8 +106,9 @@ void Unstash(const string path)
 //+------------------------------------------------------------------+
 #define SSR_QA_RESULT_FILE  "SSReplay\\qa-result.txt"
 
-int g_fh    = INVALID_HANDLE;
-int g_out_n = 0;
+int    g_fh    = INVALID_HANDLE;
+int    g_out_n = 0;
+string g_path  = "";
 
 //+------------------------------------------------------------------+
 //| WRITTEN AS IT HAPPENS, not collected and written at the end.      |
@@ -124,13 +125,48 @@ int g_out_n = 0;
 //| last thing that worked, and the last line in it names the place   |
 //| it stopped.                                                       |
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| AND OPENED IN A WAY THAT CANNOT SILENTLY GET NOTHING.            |
+//|                                                                  |
+//| Reported twice: "it hung and no file was made". Both times the    |
+//| suite had in fact run. FileOpen without a share mode asks Windows |
+//| for the file EXCLUSIVELY, and the obvious way to use this tool is |
+//| to open qa-result.txt in an editor to copy it - which is exactly  |
+//| what makes the next run unable to open it. It then wrote nowhere, |
+//| the folder looked untouched, and a slow run and a dead one are    |
+//| indistinguishable from outside.                                   |
+//|                                                                  |
+//| Two changes. FILE_SHARE_READ, so the run cannot lock out somebody |
+//| reading the file it is writing. And when the usual name is taken  |
+//| anyway, the run does NOT shrug and continue into the log pane: it |
+//| writes a stamped file beside it and says so on the chart, where   |
+//| the person waiting is actually looking.                           |
+//+------------------------------------------------------------------+
 void LogOpen(void)
   {
    FolderCreate("SSReplay");
-   g_fh = FileOpen(SSR_QA_RESULT_FILE, FILE_WRITE | FILE_TXT | FILE_ANSI);
+   g_path = SSR_QA_RESULT_FILE;
+   g_fh   = FileOpen(g_path, FILE_WRITE | FILE_TXT | FILE_ANSI |
+                             FILE_SHARE_READ);
    if(g_fh == INVALID_HANDLE)
-      PrintFormat("could not open %s (err %d) - the log pane is the only copy",
-                  SSR_QA_RESULT_FILE, GetLastError());
+     {
+      int err = GetLastError();
+      string stamp = TimeToString(TimeLocal(), TIME_DATE | TIME_MINUTES);
+      StringReplace(stamp, ".", "");
+      StringReplace(stamp, ":", "");
+      StringReplace(stamp, " ", "-");
+      g_path = "SSReplay\\qa-result-" + stamp + ".txt";
+      g_fh = FileOpen(g_path, FILE_WRITE | FILE_TXT | FILE_ANSI |
+                              FILE_SHARE_READ);
+      string note = StringFormat("%s could not be opened (err %d) - it is "
+                                 "probably still open in an editor. Writing "
+                                 "to %s instead.",
+                                 SSR_QA_RESULT_FILE, err,
+                                 (g_fh == INVALID_HANDLE ? "NOWHERE - the log "
+                                  "pane is the only copy" : g_path));
+      Print(note);
+      Comment(note);
+     }
   }
 
 void Log(const string line)
@@ -1215,7 +1251,7 @@ void OnStart()
          int th = FileOpen(tj.LastPath(), FILE_READ | FILE_TXT | FILE_ANSI);
          if(th != INVALID_HANDLE)
            {
-            while(!FileIsEnding(th))
+            while(!FileIsEnding(th) && !IsStopped())
                body += FileReadString(th);
             FileClose(th);
            }
@@ -2014,7 +2050,7 @@ void OnStart()
                FILE_REWRITE);
 
       string junk = SSR_CLASS_DIR + "\\class-notajournal.csv";
-      int jh = FileOpen(junk, FILE_WRITE | FILE_TXT | FILE_ANSI);
+      int jh = FileOpen(junk, FILE_WRITE | FILE_TXT | FILE_ANSI | FILE_SHARE_READ);
       if(jh != INVALID_HANDLE)
         {
          FileWriteString(jh, "date,amount\r\n2026.01.01,12.50\r\n");
@@ -2079,7 +2115,7 @@ void OnStart()
          int ph = FileOpen(out, FILE_READ | FILE_TXT | FILE_ANSI);
          if(ph != INVALID_HANDLE)
            {
-            while(!FileIsEnding(ph))
+            while(!FileIsEnding(ph) && !IsStopped())
                body += FileReadString(ph);
             FileClose(ph);
            }
@@ -2806,6 +2842,41 @@ void OnStart()
         }
    }
 
+   //+------------------------------------------------------------------+
+   //| 30. THE REPORT CAN BE READ WHILE IT IS BEING WRITTEN.            |
+   //|                                                                  |
+   //| Twice now: "it hung and no file was made". The suite had run.     |
+   //| FileOpen with no share mode takes the file exclusively, so the    |
+   //| ordinary way to use this tool - open qa-result.txt, copy it,      |
+   //| leave the editor open - is what stops the next run from writing   |
+   //| at all. Nothing appeared in the folder, and from outside a slow    |
+   //| run and a dead one look the same.                                 |
+   //|                                                                  |
+   //| So it is asserted, not assumed: the file this run is holding      |
+   //| open right now is opened a SECOND time, for reading, and read.    |
+   //| That is the user's editor, in one check.                          |
+   //+------------------------------------------------------------------+
+   {
+      int rh = FileOpen(g_path, FILE_READ | FILE_TXT | FILE_ANSI |
+                                FILE_SHARE_READ | FILE_SHARE_WRITE);
+      if(Check("30 the report can be opened while the run still holds it",
+               rh != INVALID_HANDLE,
+               (rh != INVALID_HANDLE
+                ? "a second handle got in - an editor left open on this file "
+                  "can no longer stop the next run from writing"
+                : StringFormat("err %d on %s - this is the bug that made a "
+                               "finished run look like a hang", GetLastError(),
+                               g_path))))
+        {
+         string peek = FileReadString(rh);
+         Check("30 and what it reads is this run",
+               StringFind(peek, "SS Replay smoke test") >= 0,
+               StringFormat("first line reads [%s]",
+                            StringSubstr(peek, 0, 46)));
+         FileClose(rh);
+        }
+   }
+
    ctrl.Release();
    Cleanup(rsym);
    Done();
@@ -2917,8 +2988,14 @@ void Done(void)
       g_fh = INVALID_HANDLE;
      }
 
-   PrintFormat("--> SEND THIS ONE FILE:  MQL5\\Files\\%s   (%d lines)",
-               SSR_QA_RESULT_FILE, g_out_n);
+   //--- the name it ACTUALLY wrote, which is not always the usual one
+   string sent = StringFormat("--> SEND THIS ONE FILE:  MQL5\\Files\\%s   "
+                              "(%d lines)", g_path, g_out_n);
+   Print(sent);
    Print("--> Toolbox has a Files tab, or: File menu -> Open Data Folder -> MQL5 -> Files");
+   //--- on the chart too. A run that finishes while the log pane is
+   //--- scrolled away has told nobody anything.
+   Comment(StringFormat("SS Replay smoke test: %d passed, %d FAILED\n%s",
+                        g_pass, g_fail, sent));
   }
 //+------------------------------------------------------------------+

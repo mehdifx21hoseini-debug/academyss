@@ -104,7 +104,7 @@ public:
       if(!m_enabled || !m.IsValid())
          return false;
       FolderCreate(SSR_CACHE_DIR);
-      int h = FileOpen(Path(m.replay_symbol), FILE_WRITE | FILE_TXT | FILE_ANSI);
+      int h = FileOpen(Path(m.replay_symbol), FILE_WRITE | FILE_TXT | FILE_ANSI | FILE_SHARE_READ);
       if(h == INVALID_HANDLE)
          return false;
 

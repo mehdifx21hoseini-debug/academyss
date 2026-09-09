@@ -65,7 +65,7 @@ void OnStart()
      }
 
    FolderCreate(SSR_DIR);
-   int fh = FileOpen("SSR_Spike\\d3_timeseries.csv", FILE_WRITE | FILE_TXT | FILE_ANSI);
+   int fh = FileOpen("SSR_Spike\\d3_timeseries.csv", FILE_WRITE | FILE_TXT | FILE_ANSI | FILE_SHARE_READ);
    if(fh != INVALID_HANDLE)
       FileWriteString(fh, "minute,ticks_total,ticks_per_sec,mem_mql_mb,mem_terminal_mb\r\n");
 

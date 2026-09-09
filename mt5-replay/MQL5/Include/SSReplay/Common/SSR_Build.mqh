@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v91 2026-09-09  compact"
+#define SSR_BUILD "v92 2026-09-09  share"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

@@ -668,7 +668,7 @@ void OnStart()
    Head("6. the places this product writes to");
    {
       string path = "SSReplay\\preflight.txt";
-      int h = FileOpen(path, FILE_WRITE | FILE_TXT | FILE_ANSI);
+      int h = FileOpen(path, FILE_WRITE | FILE_TXT | FILE_ANSI | FILE_SHARE_READ);
       if(h == INVALID_HANDLE)
          Blocker("file write",
                  StringFormat("cannot write MQL5\\Files\\%s (error %d) - "

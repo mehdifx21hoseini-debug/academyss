@@ -41,7 +41,7 @@ private:
          Print(line);
       if(m_to_file && m_file != "")
         {
-         int h = FileOpen(m_file, FILE_READ | FILE_WRITE | FILE_TXT | FILE_ANSI);
+         int h = FileOpen(m_file, FILE_READ | FILE_WRITE | FILE_TXT | FILE_ANSI | FILE_SHARE_READ);
          if(h != INVALID_HANDLE)
            {
             FileSeek(h, 0, SEEK_END);

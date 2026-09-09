@@ -135,7 +135,7 @@ public:
      {
       m_last_error = "";
       m_path       = path;
-      m_handle = FileOpen(path, FILE_WRITE | FILE_TXT | FILE_ANSI);
+      m_handle = FileOpen(path, FILE_WRITE | FILE_TXT | FILE_ANSI | FILE_SHARE_READ);
       if(m_handle == INVALID_HANDLE)
         {
          Fail("cannot write " + path + " (err " + IntegerToString(GetLastError()) + ")");

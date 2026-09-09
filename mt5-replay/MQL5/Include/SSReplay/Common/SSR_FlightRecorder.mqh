@@ -146,7 +146,7 @@ public:
       StringReplace(when, " ", "-");
       m_path = "SSReplay-flight-" + Cell(tag) + "-" + when + ".csv";
 
-      m_handle = FileOpen(m_path, FILE_WRITE | FILE_TXT | FILE_ANSI);
+      m_handle = FileOpen(m_path, FILE_WRITE | FILE_TXT | FILE_ANSI | FILE_SHARE_READ);
       if(m_handle == INVALID_HANDLE)
         {
          m_failed = true;

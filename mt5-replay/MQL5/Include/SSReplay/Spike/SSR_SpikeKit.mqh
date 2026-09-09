@@ -94,7 +94,7 @@ void SSR_Append(const string file, const string header, const string line)
   {
    FolderCreate(SSR_DIR);
    bool fresh = !FileIsExist(file);
-   int h = FileOpen(file, FILE_READ | FILE_WRITE | FILE_TXT | FILE_ANSI);
+   int h = FileOpen(file, FILE_READ | FILE_WRITE | FILE_TXT | FILE_ANSI | FILE_SHARE_READ);
    if(h == INVALID_HANDLE)
      {
       PrintFormat("[SSR] cannot open %s err=%d", file, GetLastError());
