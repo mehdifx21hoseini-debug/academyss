@@ -18,6 +18,18 @@
 #+------------------------------------------------------------------+
 set -u
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# MetaEditor is not part of the repo (it is 15 MB of MetaQuotes binary and
+# the egress proxy will not fetch it), so it lives outside the tree. A
+# container rebuild moved it once and cost a compile, so look in both of
+# the places it has actually been rather than in one of them.
+if [ -z "${ME:-}" ]; then
+  for c in "$ROOT/../.metaeditor/MetaEditor64.exe" \
+           "$HOME/.metaeditor/MetaEditor64.exe" \
+           "/home/user/.metaeditor/MetaEditor64.exe" \
+           "$HOME/.wine-mt5/drive_c/mt5/MetaEditor64.exe"; do
+    if [ -f "$c" ]; then ME="$c"; break; fi
+  done
+fi
 ME="${ME:-$ROOT/../.metaeditor/MetaEditor64.exe}"
 export WINEPREFIX="${WINEPREFIX:-$HOME/.wine-mt5}"
 export WINEDEBUG=-all

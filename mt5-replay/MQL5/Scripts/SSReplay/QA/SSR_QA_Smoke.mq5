@@ -149,6 +149,31 @@ void Ok(const string what, const string detail)
 void No(const string what, const string detail)
   { g_fail++; Log(StringFormat("  FAIL  %-34s %s", what, detail)); }
 
+//+------------------------------------------------------------------+
+//| DO NOT PUT A CALL THAT CHANGES SOMETHING IN THE COND ARGUMENT.   |
+//|                                                                  |
+//| MQL5 does not promise the order it evaluates a call's arguments   |
+//| in, and in practice it builds `detail` BEFORE it runs `cond`. So  |
+//|                                                                  |
+//|   Check("it saves", mgr.Save(n), mgr.LastError());               |
+//|                                                                  |
+//| prints the error from the PREVIOUS call, and                     |
+//|                                                                  |
+//|   Check("...", lines.ArmSide(px,...), fmt(lines.SlPrice()));     |
+//|                                                                  |
+//| prints the stop from before it was armed. Six PASS lines in the   |
+//| v90 run came back with an empty detail and one printed a LONG     |
+//| setup under "the lines arm SHORT" - the checks were right and     |
+//| every one of their evidence lines was a lie.                      |
+//|                                                                  |
+//| So: run it first, keep the answer in a bool, pass the bool.       |
+//|                                                                  |
+//|   bool saved = mgr.Save(n);                                       |
+//|   Check("it saves", saved, mgr.LastError());                      |
+//|                                                                  |
+//| A read-only getter on both sides is fine - order cannot matter    |
+//| when nothing moves.                                               |
+//+------------------------------------------------------------------+
 bool Check(const string what, const bool cond, const string detail)
   {
    if(cond) Ok(what, detail); else No(what, detail);
@@ -491,7 +516,8 @@ void OnStart()
    //| read the file back, count what is in it.                          |
    //+------------------------------------------------------------------+
    CSSRFlightRecorder rec;
-   if(Check("the black box can open a file", rec.Open("smoke"), rec.Path()))
+   bool rec_open = rec.Open("smoke");
+   if(Check("the black box can open a file", rec_open, rec.Path()))
      {
       rec.Preamble(origin, rsym, win_start, win_end, 400, false, false,
                    SSR_INVALID_TIME, 30.0, 40);
@@ -585,7 +611,8 @@ void OnStart()
             StringFormat("equity %.2f -> %.2f after an hour of replay",
                          eq_before, acct.Equity()));
 
-      Check("it closes", acct.Close(ticket),
+      bool did_close = acct.Close(ticket);
+      Check("it closes", did_close,
             (acct.LastError() == "" ? "closed" : acct.LastError()));
       Check("and the books balance", acct.OpenCount() == 0 && acct.ClosedCount() == 1,
             StringFormat("%d open, %d closed", acct.OpenCount(), acct.ClosedCount()));
@@ -600,7 +627,8 @@ void OnStart()
       CSSRJournal jrn;
       jrn.Attach(GetPointer(acct));
       string html = "SSReplay-smoke-statement";
-      if(Check("the statement exports", jrn.ExportHtml(html, 2),
+      bool jrn_ok = jrn.ExportHtml(html, 2);
+      if(Check("the statement exports", jrn_ok,
                jrn.LastPath() + (jrn.LastError() == "" ? "" : "  " + jrn.LastError())))
         {
          int jh = FileOpen(jrn.LastPath(), FILE_READ | FILE_TXT | FILE_ANSI);
@@ -697,20 +725,20 @@ void OnStart()
       //| ever be built with a mouse. Arm short, apply a distance, and ask |
       //| whether the stop is still on the short side.                     |
       //+------------------------------------------------------------------+
+      bool armed_short = lines.ArmSide(lpx, 500, 2.0, false);
       Check("the lines arm SHORT with the stop above the price",
-            lines.ArmSide(lpx, 500, 2.0, false) && lines.SlPrice() > lpx &&
-            lines.TpPrice() < lpx,
-            StringFormat("price %s  sl %s  tp %s", DoubleToString(lpx, 2),
-                         DoubleToString(lines.SlPrice(), 2),
-                         DoubleToString(lines.TpPrice(), 2)));
+            armed_short && lines.SlPrice() > lpx && lines.TpPrice() < lpx,
+            StringFormat("price %s  sl %s  tp %s", DoubleToString(lpx, 5),
+                         DoubleToString(lines.SlPrice(), 5),
+                         DoubleToString(lines.TpPrice(), 5)));
 
       lines.SetStopPoints(lpx, 600);
       Check("and a stop distance does not flip it back to long",
             lines.SlPrice() > lpx && lines.TpPrice() < lpx,
             StringFormat("after SetStopPoints: sl %s  tp %s - below the price "
                          "here means a short can never be placed",
-                         DoubleToString(lines.SlPrice(), 2),
-                         DoubleToString(lines.TpPrice(), 2)));
+                         DoubleToString(lines.SlPrice(), 5),
+                         DoubleToString(lines.TpPrice(), 5)));
 
       //+------------------------------------------------------------------+
       //| AND A CLOSED TRADE STAYS ON THE CHART.                           |
@@ -808,15 +836,16 @@ void OnStart()
    SSRSessionSettings sset;
    sset.Init();
    string sname = "ssr-smoke-session";
-   if(Check("a session saves", smgr.Save(sname, sset),
+   bool saved = smgr.Save(sname, sset);
+   if(Check("a session saves", saved,
             (smgr.LastError() == "" ? smgr.LastPath() : smgr.LastError())))
      {
       Check("and the file is there afterwards", smgr.Exists(sname),
             smgr.LastPath());
 
       long r_start = 0, r_end = 0;
-      Check("and the window reads back",
-            smgr.ReadWindow(sname, 0, r_start, r_end) && r_end > r_start,
+      bool read_ok = smgr.ReadWindow(sname, 0, r_start, r_end);
+      Check("and the window reads back", read_ok && r_end > r_start,
             StringFormat("%s .. %s", SSRFormatMsc(r_start), SSRFormatMsc(r_end)));
 
       FileDelete(smgr.LastPath());
@@ -971,7 +1000,8 @@ void OnStart()
                StringFormat("ticket %d at %.2f lots%s", (int)t1, step * 2,
                             (t1 > 0 ? "" : " - " + acct.LastError()))))
         {
-         Check("half of it closes", port.ClosePartial(t1, 0.5),
+         bool halved = port.ClosePartial(t1, 0.5);
+         Check("half of it closes", halved,
                (port.TradeError() == "" ? "closed one step"
                 : port.TradeError()));
 
@@ -987,10 +1017,11 @@ void OnStart()
                seen1 && p1.IsOpen() && MathAbs(p1.volume - step) < step / 10.0,
                StringFormat("%.3f lots left of %.3f", p1.volume, step * 2));
 
-         Check("break-even puts the stop at the entry", port.BreakEven(t1),
-               (port.TradeError() == "" ? "" : port.TradeError()));
-         Check("a trailing distance reaches the open trade",
-               port.SetTrailing(250.0),
+         bool be_ok = port.BreakEven(t1);
+         Check("break-even puts the stop at the entry", be_ok,
+               (port.TradeError() == "" ? "stop moved" : port.TradeError()));
+         bool trail_ok = port.SetTrailing(250.0);
+         Check("a trailing distance reaches the open trade", trail_ok,
                (port.TradeError() == "" ? "250 pt" : port.TradeError()));
 
          seen1 = false;
@@ -1173,7 +1204,8 @@ void OnStart()
       CSSRJournal tj;
       tj.Attach(GetPointer(acct), GetPointer(stats));
       string tname = "SSReplay-smoke-tags";
-      if(Check("the statement exports with tags in it", tj.ExportHtml(tname, 2),
+      bool tj_ok = tj.ExportHtml(tname, 2);
+      if(Check("the statement exports with tags in it", tj_ok,
                tj.LastPath() + (tj.LastError() == "" ? "" : "  " + tj.LastError())))
         {
          //--- READ IT. A file of the right size with no breakdown in it
@@ -2039,7 +2071,8 @@ void OnStart()
                          unreadable));
 
       string out = "SSReplay\\class-smoke.html";
-      if(Check("the page is written", rep.Write(out),
+      bool page_written = rep.Write(out);
+      if(Check("the page is written", page_written,
                out + (rep.LastError() == "" ? "" : "  " + rep.LastError())))
         {
          string body = "";
@@ -2177,17 +2210,20 @@ void OnStart()
 
          //--- a market order with no price is still refused, and a
          //--- pending with no stop cannot be sized at all
+         bool no_stop = (pa.OpenPendingWithRisk(SSR_ORDER_BUY_LIMIT,
+                                               1.0, 99.0, 0.0) == 0);
          Check("a pending with no stop is refused, not guessed",
-               pa.OpenPendingWithRisk(SSR_ORDER_BUY_LIMIT, 1.0, 99.0, 0.0) == 0,
-               pa.LastError());
+               no_stop, pa.LastError());
+         bool not_pending = (pa.OpenPendingWithRisk(SSR_ORDER_BUY,
+                                                   1.0, 99.0, 98.0) == 0);
          Check("and a market type is not accepted as a pending",
-               pa.OpenPendingWithRisk(SSR_ORDER_BUY, 1.0, 99.0, 98.0) == 0,
-               pa.LastError());
+               not_pending, pa.LastError());
 
          //--- X on the row cancels it. The engine has always done this;
          //--- what is new is that the row exists to press.
+         bool cancelled = pa.Close(pt1);
          Check("cancelling it takes it off the books",
-               pa.Close(pt1) && pa.OpenCount() == 0,
+               cancelled && pa.OpenCount() == 0,
                StringFormat("%d open, %d closed after the cancel",
                             pa.OpenCount(), pa.ClosedCount()));
       }
@@ -2388,8 +2424,9 @@ void OnStart()
                StringFormat("host registers 9 with an evaluation running, "
                             "%d slots exist", SSR_MAX_OBSERVERS));
          CSSRTickObserver  over;
+         bool refused = !oc.AddObserver(GetPointer(over));
          Check("26d one too many is refused, with a reason",
-               !oc.AddObserver(GetPointer(over)) && oc.LastErrorText() != "",
+               refused && oc.LastErrorText() != "",
                oc.LastErrorText());
       }
 
