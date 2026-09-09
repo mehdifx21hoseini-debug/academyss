@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v102 2026-09-09  modal"
+#define SSR_BUILD "v103 2026-09-09  steady"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

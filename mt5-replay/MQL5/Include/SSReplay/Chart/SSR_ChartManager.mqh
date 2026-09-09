@@ -549,10 +549,30 @@ public:
 
       for(int i = 0; i < m_count; i++)
         {
-         //--- a chart the user scrolled back is theirs until they ask
-         //--- for it back. DetectScroll runs in Sync, which the owner
-         //--- calls immediately before this, so follow is current.
-         if(advanced && m_charts[i].follow && !m_charts[i].user_detached)
+         //+------------------------------------------------------------------+
+         //| SNAP ONLY WHEN THE VIEW HAS ACTUALLY FALLEN BEHIND.              |
+         //|                                                                  |
+         //| CHART_AUTOSCROLL is set on every chart this manager opens, and    |
+         //| it usually works. This navigate exists for the case where it      |
+         //| does not - a custom symbol written from an EA, where bars land    |
+         //| in the series and the window stays put.                           |
+         //|                                                                  |
+         //| Firing it on EVERY new bar made those two fight. Worse, "new      |
+         //| bar" is measured on M1 while the chart is usually M5 or higher,   |
+         //| so a view that was already exactly where it belonged got          |
+         //| re-anchored five times for every candle the user could see. That  |
+         //| is what "the chart jumps" is: not one bad jump, but a correct     |
+         //| position being re-asserted over and over while the terminal was   |
+         //| already easing towards it.                                        |
+         //|                                                                  |
+         //| ViewOffset already answers the only question worth asking - how   |
+         //| far from the end is this chart. Zero means the newest bar is on   |
+         //| screen and there is nothing to fix. It is the same number the     |
+         //| detach test uses, so the two cannot disagree about what "behind"  |
+         //| means.                                                            |
+         //+------------------------------------------------------------------+
+         if(advanced && m_charts[i].follow && !m_charts[i].user_detached &&
+            ViewOffset(m_charts[i].id) > 0)
            {
             ChartNavigate(m_charts[i].id, CHART_END, 0);
             m_charts[i].last_offset = 0;

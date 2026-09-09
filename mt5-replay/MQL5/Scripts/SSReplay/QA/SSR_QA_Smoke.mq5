@@ -583,6 +583,26 @@ void OnStart()
                             "are being written off screen.",
                             (int)away_off, (int)back_off, (int)mgr.Snaps()));
 
+      //+------------------------------------------------------------------+
+      //| A CHART ALREADY AT THE END IS NOT DRAGGED THERE AGAIN.           |
+      //|                                                                  |
+      //| The snap exists for the case where CHART_AUTOSCROLL does not hold |
+      //| on a custom symbol. Firing it on EVERY new bar made the two       |
+      //| fight - and "new bar" is measured on M1 while the chart is M5 or  |
+      //| higher, so a view that was exactly where it belonged got          |
+      //| re-anchored five times for every candle the user could see. That  |
+      //| is what "the chart jumps" was.                                    |
+      //+------------------------------------------------------------------+
+      long snaps_before = mgr.Snaps();
+      mgr.Sync();  mgr.Redraw(true);
+      mgr.Sync();  mgr.Redraw(true);
+      Check("a view already at the end is left alone",
+            mgr.Snaps() == snaps_before,
+            StringFormat("%d snap(s) over two redraws with the view at the "
+                         "newest bar - anything above zero is the terminal "
+                         "and this manager pulling the same view in turn",
+                         (int)(mgr.Snaps() - snaps_before)));
+
       Ok("manager redraws on demand", "Redraw(force) returned");
       ChartClose(probe);
      }
