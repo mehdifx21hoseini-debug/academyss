@@ -105,6 +105,8 @@ int SSRCommands(SSRCommand &out[])
    //--- View
    SSRAddCommand(out, i, "Keyboard shortcuts",        "View", SSR_CMD_KEYS);
    SSRAddCommand(out, i, "Collapse the panel",        "View", SSR_CMD_COLLAPSE);
+   SSRAddCommand(out, i, "Taller panel (more open positions)",
+                                                      "View", SSR_CMD_PANEL_SIZE);
    SSRAddCommand(out, i, "Move the panel to the next corner",
                                                       "View", SSR_CMD_NONE, "move");
 

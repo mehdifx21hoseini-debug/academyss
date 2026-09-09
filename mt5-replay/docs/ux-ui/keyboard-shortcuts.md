@@ -25,6 +25,7 @@ declared twice, and no card line exceeds MetaTrader's 63-character cut.
 | `−` / `Num −` | slower | `S` | saved sessions |
 | `0` | reset (asks first) | `F` | bring charts back to now |
 | `H` | this list | `D` | fidelity |
+| `A` | the session review | `P` | taller panel (12 open positions) |
 
 **Why `R` and `Tab`.** The hand that is trading owns them: drop the lines, drag
 them, take the trade. **Why `0` for reset:** it is not a letter, so a finger
@@ -50,7 +51,8 @@ reaching for the lines cannot destroy the session.
 | `Shift+→` / `Shift+←` | ten candles (alias of PgDn/PgUp) | planned |
 | `↑` `↓` | choose, inside the palette | **shipped, v105** |
 | `Enter` | run the selection | **shipped, v105** |
-| `A` | Analysis | planned, Phase 7 |
+| `A` | the session review | **shipped, v110** |
+| `P` | taller panel | **shipped, v112** |
 | `Esc` | close the top modal | **partially exists** (releases edit focus) |
 
 All additions go through `SSRAddKey` in the same table. Nothing is bound in two

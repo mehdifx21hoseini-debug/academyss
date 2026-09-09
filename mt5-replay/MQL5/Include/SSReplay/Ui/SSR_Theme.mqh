@@ -169,12 +169,29 @@
 //| a number nobody updated. Positions now ends at 193, Trade at 218. |
 //+------------------------------------------------------------------+
 #define SSR_SHEET_H        186
+
+//+------------------------------------------------------------------+
+//| THE TALL SHEET.                                                  |
+//|                                                                  |
+//| Seven more rows of the Positions list, at SSR_ROW_H + 1 each -   |
+//| the one sheet that was actually running out of room. It is not   |
+//| automatic: compact is a DEGRADATION forced by a chart with no    |
+//| space, and taking space is the opposite kind of decision, so it  |
+//| is asked for and remembered.                                     |
+//|                                                                  |
+//| Written as an offset rather than a second total, because a       |
+//| second total is a number that has to be kept in step by hand     |
+//| with the first - and this file has lost that argument before.    |
+//+------------------------------------------------------------------+
+#define SSR_SHEET_GROW     140
+#define SSR_SHEET_H_TALL   (SSR_SHEET_H + SSR_SHEET_GROW)
 #define SSR_PANEL_W        420
 //--- ADDED UP BY THE COMPILER, not by me. The sum above was a comment
 //--- for eleven builds and the two rows v69 added went straight past
 //--- the end of it; written this way, a taller sheet moves the frame
 //--- with it and there is no second number to forget.
 #define SSR_PANEL_H        (23 + 32 + 27 + 21 + 21 + SSR_SHEET_H + 18 + 8)
+#define SSR_PANEL_TALL_H   (SSR_PANEL_H + SSR_SHEET_GROW)
 //--- CAPTION 23 + CLOCK/PROGRESS 32 + TRANSPORT 27 + SPEED 21
 //--- + STATUS 18 + MARGIN 7. Everything a person touches while the
 //--- replay runs, and nothing they only consult.

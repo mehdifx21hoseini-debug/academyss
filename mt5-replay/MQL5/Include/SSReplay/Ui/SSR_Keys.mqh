@@ -38,6 +38,7 @@ enum ENUM_SSR_CMD
    SSR_CMD_LINES_FLIP,       // mirror them: long <-> short
    SSR_CMD_OPEN_LINES,       // take the trade the lines describe
    SSR_CMD_REVIEW,           // the session, after the session
+   SSR_CMD_PANEL_SIZE,       // standard sheet <-> tall sheet
    SSR_CMD_KEYS              // show the list of keys, on the chart
   };
 
@@ -69,6 +70,7 @@ enum ENUM_SSR_CMD
 #define SSR_VK_DOWN     40
 #define SSR_VK_K        75
 #define SSR_VK_A       65
+#define SSR_VK_P       80
 #define SSR_VK_ESCAPE  27
 #define SSR_VK_ENTER   13
 
@@ -205,6 +207,12 @@ int SSRKeyBindings(SSRKeyBinding &out[])
              SSR_CMD_REVIEW,
              "the session review", true);
 
+   //--- P for the panel itself. Costs nothing when the chart is too
+   //--- short - it says why rather than doing nothing.
+   SSRAddKey(out, i, SSR_VK_P, "P",
+             SSR_CMD_PANEL_SIZE,
+             "taller panel: 12 open positions instead of 5", true);
+
    SSRAddKey(out, i, SSR_VK_H, "H",
              SSR_CMD_KEYS,
              "this list", true);
@@ -254,6 +262,7 @@ string SSRCmdName(const ENUM_SSR_CMD c)
       case SSR_CMD_SESSIONS:         return "sessions";
       case SSR_CMD_OPEN_LINES:       return "take the trade";
       case SSR_CMD_REVIEW:           return "review";
+      case SSR_CMD_PANEL_SIZE:       return "panel size";
       case SSR_CMD_KEYS:             return "keys";
      }
    return "none";

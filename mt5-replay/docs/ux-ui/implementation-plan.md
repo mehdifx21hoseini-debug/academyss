@@ -36,7 +36,7 @@ This document set. No code changed.
   luck. Both now include what they use.
 - **Not yet used by any screen.** Phase 3 is the first consumer.
 
-### Phase 3 — Replay workspace  ◧ partly done
+### Phase 3 — Replay workspace ✅ complete
 - Panel mode **Pro** (rail + Analysis + palette entry). Compact and Standard
   unchanged.
 - **Command palette** (`Ctrl+K`): `OBJ_EDIT` + filtered `List`, built the way
@@ -54,22 +54,61 @@ This document set. No code changed.
   writes it in the chart's own corner, and repeating it would defeat Blind
   mode. New smoke check measures that the chips clear the buttons, which is
   the one row the frame test cannot police.
-- **Still open: Pro panel mode.** Deliberately not started - see below.
+- **Done: Pro panel mode.** Deliberately deferred until Phase 7 had
+  established how a sheet asks for space - see Phase 3b below.
 
-### Phase 3b — Pro panel mode  ◻ deferred, with a reason
+### Phase 3b — Pro panel mode ✅ complete
 
-Compact and Standard are height-driven and tested. Pro was specified as
-"Standard plus a persistent rail", but the rail is already always visible in
-Standard - so that version of Pro adds nothing a user would notice.
+The version specified — "Standard plus a persistent rail" — was not built,
+because the rail is **already always visible** in Standard: it would have
+added nothing a user could notice. What shipped is the version the deferral
+note named as worth building: **a taller sheet on a tall chart**.
 
-The version worth building is a **taller sheet on a tall chart**: Positions
-showing more than five rows, Stats showing more than ten of the forty-three
-measures. That is a real capability gain, but it means `SSR_SHEET_H` stops
-being a constant, every sheet has to ask how much room it has, and the layout
-test needs a second branch to measure the tall case.
-
-That is a phase, not a corner of one. It is scheduled after Phase 7, where
-the Analysis surface will have established how a sheet asks for space.
+- **`SSR_SHEET_H` stopped being a constant.** `SheetH()`, `BodyH()`,
+  `PosGroupH()` and `PosCap()` are the only four places that answer a height
+  question now; the frame, the corner snap, the drag repaint and six sheets
+  all read them. Nine places working the same number out separately would be
+  nine places that can be wrong by 140 pixels.
+- **Positions: five rows → twelve.** That was the sheet actually running out
+  of room — a trader scaling into a position runs out of rows long before
+  they run out of screen. The wire carries twelve (`SSR_POS_MAX`); how many
+  are *drawn* is the panel's decision and changes with its height, because a
+  port that knew how tall the panel was would be a layout decision taken one
+  layer below the layout.
+- **The cap has never been a trading cap** and still is not: `+N not shown`
+  moved onto the hint row, where it is legible — it used to be drawn three
+  pixels above the hint, so on a full list the two lines were printed over
+  each other, visible only in the one situation the line exists for.
+- **It is asked for, not automatic.** Compact is a *degradation* forced by a
+  chart with no space; taking space is the opposite kind of decision. `P`
+  toggles it, the palette offers it, and `panel.ini` remembers it.
+- **The wish and the fact are two flags.** `m_pro` is what the user asked
+  for and survives; `m_tall` is whether this chart can hold it. Folding them
+  into one would mean an afternoon on a laptop silently costing the setting.
+  A chart with no room says so on the status strip for four seconds — a key
+  that refuses silently is reported as a broken key.
+- **The Stats half of the original idea was superseded, not skipped.** "Stats
+  showing more than ten of the forty-three measures" is what Phase 7 built,
+  in a modal, where all forty-three fit and page. A second copy on a sheet
+  would be a second surface for the same numbers.
+- **Found while building it: the per-row close button was never a button.**
+  Every row drew its "no stop" note into `px<r>` and then its close button
+  into `px<r>`. `ObjectCreate` refuses a name that already exists, so
+  `ButtonC` found the *label*, wrote "X" over the note and moved it right.
+  `PollClicks` scans `OBJ_BUTTON`, so no press on it was ever seen —
+  **per-row close has not worked since it shipped**, and the entry spread
+  and "no stop" notes have never been on screen. The note is `pn<r>` now.
+- **Found while building it: the row dispatch matched a name of length 3.**
+  `px0`..`px9` — correct at five rows, silently wrong at twelve, where the
+  last two rows' buttons would have done nothing. The row number is parsed
+  digit by digit now, because `StringToInteger` answers 0 for anything it
+  cannot read and 0 is a valid row.
+- **Test: stage 39** checks the close button's object TYPE from the chart —
+  the only thing that would have caught the collision — measures the tall
+  sheet against the frame the panel drew, drives `P` through the key path
+  rather than calling the toggle, and asserts that shrinking sweeps the rows
+  the tall sheet drew.
+- 39 clean, 17 audits silent.
 
 ### Phase 4 — Setup / onboarding ✅ complete
 - Quick-start screen (F1) ahead of the wizard.

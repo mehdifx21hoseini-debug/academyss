@@ -337,7 +337,7 @@ public:
          //--- hunting the chart for its lines. Newest first, because the
          //--- trade being managed is almost always the trade just opened.
          int total = m_acct.Total();
-         for(int pi = total - 1; pi >= 0 && out.pos_rows < 5; pi--)
+         for(int pi = total - 1; pi >= 0 && out.pos_rows < SSR_POS_MAX; pi--)
            {
             SSRVirtualPosition vp;
             if(!m_acct.At(pi, vp))

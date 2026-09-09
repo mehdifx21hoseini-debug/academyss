@@ -20,6 +20,15 @@
 #include "../Common/SSR_Time.mqh"
 
 //+------------------------------------------------------------------+
+//| HOW MANY OPEN POSITIONS FIT ON THE WIRE.                         |
+//|                                                                  |
+//| Not how many the panel draws, and never how many may be open.    |
+//| The engine has no position limit and this must never become one; |
+//| when more exist than fit here, the panel says so.                |
+//+------------------------------------------------------------------+
+#define SSR_POS_MAX 12
+
+//+------------------------------------------------------------------+
 //| Everything the panel is allowed to know, flattened.              |
 //|                                                                  |
 //| Flat and pointer-free on purpose: an IPC port fills this from    |
@@ -164,18 +173,26 @@ struct SSRUiState
    int                prop_days_max;      // 0 = no deadline
    bool               prop_trailing;      // which base the total floor uses
 
-   //--- THE OPEN POSITIONS, as rows the panel can show and act on.
-   //--- Five is a display cap, not a trading cap: pos_rows says how
-   //--- many are shown, open_positions how many exist, and when they
-   //--- differ the panel says "+N more" instead of lying by omission.
+   //+------------------------------------------------------------------+
+   //| THE OPEN POSITIONS, as rows the panel can show and act on.       |
+   //|                                                                  |
+   //| Never a trading cap: pos_rows says how many are ON THE WIRE,     |
+   //| open_positions how many exist, and when they differ the panel    |
+   //| says "+N more" instead of lying by omission.                     |
+   //|                                                                  |
+   //| The wire carries twelve. How many are DRAWN is the panel's       |
+   //| decision and changes with the height of its sheet - which is     |
+   //| the point: a port that knew how tall the panel was would be a    |
+   //| layout decision taken one layer below the layout.                |
+   //+------------------------------------------------------------------+
    int                pos_rows;
-   long               pos_ticket[5];
-   string             pos_text[5];     // "BUY 1.00 @ 53513"
-   double             pos_pl[5];
+   long               pos_ticket[SSR_POS_MAX];
+   string             pos_text[SSR_POS_MAX];     // "BUY 1.00 @ 53513"
+   double             pos_pl[SSR_POS_MAX];
    //--- a row that has not filled yet. Half, break-even and a running
    //--- P/L all mean nothing on one, and offering them would be
    //--- offering three buttons that answer "refused".
-   bool               pos_pending[5];
+   bool               pos_pending[SSR_POS_MAX];
 
    //+------------------------------------------------------------------+
    //| EXECUTION TRANSPARENCY, PER POSITION.                            |
@@ -189,8 +206,8 @@ struct SSRUiState
    //| whether a fill was realistic. It is recorded on every fill and    |
    //| has never been shown anywhere but the exported statement.         |
    //+------------------------------------------------------------------+
-   bool               pos_no_stop[5];
-   double             pos_spread[5];
+   bool               pos_no_stop[SSR_POS_MAX];
+   double             pos_spread[SSR_POS_MAX];
 
    //+------------------------------------------------------------------+
    //| THE STOP AND TARGET ARE LINES, NOT NUMBERS.                      |
@@ -256,12 +273,14 @@ struct SSRUiState
       trade_symbol = ""; can_trade = false; tp_points = 0.0;
       strategy_text = "";
       pos_rows = 0;
-      for(int pi = 0; pi < 5; pi++)
+      //--- one loop. There were two, the second a leftover clearing three
+      //--- of the six fields the first had already cleared - harmless,
+      //--- and exactly the kind of thing that gets copied when the cap
+      //--- changes and then clears the wrong number of rows.
+      for(int pi = 0; pi < SSR_POS_MAX; pi++)
         { pos_ticket[pi] = 0; pos_text[pi] = ""; pos_pl[pi] = 0.0;
           pos_pending[pi] = false; pos_no_stop[pi] = false;
           pos_spread[pi] = 0.0; }
-      for(int i = 0; i < 5; i++)
-        { pos_ticket[i] = 0; pos_text[i] = ""; pos_pl[i] = 0.0; }
       lines_armed = false; sl_price = 0.0; tp_price = 0.0; line_long = true;
       bid = 0.0; ask = 0.0; price_digits = 2; spread_points = 0.0;
       lot_from_risk = 0.0; risk_money = 0.0; reward_money = 0.0; rr = 0.0;

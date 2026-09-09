@@ -47,7 +47,7 @@
 #include "SSR_Palette.mqh"
 #include "SSR_KeyCard.mqh"
 
-#define SSR_SLOTS 80
+#define SSR_SLOTS 128
 
 //+------------------------------------------------------------------+
 //| WHERE THE PANEL LIVES, remembered between sessions.              |
@@ -94,6 +94,20 @@ private:
    bool              m_collapsed;
    bool              m_closed;      // hidden entirely; one button brings it back
    bool              m_compact;     // the chart is too short for the full panel
+   //+------------------------------------------------------------------+
+   //| TWO FLAGS, BECAUSE A WISH AND A FACT ARE NOT THE SAME THING.     |
+   //|                                                                  |
+   //| m_pro is what the user asked for and is remembered across        |
+   //| sessions. m_tall is whether they are getting it on THIS chart.   |
+   //| Folding them into one would mean a chart too short to hold the   |
+   //| tall panel silently forgetting the preference - so that moving   |
+   //| the terminal to a laptop for an afternoon would cost the setting |
+   //| permanently, with nothing said.                                   |
+   //+------------------------------------------------------------------+
+   bool              m_pro;         // asked for
+   bool              m_tall;        // and there is room for it
+   string            m_pro_why;     // why not, when there is not
+   uint              m_pro_said;    // when the user last asked
    bool              m_dragging;
    int               m_drag_dx, m_drag_dy;
 
@@ -230,6 +244,22 @@ private:
       return StringSubstr(s, 0, cap - 1) + "~";
      }
 
+   //--- "" is not a number. StringToInteger would answer 0 for it, and
+   //--- 0 is a valid row.
+   bool              AllDigits(const string t)
+     {
+      int n = StringLen(t);
+      if(n <= 0)
+         return false;
+      for(int i = 0; i < n; i++)
+        {
+         ushort c = StringGetCharacter(t, i);
+         if(c < '0' || c > '9')
+            return false;
+        }
+      return true;
+     }
+
    string            Price(const double v)
      {
       int d = m_state.price_digits;
@@ -244,6 +274,7 @@ public:
        m_x(12), m_y(24), m_saved_mouse_move(0), m_saved_mouse_scroll(1),
        m_saved_quick_nav(1), m_saved_key_control(1),
        m_saved(false), m_collapsed(false), m_closed(false), m_compact(false),
+       m_pro(false), m_tall(false), m_pro_why(""), m_pro_said(0),
        m_pending_cmd(SSR_CMD_NONE),
        m_last_ticket(0), m_toast_text(""), m_toast_until(0),
        m_dragging(false),
@@ -375,6 +406,38 @@ public:
    //| a resized terminal from stranding the panel off the edge, where   |
    //| there is no way to get it back.                                   |
    //+------------------------------------------------------------------+
+   //+------------------------------------------------------------------+
+   //| ONE PLACE ANSWERS "HOW TALL IS THE SHEET".                       |
+   //|                                                                  |
+   //| Six sheets, the panel frame, the corner snap and the drag ghost   |
+   //| all need this number. When it was a constant they all read the    |
+   //| same one; the moment it varies, every one of them that worked it  |
+   //| out separately would be a place that can be wrong by 140 pixels.  |
+   //+------------------------------------------------------------------+
+   int               SheetH(void)
+     { return (m_tall ? SSR_SHEET_H_TALL : SSR_SHEET_H); }
+
+   int               BodyH(void)
+     {
+      if(m_collapsed) return SSR_HEADER_H + 2;
+      if(m_compact)   return SSR_PANEL_COMPACT_H;
+      return (m_tall ? SSR_PANEL_TALL_H : SSR_PANEL_H);
+     }
+
+   //--- how many position rows this sheet can hold, derived from the
+   //--- height rather than written beside it. A group that grows takes
+   //--- the extra rows with it and no second number has to be edited.
+   int               PosCap(void)
+     {
+      int rows = (PosGroupH() - 22) / (SSR_ROW_H + 1);
+      if(rows > SSR_POS_MAX) rows = SSR_POS_MAX;
+      if(rows < 1)           rows = 1;
+      return rows;
+     }
+
+   int               PosGroupH(void)
+     { return (m_tall ? 134 + SSR_SHEET_GROW : 134); }
+
    void              ClampToChart(const int W, const int H)
      {
       int cw = (int)ChartGetInteger(m_chart, CHART_WIDTH_IN_PIXELS);
@@ -430,6 +493,7 @@ public:
       f.SetInt("corner",    m_corner);
       f.SetInt("collapsed", m_collapsed ? 1 : 0);
       f.SetInt("tab",       m_tab);
+      f.SetInt("pro",       m_pro ? 1 : 0);
       f.Close();
       return true;
      }
@@ -471,6 +535,9 @@ public:
       int tab = f.GetInt("tab", m_tab);
       if(tab >= 0 && tab < SSR_TAB_MAX)
          m_tab = tab;
+      //--- the WISH is restored; whether this chart can hold it is
+      //--- decided on the first painted frame, not here
+      m_pro = (f.GetInt("pro", m_pro ? 1 : 0) != 0);
       return true;
      }
 
@@ -480,7 +547,7 @@ public:
      {
       m_corner = (m_corner + 1) % 4;
       int W = SSR_PANEL_W;
-      int H = m_collapsed ? SSR_HEADER_H + 2 : SSR_PANEL_H;
+      int H = BodyH();
       int cw = (int)ChartGetInteger(m_chart, CHART_WIDTH_IN_PIXELS);
       int ch = (int)ChartGetInteger(m_chart, CHART_HEIGHT_IN_PIXELS);
       if(cw < W + 24) cw = W + 24;
@@ -579,8 +646,34 @@ public:
                                   "the tabs back" : ""));
         }
 
-      int H = m_collapsed ? SSR_HEADER_H + 2
-                          : (m_compact ? SSR_PANEL_COMPACT_H : SSR_PANEL_H);
+      //+------------------------------------------------------------------+
+      //| THE WISH, AND WHETHER THIS CHART CAN GRANT IT.                   |
+      //|                                                                  |
+      //| Asked for once and remembered; checked against the chart on       |
+      //| every frame, because the chart is resized by the user at any      |
+      //| moment and a panel that is taller than what it stands on is an    |
+      //| invisible panel - the exact failure compact mode exists to stop.  |
+      //|                                                                  |
+      //| Refused silently would be worse than not offered: the key would   |
+      //| look dead. m_pro_why carries the reason to the status strip.      |
+      //+------------------------------------------------------------------+
+      bool was_tall = m_tall;
+      bool room     = (chart_h <= 0 || chart_h >= SSR_PANEL_TALL_H + 24);
+      m_tall    = (m_pro && !m_compact && room);
+      m_pro_why = (m_pro && !m_tall
+                   ? StringFormat("tall panel needs %d px, chart is %d",
+                                  SSR_PANEL_TALL_H + 24, chart_h)
+                   : "");
+      if(m_tall != was_tall)
+        {
+         //--- the sheet shrank under objects that were drawn for a taller
+         //--- one. Nothing repaints them away, so they are swept.
+         HideSheets();
+         PrintFormat("[panel] %s sheet - %d position rows",
+                     (m_tall ? "tall" : "standard"), PosCap());
+        }
+
+      int H = BodyH();
       ClampToChart(W, H);
       int x = m_x, y = m_y;
 
@@ -615,6 +708,9 @@ public:
          DrawSide(x + SSR_PAD, cy + 4);
          DrawSheet(x + SSR_PAD + SSR_SIDE_W + SSR_GAP, cy + 4,
                    W - 2 * SSR_PAD - SSR_SIDE_W - SSR_GAP);
+         //--- the side column is six buttons whatever the height, so a
+         //--- tall panel leaves it alone rather than stretching it into
+         //--- six buttons with an inch of nothing between them
         }
       DrawStatus(x, y + H - SSR_STATUS_H - 1, W);
 
@@ -1048,11 +1144,15 @@ private:
          m_w.Remove(mid + "_fill");
          m_w.Remove(mid + "_lim");
         }
-      for(int r = 0; r < 5; r++)
+      //--- SSR_POS_MAX, not the current cap: switching from the tall
+      //--- sheet to the standard one has to sweep the rows the tall one
+      //--- drew, and the cap has already changed by the time this runs
+      for(int r = 0; r < SSR_POS_MAX; r++)
         {
          string t = IntegerToString(r);
          m_w.Remove("pr" + t);
          m_w.Remove("pl" + t);
+         m_w.Remove("pn" + t);
          m_w.Remove("ph" + t);
          m_w.Remove("pb" + t);
          m_w.Remove("px" + t);
@@ -1220,9 +1320,13 @@ private:
    //----------------------------------------------------------------
    void              SheetPositions(const int x, const int y, const int w)
      {
-      m_w.Group("g1", x, y, w, 134, "Open positions");
+      int gh    = PosGroupH();
+      int cap   = PosCap();
+      int shown = (m_state.pos_rows < cap ? m_state.pos_rows : cap);
 
-      if(m_state.pos_rows <= 0)
+      m_w.Group("g1", x, y, w, gh, "Open positions");
+
+      if(shown <= 0)
         {
          Text(20, "posempty", x + 8, y + 16,
               "Nothing open. Place the lines (L), drag the stop, press Open.",
@@ -1233,9 +1337,9 @@ private:
          //--- one row per position: side and size, its P/L in money,
          //--- and its own close button. Managed from the panel, not by
          //--- hunting the chart for the right dashed line.
-         for(int r = 0; r < m_state.pos_rows; r++)
+         for(int r = 0; r < shown; r++)
            {
-            int ry = y + 14 + r * 20;
+            int ry = y + 14 + r * (SSR_ROW_H + 1);
             string t = IntegerToString(r);
             //+------------------------------------------------------------------+
             //| A TRADE WITH NO STOP SAYS SO, WHILE IT CAN STILL BE FIXED.       |
@@ -1250,6 +1354,14 @@ private:
             //| The spread it was entered at rides beside it, because that is the |
             //| number that says whether the fill was realistic, and it has never |
             //| been visible anywhere but the exported statement.                 |
+            //|                                                                  |
+            //| IT IS "pn", NOT "px". It was px - the same object name as the     |
+            //| close button four lines below. ObjectCreate refuses a name that   |
+            //| already exists, so the button was never created: ButtonC found    |
+            //| the LABEL, set its text to "X" and moved it to the right-hand      |
+            //| column. The note was overwritten every frame and never seen, and  |
+            //| the X was a label - so PollClicks, which scans OBJ_BUTTON, never  |
+            //| saw a press on it. Per-row close has not worked since it shipped. |
             //+------------------------------------------------------------------+
             string note = "";
             if(!m_state.pos_pending[r] && m_state.pos_no_stop[r])
@@ -1257,18 +1369,18 @@ private:
             else if(!m_state.pos_pending[r] && m_state.pos_spread[r] > 0.0)
                note = StringFormat("  sp %.1f", m_state.pos_spread[r]);
 
-            Text(20 + r, "pr" + t, x + 8, ry + 3, m_state.pos_text[r],
+            Text(80 + r, "pr" + t, x + 8, ry + 3, m_state.pos_text[r],
                  SSR_C_TEXT);
-            Text(35 + r, "px" + t, x + 8 + 128, ry + 3, note,
+            Text(104 + r, "pn" + t, x + 8 + 128, ry + 3, note,
                  (m_state.pos_no_stop[r] ? SSR_C_STOP : SSR_C_TEXT_FAINT),
                  SSR_FS_SMALL);
             //--- a pending has no result yet, and 0.00 beside real
             //--- positions reads as break-even rather than as "not yet"
             if(m_state.pos_pending[r])
-               Text(25 + r, "pl" + t, x + w - 140, ry + 3, "waiting",
+               Text(92 + r, "pl" + t, x + w - 140, ry + 3, "waiting",
                     SSR_C_HOLD);
             else
-               Text(25 + r, "pl" + t, x + w - 140, ry + 3,
+               Text(92 + r, "pl" + t, x + w - 140, ry + 3,
                     Money(m_state.pos_pl[r], true),
                     m_state.pos_pl[r] >= 0.0 ? SSR_C_RUN : SSR_C_STOP);
 
@@ -1299,12 +1411,6 @@ private:
             m_w.ButtonC("px" + t, x + w - 26, ry, 18, 17, "X",
                         SSR_C_BTN, SSR_C_BTN_EDGE, SSR_C_STOP, SSR_FS_SMALL);
            }
-         //--- the cap is a display cap; when it hides trades, say so
-         if(m_state.open_positions > m_state.pos_rows)
-            Text(30, "posmore", x + 8, y + 116,
-                 StringFormat("+%d more - Close all still closes everything",
-                              m_state.open_positions - m_state.pos_rows),
-                 SSR_C_HOLD, SSR_FS_SMALL);
         }
 
       //--- the hint's line is also where a refusal goes. The Trade sheet
@@ -1312,15 +1418,31 @@ private:
       //--- so "too small to split at this lot step" would otherwise only
       //--- reach the log - and a button that does nothing visible is a
       //--- button the user reports as broken.
+      int hy = y + gh - 15;
       if(m_port != NULL && m_port.TradeError() != "")
-         Text(31, "poshint", x + 8, y + 119, m_port.TradeError(),
+         Text(31, "poshint", x + 8, hy, m_port.TradeError(),
               SSR_C_STOP, SSR_FS_SMALL);
       else
-         Text(31, "poshint", x + 8, y + 119,
-              "H halves   B stop to entry   X closes, or cancels an order",
+         Text(31, "poshint", x + 8, hy,
+              "H halves   B stop to entry   X closes",
               SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
-      int by = y + 138;
+      //+------------------------------------------------------------------+
+      //| THE CAP IS A DISPLAY CAP, AND IT SAYS SO ON THE SAME ROW.        |
+      //|                                                                  |
+      //| It used to sit three pixels above the hint, which on a full list  |
+      //| meant the two lines were drawn over each other - visible only in  |
+      //| the one situation the line exists for. It shares the hint's row   |
+      //| now, at the far end, where nothing else is.                       |
+      //+------------------------------------------------------------------+
+      if(m_state.open_positions > shown)
+         Text(30, "posmore", x + w - 92, hy,
+              StringFormat("+%d not shown", m_state.open_positions - shown),
+              SSR_C_HOLD, SSR_FS_SMALL);
+      else
+         m_w.Remove("posmore");
+
+      int by = y + gh + 4;
       int bw = (w - SSR_GAP) / 2;
       m_w.Button("be",   x, by, bw, SSR_BTN_H, "Break-even all",
                  false, m_state.open_positions > 0);
@@ -1605,6 +1727,29 @@ private:
       m_w.Hide("stopen",  false);
       m_w.Hide("stspread",false);
       m_w.Hide("stfid",   false);
+
+      //+------------------------------------------------------------------+
+      //| A REFUSED PANEL SIZE SAYS WHY, IN THE SAME PLACE.                |
+      //|                                                                  |
+      //| P on a chart with no room for the tall panel would otherwise be  |
+      //| a key that did nothing at all - which is the one outcome a user  |
+      //| reports as a bug rather than as a limit. The wish is kept; only  |
+      //| this chart cannot honour it, and the line says so with both      |
+      //| numbers rather than "not enough room".                            |
+      //+------------------------------------------------------------------+
+      //--- and only for as long as a warning is worth a balance: this is
+      //--- the answer to a keypress, not a standing condition, and the
+      //--- five numbers it displaces are wanted the rest of the time
+      if(m_pro_why != "" && GetTickCount() - m_pro_said < SSR_CONFIRM_MS)
+        {
+         Text(50, "stbal", x + SSR_PAD, y + 4, m_pro_why,
+              SSR_C_HOLD, SSR_FS_SMALL);
+         m_w.Hide("stflt",   true);
+         m_w.Hide("stopen",  true);
+         m_w.Hide("stspread",true);
+         m_w.Hide("stfid",   true);
+         return;
+        }
 
       //--- A REFUSED ORDER TAKES THE STRIP, like the reset question. It
       //--- is the answer to something the user just pressed, and it is
@@ -1911,6 +2056,26 @@ public:
             SavePlace();
             Render();
             return true;
+
+         //+------------------------------------------------------------------+
+         //| THE WISH IS ALWAYS GRANTED; THE CHART DECIDES THE REST.          |
+         //|                                                                  |
+         //| m_pro flips whatever the chart can hold, so the preference        |
+         //| survives an afternoon on a laptop. Render works out whether       |
+         //| there is room and puts the reason in the status strip when there  |
+         //| is not - which is the difference between a key that refused and   |
+         //| a key that is broken.                                             |
+         //+------------------------------------------------------------------+
+         case SSR_CMD_PANEL_SIZE:
+           {
+            m_pro      = !m_pro;
+            m_pro_said = GetTickCount();
+            SavePlace();
+            Render();
+            //--- true either way: the command RAN. Whether the chart could
+            //--- honour it is a separate fact, and it is on the strip.
+            return true;
+           }
         }
       return false;
      }
@@ -2191,13 +2356,33 @@ public:
       //| does nothing, which is the right answer - it is better to miss a  |
       //| click than to close a position the user was not looking at.       |
       //+------------------------------------------------------------------+
-      if(StringLen(what) == 3 && StringSubstr(what, 0, 1) == "p" &&
+      //+------------------------------------------------------------------+
+      //| THE ROW NUMBER IS PARSED, NOT ASSUMED TO BE ONE DIGIT.           |
+      //|                                                                  |
+      //| This was StringLen(what) == 3, which is "px0".."px9" - correct    |
+      //| while the sheet held five rows and silently wrong the moment it   |
+      //| held twelve: px10 and px11 would have fallen through to whatever  |
+      //| matched next, and the close button on the last two rows of a full |
+      //| list would have done nothing.                                     |
+      //|                                                                  |
+      //| Every digit is checked rather than handed to StringToInteger,     |
+      //| which answers 0 for anything it cannot read - and 0 is a row      |
+      //| number, so a name that merely started "px" would have closed the  |
+      //| FIRST position instead of being ignored.                          |
+      //+------------------------------------------------------------------+
+      if(StringLen(what) >= 3 && StringSubstr(what, 0, 1) == "p" &&
          (StringSubstr(what, 1, 1) == "x" || StringSubstr(what, 1, 1) == "h" ||
-          StringSubstr(what, 1, 1) == "b"))
+          StringSubstr(what, 1, 1) == "b") &&
+         AllDigits(StringSubstr(what, 2)))
         {
          string act = StringSubstr(what, 1, 1);
          int    r   = (int)StringToInteger(StringSubstr(what, 2));
-         if(m_port == NULL || r < 0 || r >= m_state.pos_rows)
+         //--- against what is DRAWN, not what is on the wire. The wire
+         //--- carries twelve and the standard sheet shows five; a row
+         //--- the user cannot see is a row they cannot have aimed at.
+         int    cap = PosCap();
+         int    live = (m_state.pos_rows < cap ? m_state.pos_rows : cap);
+         if(m_port == NULL || r < 0 || r >= live)
             return SSR_CMD_NONE;
 
          long   tk = m_state.pos_ticket[r];
@@ -2508,6 +2693,15 @@ public:
    //--- decided by the chart it is standing on, so a test cannot pick
    //--- it - it can only ask which one it got and measure THAT one.
    bool              IsCompact(void)        { return m_compact; }
+
+   //--- read-only seams. A test cannot read a chart label, but it can
+   //--- ask the panel what it believes it is doing - and the wish and
+   //--- the fact are two different questions, which is the whole point
+   //--- of there being two flags.
+   bool              IsPro(void)            { return m_pro; }
+   bool              IsTall(void)           { return m_tall; }
+   int               RowCap(void)           { return PosCap(); }
+   int               PanelH(void)           { return BodyH(); }
   };
 
 #endif // SSR_PANEL_MQH

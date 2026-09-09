@@ -4160,6 +4160,263 @@ void OnStart()
         }
    }
 
+   //+------------------------------------------------------------------+
+   //| 39. THE TALL PANEL, AND A CLOSE BUTTON THAT WAS NEVER A BUTTON.  |
+   //|                                                                  |
+   //| The Positions sheet held five rows because the sheet was 186 px   |
+   //| and the sheet was 186 px because SSR_SHEET_H was a constant. A    |
+   //| trader scaling into a position runs out of rows long before they  |
+   //| run out of screen, and the panel had no way to use the screen.    |
+   //|                                                                  |
+   //| Writing that turned up something worse. Every row drew its "no    |
+   //| stop" note into an object called px<r> and then drew its CLOSE    |
+   //| BUTTON into an object called px<r>. ObjectCreate refuses a name   |
+   //| that already exists, so the button was never created: ButtonC     |
+   //| found the label, wrote "X" over the note and moved it right.      |
+   //| PollClicks scans OBJ_BUTTON, so no press on it was ever seen -    |
+   //| per-row close has not worked since it shipped, and the spread and |
+   //| "no stop" notes have never once been on screen.                   |
+   //|                                                                  |
+   //| Both are checked here from the CHART, by object type, because     |
+   //| that is the only thing that would have caught it.                 |
+   //+------------------------------------------------------------------+
+   {
+      Step("39 the tall panel");
+
+      long tchart = ChartOpen(rsym, PERIOD_M1);
+      int  tch    = (int)ChartGetInteger(tchart, CHART_HEIGHT_IN_PIXELS);
+      if(Check("39 a chart for the tall panel", tchart != 0, rsym))
+        {
+         CSSRTradingEngine tacct;
+         tacct.SetBalance(100000.0);
+         tacct.OnSessionStart(rsym,
+                              (int)SymbolInfoInteger(rsym, SYMBOL_DIGITS),
+                              SymbolInfoDouble(rsym, SYMBOL_POINT), 0);
+
+         MqlTick tt[1];
+         double tpt = SymbolInfoDouble(rsym, SYMBOL_POINT);
+         if(tpt <= 0.0) tpt = 0.00001;
+         double tbase = SymbolInfoDouble(rsym, SYMBOL_BID);
+         if(tbase <= 0.0) tbase = 10000.0 * tpt;
+         tt[0].bid = tbase; tt[0].ask = tbase + 10.0 * tpt;
+         tt[0].time_msc = 1000; tt[0].last = tbase;
+         tt[0].volume = 1; tt[0].flags = 0;
+         tacct.OnTicks(tt, 1);
+
+         //--- twelve, so the wire is full and the standard sheet has to
+         //--- admit it is hiding some
+         int opened = 0;
+         for(int i = 0; i < 12; i++)
+            if(tacct.Open(SSR_ORDER_BUY, 0.01) > 0)
+               opened++;
+
+         CSSRReplayGroup tgroup;
+         tgroup.Add(GetPointer(ctrl));
+         CSSRGroupPort tport;
+         tport.Attach(GetPointer(tgroup));
+         tport.AttachAccount(GetPointer(tacct));
+
+         CSSRPanel tp;
+         tp.Create(tchart, GetPointer(tport), "SSRT_");
+         tp.Render();
+
+         //--- THE TEST CHECKS ITS OWN EYES FIRST. Everything below is
+         //--- about a list of twelve; without twelve it would be about
+         //--- nothing, and would pass.
+         if(!Check("39 twelve positions to look at", opened == 12,
+                   StringFormat("%d opened", opened)))
+           {
+            tacct.CloseAll();
+            tp.Destroy();
+            ChartClose(tchart);
+           }
+         else if(tp.IsCompact())
+           {
+            Note("39 the tall panel was not measured",
+                 StringFormat("this chart is %d px and compact mode has no "
+                              "sheet at all - close the Toolbox (Ctrl+T) and "
+                              "re-run", tch));
+            tacct.CloseAll();
+            tp.Destroy();
+            ChartClose(tchart);
+           }
+         else
+           {
+            tp.Dispatch("tab1");            // Positions
+            tp.Render();
+
+            //+------------------------------------------------------------------+
+            //| THE BUG. A close button that is a label is a button that cannot   |
+            //| be pressed, and it looks completely normal on the chart.          |
+            //+------------------------------------------------------------------+
+            Check("39 the per-row close is a BUTTON, not a label wearing an X",
+                  ObjectFind(tchart, "SSRT_px0") >= 0 &&
+                  ObjectGetInteger(tchart, "SSRT_px0", OBJPROP_TYPE) == OBJ_BUTTON,
+                  "PollClicks scans OBJ_BUTTON; a label named px0 is a close "
+                  "button no press can ever reach");
+
+            Check("39 and the row note has an object of its own",
+                  ObjectFind(tchart, "SSRT_pn0") >= 0 &&
+                  ObjectGetInteger(tchart, "SSRT_pn0", OBJPROP_TYPE) == OBJ_LABEL,
+                  "'no stop' and the entry spread were written into the same "
+                  "object the X was, and overwritten every frame");
+
+            //--- standard first: five drawn out of twelve, and it says so
+            int cap_std = tp.RowCap();
+            Check("39 the standard sheet shows five",
+                  cap_std == 5, StringFormat("%d rows", cap_std));
+            Check("39 and admits the other seven exist",
+                  ObjectFind(tchart, "SSRT_posmore") >= 0,
+                  "a display cap that hides trades silently is a panel "
+                  "lying by omission");
+            Check("39 the sixth row is not drawn",
+                  ObjectFind(tchart, "SSRT_pr5") < 0,
+                  "row 5 of a five-row sheet would be drawn over the hint");
+
+            int h_std = tp.PanelH();
+
+            //+------------------------------------------------------------------+
+            //| P, THROUGH THE KEY PATH - not by calling the toggle. A binding    |
+            //| that exists in the table and is not reachable from a keypress is  |
+            //| a key the card promises and the panel ignores.                    |
+            //+------------------------------------------------------------------+
+            Check("39 P is bound to the panel size",
+                  SSRKeyToCommand(SSR_VK_P) == SSR_CMD_PANEL_SIZE,
+                  SSRCmdName(SSRKeyToCommand(SSR_VK_P)));
+
+            //--- OnEvent takes lparam BY REFERENCE, so the key code has
+            //--- to be a variable. A macro cannot bind to a const long&.
+            double dz  = 0.0;
+            long   vkp = SSR_VK_P;
+            tp.OnEvent(CHARTEVENT_KEYDOWN, vkp, dz, "");
+            tp.Render();
+
+            Check("39 the wish is granted whatever the chart can hold",
+                  tp.IsPro(),
+                  "kept even where it cannot be honoured, so an afternoon on "
+                  "a laptop does not cost the setting");
+
+            if(tch > 0 && tch < SSR_PANEL_TALL_H + 24)
+              {
+               //+------------------------------------------------------------------+
+               //| NO ROOM IS A RESULT, NOT A FAILURE.                              |
+               //+------------------------------------------------------------------+
+               Check("39 a chart with no room does not grow the panel anyway",
+                     !tp.IsTall() && tp.PanelH() == h_std,
+                     StringFormat("chart %d px, tall panel needs %d - a panel "
+                                  "taller than its chart is an invisible panel",
+                                  tch, SSR_PANEL_TALL_H + 24));
+               Note("39 the tall layout was not measured",
+                    StringFormat("this chart is %d px and the tall panel needs "
+                                 "%d - make the chart taller and re-run",
+                                 tch, SSR_PANEL_TALL_H + 24));
+              }
+            else
+              {
+               Check("39 the sheet grows by exactly what the constant says",
+                     tp.IsTall() && tp.PanelH() == h_std + SSR_SHEET_GROW,
+                     StringFormat("%d px -> %d px", h_std, tp.PanelH()));
+
+               int cap_tall = tp.RowCap();
+               Check("39 and the extra height becomes rows",
+                     cap_tall == SSR_POS_MAX,
+                     StringFormat("%d rows, up from %d", cap_tall, cap_std));
+
+               Check("39 all twelve are drawn",
+                     ObjectFind(tchart, "SSRT_pr11") >= 0 &&
+                     ObjectFind(tchart, "SSRT_px11") >= 0,
+                     "the last row is the one a five-row cap was hiding");
+
+               Check("39 and nothing is hidden any more, so nothing says so",
+                     ObjectFind(tchart, "SSRT_posmore") < 0,
+                     "'+N not shown' with nothing not shown is a line that "
+                     "teaches the user to ignore it");
+
+               //+------------------------------------------------------------------+
+               //| TWO DIGITS. The dispatch matched a name of length THREE, which   |
+               //| is px0..px9 - correct on a five-row sheet and silently wrong on  |
+               //| a twelve-row one, where the last two rows' buttons would have    |
+               //| done nothing at all.                                              |
+               //+------------------------------------------------------------------+
+               long last = 0;
+               int  before = tacct.OpenCount();
+               //--- whichever ticket row 11 is showing; read from the state
+               //--- the panel drew, not guessed from the order they opened
+               SSRUiState ts;
+               if(tport.ReadState(ts) && ts.pos_rows >= 12)
+                  last = ts.pos_ticket[11];
+               tp.Dispatch("px11");
+               Check("39 the last row's close button reaches the last row",
+                     last > 0 && tacct.OpenCount() == before - 1,
+                     StringFormat("#%d closed: %d open, was %d",
+                                  (int)last, tacct.OpenCount(), before));
+
+               //--- and a name that merely starts "px" closes nothing.
+               //--- StringToInteger answers 0 for anything it cannot read,
+               //--- and 0 is a row number.
+               int now_open = tacct.OpenCount();
+               tp.Dispatch("pxq");
+               Check("39 and a name that is not a row closes nothing",
+                     tacct.OpenCount() == now_open,
+                     StringFormat("%d open, unchanged - 'not a number' must "
+                                  "not resolve to row zero", tacct.OpenCount()));
+
+               //+------------------------------------------------------------------+
+               //| THE FRAME, on the sheet that just grew.                          |
+               //+------------------------------------------------------------------+
+               tp.Render();
+               int f_top = 0, f_bottom = 0, deepest = 0;
+               string deep_name = "";
+               int all = ObjectsTotal(tchart, -1, -1);
+               for(int i = 0; i < all; i++)
+                 {
+                  string nm = ObjectName(tchart, i, -1, -1);
+                  if(StringFind(nm, "SSRT_") != 0)
+                     continue;
+                  int oy = (int)ObjectGetInteger(tchart, nm, OBJPROP_YDISTANCE);
+                  int oh = (int)ObjectGetInteger(tchart, nm, OBJPROP_YSIZE);
+                  if(ObjectGetInteger(tchart, nm, OBJPROP_TYPE) == OBJ_LABEL)
+                     oh = 12;
+                  if(nm == "SSRT_bg")
+                    { f_top = oy; f_bottom = oy + oh; continue; }
+                  if(oy + oh > deepest)
+                    { deepest = oy + oh; deep_name = nm; }
+                 }
+               if(Check("39 the tall panel drew a frame to measure against",
+                        f_bottom > f_top && deep_name != "",
+                        StringFormat("frame %d..%d px", f_top, f_bottom)))
+                  Check("39 and twelve rows stay inside it",
+                        deepest <= f_bottom,
+                        StringFormat("deepest control %s ends at %d, frame "
+                                     "ends at %d (%d px %s)",
+                                     StringSubstr(deep_name, 5), deepest,
+                                     f_bottom,
+                                     (int)MathAbs(f_bottom - deepest),
+                                     (deepest <= f_bottom
+                                      ? "spare"
+                                      : "OVER - raise SSR_SHEET_GROW")));
+
+               //--- and back. The rows the tall sheet drew have to GO:
+               //--- nothing repaints an object nobody draws any more.
+               dz  = 0.0;
+               vkp = SSR_VK_P;
+               tp.OnEvent(CHARTEVENT_KEYDOWN, vkp, dz, "");
+               tp.Render();
+               Check("39 shrinking sweeps the rows it can no longer hold",
+                     !tp.IsTall() && tp.PanelH() == h_std &&
+                     ObjectFind(tchart, "SSRT_pr11") < 0 &&
+                     ObjectFind(tchart, "SSRT_px11") < 0,
+                     "a row left behind by a shrinking sheet is drawn over "
+                     "the chart forever");
+              }
+
+            tacct.CloseAll();
+            tp.Destroy();
+            ChartClose(tchart);
+           }
+        }
+   }
+
    ctrl.Release();
    Cleanup(rsym);
    Done();
