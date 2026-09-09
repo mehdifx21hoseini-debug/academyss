@@ -257,6 +257,22 @@ bool Check(const string what, const bool cond, const string detail)
 void Note(const string what, const string detail)
   { Log(StringFormat("  NOTE  %-34s %s", what, detail)); }
 
+//+------------------------------------------------------------------+
+//| A BREADCRUMB BETWEEN TWO CHECKS.                                 |
+//|                                                                  |
+//| The chart shows the last line logged, so a freeze is located to   |
+//| the gap AFTER it. Where that gap holds several terminal calls,    |
+//| "somewhere in stage 26" is not an answer - and stage 26 is where  |
+//| EURUSD@ stops, at line 152, seven seconds in, with the script     |
+//| still attached to the chart. Still attached means blocked inside  |
+//| a call, not killed by a runtime error: a script that dies is      |
+//| removed from the chart.                                           |
+//|                                                                  |
+//| These name the individual call, so the next freeze names it too.  |
+//+------------------------------------------------------------------+
+void Step(const string where)
+  { Log("  ..    " + where); }
+
 //--- an object nobody can see is not on the panel, whether it was
 //--- never created or drawn and then hidden. The panel hides by
 //--- OBJPROP_TIMEFRAMES, so both cases answer the same question here.
@@ -2393,8 +2409,19 @@ void OnStart()
                ObjectFind(ec, "SSR_LINE_SL") >= 0,
                "back to a market setup");
 
+         Step("26 clearing the entry lines");
          el.Clear();
+         //--- CSSRCustomSymbolManager::Destroy already carries this
+         //--- lesson - "the terminal needs a beat to release a
+         //--- just-closed chart" - and the QA has never given it one.
+         //--- It is not a diagnosis, it is the one cheap thing the
+         //--- evidence permits: the freeze is inside a call in this
+         //--- gap, and this gap closes a chart that still holds
+         //--- objects whose owner is destroyed a line later.
+         Step("26 closing the entry-line chart");
          ChartClose(ec);
+         Sleep(50);
+         Step("26 entry-line chart closed");
         }
    }
 
@@ -2428,16 +2455,23 @@ void OnStart()
       base = NormalizeDouble(base, dg);
 
       double spread = 10.0 * pt;      // a plausible one, in points
+      Step(StringFormat("26 read %s: digits %d, point %s, bid %s",
+                        origin, dg, DoubleToString(pt, 8),
+                        DoubleToString(base, dg)));
 
       //--- 26a. A STOP IS A MARKET ORDER ONCE IT IS TOUCHED.
       {
+         Step("26a building the engine");
          CSSRTradingEngine ex;
          ex.SetBalance(10000.0);
+         Step("26a reading the instrument into the risk model");
          ex.OnSessionStart(origin, dg, pt, 0);
 
          MqlTick t[1];
          t[0].bid = base; t[0].ask = base + spread; t[0].time_msc = 1000;
+         Step("26a first tick");
          ex.OnTicks(t, 1);
+         Step("26a opening the position");
 
          double sl = NormalizeDouble(base - 100.0 * pt, dg);
          long tk = ex.Open(SSR_ORDER_BUY, 0.10, sl, 0.0);

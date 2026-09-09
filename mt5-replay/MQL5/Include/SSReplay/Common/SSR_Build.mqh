@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v94 2026-09-09  sweep"
+#define SSR_BUILD "v95 2026-09-09  stage26"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
