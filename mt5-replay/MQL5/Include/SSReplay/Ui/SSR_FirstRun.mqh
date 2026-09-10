@@ -29,6 +29,7 @@
 #define SSR_FIRST_RUN_MQH
 
 #include "../Common/SSR_Types.mqh"
+#include "SSR_Strings.mqh"
 #include "SSR_Theme.mqh"
 #include "SSR_Widgets.mqh"
 
@@ -87,7 +88,7 @@ public:
 
       int x = 14, y = SSR_PANEL_H + 40, w = 396, h = 104;
       m_w.Rect("bg", x, y, w, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
-      m_w.Label("t", x + 12, y + 10, "SS REPLAY  -  WHAT NOW?",
+      m_w.Label("t", x + 12, y + 10, T(SSR_S_FIRSTRUN_TITLE),
                 SSR_C_HOLD, SSR_FS_BODY);
 
       //--- every one of these is under MetaTrader's 63-character cut.
@@ -102,16 +103,16 @@ public:
       //--- conclude the tool is broken rather than the sentence.
       //--- H opens the generated list, which cannot go stale at all.
       m_w.Label("l1", x + 12, y + 32,
-                "Playing. SPACE pauses, arrows step one candle at a time.",
+                T(SSR_S_FIRSTRUN_1),
                 SSR_C_TEXT, SSR_FS_SMALL);
       m_w.Label("l2", x + 12, y + 48,
-                "R puts the stop and target on the chart. Drag them, Tab buys.",
+                T(SSR_S_FIRSTRUN_2),
                 SSR_C_TEXT, SSR_FS_SMALL);
       m_w.Label("l3", x + 12, y + 64,
-                "H lists every key. All virtual - nothing reaches a broker.",
+                T(SSR_S_FIRSTRUN_3),
                 SSR_C_TEXT, SSR_FS_SMALL);
       m_w.Label("l4", x + 12, y + 84,
-                "Shown once. Delete MQL5/Files/SSReplay/seen.txt for it again.",
+                T(SSR_S_FIRSTRUN_4),
                 SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
       ChartRedraw(m_chart);

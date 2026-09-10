@@ -38,6 +38,7 @@
 #include <SSReplay/Mt5/SSR_CustomSymbolSink.mqh>
 #include <SSReplay/Chart/SSR_ChartManager.mqh>
 #include <SSReplay/Chart/SSR_TradeLines.mqh>
+#include <SSReplay/Ui/SSR_Strings.mqh>
 #include <SSReplay/Ui/SSR_Panel.mqh>
 #include <SSReplay/Ui/SSR_RevealCard.mqh>
 #include <SSReplay/Ui/SSR_ReviewCard.mqh>
@@ -172,6 +173,18 @@ input double          InpPropTotal   = 10.0;                 // Max overall draw
 input bool            InpPropTrail   = false;                // Drawdown trails the equity peak
 input int             InpPropMinDays = 3;                    // Minimum trading days
 input int             InpPropMaxDays = 30;                   // Deadline in days (0 = none)
+
+//+------------------------------------------------------------------+
+//| LANGUAGE. Empty means English, which is compiled in and cannot   |
+//| be missing. Anything else names a file the user can edit:        |
+//| MQL5\Files\SSReplay\lang\<code>.txt - so a translation needs   |
+//| no compiler, no MetaEditor, and no new build of this expert.     |
+//|                                                                  |
+//| A file that is absent, unreadable or half-finished costs nothing: |
+//| every string it does not cover stays English. There is no state  |
+//| in which this setting produces a panel of blank labels.          |
+//+------------------------------------------------------------------+
+input string          InpLanguage    = "";                   // Language: "" = English, or fa, de, ru...
 
 CSSRMt5DataSource    g_src;
 CSSRCustomSymbolSink g_sink;
@@ -1727,6 +1740,11 @@ int OnInit()
    //| such moment. The start line is kept because it is the user's      |
    //| choice, not a previous run's rubbish.                             |
    //+------------------------------------------------------------------+
+   //--- BEFORE the first thing is drawn. A panel built while the
+   //--- catalogue is still English would cache English text in its
+   //--- label slots and only correct itself when a value changed.
+   SSRLoadLanguage(InpLanguage);
+
    SSRPurgeChart(0, SSR_PICK_LINE);
 
    //+------------------------------------------------------------------+

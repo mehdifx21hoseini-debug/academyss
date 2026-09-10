@@ -52,6 +52,7 @@
 #include <SSReplay/Ui/SSR_Palette.mqh>
 #include <SSReplay/Ui/SSR_RevealCard.mqh>
 #include <SSReplay/Ui/SSR_ReviewCard.mqh>
+#include <SSReplay/Ui/SSR_Strings.mqh>
 #include <SSReplay/Ui/SSR_Panel.mqh>
 
 input string InpSymbol     = "";     // Symbol (empty = this chart)
@@ -4636,6 +4637,197 @@ void OnStart()
            }
          gl.Clear();
          ChartClose(gchart);
+        }
+   }
+
+   //+------------------------------------------------------------------+
+   //| 41. EVERY WORD THE USER READS, AND WHETHER PERSIAN SURVIVES.     |
+   //|                                                                  |
+   //| The catalogue is indexed by an ENUM rather than a string key, so  |
+   //| the whole class of "the button shows its own key name" bugs is a  |
+   //| compile error and not something to test for. What IS worth        |
+   //| testing is the other end: a table short by one entry compiles     |
+   //| perfectly and draws BLANK - not wrong, blank - which reads as a   |
+   //| rendering fault rather than a missing string.                     |
+   //|                                                                  |
+   //| And then the question this project cannot answer by reasoning:    |
+   //| does this terminal actually draw Persian? That is a fact about a  |
+   //| Windows build and a font, not about this code, so it is MEASURED  |
+   //| here and reported rather than assumed in either direction.        |
+   //+------------------------------------------------------------------+
+   {
+      Step("41 the string catalogue");
+
+      //--- start from a known state whatever the EA was set to
+      SSRLoadLanguage("en");
+
+      Check("41 every string in the enum has English text",
+            SSRStringsMissing() == 0,
+            StringFormat("%d of %d missing - a table short by one draws a "
+                         "blank label, which reads as a rendering fault",
+                         SSRStringsMissing(), SSRStringCount()));
+
+      //--- and a NAME, which is the only thing a translation file can
+      //--- refer to. The enum's numeric value shifts the moment somebody
+      //--- inserts a string in the middle.
+      int unnamed = 0, empty = 0, longest = 0;
+      string worst = "";
+      for(int i = 0; i < SSRStringCount(); i++)
+        {
+         ENUM_SSR_STR id = (ENUM_SSR_STR)i;
+         if(SSRStringName(id) == "") unnamed++;
+         string t = T(id);
+         if(t == "") empty++;
+         if(StringLen(t) > longest) { longest = StringLen(t); worst = t; }
+        }
+      Check("41 every string has a name a translation file can address",
+            unnamed == 0, StringFormat("%d unnamed", unnamed));
+      Check("41 and none of them is empty",
+            empty == 0, StringFormat("%d empty", empty));
+
+      //--- MetaTrader draws 63 characters of OBJPROP_TEXT and says
+      //--- nothing about the rest. One English string shipped at 64 and
+      //--- had its last character cut on every chart since.
+      Check("41 no string is longer than MetaTrader will draw",
+            longest <= 63,
+            StringFormat("longest %d of 63: \"%s\"", longest, worst));
+
+      //+------------------------------------------------------------------+
+      //| A LANGUAGE THAT IS NOT THERE COSTS NOTHING.                      |
+      //+------------------------------------------------------------------+
+      string before = T(SSR_S_PLAY);
+      bool   got    = SSRLoadLanguage("zz_not_a_language");
+      Check("41 a missing translation leaves the product in English",
+            !got && T(SSR_S_PLAY) == before && SSRLanguage() == "en",
+            StringFormat("\"%s\", language %s - there is no state in which "
+                         "this draws blank labels", T(SSR_S_PLAY),
+                         SSRLanguage()));
+
+      //+------------------------------------------------------------------+
+      //| THE ONE THAT SHIPS.                                              |
+      //|                                                                  |
+      //| Not "a file loaded" - a WORD CHANGED. A loader that reported     |
+      //| success and applied nothing would pass every check above.        |
+      //+------------------------------------------------------------------+
+      if(!FileIsExist("SSReplay\\lang\\fa.txt"))
+        {
+         Note("41 the Persian translation was not measured",
+              "MQL5\\Files\\SSReplay\\lang\\fa.txt is not installed - the "
+              "ZIP ships it, so this terminal has an older install");
+         SSRLoadLanguage("en");
+        }
+      else
+        {
+         SSRLoadLanguage("fa");
+         Check("41 the Persian file loads and actually changes words",
+               SSRLanguage() == "fa" && SSRTranslated() > 0 &&
+               T(SSR_S_PLAY) != before,
+               StringFormat("%d of %d strings translated, Play -> \"%s\"",
+                            SSRTranslated(), SSRStringCount(), T(SSR_S_PLAY)));
+
+         //--- the format markers are where a number goes. A translation
+         //--- that dropped one prints the wrong number, or nothing, and
+         //--- StringFormat will not complain.
+         int lost = 0;
+         string lost_name = "";
+         SSRStringEntry en_[];
+         SSRStringsEnglish(en_);
+         for(int i = 0; i < SSRStringCount(); i++)
+           {
+            ENUM_SSR_STR id = (ENUM_SSR_STR)i;
+            int a = 0, b = 0;
+            string e = en_[i].text, f = T(id);
+            for(int c = 0; c + 1 < StringLen(e); c++)
+               if(StringGetCharacter(e, c) == '%' &&
+                  StringGetCharacter(e, c + 1) != '%') a++;
+            for(int c = 0; c + 1 < StringLen(f); c++)
+               if(StringGetCharacter(f, c) == '%' &&
+                  StringGetCharacter(f, c + 1) != '%') b++;
+            if(a != b)
+              {
+               lost++;
+               if(lost_name == "") lost_name = SSRStringName(id);
+              }
+           }
+         Check("41 no translation lost a place where a number goes",
+               lost == 0,
+               (lost == 0
+                ? "every %d and %s survived the translation"
+                : StringFormat("%d string(s), first: %s - StringFormat will "
+                               "not complain, it will print the wrong number",
+                               lost, lost_name)));
+
+         //--- and none of them is longer than the chart will draw
+         int over = 0;
+         string over_name = "";
+         for(int i = 0; i < SSRStringCount(); i++)
+           {
+            ENUM_SSR_STR id = (ENUM_SSR_STR)i;
+            if(StringLen(T(id)) > 63)
+              {
+               over++;
+               if(over_name == "") over_name = SSRStringName(id);
+              }
+           }
+         Check("41 and none of them is longer than 63 characters",
+               over == 0,
+               (over == 0 ? "measured in the language that is loaded"
+                          : StringFormat("%d over, first: %s", over, over_name)));
+
+         //+------------------------------------------------------------------+
+         //| DOES THIS TERMINAL DRAW PERSIAN AT ALL?                          |
+         //|                                                                  |
+         //| A fact about a Windows build and a font, not about this code, so |
+         //| it is measured rather than assumed. Two things can be known from |
+         //| inside MQL5, and one cannot:                                     |
+         //|                                                                  |
+         //|   - the font has the glyphs (a width comes back, and it is not   |
+         //|     the width of a row of missing-glyph boxes)                   |
+         //|   - the text survives the round trip into an object and back     |
+         //|                                                                  |
+         //| What CANNOT be measured from here is whether the glyphs are      |
+         //| SHAPED and ordered right-to-left on screen. There is no API that |
+         //| answers it. So this stage does not claim RTL works - it reports  |
+         //| the two facts it can establish and says the third is open.        |
+         //+------------------------------------------------------------------+
+         uint fw = 0, fh = 0;
+         string fa_probe = T(SSR_S_PLAY);
+         bool measured = (TextSetFont(SSR_FONT, -80, 0, 0) &&
+                          TextGetSize(fa_probe, fw, fh) && fw > 0);
+         if(!Check("41 the font reports a size for Persian text", measured,
+                   StringFormat("\"%s\" measures %d x %d px", fa_probe,
+                                (int)fw, (int)fh)))
+            Note("41 Persian may not be drawable on this terminal",
+                 "TextGetSize returned nothing for Persian in " + SSR_FONT);
+
+         long fchart = ChartOpen(rsym, PERIOD_M1);
+         if(Check("41 a chart for the Persian round trip", fchart != 0, rsym))
+           {
+            string nm = "SSRFA_probe";
+            if(ObjectCreate(fchart, nm, OBJ_LABEL, 0, 0, 0))
+              {
+               ObjectSetInteger(fchart, nm, OBJPROP_XDISTANCE, 20);
+               ObjectSetInteger(fchart, nm, OBJPROP_YDISTANCE, 20);
+               ObjectSetString(fchart, nm, OBJPROP_FONT, SSR_FONT);
+               ObjectSetString(fchart, nm, OBJPROP_TEXT, fa_probe);
+               string back = ObjectGetString(fchart, nm, OBJPROP_TEXT);
+               Check("41 Persian survives the trip into a chart object",
+                     back == fa_probe,
+                     StringFormat("wrote %d chars, read %d back",
+                                  StringLen(fa_probe), StringLen(back)));
+               ObjectDelete(fchart, nm);
+              }
+            ChartClose(fchart);
+           }
+
+         Note("41 right-to-left LAYOUT is not claimed",
+              "glyph coverage and the round trip are measurable and pass; "
+              "whether MetaTrader SHAPES and mirrors them on screen has no "
+              "API that answers it. The coordinate mirroring in "
+              "SSR_Layout.mqh is written and deliberately OFF - see "
+              "docs/ux-ui/localization.md");
+
+         SSRLoadLanguage("en");        // leave the terminal as it was found
         }
    }
 

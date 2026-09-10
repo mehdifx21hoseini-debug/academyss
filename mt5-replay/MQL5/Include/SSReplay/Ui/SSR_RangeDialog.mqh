@@ -15,6 +15,7 @@
 #define SSR_RANGE_DIALOG_MQH
 
 #include "../Common/SSR_Types.mqh"
+#include "SSR_Strings.mqh"
 #include "../Common/SSR_Time.mqh"
 #include "../Data/SSR_HistoryCatalog.mqh"
 #include "../Data/SSR_SessionRange.mqh"
@@ -150,7 +151,7 @@ public:
       int x = m_x, y = m_y, W = SSR_DLG_W;
       m_w.Rect("bg", x, y, W, SSR_DLG_H, SSR_C_PANEL, SSR_C_PANEL_EDGE);
       m_w.Rect("hdr", x + 1, y + 1, W - 2, SSR_HEADER_H, SSR_C_HEADER, SSR_C_GROUP_EDGE);
-      m_w.Label("title", x + SSR_PAD, y + 5, "NEW SESSION", SSR_C_ACCENT, SSR_FS_TITLE);
+      m_w.Label("title", x + SSR_PAD, y + 5, T(SSR_S_RD_TITLE), SSR_C_ACCENT, SSR_FS_TITLE);
       m_w.Button("close", x + W - 24, y + 3, 18, SSR_HEADER_H - 5, "x");
 
       int cy = y + SSR_HEADER_H + SSR_GAP;
@@ -165,7 +166,7 @@ public:
       cy += SSR_ROW_H - 4;
 
       //--- start, typed as text: MetaTrader has no date picker
-      m_w.Label("startlbl", x + SSR_PAD, cy + 4, "START", SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      m_w.Label("startlbl", x + SSR_PAD, cy + 4, T(SSR_S_RD_START), SSR_C_TEXT_DIM, SSR_FS_SMALL);
       string n = m_prefix + "start";
       if(ObjectFind(m_chart, n) < 0)
         {
@@ -188,7 +189,7 @@ public:
       cy += SSR_ROW_H + 4;
 
       //--- deepest timeframe wanted; this is what drives the warmup cost
-      m_w.Label("tflbl", x + SSR_PAD, cy + 4, "CONTEXT", SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      m_w.Label("tflbl", x + SSR_PAD, cy + 4, T(SSR_S_RD_CONTEXT), SSR_C_TEXT_DIM, SSR_FS_SMALL);
       int bw = 30, bx = x + W - SSR_PAD - (bw * SSR_DLG_TF_COUNT + 9);
       for(int i = 0; i < SSR_DLG_TF_COUNT; i++)
         {
@@ -201,14 +202,14 @@ public:
       //--- THE QUOTE
       m_w.Rect("qbg", x + SSR_PAD, cy, W - 2 * SSR_PAD, 44, SSR_C_WELL, SSR_C_PANEL_EDGE);
       m_w.Label("q1", x + SSR_PAD + 6, cy + 5,
-                StringFormat("warmup %d bars  +  replay %d bars",
+                StringFormat(T(SSR_S_RD_BARS),
                              (int)m_quote.warmup_bars, (int)m_quote.replay_bars),
                 SSR_C_TEXT_DIM, SSR_FS_SMALL, SSR_FONT_MONO);
       m_w.Label("q2", x + SSR_PAD + 6, cy + 22,
                 (m_quote.IsFeasible()
-                 ? StringFormat("~%.0fs to load,  %.1f MB",
+                 ? StringFormat(T(SSR_S_RD_COST),
                                 m_quote.seconds, m_quote.megabytes)
-                 : "not enough history"),
+                 : T(SSR_S_RD_NO_HISTORY)),
                 (m_quote.IsFeasible() ? SSR_C_TEXT : SSR_C_STOP),
                 SSR_FS_SMALL, SSR_FONT_MONO);
       cy += 44 + SSR_GAP;
@@ -218,8 +219,8 @@ public:
       m_w.Label("problem", x + SSR_PAD, cy, m_problem, pc, SSR_FS_SMALL);
       cy += SSR_ROW_H - 2;
 
-      m_w.Button("more", x + SSR_PAD, cy, 96, SSR_BTN_H, "LOAD MORE");
-      m_w.Button("start", x + W - SSR_PAD - 96, cy, 96, SSR_BTN_H, "START",
+      m_w.Button("more", x + SSR_PAD, cy, 96, SSR_BTN_H, T(SSR_S_RD_LOAD_MORE));
+      m_w.Button("start", x + W - SSR_PAD - 96, cy, 96, SSR_BTN_H, T(SSR_S_RD_START),
                  false, CanStart());
 
       //+------------------------------------------------------------------+

@@ -31,6 +31,7 @@
 #define SSR_PALETTE_MQH
 
 #include "SSR_Theme.mqh"
+#include "SSR_Strings.mqh"
 #include "SSR_Widgets.mqh"
 #include "SSR_Command.mqh"
 
@@ -160,7 +161,7 @@ public:
       //--- clicked at even as the list below it grows and shrinks
       m_w.Rect("bg", m_x - 6, m_y - 6, SSR_PAL_W + 12, 40,
                SSR_C_PANEL, SSR_C_PRIMARY_EDGE);
-      m_w.Label("cap", m_x, m_y - 2, "RUN A COMMAND",
+      m_w.Label("cap", m_x, m_y - 2, T(SSR_S_PAL_TITLE),
                 SSR_C_TEXT_FAINT, SSR_FS_SMALL);
       m_w.Edit(QueryId(), m_x, m_y + 12, SSR_PAL_W, 20, m_query, false);
 
@@ -187,7 +188,7 @@ public:
          m_w.Rect("none_bg", m_x - 2, m_y + 36, SSR_PAL_W + 4, 24,
                   SSR_C_WELL, SSR_C_WELL_EDGE);
          m_w.Label("none", m_x + 8, m_y + 42,
-                   "Nothing matches - try fewer letters",
+                   T(SSR_S_PAL_NOTHING),
                    SSR_C_TEXT_DIM, SSR_FS_SMALL);
         }
       if(m_n > 0)
@@ -197,9 +198,9 @@ public:
       //--- knows how to leave is a modal nobody opens twice
       int fy = m_y + 38 + (m_n > 0 ? k * SSR_PAL_ROW_H : 24) + 4;
       string more = (m_n > SSR_PAL_SHOWN
-                     ? StringFormat("  ·  %d of %d", k, m_n) : "");
+                     ? StringFormat(T(SSR_S_PAL_OF), k, m_n) : "");
       m_w.Label("foot", m_x, fy,
-                "Enter runs  ·  Up / Down chooses  ·  Esc closes" + more,
+                T(SSR_S_PAL_HINT) + more,
                 SSR_C_TEXT_FAINT, SSR_FS_SMALL);
 
       ChartRedraw(m_chart);

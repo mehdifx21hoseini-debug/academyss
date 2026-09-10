@@ -24,6 +24,7 @@
 #define SSR_REVIEW_CARD_MQH
 
 #include "SSR_Theme.mqh"
+#include "SSR_Strings.mqh"
 #include "SSR_Widgets.mqh"
 #include "SSR_Review.mqh"
 #include "SSR_Keys.mqh"
@@ -114,7 +115,7 @@ public:
       m_w.Rect("bg", m_x, m_y, SSR_RV_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
       m_w.Rect("hdr", m_x + 1, m_y + 1, SSR_RV_W - 2, SSR_HEADER_H,
                SSR_C_HEADER, SSR_C_GROUP_EDGE);
-      m_w.Label("title", m_x + 12, m_y + 5, "SESSION REVIEW",
+      m_w.Label("title", m_x + 12, m_y + 5, T(SSR_S_SESSION_REVIEW),
                 SSR_C_TEXT, SSR_FS_TITLE);
 
       //+------------------------------------------------------------------+
@@ -128,16 +129,16 @@ public:
                 StringFormat("%.2f R", m_st.total_r),
                 (m_st.total_r >= 0.0 ? SSR_C_RUN : SSR_C_STOP), SSR_FS_CLOCK);
       m_w.Label("h2", m_x + 120, hy + 4,
-                StringFormat("%d trades", m_st.trades),
+                StringFormat(T(SSR_S_TRADES_N), m_st.trades),
                 SSR_C_TEXT, SSR_FS_BODY);
       m_w.Label("h3", m_x + 210, hy + 4,
-                StringFormat("%.0f%% won", m_st.win_rate),
+                StringFormat(T(SSR_S_WON_PCT), m_st.win_rate),
                 SSR_C_TEXT, SSR_FS_BODY);
       m_w.Label("h4", m_x + 300, hy + 4,
-                StringFormat("max DD %.2f", m_st.max_drawdown),
+                StringFormat(T(SSR_S_MAX_DD), m_st.max_drawdown),
                 SSR_C_TEXT_DIM, SSR_FS_BODY);
       m_w.Label("h5", m_x + 420, hy + 4,
-                StringFormat("net %.2f", m_st.net_profit),
+                StringFormat(T(SSR_S_NET), m_st.net_profit),
                 (m_st.net_profit >= 0.0 ? SSR_C_RUN : SSR_C_STOP),
                 SSR_FS_BODY);
 
@@ -162,10 +163,10 @@ public:
                lines, m_first, SSR_RV_SHOWN, -1);
 
       int py = ly + SSR_RV_SHOWN * SSR_RV_ROW_H + 6;
-      m_w.Button("up",   m_x + SSR_RV_W - 96, py, 36, 18, "Up");
-      m_w.Button("down", m_x + SSR_RV_W - 56, py, 36, 18, "Down");
+      m_w.Button("up",   m_x + SSR_RV_W - 96, py, 36, 18, T(SSR_S_UP));
+      m_w.Button("down", m_x + SSR_RV_W - 56, py, 36, 18, T(SSR_S_DOWN));
       m_w.Label("count", m_x + 12, py + 3,
-                StringFormat("%d - %d of %d measured",
+                StringFormat(T(SSR_S_MEASURED_RANGE),
                              m_first + 1,
                              (m_first + SSR_RV_SHOWN < m_n
                               ? m_first + SSR_RV_SHOWN : m_n), m_n),
@@ -179,7 +180,7 @@ public:
       int oy = py + 24;
       if(m_obs_n > 0)
         {
-         m_w.Label("ohd", m_x + 12, oy, "WHAT WAS COUNTED",
+         m_w.Label("ohd", m_x + 12, oy, T(SSR_S_WHAT_WAS_COUNTED),
                    SSR_C_TEXT_FAINT, SSR_FS_SMALL);
          for(int i = 0; i < 8; i++)
            {
@@ -199,8 +200,8 @@ public:
         }
 
       m_w.Button("stmt",  m_x + 12, m_y + h - 28, 150, 20,
-                 "Export the full statement");
-      m_w.ButtonC("close", m_x + SSR_RV_W - 92, m_y + h - 28, 80, 20, "Close",
+                 T(SSR_S_EXPORT_FULL_STATEMENT));
+      m_w.ButtonC("close", m_x + SSR_RV_W - 92, m_y + h - 28, 80, 20, T(SSR_S_CLOSE),
                   SSR_C_PRIMARY, SSR_C_PRIMARY_EDGE, SSR_C_PRIMARY_TEXT,
                   SSR_FS_BODY);
 

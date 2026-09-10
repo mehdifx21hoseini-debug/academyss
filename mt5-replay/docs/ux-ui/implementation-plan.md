@@ -334,10 +334,59 @@ note named as worth building: **a taller sheet on a tall chart**.
   does.
 - 39 clean, **18** audits silent.
 
-### Phase 10 — Localization
-- `SSR_Strings.mqh` catalogue; every draw site calls `T(key)`.
-- RTL as a coordinate-mirroring mode through the Phase 2 layout helper.
-- **Risk: high in breadth, low in depth** — mechanical, but touches every file.
+### Phase 10 — Localization ◧ 10a complete, 10b **not done and not claimed**
+
+- **Measured before starting:** 214 draw-site lines carried a literal, and 152
+  log lines did too. The second number is the one that decided the scope — a
+  log in a language the person reading the bug report cannot read is not a
+  localised log, it is a lost diagnostic.
+- **Done: 176 strings, every user-visible surface, and a complete Persian
+  translation.** Panel, all five sheets, both dialogs, the setup wizard, the
+  review card, the reveal card, the key card, the first-run card, the command
+  palette. Zero draw sites still hold a literal, except `SS Replay` — a
+  product name is not a string to translate.
+- **An enum index, not a string key.** `T("panel.play")` costs sixty table
+  lookups a frame at 10 Hz, and a *mistyped* string key compiles, runs, and
+  puts `panel.paly` on the chart in front of a user. A mistyped enum does not
+  compile — that whole class of bug is removed rather than audited.
+- **English is compiled in and can never be missing.** A translation is an
+  override file (`InpLanguage`, no recompile, no MetaEditor): it replaces the
+  lines it has and leaves the rest English, lines naming a string this build
+  does not have are skipped rather than fatal, and there is no state in which
+  the panel draws blank labels.
+- **Found by measuring: an English string had been cut since it shipped.**
+  "Then drag them. Buy / Sell would open with no stop until you do." is 64
+  characters; MetaTrader draws 63. It had been losing its last character
+  mid-word on every chart. A translator has no way to know that limit exists,
+  so **A19 checks every catalogue string and every line of every shipped
+  translation**, and stage 41 checks whatever language is loaded.
+- **Audit A19** also asserts every enum value has a table line (a missing one
+  draws *blank*, which reads as a rendering fault), and that no drawing call
+  takes a literal as its text argument — looked up by argument *position*,
+  since every one of those calls takes an object name first. It fails if
+  fewer than 100 calls resolve to `T(SSR_S_...)`, so a changed widget
+  signature cannot make it pass by reading the wrong argument everywhere.
+- **Test: stage 41** asserts a word actually *changes* when Persian loads — a
+  loader that reported success and applied nothing would pass every other
+  check — and that no translation dropped a `%d` or `%s`, which
+  `StringFormat` will not complain about but will print wrongly.
+
+**10b — RTL: not implemented, and deliberately not half-implemented.**
+
+- Measured and passing: Tahoma reports a real width for Persian, the text
+  survives the `OBJPROP_TEXT` round trip unchanged, all 176 Persian strings
+  are inside 63 characters.
+- **Not measurable from inside MQL5, and therefore not claimed:** whether
+  MetaTrader *shapes* Arabic-script glyphs and orders them right-to-left on
+  screen. No API answers it.
+- `SSR_Layout.mqh` has had coordinate mirroring since Phase 2 and it is still
+  OFF, because Phases 3–9 did not adopt the helper: the panel's ~200 draw
+  sites compute `x` inline, exactly as `localization.md` warned they must not.
+  Flipping the flag now would mirror the handful of sites that use the helper
+  and leave every other one in place — a half-mirrored panel, on a chart I
+  cannot see. **The constraint that document placed on Phases 2–9 was not
+  honoured, and saying so is more useful than a switch that half works.**
+- 39 clean, **19** audits silent.
 
 ### Phase 11 — Polish and performance
 - Profile the pump loop before and after. The engine pumps every 40 ms and the

@@ -1,0 +1,233 @@
+# SS Replay - Persian / فارسی
+#
+# One line per string:   name = text
+#
+# Lines that are blank, start with #, or name something this build does
+# not have are SKIPPED. A missing line falls back to English, so a
+# partial translation is usable - you can ship sixty of these and the
+# rest simply stays in English.
+#
+# WHAT NOT TO TOUCH: the %d, %s, %.2f and %% markers. They are where a
+# number is inserted, they must stay, and they must stay IN THE SAME
+# ORDER as the English line. A line with the wrong markers will print
+# the wrong number, or nothing.
+#
+# Digits stay Latin on purpose: the panel uses Tahoma because it draws
+# all ten digits on the same width, which is what keeps a price column
+# lined up. Persian digits break that.
+
+# --- transport -----------------------------------------------------
+play              = پخش
+pause             = توقف
+reset             = شروع دوباره
+reset.ask         = مطمئنی؟
+speed             = سرعت
+follow            = دنبال‌کردن  F
+follow.n          = دنبال‌کردن %d  F
+lines.on          = خطوط روشن  L
+lines.off         = حد ضرر / سود  L
+bookmark          = نشانه‌گذاری  B
+jump              = پرش به...  J
+sessions          = جلسه‌ها...  S
+fidelity          = دقت تیک  D
+
+# --- tabs -----------------------------------------------------------
+tab.trade         = معامله
+tab.positions     = پوزیشن‌ها
+tab.positions.n   = پوزیشن‌ها %d
+tab.stats         = آمار
+tab.session       = جلسه
+tab.prop          = پراپ
+tab.prop.ok       = پراپ قبول
+tab.prop.fail     = پراپ !
+
+# --- trade sheet ----------------------------------------------------
+grp.risk          = ریسک
+risk.per.trade    = ریسک هر معامله
+setup             = ستاپ
+grp.stop.target   = حد ضرر و حد سود
+place.lines       = خطوط حد ضرر / سود را روی چارت بگذار
+then.drag         = بعد بکششان. تا آن موقع خرید / فروش بدون حد ضرر باز می‌شود.
+waiting.price     = منتظر اولین قیمت.
+long.setup        = ستاپ خرید - حد ضرر پایین، حد سود بالا
+short.setup       = ستاپ فروش - حد ضرر بالا، حد سود پایین
+buy               = خرید
+sell              = فروش
+
+# --- positions sheet -------------------------------------------------
+grp.open.positions = پوزیشن‌های باز
+nothing.open      = چیزی باز نیست. خطوط را بگذار (L)، حد ضرر را بکش، Open را بزن.
+waiting           = در انتظار
+no.stop           = ‏  بدون حد ضرر
+not.shown         = %d تای دیگر نشان داده نشده
+row.hint          = H نصف   B حد ضرر به نقطه ورود   X بستن
+break.even.all    = سربه‌سر کردن همه
+close.all         = بستن همه
+trailing.stop     = حد ضرر دنبال‌کننده   %s
+off               = خاموش
+
+# --- stats sheet -----------------------------------------------------
+grp.account       = حساب
+balance           = موجودی
+equity            = ارزش خالص
+floating          = شناور
+grp.this.run      = این اجرا
+bars              = کندل‌ها
+ticks             = تیک‌ها
+rejected          = ردشده
+save.statement    = ذخیرهٔ گزارش HTML
+eval.see.prop.tab = ارزیابی  ->  تب پراپ
+
+# --- prop sheet ------------------------------------------------------
+profit.target     = هدف سود
+daily.loss        = ضرر روزانه
+no.daily.limit    = بدون حد روزانه
+drawdown          = افت سرمایه
+drawdown.trailing = افت سرمایه (متحرک)
+drawdown.static   = افت سرمایه (ثابت)
+no.drawdown.limit = بدون حد افت
+trading.days      = روزهای معاملاتی
+days.needed       = %d از %d لازم
+no.minimum        = %d  (بدون حداقل)
+used.floor        = %d%% مصرف   کف %s
+day.of.elapsed    = روز %d از %d گذشته
+reset.evaluation  = شروع دوبارهٔ ارزیابی
+no.target         = %+.2f%%   (بدون هدف)
+
+# --- session sheet ---------------------------------------------------
+grp.session       = جلسه
+bookmarks         = نشانه‌ها
+streams           = جریان‌ها
+charts            = چارت‌ها
+charts.clean      = تمیز
+grp.keyboard      = صفحه‌کلید
+
+# --- the review card -------------------------------------------------
+session.review    = بازبینی جلسه
+trades.n          = %d معامله
+won.pct           = %.0f%% برد
+max.dd            = بیشترین افت %.2f
+net               = خالص %.2f
+measured.range    = %d - %d از %d اندازه‌گیری‌شده
+what.was.counted  = چه چیزی شمرده شد
+export.full.statement = خروجی گزارش کامل
+up                = بالا
+down              = پایین
+close             = بستن
+
+# --- the reveal card -------------------------------------------------
+session.complete  = جلسه تمام شد
+still.hidden      = بازار هنوز پنهان است.
+reveal.explain.1  = آشکارکردن، نماد و تاریخ و مقیاس قیمت را
+reveal.explain.2  = دقیقاً همان‌طور که قبل از این جلسه بود برمی‌گرداند.
+reveal.button     = بازار را آشکار کن
+blind             = کور
+prop              = پراپ
+
+# --- status strip ----------------------------------------------------
+bal               = موجودی %s
+float             = شناور %s
+open              = باز %d
+spread            = اسپرد %.1f
+too.narrow        = چارت %d پیکسل است، پنل %d می‌خواهد - کنترل‌ها بیرون لبه‌اند
+tall.needs        = پنل بلند %d پیکسل می‌خواهد، چارت %d است
+
+# --- command palette --------------------------------------------------
+pal.hint          = Enter اجرا  ·  بالا / پایین انتخاب  ·  Esc بستن
+pal.nothing       = چیزی پیدا نشد
+pal.of            =   ·  %d از %d
+
+# --- two column layouts that carry a word ---------------------------
+rejected.guard    = %-12s %d      نگهبان %d
+streams.skew      = %-12s %d      اختلاف %d میلی‌ثانیه
+
+# --- the range dialog -------------------------------------------------
+rd.title          = جلسهٔ جدید
+rd.start          = شروع
+rd.context        = پیش‌زمینه
+rd.bars           = گرم‌کردن %d کندل  +  ریپلی %d کندل
+rd.cost           = ~%.0f ثانیه بارگذاری،  %.1f مگابایت
+rd.no.history     = تاریخچهٔ کافی نیست
+rd.load.more      = بارگذاری بیشتر
+
+# --- the session dialog -----------------------------------------------
+sd.title          = جلسه‌ها
+sd.overwrite      = جلسه بازنویسی شود؟
+sd.exists         = " از قبل وجود دارد.
+sd.no.undo        = ذخیره جایگزینش می‌کند. روی دیسک برگشتی ندارد.
+sd.replace        = جایگزین کن
+sd.keep           = نگهش دار
+sd.none.yet       = هنوز جلسه‌ای ذخیره نشده.
+sd.how.1          = روی اکسپرت InpSession="یک نام" را بگذار تا ذخیره شود
+sd.how.2          = وقتی حذفش می‌کنی - معامله‌ها، ساعت، همه چیز.
+sd.load           = بارگذاری
+sd.delete         = حذف
+
+# --- the setup wizard --------------------------------------------------
+su.new.replay     = ریپلی جدید
+su.same.as.last   = مثل دفعهٔ قبل
+su.summary        = %s  ·  %s  ·  %s  ·  %.2f%% ریسک
+su.continue       = ادامهٔ "
+su.continue.why   = از همان جایی که آن جلسه رها شد ادامه می‌دهد
+su.random         = جلسهٔ تصادفی
+su.random.why     = شروعی که ندیده‌ای، با یک seed که می‌توانی به اشتراک بگذاری
+su.customise      = دلخواه...
+su.settings       = SS REPLAY  -  تنظیمات
+su.mode           = SS REPLAY  -  حالت
+su.where          = SS REPLAY  -  از کجا شروع شود
+su.step           = مرحلهٔ %d از ۳
+su.account        = حساب
+su.replay         = ریپلی
+su.evaluation     = ارزیابی
+su.session        = جلسه
+su.next.mode      = بعدی  -  نوع تمرین را انتخاب کن
+su.next.start     = بعدی  -  محل شروع را انتخاب کن
+su.back           = برگشت
+su.you.chose      = انتخاب تو
+su.seed           = SEED  -  همان seed همان جلسه را دوباره پخش می‌کند
+su.orange.line    = ریپلی از خط نارنجی شروع می‌شود
+su.bring.line     = خط را به این نما بیاور
+su.drag.line      = خط نارنجی را بکش
+su.start.here     = ریپلی از اینجا شروع شود
+
+# --- the trade sheet's second half ------------------------------------
+stop.row          = حد ضرر   %s      %s
+target.row        = حد سود   %s      %s
+lot               = %.2f لات
+no.size           = بدون حجم
+place.order       = ثبت %s  %.2f لات
+open.order        = باز کن %s  %.2f لات
+long              = خرید
+short             = فروش
+cannot.place      = این سفارش هنوز قابل ثبت نیست
+open.no.size      = باز کن - با این حد ضرر حجمی نمی‌ماند
+flip              = برعکس  X
+at.market         = به قیمت بازار
+entry.line        = خط ورود
+remove            = حذف
+buy.btn           = خرید  %s
+sell.btn          = فروش  %s
+pt                = %.0f پوینت
+spread.short      = اسپرد %.1f
+n.open            = %d باز
+
+# --- keyboard hints -----------------------------------------------------
+keys.1            = Space پخش/توقف    < > گام    PgUp/PgDn ۱۰تایی
+keys.2            = + - سرعت    R شروع دوباره    J پرش    B نشانه
+keys.3            = S جلسه‌ها   F دنبال   D دقت   L خطوط   X برعکس
+keys.4            = نوار بالا:  [] گوشه    -  جمع‌کردن    X  بستن
+
+# --- the key card --------------------------------------------------------
+keycard.title     = کلیدها
+keycard.close     = H دوباره این را می‌بندد
+all.virtual       = هر معامله اینجا مجازی است. هیچ چیز به بروکر نمی‌رسد.
+
+# --- the first-run card ---------------------------------------------------
+firstrun.title    = SS REPLAY  -  حالا چه کار؟
+firstrun.1        = در حال پخش. SPACE توقف، جهت‌نماها یک کندل جلو/عقب.
+firstrun.2        = R حد ضرر و سود را روی چارت می‌گذارد. بکششان، Tab می‌خرد.
+firstrun.3        = H همهٔ کلیدها را نشان می‌دهد. همه مجازی است.
+firstrun.4        = یک بار نشان داده می‌شود. برای تکرار، seen.txt را پاک کن.
+
+# --- the command palette ---------------------------------------------------
+pal.title         = اجرای یک فرمان

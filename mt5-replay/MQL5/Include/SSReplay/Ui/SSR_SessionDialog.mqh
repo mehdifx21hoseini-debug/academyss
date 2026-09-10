@@ -16,6 +16,7 @@
 #define SSR_SESSION_DIALOG_MQH
 
 #include "../Common/SSR_Types.mqh"
+#include "SSR_Strings.mqh"
 #include "../Common/SSR_Time.mqh"
 #include "SSR_Theme.mqh"
 #include "SSR_Widgets.mqh"
@@ -113,7 +114,8 @@ public:
       m_w.Rect("hdr", x + 1, y + 1, SSR_SD_W - 2, SSR_HEADER_H,
                SSR_C_HEADER, SSR_C_GROUP_EDGE);
       m_w.Label("title", x + SSR_PAD, y + 5,
-                (m_mode == SSR_SD_CONFIRM_SAVE ? "OVERWRITE SESSION?" : "SESSIONS"),
+                (m_mode == SSR_SD_CONFIRM_SAVE ? T(SSR_S_SD_OVERWRITE)
+                                               : T(SSR_S_SD_TITLE)),
                 SSR_C_ACCENT, SSR_FS_TITLE);
       m_w.Button("close", x + SSR_SD_W - 24, y + 3, 18, SSR_HEADER_H - 5, "x");
 
@@ -123,15 +125,15 @@ public:
         {
          //--- NAMED, so the user is not confirming an abstraction
          m_w.Label("q1", x + SSR_PAD, cy,
-                   "\"" + m_pending + "\" already exists.",
+                   "\"" + m_pending + T(SSR_S_SD_EXISTS),
                    SSR_C_TEXT, SSR_FS_BODY);
          cy += SSR_ROW_H;
          m_w.Label("q2", x + SSR_PAD, cy,
-                   "Saving replaces it. There is no undo on disk.",
+                   T(SSR_S_SD_NO_UNDO),
                    SSR_C_HOLD, SSR_FS_SMALL);
          cy += SSR_ROW_H + SSR_GAP;
-         m_w.Button("yes", x + SSR_PAD, cy, 110, SSR_BTN_H, "REPLACE IT");
-         m_w.Button("no",  x + SSR_PAD + 118, cy, 110, SSR_BTN_H, "KEEP IT");
+         m_w.Button("yes", x + SSR_PAD, cy, 110, SSR_BTN_H, T(SSR_S_SD_REPLACE));
+         m_w.Button("no",  x + SSR_PAD + 118, cy, 110, SSR_BTN_H, T(SSR_S_SD_KEEP));
          ChartRedraw(m_chart);
          return;
         }
@@ -167,13 +169,13 @@ public:
       if(m_count == 0)
         {
          m_w.Label("empty1", x + SSR_PAD, cy + 6,
-                   "No saved sessions yet.",
+                   T(SSR_S_SD_NONE_YET),
                    SSR_C_TEXT_DIM, SSR_FS_SMALL);
          m_w.Label("empty2", x + SSR_PAD, cy + 26,
-                   "Set InpSession=\"a name\" on the EA and one is saved",
+                   T(SSR_S_SD_HOW_1),
                    SSR_C_TEXT_FAINT, SSR_FS_SMALL);
          m_w.Label("empty3", x + SSR_PAD, cy + 42,
-                   "when you remove it - trades, clock and all.",
+                   T(SSR_S_SD_HOW_2),
                    SSR_C_TEXT_FAINT, SSR_FS_SMALL);
         }
       else
@@ -189,9 +191,9 @@ public:
       m_w.Button("down", x + SSR_PAD + 44, cy, 40, SSR_BTN_H, "v", false,
                  m_top + SSR_SD_ROWS < m_count);
       m_w.Button("load", x + SSR_SD_W - SSR_PAD - 200, cy, 95, SSR_BTN_H,
-                 "LOAD", false, m_selected >= 0);
+                 T(SSR_S_SD_LOAD), false, m_selected >= 0);
       m_w.Button("del",  x + SSR_SD_W - SSR_PAD - 100, cy, 95, SSR_BTN_H,
-                 "DELETE", false, m_selected >= 0);
+                 T(SSR_S_SD_DELETE), false, m_selected >= 0);
       cy += SSR_BTN_H + 4;
 
       m_w.Label("msg", x + SSR_PAD, cy, m_message,

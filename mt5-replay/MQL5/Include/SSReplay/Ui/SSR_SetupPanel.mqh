@@ -30,6 +30,7 @@
 #define SSR_SETUP_PANEL_MQH
 
 #include "../Common/SSR_Types.mqh"
+#include "SSR_Strings.mqh"
 #include "SSR_Theme.mqh"
 #include "SSR_Widgets.mqh"
 #include "../Chart/SSR_BlindMode.mqh"
@@ -663,18 +664,18 @@ public:
       int rows = (have_last ? 1 : 0) + (have_session ? 1 : 0) + 1;
       int h    = 34 + rows * 46 + 40;
       m_w.Rect("frame", m_x, m_y, SSR_SETUP_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
-      m_w.Label("title", m_x + 12, m_y + 9, "NEW REPLAY",
+      m_w.Label("title", m_x + 12, m_y + 9, T(SSR_S_SU_NEW_REPLAY),
                 SSR_C_TEXT, SSR_FS_BODY);
 
       int by = m_y + 34;
       if(have_last)
         {
          m_w.ButtonC("qlast", m_x + 12, by, SSR_SETUP_W - 24, 26,
-                     "Same as last time",
+                     T(SSR_S_SU_SAME_AS_LAST),
                      SSR_C_PRIMARY, SSR_C_PRIMARY_EDGE,
                      SSR_C_PRIMARY_TEXT, SSR_FS_BODY);
          m_w.Label("qlastd", m_x + 14, by + 29,
-                   StringFormat("%s  ·  %s  ·  %s  ·  %.2f%% risk",
+                   StringFormat(T(SSR_S_SU_SUMMARY),
                                 SSRSetupTfName(m_v.chart_tf),
                                 SSRSetupBlindName(m_v.blind),
                                 DoubleToString(m_v.balance, 2),
@@ -688,9 +689,9 @@ public:
       if(have_session)
         {
          m_w.Button("qcont", m_x + 12, by, SSR_SETUP_W - 24, 26,
-                    "Continue \"" + m_v.session_name + "\"");
+                    T(SSR_S_SU_CONTINUE) + m_v.session_name + "\"");
          m_w.Label("qcontd", m_x + 14, by + 29,
-                   "picks up where that session was left",
+                   T(SSR_S_SU_CONTINUE_WHY),
                    SSR_C_TEXT_DIM, SSR_FS_SMALL);
          by += 46;
         }
@@ -698,14 +699,14 @@ public:
         { m_w.Remove("qcont"); m_w.Remove("qcontd"); }
 
       m_w.Button("qrand", m_x + 12, by, SSR_SETUP_W - 24, 26,
-                 "Random session");
+                 T(SSR_S_SU_RANDOM));
       m_w.Label("qrandd", m_x + 14, by + 29,
-                "a start you have not seen, with a seed you can share",
+                T(SSR_S_SU_RANDOM_WHY),
                 SSR_C_TEXT_DIM, SSR_FS_SMALL);
       by += 46;
 
       m_w.Button("qcust", m_x + 12, by + 4, SSR_SETUP_W - 24, 22,
-                 "Customise...");
+                 T(SSR_S_SU_CUSTOMISE));
      }
 
    void              RenderSettings(void)
@@ -713,26 +714,26 @@ public:
       int rows = 17;
       int h    = 30 + rows * SSR_SETUP_ROW + 44;
       m_w.Rect("frame", m_x, m_y, SSR_SETUP_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
-      m_w.Label("title", m_x + 12, m_y + 9, "SS REPLAY  -  SETTINGS",
+      m_w.Label("title", m_x + 12, m_y + 9, T(SSR_S_SU_SETTINGS),
                 SSR_C_TEXT, SSR_FS_BODY);
-      m_w.Label("stepn", m_x + SSR_SETUP_W - 52, m_y + 10, "step 1 of 3",
+      m_w.Label("stepn", m_x + SSR_SETUP_W - 52, m_y + 10, StringFormat(T(SSR_S_SU_STEP), 1),
                 SSR_C_TEXT_FAINT, SSR_FS_SMALL);
 
       int r = 0;
-      m_w.Label("h1", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5, "ACCOUNT",
+      m_w.Label("h1", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5, T(SSR_S_SU_ACCOUNT),
                 SSR_C_TEXT_DIM, SSR_FS_SMALL); r++;
       Row("bal",  r++, "Balance",          DoubleToString(m_v.balance, 2),      true);
       Row("risk", r++, "Risk per trade %", DoubleToString(m_v.risk_percent, 2), true);
       Row("spr",  r++, "Spread, points",   DoubleToString(m_v.spread_points, 1),true);
 
-      m_w.Label("h2", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5, "REPLAY",
+      m_w.Label("h2", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5, T(SSR_S_SU_REPLAY),
                 SSR_C_TEXT_DIM, SSR_FS_SMALL); r++;
       Row("spd",  r++, "Speed",            DoubleToString(m_v.speed, 0),        true);
       Row("tf",   r++, "Chart timeframe",  SSRSetupTfName(m_v.chart_tf),        false);
       Row("xtf",  r++, "Extra timeframes", m_v.extra_tfs,                       true);
       Row("bl",   r++, "Blind mode",       SSRSetupBlindName(m_v.blind),        false);
 
-      m_w.Label("h3", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5, "EVALUATION",
+      m_w.Label("h3", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5, T(SSR_S_SU_EVALUATION),
                 SSR_C_TEXT_DIM, SSR_FS_SMALL); r++;
       //--- ONE CLICK INSTEAD OF THREE NUMBERS. Nobody remembers what a
       //--- given firm's daily loss limit is, and nobody should have to.
@@ -745,17 +746,17 @@ public:
       Row("ptl",  r++, "Max drawdown %",   DoubleToString(m_v.prop_total, 1),   true,
           m_force_prop);
 
-      m_w.Label("h4", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5, "SESSION",
+      m_w.Label("h4", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5, T(SSR_S_SU_SESSION),
                 SSR_C_TEXT_DIM, SSR_FS_SMALL); r++;
       Row("ses",  r++, "Save as",          m_v.session_name,                    true);
 
       //--- NOTHING ON THIS STEP CAN START A REPLAY. That is the point.
       int by = m_y + 30 + r * SSR_SETUP_ROW + 8;
       m_w.ButtonC("next", m_x + 12, by, SSR_SETUP_W - 24, 26,
-                  "Next  -  choose the kind of practice",
+                  T(SSR_S_SU_NEXT_MODE),
                   SSR_C_PRIMARY, SSR_C_PRIMARY_EDGE,
                   SSR_C_PRIMARY_TEXT, SSR_FS_BODY);
-      m_w.Button("back", m_x + 12, by + 30, SSR_SETUP_W - 24, 20, "Back");
+      m_w.Button("back", m_x + 12, by + 30, SSR_SETUP_W - 24, 20, T(SSR_S_SU_BACK));
      }
 
    //+------------------------------------------------------------------+
@@ -773,9 +774,9 @@ public:
      {
       int h = 34 + 4 * 48 + 62;
       m_w.Rect("frame", m_x, m_y, SSR_SETUP_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
-      m_w.Label("title", m_x + 12, m_y + 9, "SS REPLAY  -  MODE",
+      m_w.Label("title", m_x + 12, m_y + 9, T(SSR_S_SU_MODE),
                 SSR_C_TEXT, SSR_FS_BODY);
-      m_w.Label("stepn", m_x + SSR_SETUP_W - 52, m_y + 10, "step 2 of 3",
+      m_w.Label("stepn", m_x + SSR_SETUP_W - 52, m_y + 10, StringFormat(T(SSR_S_SU_STEP), 2),
                 SSR_C_TEXT_FAINT, SSR_FS_SMALL);
 
       string names[] = {"Standard", "Blind", "Prop challenge", "Random practice"};
@@ -801,10 +802,10 @@ public:
 
       int by = m_y + 34 + 4 * 48 + 6;
       m_w.ButtonC("next", m_x + 12, by, SSR_SETUP_W - 24, 26,
-                  "Next  -  choose where to start",
+                  T(SSR_S_SU_NEXT_START),
                   SSR_C_PRIMARY, SSR_C_PRIMARY_EDGE,
                   SSR_C_PRIMARY_TEXT, SSR_FS_BODY);
-      m_w.Button("back", m_x + 12, by + 30, SSR_SETUP_W - 24, 20, "Back");
+      m_w.Button("back", m_x + 12, by + 30, SSR_SETUP_W - 24, 20, T(SSR_S_SU_BACK));
      }
 
    void              RenderStart(void)
@@ -812,15 +813,15 @@ public:
       int rows = 10 + (m_v.random_start ? 2 : 0);
       int h    = 30 + rows * SSR_SETUP_ROW + 92;
       m_w.Rect("frame", m_x, m_y, SSR_SETUP_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
-      m_w.Label("title", m_x + 12, m_y + 9, "SS REPLAY  -  WHERE TO START",
+      m_w.Label("title", m_x + 12, m_y + 9, T(SSR_S_SU_WHERE),
                 SSR_C_TEXT, SSR_FS_BODY);
-      m_w.Label("stepn", m_x + SSR_SETUP_W - 52, m_y + 10, "step 3 of 3",
+      m_w.Label("stepn", m_x + SSR_SETUP_W - 52, m_y + 10, StringFormat(T(SSR_S_SU_STEP), 3),
                 SSR_C_TEXT_FAINT, SSR_FS_SMALL);
 
       //--- read back what step 1 was told, so the confirmation is one
       //--- and not a press into the dark
       int r = 0;
-      m_w.Label("h1", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5, "YOU CHOSE",
+      m_w.Label("h1", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5, T(SSR_S_SU_YOU_CHOSE),
                 SSR_C_TEXT_DIM, SSR_FS_SMALL); r++;
       Recap("bal2",  r++, "Balance",   DoubleToString(m_v.balance, 2));
       Recap("risk2", r++, "Risk",      StringFormat("%.2f %%", m_v.risk_percent));
@@ -858,7 +859,7 @@ public:
       if(m_v.random_start)
         {
          m_w.Label("h3", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5,
-                   "SEED  -  the same seed replays the same session",
+                   T(SSR_S_SU_SEED),
                    SSR_C_TEXT_DIM, SSR_FS_SMALL); r++;
          int sy = m_y + 30 + r * SSR_SETUP_ROW;
          m_w.Edit("eseed", m_x + 12, sy, SSR_SETUP_W - 24, SSR_SETUP_ROW - 4,
@@ -870,22 +871,22 @@ public:
         { m_w.Remove("h3"); m_w.Remove("eseed"); }
 
       m_w.Label("h2", m_x + 12, m_y + 30 + r * SSR_SETUP_ROW + 5,
-                "THE REPLAY BEGINS AT THE ORANGE LINE",
+                T(SSR_S_SU_ORANGE_LINE),
                 SSR_C_TEXT_DIM, SSR_FS_SMALL); r++;
 
       int by = m_y + 30 + r * SSR_SETUP_ROW + 4;
       m_w.Button("here", m_x + 12, by, SSR_SETUP_W - 24, 22,
-                 "Bring the line to this view");
+                 T(SSR_S_SU_BRING_LINE));
       m_start_y = by + 26;
       m_w.Label("startlbl", m_x + 12, m_start_y,
-                (m_start_text == "" ? "Drag the orange line" : m_start_text),
+                (m_start_text == "" ? T(SSR_S_SU_DRAG_LINE) : m_start_text),
                 SSR_C_HOLD, SSR_FS_SMALL);
 
       //--- the irreversible one, on its own, with the way back beside it
       int gy = by + 42;
-      m_w.Button("back", m_x + 12, gy, 74, 26, "Back");
+      m_w.Button("back", m_x + 12, gy, 74, 26, T(SSR_S_SU_BACK));
       m_w.ButtonC("go", m_x + 92, gy, SSR_SETUP_W - 104, 26,
-                  "START REPLAY HERE", SSR_C_BUY, SSR_C_BUY_EDGE,
+                  T(SSR_S_SU_START_HERE), SSR_C_BUY, SSR_C_BUY_EDGE,
                   SSR_C_DEAL_TEXT, SSR_FS_BODY);
      }
 

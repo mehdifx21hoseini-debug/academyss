@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v113 2026-09-09  contrast"
+#define SSR_BUILD "v114 2026-09-10  strings"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

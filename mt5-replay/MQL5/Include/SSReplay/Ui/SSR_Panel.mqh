@@ -40,6 +40,7 @@
 #include "../Common/SSR_FlightRecorder.mqh"
 #include "../Common/SSR_SessionFile.mqh"
 #include "SSR_Theme.mqh"
+#include "SSR_Strings.mqh"
 #include "SSR_Layout.mqh"
 #include "SSR_Widgets.mqh"
 #include "SSR_ReplayPort.mqh"
@@ -707,7 +708,7 @@ public:
       bool room     = (chart_h <= 0 || chart_h >= SSR_PANEL_TALL_H + 24);
       m_tall    = (m_pro && !m_compact && room);
       m_pro_why = (m_pro && !m_tall
-                   ? StringFormat("tall panel needs %d px, chart is %d",
+                   ? StringFormat(T(SSR_S_TALL_NEEDS),
                                   SSR_PANEL_TALL_H + 24, chart_h)
                    : "");
       if(m_tall != was_tall)
@@ -890,13 +891,13 @@ private:
                      SSR_C_WELL) + 4;
 
       if(m_state.blind)
-         cx += m_w.Chip("chblind", cx, y + 4, "BLIND",
+         cx += m_w.Chip("chblind", cx, y + 4, T(SSR_S_BLIND),
                         SSR_C_HOLD, SSR_C_WELL) + 4;
       else
          { m_w.Remove("chblind"); m_w.Remove("chblind_bg"); }
 
       if(m_state.prop_on)
-         cx += m_w.Chip("chprop", cx, y + 4, "PROP",
+         cx += m_w.Chip("chprop", cx, y + 4, T(SSR_S_PROP),
                         SSR_C_ACCENT, SSR_C_WELL) + 4;
       else
          { m_w.Remove("chprop"); m_w.Remove("chprop_bg"); }
@@ -982,7 +983,7 @@ private:
       //--- the one primary control on the panel
       bool can_toggle = (m_state.CanPlay() || m_state.IsRunning());
       m_w.ButtonC("toggle", bx, y, pw, SSR_BTN_H,
-                  m_state.IsRunning() ? "Pause" : "Play",
+                  m_state.IsRunning() ? T(SSR_S_PAUSE) : T(SSR_S_PLAY),
                   can_toggle ? SSR_C_PRIMARY      : SSR_C_BTN,
                   can_toggle ? SSR_C_PRIMARY_EDGE : SSR_C_BTN_EDGE,
                   can_toggle ? SSR_C_PRIMARY_TEXT : SSR_C_TEXT_FAINT,
@@ -997,7 +998,7 @@ private:
       //--- finger is already moving is how a confirmation gets pressed
       //--- by accident, which is worse than not having one.
       bool armed = ResetArmed();
-      m_w.Button("reset",   bx, y, rw, SSR_BTN_H, (armed ? "Reset?" : "Reset"),
+      m_w.Button("reset",   bx, y, rw, SSR_BTN_H, (armed ? T(SSR_S_RESET_ASK) : T(SSR_S_RESET)),
                  armed, m_state.connected);
       return y + SSR_BTN_H + SSR_GAP;
      }
@@ -1007,7 +1008,7 @@ private:
    //================================================================
    int               DrawSpeed(const int x, const int y, const int W)
      {
-      Text(4, "spdlbl", x + SSR_PAD, y + 3, "Speed", SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      Text(4, "spdlbl", x + SSR_PAD, y + 3, T(SSR_S_SPEED), SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
       int bx = x + SSR_PAD + 34;
       m_w.Button("spdn", bx, y, 18, SSR_ROW_H, "-");
@@ -1051,18 +1052,20 @@ private:
      {
       switch(i)
         {
-         case SSR_TAB_TRADE:     return "Trade";
+         case SSR_TAB_TRADE:     return T(SSR_S_TAB_TRADE);
          case SSR_TAB_POSITIONS:
             return (m_state.open_positions > 0
-                    ? "Positions " + IntegerToString(m_state.open_positions)
-                    : "Positions");
-         case SSR_TAB_STATS:     return "Stats";
-         case SSR_TAB_SESSION:   return "Session";
+                    ? StringFormat(T(SSR_S_TAB_POSITIONS_N),
+                                   m_state.open_positions)
+                    : T(SSR_S_TAB_POSITIONS));
+         case SSR_TAB_STATS:     return T(SSR_S_TAB_STATS);
+         case SSR_TAB_SESSION:   return T(SSR_S_TAB_SESSION);
          //--- FAILED is the one word a trader must not have to hunt for,
          //--- so the strip carries the verdict rather than only the name
          case SSR_TAB_PROP:
-            return (m_state.prop_state == 3 ? "Prop !"
-                    : (m_state.prop_state == 2 ? "Prop OK" : "Prop"));
+            return (m_state.prop_state == 3 ? T(SSR_S_TAB_PROP_FAIL)
+                    : (m_state.prop_state == 2 ? T(SSR_S_TAB_PROP_OK)
+                                               : T(SSR_S_TAB_PROP)));
         }
       return "";
      }
@@ -1110,20 +1113,20 @@ private:
 
       m_w.Button("follow", x, cy, SSR_SIDE_W, h,
                  (m_state.charts_detached > 0
-                  ? "Follow " + IntegerToString(m_state.charts_detached) + "  F"
-                  : "Follow  F"),
+                  ? StringFormat(T(SSR_S_FOLLOW_N), m_state.charts_detached)
+                  : T(SSR_S_FOLLOW)),
                  m_state.charts_detached > 0,
                  m_state.charts_detached > 0);                  cy += h + gp;
       m_w.Button("lines", x, cy, SSR_SIDE_W, h,
-                 m_state.lines_armed ? "Lines on  L" : "SL / TP  L",
+                 m_state.lines_armed ? T(SSR_S_LINES_ON) : T(SSR_S_LINES_OFF),
                  m_state.lines_armed, m_state.can_trade);       cy += h + gp;
-      m_w.Button("bookmark", x, cy, SSR_SIDE_W, h, "Bookmark  B",
+      m_w.Button("bookmark", x, cy, SSR_SIDE_W, h, T(SSR_S_BOOKMARK),
                  false, m_state.connected);                     cy += h + gp;
-      m_w.Button("jump", x, cy, SSR_SIDE_W, h, "Jump...  J",
+      m_w.Button("jump", x, cy, SSR_SIDE_W, h, T(SSR_S_JUMP),
                  false, m_state.connected);                     cy += h + gp;
-      m_w.Button("sessions", x, cy, SSR_SIDE_W, h, "Sessions...  S",
+      m_w.Button("sessions", x, cy, SSR_SIDE_W, h, T(SSR_S_SESSIONS),
                  false, m_state.connected);                     cy += h + gp;
-      m_w.Button("fidelity", x, cy, SSR_SIDE_W, h, "Fidelity  D",
+      m_w.Button("fidelity", x, cy, SSR_SIDE_W, h, T(SSR_S_FIDELITY),
                  false, m_state.connected);
      }
 
@@ -1211,8 +1214,8 @@ private:
    void              SheetTrade(const int x, const int y, const int w)
      {
       //--- risk
-      m_w.Group("g1", x, y, w, 36, "Risk");
-      Text(10, "risklbl", x + 8, y + 13, "Risk per trade", SSR_C_TEXT_DIM);
+      m_w.Group("g1", x, y, w, 36, T(SSR_S_GRP_RISK));
+      Text(10, "risklbl", x + 8, y + 13, T(SSR_S_RISK_PER_TRADE), SSR_C_TEXT_DIM);
       //--- the money answers "how much is that", and it sits with the
       //--- label rather than between the steppers, where it used to run
       //--- underneath the + button
@@ -1235,7 +1238,7 @@ private:
       //| Read on the way into a trade, not on edit: the same one-read      |
       //| rule the setup panel follows, for the same reason.                |
       //+------------------------------------------------------------------+
-      m_w.Label("taglbl", x + 8, y + 42, "Setup", SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      m_w.Label("taglbl", x + 8, y + 42, T(SSR_S_SETUP), SSR_C_TEXT_DIM, SSR_FS_SMALL);
       m_tag_x = x + 48; m_tag_y = y + 38; m_tag_w = w - 56; m_tag_h = 18;
       m_w.Edit("tagbox", m_tag_x, m_tag_y, m_tag_w, m_tag_h, m_state.trade_tag, false);
       m_w.Hide("tagbox", false);
@@ -1249,32 +1252,32 @@ private:
       //| reason a person practises on a replay.                           |
       //+------------------------------------------------------------------+
       int gy = y + 60;
-      m_w.Group("g2", x, gy, w, 92, "Stop & target");
+      m_w.Group("g2", x, gy, w, 92, T(SSR_S_GRP_STOP_TARGET));
 
       if(!m_state.lines_armed)
         {
          m_w.Button("armbtn", x + 8, gy + 13, w - 16, SSR_BTN_H,
-                    "Place SL / TP lines on the chart", false, m_state.can_trade);
+                    T(SSR_S_PLACE_LINES), false, m_state.can_trade);
          Text(12, "hintrow", x + 8, gy + 40,
               m_state.can_trade
-              ? "Then drag them. Buy / Sell would open with no stop until you do."
-              : "Waiting for the first price.",
+              ? T(SSR_S_THEN_DRAG)
+              : T(SSR_S_WAITING_PRICE),
               SSR_C_TEXT_DIM, SSR_FS_SMALL);
         }
       else
         {
          //--- the side is read from the geometry, never asked for
          Text(12, "setuprow", x + 8, gy + 12,
-              m_state.line_long ? "LONG setup - stop below, target above"
-                                : "SHORT setup - stop above, target below",
+              m_state.line_long ? T(SSR_S_LONG_SETUP)
+                                : T(SSR_S_SHORT_SETUP),
               m_state.line_long ? SSR_C_RUN : SSR_C_STOP, SSR_FS_SMALL);
 
          Text(13, "slrow", x + 8, gy + 24,
-              StringFormat("Stop      %s      %s",
+              StringFormat(T(SSR_S_STOP_ROW),
                            Price(m_state.sl_price),
                            Money(-m_state.risk_money, true)), SSR_C_TEXT);
          Text(14, "tprow", x + 8, gy + 36,
-              StringFormat("Target    %s      %s",
+              StringFormat(T(SSR_S_TARGET_ROW),
                            Price(m_state.tp_price),
                            Money(m_state.reward_money, true)), SSR_C_TEXT);
          Text(15, "rrrow", x + w - 96, gy + 24,
@@ -1282,8 +1285,8 @@ private:
               SSR_C_TEXT_DIM);
          Text(16, "sizerow", x + w - 96, gy + 36,
               m_state.lot_from_risk > 0.0
-              ? StringFormat("%.2f lot", m_state.lot_from_risk)
-              : "no size",
+              ? StringFormat(T(SSR_S_LOT), m_state.lot_from_risk)
+              : T(SSR_S_NO_SIZE),
               m_state.lot_from_risk > 0.0 ? SSR_C_TEXT_DIM : SSR_C_STOP);
 
          //--- WHY it cannot be placed, in the words of the drag that
@@ -1304,24 +1307,26 @@ private:
          m_w.ButtonC("openln", x + 8, gy + 46, w - 16, 22,
                      m_state.lot_from_risk > 0.0
                      ? (m_state.entry_armed
-                        ? StringFormat("Place %s  %.2f lot",
+                        ? StringFormat(T(SSR_S_PLACE_ORDER),
                                        m_state.order_name,
                                        m_state.lot_from_risk)
-                        : StringFormat("Open %s  %.2f lot",
-                                       (m_state.line_long ? "LONG" : "SHORT"),
+                        : StringFormat(T(SSR_S_OPEN_ORDER),
+                                       (m_state.line_long ? T(SSR_S_LONG)
+                                                          : T(SSR_S_SHORT)),
                                        m_state.lot_from_risk))
-                     : (m_state.order_why != "" ? "Cannot place this order yet"
-                                                : "Open - no size at this stop"),
+                     : (m_state.order_why != "" ? T(SSR_S_CANNOT_PLACE)
+                                                : T(SSR_S_OPEN_NO_SIZE)),
                      m_state.lot_from_risk <= 0.0 ? SSR_C_DEAL_DIM
                      : (m_state.line_long ? SSR_C_BUY : SSR_C_SELL),
                      m_state.lot_from_risk <= 0.0 ? SSR_C_DEAL_DIM
                      : (m_state.line_long ? SSR_C_BUY_EDGE : SSR_C_SELL_EDGE),
                      SSR_C_DEAL_TEXT, SSR_FS_TITLE);
          int bw3 = (w - 28) / 3;
-         m_w.Button("flipbtn", x + 8, gy + 70, bw3, 18, "Flip  X");
+         m_w.Button("flipbtn", x + 8, gy + 70, bw3, 18, T(SSR_S_FLIP));
          m_w.Button("enbtn",   x + 14 + bw3, gy + 70, bw3, 18,
-                    m_state.entry_armed ? "At market" : "Entry line");
-         m_w.Button("clrbtn",  x + 20 + bw3 * 2, gy + 70, bw3, 18, "Remove");
+                    m_state.entry_armed ? T(SSR_S_AT_MARKET)
+                                        : T(SSR_S_ENTRY_LINE));
+         m_w.Button("clrbtn",  x + 20 + bw3 * 2, gy + 70, bw3, 18, T(SSR_S_REMOVE));
         }
 
       //--- the deal buttons. The side the lines did not draw is dimmed,
@@ -1334,12 +1339,12 @@ private:
                       (m_state.lines_armed &&  m_state.line_long);
 
       m_w.ButtonC("buy", x, dy, dw, 24,
-                  StringFormat("Buy  %s", Price(m_state.ask)),
+                  StringFormat(T(SSR_S_BUY_BTN), Price(m_state.ask)),
                   dim_buy ? SSR_C_DEAL_DIM : SSR_C_BUY,
                   dim_buy ? SSR_C_DEAL_DIM : SSR_C_BUY_EDGE,
                   SSR_C_DEAL_TEXT, SSR_FS_TITLE);
       m_w.ButtonC("sell", x + dw + SSR_GAP, dy, dw, 24,
-                  StringFormat("Sell  %s", Price(m_state.bid)),
+                  StringFormat(T(SSR_S_SELL_BTN), Price(m_state.bid)),
                   dim_sell ? SSR_C_DEAL_DIM : SSR_C_SELL,
                   dim_sell ? SSR_C_DEAL_DIM : SSR_C_SELL_EDGE,
                   SSR_C_DEAL_TEXT, SSR_FS_TITLE);
@@ -1370,12 +1375,12 @@ private:
       int cap   = PosCap();
       int shown = (m_state.pos_rows < cap ? m_state.pos_rows : cap);
 
-      m_w.Group("g1", x, y, w, gh, "Open positions");
+      m_w.Group("g1", x, y, w, gh, T(SSR_S_GRP_OPEN_POSITIONS));
 
       if(shown <= 0)
         {
          Text(20, "posempty", x + 8, y + 16,
-              "Nothing open. Place the lines (L), drag the stop, press Open.",
+              T(SSR_S_NOTHING_OPEN),
               SSR_C_TEXT_DIM, SSR_FS_SMALL);
         }
       else
@@ -1411,9 +1416,10 @@ private:
             //+------------------------------------------------------------------+
             string note = "";
             if(!m_state.pos_pending[r] && m_state.pos_no_stop[r])
-               note = "  no stop";
+               note = T(SSR_S_NO_STOP);
             else if(!m_state.pos_pending[r] && m_state.pos_spread[r] > 0.0)
-               note = StringFormat("  sp %.1f", m_state.pos_spread[r]);
+               note = "  " + StringFormat(T(SSR_S_SPREAD_SHORT),
+                                           m_state.pos_spread[r]);
 
             Text(80 + r, "pr" + t, x + 8, ry + 3, m_state.pos_text[r],
                  SSR_C_TEXT);
@@ -1436,7 +1442,7 @@ private:
             //--- a pending has no result yet, and 0.00 beside real
             //--- positions reads as break-even rather than as "not yet"
             if(m_state.pos_pending[r])
-               Text(92 + r, "pl" + t, x + w - 116, ry + 3, "waiting",
+               Text(92 + r, "pl" + t, x + w - 116, ry + 3, T(SSR_S_WAITING),
                     SSR_C_HOLD);
             else
                Text(92 + r, "pl" + t, x + w - 116, ry + 3,
@@ -1483,7 +1489,7 @@ private:
               SSR_C_STOP, SSR_FS_SMALL);
       else
          Text(31, "poshint", x + 8, hy,
-              "H halves   B stop to entry   X closes",
+              T(SSR_S_ROW_HINT),
               SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
       //+------------------------------------------------------------------+
@@ -1496,30 +1502,30 @@ private:
       //+------------------------------------------------------------------+
       if(m_state.open_positions > shown)
          Text(30, "posmore", x + w - 92, hy,
-              StringFormat("+%d not shown", m_state.open_positions - shown),
+              StringFormat(T(SSR_S_NOT_SHOWN), m_state.open_positions - shown),
               SSR_C_HOLD, SSR_FS_SMALL);
       else
          m_w.Remove("posmore");
 
       int by = y + gh + 4;
       int bw = (w - SSR_GAP) / 2;
-      m_w.Button("be",   x, by, bw, SSR_BTN_H, "Break-even all",
+      m_w.Button("be",   x, by, bw, SSR_BTN_H, T(SSR_S_BREAK_EVEN_ALL),
                  false, m_state.open_positions > 0);
-      m_w.Button("flat", x + bw + SSR_GAP, by, bw, SSR_BTN_H, "Close all",
+      m_w.Button("flat", x + bw + SSR_GAP, by, bw, SSR_BTN_H, T(SSR_S_CLOSE_ALL),
                  false, m_state.open_positions > 0);
 
       //--- the trailing distance, in points, applied to what is open now
       //--- AND to whatever opens next
       int ty = by + SSR_BTN_H + 4;
       Text(32, "trlbl", x + 8, ty + 3,
-           StringFormat("Trailing stop   %s",
+           StringFormat(T(SSR_S_TRAILING_STOP),
                         m_state.trail_points > 0.0
-                        ? StringFormat("%.0f pt", m_state.trail_points)
-                        : "off"),
+                        ? StringFormat(T(SSR_S_PT), m_state.trail_points)
+                        : T(SSR_S_OFF)),
            m_state.trail_points > 0.0 ? SSR_C_RUN : SSR_C_TEXT_DIM);
       m_w.Button("trdn", x + w - 86, ty, 18, SSR_ROW_H, "-");
       m_w.Button("trup", x + w - 64, ty, 18, SSR_ROW_H, "+");
-      m_w.Button("troff", x + w - 42, ty, 42, SSR_ROW_H, "off");
+      m_w.Button("troff", x + w - 42, ty, 42, SSR_ROW_H, T(SSR_S_OFF));
      }
 
    //----------------------------------------------------------------
@@ -1527,26 +1533,29 @@ private:
    //----------------------------------------------------------------
    void              SheetStats(const int x, const int y, const int w)
      {
-      m_w.Group("g1", x, y, w, 68, "Account");
+      m_w.Group("g1", x, y, w, 68, T(SSR_S_GRP_ACCOUNT));
       Text(30, "st1", x + 8, y + 14,
-           StringFormat("Balance      %s", Money(m_state.balance)), SSR_C_TEXT);
+           StringFormat("%-12s %s", T(SSR_S_BALANCE),
+                        Money(m_state.balance)), SSR_C_TEXT);
       Text(31, "st2", x + 8, y + 28,
-           StringFormat("Equity       %s", Money(m_state.equity)), SSR_C_TEXT);
+           StringFormat("%-12s %s", T(SSR_S_EQUITY),
+                        Money(m_state.equity)), SSR_C_TEXT);
       Text(32, "st3", x + 8, y + 42,
-           StringFormat("Floating     %s", Money(m_state.floating, true)),
+           StringFormat("%-12s %s", T(SSR_S_FLOATING),
+                        Money(m_state.floating, true)),
            m_state.floating >= 0.0 ? SSR_C_RUN : SSR_C_STOP);
 
-      m_w.Group("g2", x, y + 72, w, 68, "This run");
+      m_w.Group("g2", x, y + 72, w, 68, T(SSR_S_GRP_THIS_RUN));
       Text(33, "st4", x + 8, y + 86,
-           StringFormat("Bars         %d", (int)m_state.bars_consumed),
+           StringFormat("%-12s %d", T(SSR_S_BARS), (int)m_state.bars_consumed),
            SSR_C_TEXT_DIM);
       Text(34, "st5", x + 8, y + 100,
-           StringFormat("Ticks        %d", (int)m_state.ticks_emitted),
+           StringFormat("%-12s %d", T(SSR_S_TICKS), (int)m_state.ticks_emitted),
            SSR_C_TEXT_DIM);
       //--- rejected ticks are shown even when zero. A counter that only
       //--- appears when it is non-zero teaches nobody what it counts.
       Text(35, "st6", x + 8, y + 114,
-           StringFormat("Rejected     %d      guard %d",
+           StringFormat(T(SSR_S_REJECTED_GUARD), T(SSR_S_REJECTED),
                         (int)m_state.ticks_rejected,
                         (int)m_state.guard_violations),
            m_state.ticks_rejected > 0 ? SSR_C_HOLD : SSR_C_TEXT_DIM);
@@ -1554,7 +1563,7 @@ private:
       //--- the statement. On the Stats sheet because that is where a
       //--- person is already looking at what the session did.
       m_w.Button("stmt", x, y + 146, w, SSR_BTN_H,
-                 "Save HTML statement", false, m_state.can_trade);
+                 T(SSR_S_SAVE_STATEMENT), false, m_state.can_trade);
 
       //+------------------------------------------------------------------+
       //| THE EVALUATION MOVED OFF THIS SHEET.                             |
@@ -1570,7 +1579,7 @@ private:
       //+------------------------------------------------------------------+
       if(m_state.prop_on)
          Text(36, "st7", x + 8, y + 146 + SSR_BTN_H + 2,
-              "Evaluation  ->  the Prop tab", SSR_C_TEXT_DIM, SSR_FS_SMALL);
+              T(SSR_S_EVAL_SEE_PROP_TAB), SSR_C_TEXT_DIM, SSR_FS_SMALL);
       else
          m_w.Remove("st7");
      }
@@ -1629,22 +1638,22 @@ private:
 
       //--- 1. the profit target. Filling up is the good direction, so
       //--- this is the one meter that must NOT go red when it is full.
-      PropRow(62, 0, x, ry, w, "Profit target",
+      PropRow(62, 0, x, ry, w, T(SSR_S_PROFIT_TARGET),
               (m_state.prop_target_pct > 0.0
                ? StringFormat("%+.2f%% of %+.1f%%",
                               m_state.prop_profit_pct, m_state.prop_target_pct)
-               : StringFormat("%+.2f%%   (no target)", m_state.prop_profit_pct)),
+               : StringFormat(T(SSR_S_NO_TARGET), m_state.prop_profit_pct)),
               m_state.prop_progress, SSR_C_RUN, false);
       ry += rh;
 
       //--- 2. the daily limit - the rule that ends most real challenges,
       //--- and the one that had no picture at all until now
-      PropRow(64, 1, x, ry, w, "Daily loss",
+      PropRow(64, 1, x, ry, w, T(SSR_S_DAILY_LOSS),
               (m_state.prop_daily_pct > 0.0
-               ? StringFormat("%d%% used   floor %s",
+               ? StringFormat(T(SSR_S_USED_FLOOR),
                               (int)MathRound(m_state.prop_daily_used * 100.0),
                               Money(m_state.prop_daily_floor))
-               : "no daily limit"),
+               : T(SSR_S_NO_DAILY_LIMIT)),
               m_state.prop_daily_used, SSR_C_HOLD, true);
       ry += rh;
 
@@ -1652,24 +1661,24 @@ private:
       //--- trailing floor that moves under a trader who thinks it is
       //--- static is the most expensive surprise in this whole product.
       PropRow(66, 2, x, ry, w,
-              (m_state.prop_total_pct <= 0.0 ? "Drawdown"
-               : (m_state.prop_trailing ? "Drawdown (trailing)"
-                                        : "Drawdown (static)")),
+              (m_state.prop_total_pct <= 0.0 ? T(SSR_S_DRAWDOWN)
+               : (m_state.prop_trailing ? T(SSR_S_DRAWDOWN_TRAILING)
+                                        : T(SSR_S_DRAWDOWN_STATIC))),
               (m_state.prop_total_pct > 0.0
-               ? StringFormat("%d%% used   floor %s",
+               ? StringFormat(T(SSR_S_USED_FLOOR),
                               (int)MathRound(m_state.prop_total_used * 100.0),
                               Money(m_state.prop_total_floor))
-               : "no drawdown limit"),
+               : T(SSR_S_NO_DRAWDOWN_LIMIT)),
               m_state.prop_total_used, SSR_C_HOLD, true);
       ry += rh;
 
       //--- 4. the days. Filling up is good again: this is a minimum to
       //--- REACH, and most people are surprised it exists at all.
-      PropRow(68, 3, x, ry, w, "Trading days",
+      PropRow(68, 3, x, ry, w, T(SSR_S_TRADING_DAYS),
               (m_state.prop_days_min > 0
-               ? StringFormat("%d of %d needed",
+               ? StringFormat(T(SSR_S_DAYS_NEEDED),
                               m_state.prop_days, m_state.prop_days_min)
-               : StringFormat("%d  (no minimum)", m_state.prop_days)),
+               : StringFormat(T(SSR_S_NO_MINIMUM), m_state.prop_days)),
               m_state.prop_days_progress, SSR_C_PRIMARY_EDGE, false);
       ry += rh;
 
@@ -1679,7 +1688,7 @@ private:
       if(m_state.prop_days_max > 0)
         {
          Text(70, "pp_dl", x, ry,
-              StringFormat("Day %d of %d elapsed",
+              StringFormat(T(SSR_S_DAY_OF_ELAPSED),
                            m_state.prop_days_elapsed, m_state.prop_days_max),
               (m_state.prop_deadline_used >= 0.8 ? SSR_C_HOLD : SSR_C_TEXT_DIM),
               SSR_FS_SMALL);
@@ -1698,7 +1707,7 @@ private:
          //--- mid-run would be a button whose only use is to erase a
          //--- bad day.
          m_w.Button("pp_reset", x, ry, w, SSR_BTN_H - 4,
-                    "Reset evaluation", false, true);
+                    T(SSR_S_RESET_EVALUATION), false, true);
         }
       else
         {
@@ -1730,30 +1739,32 @@ private:
    //----------------------------------------------------------------
    void              SheetSession(const int x, const int y, const int w)
      {
-      m_w.Group("g1", x, y, w, 68, "Session");
+      m_w.Group("g1", x, y, w, 68, T(SSR_S_GRP_SESSION));
       Text(40, "ses1", x + 8, y + 14,
-           StringFormat("Bookmarks    %d", m_state.bookmarks), SSR_C_TEXT_DIM);
+           StringFormat("%-12s %d", T(SSR_S_BOOKMARKS), m_state.bookmarks),
+           SSR_C_TEXT_DIM);
       Text(41, "ses2", x + 8, y + 28,
-           StringFormat("Streams      %d      skew %d ms",
+           StringFormat(T(SSR_S_STREAMS_SKEW), T(SSR_S_STREAMS),
                         m_state.streams, (int)m_state.skew_msc),
            m_state.skew_msc == 0 ? SSR_C_TEXT_DIM : SSR_C_STOP);
       Text(42, "ses3", x + 8, y + 42,
-           m_state.leak_clean ? "Charts       clean"
-                              : "Charts       " + m_state.leak_advice,
+           StringFormat("%-12s %s", T(SSR_S_CHARTS),
+                        m_state.leak_clean ? T(SSR_S_CHARTS_CLEAN)
+                                           : m_state.leak_advice),
            m_state.leak_clean ? SSR_C_TEXT_DIM : SSR_C_HOLD);
 
-      m_w.Group("g2", x, y + 72, w, 68, "Keyboard");
+      m_w.Group("g2", x, y + 72, w, 68, T(SSR_S_GRP_KEYBOARD));
       Text(43, "ses4", x + 8, y + 86,
-           "Space play/pause    < > step    PgUp/PgDn x10",
+           T(SSR_S_KEYS_1),
            SSR_C_TEXT_DIM, SSR_FS_SMALL);
       Text(44, "keyhint", x + 8, y + 99,
-           "+ - speed    R reset    J jump    B bookmark",
+           T(SSR_S_KEYS_2),
            SSR_C_TEXT_DIM, SSR_FS_SMALL);
       Text(45, "ses5", x + 8, y + 112,
-           "S sessions   F follow   D fidelity   L lines   X flip",
+           T(SSR_S_KEYS_3),
            SSR_C_TEXT_DIM, SSR_FS_SMALL);
       Text(46, "ses6", x + 8, y + 125,
-           "caption:  [] corner    -  collapse    X  close",
+           T(SSR_S_KEYS_4),
            SSR_C_TEXT_DIM, SSR_FS_SMALL);
      }
 
@@ -1807,8 +1818,7 @@ private:
          Text(50, "stbal", x + SSR_PAD, y + 4,
               //--- 59 characters at a three-digit width, and TooNarrow
               //--- cannot fire at four: MetaTrader draws 63
-              StringFormat("chart is %d px, panel needs %d - controls "
-                           "are off the edge",
+              StringFormat(T(SSR_S_TOO_NARROW),
                            (int)ChartGetInteger(m_chart, CHART_WIDTH_IN_PIXELS),
                            SSR_PANEL_W),
               SSR_C_HOLD, SSR_FS_SMALL);
@@ -1845,20 +1855,20 @@ private:
         }
 
       Text(50, "stbal", x + SSR_PAD, y + 4,
-           StringFormat("Bal %s", Money(m_state.balance)), SSR_C_TEXT_DIM,
+           StringFormat(T(SSR_S_BAL), Money(m_state.balance)), SSR_C_TEXT_DIM,
            SSR_FS_SMALL);
       Text(51, "stflt", x + 116, y + 4,
-           StringFormat("Float %s", Money(m_state.floating, true)),
+           StringFormat(T(SSR_S_FLOAT), Money(m_state.floating, true)),
            m_state.floating >= 0.0 ? SSR_C_RUN : SSR_C_STOP, SSR_FS_SMALL);
       Text(52, "stopen", x + 218, y + 4,
-           StringFormat("%d open", m_state.open_positions),
+           StringFormat(T(SSR_S_N_OPEN), m_state.open_positions),
            SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
       //--- SHOW WHAT IS RUNNING, NOT WHAT WAS ASKED FOR. A tool that
       //--- displays the request while emitting something else is the
       //--- quiet dishonesty this whole product exists to avoid.
       Text(54, "stspread", x + 268, y + 4,
-           StringFormat("sp %.1f", m_state.spread_points),
+           StringFormat(T(SSR_S_SPREAD_SHORT), m_state.spread_points),
            SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
       bool degraded = (m_state.fidelity_effective != m_state.fidelity);

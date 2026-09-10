@@ -29,6 +29,7 @@
 #define SSR_REVEAL_CARD_MQH
 
 #include "SSR_Theme.mqh"
+#include "SSR_Strings.mqh"
 #include "SSR_Widgets.mqh"
 
 #define SSR_REVEAL_W  360
@@ -83,13 +84,13 @@ public:
                SSR_C_PANEL, SSR_C_PANEL_EDGE);
       m_w.Rect("hdr", x + 1, y + 1, SSR_REVEAL_W - 2, SSR_HEADER_H,
                SSR_C_HEADER, SSR_C_GROUP_EDGE);
-      m_w.Label("title", x + 12, y + 5, "SESSION COMPLETE",
+      m_w.Label("title", x + 12, y + 5, T(SSR_S_SESSION_COMPLETE),
                 SSR_C_TEXT, SSR_FS_TITLE);
-      m_w.Chip("chip", x + SSR_REVEAL_W - 58, y + 4, "BLIND",
+      m_w.Chip("chip", x + SSR_REVEAL_W - 58, y + 4, T(SSR_S_BLIND),
                SSR_C_HOLD, SSR_C_WELL);
 
       m_w.Label("l1", x + 12, y + 34,
-                "The market is still hidden.", SSR_C_TEXT, SSR_FS_BODY);
+                T(SSR_S_STILL_HIDDEN), SSR_C_TEXT, SSR_FS_BODY);
 
       //--- what the session did, in the words of whoever counted it
       if(m_headline != "")
@@ -99,14 +100,14 @@ public:
          m_w.Remove("l2");
 
       m_w.Label("l3", x + 12, y + 72,
-                "Revealing puts the instrument, the dates and the price",
+                T(SSR_S_REVEAL_EXPLAIN_1),
                 SSR_C_TEXT_DIM, SSR_FS_SMALL);
       m_w.Label("l4", x + 12, y + 84,
-                "scale back exactly as they were before this session.",
+                T(SSR_S_REVEAL_EXPLAIN_2),
                 SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
       m_w.ButtonC("reveal", x + 12, y + SSR_REVEAL_H - 34,
-                  SSR_REVEAL_W - 24, 26, "REVEAL THE MARKET",
+                  SSR_REVEAL_W - 24, 26, T(SSR_S_REVEAL_BUTTON),
                   SSR_C_PRIMARY, SSR_C_PRIMARY_EDGE, SSR_C_PRIMARY_TEXT,
                   SSR_FS_TITLE);
 

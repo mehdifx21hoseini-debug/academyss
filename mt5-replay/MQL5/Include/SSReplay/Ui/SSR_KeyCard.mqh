@@ -25,6 +25,7 @@
 #define SSR_KEY_CARD_MQH
 
 #include "../Common/SSR_Types.mqh"
+#include "SSR_Strings.mqh"
 #include "SSR_Theme.mqh"
 #include "SSR_Widgets.mqh"
 #include "SSR_Keys.mqh"
@@ -75,8 +76,8 @@ public:
       int h = 34 + rows * SSR_KEYCARD_ROW + 26;
 
       m_w.Rect("bg", x, y, SSR_KEYCARD_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
-      m_w.Label("t", x + 12, y + 9, "KEYS", SSR_C_HOLD, SSR_FS_BODY);
-      m_w.Label("t2", x + 62, y + 10, "H closes this again",
+      m_w.Label("t", x + 12, y + 9, T(SSR_S_KEYCARD_TITLE), SSR_C_HOLD, SSR_FS_BODY);
+      m_w.Label("t2", x + 62, y + 10, T(SSR_S_KEYCARD_CLOSE),
                 SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
       int ry = y + 32;
@@ -94,7 +95,7 @@ public:
         }
 
       m_w.Label("foot", x + 12, ry + 6,
-                "Every trade here is virtual. Nothing reaches a broker.",
+                T(SSR_S_ALL_VIRTUAL),
                 SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
       ChartRedraw(m_chart);

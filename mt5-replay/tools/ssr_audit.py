@@ -1183,7 +1183,236 @@ def audit_a18():
                "table like this eventually has." % declared)
 
 
-for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13, audit_a14, audit_a15, audit_a16, audit_a17, audit_a18):
+#--- the text argument's INDEX in each drawing call. This is the whole
+#--- trick: the first argument of every one of them is an OBJECT NAME,
+#--- which must never be translated, and a scan that looked for "any
+#--- literal near a draw call" would report every one of them.
+SSR_DRAW_TEXT_ARG = {"Label": 3, "Button": 5, "ButtonC": 5, "Chip": 3,
+                     "Group": 5, "Toast": 4, "Edit": 5, "Text": 4}
+
+#--- a product name is not a string to translate, in any language
+SSR_I18N_ALLOWED = ("SS Replay",)
+
+
+def _decomment(text):
+    """Comments out, STRINGS KEPT.
+
+    The shared strip_comments() blanks string literals as well, which is
+    right for every audit that looks for code and catastrophic for this
+    one: A19 would find no literals anywhere and pass by having nothing
+    to check. A17 learned the same lesson from the other direction -
+    C'196,74,64' is single-quoted, so the shared stripper ate it.
+    """
+    out, i, n = [], 0, len(text)
+    while i < n:
+        c = text[i]
+        if c == "/" and i + 1 < n and text[i + 1] == "/":
+            j = text.find("\n", i)
+            j = n if j < 0 else j
+            out.append(" " * (j - i))
+            i = j
+        elif c == "/" and i + 1 < n and text[i + 1] == "*":
+            j = text.find("*/", i + 2)
+            j = n if j < 0 else j + 2
+            out.append("".join(ch if ch == "\n" else " " for ch in text[i:j]))
+            i = j
+        elif c == '"':
+            j = i + 1
+            while j < n and text[j] != '"':
+                j += 2 if text[j] == "\\" else 1
+            j = min(j + 1, n)
+            out.append(text[i:j])
+            i = j
+        else:
+            out.append(c)
+            i += 1
+    return "".join(out)
+
+
+def _split_args(src, at):
+    """Arguments of the call whose '(' is at src[at]. Quote-aware, so a
+    comma inside a string does not split an argument in half."""
+    depth, cur, out, instr, j = 0, "", [], False, at
+    while j < len(src):
+        c = src[j]
+        if instr:
+            cur += c
+            if c == "\\":
+                cur += src[j + 1]
+                j += 2
+                continue
+            if c == '"':
+                instr = False
+            j += 1
+            continue
+        if c == '"':
+            instr = True
+            cur += c
+            j += 1
+            continue
+        if c == "(":
+            depth += 1
+            if depth == 1:
+                j += 1
+                continue
+            cur += c
+            j += 1
+            continue
+        if c == ")":
+            depth -= 1
+            if depth == 0:
+                out.append(cur)
+                return out
+            cur += c
+            j += 1
+            continue
+        if c == "," and depth == 1:
+            out.append(cur)
+            cur = ""
+            j += 1
+            continue
+        cur += c
+        j += 1
+    return out
+
+
+def audit_a19():
+    """A word drawn from a literal is a word that cannot be translated.
+
+    Phase 10 moved 176 strings into SSR_Strings.mqh. Nothing stops the
+    177th being written inline next week - and it would not fail, or
+    warn, or look wrong: it would simply be the one label that stays
+    English when the panel is Persian, which is harder to notice than a
+    label that is missing.
+
+    Two checks, and the second is the one that matters:
+
+      1. The enum and the table agree. A value with no SSRAddString line
+         draws BLANK - not wrong, blank - which reads as a rendering
+         fault rather than a missing string.
+
+      2. No drawing call takes a literal as its TEXT argument. The text
+         argument's position differs per call and every one of these
+         functions takes an OBJECT NAME first, so the position is
+         looked up rather than guessed; a scan for "a literal near a
+         draw call" would report every object name in the product.
+    """
+    strings = None
+    for path in FILES:
+        if os.path.basename(path) == "SSR_Strings.mqh":
+            strings = path
+            break
+    if strings is None:
+        return
+
+    src = FILES[strings]
+    m = re.search(r"enum ENUM_SSR_STR\s*\{(.*?)\};", src, re.S)
+    if m:
+        ids = [x.group(1) for x in re.finditer(r"^\s*(SSR_S_\w+)", m.group(1), re.M)]
+        ids = [i for i in ids if i != "SSR_S_COUNT"]
+        listed = set(re.findall(r"SSRAddString\(out, n, (SSR_S_\w+),", src))
+        for i in ids:
+            if i not in listed:
+                report("A19", strings, 1,
+                       "%s is in the enum and has no SSRAddString line. It "
+                       "will draw BLANK - which reads as a rendering fault, "
+                       "not as a missing string." % i)
+
+    #+------------------------------------------------------------------+
+    #| THE 63-CHARACTER CUT, FOR EVERY LANGUAGE.                        |
+    #|                                                                  |
+    #| MetaTrader stores OBJPROP_TEXT in full and DRAWS 63 characters.  |
+    #| Nothing errors. "Then drag them. Buy / Sell would open with no   |
+    #| stop until you do." was 64 and had its last character cut on     |
+    #| every chart since it shipped - mid-word, which reads as a        |
+    #| rendering fault rather than a limit.                             |
+    #|                                                                  |
+    #| A translation makes this worse, not better: the translator has   |
+    #| no way to know the limit exists, and a language that runs longer |
+    #| than English will hit it on strings English cleared. So every    |
+    #| file under MQL5/Files/SSReplay/lang is checked too.              |
+    #+------------------------------------------------------------------+
+    for em in re.finditer(
+            r'SSRAddString\(out, n, (SSR_S_\w+),\s*\n?\s*"([^"]*)",'
+            r'\s*\n?\s*"((?:[^"\\]|\\.)*)"\)', src):
+        text = em.group(3).replace('\\"', '"')
+        if len(text) > 63:
+            report("A19", strings, src[:em.start()].count("\n") + 1,
+                   "%s is %d characters and MetaTrader draws 63. The end of "
+                   "it will not be on the chart, and nothing will say so."
+                   % (em.group(1), len(text)))
+
+    langdir = os.path.join(ROOT, "MQL5", "Files", "SSReplay", "lang")
+    if os.path.isdir(langdir):
+        for fn_ in sorted(os.listdir(langdir)):
+            if not fn_.endswith(".txt"):
+                continue
+            full = os.path.join(langdir, fn_)
+            with open(full, encoding="utf-8") as fh:
+                for ln, line in enumerate(fh, 1):
+                    line = line.rstrip("\n")
+                    st = line.strip()
+                    if not st or st.startswith("#") or "=" not in st:
+                        continue
+                    val = st.split("=", 1)[1].strip()
+                    if len(val) > 63:
+                        report("A19", full, ln,
+                               "this translation is %d characters and "
+                               "MetaTrader draws 63. A translator cannot see "
+                               "that limit; this is the only place it is "
+                               "checked." % len(val))
+
+    call = re.compile(r"\b(?:m_w\.)?(Label|ButtonC|Button|Chip|Group|Toast|Edit|Text)\s*\(")
+    lit  = re.compile(r'"((?:[^"\\]|\\.)*)"')
+    seen = [0, 0]        # [literals reported, T() calls found]
+    for path in FILES:
+        base = os.path.basename(path)
+        #--- Widgets DEFINES these calls, Strings holds the catalogue
+        #--- itself, and Layout draws nothing.
+        if base in ("SSR_Strings.mqh", "SSR_Widgets.mqh", "SSR_Layout.mqh"):
+            continue
+        if "/Ui/" not in path.replace("\\", "/"):
+            continue
+        code = _decomment(FILES[path])
+        for c in call.finditer(code):
+            fn = c.group(1)
+            at = code.find("(", c.end() - 1)
+            if at < 0:
+                continue
+            a = _split_args(code, at)
+            idx = SSR_DRAW_TEXT_ARG[fn]
+            if idx >= len(a):
+                continue
+            for text in lit.findall(a[idx]):
+                if text in SSR_I18N_ALLOWED:
+                    continue
+                #--- symbols and punctuation are not words: "<<", "+", "X"
+                if not re.search(r"[A-Za-z]{2}", text):
+                    continue
+                line = code[:c.start()].count("\n") + 1
+                seen[0] += 1
+                report("A19", path, line,
+                       "%s draws the literal \"%s\". Put it in "
+                       "SSR_Strings.mqh and call T(). A word written here "
+                       "is the one label that stays English when the rest "
+                       "of the panel is not." % (fn, text))
+            if "T(SSR_S_" in a[idx]:
+                seen[1] += 1
+
+    #--- THE VACUOUS PASS. If the argument-position table stopped
+    #--- matching the widget signatures, this audit would look at the
+    #--- wrong argument of every call, find nothing, and report success
+    #--- forever. It only passes if it can SEE the conversion it exists
+    #--- to protect.
+    if seen[1] < 100:
+        report("A19", strings, 1,
+               "only %d drawing calls resolve to T(SSR_S_...). This audit "
+               "finds the text argument by POSITION, so a widget whose "
+               "signature changed would make it read the wrong argument "
+               "everywhere and pass by finding nothing." % seen[1])
+
+
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13, audit_a14, audit_a15, audit_a16, audit_a17, audit_a18, audit_a19):
     fn()
 
 if findings:
