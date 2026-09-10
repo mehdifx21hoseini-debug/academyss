@@ -83,6 +83,8 @@ private:
    SSRSymbolStats    m_stats;
 
    ENUM_SSR_ERR      m_last_error;
+   int               m_session_days;   // days whose quote session covers 24h
+   string            m_session_note;   // why not, when it is not 7
    string            m_last_error_text;
 
    void              Fail(const ENUM_SSR_ERR e, const string t)
@@ -99,21 +101,99 @@ private:
    //| happening on the target build; setting 24/7 costs nothing either |
    //| way, so it is set unconditionally.                               |
    //+------------------------------------------------------------------+
-   void              Apply247Sessions(void)
+   //+------------------------------------------------------------------+
+   //| A TICK OUTSIDE THE QUOTE SESSION BUILDS NO BAR.                  |
+   //|                                                                  |
+   //| This was fourteen calls and nobody looked at one of them, and it  |
+   //| is the best candidate this project has ever had for the defect    |
+   //| that has outlived every other: "the candles do not build from the |
+   //| ticks". The first reproducible case arrived on US30.U26 -         |
+   //|                                                                  |
+   //|   60 calls offered ticks, the terminal took 481 and refused 0,    |
+   //|   and the M1 series stayed at 139 bars.                           |
+   //|                                                                  |
+   //| Accepted, stored, and no bar made from any of them. CustomTicksAdd|
+   //| does not refuse a tick outside the symbol's QUOTE SESSION - it    |
+   //| keeps it and builds nothing. Meanwhile the warmup and the jump    |
+   //| both worked in that same run, and both write RATES, which ignore  |
+   //| sessions entirely. Ticks fail, rates succeed: that is the split.  |
+   //|                                                                  |
+   //| WHY IT IS SYMBOL-SPECIFIC, and why four earlier runs looked like  |
+   //| luck. A forex symbol has ONE quote session a day, so writing      |
+   //| session 0 over the whole day replaces it and succeeds. An index   |
+   //| future has two or three - it closes for a daily break - and a new |
+   //| session 0 spanning midnight to midnight OVERLAPS the ones the     |
+   //| clone inherited. MetaTrader refuses an overlapping session, this  |
+   //| code never asked, and the symbol kept the origin's trading hours. |
+   //| Every tick the engine replayed outside those hours then vanished  |
+   //| into the tick history without making a candle.                    |
+   //|                                                                  |
+   //| So: DELETE what was inherited first, then add one session, then   |
+   //| READ IT BACK. The read-back is the part that matters - it is the  |
+   //| difference between this being fixed and this being believed.      |
+   //+------------------------------------------------------------------+
+   int               Apply247Sessions(void)
      {
+      int bad = 0;
+      m_session_note = "";
+
       for(int d = 0; d <= 6; d++)
         {
          ENUM_DAY_OF_WEEK day = (ENUM_DAY_OF_WEEK)d;
-         CustomSymbolSetSessionQuote(m_symbol, day, 0, (datetime)0, (datetime)86399);
-         CustomSymbolSetSessionTrade(m_symbol, day, 0, (datetime)0, (datetime)86399);
+
+         //--- from==to==0 deletes a session and shifts the rest down, so
+         //--- deleting index 0 until it refuses empties the day. Eight is
+         //--- a guard against a terminal that answers true for ever, not
+         //--- a belief about how many sessions a symbol can have.
+         for(int g = 0; g < 8; g++)
+            if(!CustomSymbolSetSessionQuote(m_symbol, day, 0, (datetime)0, (datetime)0))
+               break;
+         for(int g = 0; g < 8; g++)
+            if(!CustomSymbolSetSessionTrade(m_symbol, day, 0, (datetime)0, (datetime)0))
+               break;
+
+         //--- 86400 is midnight to midnight. 86399 left a one-second hole
+         //--- at 23:59:59 that a tick can land in, so it is only the
+         //--- fallback for a build that refuses the round number.
+         if(!CustomSymbolSetSessionQuote(m_symbol, day, 0, (datetime)0, (datetime)86400))
+            if(!CustomSymbolSetSessionQuote(m_symbol, day, 0, (datetime)0, (datetime)86399))
+               bad++;
+         if(!CustomSymbolSetSessionTrade(m_symbol, day, 0, (datetime)0, (datetime)86400))
+            if(!CustomSymbolSetSessionTrade(m_symbol, day, 0, (datetime)0, (datetime)86399))
+               bad++;
         }
+
+      //+------------------------------------------------------------------+
+      //| AND NOW ASK THE TERMINAL WHAT IT ACTUALLY HAS.                   |
+      //|                                                                  |
+      //| Setting a property and trusting the return value is how the      |
+      //| original version of this passed for a year. A read-back is the    |
+      //| only statement worth making about a session table.                |
+      //+------------------------------------------------------------------+
+      int covered = 0;
+      for(int d = 0; d <= 6; d++)
+        {
+         datetime from = 0, to = 0;
+         if(SymbolInfoSessionQuote(m_symbol, (ENUM_DAY_OF_WEEK)d, 0, from, to) &&
+            to - from >= 86399)
+            covered++;
+        }
+      m_session_days = covered;
+
+      if(covered < 7)
+         m_session_note = StringFormat(
+            "%s quotes on only %d day(s) of 7 - a tick outside the quote "
+            "session is ACCEPTED and builds no candle, which is what an "
+            "empty replay looks like", m_symbol, covered);
+      return bad;
      }
 
 public:
                      CSSRCustomSymbolManager(void)
      : m_origin(""), m_symbol(""), m_slot(1), m_anonymous(false),
        m_created(false), m_selected(false),
-       m_digits(5), m_point(0.00001), m_last_error(SSR_OK), m_last_error_text("")
+       m_digits(5), m_point(0.00001), m_last_error(SSR_OK), m_last_error_text(""),
+       m_session_days(0), m_session_note("")
      { m_stats.Init(); }
 
                     ~CSSRCustomSymbolManager(void) {}
@@ -129,6 +209,11 @@ public:
    int               Digits(void)   { return m_digits; }
    double            Point(void)    { return m_point; }
    bool              IsCreated(void){ return m_created; }
+   //--- how many of the seven days the replay symbol will quote on. Seven
+   //--- or the engine's ticks silently build no candles.
+   int               SessionDays(void)   { return m_session_days; }
+   string            SessionNote(void)   { return m_session_note; }
+
    ENUM_SSR_ERR      LastError(void)     { return m_last_error; }
    string            LastErrorText(void) { return m_last_error_text; }
    void              StatsInto(SSRSymbolStats &out) { out = m_stats; }
@@ -234,7 +319,12 @@ public:
       //--- the three overrides the engine depends on
       CustomSymbolSetInteger(m_symbol, SYMBOL_SPREAD_FLOAT, true);
       CustomSymbolSetInteger(m_symbol, SYMBOL_TRADE_MODE, SYMBOL_TRADE_MODE_DISABLED);
+
+      //--- NOT a cosmetic property. A symbol that quotes for six hours a
+      //--- day replays six hours of candles and swallows the rest.
       Apply247Sessions();
+      if(m_session_days < 7)
+         PrintFormat("[symbol] %s", m_session_note);
       CloneMoneyProperties(origin);
 
       //--- CustomTicksAdd only broadcasts to charts for a symbol that is

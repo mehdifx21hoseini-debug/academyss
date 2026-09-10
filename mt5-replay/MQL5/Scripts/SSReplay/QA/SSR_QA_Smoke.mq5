@@ -448,6 +448,49 @@ void OnStart()
    Check("replay symbol is ours",
          (bool)SymbolInfoInteger(rsym, SYMBOL_CUSTOM), "SYMBOL_CUSTOM");
 
+   //+------------------------------------------------------------------+
+   //| THE QUOTE SESSION, READ BACK FROM THE TERMINAL.                  |
+   //|                                                                  |
+   //| The best candidate this project has ever had for "the candles do  |
+   //| not build from the ticks". CustomTicksAdd does NOT refuse a tick  |
+   //| outside the symbol's quote session - it accepts it, stores it,    |
+   //| and builds nothing. On US30.U26 that read exactly like this:      |
+   //|                                                                  |
+   //|   60 calls offered ticks, the terminal took 481 and refused 0,    |
+   //|   and the M1 series stayed at 139 bars.                           |
+   //|                                                                  |
+   //| A forex symbol has one session a day, so overwriting session 0    |
+   //| worked and nobody noticed the code never checked. An index future |
+   //| has two or three, a full-day session OVERLAPS them, and MetaTrader|
+   //| refuses an overlapping session - leaving the clone with the       |
+   //| origin's trading hours and the engine replaying into a closed     |
+   //| market.                                                           |
+   //|                                                                  |
+   //| Asserted BEFORE the tick checks below, because if this fails they |
+   //| are a consequence and not a second fault.                         |
+   //+------------------------------------------------------------------+
+   {
+      int      days = 0;
+      string   worst = "";
+      for(int d = 0; d <= 6; d++)
+        {
+         datetime qf = 0, qt = 0;
+         if(SymbolInfoSessionQuote(rsym, (ENUM_DAY_OF_WEEK)d, 0, qf, qt) &&
+            qt - qf >= 86399)
+            days++;
+         else if(worst == "")
+            worst = StringFormat("day %d quotes %d..%d", d, (int)qf, (int)qt);
+        }
+      Check("the replay symbol quotes on all seven days",
+            days == 7,
+            (days == 7
+             ? "00:00..24:00 every day - a tick outside the quote session is "
+               "accepted and builds no candle"
+             : StringFormat("%d of 7 (%s). The engine's ticks will be taken "
+                            "and no bar made from them, which is what an "
+                            "empty replay looks like", days, worst)));
+   }
+
    //--- THE ACCOUNT LISTENS FROM HERE, not from the trading stage.
    //--- It is fed by the same tick stream the replay emits, so it has
    //--- to be attached before the ticks start or it will have no price
@@ -531,8 +574,9 @@ void OnStart()
    //--- M1, not M5: this stage has to scroll the view away from the
    //--- end, and a chart with fewer bars than fit on screen cannot be
    //--- scrolled at all. M1 has five times as many.
-   long probe = ChartOpen(rsym, PERIOD_M1);
-   if(Check("a chart can be opened on the replay symbol", probe != 0, rsym))
+   string probe_why = "";
+         long probe = OpenChart(rsym, PERIOD_M1, probe_why);
+         if(Check("a chart can be opened on the replay symbol", probe != 0, probe_why))
      {
       ChartSetInteger(probe, CHART_AUTOSCROLL, false);   // as MT5 leaves it
 
@@ -867,8 +911,9 @@ void OnStart()
    //| Dragging needs a mouse. This does not: it asks whether the right  |
    //| objects exist before and after, which is the whole of the bug.    |
    //+------------------------------------------------------------------+
-   long lchart = ChartOpen(rsym, PERIOD_M1);
-   if(Check("a chart for the line test", lchart != 0, rsym))
+   string lchart_why = "";
+         long lchart = OpenChart(rsym, PERIOD_M1, lchart_why);
+         if(Check("a chart for the line test", lchart != 0, lchart_why))
      {
       CSSRTradeLines lines;
       lines.Attach(lchart, (int)SymbolInfoInteger(rsym, SYMBOL_DIGITS),
@@ -1695,8 +1740,9 @@ void OnStart()
    //| user's own layout has done more harm than the stage is worth.     |
    //+------------------------------------------------------------------+
    {
-      long rc = ChartOpen(rsym, PERIOD_M1);
-      if(Check("a chart for the position test", rc != 0, rsym))
+      string rc_why = "";
+         long rc = OpenChart(rsym, PERIOD_M1, rc_why);
+         if(Check("a chart for the position test", rc != 0, rc_why))
         {
          int ax = 0, ay = 0, ac = 0, at = 0;
            {
@@ -1781,8 +1827,9 @@ void OnStart()
    //| that the picture reaches a document someone else opens.            |
    //+------------------------------------------------------------------+
    {
-      long sc = ChartOpen(rsym, PERIOD_M1);
-      if(Check("a chart for the screenshot test", sc != 0, rsym))
+      string sc_why = "";
+         long sc = OpenChart(rsym, PERIOD_M1, sc_why);
+         if(Check("a chart for the screenshot test", sc != 0, sc_why))
         {
          CSSRTradingEngine sa;
          SSRExecutionModel sx;
@@ -1884,8 +1931,9 @@ void OnStart()
    {
       Stash(SSR_PRESET_FILE);
 
-      long pk = ChartOpen(rsym, PERIOD_M1);
-      if(Check("a chart for the preset test", pk != 0, rsym))
+      string pk_why = "";
+         long pk = OpenChart(rsym, PERIOD_M1, pk_why);
+         if(Check("a chart for the preset test", pk != 0, pk_why))
         {
          //--- 21a. NO FILE: the built-ins are used and the file is written,
          //--- so the first thing a user looking for their own numbers finds
@@ -2189,8 +2237,9 @@ void OnStart()
         }
 
       //--- 22d. THE LINES. Idempotent, and clean up after themselves.
-      long cc = ChartOpen(rsym, PERIOD_M1);
-      if(Check("a chart for the calendar lines", cc != 0, rsym))
+      string cc_why = "";
+         long cc = OpenChart(rsym, PERIOD_M1, cc_why);
+         if(Check("a chart for the calendar lines", cc != 0, cc_why))
         {
          CSSRCalendarLines cl;
          cl.Attach(cc);
@@ -2228,8 +2277,9 @@ void OnStart()
       Check("with no marker, the card has not been seen",
             !CSSRFirstRun::AlreadySeen(), SSR_SEEN_FILE + " is not there");
 
-      long fc = ChartOpen(rsym, PERIOD_M1);
-      if(Check("a chart for the first-run card", fc != 0, rsym))
+      string fc_why = "";
+         long fc = OpenChart(rsym, PERIOD_M1, fc_why);
+         if(Check("a chart for the first-run card", fc != 0, fc_why))
         {
          CSSRFirstRun fr;
          Check("it goes up", fr.Show(fc) && fr.IsUp(),
@@ -2529,8 +2579,9 @@ void OnStart()
       }
 
       //--- 25c. THE THIRD LINE, on a real chart.
-      long ec = ChartOpen(rsym, PERIOD_M1);
-      if(Check("a chart for the entry line", ec != 0, rsym))
+      string ec_why = "";
+         long ec = OpenChart(rsym, PERIOD_M1, ec_why);
+         if(Check("a chart for the entry line", ec != 0, ec_why))
         {
          CSSRTradeLines el;
          el.Attach(ec, (int)SymbolInfoInteger(rsym, SYMBOL_DIGITS),
@@ -2920,8 +2971,9 @@ void OnStart()
    //| made to answer a question about nothing.                          |
    //+------------------------------------------------------------------+
    {
-      long cchart = ChartOpen(rsym, PERIOD_M1);
-      if(Check("28 a chart for the confirm test", cchart != 0, rsym))
+      string cchart_why = "";
+         long cchart = OpenChart(rsym, PERIOD_M1, cchart_why);
+         if(Check("28 a chart for the confirm test", cchart != 0, cchart_why))
         {
          CSSRTradingEngine cacct;
          cacct.SetBalance(10000.0);
@@ -3094,8 +3146,9 @@ void OnStart()
             SSRKeyToCommand(SSR_VK_H) == SSR_CMD_KEYS, "");
 
       //--- the card itself
-      long kchart = ChartOpen(rsym, PERIOD_M1);
-      if(Check("29 a chart for the key card", kchart != 0, rsym))
+      string kchart_why = "";
+         long kchart = OpenChart(rsym, PERIOD_M1, kchart_why);
+         if(Check("29 a chart for the key card", kchart != 0, kchart_why))
         {
          CSSRKeyCard kc;
          Check("29 the card goes up", kc.Toggle(kchart) && kc.IsUp(),
@@ -3264,8 +3317,9 @@ void OnStart()
                          SSRColX(ltr, 2, 3)));
 
       //--- now the primitives, on a real chart
-      long dchart = ChartOpen(rsym, PERIOD_M1);
-      if(Check("32 a chart for the primitives", dchart != 0, rsym))
+      string dchart_why = "";
+         long dchart = OpenChart(rsym, PERIOD_M1, dchart_why);
+         if(Check("32 a chart for the primitives", dchart != 0, dchart_why))
         {
          CSSRWidgets w;
          w.Attach(dchart, "SSRW_");
@@ -3395,8 +3449,9 @@ void OnStart()
             "and the palette shows a line telling you to try fewer letters");
 
       //--- now on a real chart
-      long pchart2 = ChartOpen(rsym, PERIOD_M1);
-      if(Check("33 a chart for the palette", pchart2 != 0, rsym))
+      string pchart2_why = "";
+         long pchart2 = OpenChart(rsym, PERIOD_M1, pchart2_why);
+         if(Check("33 a chart for the palette", pchart2 != 0, pchart2_why))
         {
          CSSRPalette pal;
          Check("33 it is not up until it is opened", !pal.IsUp(), "");
@@ -3522,8 +3577,9 @@ void OnStart()
    //| as it was, which is the promise the whole mode rests on.          |
    //+------------------------------------------------------------------+
    {
-      long bchart = ChartOpen(rsym, PERIOD_M1);
-      if(Check("36 a chart for the reveal", bchart != 0, rsym))
+      string bchart_why = "";
+         long bchart = OpenChart(rsym, PERIOD_M1, bchart_why);
+         if(Check("36 a chart for the reveal", bchart != 0, bchart_why))
         {
          bool had_ohlc = (bool)ChartGetInteger(bchart, CHART_SHOW_OHLC);
 
@@ -3761,8 +3817,9 @@ void OnStart()
       //| PAGING, because MQL5 has no scrollbar and no clipping: a list    |
       //| that ran off the end would paint its surplus over the chart.     |
       //+------------------------------------------------------------------+
-      long vchart = ChartOpen(rsym, PERIOD_M1);
-      if(Check("37 a chart for the card", vchart != 0, rsym))
+      string vchart_why = "";
+         long vchart = OpenChart(rsym, PERIOD_M1, vchart_why);
+         if(Check("37 a chart for the card", vchart != 0, vchart_why))
         {
          CSSRReviewCard card;
          Check("37 the card is not up until it is asked for",
@@ -3997,8 +4054,9 @@ void OnStart()
       //+------------------------------------------------------------------+
       //| AND THE SHEET, ON A REAL CHART.                                  |
       //+------------------------------------------------------------------+
-      long pchart = ChartOpen(rsym, PERIOD_M1);
-      if(Check("38 a chart for the prop sheet", pchart != 0, rsym))
+      string pchart_why = "";
+         long pchart = OpenChart(rsym, PERIOD_M1, pchart_why);
+         if(Check("38 a chart for the prop sheet", pchart != 0, pchart_why))
         {
          CSSRReplayGroup pgroup;
          pgroup.Add(GetPointer(ctrl));
@@ -4467,8 +4525,9 @@ void OnStart()
 
       Stash(SSR_PANEL_FILE);
 
-      long lchart = ChartOpen(rsym, PERIOD_M1);
-      if(Check("40 a chart to measure on", lchart != 0, rsym))
+      string lchart_why = "";
+         long lchart = OpenChart(rsym, PERIOD_M1, lchart_why);
+         if(Check("40 a chart to measure on", lchart != 0, lchart_why))
         {
          //--- a probe first: if this terminal cannot measure text, every
          //--- check below would pass by measuring nothing
@@ -4624,8 +4683,9 @@ void OnStart()
       //| and a tooltip is not a second channel, it is the same channel      |
       //| behind a delay.                                                   |
       //+------------------------------------------------------------------+
-      long gchart = ChartOpen(rsym, PERIOD_M1);
-      if(Check("40 a chart for the planning lines", gchart != 0, rsym))
+      string gchart_why = "";
+         long gchart = OpenChart(rsym, PERIOD_M1, gchart_why);
+         if(Check("40 a chart for the planning lines", gchart != 0, gchart_why))
         {
          CSSRTradeLines gl;
          gl.Attach(gchart, (int)SymbolInfoInteger(rsym, SYMBOL_DIGITS),
@@ -4827,8 +4887,9 @@ void OnStart()
             Note("41 Persian may not be drawable on this terminal",
                  "TextGetSize returned nothing for Persian in " + SSR_FONT);
 
-         long fchart = ChartOpen(rsym, PERIOD_M1);
-         if(Check("41 a chart for the Persian round trip", fchart != 0, rsym))
+         string fchart_why = "";
+         long fchart = OpenChart(rsym, PERIOD_M1, fchart_why);
+         if(Check("41 a chart for the Persian round trip", fchart != 0, fchart_why))
            {
             string nm = "SSRFA_probe";
             if(ObjectCreate(fchart, nm, OBJ_LABEL, 0, 0, 0))
@@ -4881,8 +4942,9 @@ void OnStart()
    {
       Step("42 the paint budget");
 
-      long mchart = ChartOpen(rsym, PERIOD_M1);
-      if(Check("42 a chart to paint on", mchart != 0, rsym))
+      string mchart_why = "";
+         long mchart = OpenChart(rsym, PERIOD_M1, mchart_why);
+         if(Check("42 a chart to paint on", mchart != 0, mchart_why))
         {
          CSSRTradingEngine macct;
          macct.SetBalance(10000.0);
@@ -4995,8 +5057,9 @@ void OnStart()
    {
       Step("43 closing the panel");
 
-      long xchart = ChartOpen(rsym, PERIOD_M1);
-      if(Check("43 a chart to close a panel on", xchart != 0, rsym))
+      string xchart_why = "";
+         long xchart = OpenChart(rsym, PERIOD_M1, xchart_why);
+         if(Check("43 a chart to close a panel on", xchart != 0, xchart_why))
         {
          CSSRTradingEngine xacct;
          xacct.SetBalance(10000.0);
@@ -5107,6 +5170,53 @@ void OnStart()
 //| - so nothing here is a shape the product does not already have.  |
 //| Equity sits at `start` every day but the last, which lands on    |
 //| `final_equity`, so each case breaks exactly one rule.             |
+//+------------------------------------------------------------------+
+//| OPEN A CHART, AND IF IT REFUSES, SAY WHY AND ASK ONCE MORE.      |
+//|                                                                  |
+//| Thirteen stages of one run reported nothing but "a chart for X"   |
+//| failing, with no error code and no idea whether it was the        |
+//| symbol, the terminal or a limit. ChartOpen returning 0 is not a   |
+//| diagnosis; the error behind it is.                                |
+//|                                                                  |
+//| ChartClose is asynchronous, so a suite that opens and closes a    |
+//| chart per stage can outrun the terminal. One short wait and one   |
+//| retry costs nothing and turns thirteen mysteries into either a    |
+//| pass or a number.                                                 |
+//+------------------------------------------------------------------+
+long OpenChart(const string sym, const ENUM_TIMEFRAMES tf, string &why)
+  {
+   ResetLastError();
+   long id = ChartOpen(sym, tf);
+   if(id != 0)
+     { why = sym; return id; }
+
+   int first = GetLastError();
+   uint until = GetTickCount() + 600;
+   while(GetTickCount() < until && !IsStopped())
+      ;                              // the close before this one is async
+   ResetLastError();
+   id = ChartOpen(sym, tf);
+   if(id != 0)
+     {
+      why = StringFormat("%s (refused once with err %d, opened on the "
+                         "retry - ChartClose is asynchronous)", sym, first);
+      return id;
+     }
+   why = StringFormat("%s - ChartOpen refused twice, err %d then %d. %d "
+                      "chart(s) are open in this terminal.",
+                      sym, first, GetLastError(), ChartCount());
+   return 0;
+  }
+
+int ChartCount(void)
+  {
+   int n = 0;
+   long id = ChartFirst();
+   while(id >= 0 && n < 512)
+     { n++; id = ChartNext(id); }
+   return n;
+  }
+
 //+------------------------------------------------------------------+
 //| WHAT A LABEL ACTUALLY OCCUPIES, IN PIXELS, ON THIS TERMINAL.     |
 //|                                                                  |

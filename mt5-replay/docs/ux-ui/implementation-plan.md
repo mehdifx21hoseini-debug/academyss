@@ -554,6 +554,71 @@ than a sentence that stops in the middle and reads as a broken tool.
 
 ---
 
+## v119 — the candle defect reproduced, and what the log says it is
+
+**The oldest open defect in this project reproduced deterministically for the
+first time.** Not a correlation across four runs — a US30.U26 run that fails
+the same way every time, with the numbers written down:
+
+```
+60 call(s) offered ticks, the terminal took 481 and refused 0,
+and the M1 series stayed at 139 bars.
+```
+
+Accepted, stored, and **no bar built from any of them**. In the same run the
+warmup and the jump both worked — and both write **rates**, not ticks. Ticks
+fail, rates succeed. That split is the whole diagnosis.
+
+**`CustomTicksAdd` does not refuse a tick outside the symbol's QUOTE SESSION.
+It keeps it and builds nothing.**
+
+And `Apply247Sessions()` was fourteen calls with **not one return value read**:
+
+```cpp
+CustomSymbolSetSessionQuote(m_symbol, day, 0, 0, 86399);   // ← never checked
+```
+
+A forex symbol has **one** quote session a day, so writing session 0 over the
+whole day replaces it and succeeds — which is why GBPUSD@ has always worked
+and nobody noticed the code never asked. An index future has **two or three**;
+it closes for a daily break. A new session 0 spanning midnight to midnight
+**overlaps** the ones the clone inherited, MetaTrader refuses an overlapping
+session, and the replay symbol quietly kept the origin's trading hours. Every
+tick the engine replayed outside those hours then vanished into the tick
+history without making a candle.
+
+That is exactly what the user reported: **"the candles don't move, but all the
+buttons work."** The buttons work because nothing else is broken.
+
+**The fix has three parts and the third is the one that matters:**
+
+1. **Delete** what the clone inherited — `from == to == 0` removes a session
+   and shifts the rest down, so deleting index 0 until it refuses empties the
+   day.
+2. **Set** one session, `0..86400`. The old `86399` left a one-second hole at
+   23:59:59 that a tick can land in; it is the fallback now, not the value.
+3. **Read it back** with `SymbolInfoSessionQuote`. Setting a property and
+   trusting the return value is how the original passed for a year. The
+   read-back is the difference between this being *fixed* and this being
+   *believed* — and if fewer than seven days come back covered, the symbol
+   manager says so on the log and the smoke test fails on it **before** the
+   tick checks, so those read as a consequence rather than a second fault.
+
+**Still not proven.** It is the strongest lead this defect has ever had and it
+explains every observation, but it is a diagnosis from a log, not a
+measurement on a terminal. The next US30 run settles it: the new check either
+passes and the candles move, or it names the day and the hours that are
+actually set.
+
+**Also from that run:** thirteen stages reported nothing but `a chart for X`
+failing — no error code, no idea whether it was the symbol, the terminal or a
+limit. `ChartOpen` returning 0 is not a diagnosis. Every chart open in the
+suite now reports the error, waits once (`ChartClose` is asynchronous, and a
+suite that opens and closes a chart per stage can outrun the terminal), and
+retries — which turns thirteen mysteries into either a pass or a number.
+
+---
+
 ## After Phase 11 — what is genuinely left
 
 1. **The candles-not-building-from-ticks defect.** v97 fixed a plausible
