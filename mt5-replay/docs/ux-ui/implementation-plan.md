@@ -523,6 +523,37 @@ a destroyed workspace is not a trade worth thinking about.
 
 ---
 
+## v118 — pressing X left the panel's furniture on the chart
+
+Photographed by the user: after the X, the build tag, the `FULL` and `PROP`
+chips, the `K` button, the `?` button and a lone `Prop` tab were still sitting
+over the candles with no panel behind them.
+
+**Two causes, the same shape.**
+
+- The close path hid **seven** caption objects by hand; the reopen path showed
+  **sixteen**. Two lists kept by hand, and the gap between them was exactly
+  what stayed on screen. `SSR_Keys.mqh` has the argument against this written
+  across a whole comment block — and the caption twenty lines away was doing
+  it anyway. There is one `HideCaption(bool)` now, used in both directions.
+- `HideBody` swept `"tab0","tab1","tab2","tab3"` written out. Phase 8 added a
+  fifth tab and nobody added it to that list, so closing a panel with an
+  evaluation running left a `Prop` button on the chart. It loops
+  `SSR_TAB_MAX` now.
+
+**Test: stage 43 does not check a list.** It asks the *chart* what is still
+visible after the close and allows exactly one object — the way back. That is
+the only form of this test a future sixth tab cannot walk past. It also
+reopens and asserts the panel comes back whole, because a close that cannot be
+undone would pass the first check perfectly.
+
+**Also fixed from the same screenshot:** the Session sheet's chart-leak advice
+was being cut mid-sentence at 63 characters — *"US30.U26 is open on 1 chart(s)
+- close it or your"*. Clipped explicitly now, so the cut is deliberate rather
+than a sentence that stops in the middle and reads as a broken tool.
+
+---
+
 ## After Phase 11 — what is genuinely left
 
 1. **The candles-not-building-from-ticks defect.** v97 fixed a plausible

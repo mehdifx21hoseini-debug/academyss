@@ -4974,6 +4974,126 @@ void OnStart()
         }
    }
 
+   //+------------------------------------------------------------------+
+   //| 43. CLOSED MEANS NOTHING IS LEFT ON THE CHART.                   |
+   //|                                                                  |
+   //| Photographed by the user: pressing X left the build tag, the      |
+   //| FULL and PROP chips, the K button and the ? button floating over  |
+   //| the candles with no panel behind them, and a lone "Prop" tab      |
+   //| further down.                                                     |
+   //|                                                                  |
+   //| Two causes, both the same shape. The close path hid seven caption |
+   //| objects by hand and the reopen path showed SIXTEEN - two lists    |
+   //| kept by hand, and the gap was exactly what stayed on screen. And  |
+   //| HideBody swept "tab0".."tab3" written out, which Phase 8's fifth  |
+   //| tab had never been added to.                                      |
+   //|                                                                  |
+   //| So this does not check a list. It asks the CHART what is still    |
+   //| visible and allows exactly one thing - which is the only form of  |
+   //| this test that a future sixth tab cannot walk past.               |
+   //+------------------------------------------------------------------+
+   {
+      Step("43 closing the panel");
+
+      long xchart = ChartOpen(rsym, PERIOD_M1);
+      if(Check("43 a chart to close a panel on", xchart != 0, rsym))
+        {
+         CSSRTradingEngine xacct;
+         xacct.SetBalance(10000.0);
+         CSSRReplayGroup xgroup;
+         xgroup.Add(GetPointer(ctrl));
+         CSSRGroupPort xport;
+         xport.Attach(GetPointer(xgroup));
+         xport.AttachAccount(GetPointer(xacct));
+
+         //--- an evaluation, so the PROP chip and the fifth tab both
+         //--- exist. The bug only showed on a panel that had them.
+         SSRPropRules xr;
+         xr.Init();
+         xr.enabled = true;
+         CSSRPropEvaluation xev;
+         xev.Attach(GetPointer(xacct));
+         xev.SetRules(xr);
+         xev.Reset();
+         xport.AttachProp(GetPointer(xev));
+
+         CSSRPanel xp;
+         xp.Create(xchart, GetPointer(xport), "SSRX_");
+         xp.Render();
+
+         int before = 0;
+         int total  = ObjectsTotal(xchart, -1, -1);
+         for(int i = 0; i < total; i++)
+           {
+            string nm = ObjectName(xchart, i, -1, -1);
+            if(StringFind(nm, "SSRX_") != 0)
+               continue;
+            if(ObjectGetInteger(xchart, nm, OBJPROP_TIMEFRAMES) != OBJ_NO_PERIODS)
+               before++;
+           }
+         if(Check("43 the panel is on the chart to begin with",
+                  before > 20, StringFormat("%d visible object(s)", before)))
+           {
+            xp.Dispatch("close");
+            xp.Render();
+
+            //--- ask the CHART, not a list. Anything still visible that
+            //--- is not the one way back is a leftover.
+            int    left = 0;
+            string names = "";
+            total = ObjectsTotal(xchart, -1, -1);
+            for(int i = 0; i < total; i++)
+              {
+               string nm = ObjectName(xchart, i, -1, -1);
+               if(StringFind(nm, "SSRX_") != 0)
+                  continue;
+               if(ObjectGetInteger(xchart, nm, OBJPROP_TIMEFRAMES) == OBJ_NO_PERIODS)
+                  continue;
+               if(nm == "SSRX_reopen")
+                  continue;
+               left++;
+               if(StringLen(names) < 40)
+                  names += (names == "" ? "" : ",") +
+                           StringSubstr(nm, 5);
+              }
+            Check("43 a closed panel leaves ONE button and nothing else",
+                  left == 0,
+                  (left == 0
+                   ? StringFormat("%d object(s) hidden, only the way back "
+                                  "is still drawn", before)
+                   : StringFormat("%d left on the chart: %s", left, names)));
+
+            Check("43 and the way back is really there",
+                  ObjectFind(xchart, "SSRX_reopen") >= 0 &&
+                  ObjectGetInteger(xchart, "SSRX_reopen",
+                                   OBJPROP_TIMEFRAMES) != OBJ_NO_PERIODS,
+                  "a control that removes its own only way back is a trap");
+
+            //--- and it all comes back. A close that cannot be undone
+            //--- would pass the check above perfectly.
+            xp.Dispatch("reopen");
+            xp.Render();
+            int after = 0;
+            total = ObjectsTotal(xchart, -1, -1);
+            for(int i = 0; i < total; i++)
+              {
+               string nm = ObjectName(xchart, i, -1, -1);
+               if(StringFind(nm, "SSRX_") != 0)
+                  continue;
+               if(ObjectGetInteger(xchart, nm, OBJPROP_TIMEFRAMES) != OBJ_NO_PERIODS)
+                  after++;
+              }
+            Check("43 and reopening brings the whole panel back",
+                  after >= before,
+                  StringFormat("%d visible before, %d after - a panel that "
+                               "comes back short is the same bug pointing "
+                               "the other way", before, after));
+           }
+         xp.Destroy();
+         ChartClose(xchart);
+        }
+   }
+
    ctrl.Release();
    Cleanup(rsym);
    Done();

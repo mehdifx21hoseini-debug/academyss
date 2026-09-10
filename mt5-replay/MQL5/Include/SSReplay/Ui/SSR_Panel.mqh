@@ -645,13 +645,7 @@ public:
       if(m_closed)
         {
          HideBody(true);
-         m_w.Hide("bg", true);
-         m_w.Hide("hdr", true);
-         m_w.Hide("title", true);
-         m_w.Hide("capinfo", true);
-         m_w.Hide("collapse", true);
-         m_w.Hide("move", true);
-         m_w.Hide("close", true);
+         HideCaption(true);
          m_w.Button("reopen", m_x, m_y, 76, SSR_HEADER_H, "SS Replay");
          ChartRedraw(m_chart);
          return;
@@ -659,12 +653,7 @@ public:
       //--- coming back from closed: the caption was hidden by hand, so
       //--- it has to be shown by hand. HideBody does not own these.
       m_w.Remove("reopen");
-      string cap[] = {"bg","hdr","title","build","capinfo","collapse","move",
-                      "close","keys","palette",
-                      "chfid","chfid_bg","chblind","chblind_bg",
-                      "chprop","chprop_bg"};
-      for(int ci = 0; ci < ArraySize(cap); ci++)
-         m_w.Hide(cap[ci], false);
+      HideCaption(false);
 
       //+------------------------------------------------------------------+
       //| A PANEL TALLER THAN ITS CHART IS AN INVISIBLE PANEL.             |
@@ -1753,9 +1742,13 @@ private:
                         m_state.streams, (int)m_state.skew_msc),
            m_state.skew_msc == 0 ? SSR_C_TEXT_DIM : SSR_C_STOP);
       Text(42, "ses3", x + 8, y + 42,
-           StringFormat("%-12s %s", T(SSR_S_CHARTS),
-                        m_state.leak_clean ? T(SSR_S_CHARTS_CLEAN)
-                                           : m_state.leak_advice),
+           //--- clipped: the advice is a whole sentence from the leak
+           //--- guard and MetaTrader draws 63 characters. It has been
+           //--- ending "- close it or your" on the chart, mid-sentence,
+           //--- which reads as a broken tool rather than a long line.
+           Clip(StringFormat("%-12s %s", T(SSR_S_CHARTS),
+                             m_state.leak_clean ? T(SSR_S_CHARTS_CLEAN)
+                                                : m_state.leak_advice), 62),
            m_state.leak_clean ? SSR_C_TEXT_DIM : SSR_C_HOLD);
 
       m_w.Group("g2", x, y + 72, w, 68, T(SSR_S_GRP_KEYBOARD));
@@ -1914,17 +1907,46 @@ private:
      }
 
    //--- everything below the caption, hidden when collapsed
+   //+------------------------------------------------------------------+
+   //| ONE CAPTION LIST, USED IN BOTH DIRECTIONS.                       |
+   //|                                                                  |
+   //| There were two. The close path hid seven objects by hand and the |
+   //| reopen path showed sixteen, and the gap was exactly what a user   |
+   //| photographed: pressing X left the build tag, the FULL and PROP    |
+   //| chips, the K button and the ? button floating on the chart with   |
+   //| no panel behind them.                                            |
+   //|                                                                  |
+   //| Two lists kept by hand always drift, and the one that drifts is   |
+   //| the one the user is looking at. This file already knows that -    |
+   //| SSR_Keys.mqh has the argument written across a whole comment      |
+   //| block - and the caption was doing it anyway.                      |
+   //+------------------------------------------------------------------+
+   void              HideCaption(const bool hidden)
+     {
+      string cap[] = {"bg","hdr","title","build","capinfo",
+                      "collapse","move","close","keys","palette",
+                      "chfid","chfid_bg","chblind","chblind_bg",
+                      "chprop","chprop_bg"};
+      for(int i = 0; i < ArraySize(cap); i++)
+         m_w.Hide(cap[i], hidden);
+     }
+
    void              HideBody(const bool hidden)
      {
       string ids[] = {"clock","prog","bar_bg","bar_fill",
                       "restart","back10","back","toggle","step","step10","reset",
                       "spdlbl","spdn","spdbox","spdval","spup","spdmean",
-                      "tab0","tab1","tab2","tab3","tabline",
+                      "tabline",
                       "follow","lines","bookmark","jump","sessions","fidelity",
                       "status","stbal","stflt","stopen","stspread","stfid",
                       "fill","fill_bg","fill_ac"};
       for(int i = 0; i < ArraySize(ids); i++)
          m_w.Hide(ids[i], hidden);
+      //--- SSR_TAB_MAX, not four written out. This list said tab0..tab3
+      //--- and Phase 8 added a fifth tab, so closing the panel left a
+      //--- lone "Prop" button sitting on the candles.
+      for(int t = 0; t < SSR_TAB_MAX; t++)
+         m_w.Hide("tab" + IntegerToString(t), hidden);
       for(int t = 0; t < SSR_SPEED_LADDER_SIZE; t++)
          m_w.Hide("spdseg" + IntegerToString(t), hidden);
       if(hidden)

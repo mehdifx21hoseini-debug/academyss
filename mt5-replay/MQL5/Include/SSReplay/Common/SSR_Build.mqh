@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v117 2026-09-10  utf8"
+#define SSR_BUILD "v118 2026-09-10  sweep"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
