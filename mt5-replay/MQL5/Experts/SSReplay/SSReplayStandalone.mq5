@@ -1415,6 +1415,13 @@ bool BuildSession(string origin, const bool on_replay,
    g_session_dlg.Create(g_panel_chart, GetPointer(g_gport));
    g_panel.Create(g_panel_chart, GetPointer(g_gport));
 
+   //--- the handover's "building..." notice, cleared by the pass that
+   //--- has something to show. Cleared HERE and not in OnDeinit: the
+   //--- pass that wrote it is the one being torn down, so clearing it
+   //--- there would erase the message while the wait it explains is
+   //--- still happening.
+   Comment("");
+
    //--- A SAVED SESSION, if one was named and exists. This restores
    //--- the account and every trade in it, not just the position -
    //--- and it reports anything it could not put back exactly.
@@ -2528,6 +2535,31 @@ void OnTimer()
          g_switching = true;
          PrintFormat("[host] handing this chart over to %s - SS Replay will "
                      "restart once on it. This is expected.", rs);
+
+         //+------------------------------------------------------------------+
+         //| SAY WHAT THE BLANK SECOND IS.                                    |
+         //|                                                                  |
+         //| Reported as "after Start the chart goes completely". It does:    |
+         //| ChartSetSymbolPeriod points this window at a custom symbol that  |
+         //| was created moments ago and has no bars drawn yet, so MetaTrader |
+         //| clears the window, drops the toolbar, and shows nothing at all   |
+         //| while it loads. Then this program is torn down and started       |
+         //| again on the new symbol.                                          |
+         //|                                                                  |
+         //| Every part of that is by design and none of it was ON SCREEN.    |
+         //| A tool that goes blank and says nothing is indistinguishable     |
+         //| from one that crashed - the same rule this product already       |
+         //| applies to a replay that pauses itself.                          |
+         //|                                                                  |
+         //| Comment() and not an object: the objects are about to be         |
+         //| destroyed with the chart's symbol, and the comment survives      |
+         //| into the next pass, which clears it once it has drawn.            |
+         //+------------------------------------------------------------------+
+         Comment(StringFormat("SS Replay\n\nBuilding %s...\n"
+                              "The chart goes blank for a moment while "
+                              "MetaTrader loads it.\nThis is expected - "
+                              "do not remove the expert.", rs));
+         ChartRedraw(0);
          if(!ChartSetSymbolPeriod(ChartID(), rs, CfgChartTf()))
            {
             g_switching = false;

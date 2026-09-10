@@ -429,6 +429,49 @@ note named as worth building: **a taller sheet on a tall chart**.
 
 ---
 
+## v116 — three defects from the user's own run
+
+Reported with screenshots, which is the only reason any of them were found.
+
+- **"Pressing its buttons works very slowly."** It was not slow. The setup
+  panel consumed the press, tore every object down and rebuilt it, and **never
+  called `ChartRedraw`** — so on a chart with no incoming ticks there was
+  nothing to force a repaint and the new panel sat there unseen. The main
+  panel had had this exact fix for builds, with a comment reading *"ends a
+  whole class of 'it did nothing' reports"*. The lesson was learned once and
+  never applied to the file beside it.
+  The clue was in the report and nobody had it: the setup panel's **one**
+  `ChartRedraw` was inside the drag handler, which is precisely why dragging
+  always felt instant and clicking did not.
+  **Audit A20** now checks it per *render function*, not per file — a file
+  whose `Render` is silent still passes a grep for `ChartRedraw` anywhere in
+  it, and this bug is the proof. Verified by deleting the fix and watching
+  A20 name the exact line.
+- **"I want all these windows to come in the middle of the chart."** The setup
+  panel opened at a hard-coded 18,84 — top left, over the oldest candles,
+  exactly where a person is *not* looking when choosing where a replay starts.
+  It centres now, on the **tallest** step rather than the one being drawn, so
+  stepping through the wizard does not make the panel jump under the hand
+  pressing Next. A dragged position still wins. The session and range dialogs
+  centre too, recomputed each render because the user resizes the terminal.
+- **"After Start the chart goes completely."** It does, and every part of that
+  was by design and none of it was on screen. `ChartSetSymbolPeriod` points
+  the window at a custom symbol created moments earlier with no bars drawn
+  yet, so MetaTrader clears the window, drops the toolbar and shows nothing
+  while it loads — then this program is torn down and started again on the new
+  symbol. A tool that goes blank and says nothing is indistinguishable from
+  one that crashed, so it now says what the wait is, through `Comment()`
+  (the objects are about to be destroyed with the chart's symbol) and the
+  next pass clears it once it has something to show.
+
+**On "make the expert faster" generally:** the certain cause of the reported
+slowness is fixed. Beyond that, **stage 42 is the answer, not a guess** — it
+reports the object-properties-per-frame and the mean millisecond repaint on
+*that* machine. Optimising the paint before reading those numbers is the thing
+this project refuses to do.
+
+---
+
 ## After Phase 11 — what is genuinely left
 
 1. **The candles-not-building-from-ticks defect.** v97 fixed a plausible

@@ -44,6 +44,11 @@
 
 #define SSR_SETUP_W        304
 #define SSR_SETUP_ROW      24
+
+//--- the tallest step (settings, seventeen rows). Centring on THIS
+//--- rather than on the step being drawn is what stops the panel
+//--- jumping under the hand that is pressing Next.
+#define SSR_SETUP_H_MAX    (30 + 17 * SSR_SETUP_ROW + 44)
 #define SSR_SETUP_FIELD_W  84
 
 //--- where the presets live. A FILE, not a table baked into the code:
@@ -174,6 +179,7 @@ class CSSRSetupPanel
   {
 private:
    long              m_chart;
+   bool              m_placed;      // the user chose this position, not us
    CSSRWidgets       m_w;
    SSRSetupValues    m_v;
    bool              m_open;
@@ -461,7 +467,7 @@ public:
      //|                                                                  |
      //| Below it, and inset, where nothing of MetaTrader's own lives.    |
      //+------------------------------------------------------------------+
-     : m_chart(0), m_open(false), m_x(18), m_y(84),
+     : m_chart(0), m_open(false), m_placed(false), m_x(18), m_y(84),
        m_start_text(""), m_tf_i(1), m_preset_i(0), m_force_prop(false),
        m_start_y(0), m_first_paint(true), m_step(0), m_menu(""),
        m_menu_y(0), m_drag(false), m_drag_dx(0), m_drag_dy(0)
@@ -509,6 +515,30 @@ public:
          PrintFormat("[setup] this chart is %d pixels tall and the setup "
                      "panel needs %d - the START button is below the bottom "
                      "edge. Press Ctrl+T to close the Toolbox.", have, need);
+
+      //+------------------------------------------------------------------+
+      //| IN THE MIDDLE OF THE CHART, NOT IN THE CORNER.                   |
+      //|                                                                  |
+      //| It opened at a hard-coded 18,84 - top left, over the oldest       |
+      //| candles, which is exactly where a person is NOT looking when they |
+      //| are about to choose where a replay starts.                        |
+      //|                                                                  |
+      //| Centred on the TALLEST step, not on the one being drawn, so that  |
+      //| stepping through the wizard does not make the panel jump under    |
+      //| the hand pressing Next. A dragged position still wins: this only  |
+      //| decides where it starts.                                          |
+      //+------------------------------------------------------------------+
+      if(!m_placed)
+        {
+         int cw2 = (int)ChartGetInteger(chart_id, CHART_WIDTH_IN_PIXELS);
+         int ch2 = (int)ChartGetInteger(chart_id, CHART_HEIGHT_IN_PIXELS);
+         if(cw2 > 0)
+            m_x = (cw2 > SSR_SETUP_W + 16 ? (cw2 - SSR_SETUP_W) / 2 : 8);
+         if(ch2 > 0)
+            m_y = (ch2 > SSR_SETUP_H_MAX + 16 ? (ch2 - SSR_SETUP_H_MAX) / 2 : 8);
+         if(m_x < 0) m_x = 0;
+         if(m_y < 0) m_y = 0;
+        }
 
       m_open = true;
       Render();
@@ -641,6 +671,29 @@ public:
       else if(m_step == 2) RenderMode();
       else                 RenderStart();
       DrawMenu();                       // last, because last is on top
+
+      //+------------------------------------------------------------------+
+      //| THE BUTTONS WERE NOT SLOW. THE SCREEN WAS NOT BEING TOLD.        |
+      //|                                                                  |
+      //| Reported as "pressing its buttons works very slowly". It was not  |
+      //| slow at all: Poll consumed the press, Repaint tore every object   |
+      //| down and built it again - and nothing asked MetaTrader to draw    |
+      //| the result. On a chart with no ticks arriving there is nothing    |
+      //| else to force a redraw, so the new panel sat there unseen until   |
+      //| the terminal repainted for its own reasons.                       |
+      //|                                                                  |
+      //| Every other surface in this product does this - the panel, both   |
+      //| cards, both dialogs, the palette, the key card. This file had ONE |
+      //| ChartRedraw and it was inside the DRAG handler, which is why      |
+      //| dragging the panel always felt instant and pressing a button did  |
+      //| not. That asymmetry was the whole clue, and no test had it,       |
+      //| because a test can read an object's properties without ever       |
+      //| asking whether the screen is showing them.                        |
+      //|                                                                  |
+      //| Here, at the end of the ONE function every path goes through, so  |
+      //| a future step or menu cannot forget it.                           |
+      //+------------------------------------------------------------------+
+      ChartRedraw(m_chart);
      }
 
    //+------------------------------------------------------------------+
@@ -954,11 +1007,17 @@ public:
      {
       GlobalVariableSet("SSR_SETUP_X", (double)m_x);
       GlobalVariableSet("SSR_SETUP_Y", (double)m_y);
+      m_placed = true;
      }
    void              LoadPlace(void)
      {
-      if(GlobalVariableCheck("SSR_SETUP_X")) m_x = (int)GlobalVariableGet("SSR_SETUP_X");
-      if(GlobalVariableCheck("SSR_SETUP_Y")) m_y = (int)GlobalVariableGet("SSR_SETUP_Y");
+      //--- a position the USER chose outranks the centre. m_placed is
+      //--- what tells Open the difference between "never moved" and
+      //--- "moved back to roughly the middle" - not the same thing.
+      if(GlobalVariableCheck("SSR_SETUP_X"))
+        { m_x = (int)GlobalVariableGet("SSR_SETUP_X"); m_placed = true; }
+      if(GlobalVariableCheck("SSR_SETUP_Y"))
+        { m_y = (int)GlobalVariableGet("SSR_SETUP_Y"); m_placed = true; }
       if(m_x < 0) m_x = 0;
       if(m_y < 0) m_y = 0;
      }

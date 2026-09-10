@@ -109,6 +109,21 @@ public:
       if(m_mode == SSR_SD_CLOSED)
          return;
 
+      //+------------------------------------------------------------------+
+      //| CENTRED ON THE CHART, not parked in a corner.                    |
+      //|                                                                  |
+      //| A modal that opens over the oldest candles in the top left is a  |
+      //| modal a person has to go and find. Computed on every Render      |
+      //| rather than once, because the user resizes the terminal and a    |
+      //| dialog that centred itself on a window that no longer exists is   |
+      //| worse than one that never centred at all.                        |
+      //+------------------------------------------------------------------+
+      int cw_ = (int)ChartGetInteger(m_chart, CHART_WIDTH_IN_PIXELS);
+      int chh_ = (int)ChartGetInteger(m_chart, CHART_HEIGHT_IN_PIXELS);
+      if(cw_ > SSR_SD_W + 16) m_x = (cw_ - SSR_SD_W) / 2;
+      if(chh_ > SSR_SD_H + 16) m_y = (chh_ - SSR_SD_H) / 2;
+      if(m_x < 0) m_x = 0;
+      if(m_y < 0) m_y = 0;
       int x = m_x, y = m_y;
       m_w.Rect("bg", x, y, SSR_SD_W, SSR_SD_H, SSR_C_PANEL, SSR_C_PANEL_EDGE);
       m_w.Rect("hdr", x + 1, y + 1, SSR_SD_W - 2, SSR_HEADER_H,

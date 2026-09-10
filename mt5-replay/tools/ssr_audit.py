@@ -1412,7 +1412,64 @@ def audit_a19():
                "everywhere and pass by finding nothing." % seen[1])
 
 
-for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13, audit_a14, audit_a15, audit_a16, audit_a17, audit_a18, audit_a19):
+def audit_a20():
+    """A surface that draws and never asks the chart to repaint is invisible.
+
+    Reported by the user as "pressing its buttons works very slowly". The
+    setup panel was not slow at all: it consumed the press, tore every
+    object down and rebuilt it, and never called ChartRedraw - so on a
+    chart with no ticks arriving the new panel simply sat there unseen
+    until the terminal repainted for its own reasons.
+
+    The main panel had had exactly this fix for builds, with a comment
+    reading "ends a whole class of 'it did nothing' reports". The lesson
+    was learned once and never applied to the file next to it. That is
+    what an audit is for.
+
+    Checked per RENDER FUNCTION, not per file: a file whose Render is
+    silent still passes a grep for ChartRedraw anywhere in it, and the
+    setup panel proves it - its one call was inside the drag handler,
+    which is precisely why DRAGGING felt instant and clicking did not.
+    """
+    want = re.compile(r"^   void\s+(Render|Repaint)\(void\)\s*$", re.M)
+    for path in FILES:
+        if "/Ui/" not in path.replace("\\", "/"):
+            continue
+        base = os.path.basename(path)
+        #--- Widgets draws on behalf of others and Layout draws nothing;
+        #--- neither owns a frame, so neither ends one.
+        if base in ("SSR_Widgets.mqh", "SSR_Layout.mqh", "SSR_Strings.mqh"):
+            continue
+        code = _decomment(FILES[path])
+        for m in want.finditer(code):
+            #--- the body: from the opening brace to the matching close,
+            #--- at this indentation
+            start = code.find("{", m.end())
+            if start < 0:
+                continue
+            depth, j = 0, start
+            while j < len(code):
+                if code[j] == "{":
+                    depth += 1
+                elif code[j] == "}":
+                    depth -= 1
+                    if depth == 0:
+                        break
+                j += 1
+            body = code[start:j]
+            #--- Repaint may delegate to Render, which is where the call
+            #--- belongs; that counts.
+            if "ChartRedraw" in body or re.search(r"\bRender\(\)", body):
+                continue
+            report("A20", path, code[:m.start()].count("\n") + 1,
+                   "%s() draws and never asks the chart to repaint. On a "
+                   "chart with no incoming ticks - a weekend, a closed "
+                   "market, a paused replay - MetaTrader does not repaint "
+                   "by itself, so what this drew is invisible until "
+                   "something else forces it." % m.group(1))
+
+
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13, audit_a14, audit_a15, audit_a16, audit_a17, audit_a18, audit_a19, audit_a20):
     fn()
 
 if findings:

@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v115 2026-09-10  measure"
+#define SSR_BUILD "v116 2026-09-10  redraw"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
