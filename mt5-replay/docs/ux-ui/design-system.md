@@ -10,22 +10,38 @@ that only code review and the layout test can enforce.
 
 Semantic, never literal. No component may name a colour that is not a token.
 
-### Surfaces — three steps of elevation
+### Surfaces — the face is the lifted part, both ends are recessed
 ```
 SSR_C_PANEL        the face, lifted off the chart
-SSR_C_HEADER       caption, lifted again
+SSR_C_HEADER       caption, RECESSED (changed in Phase 9)
+SSR_C_STATUS       the status strip, recessed at the other end
 SSR_C_WELL         sunk below the face: tracks, lists, values
-SSR_C_STATUS       the status strip
 SSR_C_PANEL_EDGE   outer frame
 SSR_C_WELL_EDGE / SSR_C_GROUP_EDGE
 ```
 Measured lesson (v100): a face only four points of luminance above a black chart
 is not a surface. The step is twelve.
 
-### Text
+Measured lesson (Phase 9): the caption used to be the *lightest* thing in the
+panel, which left every colour drawn on it with the least contrast room — five
+of the eleven WCAG failures were "on the header". Recessing it fixed all five
+**without changing a single foreground colour**. Caption and status strip are
+now both recessed and the body is the lifted part between them.
+
+### Text — three steps, and 149 is the floor
 ```
-SSR_C_TEXT   primary   SSR_C_TEXT_DIM   labels, units   SSR_C_TEXT_FAINT   disabled
+SSR_C_TEXT   233   primary
+SSR_C_TEXT_DIM   186   labels, units
+SSR_C_TEXT_FAINT 149   disabled — the READABLE floor
 ```
+Measured lesson (Phase 9): the dimmest grey that clears 4.5:1 on this panel is
+about 149, and `TEXT_DIM` was already 149 — so a fourth step below it was, by
+definition, below the readable floor. The ramp was **re-spread** rather than
+extended: three visibly distinct steps, all of them readable, instead of four
+of which the last was decoration.
+
+**Every pair is enforced by audit A18**, from a table declared beside the
+tokens in `SSR_Theme.mqh`.
 
 ### Semantic — never borrowed by decoration
 ```

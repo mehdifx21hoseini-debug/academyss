@@ -23,6 +23,26 @@ private:
    string            m_prefix;
    int               m_created;
 
+   //+------------------------------------------------------------------+
+   //| WHAT THE PAINT ACTUALLY COSTS, COUNTED.                          |
+   //|                                                                  |
+   //| Phase 11's rule is that the paint budget may not grow, and until |
+   //| now there was no number to compare against. "It feels the same"  |
+   //| is not a measurement, and this panel gained a fifth tab, four    |
+   //| meters, seven more position rows and 176 string lookups over     |
+   //| Phases 2-10 without anyone being able to say what that cost.     |
+   //|                                                                  |
+   //| One counter, incremented where the writes actually happen, so a  |
+   //| test can render a frame and report the exact figure on the       |
+   //| user's own machine rather than on an assumption about it.         |
+   //|                                                                  |
+   //| NOTE WHAT THIS IS NOT: it is not an optimisation. Nothing here   |
+   //| has been made faster, because nothing has been measured slow -   |
+   //| and changing the paint on a hunch is the thing this project      |
+   //| refuses to do. This is the instrument that would justify one.     |
+   //+------------------------------------------------------------------+
+   int               m_writes;
+
    void              Common(const string name)
      {
       ObjectSetInteger(m_chart, name, OBJPROP_CORNER,     CORNER_LEFT_UPPER);
@@ -33,13 +53,16 @@ private:
      }
 
 public:
-                     CSSRWidgets(void) : m_chart(0), m_prefix("SSR_"), m_created(0) {}
+                     CSSRWidgets(void) : m_chart(0), m_prefix("SSR_"), m_created(0),
+                                        m_writes(0) {}
 
    void              Attach(const long chart_id, const string prefix)
      { m_chart = chart_id; m_prefix = prefix; }
 
    string            Prefix(void)  { return m_prefix; }
    int               Created(void) { return m_created; }
+   int               Writes(void)  { return m_writes; }
+   void              ResetWrites(void) { m_writes = 0; }
    string            N(const string id) { return m_prefix + id; }
 
    bool              Exists(const string id) { return (ObjectFind(m_chart, N(id)) >= 0); }
@@ -66,6 +89,7 @@ public:
       ObjectSetInteger(m_chart, n, OBJPROP_COLOR,       edge);
       ObjectSetInteger(m_chart, n, OBJPROP_WIDTH,       1);
       ObjectSetInteger(m_chart, n, OBJPROP_BACK,        false);
+      m_writes += 9;
       return true;
      }
 
@@ -90,6 +114,7 @@ public:
       ObjectSetInteger(m_chart, n, OBJPROP_FONTSIZE,  size);
       ObjectSetString (m_chart, n, OBJPROP_FONT,      font);
       ObjectSetString (m_chart, n, OBJPROP_TEXT,      text);
+      m_writes += 6;
       return true;
      }
 
@@ -156,8 +181,12 @@ public:
       //--- that came back EMPTY after being rebuilt would lose the value
       //--- just as completely, and silently, so a fresh object always
       //--- gets the caller's text whatever the caller asked for.
+      m_writes += 9;
       if(set_text || fresh)
+        {
          ObjectSetString(m_chart, n, OBJPROP_TEXT, text);
+         m_writes++;
+        }
       return true;
      }
 
@@ -214,6 +243,7 @@ public:
       ObjectSetInteger(m_chart, n, OBJPROP_COLOR,        fg);
       ObjectSetInteger(m_chart, n, OBJPROP_FONTSIZE,     size);
       ObjectSetString (m_chart, n, OBJPROP_TEXT,         text);
+      m_writes += 9;
       //--- THE PRESSED STATE IS NOT CLEARED HERE ANY MORE.
       //--- MetaTrader latches a button down when it is clicked, and
       //--- that latch is now how the panel LEARNS about the click -

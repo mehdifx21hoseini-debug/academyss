@@ -1798,6 +1798,38 @@ private:
       m_w.Hide("stspread",false);
       m_w.Hide("stfid",   false);
 
+      //--- A REFUSED ORDER TAKES THE STRIP, like the reset question. It
+      //--- is the answer to something the user just pressed, and it is
+      //--- worth more for those seconds than five standing numbers.
+      if(m_port != NULL && m_port.TradeError() != "")
+        {
+         Text(50, "stbal", x + SSR_PAD, y + 4, m_port.TradeError(),
+              SSR_C_STOP, SSR_FS_SMALL);
+         m_w.Hide("stflt",   true);
+         m_w.Hide("stopen",  true);
+         m_w.Hide("stspread",true);
+         m_w.Hide("stfid",   true);
+         return;
+        }
+
+      //+------------------------------------------------------------------+
+      //| THE LADDER, WRITTEN DOWN, BECAUSE IT GREW BY ACCRETION.          |
+      //|                                                                  |
+      //| One strip, five things that want it, and the order is the whole  |
+      //| design. It is, highest first:                                     |
+      //|                                                                  |
+      //|   1. the armed reset   - a destructive QUESTION, four seconds     |
+      //|   2. a refused order   - the ANSWER to something just pressed     |
+      //|   3. a refused size    - the same, for the P key                  |
+      //|   4. a chart too narrow - a STANDING CONDITION                    |
+      //|   5. the five numbers  - the resting state                        |
+      //|                                                                  |
+      //| Phase 9 put the narrow-chart line in at position two, and on a    |
+      //| narrow chart that meant a trade refusal could NEVER be seen: a    |
+      //| standing condition permanently outranking the answer to a press.  |
+      //| A message the user cannot get rid of must sit below every message |
+      //| that is about what they just did.                                 |
+      //+------------------------------------------------------------------+
       //+------------------------------------------------------------------+
       //| A REFUSED PANEL SIZE SAYS WHY, IN THE SAME PLACE.                |
       //|                                                                  |
@@ -1807,28 +1839,9 @@ private:
       //| this chart cannot honour it, and the line says so with both      |
       //| numbers rather than "not enough room".                            |
       //+------------------------------------------------------------------+
-      //--- and only for as long as a warning is worth a balance: this is
-      //--- the answer to a keypress, not a standing condition, and the
-      //--- five numbers it displaces are wanted the rest of the time
-      //--- a chart too narrow for the panel is a standing condition, not
-      //--- an answer to a keypress, so it stands: the four numbers it
-      //--- displaces are all off the right-hand edge anyway
-      if(TooNarrow())
-        {
-         Text(50, "stbal", x + SSR_PAD, y + 4,
-              //--- 59 characters at a three-digit width, and TooNarrow
-              //--- cannot fire at four: MetaTrader draws 63
-              StringFormat(T(SSR_S_TOO_NARROW),
-                           (int)ChartGetInteger(m_chart, CHART_WIDTH_IN_PIXELS),
-                           SSR_PANEL_W),
-              SSR_C_HOLD, SSR_FS_SMALL);
-         m_w.Hide("stflt",   true);
-         m_w.Hide("stopen",  true);
-         m_w.Hide("stspread",true);
-         m_w.Hide("stfid",   true);
-         return;
-        }
-
+      //--- 3. the answer to a keypress, for as long as an answer is
+      //--- worth five numbers. Above the narrow-chart line because that
+      //--- one never goes away and this one is about what was just done.
       if(m_pro_why != "" && GetTickCount() - m_pro_said < SSR_CONFIRM_MS)
         {
          Text(50, "stbal", x + SSR_PAD, y + 4, m_pro_why,
@@ -1840,13 +1853,17 @@ private:
          return;
         }
 
-      //--- A REFUSED ORDER TAKES THE STRIP, like the reset question. It
-      //--- is the answer to something the user just pressed, and it is
-      //--- worth more for those seconds than five standing numbers.
-      if(m_port != NULL && m_port.TradeError() != "")
+      //--- 4. a standing condition, and the lowest of the messages. The
+      //--- four numbers it displaces are off the right-hand edge anyway.
+      if(TooNarrow())
         {
-         Text(50, "stbal", x + SSR_PAD, y + 4, m_port.TradeError(),
-              SSR_C_STOP, SSR_FS_SMALL);
+         Text(50, "stbal", x + SSR_PAD, y + 4,
+              //--- 59 characters at a three-digit width, and TooNarrow
+              //--- cannot fire at four: MetaTrader draws 63
+              StringFormat(T(SSR_S_TOO_NARROW),
+                           (int)ChartGetInteger(m_chart, CHART_WIDTH_IN_PIXELS),
+                           SSR_PANEL_W),
+              SSR_C_HOLD, SSR_FS_SMALL);
          m_w.Hide("stflt",   true);
          m_w.Hide("stopen",  true);
          m_w.Hide("stspread",true);
@@ -2787,6 +2804,22 @@ public:
    //--- ask the panel what it believes it is doing - and the wish and
    //--- the fact are two different questions, which is the whole point
    //--- of there being two flags.
+   //+------------------------------------------------------------------+
+   //| WHAT ONE FRAME COSTS. Two numbers, and they answer different     |
+   //| questions.                                                       |
+   //|                                                                  |
+   //| Writes()      - labels this panel actually rewrote. On a frame    |
+   //|                 where nothing changed this must be ZERO: it is    |
+   //|                 the label cache, and a cache that has quietly     |
+   //|                 stopped working looks exactly like one that has   |
+   //|                 not.                                              |
+   //| PaintWrites() - object properties written underneath, cache or    |
+   //|                 no cache. Buttons and rectangles have no cache    |
+   //|                 at all, so this is the real floor of the paint.   |
+   //+------------------------------------------------------------------+
+   int               PaintWrites(void)      { return m_w.Writes(); }
+   void              ResetPaintWrites(void) { m_w.ResetWrites(); m_writes = 0; }
+
    bool              IsPro(void)            { return m_pro; }
    bool              IsTall(void)           { return m_tall; }
    int               RowCap(void)           { return PosCap(); }

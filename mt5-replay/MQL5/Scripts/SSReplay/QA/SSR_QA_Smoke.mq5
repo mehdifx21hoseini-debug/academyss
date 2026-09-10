@@ -4831,6 +4831,122 @@ void OnStart()
         }
    }
 
+   //+------------------------------------------------------------------+
+   //| 42. WHAT ONE FRAME COSTS.                                        |
+   //|                                                                  |
+   //| Phase 11's rule is that the paint budget may not grow. Until now  |
+   //| there was no number to compare against, and "it feels the same"   |
+   //| is not a measurement - which matters because this panel gained a  |
+   //| fifth tab, four meters, seven more position rows and 176 string   |
+   //| lookups over Phases 2-10 with nobody able to say what that cost.  |
+   //|                                                                  |
+   //| THE ASSERTION THAT MATTERS is not a millisecond figure. It is     |
+   //| that a frame where NOTHING CHANGED rewrites NO labels. That is    |
+   //| the label cache, and a cache which has quietly stopped working    |
+   //| looks exactly like one that has not - the panel is correct        |
+   //| either way, it just does sixty times the work, for ever.          |
+   //|                                                                  |
+   //| The millisecond figure is REPORTED, not asserted against a number |
+   //| invented here. What one repaint costs depends on the machine, and |
+   //| a ceiling picked in this file would be a claim about somebody     |
+   //| else's terminal.                                                  |
+   //+------------------------------------------------------------------+
+   {
+      Step("42 the paint budget");
+
+      long mchart = ChartOpen(rsym, PERIOD_M1);
+      if(Check("42 a chart to paint on", mchart != 0, rsym))
+        {
+         CSSRTradingEngine macct;
+         macct.SetBalance(10000.0);
+         macct.OnSessionStart(rsym,
+                              (int)SymbolInfoInteger(rsym, SYMBOL_DIGITS),
+                              SymbolInfoDouble(rsym, SYMBOL_POINT), 0);
+         CSSRReplayGroup mgroup;
+         mgroup.Add(GetPointer(ctrl));
+         CSSRGroupPort mport;
+         mport.Attach(GetPointer(mgroup));
+         mport.AttachAccount(GetPointer(macct));
+
+         CSSRPanel mp;
+         mp.Create(mchart, GetPointer(mport), "SSRM_");
+
+         //--- the first frame CREATES every object, so it is not a
+         //--- measurement of a repaint and is deliberately thrown away
+         mp.Render();
+         int created = mp.ObjectCount();
+
+         //+------------------------------------------------------------------+
+         //| THE CACHE. Nothing changed between these two frames.             |
+         //+------------------------------------------------------------------+
+         mp.ResetPaintWrites();
+         mp.Render();
+         int cached_labels = mp.Writes();
+         int cached_props  = mp.PaintWrites();
+
+         Check("42 a frame that changed nothing rewrites no labels",
+               cached_labels == 0,
+               StringFormat("%d label(s) rewritten on an identical frame - "
+                            "the cache is either working or the panel is "
+                            "doing this sixty times a second for ever",
+                            cached_labels));
+
+         //--- the floor underneath the cache: buttons and rectangles have
+         //--- none, so this is what a repaint costs however still the
+         //--- panel is. Reported, because it is the number any future
+         //--- optimisation has to beat - and there is no point beating
+         //--- it until somebody has measured it hurting.
+         Note("42 object properties written per still frame",
+              StringFormat("%d, across %d objects. Labels are cached; "
+                           "buttons and rectangles are not.",
+                           cached_props, created));
+
+         //+------------------------------------------------------------------+
+         //| AND WHAT IT COSTS IN TIME, on this machine, reported.            |
+         //|                                                                  |
+         //| The mean of twenty, not one: a single frame can be interrupted   |
+         //| by anything the terminal is doing and would say more about that  |
+         //| than about the panel.                                            |
+         //+------------------------------------------------------------------+
+         uint t0 = GetTickCount();
+         for(int i = 0; i < 20 && !IsStopped(); i++)
+            mp.Render();
+         uint spent = GetTickCount() - t0;
+         double per = spent / 20.0;
+
+         Note("42 mean repaint",
+              StringFormat("%.2f ms over 20 frames. The panel repaints every "
+                           "100 ms and the engine pumps every 40 ms, so a "
+                           "repaint has to stay well inside both.", per));
+
+         //--- one ceiling IS asserted, and it is the one that cannot be
+         //--- an opinion: a repaint slower than the interval it repeats
+         //--- on would never finish before the next one is due.
+         Check("42 a repaint finishes inside its own interval",
+               per < 100.0,
+               StringFormat("%.2f ms against a 100 ms repaint interval", per));
+
+         //+------------------------------------------------------------------+
+         //| AND A SHEET THAT CHANGED REDRAWS - the other half of a cache.    |
+         //|                                                                  |
+         //| A cache that never invalidates is not a cache, it is a frozen    |
+         //| panel. Switching tabs changes every label on the sheet, so this   |
+         //| frame MUST write.                                                 |
+         //+------------------------------------------------------------------+
+         mp.ResetPaintWrites();
+         mp.Dispatch("tab2");
+         mp.Render();
+         Check("42 and a frame that changed something does write",
+               mp.Writes() > 0,
+               StringFormat("%d label(s) rewritten after a tab change - a "
+                            "cache that never invalidates is a frozen panel",
+                            mp.Writes()));
+
+         mp.Destroy();
+         ChartClose(mchart);
+        }
+   }
+
    ctrl.Release();
    Cleanup(rsym);
    Done();

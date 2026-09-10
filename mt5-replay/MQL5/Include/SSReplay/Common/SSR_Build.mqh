@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v114 2026-09-10  strings"
+#define SSR_BUILD "v115 2026-09-10  measure"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

@@ -10,7 +10,7 @@
 //|  an indicator, so the EA slot stays free for the user's own      |
 //|  strategy. That split needs an IPC transport which does not      |
 //|  exist yet. Because the panel talks through CSSRReplayPort, the  |
-//|  move is a wiring change - swap CSSRDirectPort for an IPC port   |
+//|  move is a wiring change - swap CSSRGroupPort for an IPC port    |
 //|  and this file becomes two - not a rewrite of anything.          |
 //|                                                                  |
 //|  Attach to ANY chart. It opens a separate replay chart and drives |

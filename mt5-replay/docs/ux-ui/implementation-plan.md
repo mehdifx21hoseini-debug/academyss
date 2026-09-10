@@ -388,10 +388,60 @@ note named as worth building: **a taller sheet on a tall chart**.
   honoured, and saying so is more useful than a switch that half works.**
 - 39 clean, **19** audits silent.
 
-### Phase 11 — Polish and performance
-- Profile the pump loop before and after. The engine pumps every 40 ms and the
-  panel repaints at 100 ms; **neither budget may grow.**
-- Delete `SSR_DirectPort.mqh` (dead).
+### Phase 11 — Polish and performance ✅ complete
+
+- **"Neither budget may grow" had no number to grow against.** That is the
+  whole finding. The panel gained a fifth tab, four meters, seven more
+  position rows and 176 string lookups over Phases 2–10, and nobody could say
+  what any of it cost — "it feels the same" is not a measurement.
+- **Done: the instrument.** `CSSRWidgets` counts every object property it
+  writes; the panel exposes `PaintWrites()` beside its existing label-cache
+  counter. **Stage 42** renders a frame, resets, renders an identical one, and
+  reports both numbers plus the mean millisecond cost of twenty repaints — on
+  the user's machine, which is the only place the question has an answer.
+- **The assertion that matters is not a millisecond figure.** It is that a
+  frame where *nothing changed* rewrites *no labels*. A label cache that has
+  quietly stopped working looks exactly like one that has not: the panel is
+  correct either way, it just does sixty times the work, for ever. Stage 42
+  asserts zero on a still frame, and non-zero after a tab change — a cache
+  that never invalidates is a frozen panel.
+- **Nothing was optimised, deliberately.** Buttons and rectangles write nine
+  properties every frame and are not cached. That is now a *reported number*,
+  not a guess, and it is the number any future optimisation has to beat.
+  Changing the paint on a hunch is the thing this project refuses to do; a
+  ceiling picked in a test file would be a claim about somebody else's
+  terminal.
+- **Done: `SSR_DirectPort.mqh` deleted.** Referenced only by one comment,
+  which now names the port that is actually there.
+- **Found by writing the status ladder down: Phase 9 broke trade refusals on a
+  narrow chart.** One strip, five things that want it, and the order *is* the
+  design. The narrow-chart line had gone in at position two — a standing
+  condition permanently outranking the answer to a press — so on a narrow
+  chart a refused order could never be seen. The ladder is now: armed reset,
+  refused order, refused panel size, standing condition, resting numbers.
+- **The Phase 0 audit was closed out honestly.** Nine of its eleven problems
+  are fixed; **P6 (61 expert inputs, 14 setup fields, no bridge) is not, and
+  is worse than when it was written.** A Settings area is a phase, not polish,
+  and building one at the end — unverifiable, on a surface nobody could look
+  at — would have been the riskiest thing in the project. See
+  `current-state-audit.md` §8.
+- 39 clean, 19 audits silent.
+
+---
+
+## After Phase 11 — what is genuinely left
+
+1. **The candles-not-building-from-ticks defect.** v97 fixed a plausible
+   mechanism and stage 31 was written to catch it, but that is **four runs of
+   correlation, not proof**, and stage 31 has never been seen green. This is
+   the one thing blocking a final release.
+2. **P6 — a Settings area** for the inputs that change *behaviour* (commission,
+   slippage, swap, margin, stop-out, extra symbols, pause rules, shot capture,
+   calendar, reference strategy), leaving deployment-time inputs where they are.
+3. **RTL layout (Phase 10b)** — route every draw site through the layout helper,
+   then flip one flag. Needs somebody who can watch the chart while it happens.
+4. **A user text-size control** — documented in `accessibility.md` as an open
+   gap, not faked.
 
 ## Sequencing decisions
 

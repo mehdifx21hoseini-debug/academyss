@@ -282,3 +282,37 @@ Ticks not building candles on a second run of the same symbol. A mechanism was
 found and fixed in v97 (`Destroy()` now waits after deleting a custom symbol)
 and stage 31 replays a symbol twice to catch it. **Four runs of correlation, no
 green confirmation yet.** Not to be described as solved.
+
+
+---
+
+# 8. Verdict, after Phases 0–11
+
+Written at the end, against the problems this document opened with. Two of the
+eleven were **not fixed**, and they are named as such rather than quietly
+dropped.
+
+| | Problem | Severity | Outcome |
+|---|---|---|---|
+| P1 | The panel is the product | Critical | **Fixed.** What is *consulted* moved to modals — the session review, the reveal card, the command palette, the key card — and what is *operated* stayed on the panel. The rule was written in v98 and every phase since has followed it. |
+| P2 | No analysis surface | Critical | **Fixed, Phase 7.** All 43 measures, paged, plus observations that state what was counted and never interpret it. |
+| P3 | Random start and seed have no UI | High | **Fixed.** `random_start` and `seed` are setup fields; the seed is shown so a session can be shared. |
+| P4 | Blind mode is a settings row | High | **Fixed, Phase 6.** The session ends with the market still hidden and one button that lifts it — the reveal is a deliberate act at a moment the trader chose. |
+| P5 | Prop evaluation has no dashboard | High | **Fixed, Phase 8.** Its own tab, one meter per rule, present only while an evaluation is configured. |
+| P6 | 61 expert inputs, 14 setup fields, no bridge | Medium | **NOT FIXED — and it got slightly worse.** The count was 54/13 when this was written; it is 61/14 now. Commission, slippage, swap, margin, stop-out, extra symbols, pause rules, shot capture, calendar behaviour and the reference strategy are still reachable only through MetaTrader's own inputs dialog. A Settings area is a phase, not polish, and building one at the end of the redesign — unverifiable, on a surface nobody could look at — would have been the riskiest thing in the whole project. It is the first thing to do next. |
+| P7 | No command surface | Medium | **Fixed, Phase 3.** `Ctrl+K`, 29 commands, and no command invents a verb — every entry resolves to a key or a button that already exists. |
+| P8 | Strings hard-coded in English | Medium | **Fixed, Phase 10a.** 176 strings, a complete Persian translation, audit A19. |
+| P9 | Accessibility is colour-only in places | Medium | **Fixed, Phase 9** — and the pass found 11 of 38 contrast pairs below WCAG AA, including the build tag at 2.06:1. Enforced by audit A18. **One gap stays open and is documented, not faked: no user text-size control.** |
+| P10 | Error and empty states inconsistent | Medium | **Fixed, Phase 11.** One strip, five claimants, and the ladder is now written down — armed reset, refused order, refused panel size, standing condition, resting numbers. Writing it down is what exposed the defect: Phase 9 had put the narrow-chart line *above* trade refusals, so on a narrow chart a refused order could never be seen. |
+| P11 | The setup wizard cannot be skipped | Low | **Fixed, Phase 4.** Quick-start: same as last time, continue that session, random session, or customise. |
+
+**Also not done, and stated in `localization.md` rather than softened:** RTL
+layout. The coordinate mirroring has existed since Phase 2 and is still off,
+because Phases 3–9 did not route their draw sites through the layout helper —
+exactly what that document warned must not happen. Flipping the flag now would
+mirror a handful of sites and leave the rest, on a chart nobody here can see.
+
+**And one defect still blocks a final release**, unchanged by any of this: the
+candles-not-building-from-ticks bug. v97 fixed a plausible mechanism and smoke
+stage 31 was written to catch it, but that is **four runs of correlation, not
+proof**, and stage 31 has never been seen green.
