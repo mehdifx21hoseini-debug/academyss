@@ -83,6 +83,7 @@ private:
    SSRSymbolStats    m_stats;
 
    ENUM_SSR_ERR      m_last_error;
+   bool              m_chart_mode_ok;  // bars build from BID, as the engine feeds
    int               m_session_days;   // days whose quote session covers 24h
    string            m_session_note;   // why not, when it is not 7
    string            m_last_error_text;
@@ -193,7 +194,7 @@ public:
      : m_origin(""), m_symbol(""), m_slot(1), m_anonymous(false),
        m_created(false), m_selected(false),
        m_digits(5), m_point(0.00001), m_last_error(SSR_OK), m_last_error_text(""),
-       m_session_days(0), m_session_note("")
+       m_chart_mode_ok(false), m_session_days(0), m_session_note("")
      { m_stats.Init(); }
 
                     ~CSSRCustomSymbolManager(void) {}
@@ -211,6 +212,11 @@ public:
    bool              IsCreated(void){ return m_created; }
    //--- how many of the seven days the replay symbol will quote on. Seven
    //--- or the engine's ticks silently build no candles.
+   //--- the replay symbol builds its bars from BID, which is what the
+   //--- engine writes. False means every tick is accepted and no candle
+   //--- is ever made from one.
+   bool              ChartModeOk(void)   { return m_chart_mode_ok; }
+
    int               SessionDays(void)   { return m_session_days; }
    string            SessionNote(void)   { return m_session_note; }
 
@@ -319,6 +325,48 @@ public:
       //--- the three overrides the engine depends on
       CustomSymbolSetInteger(m_symbol, SYMBOL_SPREAD_FLOAT, true);
       CustomSymbolSetInteger(m_symbol, SYMBOL_TRADE_MODE, SYMBOL_TRADE_MODE_DISABLED);
+
+      //+------------------------------------------------------------------+
+      //| BID MODE, FORCED. THIS IS THE DEFECT THAT OUTLIVED EVERY OTHER.  |
+      //|                                                                  |
+      //| "The candles do not build from the ticks" - open since the first |
+      //| build, blamed on timing, on teardown, on the terminal, and never |
+      //| once measured. It was never intermittent. It was PER SYMBOL      |
+      //| CLASS, and this is the line that was missing.                    |
+      //|                                                                  |
+      //| A forex pair is SYMBOL_CHART_MODE_BID: MetaTrader builds its     |
+      //| bars from the bid price, which is what this engine synthesises,   |
+      //| so GBPUSD@ has worked for the life of the project. An index or   |
+      //| futures CFD is SYMBOL_CHART_MODE_LAST - it builds from the LAST  |
+      //| price - and CustomSymbolCreate clones that faithfully.           |
+      //|                                                                  |
+      //| CustomTicksAdd does not refuse a tick that carries nothing the   |
+      //| chart mode can use. It takes it, stores it, and builds no bar:   |
+      //|                                                                  |
+      //|   60 calls offered ticks, the terminal took 481, refused 0,      |
+      //|   and the M1 series stayed at 139 bars.                          |
+      //|                                                                  |
+      //| That is a US30.U26 run. Same build, same engine, same code path  |
+      //| that had just produced sixty candles on GBPUSD.                   |
+      //|                                                                  |
+      //| The replay symbol is a container this product owns, exactly like |
+      //| SPREAD_FLOAT and TRADE_MODE above. It is told what to build from |
+      //| rather than asked. The ticks now also carry TICK_FLAG_LAST, so   |
+      //| a terminal that ignores this property still gets a usable price. |
+      //+------------------------------------------------------------------+
+      CustomSymbolSetInteger(m_symbol, SYMBOL_CHART_MODE, SYMBOL_CHART_MODE_BID);
+
+      //--- and READ IT BACK. Setting a property and trusting the return
+      //--- value is exactly how this hid for so long.
+      m_chart_mode_ok =
+         ((ENUM_SYMBOL_CHART_MODE)SymbolInfoInteger(m_symbol, SYMBOL_CHART_MODE)
+          == SYMBOL_CHART_MODE_BID);
+      if(!m_chart_mode_ok)
+         PrintFormat("[symbol] %s did NOT take SYMBOL_CHART_MODE_BID (it "
+                     "reads %d). Its bars are built from the LAST price, and "
+                     "the engine's ticks will be accepted and build nothing.",
+                     m_symbol,
+                     (int)SymbolInfoInteger(m_symbol, SYMBOL_CHART_MODE));
 
       //--- NOT a cosmetic property. A symbol that quotes for six hours a
       //--- day replays six hours of candles and swallows the rest.

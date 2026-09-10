@@ -619,6 +619,62 @@ retries — which turns thirteen mysteries into either a pass or a number.
 
 ---
 
+## v120 — the defect that outlived every other one
+
+**It was never intermittent. It was per symbol class, and nobody had run the
+suite on the other class.**
+
+For the life of this project "the candles do not build from the ticks" has
+been blamed on timing, on teardown, on the terminal, and never once measured.
+The US30.U26 run measured it:
+
+```
+60 call(s) offered ticks, the terminal took 481 and refused 0,
+and the M1 series stayed at 139 bars.
+```
+
+Same build, same engine, the same code path that had just produced sixty
+candles on GBPUSD@.
+
+**`SYMBOL_CHART_MODE` is what a symbol builds its bars from, and nothing in
+this codebase ever set it.**
+
+- A forex pair is `SYMBOL_CHART_MODE_BID`. MetaTrader builds its bars from the
+  bid price — which is exactly what this engine synthesises. That is why
+  GBPUSD@ has worked since the first build.
+- An index or futures CFD is `SYMBOL_CHART_MODE_LAST`. Bars come from the
+  **last** price. `CustomSymbolCreate` clones that faithfully from the origin.
+- `CustomTicksAdd` **does not refuse** a tick that carries nothing the chart
+  mode can use. It takes it, stores it in the tick history, and builds no bar.
+
+Accepted, stored, invisible. "A swallowed write, not a refusal" — the smoke
+test had been printing the exact words for builds and the meaning was in the
+symbol's properties, not in the write.
+
+**Two fixes, because one of them being right has never been enough here:**
+
+1. **`SYMBOL_CHART_MODE_BID` is forced on the replay symbol** — it is a
+   container this product owns, exactly like `SPREAD_FLOAT` and
+   `TRADE_MODE_DISABLED` beside it. It is told what to build from rather than
+   asked. **And read back**, because setting a property and trusting the
+   return value is precisely how this hid for so long.
+2. **Every synthesised tick carries `TICK_FLAG_LAST`.** The `last` field has
+   been filled since the synthesiser was written and the flag saying so never
+   was — costless on a BID-mode symbol, fatal on a LAST-mode one. So a
+   terminal that ignores the property above still gets a usable price.
+
+**Two smoke checks, placed BEFORE every tick check**, so if this ever returns
+those read as the consequence they are: the replay symbol builds from the BID,
+and every synthesised tick carries a Last price *and says so* — measured on a
+real synthesised bar, not asserted about the source.
+
+**The previous round's session theory was wrong.** It explained the same
+observations and it was a guess from a log; it is left in place because
+deleting an inherited session table and reading it back is correct on its own
+merits, but it was not this.
+
+---
+
 ## After Phase 11 — what is genuinely left
 
 1. **The candles-not-building-from-ticks defect.** v97 fixed a plausible

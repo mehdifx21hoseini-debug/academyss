@@ -151,7 +151,27 @@ public:
          out[idx].last        = out[idx].bid;
          out[idx].volume      = 1;
          out[idx].volume_real = 1.0;
-         out[idx].flags       = TICK_FLAG_BID | TICK_FLAG_ASK;
+         //+------------------------------------------------------------------+
+         //| TICK_FLAG_LAST, AND WHY IT WAS THE BUG.                          |
+         //|                                                                  |
+         //| `last` has been filled since this file was written and the flag  |
+         //| saying so never was. On a symbol whose SYMBOL_CHART_MODE is BID   |
+         //| that costs nothing - which is every forex pair, which is why      |
+         //| this passed on GBPUSD for the life of the project.                |
+         //|                                                                  |
+         //| An index or futures CFD is CHART_MODE_LAST. MetaTrader builds     |
+         //| its bars from the LAST price there, and it does not consider a    |
+         //| tick to carry one unless the tick says so. So every tick was      |
+         //| ACCEPTED, stored, and contributed nothing to a bar:               |
+         //|                                                                  |
+         //|   60 calls offered ticks, the terminal took 481, refused 0,       |
+         //|   and the M1 series stayed at 139 bars.                           |
+         //|                                                                  |
+         //| The replay symbol is also forced to BID mode now, so this flag    |
+         //| is the belt to that braces. Both, because one of them being       |
+         //| right has never been enough in this codebase.                     |
+         //+------------------------------------------------------------------+
+         out[idx].flags       = TICK_FLAG_BID | TICK_FLAG_ASK | TICK_FLAG_LAST;
         }
 
       //--- the last tick must land exactly on the close, otherwise the
@@ -178,7 +198,9 @@ public:
       out[offset].last        = out[offset].bid;
       out[offset].volume      = 1;
       out[offset].volume_real = 1.0;
-      out[offset].flags       = TICK_FLAG_BID | TICK_FLAG_ASK;
+      //--- see the block above: a tick without TICK_FLAG_LAST builds no
+      //--- bar on a CHART_MODE_LAST symbol, and is not refused either
+      out[offset].flags       = TICK_FLAG_BID | TICK_FLAG_ASK | TICK_FLAG_LAST;
       return 1;
      }
 

@@ -449,6 +449,75 @@ void OnStart()
          (bool)SymbolInfoInteger(rsym, SYMBOL_CUSTOM), "SYMBOL_CUSTOM");
 
    //+------------------------------------------------------------------+
+   //| WHAT DOES THIS SYMBOL BUILD ITS BARS FROM?                       |
+   //|                                                                  |
+   //| The defect that outlived every other one in this project, and the |
+   //| single line that was missing. It was never intermittent - it was  |
+   //| PER SYMBOL CLASS, and nobody had run the suite on the other class.|
+   //|                                                                  |
+   //| A forex pair is CHART_MODE_BID and MetaTrader builds its bars     |
+   //| from the bid, which is what this engine synthesises. An index or  |
+   //| futures CFD is CHART_MODE_LAST - bars come from the LAST price -  |
+   //| and CustomSymbolCreate clones that faithfully from the origin.    |
+   //|                                                                  |
+   //| CustomTicksAdd does not refuse a tick that carries nothing the    |
+   //| chart mode can use. It takes it, stores it, and builds no bar:    |
+   //|                                                                  |
+   //|   60 calls offered ticks, the terminal took 481, refused 0,       |
+   //|   and the M1 series stayed at 139 bars.                           |
+   //|                                                                  |
+   //| Asserted HERE, before every tick check below, so that if it ever  |
+   //| comes back those read as the consequence they are.                |
+   //+------------------------------------------------------------------+
+   {
+      long mode = SymbolInfoInteger(rsym, SYMBOL_CHART_MODE);
+      Check("the replay symbol builds its bars from the BID",
+            (ENUM_SYMBOL_CHART_MODE)mode == SYMBOL_CHART_MODE_BID,
+            ((ENUM_SYMBOL_CHART_MODE)mode == SYMBOL_CHART_MODE_BID
+             ? "which is what the engine writes"
+             : StringFormat("CHART_MODE is %d, not BID(%d). Bars are built "
+                            "from the LAST price and every tick this engine "
+                            "sends will be accepted and build nothing.",
+                            (int)mode, (int)SYMBOL_CHART_MODE_BID)));
+   }
+
+   //+------------------------------------------------------------------+
+   //| AND THE TICKS THEMSELVES CARRY A LAST PRICE.                     |
+   //|                                                                  |
+   //| Belt to the braces above: `last` has been filled since the        |
+   //| synthesiser was written and the FLAG saying so never was, so a    |
+   //| terminal that ignored the property would still have swallowed     |
+   //| every tick. Measured on a real synthesised bar, not asserted      |
+   //| about the source.                                                 |
+   //+------------------------------------------------------------------+
+   {
+      //--- Configure(digits, point) and SetTicksPerBar - read from the
+      //--- class, not remembered. Guessing a signature has cost this
+      //--- project a compile five times now.
+      CSSRTickSynthesizer syn;
+      syn.Configure(5, 0.00001);
+      syn.SetTicksPerBar(10);
+      syn.SetSpreadMode(SSR_SPREAD_RECORDED);
+      MqlRates one;
+      one.time   = (datetime)(SSRToTime(1700000000000));
+      one.open   = 1.10000; one.high = 1.10050;
+      one.low    = 1.09950; one.close = 1.10020;
+      one.spread = 8; one.tick_volume = 10; one.real_volume = 0;
+      MqlTick made[];
+      ArrayResize(made, 64);
+      int made_n = syn.Synthesize(one, made, 0);
+      int no_last = 0;
+      for(int i = 0; i < made_n; i++)
+         if((made[i].flags & TICK_FLAG_LAST) == 0 || made[i].last <= 0.0)
+            no_last++;
+      Check("every synthesised tick carries a LAST price and says so",
+            made_n > 0 && no_last == 0,
+            StringFormat("%d tick(s), %d without TICK_FLAG_LAST - a tick "
+                         "with no usable price for the chart mode is "
+                         "accepted and builds nothing", made_n, no_last));
+   }
+
+   //+------------------------------------------------------------------+
    //| THE QUOTE SESSION, READ BACK FROM THE TERMINAL.                  |
    //|                                                                  |
    //| The best candidate this project has ever had for "the candles do  |

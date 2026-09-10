@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v119 2026-09-10  sessions"
+#define SSR_BUILD "v120 2026-09-10  chartmode"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

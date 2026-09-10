@@ -312,7 +312,13 @@ because Phases 3â€“9 did not route their draw sites through the layout helper â€
 exactly what that document warned must not happen. Flipping the flag now would
 mirror a handful of sites and leave the rest, on a chart nobody here can see.
 
-**And one defect still blocks a final release**, unchanged by any of this: the
-candles-not-building-from-ticks bug. v97 fixed a plausible mechanism and smoke
-stage 31 was written to catch it, but that is **four runs of correlation, not
-proof**, and stage 31 has never been seen green.
+**The defect that blocked a final release was found in v120.** It was never
+intermittent: `SYMBOL_CHART_MODE` was never set, so a replay symbol cloned from
+an index or futures CFD inherited `CHART_MODE_LAST` and built its bars from a
+`last` price the engine's ticks never flagged. `CustomTicksAdd` accepted every
+one of them and built nothing. Forex symbols are `CHART_MODE_BID` and worked
+from the first build, which is why four years of runs looked like luck.
+
+Fixed by forcing `CHART_MODE_BID` on the replay symbol *and* flagging the Last
+price the ticks already carried, with both read back and both asserted in the
+smoke test ahead of every tick check.
