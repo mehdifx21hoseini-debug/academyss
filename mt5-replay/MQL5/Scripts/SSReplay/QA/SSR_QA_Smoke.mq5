@@ -1909,6 +1909,19 @@ void OnStart()
                   FileIsExist(SSR_PRESET_FILE),
                   "MQL5\\Files\\" + SSR_PRESET_FILE);
 
+            //+------------------------------------------------------------------+
+            //| STEP 0 IS THE QUICK SCREEN NOW, and bpre is not on it.           |
+            //|                                                                  |
+            //| Phase 4 put a quick-start screen in front of the wizard, and     |
+            //| this stage went on pressing a button that lives on the SETTINGS  |
+            //| step. Pressing an object that does not exist does nothing and    |
+            //| reports nothing, so the three checks below have been failing     |
+            //| ever since against a feature that works - which is the exact     |
+            //| shape of a test that outlived its screen.                        |
+            //+------------------------------------------------------------------+
+            ObjectSetInteger(pk, "SSRS_qcust", OBJPROP_STATE, true);
+            sp.Poll();
+
             ObjectSetInteger(pk, "SSRS_bpre", OBJPROP_STATE, true);
             sp.Poll();
             SSRSetupValues a;
@@ -3450,7 +3463,21 @@ void OnStart()
       //--- taking five pointers - I wrote one from memory and the
       //--- compiler said so, which is the third time this session a
       //--- signature guessed from a fragment has cost a build.
+      //+------------------------------------------------------------------+
+      //| THE GROUP IS NOT OPTIONAL, and this stage left it out.           |
+      //|                                                                  |
+      //| ReadState returns FALSE the moment there is no primary            |
+      //| controller, so the panel saw a zeroed state and reported 0 rows   |
+      //| against an account holding two positions. Stage 28 wrote that     |
+      //| lesson down in a comment three hundred lines above this one and   |
+      //| this stage made the same mistake anyway - which is what a         |
+      //| comment is worth against a copy-paste.                            |
+      //+------------------------------------------------------------------+
+      CSSRReplayGroup group2;
+      group2.Add(GetPointer(ctrl));
+
       CSSRGroupPort port2;
+      port2.Attach(GetPointer(group2));
       port2.AttachAccount(GetPointer(ex2));
 
       SSRUiState st2;
@@ -5031,6 +5058,19 @@ int LabelOverlaps(const long chart, const string prefix, string &worst)
      {
       string nm = ObjectName(chart, i, -1, OBJ_LABEL);
       if(StringFind(nm, prefix) != 0)
+         continue;
+      //+------------------------------------------------------------------+
+      //| A TOAST IS AN OVERLAY. THAT IS WHAT A TOAST IS.                  |
+      //|                                                                  |
+      //| It reported the fill toast sitting over the trailing-stop row,   |
+      //| which is true and is the design: something that just HAPPENED is |
+      //| worth more for three seconds than a standing setting, and it is  |
+      //| deliberately not allowed to evict the status strip instead.      |
+      //|                                                                  |
+      //| Named, not a wildcard. Everything else on every sheet is still   |
+      //| held to "nothing over anything".                                 |
+      //+------------------------------------------------------------------+
+      if(StringFind(nm, prefix + "fill") == 0)
          continue;
       int lx, ly, lw, lh;
       if(!LabelBox(chart, nm, lx, ly, lw, lh))

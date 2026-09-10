@@ -2532,6 +2532,50 @@ void OnTimer()
         }
       else
         {
+         //+------------------------------------------------------------------+
+         //| NEVER TAKE THE USER'S CHART FOR A SESSION THAT IS NOT THERE.     |
+         //|                                                                  |
+         //| Reported on US30.U26: "when I press Start the symbol is erased    |
+         //| completely". From the outside that is exactly what this looked    |
+         //| like - the chart was pointed at a replay symbol, and whatever     |
+         //| went wrong after that left a window with no instrument in it and  |
+         //| a greyed-out toolbar.                                             |
+         //|                                                                  |
+         //| The root cause is not established and is NOT guessed at here.     |
+         //| What is fixed is the consequence: this hands the chart over only  |
+         //| once the replay symbol is demonstrably real - it exists, it is in |
+         //| Market Watch, and it has bars. If any of that is not true the     |
+         //| chart is LEFT ALONE and the reason is printed, which turns "my    |
+         //| symbol was erased" into a line naming the instrument and the      |
+         //| check that failed.                                                |
+         //|                                                                  |
+         //| Three cheap questions against a destroyed workspace is not a      |
+         //| trade worth thinking about.                                       |
+         //+------------------------------------------------------------------+
+         ResetLastError();
+         bool rs_exists = (SymbolInfoInteger(rs, SYMBOL_DIGITS) > 0 &&
+                           GetLastError() == 0);
+         bool rs_shown  = (bool)SymbolInfoInteger(rs, SYMBOL_SELECT);
+         long rs_bars   = (rs_exists ? Bars(rs, CfgChartTf()) : 0);
+
+         if(!rs_exists || !rs_shown || rs_bars <= 0)
+           {
+            PrintFormat("[host] NOT handing this chart over: %s %s, %s, %d "
+                        "bar(s) on %s. Your chart is untouched - the replay "
+                        "is on its own window.",
+                        rs,
+                        (rs_exists ? "exists" : "DOES NOT EXIST"),
+                        (rs_shown ? "is in Market Watch"
+                                  : "IS NOT IN MARKET WATCH"),
+                        (int)rs_bars, EnumToString(CfgChartTf()));
+            if(g_flight.IsOpen())
+               g_flight.Event(StringFormat("handover refused: %s exists=%d "
+                                           "shown=%d bars=%d", rs,
+                                           (int)rs_exists, (int)rs_shown,
+                                           (int)rs_bars));
+            return;
+           }
+
          g_switching = true;
          PrintFormat("[host] handing this chart over to %s - SS Replay will "
                      "restart once on it. This is expected.", rs);

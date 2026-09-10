@@ -1258,7 +1258,7 @@ private:
         {
          m_w.Button("armbtn", x + 8, gy + 13, w - 16, SSR_BTN_H,
                     T(SSR_S_PLACE_LINES), false, m_state.can_trade);
-         Text(12, "hintrow", x + 8, gy + 40,
+         Text(18, "hintrow", x + 8, gy + 40,
               m_state.can_trade
               ? T(SSR_S_THEN_DRAG)
               : T(SSR_S_WAITING_PRICE),
@@ -1291,8 +1291,13 @@ private:
 
          //--- WHY it cannot be placed, in the words of the drag that
          //--- fixes it. "Invalid" is not something a person can act on.
+         //--- SLOT 17, NOT 12. This wrote a second, different text into
+         //--- the slot the line above had just cached, so both missed
+         //--- the cache on every single frame - for ever, on the sheet
+         //--- a trader spends the session on. Measured: 3 labels
+         //--- rewritten on a frame where nothing had changed.
          if(m_state.order_why != "")
-            Text(12, "setuprow", x + 8, gy + 12, m_state.order_why,
+            Text(17, "setuprow", x + 8, gy + 12, m_state.order_why,
                  SSR_C_STOP, SSR_FS_SMALL);
 
          //--- ONE press opens what the lines describe. The side is not

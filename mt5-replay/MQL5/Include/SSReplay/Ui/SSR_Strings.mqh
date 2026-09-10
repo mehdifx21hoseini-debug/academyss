@@ -603,10 +603,28 @@ bool SSRLoadLanguage(const string code)
       return false;
      }
 
-   //--- FILE_SHARE_READ because a translator will have the file open in an
-   //--- editor while they test, and an exclusive open would fail with no
-   //--- explanation anyone could act on
-   int fh = FileOpen(path, FILE_READ | FILE_TXT | FILE_ANSI | FILE_SHARE_READ |
+   //+------------------------------------------------------------------+
+   //| READ AS BYTES, DECODED AS UTF-8. NOT FILE_TXT|FILE_ANSI.         |
+   //|                                                                  |
+   //| This was FILE_ANSI, which hands back one character per BYTE. A    |
+   //| Persian letter is two bytes in UTF-8, so every string came out    |
+   //| twice as long and completely wrong - and the panel drew that.     |
+   //|                                                                  |
+   //| It hid for a whole build because the QA log is written with the   |
+   //| same encoding: the mojibake bytes went in and came back out, so   |
+   //| the report showed "پخش" perfectly while the chart could not have. |
+   //| What gave it away was a NUMBER - the 63-character check failed on |
+   //| 24 strings, and every one of them was inside 63 characters and    |
+   //| over 63 BYTES. A count is harder to fool than a screenshot.        |
+   //|                                                                  |
+   //| FILE_UNICODE is not the answer either: that is UTF-16, and a      |
+   //| translator's editor will save UTF-8. Bytes in, CP_UTF8 out.       |
+   //|                                                                  |
+   //| FILE_SHARE_READ|WRITE because a translator will have the file     |
+   //| open in an editor while they test, and an exclusive open would    |
+   //| fail with no explanation anyone could act on.                      |
+   //+------------------------------------------------------------------+
+   int fh = FileOpen(path, FILE_READ | FILE_BIN | FILE_SHARE_READ |
                      FILE_SHARE_WRITE);
    if(fh == INVALID_HANDLE)
      {
@@ -615,10 +633,29 @@ bool SSRLoadLanguage(const string code)
       return false;
      }
 
-   int applied = 0, unknown = 0;
-   while(!FileIsEnding(fh))
+   int    size = (int)FileSize(fh);
+   uchar  raw[];
+   if(size > 0)
      {
-      string line = FileReadString(fh);
+      ArrayResize(raw, size);
+      FileReadArray(fh, raw, 0, size);
+     }
+   FileClose(fh);
+
+   //--- a UTF-8 BOM is what most editors write and it is not text
+   int from = 0;
+   if(size >= 3 && raw[0] == 0xEF && raw[1] == 0xBB && raw[2] == 0xBF)
+      from = 3;
+
+   string whole = CharArrayToString(raw, from, WHOLE_ARRAY, CP_UTF8);
+   string lines[];
+   StringReplace(whole, "\r", "");
+   int nlines = StringSplit(whole, (ushort)'\n', lines);
+
+   int applied = 0, unknown = 0;
+   for(int li = 0; li < nlines; li++)
+     {
+      string line = lines[li];
       StringTrimLeft(line);
       StringTrimRight(line);
       if(line == "" || StringGetCharacter(line, 0) == '#')
@@ -640,7 +677,6 @@ bool SSRLoadLanguage(const string code)
       if(!hit)
          unknown++;
      }
-   FileClose(fh);
 
    g_ssr_lang      = code;
    g_ssr_overrides = applied;

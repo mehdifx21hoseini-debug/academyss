@@ -24,6 +24,98 @@ private:
    int               m_created;
 
    //+------------------------------------------------------------------+
+   //| DO NOT WRITE WHAT IS ALREADY THERE.                              |
+   //|                                                                  |
+   //| Phase 11 built the counter and refused to optimise against it,    |
+   //| because nothing had been measured slow. The user's run measured   |
+   //| it: 561 object properties written per STILL frame, and a mean     |
+   //| repaint of 39.05 ms - against an engine that pumps every 40. One  |
+   //| repaint was eating a whole pump interval, which is exactly what   |
+   //| "the buttons work slowly" feels like from the outside.            |
+   //|                                                                  |
+   //| So each object remembers what was last written to it, and a call  |
+   //| that would write the same thing returns instead. On a frame where |
+   //| nothing changed that is 561 writes turned into 77 lookups.        |
+   //|                                                                  |
+   //| NO HASH, AND THEREFORE NO COLLISION. The numbers are mixed into   |
+   //| one long, but the TEXT is kept and compared as a string. A hash   |
+   //| collision here would silently leave the wrong word on a button    |
+   //| on a trading panel, and "vanishingly unlikely" is not a property  |
+   //| worth having in that sentence.                                    |
+   //|                                                                  |
+   //| THE DANGEROUS CASE IS DELETION, not drawing: an object removed    |
+   //| behind the cache's back would never be recreated, because the     |
+   //| cache would say "already correct". So Remove, RemoveAll and Hide  |
+   //| all invalidate, and every draw checks ObjectFind as well - the    |
+   //| early return needs BOTH "unchanged" and "still there".            |
+   //+------------------------------------------------------------------+
+   //--- open addressing, power of two, so the index is a mask not a mod
+   #define SSR_W_SLOTS 512
+   string            m_ck[SSR_W_SLOTS];    // object name, "" when free
+   long              m_cn[SSR_W_SLOTS];    // the numbers, mixed
+   string            m_ct[SSR_W_SLOTS];    // the text, kept whole
+
+   int               Slot(const string name)
+     {
+      //--- FNV-1a over the name. Only used to CHOOSE a slot; the name
+      //--- itself is compared before anything is trusted.
+      ulong h = 1469598103934665603;
+      int   n = StringLen(name);
+      for(int i = 0; i < n; i++)
+        {
+         h ^= (ulong)StringGetCharacter(name, i);
+         h *= 1099511628211;
+        }
+      int at = (int)(h & (SSR_W_SLOTS - 1));
+      for(int probe = 0; probe < 8; probe++)
+        {
+         int k = (at + probe) & (SSR_W_SLOTS - 1);
+         if(m_ck[k] == "" || m_ck[k] == name)
+            return k;
+        }
+      return -1;                      // full run of probes: never cache
+     }
+
+   //--- true when this object already holds exactly this, and exists
+   bool              Same(const string name, const long nums, const string text)
+     {
+      int k = Slot(name);
+      if(k < 0 || m_ck[k] != name)
+         return false;
+      if(m_cn[k] != nums || m_ct[k] != text)
+         return false;
+      //--- the object could have been deleted by something that did not
+      //--- go through Remove. Cheaper than nine writes, and the one
+      //--- check that makes the whole cache safe.
+      return (ObjectFind(m_chart, name) >= 0);
+     }
+
+   void              Keep(const string name, const long nums, const string text)
+     {
+      int k = Slot(name);
+      if(k < 0)
+         return;
+      m_ck[k] = name;
+      m_cn[k] = nums;
+      m_ct[k] = text;
+     }
+
+   void              Forget(const string name)
+     {
+      int k = Slot(name);
+      if(k >= 0 && m_ck[k] == name)
+        { m_ck[k] = ""; m_cn[k] = 0; m_ct[k] = ""; }
+     }
+
+   void              ForgetAll(void)
+     {
+      for(int i = 0; i < SSR_W_SLOTS; i++)
+        { m_ck[i] = ""; m_cn[i] = 0; m_ct[i] = ""; }
+     }
+
+   long              Mix(const long a, const long b) { return a * 1000003 + b; }
+
+   //+------------------------------------------------------------------+
    //| WHAT THE PAINT ACTUALLY COSTS, COUNTED.                          |
    //|                                                                  |
    //| Phase 11's rule is that the paint budget may not grow, and until |
@@ -57,7 +149,14 @@ public:
                                         m_writes(0) {}
 
    void              Attach(const long chart_id, const string prefix)
-     { m_chart = chart_id; m_prefix = prefix; }
+     {
+      //--- a cache from another chart would answer for objects that are
+      //--- not on this one
+      if(m_chart != chart_id || m_prefix != prefix)
+         ForgetAll();
+      m_chart = chart_id;
+      m_prefix = prefix;
+     }
 
    string            Prefix(void)  { return m_prefix; }
    int               Created(void) { return m_created; }
@@ -73,6 +172,9 @@ public:
                           const color bg, const color edge)
      {
       string n = N(id);
+      long   fp = Mix(Mix(Mix(Mix(Mix(x, y), w), h), (long)bg), (long)edge);
+      if(Same(n, fp, ""))
+         return true;
       if(ObjectFind(m_chart, n) < 0)
         {
          if(!ObjectCreate(m_chart, n, OBJ_RECTANGLE_LABEL, 0, 0, 0))
@@ -90,6 +192,7 @@ public:
       ObjectSetInteger(m_chart, n, OBJPROP_WIDTH,       1);
       ObjectSetInteger(m_chart, n, OBJPROP_BACK,        false);
       m_writes += 9;
+      Keep(n, fp, "");
       return true;
      }
 
@@ -100,6 +203,10 @@ public:
                            const string font = SSR_FONT)
      {
       string n = N(id);
+      long   fp = Mix(Mix(Mix(Mix(x, y), (long)col), size),
+                      (long)StringLen(font));
+      if(Same(n, fp, text))
+         return true;
       if(ObjectFind(m_chart, n) < 0)
         {
          if(!ObjectCreate(m_chart, n, OBJ_LABEL, 0, 0, 0))
@@ -115,6 +222,7 @@ public:
       ObjectSetString (m_chart, n, OBJPROP_FONT,      font);
       ObjectSetString (m_chart, n, OBJPROP_TEXT,      text);
       m_writes += 6;
+      Keep(n, fp, text);
       return true;
      }
 
@@ -226,6 +334,10 @@ public:
                              const color fg, const int size = SSR_FS_BODY)
      {
       string n = N(id);
+      long   fp = Mix(Mix(Mix(Mix(Mix(Mix(Mix(x, y), w), h),
+                                  (long)bg), (long)edge), (long)fg), size);
+      if(Same(n, fp, text))
+         return true;
       if(ObjectFind(m_chart, n) < 0)
         {
          if(!ObjectCreate(m_chart, n, OBJ_BUTTON, 0, 0, 0))
@@ -244,6 +356,7 @@ public:
       ObjectSetInteger(m_chart, n, OBJPROP_FONTSIZE,     size);
       ObjectSetString (m_chart, n, OBJPROP_TEXT,         text);
       m_writes += 9;
+      Keep(n, fp, text);
       //--- THE PRESSED STATE IS NOT CLEARED HERE ANY MORE.
       //--- MetaTrader latches a button down when it is clicked, and
       //--- that latch is now how the panel LEARNS about the click -
@@ -442,6 +555,9 @@ public:
       if(ObjectFind(m_chart, n) >= 0)
          ObjectSetInteger(m_chart, n, OBJPROP_TIMEFRAMES,
                           hidden ? OBJ_NO_PERIODS : OBJ_ALL_PERIODS);
+      //--- visibility is not in the fingerprint, so the next draw must
+      //--- not be allowed to skip itself on a hidden object
+      Forget(n);
      }
 
    void              Remove(const string id)
@@ -449,6 +565,7 @@ public:
       string n = N(id);
       if(ObjectFind(m_chart, n) >= 0)
          ObjectDelete(m_chart, n);
+      Forget(n);
      }
 
    //--- removes EVERY object carrying the prefix, including any left
@@ -457,6 +574,7 @@ public:
      {
       int n = ObjectsDeleteAll(m_chart, m_prefix, 0);
       m_created = 0;
+      ForgetAll();
       return n;
      }
 

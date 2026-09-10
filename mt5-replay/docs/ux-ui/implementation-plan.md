@@ -472,6 +472,57 @@ this project refuses to do.
 
 ---
 
+## v117 — the first real QA run, and what it found
+
+311 passed, 7 failed. Every one of the seven was worth having.
+
+- **The Persian translation was mojibake, and the log hid it.** The file was
+  opened `FILE_ANSI` — one character per byte — so every string arrived twice
+  as long and wrong. The QA log is written with the same encoding, so the
+  bytes round-tripped and the report showed `Play -> "پخش"` perfectly while
+  the chart could not have. **A number caught it**: the 63-character check
+  failed on 24 strings, and all 24 are inside 63 characters and over 63
+  *bytes*. Read as bytes and decoded `CP_UTF8` now. The glyph-coverage and
+  round-trip results from that run are **withdrawn**, not carried over.
+- **The paint was measured: 561 object properties per still frame, 39.05 ms
+  mean repaint — against an engine that pumps every 40.** One repaint was
+  eating a whole pump interval, which is what "the buttons work slowly" feels
+  like from outside. Phase 11 built the counter and deliberately did not
+  optimise; this is the measurement that justifies it. Every widget now
+  remembers what was last written to it and a call that would write the same
+  thing returns instead. **No hash, therefore no collision**: the numbers are
+  mixed into one `long` but the text is kept and compared as a string, because
+  a collision would leave the wrong word on a button on a trading panel.
+  Deletion is the dangerous direction, so `Remove`, `RemoveAll`, `Hide` and
+  `Attach` all invalidate, and every draw still checks `ObjectFind`.
+- **Three labels rewrote themselves on an identical frame** — `setuprow` and
+  `hintrow` shared slot 12 and `setuprow` was written into it twice per frame
+  with different text, so both missed the cache for ever, on the sheet a
+  trader spends the session on.
+- **Two of the seven failures were stale tests, not defects.** The preset
+  checks pressed a button that has lived on the *settings* step since Phase 4
+  put a quick-start screen in front of the wizard — pressing an object that
+  does not exist does nothing and reports nothing. And stage 35 built a port
+  with no controller, so `ReadState` returned false and it reported 0 rows
+  against an account holding two positions — the exact lesson stage 28 wrote
+  down in a comment three hundred lines above it.
+- **One "failure" was a design being reported as a bug.** The fill toast sits
+  over the trailing-stop row, which is what a toast is: something that just
+  happened outranks a standing setting for three seconds, and it is
+  deliberately not allowed to evict the status strip instead. Exempted by
+  name, not by wildcard.
+
+**And the US30 report — "when I press Start the symbol is erased completely".**
+The root cause is **not established and is not guessed at**. What is fixed is
+the consequence: the chart is handed over only once the replay symbol is
+demonstrably real — it exists, it is in Market Watch, and it has bars. If any
+of that is untrue the chart is **left alone** and the reason is printed and
+recorded in the flight log, which turns "my symbol was erased" into a line
+naming the instrument and the check that failed. Three cheap questions against
+a destroyed workspace is not a trade worth thinking about.
+
+---
+
 ## After Phase 11 — what is genuinely left
 
 1. **The candles-not-building-from-ticks defect.** v97 fixed a plausible

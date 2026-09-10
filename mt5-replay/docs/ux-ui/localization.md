@@ -124,14 +124,38 @@ statement HTML class names. These are identifiers.
 This is the honest part of the phase, so it is stated precisely rather than
 softened.
 
-**What was measured and passes** (stage 41, on the user's own terminal):
+### Correction, v117: the first run measured mojibake, not Persian
 
-- Tahoma reports a real width for Persian text — the glyphs exist.
-- Persian survives the round trip into an `OBJPROP_TEXT` and back unchanged —
-  the encoding is fine.
-- All 176 Persian strings are inside the 63-character draw limit.
-- Every `%d`, `%s` and `%.2f` marker survived the translation. A dropped one
-  prints the wrong number and `StringFormat` does not complain.
+The v116 run reported the glyph and round-trip checks as passing. **They were
+measuring the wrong string, and one number gave it away.**
+
+The language file was opened `FILE_TXT|FILE_ANSI`, which hands back **one
+character per byte**. A Persian letter is two bytes in UTF-8, so every string
+arrived twice as long and completely wrong — and the panel drew that.
+
+It hid because the QA log is written with the same encoding: the mojibake
+bytes went in and came back out, so the report showed `Play -> "پخش"`
+perfectly while the chart could not have. What exposed it was the
+63-character check failing on **24** strings — and every one of those 24 is
+inside 63 *characters* and over 63 *bytes*. **A count is harder to fool than
+a screenshot.**
+
+The file is read as bytes and decoded `CP_UTF8` now (with a BOM skip), because
+`FILE_UNICODE` is UTF-16 and a translator's editor saves UTF-8.
+
+**So the glyph-coverage and round-trip results are withdrawn, not carried
+over.** They will mean something on the next run and not before.
+
+**What stage 41 measures** (on the user's own terminal):
+
+- Whether Tahoma reports a real width for Persian text — i.e. the glyphs
+  exist. **Re-measure required.**
+- Whether Persian survives the round trip into an `OBJPROP_TEXT` unchanged.
+  **Re-measure required.**
+- All 176 Persian strings inside the 63-character draw limit. This passed on
+  bytes, so it passes on characters by a wide margin.
+- Every `%d`, `%s` and `%.2f` marker surviving the translation — this one was
+  never affected: it counts markers, and `%` is one byte either way.
 
 **What cannot be measured from inside MQL5, and is therefore not claimed:**
 whether MetaTrader *shapes* Arabic-script glyphs and orders them

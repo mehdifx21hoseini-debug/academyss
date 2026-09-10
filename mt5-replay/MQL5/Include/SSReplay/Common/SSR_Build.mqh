@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v116 2026-09-10  redraw"
+#define SSR_BUILD "v117 2026-09-10  utf8"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

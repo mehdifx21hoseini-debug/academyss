@@ -1,10 +1,10 @@
-# Names called across the tree that are declared nowhere in it.
+#
 # Every one is a MetaTrader built-in, a cast, or a macro: the
-# tree compiles, so none can be a missing definition. A13 flags
+# Names called across the tree that are declared nowhere in it.
+# Regenerate with tools/ssr_known_calls.py, and only when the
 # any name outside this list, which by construction can only be
 # something newly introduced and not yet defined.
-#
-# Regenerate with tools/ssr_known_calls.py, and only when the
+# tree compiles, so none can be a missing definition. A13 flags
 # tree compiles.
 AccountInfoString
 ArrayCopy
@@ -26,6 +26,7 @@ CSSRTickProvider
 CTestObserver
 CalendarEventById
 CalendarValueHistory
+CharArrayToString
 ChartClose
 ChartFirst
 ChartGetInteger
@@ -68,6 +69,7 @@ FileIsEnding
 FileIsExist
 FileMove
 FileOpen
+FileReadArray
 FileReadString
 FileSeek
 FileSize
@@ -130,8 +132,8 @@ StringSplit
 StringSubstr
 StringToDouble
 StringToInteger
-StringToTime
 StringToLower
+StringToTime
 StringToUpper
 StringTrimLeft
 StringTrimRight
