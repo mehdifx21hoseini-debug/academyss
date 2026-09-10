@@ -1106,6 +1106,75 @@ def audit_a17():
                        "panel goes dark." % m.group(0))
 
 
+def _active_branches(src):
+    """Blank the #ifdef branches that are NOT built, keeping line numbers.
+
+    SSR_Theme.mqh carries two complete palettes now - the light one the
+    user asked for and the dark one they asked to keep - behind a single
+    #define. A regex sweep over the raw file finds BOTH definitions of
+    every token, and a dict built from it keeps whichever came last,
+    which is the palette that is NOT being compiled. The audit would
+    then have reported on the theme nobody is looking at, and passed the
+    one on screen by accident: exactly the failure mode a measurement
+    exists to prevent.
+
+    So this is a preprocessor, small enough to be obviously right:
+    #define / #undef of a bare name, #ifdef / #ifndef / #else / #endif.
+    #if and #elif are NOT evaluated - a build-time expression needs the
+    compiler's own arithmetic - so a branch guarded by one is left
+    active rather than guessed at, which can over-report but can never
+    silently skip a colour that ships.
+
+    Lines that are cut become empty strings rather than disappearing,
+    so every line number this audit prints still points at the right
+    line of the real file.
+    """
+    defined = set()
+    stack = []            # one (live, seen_true, evaluated) per open #if*
+    out = []
+    for raw in src.split("\n"):
+        line = raw.strip()
+        live = all(f[0] for f in stack)
+        word = line.split()[0] if line.startswith("#") and line[1:].strip() else ""
+
+        if word in ("#ifdef", "#ifndef"):
+            name = line.split()[1] if len(line.split()) > 1 else ""
+            hit = name in defined
+            take = hit if word == "#ifdef" else not hit
+            stack.append([take and live, take, True])
+        elif word in ("#if", "#elif"):
+            #--- not evaluated: keep it, and remember we did not decide
+            if word == "#if":
+                stack.append([live, True, False])
+            elif stack:
+                stack[-1][0] = live or stack[-1][0]
+        elif word == "#else":
+            if stack:
+                f = stack[-1]
+                outer = all(g[0] for g in stack[:-1])
+                f[0] = (not f[1] and outer) if f[2] else outer
+        elif word == "#endif":
+            if stack:
+                stack.pop()
+        elif live and word == "#define":
+            parts = line.split()
+            if len(parts) > 1:
+                defined.add(parts[1].split("(")[0])
+        elif live and word == "#undef":
+            parts = line.split()
+            if len(parts) > 1:
+                defined.discard(parts[1])
+
+        #--- STRUCTURE SURVIVES, CONTENT DOES NOT. A #define inside a
+        #--- dead branch is exactly what this exists to hide, so only
+        #--- the branching directives themselves are kept regardless -
+        #--- losing a nested #endif would corrupt every line after it.
+        structural = word in ("#ifdef", "#ifndef", "#if", "#elif",
+                              "#else", "#endif")
+        out.append(raw if structural or all(f[0] for f in stack) else "")
+    return "\n".join(out)
+
+
 def audit_a18():
     """Contrast, computed rather than eyeballed.
 
@@ -1132,10 +1201,25 @@ def audit_a18():
     if theme is None:
         return
 
-    src = FILES[theme]
+    raw = FILES[theme]
+    src = _active_branches(raw)
     tok = {}
     for m in re.finditer(r"#define\s+(SSR_C_\w+)\s+C'(\d+),(\d+),(\d+)'", src):
         tok[m.group(1)] = (int(m.group(2)), int(m.group(3)), int(m.group(4)))
+
+    #--- EVERY PALETTE DEFINES EVERY TOKEN, or switching themes drops a
+    #--- colour and the panel draws it as black. The audit can only
+    #--- measure the branch being built, so the branch it cannot see is
+    #--- checked for COMPLETENESS instead: same names, both ways.
+    all_tok = set(re.findall(r"#define\s+(SSR_C_\w+)\s+C'", raw))
+    missing = sorted(all_tok - set(tok))
+    if missing:
+        report("A18", theme, 1,
+               "%d colour token(s) are defined in the palette that is NOT "
+               "being built and missing from the one that is: %s. A theme "
+               "switch that drops a token draws it as black, and nothing "
+               "else in this build will mention it."
+               % (len(missing), ", ".join(t[6:] for t in missing[:6])))
 
     def channel(v):
         v /= 255.0

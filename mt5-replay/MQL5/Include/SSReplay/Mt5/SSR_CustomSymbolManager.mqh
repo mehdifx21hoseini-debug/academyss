@@ -133,6 +133,35 @@ private:
    //| READ IT BACK. The read-back is the part that matters - it is the  |
    //| difference between this being fixed and this being believed.      |
    //+------------------------------------------------------------------+
+   //--- one day, read back from the terminal rather than from a
+   //--- return value. Used both to decide and to report.
+   bool              DayIsCovered(const ENUM_DAY_OF_WEEK day)
+     {
+      datetime from = 0, to = 0;
+      return (SymbolInfoSessionQuote(m_symbol, day, 0, from, to) &&
+              to - from >= 86399);
+     }
+
+   //+------------------------------------------------------------------+
+   //| A TICK OUTSIDE THE QUOTE SESSION BUILDS NO BAR - but the fix     |
+   //| for that must not be able to leave a symbol with NO session.     |
+   //|                                                                  |
+   //| v119 replaced a single working call with "delete every session,  |
+   //| then add one", on a theory about overlapping sessions that the    |
+   //| next build disproved. Two changes went out together on a system   |
+   //| I cannot run, and the result got worse. That is my mistake, and   |
+   //| the rule it breaks is the one this project is built on.           |
+   //|                                                                  |
+   //| So the order is inverted. The call that worked for a year runs    |
+   //| FIRST and unconditionally. The delete-and-retry happens only      |
+   //| when the read-back says the day is still not covered - and after  |
+   //| everything, a day with no session at all is put back, because a   |
+   //| symbol that quotes on no day quotes never and nothing works.      |
+   //|                                                                  |
+   //| 86400 is gone. 86399 is what shipped for a year; the one-second   |
+   //| hole at 23:59:59 was my invention, not a measured defect, and an  |
+   //| unproven change has no business riding along with a real one.     |
+   //+------------------------------------------------------------------+
    int               Apply247Sessions(void)
      {
       int bad = 0;
@@ -142,43 +171,40 @@ private:
         {
          ENUM_DAY_OF_WEEK day = (ENUM_DAY_OF_WEEK)d;
 
-         //--- from==to==0 deletes a session and shifts the rest down, so
-         //--- deleting index 0 until it refuses empties the day. Eight is
-         //--- a guard against a terminal that answers true for ever, not
-         //--- a belief about how many sessions a symbol can have.
-         for(int g = 0; g < 8; g++)
-            if(!CustomSymbolSetSessionQuote(m_symbol, day, 0, (datetime)0, (datetime)0))
-               break;
-         for(int g = 0; g < 8; g++)
-            if(!CustomSymbolSetSessionTrade(m_symbol, day, 0, (datetime)0, (datetime)0))
-               break;
+         //--- 1. the way that has always worked: overwrite session 0
+         CustomSymbolSetSessionQuote(m_symbol, day, 0, (datetime)0, (datetime)86399);
+         CustomSymbolSetSessionTrade(m_symbol, day, 0, (datetime)0, (datetime)86399);
 
-         //--- 86400 is midnight to midnight. 86399 left a one-second hole
-         //--- at 23:59:59 that a tick can land in, so it is only the
-         //--- fallback for a build that refuses the round number.
-         if(!CustomSymbolSetSessionQuote(m_symbol, day, 0, (datetime)0, (datetime)86400))
-            if(!CustomSymbolSetSessionQuote(m_symbol, day, 0, (datetime)0, (datetime)86399))
+         //--- 2. only if the terminal did not take it. A symbol with two
+         //--- or three sessions a day can refuse an overlapping one.
+         if(!DayIsCovered(day))
+           {
+            for(int g = 0; g < 8; g++)
+               if(!CustomSymbolSetSessionQuote(m_symbol, day, 0, (datetime)0, (datetime)0))
+                  break;
+            for(int g = 0; g < 8; g++)
+               if(!CustomSymbolSetSessionTrade(m_symbol, day, 0, (datetime)0, (datetime)0))
+                  break;
+            CustomSymbolSetSessionQuote(m_symbol, day, 0, (datetime)0, (datetime)86399);
+            CustomSymbolSetSessionTrade(m_symbol, day, 0, (datetime)0, (datetime)86399);
+           }
+
+         //--- 3. AND NEVER LEAVE THE DAY EMPTY. A symbol with no quote
+         //--- session quotes never; that is worse than the hours it came
+         //--- with, and it is what step 2 can do if its last call fails.
+         if(!DayIsCovered(day))
+           {
+            CustomSymbolSetSessionQuote(m_symbol, day, 0, (datetime)0, (datetime)86399);
+            CustomSymbolSetSessionTrade(m_symbol, day, 0, (datetime)0, (datetime)86399);
+            if(!DayIsCovered(day))
                bad++;
-         if(!CustomSymbolSetSessionTrade(m_symbol, day, 0, (datetime)0, (datetime)86400))
-            if(!CustomSymbolSetSessionTrade(m_symbol, day, 0, (datetime)0, (datetime)86399))
-               bad++;
+           }
         }
 
-      //+------------------------------------------------------------------+
-      //| AND NOW ASK THE TERMINAL WHAT IT ACTUALLY HAS.                   |
-      //|                                                                  |
-      //| Setting a property and trusting the return value is how the      |
-      //| original version of this passed for a year. A read-back is the    |
-      //| only statement worth making about a session table.                |
-      //+------------------------------------------------------------------+
       int covered = 0;
       for(int d = 0; d <= 6; d++)
-        {
-         datetime from = 0, to = 0;
-         if(SymbolInfoSessionQuote(m_symbol, (ENUM_DAY_OF_WEEK)d, 0, from, to) &&
-            to - from >= 86399)
+         if(DayIsCovered((ENUM_DAY_OF_WEEK)d))
             covered++;
-        }
       m_session_days = covered;
 
       if(covered < 7)

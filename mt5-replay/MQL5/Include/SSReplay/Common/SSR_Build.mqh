@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v120 2026-09-10  chartmode"
+#define SSR_BUILD "v121 2026-09-10  light"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
