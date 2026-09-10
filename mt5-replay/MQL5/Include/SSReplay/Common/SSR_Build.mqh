@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v121 2026-09-10  light"
+#define SSR_BUILD "v122 2026-09-10  handover"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

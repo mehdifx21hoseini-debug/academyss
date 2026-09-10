@@ -201,6 +201,13 @@ void OnStart()
          SymbolSelect(sym2, true);
          SSR_WaitSeries(sym2, PERIOD_M1, 10000);
 
+         //--- and touch M5 before counting it: an unasked-for series
+         //--- answers zero, and this metric is the whole point of the
+         //--- experiment - "is M1 the only storage base?" cannot be
+         //--- settled by a number that would be zero either way.
+         MqlRates touch[];
+         CopyRates(sym2, PERIOD_M5, 0, 1, touch);
+
          int bars_m1 = Bars(sym2, PERIOD_M1);
          int bars_m5 = Bars(sym2, PERIOD_M5);
 

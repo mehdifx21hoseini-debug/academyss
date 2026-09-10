@@ -1553,7 +1553,82 @@ def audit_a20():
                    "something else forces it." % m.group(1))
 
 
-for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13, audit_a14, audit_a15, audit_a16, audit_a17, audit_a18, audit_a19, audit_a20):
+def audit_a21():
+    """A bar count on a timeframe nobody has touched is always zero.
+
+    MetaTrader builds a timeframe series LAZILY - the first read returns
+    zero, and zero means "no series yet", not "no bars". The two are
+    indistinguishable from the caller.
+
+    This cost the product a build. The seed writes M1; the replay chart
+    opens on M5 by default; and the handover guard asked
+    Bars(replay_symbol, CfgChartTf()) - a series nobody had ever touched,
+    on a symbol created two seconds earlier. It got the zero that always
+    comes back first, decided the session was not real, and refused to
+    hand the chart over. The user kept their LIVE chart: every button
+    worked, the panel updated, and no candle ever moved. Reported twice,
+    in those words.
+
+    CustomSymbolManager::BarCount had known this for twenty builds and
+    primed with a CopyRates before asking. The guard was the caller that
+    did not, and nothing connected the two.
+
+    THE RULE: a bar count on any timeframe other than M1 must be primed
+    with a CopyRates on that same timeframe, within sight of the read.
+    M1 is exempt because M1 is what this program WRITES - the writes
+    build that series themselves.
+
+    Proof of priming has to be LOCAL. A CopyRates elsewhere in the file
+    is not evidence that this read is safe, and an audit that accepted
+    it would pass the exact line that caused this.
+    """
+    tf_arg = r"([A-Za-z_]\w*(?:\s*\(\s*\))?)"
+    ask = re.compile(r"\bBars\s*\(\s*([^,()]+?)\s*,\s*" + tf_arg +
+                     r"\s*[,)]"
+                     r"|SeriesInfoInteger\s*\(\s*([^,()]+?)\s*,\s*" +
+                     tf_arg + r"\s*,\s*SERIES_BARS_COUNT")
+    for path in FILES:
+        code = _decomment(FILES[path])
+        lines = code.split("\n")
+        for m in ask.finditer(code):
+            tf = m.group(2) or m.group(4)
+            if tf == "PERIOD_M1":
+                continue
+            n = code[:m.start()].count("\n") + 1
+
+            #--- TWELVE LINES EITHER SIDE, which is as far as a reader
+            #--- checking "is this primed?" would look.
+            #---
+            #--- BELOW counts as well as above, and deliberately: the
+            #--- correct shape is "read; if it came back zero, touch the
+            #--- series and read again" - BarCount is written exactly
+            #--- that way. It is a read followed by NOTHING that is the
+            #--- defect. Proof has to stay local either way; a CopyRates
+            #--- elsewhere in the file is not evidence about this line,
+            #--- and accepting one would pass the line that caused this.
+            #--- ANY read that names this timeframe touches the series
+            #--- into existence - that is the whole mechanism. CopyRates
+            #--- is the usual one; iTime and friends do it too, and in
+            #--- the spikes SSR_WaitSeries does it AND waits.
+            near = "\n".join(lines[max(0, n - 13):n + 12]).replace(" ", "")
+            probe = re.escape(tf.replace(" ", ""))
+            touch = (r"(?:CopyRates|CopyTime|CopyClose|iTime|iOpen|iHigh|"
+                     r"iLow|iClose|iBars|SSR_WaitSeries)\([^;]*\b%s\b"
+                     % probe)
+            if re.search(touch, near):
+                continue
+
+            report("A21", path, n,
+                   "this asks for a bar count on %s without priming it "
+                   "first. MetaTrader builds a series when something asks "
+                   "for it, so the FIRST read of an untouched timeframe is "
+                   "zero whether or not the bars exist - and this program "
+                   "only ever writes M1. CopyRates(%s, %s, 0, 1, probe) "
+                   "before the read, or go through BarCount()."
+                   % (tf, m.group(1) or m.group(3), tf))
+
+
+for fn in (audit_a1, audit_a2, audit_a3, audit_a4, audit_a5, audit_a6, audit_a7, audit_a8, audit_a9, audit_a10, audit_a11, audit_a12, audit_a13, audit_a14, audit_a15, audit_a16, audit_a17, audit_a18, audit_a19, audit_a20, audit_a21):
     fn()
 
 if findings:

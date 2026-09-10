@@ -567,6 +567,57 @@ long SeriesInfoIntegerOrZero(const string sym)
   }
 
 //+------------------------------------------------------------------+
+//| DOES THE REPLAY SYMBOL ACTUALLY HAVE BARS?                       |
+//|                                                                  |
+//| NOT Bars(rs, tf). That question was asked the naive way for one  |
+//| build and it cost the whole product.                             |
+//|                                                                  |
+//| MetaTrader builds a timeframe series LAZILY - when something     |
+//| first asks for it. Until then the count is zero, and zero here   |
+//| does not mean "no bars", it means "no series yet". The two are   |
+//| indistinguishable from the outside.                              |
+//|                                                                  |
+//| The seed writes M1. The replay chart opens on M5 by default. So  |
+//| the handover guard asked about a series NOBODY HAD EVER TOUCHED, |
+//| on a symbol created two seconds earlier, got the zero that       |
+//| always comes back the first time, and refused to hand the chart  |
+//| over - on a session that was entirely fine. The user was left    |
+//| looking at their live chart: every button worked, the panel      |
+//| updated, and no candle ever moved or disappeared. Which is       |
+//| exactly what was reported, twice.                                |
+//|                                                                  |
+//| CustomSymbolManager::BarCount has known this for twenty builds   |
+//| and does it correctly. The guard was the caller that did not.    |
+//|                                                                  |
+//| M1 IS THE CLAIM, because M1 is what was written. The display     |
+//| timeframe is only PRIMED here and its answer is never read: a    |
+//| derived series that has not been built yet is not a missing      |
+//| session, and demanding one would be the same mistake one level   |
+//| down.                                                            |
+//|                                                                  |
+//| Up to a second of waiting, once, on the handover path only.      |
+//+------------------------------------------------------------------+
+long ReplayBarsReady(const string sym, const ENUM_TIMEFRAMES display_tf)
+  {
+   MqlRates probe[];
+   long n = 0;
+   for(int i = 0; i < 10 && n <= 0; i++)
+     {
+      CopyRates(sym, PERIOD_M1, 0, 1, probe);      // touch it into existence
+      SeriesInfoInteger(sym, PERIOD_M1, SERIES_BARS_COUNT, n);
+      if(n <= 0)
+         Sleep(100);
+     }
+
+   //--- give the terminal a head start on the one the chart is about
+   //--- to open with. Not required, not read, not waited for.
+   if(display_tf != PERIOD_M1)
+      CopyRates(sym, display_tf, 0, 1, probe);
+
+   return n;
+  }
+
+//+------------------------------------------------------------------+
 //| DOWNLOAD THE M1 HISTORY, INSTEAD OF ASKING THE USER TO.          |
 //|                                                                  |
 //| Every session so far has been cramped by the four days of M1 the |
@@ -2556,23 +2607,67 @@ void OnTimer()
          bool rs_exists = (SymbolInfoInteger(rs, SYMBOL_DIGITS) > 0 &&
                            GetLastError() == 0);
          bool rs_shown  = (bool)SymbolInfoInteger(rs, SYMBOL_SELECT);
-         long rs_bars   = (rs_exists ? Bars(rs, CfgChartTf()) : 0);
+         long rs_bars   = (rs_exists ? ReplayBarsReady(rs, CfgChartTf()) : 0);
 
          if(!rs_exists || !rs_shown || rs_bars <= 0)
            {
             PrintFormat("[host] NOT handing this chart over: %s %s, %s, %d "
-                        "bar(s) on %s. Your chart is untouched - the replay "
-                        "is on its own window.",
+                        "M1 bar(s) after priming. Your chart is untouched - "
+                        "the replay is on its own window.",
                         rs,
                         (rs_exists ? "exists" : "DOES NOT EXIST"),
                         (rs_shown ? "is in Market Watch"
                                   : "IS NOT IN MARKET WATCH"),
-                        (int)rs_bars, EnumToString(CfgChartTf()));
+                        (int)rs_bars);
             if(g_flight.IsOpen())
                g_flight.Event(StringFormat("handover refused: %s exists=%d "
-                                           "shown=%d bars=%d", rs,
+                                           "shown=%d m1bars=%d tf=%s", rs,
                                            (int)rs_exists, (int)rs_shown,
-                                           (int)rs_bars));
+                                           (int)rs_bars,
+                                           EnumToString(CfgChartTf())));
+
+            //+------------------------------------------------------------------+
+            //| AND THEN GIVE THEM A WINDOW, because the sentence above           |
+            //| said "the replay is on its own window" and in one-chart           |
+            //| mode that was NOT TRUE.                                           |
+            //|                                                                   |
+            //| One-chart mode opens no second window on purpose - the            |
+            //| chart it is about to take over is the one. When the               |
+            //| handover is refused, nothing has been taken over and              |
+            //| nothing was opened, so the replay runs with no chart              |
+            //| showing it at all: the transport buttons work, the panel          |
+            //| updates, the clock advances, and the candles the user is          |
+            //| looking at are their LIVE ones, which of course never             |
+            //| move. This program has already written that failure down          |
+            //| once, twelve hundred lines up - "no candles, no lines to           |
+            //| arm, while every transport button cheerfully worked on a          |
+            //| chart showing nothing" - and did not connect it here.             |
+            //|                                                                   |
+            //| A refusal is a reason not to take the user's chart. It is         |
+            //| not a reason to show them nothing.                                |
+            //+------------------------------------------------------------------+
+            if(g_replay_chart == 0)
+              {
+               long id = g_charts.OpenChart(CfgChartTf());
+               if(id != 0)
+                 {
+                  g_replay_chart = id;
+                  g_shots.SetChart(id);
+                  g_cal_lines.Attach(id);
+                  if(InpTradeLines)
+                     g_lines.Attach(id,
+                                    (int)SymbolInfoInteger(rs, SYMBOL_DIGITS),
+                                    SymbolInfoDouble(rs, SYMBOL_POINT),
+                                    SSR_C_LINE_SL, SSR_C_LINE_TP);
+                  PrintFormat("[host] opened a separate window on %s instead. "
+                              "Your chart is untouched.", rs);
+                 }
+               else
+                  PrintFormat("[host] and a separate window on %s could not "
+                              "be opened either (%d). NOTHING IS SHOWING THE "
+                              "REPLAY - the buttons will work and no candle "
+                              "will move.", rs, GetLastError());
+              }
             return;
            }
 

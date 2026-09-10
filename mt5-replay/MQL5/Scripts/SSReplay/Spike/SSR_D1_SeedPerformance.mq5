@@ -106,6 +106,19 @@ void SeedCase(const int total, const int chunk, const int digits, const double p
    SSR_Metric(c, "mem_terminal_delta", (double)(SSR_MemTerminal() - mem0), "MB");
 
    //--- how many higher-timeframe candles did this depth actually buy?
+   //---
+   //--- TOUCH EACH SERIES BEFORE COUNTING IT. MetaTrader builds a
+   //--- timeframe when something first asks for it, so an unasked-for
+   //--- series answers zero - and zero published here would read as
+   //--- "the seed bought no higher-timeframe candles", which is the
+   //--- exact wrong conclusion this spike exists to settle. CopyRates
+   //--- rather than SSR_WaitSeries: the flag takes about nine seconds
+   //--- and the bars come back in tens of milliseconds.
+   MqlRates touch[];
+   CopyRates(InpTest, PERIOD_H1, 0, 1, touch);
+   CopyRates(InpTest, PERIOD_H4, 0, 1, touch);
+   CopyRates(InpTest, PERIOD_D1, 0, 1, touch);
+
    SSR_Metric(c, "resulting_H1_bars", (double)Bars(InpTest, PERIOD_H1), "count");
    SSR_Metric(c, "resulting_H4_bars", (double)Bars(InpTest, PERIOD_H4), "count");
    SSR_Metric(c, "resulting_D1_bars", (double)Bars(InpTest, PERIOD_D1), "count");
