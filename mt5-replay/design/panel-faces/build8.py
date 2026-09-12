@@ -18,6 +18,29 @@ L = {
         "are changes against.",
    fa="همان ۰۸ که دیدید. مبنای مقایسهٔ نه‌تای دیگر."),
 
+ "b01": dict(name="Slider only", w=300, rail="left",
+   order="cap clock transport speed sheet status", speed="slider",
+   note="Design 08 with one change: the eight cells become a track, a "
+        "fill and a thumb. Same row, same height, same everything else.",
+   fa="۰۸ با یک تغییر: هشت خانه می‌شود شیار، پُرشدگی و دستگیره. همان ردیف، "
+      "همان ارتفاع، بقیه دست‌نخورده."),
+
+ "b02": dict(name="Slider + readout", w=300, rail="left",
+   order="cap clock transport speed sheet status", speed="sliderread",
+   note="The same slider, with the two numbers you asked for folded into "
+        "the empty right-hand end of the row. Still no extra row, still "
+        "the same panel height.",
+   fa="همان اسلایدر، با دو عددی که خواستید — در فضای خالی سمت راست همان "
+      "ردیف. بدون ردیف اضافه، بدون تغییر ارتفاع پنل."),
+
+ "b03": dict(name="Slider + full readout", w=300, rail="left",
+   order="cap clock transport speed sheet status", speed="sliderline",
+   note="The slider with a full readout line under it: ticks per second, "
+        "seconds per candle, and what the session costs in real time. "
+        "One extra row - twelve pixels.",
+   fa="اسلایدر با یک سطر کامل زیرش: تیک بر ثانیه، ثانیه بر کندل، و اینکه "
+      "جلسه چقدر وقت واقعی می‌برد. یک ردیف اضافه — دوازده پیکسل."),
+
  "a02": dict(name="Speed presets", w=300, rail="left",
    order="cap clock transport speed sheet status", speed="chips",
    note="The minus / value / plus / track becomes five chips: 1x 2x 5x "
@@ -85,6 +108,7 @@ L = {
       "۲۷۰ پیکسل، کمترین پوشش نمودار."),
 }
 ORDER8 = ["a01","a02","a03","a04","a05","a06","a07","a08","a09","a10"]
+ORDERB = ["a01","b01","b02","b03"]
 
 def panel8(k):
     v = L[k]; p = P8
@@ -144,6 +168,27 @@ def panel8(k):
                       + '<span class="spdnum">5x</span>' + key("+", "bar")
                       + '</div><div class="speedtrack">' + track
                       + '<span class="mean">1h in 12m</span></div>')
+    elif sp.startswith("slider"):
+        #--- A TRACK, A FILL AND A THUMB. Three rectangles, any pixel
+        #--- width, so it reads continuous instead of stepped - and it
+        #--- is still clicked and dragged exactly the way the eight
+        #--- cells were, because that handler already exists.
+        sl = ('<div class="sl"><i class="fill" style="width:46%"></i>'
+              '<i class="thumb" style="left:46%"></i></div>')
+        head = ('<div class="speedrow slid"><span class="lbl">Speed</span>'
+                + key("-", "sm") + '<span class="well spd">5x</span>'
+                + key("+", "sm") + sl)
+        if sp == "sliderread":
+            B["speed"] = (head + '<span class="rd">12 t/s <s>&middot;</s> '
+                                 '1.0 s</span></div>')
+        elif sp == "sliderline":
+            B["speed"] = (head + '</div><div class="rdline">'
+                          '<span class="v">12</span><span class="u">ticks/s</span>'
+                          '<s>&middot;</s>'
+                          '<span class="v">1.0</span><span class="u">s per candle</span>'
+                          '<span class="pl">1 h in 60 s</span></div>')
+        else:
+            B["speed"] = head + '</div>'
     else:
         B["speed"] = ""
 
@@ -239,6 +284,24 @@ CSS8 = r"""
  border:1px solid transparent}
 .rail b.on{color:var(--text);background:var(--face);border-color:var(--edge);
  border-right-color:var(--face)}
+
+/* the continuous slider, in design 08's own speed row */
+.speedrow.slid{gap:4px}
+.speedrow.slid .lbl{width:34px}
+.sl{position:relative;flex:1;height:8px;background:var(--well);
+ border:1px solid var(--edge)}
+.sl .fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent)}
+.sl .thumb{position:absolute;top:-4px;width:5px;height:14px;margin-left:-2px;
+ background:var(--text);border:1px solid var(--face)}
+.speedrow .rd{flex:none;width:72px;text-align:right;font-size:9px;
+ color:var(--faint);font-variant-numeric:tabular-nums}
+.speedrow .rd s{text-decoration:none}
+.rdline{display:flex;align-items:baseline;gap:4px;padding:5px 8px 0;
+ font-size:9px}
+.rdline .v{color:var(--text);font-size:11px;font-variant-numeric:tabular-nums}
+.rdline .u{color:var(--dim)}
+.rdline s{text-decoration:none;color:var(--faint)}
+.rdline .pl{margin-left:auto;color:var(--faint)}
 
 /* 02 - speed presets */
 .speedrow.chips{gap:3px}

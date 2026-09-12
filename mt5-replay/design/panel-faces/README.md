@@ -113,3 +113,29 @@ at all under test - see `glyph.html`, which is the specimen that settled
 it.
 
 Sizes: flat 302x338, in-position 302x367, collapsed 302x187.
+
+---
+
+# The one change: 08's speed track becomes a slider
+
+Asked for after the proposal: keep design 08's layout exactly - the same
+rows in the same order, the same rail, and the same speed box with its
+minus and plus - and change ONLY the eight square cells, because the
+speed control should not be blocky and should run continuously from
+zero.
+
+Three ways, in `shotsB/`:
+
+| | what | size |
+|---|---|---|
+| **A** `b01` | the slider alone | 302x322 - identical to 08 |
+| **B** `b02` | the slider, with `12 t/s . 1.0 s` in the empty right end of the same row | 302x322 - identical to 08 |
+| **C** `b03` | the slider, with a full readout line under it: ticks/s, s per candle, and what the session costs in real time | 302x338 - one row taller |
+
+**B is the recommendation.** It is the only one that answers both halves
+of the request - not blocky, and both the tick and the second - without
+changing the panel's height by a single pixel.
+
+The slider is a track, a fill and a thumb: three rectangles at any pixel
+width. The click and drag handling is the one the eight cells already
+had, so this is a rendering change, not a new interaction.
