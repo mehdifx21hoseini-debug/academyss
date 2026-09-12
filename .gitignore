@@ -6,3 +6,12 @@
 # was dropped when the packager landed; this is that decision written
 # down, so the next build does not drift back into the repo.
 SSReplay-v*.zip
+
+#--- WORKFLOW SCRIPTS, NOT SOURCE.
+#
+# The Workflow tool only accepts a script path it can already read, which
+# means a long-running audit harness has to be copied into the working
+# tree to be resumed. The canonical copy lives in the session's own
+# workflow directory and this one is a pointer, not a product file - it
+# describes how an audit was orchestrated, not anything the expert does.
+ssreplay-audit-resume.js
