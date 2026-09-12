@@ -117,10 +117,10 @@
 
 #define SSR_C_TRACK        C'228,230,233'
 #define SSR_C_TRACK_EDGE   C'138,143,149'
-#define SSR_C_TRACK_FILL   C'23,98,158'
+#define SSR_C_TRACK_FILL   C'24,103,166'
 //--- the speed thumb was 246 on a 228 track: 1.16:1, invisible. On a
 //--- light theme the thumb is the DARK part.
-#define SSR_C_THUMB        C'130,130,132'
+#define SSR_C_THUMB        C'20,23,27'
 #define SSR_C_THUMB_EDGE   C'80,82,86'
 #define SSR_C_TICK         C'150,154,160'
 
@@ -342,7 +342,18 @@
 //--- SSR_CONTRAST: SSR_C_BTN_ON_EDGE on SSR_C_PANEL ui
 //--- SSR_CONTRAST: SSR_C_PRIMARY_EDGE on SSR_C_PANEL ui
 //--- SSR_CONTRAST: SSR_C_PANEL_EDGE on SSR_C_PANEL ui
+//--- THE THUMB SITS ON THE FILL NOW.
+//---
+//--- It did not before: the segmented track made the thumb a whole cell
+//--- with its own border, so it was only ever measured against the
+//--- groove. A thumb that slides ALONG the fill has to clear it too -
+//--- and the light palette's thumb was 1.67:1 on its own fill, which is
+//--- a marker you cannot see in the half of the track that matters.
+//--- Solved by moving the thumb, not the fill: near-black clears the
+//--- light groove, the fill and the panel face at once.
 //--- SSR_CONTRAST: SSR_C_THUMB on SSR_C_TRACK ui
+//--- SSR_CONTRAST: SSR_C_THUMB on SSR_C_TRACK_FILL ui
+//--- SSR_CONTRAST: SSR_C_THUMB on SSR_C_PANEL ui
 //--- SSR_CONTRAST: SSR_C_TRACK_FILL on SSR_C_TRACK ui
 
 //--- type. ONE face - see the header.

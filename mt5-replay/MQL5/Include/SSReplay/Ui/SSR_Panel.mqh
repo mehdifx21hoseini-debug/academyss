@@ -1008,17 +1008,26 @@ private:
            SSR_C_TEXT, SSR_FS_BODY);
       m_w.Button("spup", bx + 68, y, 18, SSR_ROW_H, "+");
 
-      //--- the bar. Twenty cells, each one clickable, because a click is
-      //--- the only input a chart we are not attached to can give us.
-      //--- the track gives up its right-hand quarter so "1h in 12m" can
-      //--- sit BESIDE it instead of on a line of its own. Twenty cells
-      //--- across 180 px is still four clicks wider than a finger needs.
+      //+------------------------------------------------------------------+
+      //| THE BAR. Still twenty cells, each one clickable, because a       |
+      //| click is the only input a chart we are not attached to can       |
+      //| give us - but it no longer LOOKS like twenty cells.              |
+      //|                                                                  |
+      //| Reported as "instead of the speed being square, make it like     |
+      //| this": eight visible boxes read as a row of buttons, not as a    |
+      //| range you slide along. The seams are gone now and a thumb marks  |
+      //| the value; see CSSRWidgets::Slider for how, and why the cells    |
+      //| had to stay underneath.                                          |
+      //|                                                                  |
+      //| The track still gives up its right-hand quarter so "1h in 12m"   |
+      //| can sit BESIDE it instead of on a line of its own.               |
+      //+------------------------------------------------------------------+
       m_track_x = bx + 92;
-      m_track_y = y + 2;
+      m_track_y = y + 5;
       m_track_w = (x + W - SSR_PAD - 92) - m_track_x;
-      m_w.TrackSegments("spdseg", m_track_x, m_track_y, m_track_w, 14,
-                        SSRSpeedLadderIndex(m_state.speed_x100),
-                        SSR_SPEED_LADDER_SIZE);
+      m_w.Slider("spdseg", m_track_x, m_track_y, m_track_w, 9,
+                 SSRSpeedLadderIndex(m_state.speed_x100),
+                 SSR_SPEED_LADDER_SIZE);
 
       //--- "5x" is a number. "1h in 12m" is something you can plan an
       //--- afternoon around, so the panel says both.
@@ -1949,6 +1958,10 @@ private:
          m_w.Hide("tab" + IntegerToString(t), hidden);
       for(int t = 0; t < SSR_SPEED_LADDER_SIZE; t++)
          m_w.Hide("spdseg" + IntegerToString(t), hidden);
+      //--- the groove and the thumb are not cells and were not in this
+      //--- loop, so a collapsed panel left a slider lying on the candles
+      m_w.Hide("spdseg_tk", hidden);
+      m_w.Hide("spdseg_th", hidden);
       if(hidden)
          HideSheets();
      }
@@ -2440,9 +2453,13 @@ public:
       //--- anywhere along the bar lands on that stop.
       if(StringLen(what) > 6 && StringSubstr(what, 0, 6) == "spdseg")
         {
-         if(m_port != NULL)
-            m_port.SetSpeedX100(SSRSpeedLadder((int)StringToInteger(
-                                   StringSubstr(what, 6))));
+         //--- ONLY THE CELLS. "spdseg_tk" and "spdseg_th" are the groove
+         //--- and the thumb, and StringToInteger("_tk") is 0 - so
+         //--- without this test a click on the slider's own outline
+         //--- would have set the speed to the bottom of the ladder.
+         string tail = StringSubstr(what, 6);
+         if(m_port != NULL && AllDigits(tail))
+            m_port.SetSpeedX100(SSRSpeedLadder((int)StringToInteger(tail)));
          return SSR_CMD_NONE;
         }
 

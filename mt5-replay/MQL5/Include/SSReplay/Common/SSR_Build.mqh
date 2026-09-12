@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v122 2026-09-10  handover"
+#define SSR_BUILD "v123 2026-09-12  slider"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

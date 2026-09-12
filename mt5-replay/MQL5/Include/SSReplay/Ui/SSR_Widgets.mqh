@@ -402,31 +402,66 @@ public:
    //| so they tile the full width exactly instead of leaving a ragged   |
    //| remainder at the right-hand end.                                  |
    //+------------------------------------------------------------------+
-   bool              TrackSegments(const string id, const int x, const int y,
-                                   const int w, const int h,
-                                   const int at, const int stops)
+   //+------------------------------------------------------------------+
+   //| A SLIDER THAT IS STILL TWENTY BUTTONS.                           |
+   //|                                                                  |
+   //| It had to stay twenty buttons. The panel lives on a chart this   |
+   //| program is NOT attached to, so it never receives a mouse          |
+   //| coordinate - the only input it ever gets is "an object was        |
+   //| clicked", which is exactly why the groove was built out of        |
+   //| clickable cells in the first place. Replacing them with one       |
+   //| rectangle would have produced a control that looks right and      |
+   //| cannot be used, which is the worst of the three outcomes.         |
+   //|                                                                  |
+   //| So the cells stay and the SEAMS go. Each cell's border is set to  |
+   //| its own fill and the one-pixel gap between them is removed, so    |
+   //| twenty buttons draw one unbroken groove. The outline comes from   |
+   //| a frame drawn BEHIND them, and the thumb is a thin rectangle      |
+   //| drawn ON TOP. Same hit targets, same handler, no squares.         |
+   //|                                                                  |
+   //| Creation order is the only z-order MQL5 has, so the order here    |
+   //| is the drawing: frame, then cells, then thumb. Moving the thumb   |
+   //| later only writes its X, so the order survives every repaint.     |
+   //|                                                                  |
+   //| The thumb is a rectangle label, so a click landing exactly on it  |
+   //| is swallowed rather than reaching a cell. Four pixels out of a    |
+   //| hundred and eighty, and the value it would have set is the value  |
+   //| it is already on.                                                 |
+   //+------------------------------------------------------------------+
+   bool              Slider(const string id, const int x, const int y,
+                            const int w, const int h,
+                            const int at, const int stops)
      {
       if(stops < 2 || w < stops)
          return false;
+
+      //--- the groove: one pixel proud of the cells on every side, so
+      //--- the outline is the frame's and not twenty separate borders
+      if(!Rect(id + "_tk", x - 1, y - 1, w + 2, h + 2,
+               SSR_C_TRACK, SSR_C_TRACK_EDGE))
+         return false;
+
       for(int i = 0; i < stops; i++)
         {
          int x0 = x + (int)MathRound((double)i       * w / (double)stops);
          int x1 = x + (int)MathRound((double)(i + 1) * w / (double)stops);
-         int cw = x1 - x0 - 1;
+         int cw = x1 - x0;
          if(cw < 1) cw = 1;
-
-         color bg   = (i <  at ? SSR_C_TRACK_FILL : SSR_C_TRACK);
-         color edge = SSR_C_TRACK_EDGE;
-         if(i == at)
-           {
-            bg   = SSR_C_THUMB;
-            edge = SSR_C_BTN_ON_EDGE;
-           }
+         //--- border == fill is what removes the seam. The text colour
+         //--- goes the same way: these cells carry no text, and a
+         //--- foreground that cannot be seen cannot be wrong.
+         color c = (i <= at ? SSR_C_TRACK_FILL : SSR_C_TRACK);
          if(!ButtonC(id + IntegerToString(i), x0, y, cw, h, "",
-                     bg, edge, SSR_C_TEXT, SSR_FS_SMALL))
+                     c, c, c, SSR_FS_SMALL))
             return false;
         }
-      return true;
+
+      //--- the thumb, last and therefore on top, at the end of the fill
+      int tx = x + (int)MathRound((double)(at + 1) * w / (double)stops) - 2;
+      if(tx < x)          tx = x;
+      if(tx > x + w - 4)  tx = x + w - 4;
+      return Rect(id + "_th", tx, y - 3, 4, h + 6,
+                  SSR_C_THUMB, SSR_C_TRACK_EDGE);
      }
 
    //+------------------------------------------------------------------+
