@@ -231,3 +231,19 @@ firstrun.4        = یک بار نشان داده می‌شود. برای تکر
 
 # --- the command palette ---------------------------------------------------
 pal.title         = اجرای یک فرمان
+
+# --- the rail layout: names written for a 44 px cell -----------------------
+rtab.trade        = معامله
+rtab.positions    = پوزیشن
+rtab.positions.n  = پوزیشن %d
+rtab.stats        = آمار
+rtab.session      = جلسه
+rtab.prop         = ارزیابی
+act.follow        = پیگیری
+act.follow.n      = پیگیری %d
+act.lines.on      = خطوط
+act.lines.off     = حد ضرر
+act.bookmark      = نشان
+act.jump          = پرش
+act.sessions      = ذخیره‌ها
+act.fidelity      = دقت

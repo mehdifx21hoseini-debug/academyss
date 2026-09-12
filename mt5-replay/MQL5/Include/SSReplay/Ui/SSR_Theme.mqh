@@ -72,7 +72,69 @@
 //| below the primary text and not three - which is exactly what the  |
 //| dark ramp found at 233 / 186 / 149.                               |
 //+------------------------------------------------------------------+
-#define SSR_THEME_LIGHT
+#define SSR_THEME_RAIL
+//#define SSR_THEME_LIGHT
+//#define SSR_THEME_DARK
+
+//--- exactly one of the three is defined above. Flat blocks rather
+//--- than nested #else so each palette is a column you can read.
+
+#ifdef SSR_THEME_RAIL
+//--- surfaces: the face lifted off a dark chart, the caption and
+//--- the wells sunk below it. Same three steps as the dark palette,
+//--- a little warmer and a little closer together.
+#define SSR_C_PANEL        C'34,37,43'
+#define SSR_C_PANEL_EDGE   C'103,111,125'
+#define SSR_C_HEADER       C'27,30,35'
+#define SSR_C_WELL         C'21,24,28'
+#define SSR_C_WELL_EDGE    C'103,111,125'
+#define SSR_C_GROUP_EDGE   C'103,111,125'
+#define SSR_C_STATUS       C'27,30,35'
+#define SSR_C_TEXT         C'230,233,238'
+#define SSR_C_TEXT_DIM     C'176,182,192'
+#define SSR_C_TEXT_FAINT   C'138,144,153'
+#define SSR_C_BTN          C'44,48,55'
+#define SSR_C_BTN_EDGE     C'103,111,124'
+#define SSR_C_BTN_TEXT     C'230,233,238'
+#define SSR_C_BTN_ON       C'224,134,58'
+#define SSR_C_BTN_ON_TEXT  C'27,30,35'
+#define SSR_C_BTN_ON_EDGE  C'224,134,58'
+#define SSR_C_TAB          C'27,30,35'
+#define SSR_C_TAB_ON       C'34,37,43'
+#define SSR_C_TAB_EDGE     C'103,111,125'
+#define SSR_C_RUN          C'79,190,134'
+#define SSR_C_HOLD         C'227,164,60'
+#define SSR_C_STOP         C'237,118,110'
+#define SSR_C_IDLE         C'148,154,165'
+#define SSR_C_BUY          C'41,134,88'
+#define SSR_C_BUY_EDGE     C'48,188,118'
+#define SSR_C_SELL         C'194,74,59'
+#define SSR_C_SELL_EDGE    C'237,87,79'
+#define SSR_C_DEAL_TEXT    C'255,255,255'
+#define SSR_C_DEAL_DIM     C'52,57,67'
+#define SSR_C_TRACK        C'21,24,28'
+#define SSR_C_TRACK_EDGE   C'103,111,125'
+#define SSR_C_TRACK_FILL   C'201,109,32'
+#define SSR_C_THUMB        C'230,233,238'
+#define SSR_C_THUMB_EDGE   C'118,126,141'
+#define SSR_C_TICK         C'70,77,90'
+#define SSR_C_ACCENT       C'224,134,58'
+#define SSR_C_PRIMARY      C'224,134,58'
+#define SSR_C_PRIMARY_EDGE C'224,134,58'
+#define SSR_C_PRIMARY_TEXT C'27,30,35'
+#define SSR_C_LINE_SL      C'237,118,110'
+#define SSR_C_LINE_TP      C'63,191,122'
+#define SSR_C_LINE_ENTRY   C'214,168,60'
+#define SSR_C_LINE_LONG    C'88,158,236'
+#define SSR_C_LINE_SHORT   C'227,164,60'
+#define SSR_C_TRADE_WIN    C'63,191,122'
+#define SSR_C_TRADE_LOSS   C'237,118,110'
+#define SSR_C_PICK_LINE    C'227,164,60'
+#define SSR_C_PICK_INFO    C'227,164,60'
+#define SSR_C_NEWS_HIGH    C'237,118,110'
+#define SSR_C_NEWS_MED     C'227,164,60'
+#define SSR_C_NEWS_LOW     C'148,154,165'
+#endif
 
 #ifdef SSR_THEME_LIGHT
 #define SSR_C_PANEL        C'236,236,236'   // the dialog face
@@ -145,7 +207,9 @@
 #define SSR_C_NEWS_HIGH    C'192,57,43'
 #define SSR_C_NEWS_MED     C'214,140,40'
 #define SSR_C_NEWS_LOW     C'120,124,130'
-#else
+#endif
+
+#ifdef SSR_THEME_DARK
 #define SSR_C_PANEL        C'38,42,51'      // the face, lifted off the chart
 #define SSR_C_PANEL_EDGE   C'108,116,130'   // outer frame - see A18
 #define SSR_C_HEADER       C'33,36,44'      // caption strip, RECESSED - see below
@@ -399,7 +463,35 @@
 //+------------------------------------------------------------------+
 #define SSR_SHEET_GROW     140
 #define SSR_SHEET_H_TALL   (SSR_SHEET_H + SSR_SHEET_GROW)
+//+------------------------------------------------------------------+
+//| THE LAYOUT SWITCH, and it is separate from the palette on purpose.|
+//|                                                                  |
+//| SSR_LAYOUT_RAIL is design 08: a 310 px panel with the four tabs   |
+//| standing in a rail down the left of the sheet, and the six        |
+//| always-reachable actions in a strip where the tab row used to be. |
+//| Comment it out and the 420 px panel with its horizontal tabs and  |
+//| its 104 px side column comes back, unchanged.                     |
+//|                                                                  |
+//| It is a switch for the same reason the palette is one: this is a  |
+//| large change to a layout that works, on a terminal I cannot run,  |
+//| and one commented line has to be able to undo it.                 |
+//|                                                                  |
+//| 310, NOT 300. The mockup was 300 with a 36 px rail carrying        |
+//| "TRD / POS / STA / SES". Real tab names in two languages need 44,  |
+//| and the sheet must not lose the ten pixels to pay for it - at 245  |
+//| it is already fifty narrower than the one that ships today.        |
+//+------------------------------------------------------------------+
+#define SSR_LAYOUT_RAIL
+
+#ifdef SSR_LAYOUT_RAIL
+#define SSR_PANEL_W        310
+#define SSR_RAIL_W         44      // the vertical tab rail
+#define SSR_ACT_H          21      // the action strip that replaced the tabs
+#else
 #define SSR_PANEL_W        420
+#define SSR_RAIL_W         0
+#define SSR_ACT_H          0
+#endif
 //--- ADDED UP BY THE COMPILER, not by me. The sum above was a comment
 //--- for eleven builds and the two rows v69 added went straight past
 //--- the end of it; written this way, a taller sheet moves the frame

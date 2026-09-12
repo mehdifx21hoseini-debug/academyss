@@ -41,6 +41,11 @@ L = {
    fa="اسلایدر با یک سطر کامل زیرش: تیک بر ثانیه، ثانیه بر کندل، و اینکه "
       "جلسه چقدر وقت واقعی می‌برد. یک ردیف اضافه — دوازده پیکسل."),
 
+ "c01": dict(name="v124 as built", w=310, rail="left", actions=True,
+   order="cap clock transport speed actions sheet status", speed="slider",
+   note="What v124 draws.",
+   fa="what v124 draws"),
+
  "a02": dict(name="Speed presets", w=300, rail="left",
    order="cap clock transport speed sheet status", speed="chips",
    note="The minus / value / plus / track becomes five chips: 1x 2x 5x "
@@ -195,6 +200,11 @@ def panel8(k):
     #--- TABS, three ways -------------------------------------------
     tabs = [("Trade", True), ("Positions 2", False), ("Stats", False),
             ("Session", False)]
+    B["actions"] = ('<div class="acts">' + "".join(
+        '<b class="k act">%s</b>' % a
+        for a in ("Follow", "SL/TP", "Mark", "Jump", "Saved", "Detail"))
+        + '</div>')
+
     B["striptabs"] = ('<div class="striptabs">' +
         "".join('<b class="%s">%s</b>' % ("on" if on else "", t)
                 for t, on in tabs) + '</div>')
@@ -243,7 +253,10 @@ def panel8(k):
         out = ['<div class="sheetwrap">']
         if rail == "left" or rail == "left+speed":
             out.append('<div class="rail">')
-            for t, on in [("TRD",1),("POS",0),("STA",0),("SES",0)]:
+            tags = ([("Trade",1),("Pos 2",0),("Stats",0),("Sess",0)]
+                    if v.get("actions") else
+                    [("TRD",1),("POS",0),("STA",0),("SES",0)])
+            for t, on in tags:
                 out.append('<b class="%s">%s</b>' % ("on" if on else "", t))
             if rail == "left+speed":
                 out.append('<div class="vtrack">' +
@@ -285,7 +298,14 @@ CSS8 = r"""
 .rail b.on{color:var(--text);background:var(--face);border-color:var(--edge);
  border-right-color:var(--face)}
 
-/* the continuous slider, in design 08's own speed row */
+/* v124: the action strip and the wider rail */
+.acts{display:flex;gap:3px;padding:2px 8px 0}
+.k.act{flex:1;height:21px;font-size:10px;color:var(--dim)}
+.c01 .rail{width:44px}
+.c01 .rail b{width:44px;height:22px;font-size:10px;letter-spacing:.02em}
+.c01 .sheetwrap{border-top:1px solid var(--edge);margin-top:5px}
+
+/* the continuous slider */
 .speedrow.slid{gap:4px}
 .speedrow.slid .lbl{width:34px}
 .sl{position:relative;flex:1;height:8px;background:var(--well);

@@ -257,6 +257,24 @@ enum ENUM_SSR_STR
    SSR_S_FIRSTRUN_3,
    SSR_S_FIRSTRUN_4,
 
+   //--- the rail layout: a vertical tab is 44 px and an action key is
+   //--- 46 px, so both need a name written FOR that width rather than
+   //--- a long one chopped at draw time - which would cut a different
+   //--- word in every language.
+   SSR_S_RTAB_TRADE,
+   SSR_S_RTAB_POSITIONS,
+   SSR_S_RTAB_POSITIONS_N,
+   SSR_S_RTAB_STATS,
+   SSR_S_RTAB_SESSION,
+   SSR_S_RTAB_PROP,
+   SSR_S_ACT_FOLLOW,
+   SSR_S_ACT_FOLLOW_N,
+   SSR_S_ACT_LINES_ON,
+   SSR_S_ACT_LINES_OFF,
+   SSR_S_ACT_BOOKMARK,
+   SSR_S_ACT_JUMP,
+   SSR_S_ACT_SESSIONS,
+   SSR_S_ACT_FIDELITY,
    SSR_S_COUNT                     // must stay last
   };
 
@@ -317,6 +335,24 @@ int SSRStringsEnglish(SSRStringEntry &out[])
    SSRAddString(out, n, SSR_S_JUMP,        "jump",          "Jump...  J");
    SSRAddString(out, n, SSR_S_SESSIONS,    "sessions",      "Sessions...  S");
    SSRAddString(out, n, SSR_S_FIDELITY,    "fidelity",      "Fidelity  D");
+
+   //--- the rail layout's short forms. The key letters are not repeated
+   //--- here: at this width they would cost a word, and the key card
+   //--- already carries every one of them.
+   SSRAddString(out, n, SSR_S_RTAB_TRADE,       "rtab.trade",      "Trade");
+   SSRAddString(out, n, SSR_S_RTAB_POSITIONS,   "rtab.positions",  "Pos");
+   SSRAddString(out, n, SSR_S_RTAB_POSITIONS_N, "rtab.positions.n","Pos %d");
+   SSRAddString(out, n, SSR_S_RTAB_STATS,       "rtab.stats",      "Stats");
+   SSRAddString(out, n, SSR_S_RTAB_SESSION,     "rtab.session",    "Sess");
+   SSRAddString(out, n, SSR_S_RTAB_PROP,        "rtab.prop",       "Prop");
+   SSRAddString(out, n, SSR_S_ACT_FOLLOW,       "act.follow",      "Follow");
+   SSRAddString(out, n, SSR_S_ACT_FOLLOW_N,     "act.follow.n",    "Follow %d");
+   SSRAddString(out, n, SSR_S_ACT_LINES_ON,     "act.lines.on",    "Lines");
+   SSRAddString(out, n, SSR_S_ACT_LINES_OFF,    "act.lines.off",   "SL/TP");
+   SSRAddString(out, n, SSR_S_ACT_BOOKMARK,     "act.bookmark",    "Mark");
+   SSRAddString(out, n, SSR_S_ACT_JUMP,         "act.jump",        "Jump");
+   SSRAddString(out, n, SSR_S_ACT_SESSIONS,     "act.sessions",    "Saved");
+   SSRAddString(out, n, SSR_S_ACT_FIDELITY,     "act.fidelity",    "Detail");
 
    SSRAddString(out, n, SSR_S_TAB_TRADE,       "tab.trade",     "Trade");
    SSRAddString(out, n, SSR_S_TAB_POSITIONS,   "tab.positions", "Positions");

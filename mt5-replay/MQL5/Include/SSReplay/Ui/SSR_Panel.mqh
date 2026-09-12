@@ -115,6 +115,8 @@ private:
    //--- the speed trackbar, which is dragged rather than clicked
    bool              m_track_drag;
    int               m_track_x, m_track_y, m_track_w;
+   //--- the worst overflow reported so far, so it is said once
+   int               m_over_r, m_over_b;
    uint              m_last_drag_paint;
    int               m_corner;      // 0 TL, 1 TR, 2 BR, 3 BL
 
@@ -281,6 +283,7 @@ public:
        m_dragging(false),
        m_drag_dx(0), m_drag_dy(0),
        m_track_drag(false), m_track_x(0), m_track_y(0), m_track_w(0),
+       m_over_r(0), m_over_b(0),
        m_last_drag_paint(0), m_corner(0),
        m_tab(SSR_TAB_TRADE), m_tag_sent(""), m_tag_focus(false),
        m_reset_armed_ms(0), m_reset_warning(""),
@@ -628,6 +631,7 @@ public:
    void              Render(void)
      {
       m_renders++;
+      m_w.ResetExtent();
 
       if(m_port != NULL)
          m_port.ReadState(m_state);
@@ -740,15 +744,25 @@ public:
          //+------------------------------------------------------------------+
          if(m_tab >= TabCount())
             m_tab = SSR_TAB_STATS;
+#ifdef SSR_LAYOUT_RAIL
+         //--- the tabs stand up in a rail beside the sheet, and the six
+         //--- always-reachable actions take the row they left behind
+         cy = DrawActions(x, cy, W);
+         DrawRail(x + SSR_PAD, cy + 4);
+         DrawSheet(x + SSR_PAD + SSR_RAIL_W + SSR_GAP, cy + 4,
+                   W - 2 * SSR_PAD - SSR_RAIL_W - SSR_GAP);
+#else
          cy = DrawTabs(x, cy, W);
          DrawSide(x + SSR_PAD, cy + 4);
          DrawSheet(x + SSR_PAD + SSR_SIDE_W + SSR_GAP, cy + 4,
                    W - 2 * SSR_PAD - SSR_SIDE_W - SSR_GAP);
+#endif
          //--- the side column is six buttons whatever the height, so a
          //--- tall panel leaves it alone rather than stretching it into
          //--- six buttons with an inch of nothing between them
         }
       DrawStatus(x, y + H - SSR_STATUS_H - 1, W);
+      CheckFrame(x, y, W, H);
 
       //+------------------------------------------------------------------+
       //| THE CARD IS DRAWN AFTER THE PANEL, EVERY FRAME.                  |
@@ -928,8 +942,16 @@ private:
       string pct = StringFormat("%d%%", (int)MathRound(m_state.progress * 100.0));
       if(m_state.pause_reason != "")
          pct += "   " + m_state.pause_reason;
+#ifdef SSR_LAYOUT_RAIL
+      //--- 110, not 160: the panel is 110 px narrower and a pause
+      //--- reason is free text. Clipped rather than allowed to run off
+      //--- the frame, which is what it did at the old offset.
+      Text(3, "prog", x + W - SSR_PAD - 110, y + 6, Clip(pct, 24),
+           SSR_C_TEXT_DIM, SSR_FS_SMALL);
+#else
       Text(3, "prog", x + W - SSR_PAD - 160, y + 6, pct,
            SSR_C_TEXT_DIM, SSR_FS_SMALL);
+#endif
 
       m_w.Progress("bar", x + SSR_PAD, y + 22, W - 2 * SSR_PAD, 6,
                    m_state.progress, SSRStateColor(m_state.status));
@@ -954,11 +976,25 @@ private:
       //| times wider than the others - far enough that a finger reaching  |
       //| for >> does not land on it.                                      |
       //+------------------------------------------------------------------+
+#ifdef SSR_LAYOUT_RAIL
+      //--- 294 usable: 24 + 4x24 + 58 + 5x3 + 10 = 203, so the primary
+      //--- key gets 91 - still nearly four times a step, which is the
+      //--- proportion this row was built on and not a number to lose.
+      //--- Reset is 58 rather than 46 because "sh(oru)e dobare" is
+      //--- eleven characters and a button that clips its own label is
+      //--- a button nobody is sure about.
+      int gp   = 3;
+      int sepw = 10;                        // the gap that protects Reset
+      int rw   = 58;                        // Reset
+      int nw   = 24;                        // a step
+      int fw   = 24;                        // rewind to the start
+#else
       int gp   = 4;
       int sepw = 16;                        // the gap that protects Reset
       int rw   = 60;                        // Reset
       int nw   = 30;                        // a step
       int fw   = 28;                        // rewind to the start
+#endif
       int pw   = (W - 2 * SSR_PAD) - (fw + nw * 4 + rw + gp * 5 + sepw);
       int bx   = x + SSR_PAD;
 
@@ -997,16 +1033,26 @@ private:
    //================================================================
    int               DrawSpeed(const int x, const int y, const int W)
      {
+#ifdef SSR_LAYOUT_RAIL
+      //--- narrower everywhere so the groove keeps a hittable width:
+      //--- 28 label + 18 + 40 + 18 = 104 of controls and 52 reserved
+      //--- for the meaning leaves 130 px of track, which is 6.5 px a
+      //--- stop. Below about five the cells stop being clickable and
+      //--- the slider becomes a picture of a control.
+      int lw = 28, vw = 40, mw = 52;
+#else
+      int lw = 34, vw = 46, mw = 92;
+#endif
       Text(4, "spdlbl", x + SSR_PAD, y + 3, T(SSR_S_SPEED), SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
-      int bx = x + SSR_PAD + 34;
+      int bx = x + SSR_PAD + lw;
       m_w.Button("spdn", bx, y, 18, SSR_ROW_H, "-");
       //--- the readout is a sunken field, not floating text: it is a
       //--- VALUE, and a value in a dialog sits in a box
-      m_w.Rect("spdbox", bx + 20, y, 46, SSR_ROW_H, SSR_C_WELL, SSR_C_WELL_EDGE);
+      m_w.Rect("spdbox", bx + 20, y, vw, SSR_ROW_H, SSR_C_WELL, SSR_C_WELL_EDGE);
       Text(5, "spdval", bx + 24, y + 4, SSRSpeedName(m_state.speed_x100),
            SSR_C_TEXT, SSR_FS_BODY);
-      m_w.Button("spup", bx + 68, y, 18, SSR_ROW_H, "+");
+      m_w.Button("spup", bx + 22 + vw, y, 18, SSR_ROW_H, "+");
 
       //+------------------------------------------------------------------+
       //| THE BAR. Still twenty cells, each one clickable, because a       |
@@ -1022,16 +1068,16 @@ private:
       //| The track still gives up its right-hand quarter so "1h in 12m"   |
       //| can sit BESIDE it instead of on a line of its own.               |
       //+------------------------------------------------------------------+
-      m_track_x = bx + 92;
+      m_track_x = bx + 44 + vw;
       m_track_y = y + 5;
-      m_track_w = (x + W - SSR_PAD - 92) - m_track_x;
+      m_track_w = (x + W - SSR_PAD - mw) - m_track_x;
       m_w.Slider("spdseg", m_track_x, m_track_y, m_track_w, 9,
                  SSRSpeedLadderIndex(m_state.speed_x100),
                  SSR_SPEED_LADDER_SIZE);
 
       //--- "5x" is a number. "1h in 12m" is something you can plan an
       //--- afternoon around, so the panel says both.
-      Text(6, "spdmean", x + W - SSR_PAD - 88, y + 5,
+      Text(6, "spdmean", x + W - SSR_PAD - mw + 4, y + 5,
            SSRSpeedMeaning(m_state.speed_x100), SSR_C_TEXT_DIM, SSR_FS_SMALL);
       return y + SSR_ROW_H + 2;
      }
@@ -1046,10 +1092,26 @@ private:
    int               TabCount(void)
      { return (m_state.prop_on ? SSR_TAB_MAX : SSR_TAB_COUNT); }
 
+   //--- the rail is 44 px wide and the tab strip was 74. Same tabs,
+   //--- names written for the width they are drawn in.
    string            TabName(const int i)
      {
       switch(i)
         {
+#ifdef SSR_LAYOUT_RAIL
+         case SSR_TAB_TRADE:     return T(SSR_S_RTAB_TRADE);
+         case SSR_TAB_POSITIONS:
+            return (m_state.open_positions > 0
+                    ? StringFormat(T(SSR_S_RTAB_POSITIONS_N),
+                                   m_state.open_positions)
+                    : T(SSR_S_RTAB_POSITIONS));
+         case SSR_TAB_STATS:     return T(SSR_S_RTAB_STATS);
+         case SSR_TAB_SESSION:   return T(SSR_S_RTAB_SESSION);
+         case SSR_TAB_PROP:
+            return (m_state.prop_state == 3 ? T(SSR_S_TAB_PROP_FAIL)
+                    : (m_state.prop_state == 2 ? T(SSR_S_TAB_PROP_OK)
+                                               : T(SSR_S_RTAB_PROP)));
+#else
          case SSR_TAB_TRADE:     return T(SSR_S_TAB_TRADE);
          case SSR_TAB_POSITIONS:
             return (m_state.open_positions > 0
@@ -1064,6 +1126,7 @@ private:
             return (m_state.prop_state == 3 ? T(SSR_S_TAB_PROP_FAIL)
                     : (m_state.prop_state == 2 ? T(SSR_S_TAB_PROP_OK)
                                                : T(SSR_S_TAB_PROP)));
+#endif
         }
       return "";
      }
@@ -1126,6 +1189,71 @@ private:
                  false, m_state.connected);                     cy += h + gp;
       m_w.Button("fidelity", x, cy, SSR_SIDE_W, h, T(SSR_S_FIDELITY),
                  false, m_state.connected);
+     }
+
+   //================================================================
+   //  THE RAIL - the tabs, standing up
+   //
+   //  Same buttons, same ids, same dispatch: only the geometry moved,
+   //  so a click on "tab2" still selects Stats whichever layout is
+   //  built. Five cells at 22 + 3 is 122 px inside a 186 px sheet.
+   //================================================================
+   void              DrawRail(const int x, const int y)
+     {
+      int n = TabCount(), h = 22, gp = 3, cy = y;
+      for(int i = 0; i < n; i++)
+        {
+         bool on = (i == m_tab);
+         m_w.ButtonC("tab" + IntegerToString(i), x, cy, SSR_RAIL_W, h,
+                     TabName(i),
+                     on ? SSR_C_TAB_ON : SSR_C_TAB,
+                     SSR_C_TAB_EDGE,
+                     on ? SSR_C_TEXT : SSR_C_TEXT_DIM);
+         cy += h + gp;
+        }
+      //--- a tab the rail no longer has is REMOVED, not left behind
+      for(int i = n; i < SSR_TAB_MAX; i++)
+         m_w.Remove("tab" + IntegerToString(i));
+     }
+
+   //================================================================
+   //  THE ACTION STRIP - the six that used to be a column
+   //
+   //  A 310 px panel cannot afford a 104 px column beside a sheet, so
+   //  the six lie down in the row the tabs left. They keep their ids
+   //  and their key letters; what they lose is the letter printed on
+   //  the face, which at 46 px would have cost the word.
+   //================================================================
+   int               DrawActions(const int x, const int y, const int W)
+     {
+      int gp = 3;
+      int bw = (W - 2 * SSR_PAD - 5 * gp) / 6;
+      int bx = x + SSR_PAD;
+
+      m_w.Button("follow", bx, y, bw, SSR_ACT_H,
+                 (m_state.charts_detached > 0
+                  ? StringFormat(T(SSR_S_ACT_FOLLOW_N), m_state.charts_detached)
+                  : T(SSR_S_ACT_FOLLOW)),
+                 m_state.charts_detached > 0,
+                 m_state.charts_detached > 0);                    bx += bw + gp;
+      m_w.Button("lines", bx, y, bw, SSR_ACT_H,
+                 m_state.lines_armed ? T(SSR_S_ACT_LINES_ON)
+                                     : T(SSR_S_ACT_LINES_OFF),
+                 m_state.lines_armed, m_state.can_trade);         bx += bw + gp;
+      m_w.Button("bookmark", bx, y, bw, SSR_ACT_H, T(SSR_S_ACT_BOOKMARK),
+                 false, m_state.connected);                       bx += bw + gp;
+      m_w.Button("jump", bx, y, bw, SSR_ACT_H, T(SSR_S_ACT_JUMP),
+                 false, m_state.connected);                       bx += bw + gp;
+      m_w.Button("sessions", bx, y, bw, SSR_ACT_H, T(SSR_S_ACT_SESSIONS),
+                 false, m_state.connected);                       bx += bw + gp;
+      m_w.Button("fidelity", bx, y, bw, SSR_ACT_H, T(SSR_S_ACT_FIDELITY),
+                 false, m_state.connected);
+
+      //--- the same hairline the tab strip drew, so the sheet still
+      //--- reads as a surface under the row rather than beside it
+      m_w.Rect("tabline", x + SSR_PAD, y + SSR_ACT_H,
+               W - 2 * SSR_PAD, 1, SSR_C_TAB_EDGE, SSR_C_TAB_EDGE);
+      return y + SSR_ACT_H;
      }
 
    //================================================================
@@ -2861,6 +2989,42 @@ public:
    //|                 no cache. Buttons and rectangles have no cache    |
    //|                 at all, so this is the real floor of the paint.   |
    //+------------------------------------------------------------------+
+   //+------------------------------------------------------------------+
+   //| DID ANYTHING LAND OUTSIDE THE FRAME?                             |
+   //|                                                                  |
+   //| A layout is arithmetic and the compiler checks none of it. This  |
+   //| panel was rebuilt from 420 px to 310 with the tabs stood up in a |
+   //| rail, on a terminal I cannot run - so rather than hope, it        |
+   //| measures the far edge of everything it drew and says so.          |
+   //|                                                                  |
+   //| Once per offence, not once per frame: this runs ten times a       |
+   //| second and a log that repeats ten times a second is a log nobody  |
+   //| reads. The number is kept so the status strip and the flight      |
+   //| recorder can carry it too.                                        |
+   //|                                                                  |
+   //| Sized objects only - see CSSRWidgets::Extent. A label that runs   |
+   //| long is a different fault and this cannot see it.                 |
+   //+------------------------------------------------------------------+
+   void              CheckFrame(const int x, const int y,
+                                const int W, const int H)
+     {
+      int over_r = m_w.MaxRight()  - (x + W);
+      int over_b = m_w.MaxBottom() - (y + H);
+      if(over_r <= 0 && over_b <= 0)
+         return;
+      if(over_r <= m_over_r && over_b <= m_over_b)
+         return;                       // no worse than already reported
+      if(over_r > m_over_r) m_over_r = over_r;
+      if(over_b > m_over_b) m_over_b = over_b;
+      PrintFormat("[panel] LAYOUT OVERFLOW: something is drawn %d px past "
+                  "the right edge and %d px past the bottom. The frame is "
+                  "%dx%d. This is a layout bug, not a chart size problem.",
+                  (over_r > 0 ? over_r : 0), (over_b > 0 ? over_b : 0), W, H);
+     }
+
+   int               FrameOverflowRight(void)  { return m_over_r; }
+   int               FrameOverflowBottom(void) { return m_over_b; }
+
    int               PaintWrites(void)      { return m_w.Writes(); }
    void              ResetPaintWrites(void) { m_w.ResetWrites(); m_writes = 0; }
 

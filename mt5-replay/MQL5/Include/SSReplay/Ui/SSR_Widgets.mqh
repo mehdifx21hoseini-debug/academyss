@@ -113,6 +113,25 @@ private:
         { m_ck[i] = ""; m_cn[i] = 0; m_ct[i] = ""; }
      }
 
+   //+------------------------------------------------------------------+
+   //| WHAT WAS DRAWN, AND WHERE IT ENDED.                              |
+   //|                                                                  |
+   //| A layout change is arithmetic, and the compiler checks none of    |
+   //| it. A row that runs four pixels past the frame looks like a       |
+   //| rendering fault to the user and like nothing at all to me, and I  |
+   //| cannot run this terminal - so the panel measures itself instead   |
+   //| of being trusted.                                                 |
+   //|                                                                  |
+   //| Sized objects only. A label's width depends on the glyphs the     |
+   //| font chose and MQL5 will not say, so guessing at it here would    |
+   //| produce a warning nobody could act on.                            |
+   //+------------------------------------------------------------------+
+   void              Extent(const int x, const int y, const int w, const int h)
+     {
+      if(x + w > m_max_r) m_max_r = x + w;
+      if(y + h > m_max_b) m_max_b = y + h;
+     }
+
    long              Mix(const long a, const long b) { return a * 1000003 + b; }
 
    //+------------------------------------------------------------------+
@@ -134,6 +153,7 @@ private:
    //| refuses to do. This is the instrument that would justify one.     |
    //+------------------------------------------------------------------+
    int               m_writes;
+   int               m_max_r, m_max_b;   // the far edge of everything drawn
 
    void              Common(const string name)
      {
@@ -146,7 +166,8 @@ private:
 
 public:
                      CSSRWidgets(void) : m_chart(0), m_prefix("SSR_"), m_created(0),
-                                        m_writes(0) {}
+                                        m_writes(0), m_max_r(0),
+                                        m_max_b(0) {}
 
    void              Attach(const long chart_id, const string prefix)
      {
@@ -161,7 +182,11 @@ public:
    string            Prefix(void)  { return m_prefix; }
    int               Created(void) { return m_created; }
    int               Writes(void)  { return m_writes; }
+   //--- the far edge of every sized object drawn since the last reset
+   int               MaxRight(void)  { return m_max_r; }
+   int               MaxBottom(void) { return m_max_b; }
    void              ResetWrites(void) { m_writes = 0; }
+   void              ResetExtent(void) { m_max_r = 0; m_max_b = 0; }
    string            N(const string id) { return m_prefix + id; }
 
    bool              Exists(const string id) { return (ObjectFind(m_chart, N(id)) >= 0); }
@@ -171,6 +196,7 @@ public:
                           const int w, const int h,
                           const color bg, const color edge)
      {
+      Extent(x, y, w, h);
       string n = N(id);
       long   fp = Mix(Mix(Mix(Mix(Mix(x, y), w), h), (long)bg), (long)edge);
       if(Same(n, fp, ""))
@@ -263,6 +289,7 @@ public:
                           const int w, const int h, const string text,
                           const bool set_text = true)
      {
+      Extent(x, y, w, h);
       string n = N(id);
       bool   fresh = false;
       if(ObjectFind(m_chart, n) < 0)
@@ -333,6 +360,7 @@ public:
                              const color bg, const color edge,
                              const color fg, const int size = SSR_FS_BODY)
      {
+      Extent(x, y, w, h);
       string n = N(id);
       long   fp = Mix(Mix(Mix(Mix(Mix(Mix(Mix(x, y), w), h),
                                   (long)bg), (long)edge), (long)fg), size);
@@ -372,6 +400,7 @@ public:
                               const int w, const int h, const double fraction,
                               const color fill)
      {
+      Extent(x, y, w, h);
       double f = fraction;
       if(f < 0.0) f = 0.0;
       if(f > 1.0) f = 1.0;

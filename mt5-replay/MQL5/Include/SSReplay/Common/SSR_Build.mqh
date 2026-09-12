@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v123 2026-09-12  slider"
+#define SSR_BUILD "v124 2026-09-12  rail"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+
