@@ -62,3 +62,54 @@ off the render.
 Range: 302x290 (09) to 303x352 (07), and 272 wide for 10.
 
 `build8.py` builds them, `shoot8.py` renders and measures them.
+
+---
+
+# The proposal: a two-state ticket
+
+Asked for after "a lot of these items aren't useful to me - as a coach,
+a programmer and a trader of twenty years, what would YOU build?"
+
+**The argument.** The panel is a form, and a replay session is not a
+form. A session has two states and they need different things:
+
+- **Flat** - you are hunting. Time, price, speed, and a way to arm a
+  trade with the risk already defined.
+- **In a position** - you are managing. Where the stop is, how many R
+  you are up or down, and the two buttons that end it.
+
+One panel, two contents. That alone removes most of what is never
+useful, because what is on screen is what is relevant now.
+
+**The speed control.** Asked for explicitly: like Soft4FX's, showing
+both ticks and seconds, not blocky, continuous from zero. I have not
+seen Soft4FX's interface and did not pretend to - this is built from
+the function described. Eight cells became a track, a fill and a thumb:
+three rectangles at any pixel width, so it reads continuous and can be
+clicked or dragged anywhere. Zero is a real position on it and means
+paused. Under it, two numbers answering two different questions -
+`12 ticks/s` is how alive a candle feels, `1.0 s per candle` is how fast
+the session moves - and the tick detail that links them sits directly
+below.
+
+**What was removed**: four tabs (to three rail cells, two of which open
+a real window), the separate "Take the trade" button, the boxed progress
+bar and its percentage, three of five caption buttons, the risk readout
+(risk became a control), and the standalone spread line.
+
+**What was added**: the price, large, coloured by direction; the speed
+slider above; tick detail as its own control; R as the primary unit;
+and an MAE/MFE bar - how far it went against you before it worked, which
+is the thing a student never remembers and a coach always asks.
+
+**One rule made it cohere**: the accent means "you can touch this".
+Anything that is only information stays grey - which is why the progress
+scrub is grey and the speed slider is orange.
+
+**One thing measured rather than assumed**: the transport glyphs
+(`<`, `>`, `||`, `[]`) are WGL4 geometric characters, which Tahoma
+carries on every Windows. Wingdings was tried first and did not render
+at all under test - see `glyph.html`, which is the specimen that settled
+it.
+
+Sizes: flat 302x338, in-position 302x367, collapsed 302x187.

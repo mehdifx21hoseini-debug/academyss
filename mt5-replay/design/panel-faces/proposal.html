@@ -1,0 +1,211 @@
+<title>Two-State Ticket</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=IBM+Plex+Mono:wght@400;500&family=Vazirmatn:wght@400;500;700&display=swap">
+<style>
+:root{--paper:#EDEEEF;--card:#FFFFFF;--ink:#15181A;--ink2:#4B5257;
+ --ink3:#6F777C;--rule:#D4D8DB;--accent:#8A4A12;--accentink:#FFF;
+ --fa:"Vazirmatn","Noto Sans Arabic",system-ui,sans-serif;
+ --dis:"Archivo","Liberation Sans",sans-serif;
+ --mono:"IBM Plex Mono","Liberation Mono",monospace}
+:root:not([data-theme="light"]){@media (prefers-color-scheme:dark){
+ --paper:#0E1012;--card:#171A1C;--ink:#E7EAEC;--ink2:#AAB2B7;--ink3:#838B90;
+ --rule:#2A2F32;--accent:#E0863A;--accentink:#1B1E23}}
+:root[data-theme="dark"]{--paper:#0E1012;--card:#171A1C;--ink:#E7EAEC;
+ --ink2:#AAB2B7;--ink3:#838B90;--rule:#2A2F32;--accent:#E0863A;
+ --accentink:#1B1E23}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--fa);
+ font-size:15.5px;line-height:1.8}
+.wrap{max-width:1080px;margin:0 auto;padding-inline:20px;padding-block:0}
+header{padding-block:64px 30px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+ text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--dis);font-weight:700;font-size:clamp(30px,5.4vw,52px);
+ line-height:1.14;margin:0 0 18px;text-wrap:balance}
+.lede{margin:0;max-width:60ch;color:var(--ink2);font-size:17px}
+.lede b{color:var(--ink);font-weight:500}
+.sec{border-top:1px solid var(--rule);padding-block:34px 6px}
+.sec h2{font-family:var(--dis);font-weight:500;font-size:24px;margin:0 0 18px}
+.states{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start;
+ margin-bottom:14px}
+.st figcaption{font-family:var(--mono);font-size:11px;letter-spacing:.12em;
+ text-transform:uppercase;color:var(--ink3);padding-bottom:10px}
+.st p{max-width:30ch;color:var(--ink2);font-size:14px;margin:12px 0 0}
+figure{margin:0}
+.sp{margin-bottom:22px;max-width:340px}
+.sp figcaption{font-size:14px;font-weight:500;padding-bottom:8px}
+.sp p{margin:10px 0 0;color:var(--ink2);font-size:13.5px;line-height:1.7}
+.spwrap{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+ gap:8px 30px}
+table{width:100%;border-collapse:collapse;margin-bottom:10px}
+th{font-family:var(--mono);font-size:10px;letter-spacing:.12em;
+ text-transform:uppercase;color:var(--ink3);text-align:right;
+ padding:0 10px 8px;border-bottom:1px solid var(--rule);font-weight:400}
+td{padding:11px 10px;border-bottom:1px solid var(--rule);vertical-align:top;
+ font-size:14px}
+td.x{color:var(--ink3);width:28%}
+td.y{color:var(--ink);width:34%}
+td.z{color:var(--ink2);width:38%}
+.rule{background:var(--card);border:1px solid var(--rule);padding:20px 22px;
+ margin-block:10px 4px}
+.rule b{color:var(--accent)}
+.note{color:var(--ink3);font-size:13.5px;max-width:62ch}
+footer{border-top:1px solid var(--rule);padding-block:26px 66px;
+ color:var(--ink3);font-size:13.5px;max-width:70ch}
+@media (max-width:560px){.st p{max-width:none}}
+
+.panel{position:relative;background:var(--face);border:1px solid var(--edge);
+ font-family:var(--font);font-size:var(--fs);color:var(--text);line-height:1;
+ user-select:none;font-variant-numeric:tabular-nums}
+.panel *{box-sizing:border-box}
+.panel b,.panel span,.panel i,.panel s{font-style:normal;font-weight:400}
+
+.cap{height:22px;background:var(--cap);border-bottom:1px solid var(--edge);
+ display:flex;align-items:center;padding:0 4px 0 8px}
+.ttl{font-weight:700;font-size:12px}
+.capb{margin-left:auto;display:flex;gap:2px}
+.capb b{width:18px;height:15px;background:var(--btn);
+ border:1px solid var(--btnedge);color:var(--dim);font-size:10px;
+ display:flex;align-items:center;justify-content:center}
+.capb b.x{color:var(--sell)}
+
+/* THE HEAD: day, session position, clock, PRICE, scrub */
+.head{padding:6px 8px 0}
+.hrow{display:flex;align-items:baseline;justify-content:space-between}
+.day{font-size:9px;letter-spacing:.14em;color:var(--dim)}
+.sess{font-size:9px;letter-spacing:.08em;color:var(--faint)}
+.hrow.big{margin-top:3px}
+.clk{font-size:15px;color:var(--dim)}
+.px{font-size:21px;color:var(--text);font-weight:700;letter-spacing:-.01em}
+.px.up{color:var(--run)}
+.px.dn{color:var(--sell)}
+.scrub{margin-top:6px;height:2px;background:var(--well)}
+.scrub i{display:block;height:2px;background:var(--dim)}
+
+/* TRANSPORT: WGL4 glyphs, one row, the play key twice as wide */
+.tr{display:flex;gap:3px;padding:7px 8px 0}
+.k{display:flex;align-items:center;justify-content:center;height:23px;
+ background:var(--btn);border:1px solid var(--btnedge);color:var(--text);
+ font-size:11px}
+.k.g{flex:1;font-size:10px;color:var(--dim)}
+.k.play{flex:2;color:var(--accent);border-color:var(--accent);font-size:11px}
+.k.stop{flex:1;color:var(--sell);font-size:9px}
+
+/* THE SPEED CONTROL - a track, a fill, a thumb */
+.spd{padding:9px 8px 0}
+.sl{position:relative;height:8px;background:var(--well);
+ border:1px solid var(--edge)}
+.sl .fill{position:absolute;left:0;top:0;bottom:0;background:var(--accent)}
+.sl .thumb{position:absolute;top:-4px;width:5px;height:14px;
+ margin-left:-2px;background:var(--text);border:1px solid var(--face)}
+.read{display:flex;align-items:baseline;gap:4px;padding-top:6px;font-size:10px}
+.read .v{color:var(--text);font-size:12px}
+.read .u{color:var(--dim);font-size:9px}
+.read .sep{color:var(--faint)}
+.read .plan{margin-left:auto;color:var(--faint);font-size:9px}
+.det{display:flex;align-items:center;gap:3px;padding-top:6px}
+.det .dl{font-size:9px;letter-spacing:.1em;color:var(--dim);width:42px}
+.det .du{font-size:9px;color:var(--faint);margin-left:4px}
+.k.chip{height:17px;min-width:28px;font-size:10px;padding:0 5px;flex:none;
+ color:var(--dim)}
+.k.chip.on{background:var(--accent);border-color:var(--accent);
+ color:#1B1E23;font-weight:700}
+
+/* RAIL - three, not four */
+.sw{display:flex;margin-top:9px;border-top:1px solid var(--edge)}
+.rail{width:34px;flex:none;border-right:1px solid var(--edge);
+ background:var(--cap);padding-top:7px;display:flex;flex-direction:column;
+ gap:3px;align-items:center}
+.rail b{width:28px;height:22px;display:flex;align-items:center;
+ justify-content:center;font-size:9px;letter-spacing:.06em;color:var(--dim);
+ border:1px solid transparent}
+.rail b.on{color:var(--text);background:var(--face);border-color:var(--edge);
+ border-right-color:var(--face)}
+.sheet{flex:1;padding:7px 8px 8px}
+
+/* the ticket rows: label, value, and a right-hand consequence */
+.fr{display:flex;align-items:center;gap:5px;height:19px}
+.fr.note{height:23px}
+.fl{width:46px;flex:none;font-size:9px;letter-spacing:.09em;color:var(--dim)}
+.fv{font-size:12px;color:var(--text)}
+.fv.num{min-width:62px}
+.fu{font-size:9px;color:var(--dim);margin-left:-2px}
+.fx{margin-left:auto;font-size:10px;color:var(--faint)}
+.fx.pos,.fv.pos{color:var(--buy)}
+.fx.neg,.fv.neg{color:var(--sell)}
+.ed{flex:1;height:19px;display:flex;align-items:center;padding:0 5px;
+ background:var(--well);border:1px solid var(--edge);font-size:11px}
+.deals{display:flex;gap:5px;margin-top:7px}
+.deals .k{flex:1;height:29px;font-weight:700;font-size:12px;
+ letter-spacing:.05em;color:var(--dealtext)}
+.k.buy{background:var(--buy);border-color:var(--buy)}
+.k.sell{background:var(--sell);border-color:var(--sell)}
+.k.flat2{background:var(--btn);border-color:var(--btnedge);color:var(--text);
+ font-weight:400;letter-spacing:.08em;font-size:11px}
+.k.close{background:var(--btn);border-color:var(--sell);color:var(--sell);
+ letter-spacing:.08em;font-size:11px}
+
+/* the open position */
+.phead{position:relative;display:flex;align-items:center;height:24px;
+ padding-left:9px;margin-bottom:4px;background:var(--well);
+ border:1px solid var(--edge)}
+.pstripe{position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--buy)}
+.pside{font-size:11px;color:var(--text);letter-spacing:.05em}
+.pr{margin-left:auto;margin-right:7px;font-size:14px;font-weight:700}
+.pr.pos{color:var(--buy)}
+.exc{display:flex;align-items:center;gap:5px;height:22px;margin-top:2px}
+.el{width:54px;flex:none;font-size:9px;letter-spacing:.04em;
+ color:var(--dim);white-space:nowrap}
+.ebar{position:relative;flex:1;height:9px;background:var(--well);
+ border:1px solid var(--edge)}
+.ebar i{position:absolute;top:0;bottom:0}
+.ebar .mae{background:var(--sell)}
+.ebar .mfe{background:var(--buy)}
+.ebar .entry{width:1px;background:var(--faint);top:-3px;bottom:-3px}
+.ebar .now{width:3px;background:var(--text);top:-2px;bottom:-2px}
+.ev{display:flex;gap:6px;font-size:10px}
+.ev s{text-decoration:none}
+.ev .pos{color:var(--buy)}
+.ev .neg{color:var(--sell)}
+
+.status{height:19px;gap:9px;margin-top:0;background:var(--cap);
+ border-top:1px solid var(--edge);display:flex;align-items:center;gap:10px;
+ padding:0 8px;font-size:10px}
+.status .run{color:var(--run);font-weight:700;letter-spacing:.08em}
+.status .sdim{color:var(--dim)}
+.status .sdim.hot{color:var(--text)}
+.status .pos{color:var(--buy);margin-left:auto}
+.collapsed .status{margin-top:9px}
+
+</style>
+<div class="wrap">
+<header>
+ <p class="eyebrow">SS Replay &middot; Panel proposal</p>
+ <h1>بلیت دوحالته</h1>
+ <p class="lede">گفتید خیلی از چیزهای پنل به کارتان نمی‌آید. موافقم، و فکر می‌کنم دلیلش این است که پنل فعلی یک <b>فرم</b> است، و یک جلسهٔ ریپلی فرم نیست. یک جلسهٔ ریپلی دو حالت دارد و آن دو حالت به دو چیز متفاوت نیاز دارند.</p>
+</header>
+
+
+<section class="sec">
+ <h2>دو حالت، نه یک فرم</h2>
+ <div class="states"><figure class="st"><figcaption>State 1 &mdash; flat</figcaption><div class="panel flat" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:300px" dir="ltr"><div class="cap"><span class="ttl">SS Replay</span><span class="capb"><b>_</b><b class="x">&#10005;</b></span></div><div class="head"><div class="hrow"><span class="day">FRI 14 MAR</span><span class="sess">day 1 / 20</span></div><div class="hrow big"><span class="clk">09:42:15</span><span class="px up">38 498.5</span></div><div class="scrub"><i style="width:37%"></i></div></div><div class="tr"><b class="k g">|&#9668;</b><b class="k g">&#9668;&#9668;</b><b class="k g">&#9668;</b><b class="k g play">&#9612;&#9612;</b><b class="k g">&#9658;</b><b class="k g">&#9658;&#9658;</b><b class="k g stop">&#9632;</b></div><div class="spd"><div class="sl"><i class="fill" style="width:46%"></i><i class="thumb" style="left:46%"></i></div><div class="read"><span class="v">12</span><span class="u">ticks/s</span><span class="sep">&middot;</span><span class="v">1.0</span><span class="u">s per candle</span><span class="plan">1 h in 60 s</span></div><div class="det"><span class="dl">DETAIL</span><b class="k chip">1</b><b class="k chip on">12</b><b class="k chip">100</b><span class="du">ticks per candle</span></div></div><div class="sw"><div class="rail"><b class="on">TRD</b><b class="">LOG</b><b class="">STA</b></div><div class="sheet"><div class="fr"><span class="fl">RISK</span><b class="k chip">0.5</b><b class="k chip on">1</b><b class="k chip">2</b><span class="fu">%</span><span class="fv">0.42 lot</span></div><div class="fr"><span class="fl">STOP</span><span class="fv num">38 412.0</span><span class="fx neg">&minus;52 pts</span></div><div class="fr"><span class="fl">TARGET</span><span class="fv num">38 604.0</span><span class="fx pos">+140 pts</span></div><div class="fr"><span class="fl">R : R</span><span class="fv num">1 : 2.7</span><span class="fx">$487 at risk</span></div><div class="fr note"><span class="fl">NOTE</span><span class="ed">breakout retest</span></div><div class="deals"><b class="k buy">&#9650;&nbsp; BUY</b><b class="k sell">&#9660;&nbsp; SELL</b></div></div></div><div class="status"><span class="run">RUNNING</span><span class="sdim">flat</span><span class="sdim">1.4</span><span class="pos">session +2.1 R</span></div></div><p>بی‌پوزیشن، شما در حال شکار هستید: زمان، قیمت، سرعت، و راهی برای مسلح‌کردن یک معامله با ریسکِ تعریف‌شده. ریسک اینجا یک کنترل است، نه یک گزارش.</p></figure><figure class="st"><figcaption>State 2 &mdash; in a position</figcaption><div class="panel pos" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:300px" dir="ltr"><div class="cap"><span class="ttl">SS Replay</span><span class="capb"><b>_</b><b class="x">&#10005;</b></span></div><div class="head"><div class="hrow"><span class="day">FRI 14 MAR</span><span class="sess">day 1 / 20</span></div><div class="hrow big"><span class="clk">09:42:15</span><span class="px up">38 538.0</span></div><div class="scrub"><i style="width:37%"></i></div></div><div class="tr"><b class="k g">|&#9668;</b><b class="k g">&#9668;&#9668;</b><b class="k g">&#9668;</b><b class="k g play">&#9612;&#9612;</b><b class="k g">&#9658;</b><b class="k g">&#9658;&#9658;</b><b class="k g stop">&#9632;</b></div><div class="spd"><div class="sl"><i class="fill" style="width:46%"></i><i class="thumb" style="left:46%"></i></div><div class="read"><span class="v">12</span><span class="u">ticks/s</span><span class="sep">&middot;</span><span class="v">1.0</span><span class="u">s per candle</span><span class="plan">1 h in 60 s</span></div><div class="det"><span class="dl">DETAIL</span><b class="k chip">1</b><b class="k chip on">12</b><b class="k chip">100</b><span class="du">ticks per candle</span></div></div><div class="sw"><div class="rail"><b class="on">TRD</b><b class="">LOG</b><b class="">STA</b></div><div class="sheet"><div class="phead"><i class="pstripe"></i><span class="pside">LONG 0.42</span><span class="pr pos">+1.4 R</span></div><div class="fr"><span class="fl">ENTRY</span><span class="fv num">38 470.0</span><span class="fx">09:31:02</span></div><div class="fr"><span class="fl">STOP</span><span class="fv num">38 412.0</span><span class="fx neg">&minus;1.0 R</span></div><div class="fr"><span class="fl">TARGET</span><span class="fv num">38 604.0</span><span class="fx pos">+2.7 R</span></div><div class="fr"><span class="fl">OPEN</span><span class="fv num pos">+$682</span><span class="fx">peak +$780</span></div><div class="exc"><span class="el">MAE/MFE</span><div class="ebar"><i class="mae" style="left:34%;width:16%"></i><i class="mfe" style="left:50%;width:28%"></i><i class="entry" style="left:50%"></i><i class="now" style="left:70%"></i></div><span class="ev"><s class="neg">&minus;0.3</s><s class="pos">+1.6</s></span></div><div class="deals"><b class="k flat2">BREAK EVEN</b><b class="k close">CLOSE</b></div></div></div><div class="status"><span class="run">RUNNING</span><span class="sdim hot">1 open</span><span class="sdim">1.4</span><span class="pos">session +2.1 R</span></div></div><p>با پوزیشن، شما در حال مدیریت هستید: استاپ کجاست، چند R جلو یا عقبید، و دو دکمه‌ای که کار را تمام می‌کنند. همان پنل، همان جا، محتوای دیگر.</p></figure><figure class="st"><figcaption>Collapsed</figcaption><div class="panel collapsed" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:300px" dir="ltr"><div class="cap"><span class="ttl">SS Replay</span><span class="capb"><b>_</b><b class="x">&#10005;</b></span></div><div class="head"><div class="hrow"><span class="day">FRI 14 MAR</span><span class="sess">day 1 / 20</span></div><div class="hrow big"><span class="clk">09:42:15</span><span class="px up">38 498.5</span></div><div class="scrub"><i style="width:37%"></i></div></div><div class="tr"><b class="k g">|&#9668;</b><b class="k g">&#9668;&#9668;</b><b class="k g">&#9668;</b><b class="k g play">&#9612;&#9612;</b><b class="k g">&#9658;</b><b class="k g">&#9658;&#9658;</b><b class="k g stop">&#9632;</b></div><div class="spd"><div class="sl"><i class="fill" style="width:46%"></i><i class="thumb" style="left:46%"></i></div><div class="read"><span class="v">12</span><span class="u">ticks/s</span><span class="sep">&middot;</span><span class="v">1.0</span><span class="u">s per candle</span><span class="plan">1 h in 60 s</span></div><div class="det"><span class="dl">DETAIL</span><b class="k chip">1</b><b class="k chip on">12</b><b class="k chip">100</b><span class="du">ticks per candle</span></div></div><div class="status"><span class="run">RUNNING</span><span class="sdim">flat</span><span class="sdim">1.4</span><span class="pos">session +2.1 R</span></div></div><p>وقتی نمودار را می‌خواهید: فقط حرکت، سرعت و وضعیت. ۳۰۲ در ۱۸۷.</p></figure></div>
+</section>
+<section class="sec">
+ <h2>کنترل سرعت</h2>
+ <p class="note" style="margin:0 0 22px">شما گفتید مثل آنِ Soft4FX باشد — هم تیک و هم ثانیه، و مربعی نباشد، و از صفر همهٔ مقادیر را داشته باشد. <b>من رابط Soft4FX را ندیده‌ام و وانمود نمی‌کنم دیده‌ام</b>؛ این را از روی کاری که توصیف کردید ساخته‌ام. اگر آنجا چیز دیگری است، بگویید تا اصلاح کنم.</p><p class="note" style="margin:0 0 26px">هشت خانهٔ مربعی رفت. جایش یک شیار، یک پُرشدگی و یک دستگیره نشست — سه مستطیل، با هر عرضِ پیکسلی، پس پیوسته دیده می‌شود و هر جایش را کلیک یا بکشید کار می‌کند. زیرش دو عدد که دو سؤال متفاوت را جواب می‌دهند: <b>تیک بر ثانیه</b> یعنی کندل چقدر زنده حس می‌شود، <b>ثانیه بر کندل</b> یعنی جلسه چقدر تند می‌رود. دقتِ تیک که این دو را به هم وصل می‌کند، درست زیرشان است.</p><div class="spwrap"><figure class="sp"><figcaption>۰ — ایستاده</figcaption><div class="panel" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:292px;padding-bottom:9px"><div class="spd"><div class="sl"><i class="fill" style="width:0%"></i><i class="thumb" style="left:0%"></i></div><div class="read"><span class="v">0</span><span class="u">ticks/s</span><span class="sep">&middot;</span><span class="v">&mdash;</span><span class="u">s per candle</span><span class="plan">paused</span></div><div class="det"><span class="dl">DETAIL</span><b class="k chip">1</b><b class="k chip on">12</b><b class="k chip">100</b><span class="du">ticks per candle</span></div></div></div><p>صفر یک نقطهٔ واقعی روی اسلایدر است و یعنی توقف. همان کنترلی که سرعت را می‌دهد، متوقف هم می‌کند.</p></figure><figure class="sp"><figcaption>مطالعه</figcaption><div class="panel" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:292px;padding-bottom:9px"><div class="spd"><div class="sl"><i class="fill" style="width:18%"></i><i class="thumb" style="left:18%"></i></div><div class="read"><span class="v">3</span><span class="u">ticks/s</span><span class="sep">&middot;</span><span class="v">4.0</span><span class="u">s per candle</span><span class="plan">1 h in 4 min</span></div><div class="det"><span class="dl">DETAIL</span><b class="k chip">1</b><b class="k chip on">12</b><b class="k chip">100</b><span class="du">ticks per candle</span></div></div></div><p>برای وقتی که روی یک ستاپ خم شده‌اید و می‌خواهید کندل جلوی چشمتان ساخته شود.</p></figure><figure class="sp"><figcaption>جلسه</figcaption><div class="panel" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:292px;padding-bottom:9px"><div class="spd"><div class="sl"><i class="fill" style="width:46%"></i><i class="thumb" style="left:46%"></i></div><div class="read"><span class="v">12</span><span class="u">ticks/s</span><span class="sep">&middot;</span><span class="v">1.0</span><span class="u">s per candle</span><span class="plan">1 h in 60 s</span></div><div class="det"><span class="dl">DETAIL</span><b class="k chip">1</b><b class="k chip on">12</b><b class="k chip">100</b><span class="du">ticks per candle</span></div></div></div><p>سرعت پیش‌فرض تمرین: یک ساعت بازار در یک دقیقه.</p></figure><figure class="sp"><figcaption>پویش</figcaption><div class="panel" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:292px;padding-bottom:9px"><div class="spd"><div class="sl"><i class="fill" style="width:88%"></i><i class="thumb" style="left:88%"></i></div><div class="read"><span class="v">90</span><span class="u">ticks/s</span><span class="sep">&middot;</span><span class="v">0.13</span><span class="u">s per candle</span><span class="plan">1 h in 8 s</span></div><div class="det"><span class="dl">DETAIL</span><b class="k chip">1</b><b class="k chip on">12</b><b class="k chip">100</b><span class="du">ticks per candle</span></div></div></div><p>برای رد شدن از ساعت‌های مرده تا رسیدن به جایی که کار دارید.</p></figure></div>
+</section>
+<section class="sec">
+ <h2>چه چیزهایی را برداشتم</h2>
+ <table><thead><tr><th>بود</th><th>شد</th><th>چرا</th></tr></thead><tbody><tr><td class=x>چهار تب</td><td class=y>سه خانهٔ ریل — و LOG و STATS پنجرهٔ خودشان را باز می‌کنند</td><td class=z>چیزی که وسط ریپلی لمسش نمی‌کنید، نباید تمام‌مدت جا بگیرد</td></tr><tr><td class=x>دکمهٔ «Take the trade»</td><td class=y>حذف — خودِ BUY و SELL معاملهٔ خطوط را می‌گیرند</td><td class=z>سه راه برای یک کار، یعنی دو تا اضافه است</td></tr><tr><td class=x>نوار پیشرفت + «۳۷٪»</td><td class=y>یک خط ۲ پیکسلی زیر ساعت</td><td class=z>این یک واقعیت است، نه یک کنترل؛ پس شکل کنترل نداشته باشد</td></tr><tr><td class=x>پنج دکمهٔ سربرگ</td><td class=y>دو تا: کوچک‌کردن و بستن</td><td class=z>بقیه کلید دارند و در منوی راست‌کلیک هستند</td></tr><tr><td class=x>«۱٪ = ۴۸۷$ / ۰.۴۲ لات» به‌عنوان نوشته</td><td class=y>ریسک یک کنترل شد: ۰.۵ / ۱ / ۲ — لات خودش حساب می‌شود</td><td class=z>لحظهٔ آموزشی همین‌جاست: شاگرد ریسک را انتخاب می‌کند، ابزار حجم را</td></tr><tr><td class=x>«spread 1.4» در سطر خودش</td><td class=y>داخل نوار وضعیت</td><td class=z>یک عدد که روزی یک‌بار نگاهش می‌کنید، سطر نمی‌خواهد</td></tr></tbody></table>
+</section>
+<section class="sec">
+ <h2>چه چیزهایی را اضافه کردم</h2>
+ <table><thead><tr><th>چه</th><th>چطور</th><th>چرا</th></tr></thead><tbody><tr><td class=x>قیمت، بزرگ</td><td class=y>رنگش جهت را می‌گوید</td><td class=z>ابزار ریپلی‌ای که قیمت روی پنلش نیست، شما را مجبور می‌کند جای دیگری را نگاه کنید</td></tr><tr><td class=x>اسلایدر سرعت، پیوسته از صفر</td><td class=y>«۱۲ تیک بر ثانیه · ۱.۰ ثانیه هر کندل» و کنارش «۱ ساعت در ۶۰ ثانیه»</td><td class=z>همان چیزی که خواستید: هم تیک، هم ثانیه — و سومی برای برنامه‌ریزی جلسه</td></tr><tr><td class=x>دقت تیک به‌عنوان کنترل جدا</td><td class=y>۱ / ۱۲ / ۱۰۰ تیک در هر کندل، درست زیر اسلایدر</td><td class=z>این نیمهٔ دیگر همان سؤال است، پس کنار همان می‌نشیند</td></tr><tr><td class=x>دو حالت به‌جای یک فرم</td><td class=y>بی‌پوزیشن: شکار — با پوزیشن: مدیریت</td><td class=z>پنل چیزی را نشان می‌دهد که همین حالا به آن نیاز دارید</td></tr><tr><td class=x>R به‌جای دلار</td><td class=y>‎+۱.۴ R اول، ‎+۶۸۲$ دوم</td><td class=z>بعد از بیست سال، هیچ‌کس معامله را با دلار قضاوت نمی‌کند</td></tr><tr><td class=x>نوار MAE / MFE</td><td class=y>چقدر بر خلافتان رفت، قبل از اینکه جواب بدهد</td><td class=z>چیزی که شاگرد هیچ‌وقت یادش نمی‌ماند و مربی همیشه می‌پرسد</td></tr></tbody></table>
+</section>
+<section class="sec">
+ <h2>یک قانون که همه‌چیز را جمع کرد</h2>
+ <div class="rule"><b>نارنجی یعنی می‌شود لمسش کرد.</b> هر چیزی که فقط اطلاعات است خاکستری می‌ماند — به همین دلیل خط پیشرفتِ زیر ساعت خاکستری است و اسلایدر سرعت نارنجی. سبز و قرمز فقط جهت و سود/زیان را می‌گویند و هیچ‌جای دیگر خرج نمی‌شوند.</div><p class="note">و یک چیز که <b>اندازه‌گیری شد نه فرض</b>: شکل‌های دکمه‌های حرکت (‎◄ ► ▌▌ ■‎) از مجموعهٔ WGL4 هستند که Tahoma روی هر ویندوزی دارد. اول Wingdings را امتحان کردم و در تست اصلاً رندر نشد، پس کنار گذاشته شد.</p>
+</section>
+
+<footer>این یک پیشنهاد است، نه یک تصمیم. هر تکه‌اش را می‌شود جدا برداشت یا رد کرد — اسلایدر سرعت به‌تنهایی هم می‌آید، بدون بقیهٔ تغییرات.</footer>
+</div>
