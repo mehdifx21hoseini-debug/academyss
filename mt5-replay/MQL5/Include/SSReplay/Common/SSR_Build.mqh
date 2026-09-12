@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v124 2026-09-12  rail"
+#define SSR_BUILD "v125 2026-09-12  fewer"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

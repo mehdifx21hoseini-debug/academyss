@@ -127,7 +127,7 @@ def panel8(k):
 
     B["cap"] = ('<div class="cap"><span class="ttl">SS Replay</span>'
                 '<span class="chip">BLIND</span><span class="capb">'
-                '<b>K</b><b>?</b><b>[]</b><b>_</b><b class="x">X</b>'
+                '<b>_</b><b class="x">X</b>'
                 '</span></div>')
 
     B["clock"] = ('<div class="clockrow">'
@@ -202,7 +202,7 @@ def panel8(k):
             ("Session", False)]
     B["actions"] = ('<div class="acts">' + "".join(
         '<b class="k act">%s</b>' % a
-        for a in ("Follow", "SL/TP", "Mark", "Jump", "Saved", "Detail"))
+        for a in ("SL/TP", "Saved", "Detail"))
         + '</div>')
 
     B["striptabs"] = ('<div class="striptabs">' +

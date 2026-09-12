@@ -913,15 +913,26 @@ private:
       //| key on the rows it opens, so it teaches the shortcut it is       |
       //| standing in for rather than replacing it.                        |
       //+------------------------------------------------------------------+
-      m_w.Button("palette", x + W - 102, y + 3, 18, SSR_HEADER_H - 5, "K",
-                 m_palette.IsUp());
+      //+------------------------------------------------------------------+
+      //| THREE CAPTION BUTTONS WERE REMOVED ON REQUEST: K, ? and [].      |
+      //|                                                                  |
+      //| They are REMOVED, not merely undrawn. This panel repaints from   |
+      //| state and never clears the chart, so an object nobody draws any  |
+      //| more is an object that sits there for ever - and an upgrade from |
+      //| v124 would have left three dead buttons on the caption of every  |
+      //| chart that had already run it.                                    |
+      //|                                                                  |
+      //| What each cost, so it is on the record rather than in a chat:     |
+      //|   ?  the key card is still on H, so nothing was lost but the way  |
+      //|      in that needed no key.                                       |
+      //|   K  the command palette had no key and is now unreachable.       |
+      //|   [] the panel cannot be dragged - it never receives a mouse      |
+      //|      coordinate - so it can no longer be moved at all.            |
+      //+------------------------------------------------------------------+
+      m_w.Remove("palette");
+      m_w.Remove("keys");
+      m_w.Remove("move");
 
-      //--- A GUIDE NOBODY CAN FIND IS NOT A GUIDE. H opens the key list,
-      //--- but nobody knows that until they have read the key list, so
-      //--- there is a way in that needs no key at all.
-      m_w.Button("keys", x + W - 82, y + 3, 18, SSR_HEADER_H - 5, "?",
-                 m_keys.IsUp());
-      m_w.Button("move", x + W - 62, y + 3, 18, SSR_HEADER_H - 5, "[]");
       m_w.Button("collapse", x + W - 42, y + 3, 18, SSR_HEADER_H - 5,
                  m_collapsed ? "+" : "-");
       m_w.ButtonC("close", x + W - 22, y + 3, 18, SSR_HEADER_H - 5, "X",
@@ -1172,19 +1183,16 @@ private:
      {
       int h = SSR_BTN_H, gp = 3, cy = y;
 
-      m_w.Button("follow", x, cy, SSR_SIDE_W, h,
-                 (m_state.charts_detached > 0
-                  ? StringFormat(T(SSR_S_FOLLOW_N), m_state.charts_detached)
-                  : T(SSR_S_FOLLOW)),
-                 m_state.charts_detached > 0,
-                 m_state.charts_detached > 0);                  cy += h + gp;
+      //--- the same three are gone here, so the fallback layout and the
+      //--- rail layout offer the same set rather than disagreeing about
+      //--- what the product has
+      m_w.Remove("follow");
+      m_w.Remove("bookmark");
+      m_w.Remove("jump");
+
       m_w.Button("lines", x, cy, SSR_SIDE_W, h,
                  m_state.lines_armed ? T(SSR_S_LINES_ON) : T(SSR_S_LINES_OFF),
                  m_state.lines_armed, m_state.can_trade);       cy += h + gp;
-      m_w.Button("bookmark", x, cy, SSR_SIDE_W, h, T(SSR_S_BOOKMARK),
-                 false, m_state.connected);                     cy += h + gp;
-      m_w.Button("jump", x, cy, SSR_SIDE_W, h, T(SSR_S_JUMP),
-                 false, m_state.connected);                     cy += h + gp;
       m_w.Button("sessions", x, cy, SSR_SIDE_W, h, T(SSR_S_SESSIONS),
                  false, m_state.connected);                     cy += h + gp;
       m_w.Button("fidelity", x, cy, SSR_SIDE_W, h, T(SSR_S_FIDELITY),
@@ -1226,24 +1234,22 @@ private:
    //================================================================
    int               DrawActions(const int x, const int y, const int W)
      {
+      //--- Follow, Mark and Jump were removed on request. Their keys -
+      //--- F, B and J - still work; it is the buttons that are gone, and
+      //--- they are REMOVED rather than skipped for the same reason as
+      //--- the three in the caption.
+      m_w.Remove("follow");
+      m_w.Remove("bookmark");
+      m_w.Remove("jump");
+
       int gp = 3;
-      int bw = (W - 2 * SSR_PAD - 5 * gp) / 6;
+      int bw = (W - 2 * SSR_PAD - 2 * gp) / 3;
       int bx = x + SSR_PAD;
 
-      m_w.Button("follow", bx, y, bw, SSR_ACT_H,
-                 (m_state.charts_detached > 0
-                  ? StringFormat(T(SSR_S_ACT_FOLLOW_N), m_state.charts_detached)
-                  : T(SSR_S_ACT_FOLLOW)),
-                 m_state.charts_detached > 0,
-                 m_state.charts_detached > 0);                    bx += bw + gp;
       m_w.Button("lines", bx, y, bw, SSR_ACT_H,
                  m_state.lines_armed ? T(SSR_S_ACT_LINES_ON)
                                      : T(SSR_S_ACT_LINES_OFF),
                  m_state.lines_armed, m_state.can_trade);         bx += bw + gp;
-      m_w.Button("bookmark", bx, y, bw, SSR_ACT_H, T(SSR_S_ACT_BOOKMARK),
-                 false, m_state.connected);                       bx += bw + gp;
-      m_w.Button("jump", bx, y, bw, SSR_ACT_H, T(SSR_S_ACT_JUMP),
-                 false, m_state.connected);                       bx += bw + gp;
       m_w.Button("sessions", bx, y, bw, SSR_ACT_H, T(SSR_S_ACT_SESSIONS),
                  false, m_state.connected);                       bx += bw + gp;
       m_w.Button("fidelity", bx, y, bw, SSR_ACT_H, T(SSR_S_ACT_FIDELITY),
@@ -2036,7 +2042,7 @@ private:
    void              HideSheetArea(const bool hidden)
      {
       string ids[] = {"tab0","tab1","tab2","tab3","tabline",
-                      "follow","lines","bookmark","jump","sessions","fidelity"};
+                      "lines","sessions","fidelity"};
       for(int i = 0; i < ArraySize(ids); i++)
          m_w.Hide(ids[i], hidden);
       if(hidden)
@@ -2061,7 +2067,7 @@ private:
    void              HideCaption(const bool hidden)
      {
       string cap[] = {"bg","hdr","title","build","capinfo",
-                      "collapse","move","close","keys","palette",
+                      "collapse","close",
                       "chfid","chfid_bg","chblind","chblind_bg",
                       "chprop","chprop_bg"};
       for(int i = 0; i < ArraySize(cap); i++)
@@ -2074,7 +2080,7 @@ private:
                       "restart","back10","back","toggle","step","step10","reset",
                       "spdlbl","spdn","spdbox","spdval","spup","spdmean",
                       "tabline",
-                      "follow","lines","bookmark","jump","sessions","fidelity",
+                      "lines","sessions","fidelity",
                       "status","stbal","stflt","stopen","stspread","stfid",
                       "fill","fill_bg","fill_ac"};
       for(int i = 0; i < ArraySize(ids); i++)
@@ -2594,6 +2600,8 @@ public:
       //--- the panel has no mouse events on a chart it is not attached
       //--- to, so it cannot be dragged. It steps between the corners
       //--- instead, which is what dragging a fixed-size panel is for.
+      //--- NO OBJECT SENDS THIS ANY MORE. The [] button was removed on
+      //--- request; the handler stays so putting it back is one line.
       if(what == "move")
         {
          SnapToCorner();
@@ -2706,6 +2714,8 @@ public:
       else if(what == "back10")   c = SSR_CMD_STEP_BACK_10;
       else if(what == "reset")    c = SSR_CMD_RESET;
       else if(what == "restart")  c = SSR_CMD_RESTART;
+      //--- follow / bookmark / jump have no buttons any more. Their keys
+      //--- F, B and J still route here, so these are NOT dead.
       else if(what == "follow")   c = SSR_CMD_FOLLOW;
       else if(what == "bookmark") c = SSR_CMD_BOOKMARK;
       else if(what == "fidelity") c = SSR_CMD_FIDELITY_CYCLE;
@@ -2734,6 +2744,7 @@ public:
       //--- because it is a SURFACE, not a verb: routing it through the
       //--- host would be a command whose only effect is to draw a way
       //--- of choosing commands.
+      //--- idle for the same reason as "move": the K button was removed.
       if(what == "palette")
         {
          m_palette.Toggle(m_chart);
