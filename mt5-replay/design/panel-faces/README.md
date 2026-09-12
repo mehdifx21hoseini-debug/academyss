@@ -36,3 +36,29 @@ Two of the ten are palette-only, because the theme file already switches
 palettes (v121 put the light and dark palettes behind one `#define`).
 The rest need a drawing change as well, and 08 needs a layout rework.
 The cost is written under each design on the study page.
+
+---
+
+# Ten variations of design 08
+
+Design 08, the compact rail, was chosen. These ten change where the hand
+goes, not what the panel looks like: the palette, the content and the
+font are identical in all ten, and the size under each one is measured
+off the render.
+
+| # | name | what moved |
+|---|---|---|
+| 01 | Baseline | - |
+| 02 | Speed presets | speed: five chips replace minus/value/plus/track |
+| 03 | Speed on the rail | speed: vertical, on the rail. One row back |
+| 04 | Speed number-led | speed: large number between two wide bars |
+| 05 | Transport on the rail | the rail carries play/step; tabs become a strip |
+| 06 | Transport at the bottom | row order only |
+| 07 | Big play | full-width play, six keys in one row under it |
+| 08 | Deals first | BUY/SELL directly under the clock |
+| 09 | Dense sheet | no group frames; two-column grid. The shortest |
+| 10 | Strip, no rail | no rail, horizontal tab strip, 270 px wide |
+
+Range: 302x290 (09) to 303x352 (07), and 272 wide for 10.
+
+`build8.py` builds them, `shoot8.py` renders and measures them.

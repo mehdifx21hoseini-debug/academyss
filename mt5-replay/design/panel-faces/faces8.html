@@ -1,0 +1,509 @@
+<title>Compact Rail Variations</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700&family=IBM+Plex+Mono:wght@400;500&family=Vazirmatn:wght@400;500;700&display=swap">
+<style>
+:root{--paper:#EAEDEF;--card:#FFFFFF;--ink:#14181B;--ink2:#4A5157;
+ --ink3:#6E767D;--rule:#D2D8DD;--accent:#8A4A12;--accentink:#FFFFFF;
+ --zoom:1;--fa:"Vazirmatn","Noto Sans Arabic",system-ui,sans-serif;
+ --dis:"Archivo","Liberation Sans",sans-serif;
+ --mono:"IBM Plex Mono","Liberation Mono",monospace}
+:root:not([data-theme="light"]){@media (prefers-color-scheme:dark){
+ --paper:#0E1113;--card:#171B1E;--ink:#E7EBED;--ink2:#AAB3B9;--ink3:#838D94;
+ --rule:#2A3034;--accent:#E0863A;--accentink:#1B1E23}}
+:root[data-theme="dark"]{--paper:#0E1113;--card:#171B1E;--ink:#E7EBED;
+ --ink2:#AAB3B9;--ink3:#838D94;--rule:#2A3034;--accent:#E0863A;
+ --accentink:#1B1E23}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--fa);
+ font-size:15px;line-height:1.75}
+.wrap{max-width:1220px;margin:0 auto;padding-inline:20px;padding-block:0}
+header{padding-block:60px 32px;border-bottom:1px solid var(--rule)}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;
+ text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+h1{font-family:var(--dis);font-weight:700;font-size:clamp(30px,5.2vw,50px);
+ line-height:1.15;margin:0 0 16px;text-wrap:balance}
+.lede{margin:0;max-width:62ch;color:var(--ink2);font-size:16.5px}
+.lede b{color:var(--ink);font-weight:500}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));
+ gap:1px;background:var(--rule);border:1px solid var(--rule);margin-block:30px 0}
+.rules div{background:var(--card);padding:15px 17px}
+.rules dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;
+ text-transform:uppercase;color:var(--ink3);margin:0 0 5px}
+.rules dd{margin:0;font-size:14px;color:var(--ink2)}
+.rules dd b{color:var(--ink);font-weight:500}
+.bar{position:sticky;top:0;z-index:5;background:var(--paper);
+ border-bottom:1px solid var(--rule);padding-block:11px;display:flex;gap:12px;
+ align-items:center;flex-wrap:wrap}
+.bar span{font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+ text-transform:uppercase;color:var(--ink3)}
+.zoom{display:flex;border:1px solid var(--rule);background:var(--card)}
+.zoom button{font:500 13px/1 var(--mono);padding:8px 15px;border:0;
+ background:transparent;color:var(--ink2);cursor:pointer}
+.zoom button+button{border-inline-start:1px solid var(--rule)}
+.zoom button[aria-pressed="true"]{background:var(--accent);color:var(--accentink)}
+.zoom button:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
+ gap:1px;background:var(--rule);border:1px solid var(--rule);border-top:0;
+ margin-bottom:70px}
+.card{background:var(--card);padding:26px 24px 24px;display:flex;
+ flex-direction:column;gap:15px}
+.head{display:flex;align-items:baseline;gap:12px}
+.num{font-family:var(--mono);font-size:12px;color:var(--accent);
+ letter-spacing:.1em;flex:none}
+h2{font-family:var(--dis);font-weight:500;font-size:20px;margin:0;direction:ltr}
+.stage{overflow-x:auto;overflow-y:hidden;
+ width:calc(var(--pw) * var(--zoom) * 1px);max-width:100%;
+ height:calc(var(--ph) * var(--zoom) * 1px)}
+.scaler{transform:scale(var(--zoom));transform-origin:top left;
+ width:calc(var(--pw) * 1px)}
+.fa{margin:0;color:var(--ink2);font-size:14.5px}
+.en{margin:0;color:var(--ink3);font-size:12.5px;direction:ltr;text-align:left;
+ font-family:var(--mono);line-height:1.65}
+.spec{margin:auto 0 0;display:grid;grid-template-columns:1fr 1fr;gap:1px;
+ background:var(--rule);border:1px solid var(--rule)}
+.spec div{background:var(--card);padding:9px 11px}
+.spec dt{font-family:var(--mono);font-size:9.5px;letter-spacing:.11em;
+ text-transform:uppercase;color:var(--ink3);margin:0 0 3px}
+.spec dd{margin:0;font-size:12.5px;color:var(--ink);line-height:1.5}
+.spec dd.ltr{direction:ltr;text-align:right;font-family:var(--mono);font-size:11.5px}
+footer{border-top:1px solid var(--rule);padding-block:28px 66px;
+ color:var(--ink3);font-size:13.5px;max-width:70ch}
+@media (max-width:520px){header{padding-block:42px 26px}.card{padding:20px 16px}}
+
+.panel{position:relative;background:var(--face);border:1px solid var(--edge);
+ font-family:var(--font);font-size:var(--fs);color:var(--text);
+ line-height:1;user-select:none;font-variant-numeric:tabular-nums}
+.panel *{box-sizing:border-box}
+.panel b,.panel span,.panel i,.panel u,.panel s{font-style:normal;font-weight:400}
+
+/* caption -------------------------------------------------------- */
+.cap{height:22px;background:var(--cap);border-bottom:1px solid var(--edge);
+ display:flex;align-items:center;gap:6px;padding:0 4px 0 7px}
+.ttl{font-weight:700;font-size:calc(var(--fs) + 1px);letter-spacing:.01em}
+.chip{font-size:9px;color:var(--accent);border:1px solid var(--accent);
+ padding:1px 4px;line-height:1}
+.capb{margin-left:auto;display:flex;gap:2px}
+.capb b{width:18px;height:15px;background:var(--btn);
+ border:1px solid var(--btnedge);color:var(--text);font-size:10px;
+ display:flex;align-items:center;justify-content:center}
+.capb b.x{color:var(--sell)}
+
+/* clock + progress ----------------------------------------------- */
+.clockrow{height:32px;padding:5px 8px 0;position:relative}
+.clock{font-family:var(--num);font-size:17px;color:var(--text);letter-spacing:.01em}
+.pct{position:absolute;right:8px;top:8px;font-size:11px;color:var(--dim)}
+.prog{position:absolute;left:8px;right:8px;top:26px;height:6px;
+ background:var(--well);border:1px solid var(--edge)}
+.prog i{display:block;height:100%;background:var(--accent)}
+
+/* rows of keys ---------------------------------------------------- */
+.k{display:flex;align-items:center;justify-content:center;height:22px;
+ background:var(--btn);border:1px solid var(--btnedge);color:var(--text);
+ font-size:var(--fs)}
+.transport{height:27px;display:flex;gap:3px;padding:0 8px;align-items:center}
+.k.nav{width:30px}
+.k.play{flex:1;font-weight:700}
+.k.reset{width:54px;color:var(--dim)}
+
+.speedrow{height:21px;display:flex;gap:4px;padding:0 8px;align-items:center}
+.speedrow .lbl{font-size:9px;color:var(--dim);width:34px}
+.k.sm{width:18px;height:19px;font-size:11px}
+.well{background:var(--well);border:1px solid var(--edge)}
+.spd{width:46px;height:19px;display:flex;align-items:center;
+ justify-content:center;font-family:var(--num);font-size:11px}
+.track{flex:1;height:14px;display:flex;gap:1px;align-items:stretch}
+.track i{flex:1;background:var(--well);border:1px solid var(--edge)}
+.track i.on{background:var(--accent);border-color:var(--accent)}
+.mean{font-size:9px;color:var(--faint);width:62px;text-align:right}
+
+/* tabs ------------------------------------------------------------ */
+.tabs{height:21px;display:flex;gap:2px;padding:0 8px;align-items:flex-end;
+ border-bottom:1px solid var(--edge)}
+.tabs b{flex:1;height:19px;display:flex;align-items:center;
+ justify-content:center;background:var(--cap);border:1px solid var(--edge);
+ border-bottom:none;color:var(--dim);font-size:10px}
+.tabs b.on{background:var(--face);color:var(--text);font-weight:700}
+.tabs b.more{flex:0 0 24px}
+
+/* the sheet ------------------------------------------------------- */
+.sheetwrap{display:flex}
+.sheet{flex:1;padding:8px 8px 9px}
+.grp{position:relative;border:1px solid var(--edge);padding:8px 7px 4px;
+ margin-bottom:4px}
+.grp .lg{position:absolute;top:-6px;left:6px;background:var(--face);
+ padding:0 3px;font-size:9px;color:var(--dim)}
+.row{display:flex;align-items:center;height:15px;font-size:var(--fs)}
+.row .a{color:var(--dim);width:54px;flex:none}
+.row .b{flex:1;font-family:var(--num);color:var(--text)}
+.row .c{color:var(--faint);text-align:right;font-family:var(--num)}
+.row .b.pos{color:var(--buy)}
+.row .b.neg{color:var(--sell)}
+.setup{display:flex;align-items:center;gap:6px;margin-bottom:5px}
+.setup .lbl{font-size:9px;color:var(--dim);width:34px}
+.ed{flex:1;height:18px;display:flex;align-items:center;padding:0 5px;
+ font-size:11px;color:var(--text)}
+.takebtn{margin-top:5px}
+.k.take{height:21px;font-size:10px;color:var(--accent);
+ border-color:var(--accent)}
+.deals{display:flex;gap:5px;margin-top:5px}
+.k.buy,.k.sell{flex:1;height:24px;font-weight:700;color:var(--dealtext);
+ font-size:calc(var(--fs) + 1px);letter-spacing:.04em}
+.k.buy{background:var(--buy);border-color:var(--buy)}
+.k.sell{background:var(--sell);border-color:var(--sell)}
+.spread{margin-top:4px;font-size:9px;color:var(--faint)}
+
+/* status ---------------------------------------------------------- */
+.status{height:18px;background:var(--cap);border-top:1px solid var(--edge);
+ display:flex;align-items:center;gap:12px;padding:0 8px;font-size:10px}
+.status .run{color:var(--run);font-weight:700}
+.status .sdim{color:var(--dim)}
+.status .pos{color:var(--buy);margin-left:auto;font-family:var(--num)}
+
+/* ================= variant structure ============================= */
+/* 02 paper: rules, not boxes */
+.grp.rule{border:none;padding:0 0 6px;margin-bottom:8px;
+ border-top:1px solid var(--edge)}
+.grp.rule .lg{position:static;display:block;background:none;padding:2px 0 4px;
+ letter-spacing:.06em;text-transform:uppercase}
+.v2 .k{background:var(--face)}
+.v2 .k.buy,.v2 .k.sell{background:var(--face);color:var(--buy);
+ border:1px solid var(--buy)}
+.v2 .k.sell{color:var(--sell);border-color:var(--sell)}
+.v2 .tabs b.on{border-bottom:2px solid var(--accent);height:20px}
+
+/* 03 bloomberg + 09 green: no group frames at all */
+.grp.none{border:none;padding:0 0 4px;margin-bottom:6px}
+.grp.none .lg{position:static;display:block;background:none;padding:0 0 3px;
+ letter-spacing:.1em}
+.tabs.fkeys{border-bottom:none;gap:0}
+.tabs.fkeys b{background:none;border:none;justify-content:flex-start;
+ padding-left:6px;font-size:10px}
+.tabs.fkeys b.on{color:var(--accent)}
+.tabs.fkeys s{text-decoration:none;color:var(--faint);margin-right:5px}
+.v3 .prog i,.v3 .track i.on{background:var(--text);border-color:var(--text)}
+.v3 .clock{color:var(--accent)}
+.v3 .k{background:#000}
+
+/* 04 swiss: a rule and a label, one red */
+.grp.swiss{border:none;padding:0;margin-bottom:11px}
+.grp.swiss .lg{position:static;display:block;background:none;padding:0 0 4px;
+ font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text);
+ border-bottom:1px solid var(--text);margin-bottom:6px}
+.is-airy .row{height:19px}
+.is-airy .sheet{padding:12px 10px 12px}
+.v4 .k{background:#fff;border-color:#000}
+.v4 .k.play{background:#000;color:#fff;border-color:#000}
+.v4 .k.buy{background:#000;color:#fff;border-color:#000}
+.v4 .k.sell{background:#fff;color:var(--sell);border-color:var(--sell);
+ font-weight:700}
+.v4 .tabs{border-bottom:1px solid #000}
+.v4 .tabs b{background:#fff;border:none;color:var(--faint)}
+.v4 .tabs b.on{color:#000;border-bottom:3px solid var(--accent)}
+.v4 .cap{border-bottom:1px solid #000}
+.v4 .prog{border-color:#000}
+.v4 .prog i{background:var(--accent)}
+.v4 .track i.on{background:#000;border-color:#000}
+
+/* 05 blueprint: corner ticks */
+.grp.tick u{position:absolute;width:5px;height:5px;border:0 solid var(--accent)}
+.grp.tick u.c1{top:-1px;left:-1px;border-top-width:1px;border-left-width:1px}
+.grp.tick u.c2{top:-1px;right:-1px;border-top-width:1px;border-right-width:1px}
+.grp.tick u.c3{bottom:-1px;left:-1px;border-bottom-width:1px;border-left-width:1px}
+.grp.tick u.c4{bottom:-1px;right:-1px;border-bottom-width:1px;border-right-width:1px}
+
+/* 06 bevel: MT5's own raised / sunken border types */
+.is-bevel .k,.is-bevel .capb b{border-width:1px;
+ border-color:#6E6E71 #232325 #232325 #6E6E71}
+.is-bevel .well,.is-bevel .prog,.is-bevel .grp,.is-bevel .track i{
+ border-color:#232325 #6E6E71 #6E6E71 #232325}
+.is-bevel .tabs b.on{border-color:#6E6E71 #232325 var(--face) #6E6E71}
+
+/* 07 daylight: one step up */
+.is-big .k{height:26px}
+.is-big .k.buy,.is-big .k.sell{height:28px}
+.is-big .row{height:18px}
+.is-big .transport{height:31px}
+
+.is-big .cap{height:24px}
+
+/* 08 rail */
+.v8 .row .a{width:46px}
+.rail{width:36px;flex:none;border-right:1px solid var(--edge);
+ background:var(--cap);padding-top:8px;display:flex;flex-direction:column;
+ gap:3px;align-items:center}
+.rail b{width:30px;height:24px;display:flex;align-items:center;
+ justify-content:center;font-size:9px;letter-spacing:.06em;color:var(--dim);
+ border:1px solid transparent}
+.rail b.on{color:var(--text);background:var(--face);
+ border-color:var(--edge);border-right-color:var(--face)}
+.v8 .k.nav{width:24px}
+.v8 .k.reset{width:44px;font-size:10px}
+.v8 .mean{display:none}
+.v8 .row .a{width:46px}
+
+/* 09 green screen: brackets, no fills */
+.v9 .k{background:none;border:none;color:var(--text);height:20px}
+.v9 .k.play{color:var(--accent);font-weight:700}
+.v9 .k.buy,.v9 .k.sell{background:none;border:none;color:var(--text)}
+.v9 .well,.v9 .prog,.v9 .track i{background:none;border:1px solid var(--edge)}
+.v9 .prog i{background:var(--text)}
+.v9 .track i.on{background:var(--text)}
+.v9 .tabs.bracket{border-bottom:1px solid var(--edge);gap:0}
+.v9 .tabs.bracket b{background:none;border:none;color:var(--dim);
+ justify-content:flex-start;padding-left:8px}
+.v9 .tabs.bracket b.on{color:var(--text)}
+.v9 .capb b{background:none;border:1px solid var(--edge)}
+.v9 .k.nav{width:26px}
+.v9 .k.play{font-size:10px}
+.v9 .k.reset{width:62px;font-size:10px}
+.v9 .k.take{border:none;color:var(--accent)}
+.v9 .k.buy,.v9 .k.sell{letter-spacing:0}
+.v9 .status{background:none;border-top:1px solid var(--edge)}
+
+/* 10 signal stripe */
+.statestripe{position:absolute;left:0;top:0;bottom:0;width:4px;
+ background:var(--run)}
+.is-stripe .cap,.is-stripe .clockrow,.is-stripe .transport,
+.is-stripe .speedrow,.is-stripe .tabs,.is-stripe .sheetwrap,
+.is-stripe .status{margin-left:4px}
+.v10 .grp{border-left:3px solid var(--accent)}
+.v10 .tabs b.on{border-top:2px solid var(--accent)}
+
+/* the compact rail's own adjustments, shared by all ten */
+.panel .k.nav{width:24px}
+.panel .k.reset{width:44px;font-size:10px}
+.panel .mean{display:none}
+.panel .row .a{width:46px}
+.rail{width:36px;flex:none;border-right:1px solid var(--edge);
+ background:var(--cap);padding-top:8px;display:flex;flex-direction:column;
+ gap:3px;align-items:center}
+.rail b{width:30px;height:24px;display:flex;align-items:center;
+ justify-content:center;font-size:9px;letter-spacing:.06em;color:var(--dim);
+ border:1px solid transparent}
+.rail b.on{color:var(--text);background:var(--face);border-color:var(--edge);
+ border-right-color:var(--face)}
+
+/* 02 - speed presets */
+.speedrow.chips{gap:3px}
+.speedrow.chips .lbl{width:34px}
+.k.chip{flex:1;height:19px;font-size:10px;padding:0}
+.k.chip.on{background:var(--accent);border-color:var(--accent);
+ color:#1B1E23;font-weight:700}
+
+/* 03 - speed on the rail */
+.vtrack{margin-top:8px;width:20px;flex:1;display:flex;flex-direction:column;
+ gap:1px;border:1px solid var(--edge);background:var(--well);padding:1px}
+.vtrack i{flex:1;background:transparent}
+.vtrack i.on{background:var(--accent)}
+.vspd{font-size:10px;color:var(--text);padding:4px 0 7px;
+ font-variant-numeric:tabular-nums}
+
+/* 04 - speed number-led */
+.speedbig{display:flex;gap:5px;padding:2px 8px 0;align-items:center}
+.k.bar{flex:1;height:22px;font-size:13px}
+.spdnum{width:74px;text-align:center;font-size:17px;color:var(--text);
+ font-variant-numeric:tabular-nums}
+.speedtrack{display:flex;gap:6px;align-items:center;padding:4px 8px 3px}
+.speedtrack .track{flex:1}
+.speedtrack .mean{display:block;font-size:9px;color:var(--faint);width:58px;
+ text-align:right}
+
+/* 05 - transport on the rail */
+.rail.trail{width:42px;gap:4px;padding-top:9px}
+.rail.trail .k{width:34px;height:24px;font-size:11px}
+.rail.trail .k.play{height:32px;font-weight:700;color:var(--accent);
+ border-color:var(--accent)}
+.rail.trail .k.reset{width:34px;font-size:10px;color:var(--dim)}
+
+/* strip tabs, used by 05 and 10 */
+.striptabs{display:flex;gap:2px;padding:0 8px 5px;border-bottom:1px solid var(--edge)}
+.striptabs b{flex:1;height:19px;display:flex;align-items:center;
+ justify-content:center;background:var(--cap);border:1px solid var(--edge);
+ color:var(--dim);font-size:9px}
+.striptabs b.on{background:var(--accent);border-color:var(--accent);
+ color:#1B1E23;font-weight:700}
+
+/* 07 - big play */
+.bigplay{padding:2px 8px 0}
+.k.play.wide{width:100%;height:28px;font-size:13px;font-weight:700;
+ color:var(--accent);border-color:var(--accent)}
+.steprow{display:flex;gap:3px;padding:4px 8px 2px}
+.steprow .k{flex:1;height:21px}
+
+/* 08 - deals first */
+.topdeals{display:flex;gap:5px;padding:3px 8px 2px}
+.topdeals .k{flex:1;height:26px;font-weight:700;font-size:12px;
+ letter-spacing:.04em;color:var(--dealtext)}
+.topdeals .k.buy{background:var(--buy);border-color:var(--buy)}
+.topdeals .k.sell{background:var(--sell);border-color:var(--sell)}
+
+/* 09 - dense sheet */
+.dense{display:grid;grid-template-columns:52px 1fr;row-gap:3px;
+ align-items:baseline;padding-bottom:3px}
+.dense .dl{font-size:9px;color:var(--dim);letter-spacing:.05em;
+ text-transform:uppercase}
+.dense .dv{font-size:11px;color:var(--text);display:flex;
+ justify-content:space-between;font-variant-numeric:tabular-nums}
+.dense .dv s{text-decoration:none;color:var(--faint);font-size:10px}
+.dense .dv.pos{color:var(--buy)}
+.dense .dv.neg{color:var(--sell)}
+.a09 .takebtn{margin-top:4px}
+
+/* 06 - transport at the bottom needs a rule above it */
+.a06 .transport{border-top:1px solid var(--edge);padding-top:4px;height:30px}
+
+/* 10 - no rail */
+.a10 .k.nav{width:21px}
+.a10 .k.reset{width:40px}
+.a10 .row .a{width:44px}
+
+</style>
+<div class="wrap">
+<header>
+ <p class="eyebrow">SS Replay &middot; Design 08 &middot; Variations</p>
+ <h1>&#1583;&#1607; &#1581;&#1575;&#1604;&#1578; &#1575;&#1586; &#1585;&#1740;&#1604; &#1601;&#1588;&#1585;&#1583;&#1607;</h1>
+ <p class="lede">&#1607;&#1605;&#1575;&#1606; &#1591;&#1585;&#1581; &#1670;&#1607;&#1575;&#1585;&#1548; &#1607;&#1605;&#1575;&#1606; &#1662;&#1575;&#1604;&#1578;&#1548; &#1607;&#1605;&#1575;&#1606; &#1605;&#1581;&#1578;&#1608;&#1575;. <b>&#1601;&#1602;&#1591; &#1580;&#1575;&#1740; &#1670;&#1740;&#1586;&#1607;&#1575; &#1593;&#1608;&#1590; &#1605;&#1740;&#8204;&#1588;&#1608;&#1583;</b> &#8212; &#1583;&#1705;&#1605;&#1607;&#1607;&#1575;&#1740; &#1581;&#1585;&#1705;&#1578;&#1548; &#1588;&#1705;&#1604; &#1705;&#1606;&#1578;&#1585;&#1604; &#1587;&#1585;&#1593;&#1578;&#1548; &#1580;&#1575;&#1740; &#1582;&#1585;&#1740;&#1583; &#1608; &#1601;&#1585;&#1608;&#1588;&#1548; &#1608; &#1582;&#1608;&#1583; &#1585;&#1740;&#1604;. &#1586;&#1740;&#1585; &#1607;&#1585; &#1705;&#1583;&#1575;&#1605;&#1548; &#1670;&#1740;&#1586;&#1740; &#1705;&#1607; &#1580;&#1575;&#1576;&#1607;&#8204;&#1580;&#1575; &#1588;&#1583;&#1607; &#1608; &#1575;&#1606;&#1583;&#1575;&#1586;&#1607;&#1654; &#1608;&#1575;&#1602;&#1593;&#1740; &#1662;&#1606;&#1604; &#1606;&#1608;&#1588;&#1578;&#1607; &#1575;&#1587;&#1578;.</p>
+ <dl class="rules">
+  <div><dt>Constant</dt><dd><b>&#1662;&#1575;&#1604;&#1578;&#1548; &#1605;&#1581;&#1578;&#1608;&#1575;&#1548; &#1601;&#1608;&#1606;&#1578;</b><br>&#1578;&#1575; &#1605;&#1602;&#1575;&#1740;&#1587;&#1607; &#1601;&#1602;&#1591; &#1583;&#1585;&#1576;&#1575;&#1585;&#1647; &#1670;&#1740;&#1583;&#1605;&#1575;&#1606; &#1576;&#1575;&#1588;&#1583;</dd></div>
+  <div><dt>What moves</dt><dd><b>&#1587;&#1585;&#1593;&#1578; (&#1779;) &#1548; &#1581;&#1585;&#1705;&#1578; (&#1779;) &#1548; &#1582;&#1585;&#1740;&#1583;/&#1601;&#1585;&#1608;&#1588; &#1548; &#1576;&#1585;&#1711;&#1607; &#1548; &#1585;&#1740;&#1604;</b></dd></div>
+  <div><dt>Size</dt><dd><b>&#1575;&#1586; &#1779;&#1776;&#1779;&#215;&#1778;&#1785;&#1776; &#1578;&#1575; &#1779;&#1776;&#1779;&#215;&#1779;&#1781;&#1778;</b><br>&#1705;&#1608;&#1670;&#1705;&#8204;&#1578;&#1585;&#1740;&#1606;&#8204;&#1588;&#1575;&#1606; &#1588;&#1605;&#1575;&#1585;&#1607;&#1654; &#1785; &#1575;&#1587;&#1578;</dd></div>
+  <div><dt>Drawn with</dt><dd><b>&#1607;&#1605;&#1575;&#1606; &#1670;&#1607;&#1575;&#1585; &#1670;&#1740;&#1586;</b><br>&#1605;&#1587;&#1578;&#1591;&#1740;&#1604;&#1548; &#1581;&#1575;&#1588;&#1740;&#1607;&#1654; &#1740;&#1705;&#8204;&#1662;&#1740;&#1705;&#1587;&#1604;&#1740;&#1548; &#1605;&#1578;&#1606;&#1548; &#1583;&#1705;&#1605;&#1607;</dd></div>
+ </dl>
+</header>
+<div class="bar"><span>Zoom</span><div class="zoom" role="group" aria-label="zoom">
+ <button data-z="1" aria-pressed="true">1&times;</button>
+ <button data-z="1.5" aria-pressed="false">1.5&times;</button>
+ <button data-z="2" aria-pressed="false">2&times;</button></div></div>
+<main class="grid">
+<article class="card" style="--pw:302;--ph:322">
+ <div class="head"><span class="num">01</span><h2>Baseline</h2></div>
+ <div class="stage"><div class="scaler"><div class="panel a01" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--num:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:300px" dir="ltr"><div class="cap"><span class="ttl">SS Replay</span><span class="chip">BLIND</span><span class="capb"><b>K</b><b>?</b><b>[]</b><b>_</b><b class="x">X</b></span></div><div class="clockrow"><span class="clock">2024.03.14&nbsp;&nbsp;09:42:15</span><span class="pct">37%</span><div class="prog"><i style="width:37%"></i></div></div><div class="transport"><b class="k nav">|&lt;</b><b class="k nav">&lt;&lt;</b><b class="k nav">&lt;</b><b class="k play">Pause</b><b class="k nav">&gt;</b><b class="k nav">&gt;&gt;</b><b class="k reset">Reset</b></div><div class="speedrow"><span class="lbl">Speed</span><b class="k sm">-</b><span class="well spd">5x</span><b class="k sm">+</b><div class="track"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><span class="mean">1h in 12m</span></div><div class="sheetwrap"><div class="rail"><b class="on">TRD</b><b class="">POS</b><b class="">STA</b><b class="">SES</b></div><div class="sheet"><div class="grp"><span class="lg">Risk</span><div class="row"><span class="a">1.0%</span><span class="b ">= $487</span><span class="c">0.42 lot</span></div></div><div class="setup"><span class="lbl">Setup</span><span class="well ed">breakout retest</span></div><div class="grp"><span class="lg">Stop &amp; target</span><div class="row"><span class="a">Stop</span><span class="b neg">38 412.0</span><span class="c">-52 pts</span></div><div class="row"><span class="a">Target</span><span class="b pos">38 604.0</span><span class="c">+140 pts</span></div><div class="row"><span class="a">R:R</span><span class="b ">1 : 2.7</span><span class="c"></span></div><div class="takebtn"><b class="k take">Take the trade  (Tab)</b></div></div><div class="deals"><b class="k buy">BUY</b><b class="k sell">SELL</b></div><div class="spread">spread 1.4</div></div></div><div class="status"><span class="run">Running</span><span class="sdim">2 positions</span><span class="pos">P&amp;L +$214</span></div></div></div></div>
+ <p class="fa">همان ۰۸ که دیدید. مبنای مقایسهٔ نه‌تای دیگر.</p>
+ <p class="en">Design 08 exactly as you saw it. The reference the other nine are changes against.</p>
+ <dl class="spec">
+  <div><dt>Size</dt><dd class="ltr">302 &times; 322</dd></div>
+  <div><dt>What moved</dt><dd>مبنا</dd></div>
+  <div><dt>vs baseline</dt><dd class="ltr">baseline</dd></div>
+  <div><dt>Build cost</dt><dd>-</dd></div>
+ </dl>
+</article>
+<article class="card" style="--pw:302;--ph:322">
+ <div class="head"><span class="num">02</span><h2>Speed presets</h2></div>
+ <div class="stage"><div class="scaler"><div class="panel a02" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--num:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:300px" dir="ltr"><div class="cap"><span class="ttl">SS Replay</span><span class="chip">BLIND</span><span class="capb"><b>K</b><b>?</b><b>[]</b><b>_</b><b class="x">X</b></span></div><div class="clockrow"><span class="clock">2024.03.14&nbsp;&nbsp;09:42:15</span><span class="pct">37%</span><div class="prog"><i style="width:37%"></i></div></div><div class="transport"><b class="k nav">|&lt;</b><b class="k nav">&lt;&lt;</b><b class="k nav">&lt;</b><b class="k play">Pause</b><b class="k nav">&gt;</b><b class="k nav">&gt;&gt;</b><b class="k reset">Reset</b></div><div class="speedrow chips"><span class="lbl">Speed</span><b class="k chip">1x</b><b class="k chip">2x</b><b class="k chip on">5x</b><b class="k chip">10x</b><b class="k chip">50x</b></div><div class="sheetwrap"><div class="rail"><b class="on">TRD</b><b class="">POS</b><b class="">STA</b><b class="">SES</b></div><div class="sheet"><div class="grp"><span class="lg">Risk</span><div class="row"><span class="a">1.0%</span><span class="b ">= $487</span><span class="c">0.42 lot</span></div></div><div class="setup"><span class="lbl">Setup</span><span class="well ed">breakout retest</span></div><div class="grp"><span class="lg">Stop &amp; target</span><div class="row"><span class="a">Stop</span><span class="b neg">38 412.0</span><span class="c">-52 pts</span></div><div class="row"><span class="a">Target</span><span class="b pos">38 604.0</span><span class="c">+140 pts</span></div><div class="row"><span class="a">R:R</span><span class="b ">1 : 2.7</span><span class="c"></span></div><div class="takebtn"><b class="k take">Take the trade  (Tab)</b></div></div><div class="deals"><b class="k buy">BUY</b><b class="k sell">SELL</b></div><div class="spread">spread 1.4</div></div></div><div class="status"><span class="run">Running</span><span class="sdim">2 positions</span><span class="pos">P&amp;L +$214</span></div></div></div></div>
+ <p class="fa">منفی/عدد/مثبت/نوار جای خود را به پنج تراشه می‌دهد: ۱x تا ۵۰x. یک کلیک به‌جای چهار تا، و کل بازه پیداست.</p>
+ <p class="en">The minus / value / plus / track becomes five chips: 1x 2x 5x 10x 50x. One press instead of four, and the whole range is visible without dragging anything.</p>
+ <dl class="spec">
+  <div><dt>Size</dt><dd class="ltr">302 &times; 322</dd></div>
+  <div><dt>What moved</dt><dd>سرعت</dd></div>
+  <div><dt>vs baseline</dt><dd class="ltr">+0 px high, +0 wide</dd></div>
+  <div><dt>Build cost</dt><dd>پالت ثابت؛ یک ردیف بازنویسی می‌شود</dd></div>
+ </dl>
+</article>
+<article class="card" style="--pw:302;--ph:301">
+ <div class="head"><span class="num">03</span><h2>Speed on the rail</h2></div>
+ <div class="stage"><div class="scaler"><div class="panel a03" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--num:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:300px" dir="ltr"><div class="cap"><span class="ttl">SS Replay</span><span class="chip">BLIND</span><span class="capb"><b>K</b><b>?</b><b>[]</b><b>_</b><b class="x">X</b></span></div><div class="clockrow"><span class="clock">2024.03.14&nbsp;&nbsp;09:42:15</span><span class="pct">37%</span><div class="prog"><i style="width:37%"></i></div></div><div class="transport"><b class="k nav">|&lt;</b><b class="k nav">&lt;&lt;</b><b class="k nav">&lt;</b><b class="k play">Pause</b><b class="k nav">&gt;</b><b class="k nav">&gt;&gt;</b><b class="k reset">Reset</b></div><div class="sheetwrap"><div class="rail"><b class="on">TRD</b><b class="">POS</b><b class="">STA</b><b class="">SES</b><div class="vtrack"><i class=""></i><i class=""></i><i class=""></i><i class=""></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i></div><span class="vspd">5x</span></div><div class="sheet"><div class="grp"><span class="lg">Risk</span><div class="row"><span class="a">1.0%</span><span class="b ">= $487</span><span class="c">0.42 lot</span></div></div><div class="setup"><span class="lbl">Setup</span><span class="well ed">breakout retest</span></div><div class="grp"><span class="lg">Stop &amp; target</span><div class="row"><span class="a">Stop</span><span class="b neg">38 412.0</span><span class="c">-52 pts</span></div><div class="row"><span class="a">Target</span><span class="b pos">38 604.0</span><span class="c">+140 pts</span></div><div class="row"><span class="a">R:R</span><span class="b ">1 : 2.7</span><span class="c"></span></div><div class="takebtn"><b class="k take">Take the trade  (Tab)</b></div></div><div class="deals"><b class="k buy">BUY</b><b class="k sell">SELL</b></div><div class="spread">spread 1.4</div></div></div><div class="status"><span class="run">Running</span><span class="sdim">2 positions</span><span class="pos">P&amp;L +$214</span></div></div></div></div>
+ <p class="fa">نوار سرعت عمودی می‌شود و زیر تب‌ها روی ریل می‌رود. یک ردیف کامل به برگه برمی‌گردد.</p>
+ <p class="en">The speed track turns vertical and moves onto the rail under the tabs. A whole row comes back to the sheet.</p>
+ <dl class="spec">
+  <div><dt>Size</dt><dd class="ltr">302 &times; 301</dd></div>
+  <div><dt>What moved</dt><dd>سرعت</dd></div>
+  <div><dt>vs baseline</dt><dd class="ltr">-21 px high, +0 wide</dd></div>
+  <div><dt>Build cost</dt><dd>نوار عمودی روی ریل؛ یک ردیف حذف</dd></div>
+ </dl>
+</article>
+<article class="card" style="--pw:302;--ph:346">
+ <div class="head"><span class="num">04</span><h2>Speed number-led</h2></div>
+ <div class="stage"><div class="scaler"><div class="panel a04" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--num:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:300px" dir="ltr"><div class="cap"><span class="ttl">SS Replay</span><span class="chip">BLIND</span><span class="capb"><b>K</b><b>?</b><b>[]</b><b>_</b><b class="x">X</b></span></div><div class="clockrow"><span class="clock">2024.03.14&nbsp;&nbsp;09:42:15</span><span class="pct">37%</span><div class="prog"><i style="width:37%"></i></div></div><div class="transport"><b class="k nav">|&lt;</b><b class="k nav">&lt;&lt;</b><b class="k nav">&lt;</b><b class="k play">Pause</b><b class="k nav">&gt;</b><b class="k nav">&gt;&gt;</b><b class="k reset">Reset</b></div><div class="speedbig"><b class="k bar">-</b><span class="spdnum">5x</span><b class="k bar">+</b></div><div class="speedtrack"><div class="track"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><span class="mean">1h in 12m</span></div><div class="sheetwrap"><div class="rail"><b class="on">TRD</b><b class="">POS</b><b class="">STA</b><b class="">SES</b></div><div class="sheet"><div class="grp"><span class="lg">Risk</span><div class="row"><span class="a">1.0%</span><span class="b ">= $487</span><span class="c">0.42 lot</span></div></div><div class="setup"><span class="lbl">Setup</span><span class="well ed">breakout retest</span></div><div class="grp"><span class="lg">Stop &amp; target</span><div class="row"><span class="a">Stop</span><span class="b neg">38 412.0</span><span class="c">-52 pts</span></div><div class="row"><span class="a">Target</span><span class="b pos">38 604.0</span><span class="c">+140 pts</span></div><div class="row"><span class="a">R:R</span><span class="b ">1 : 2.7</span><span class="c"></span></div><div class="takebtn"><b class="k take">Take the trade  (Tab)</b></div></div><div class="deals"><b class="k buy">BUY</b><b class="k sell">SELL</b></div><div class="spread">spread 1.4</div></div></div><div class="status"><span class="run">Running</span><span class="sdim">2 positions</span><span class="pos">P&amp;L +$214</span></div></div></div></div>
+ <p class="fa">سرعت مثل ساعت خوانده می‌شود: عددی بزرگ بین دو نوار پهن، و خط نوار و معنی‌اش در سطر خودشان.</p>
+ <p class="en">Speed reads like the clock does: a large number between two wide bars, with the track and its meaning on their own line.</p>
+ <dl class="spec">
+  <div><dt>Size</dt><dd class="ltr">302 &times; 346</dd></div>
+  <div><dt>What moved</dt><dd>سرعت</dd></div>
+  <div><dt>vs baseline</dt><dd class="ltr">+24 px high, +0 wide</dd></div>
+  <div><dt>Build cost</dt><dd>دو ردیف به‌جای یکی</dd></div>
+ </dl>
+</article>
+<article class="card" style="--pw:302;--ph:320">
+ <div class="head"><span class="num">05</span><h2>Transport on the rail</h2></div>
+ <div class="stage"><div class="scaler"><div class="panel a05" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--num:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:300px" dir="ltr"><div class="cap"><span class="ttl">SS Replay</span><span class="chip">BLIND</span><span class="capb"><b>K</b><b>?</b><b>[]</b><b>_</b><b class="x">X</b></span></div><div class="clockrow"><span class="clock">2024.03.14&nbsp;&nbsp;09:42:15</span><span class="pct">37%</span><div class="prog"><i style="width:37%"></i></div></div><div class="striptabs"><b class="on">Trade</b><b class="">Positions 2</b><b class="">Stats</b><b class="">Session</b></div><div class="speedrow"><span class="lbl">Speed</span><b class="k sm">-</b><span class="well spd">5x</span><b class="k sm">+</b><div class="track"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><span class="mean">1h in 12m</span></div><div class="sheetwrap"><div class="rail trail"><b class="k nav">|&lt;</b><b class="k nav">&lt;</b><b class="k play">||</b><b class="k nav">&gt;</b><b class="k nav">&gt;&gt;</b><b class="k reset">R</b></div><div class="sheet"><div class="grp"><span class="lg">Risk</span><div class="row"><span class="a">1.0%</span><span class="b ">= $487</span><span class="c">0.42 lot</span></div></div><div class="setup"><span class="lbl">Setup</span><span class="well ed">breakout retest</span></div><div class="grp"><span class="lg">Stop &amp; target</span><div class="row"><span class="a">Stop</span><span class="b neg">38 412.0</span><span class="c">-52 pts</span></div><div class="row"><span class="a">Target</span><span class="b pos">38 604.0</span><span class="c">+140 pts</span></div><div class="row"><span class="a">R:R</span><span class="b ">1 : 2.7</span><span class="c"></span></div><div class="takebtn"><b class="k take">Take the trade  (Tab)</b></div></div><div class="deals"><b class="k buy">BUY</b><b class="k sell">SELL</b></div><div class="spread">spread 1.4</div></div></div><div class="status"><span class="run">Running</span><span class="sdim">2 positions</span><span class="pos">P&amp;L +$214</span></div></div></div></div>
+ <p class="fa">ریل به‌جای تب‌ها، دست را حمل می‌کند: پخش، قدم، ریست — همان‌جا که انگشت می‌نشیند. تب‌ها نواری می‌شوند.</p>
+ <p class="en">The rail carries the hand instead of the tabs: play, step, reset - stacked where the thumb rests. Tabs become a strip.</p>
+ <dl class="spec">
+  <div><dt>Size</dt><dd class="ltr">302 &times; 320</dd></div>
+  <div><dt>What moved</dt><dd>دکمه‌های حرکت</dd></div>
+  <div><dt>vs baseline</dt><dd class="ltr">-2 px high, +0 wide</dd></div>
+  <div><dt>Build cost</dt><dd>ریل و ردیف تب جابه‌جا می‌شوند</dd></div>
+ </dl>
+</article>
+<article class="card" style="--pw:302;--ph:325">
+ <div class="head"><span class="num">06</span><h2>Transport at the bottom</h2></div>
+ <div class="stage"><div class="scaler"><div class="panel a06" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--num:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:300px" dir="ltr"><div class="cap"><span class="ttl">SS Replay</span><span class="chip">BLIND</span><span class="capb"><b>K</b><b>?</b><b>[]</b><b>_</b><b class="x">X</b></span></div><div class="clockrow"><span class="clock">2024.03.14&nbsp;&nbsp;09:42:15</span><span class="pct">37%</span><div class="prog"><i style="width:37%"></i></div></div><div class="sheetwrap"><div class="rail"><b class="on">TRD</b><b class="">POS</b><b class="">STA</b><b class="">SES</b></div><div class="sheet"><div class="grp"><span class="lg">Risk</span><div class="row"><span class="a">1.0%</span><span class="b ">= $487</span><span class="c">0.42 lot</span></div></div><div class="setup"><span class="lbl">Setup</span><span class="well ed">breakout retest</span></div><div class="grp"><span class="lg">Stop &amp; target</span><div class="row"><span class="a">Stop</span><span class="b neg">38 412.0</span><span class="c">-52 pts</span></div><div class="row"><span class="a">Target</span><span class="b pos">38 604.0</span><span class="c">+140 pts</span></div><div class="row"><span class="a">R:R</span><span class="b ">1 : 2.7</span><span class="c"></span></div><div class="takebtn"><b class="k take">Take the trade  (Tab)</b></div></div><div class="deals"><b class="k buy">BUY</b><b class="k sell">SELL</b></div><div class="spread">spread 1.4</div></div></div><div class="transport"><b class="k nav">|&lt;</b><b class="k nav">&lt;&lt;</b><b class="k nav">&lt;</b><b class="k play">Pause</b><b class="k nav">&gt;</b><b class="k nav">&gt;&gt;</b><b class="k reset">Reset</b></div><div class="speedrow"><span class="lbl">Speed</span><b class="k sm">-</b><span class="well spd">5x</span><b class="k sm">+</b><div class="track"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><span class="mean">1h in 12m</span></div><div class="status"><span class="run">Running</span><span class="sdim">2 positions</span><span class="pos">P&amp;L +$214</span></div></div></div></div>
+ <p class="fa">اطلاعات بالا، هرچه فشار می‌دهید پایین — کنار نوار وضعیتی که جوابش را می‌دهد.</p>
+ <p class="en">The chart information sits at the top and everything you press sits at the bottom, next to the status line that answers it.</p>
+ <dl class="spec">
+  <div><dt>Size</dt><dd class="ltr">302 &times; 325</dd></div>
+  <div><dt>What moved</dt><dd>دکمه‌های حرکت</dd></div>
+  <div><dt>vs baseline</dt><dd class="ltr">+3 px high, +0 wide</dd></div>
+  <div><dt>Build cost</dt><dd>فقط ترتیب ردیف‌ها</dd></div>
+ </dl>
+</article>
+<article class="card" style="--pw:302;--ph:352">
+ <div class="head"><span class="num">07</span><h2>Big play</h2></div>
+ <div class="stage"><div class="scaler"><div class="panel a07" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--num:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:300px" dir="ltr"><div class="cap"><span class="ttl">SS Replay</span><span class="chip">BLIND</span><span class="capb"><b>K</b><b>?</b><b>[]</b><b>_</b><b class="x">X</b></span></div><div class="clockrow"><span class="clock">2024.03.14&nbsp;&nbsp;09:42:15</span><span class="pct">37%</span><div class="prog"><i style="width:37%"></i></div></div><div class="bigplay"><b class="k play wide">Pause</b></div><div class="steprow"><b class="k nav">|&lt;</b><b class="k nav">&lt;&lt;</b><b class="k nav">&lt;</b><b class="k nav">&gt;</b><b class="k nav">&gt;&gt;</b><b class="k reset">Reset</b></div><div class="speedrow"><span class="lbl">Speed</span><b class="k sm">-</b><span class="well spd">5x</span><b class="k sm">+</b><div class="track"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><span class="mean">1h in 12m</span></div><div class="sheetwrap"><div class="rail"><b class="on">TRD</b><b class="">POS</b><b class="">STA</b><b class="">SES</b></div><div class="sheet"><div class="grp"><span class="lg">Risk</span><div class="row"><span class="a">1.0%</span><span class="b ">= $487</span><span class="c">0.42 lot</span></div></div><div class="setup"><span class="lbl">Setup</span><span class="well ed">breakout retest</span></div><div class="grp"><span class="lg">Stop &amp; target</span><div class="row"><span class="a">Stop</span><span class="b neg">38 412.0</span><span class="c">-52 pts</span></div><div class="row"><span class="a">Target</span><span class="b pos">38 604.0</span><span class="c">+140 pts</span></div><div class="row"><span class="a">R:R</span><span class="b ">1 : 2.7</span><span class="c"></span></div><div class="takebtn"><b class="k take">Take the trade  (Tab)</b></div></div><div class="deals"><b class="k buy">BUY</b><b class="k sell">SELL</b></div><div class="spread">spread 1.4</div></div></div><div class="status"><span class="run">Running</span><span class="sdim">2 positions</span><span class="pos">P&amp;L +$214</span></div></div></div></div>
+ <p class="fa">پخش/توقف کل عرض و ۲۸ پیکسل ارتفاع می‌گیرد. شش کلید قدم و ریست زیرش در یک ردیف.</p>
+ <p class="en">Play / pause gets the full width and 28 pixels of height. The six step and reset keys share one row under it.</p>
+ <dl class="spec">
+  <div><dt>Size</dt><dd class="ltr">302 &times; 352</dd></div>
+  <div><dt>What moved</dt><dd>دکمه‌های حرکت</dd></div>
+  <div><dt>vs baseline</dt><dd class="ltr">+30 px high, +0 wide</dd></div>
+  <div><dt>Build cost</dt><dd>یک دکمهٔ تمام‌عرض + یک ردیف</dd></div>
+ </dl>
+</article>
+<article class="card" style="--pw:302;--ph:324">
+ <div class="head"><span class="num">08</span><h2>Deals first</h2></div>
+ <div class="stage"><div class="scaler"><div class="panel a08" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--num:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:300px" dir="ltr"><div class="cap"><span class="ttl">SS Replay</span><span class="chip">BLIND</span><span class="capb"><b>K</b><b>?</b><b>[]</b><b>_</b><b class="x">X</b></span></div><div class="clockrow"><span class="clock">2024.03.14&nbsp;&nbsp;09:42:15</span><span class="pct">37%</span><div class="prog"><i style="width:37%"></i></div></div><div class="topdeals"><b class="k buy">BUY</b><b class="k sell">SELL</b></div><div class="transport"><b class="k nav">|&lt;</b><b class="k nav">&lt;&lt;</b><b class="k nav">&lt;</b><b class="k play">Pause</b><b class="k nav">&gt;</b><b class="k nav">&gt;&gt;</b><b class="k reset">Reset</b></div><div class="speedrow"><span class="lbl">Speed</span><b class="k sm">-</b><span class="well spd">5x</span><b class="k sm">+</b><div class="track"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><span class="mean">1h in 12m</span></div><div class="sheetwrap"><div class="rail"><b class="on">TRD</b><b class="">POS</b><b class="">STA</b><b class="">SES</b></div><div class="sheet"><div class="grp"><span class="lg">Risk</span><div class="row"><span class="a">1.0%</span><span class="b ">= $487</span><span class="c">0.42 lot</span></div></div><div class="setup"><span class="lbl">Setup</span><span class="well ed">breakout retest</span></div><div class="grp"><span class="lg">Stop &amp; target</span><div class="row"><span class="a">Stop</span><span class="b neg">38 412.0</span><span class="c">-52 pts</span></div><div class="row"><span class="a">Target</span><span class="b pos">38 604.0</span><span class="c">+140 pts</span></div><div class="row"><span class="a">R:R</span><span class="b ">1 : 2.7</span><span class="c"></span></div><div class="takebtn"><b class="k take">Take the trade  (Tab)</b></div></div><div class="spread">spread 1.4</div></div></div><div class="status"><span class="run">Running</span><span class="sdim">2 positions</span><span class="pos">P&amp;L +$214</span></div></div></div></div>
+ <p class="fa">خرید و فروش می‌آیند زیر ساعت — دو کلیدی که سریع‌ترین فشار را می‌خورند، نزدیک‌ترین به قیمت.</p>
+ <p class="en">BUY and SELL move directly under the clock - the two keys pressed fastest end up nearest the price.</p>
+ <dl class="spec">
+  <div><dt>Size</dt><dd class="ltr">302 &times; 324</dd></div>
+  <div><dt>What moved</dt><dd>دکمه‌های خرید/فروش</dd></div>
+  <div><dt>vs baseline</dt><dd class="ltr">+2 px high, +0 wide</dd></div>
+  <div><dt>Build cost</dt><dd>فقط جابه‌جایی دو دکمه</dd></div>
+ </dl>
+</article>
+<article class="card" style="--pw:302;--ph:290">
+ <div class="head"><span class="num">09</span><h2>Dense sheet</h2></div>
+ <div class="stage"><div class="scaler"><div class="panel a09" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--num:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:300px" dir="ltr"><div class="cap"><span class="ttl">SS Replay</span><span class="chip">BLIND</span><span class="capb"><b>K</b><b>?</b><b>[]</b><b>_</b><b class="x">X</b></span></div><div class="clockrow"><span class="clock">2024.03.14&nbsp;&nbsp;09:42:15</span><span class="pct">37%</span><div class="prog"><i style="width:37%"></i></div></div><div class="transport"><b class="k nav">|&lt;</b><b class="k nav">&lt;&lt;</b><b class="k nav">&lt;</b><b class="k play">Pause</b><b class="k nav">&gt;</b><b class="k nav">&gt;&gt;</b><b class="k reset">Reset</b></div><div class="speedrow"><span class="lbl">Speed</span><b class="k sm">-</b><span class="well spd">5x</span><b class="k sm">+</b><div class="track"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><span class="mean">1h in 12m</span></div><div class="sheetwrap"><div class="rail"><b class="on">TRD</b><b class="">POS</b><b class="">STA</b><b class="">SES</b></div><div class="sheet"><div class="dense"><span class="dl">Risk</span><span class="dv">1.0%  =  $487</span><span class="dl">Lot</span><span class="dv">0.42</span><span class="dl">Setup</span><span class="dv">breakout retest</span><span class="dl">Stop</span><span class="dv neg">38 412.0<s>-52 pts</s></span><span class="dl">Target</span><span class="dv pos">38 604.0<s>+140 pts</s></span><span class="dl">R:R</span><span class="dv">1 : 2.7</span></div><div class="takebtn"><b class="k take">Take the trade  (Tab)</b></div><div class="deals"><b class="k buy">BUY</b><b class="k sell">SELL</b></div><div class="spread">spread 1.4</div></div></div><div class="status"><span class="run">Running</span><span class="sdim">2 positions</span><span class="pos">P&amp;L +$214</span></div></div></div></div>
+ <p class="fa">بدون هیچ کادر گروهی: برچسب و مقدار در دو ستون. هیچ اطلاعاتی کم نمی‌شود و حدود پنجاه پیکسل برمی‌گردد.</p>
+ <p class="en">No group frames at all: label and value in two columns. Costs nothing in information and gives back about fifty pixels.</p>
+ <dl class="spec">
+  <div><dt>Size</dt><dd class="ltr">302 &times; 290</dd></div>
+  <div><dt>What moved</dt><dd>برگهٔ معامله</dd></div>
+  <div><dt>vs baseline</dt><dd class="ltr">-32 px high, +0 wide</dd></div>
+  <div><dt>Build cost</dt><dd>حذف کادرهای گروه، شبکهٔ دو ستونه</dd></div>
+ </dl>
+</article>
+<article class="card" style="--pw:272;--ph:347">
+ <div class="head"><span class="num">10</span><h2>Strip, no rail</h2></div>
+ <div class="stage"><div class="scaler"><div class="panel a10" style="--face:#22252B;--cap:#1B1E23;--well:#15181C;--edge:#676F7D;--text:#E6E9EE;--dim:#B0B6C0;--faint:#8A9099;--accent:#E0863A;--buy:#298658;--sell:#C24A3B;--run:#4FBE86;--btn:#2C3037;--btnedge:#676F7C;--dealtext:#FFFFFF;--font:'Tahoma','DejaVu Sans',sans-serif;--num:'Tahoma','DejaVu Sans',sans-serif;--fs:11px;width:270px" dir="ltr"><div class="cap"><span class="ttl">SS Replay</span><span class="chip">BLIND</span><span class="capb"><b>K</b><b>?</b><b>[]</b><b>_</b><b class="x">X</b></span></div><div class="clockrow"><span class="clock">2024.03.14&nbsp;&nbsp;09:42:15</span><span class="pct">37%</span><div class="prog"><i style="width:37%"></i></div></div><div class="striptabs"><b class="on">Trade</b><b class="">Positions 2</b><b class="">Stats</b><b class="">Session</b></div><div class="transport"><b class="k nav">|&lt;</b><b class="k nav">&lt;&lt;</b><b class="k nav">&lt;</b><b class="k play">Pause</b><b class="k nav">&gt;</b><b class="k nav">&gt;&gt;</b><b class="k reset">Reset</b></div><div class="speedrow"><span class="lbl">Speed</span><b class="k sm">-</b><span class="well spd">5x</span><b class="k sm">+</b><div class="track"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class=""></i><i class=""></i><i class=""></i><i class=""></i></div><span class="mean">1h in 12m</span></div><div class="sheetwrap"><div class="sheet"><div class="grp"><span class="lg">Risk</span><div class="row"><span class="a">1.0%</span><span class="b ">= $487</span><span class="c">0.42 lot</span></div></div><div class="setup"><span class="lbl">Setup</span><span class="well ed">breakout retest</span></div><div class="grp"><span class="lg">Stop &amp; target</span><div class="row"><span class="a">Stop</span><span class="b neg">38 412.0</span><span class="c">-52 pts</span></div><div class="row"><span class="a">Target</span><span class="b pos">38 604.0</span><span class="c">+140 pts</span></div><div class="row"><span class="a">R:R</span><span class="b ">1 : 2.7</span><span class="c"></span></div><div class="takebtn"><b class="k take">Take the trade  (Tab)</b></div></div><div class="deals"><b class="k buy">BUY</b><b class="k sell">SELL</b></div><div class="spread">spread 1.4</div></div></div><div class="status"><span class="run">Running</span><span class="sdim">2 positions</span><span class="pos">P&amp;L +$214</span></div></div></div></div>
+ <p class="fa">ریل حذف می‌شود و تب‌ها نواری زیر ساعت می‌شوند. باریک‌ترین حالت: ۲۷۰ پیکسل، کمترین پوشش نمودار.</p>
+ <p class="en">The rail goes away and the tabs become a strip under the clock. The narrowest of all: 270 px, the least chart covered.</p>
+ <dl class="spec">
+  <div><dt>Size</dt><dd class="ltr">272 &times; 347</dd></div>
+  <div><dt>What moved</dt><dd>ریل</dd></div>
+  <div><dt>vs baseline</dt><dd class="ltr">+25 px high, -30 wide</dd></div>
+  <div><dt>Build cost</dt><dd>حذف ریل، نوار تب افقی، عرض ۲۷۰</dd></div>
+ </dl>
+</article>
+</main>
+<footer>&#1588;&#1605;&#1575;&#1585;&#1607;&#1654; &#1607;&#1585; &#1705;&#1583;&#1575;&#1605; &#1585;&#1575; &#1576;&#1711;&#1608;&#1740;&#1740;&#1583; &#8212; &#1740;&#1575; &#1670;&#1606;&#1583; &#1578;&#1575; &#1585;&#1575; &#1578;&#1585;&#1705;&#1740;&#1576; &#1705;&#1606;&#1740;&#1583;&#1548; &#1605;&#1579;&#1604;&#1575;&#1611; &#1587;&#1585;&#1593;&#1578;&#1647; &#1779; &#1576;&#1575; &#1583;&#1705;&#1605;&#1607;&#8204;&#1607;&#1575;&#1740;&#1647; &#1783;. &#1607;&#1740;&#1670;&#8204;&#1705;&#1583;&#1575;&#1605;&#1588;&#1575;&#1606; &#1670;&#1740;&#1586;&#1740; &#1606;&#1605;&#1740;&#8204;&#1582;&#1608;&#1575;&#1607;&#1583; &#1705;&#1607; MQL5 &#1606;&#1578;&#1608;&#1575;&#1606;&#1583; &#1576;&#1705;&#1588;&#1583;.</footer>
+</div>
+<script>
+(function(){var r=document.documentElement,
+ b=[].slice.call(document.querySelectorAll('.zoom button'));
+ function set(z,s){r.style.setProperty('--zoom',z);
+  b.forEach(function(x){x.setAttribute('aria-pressed',x.dataset.z===String(z)?'true':'false');});
+  if(s){try{localStorage.setItem('ssr.v8.zoom',z);}catch(e){}}}
+ b.forEach(function(x){x.addEventListener('click',function(){set(x.dataset.z,true);});});
+ try{var v=localStorage.getItem('ssr.v8.zoom');if(v){set(v,false);}}catch(e){}})();
+</script>
