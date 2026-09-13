@@ -236,7 +236,7 @@ key; **bold** = one of the 14 keys `setup.ini` already writes; `—` = not store
 | 16 | `InpChartTf` | 73 | Replay | BASIC | FILE | **`chart_tf`** | `CfgChartTf()` `:228` → `OpenChart` `:1277` |
 | 17 | `InpExtraTfs` | 99 | Replay | BASIC | FILE | **`extra_tfs`** | `CfgExtraTfs()` `:229` → `ParseTimeframes` `:1302` |
 | 18 | `InpStartSpeed` | 83 | Replay | BASIC | **LIVE** | **`speed`** | `CfgSpeed()` `:227` → `SetSpeedX100` `:1586`. **Already live**: the speed control |
-| 19 | `InpAutoPlay` | 159 | Replay | BASIC | FILE | `auto_play` | `:1710-1724` (see `host-expert-3`, CONFIRMED HIGH) |
+| 19 | `InpAutoPlay` | 159 | Replay | BASIC | FILE | `auto_play` | `:1710-1724` (see `host-expert-3`, CONFIRMED MEDIUM) |
 | 20 | `InpOneChart` | 131 | Replay | ADV | **IN** | — | `:1893`, `:2555`. A setting that controls the handover cannot be carried by the handover (`host-expert-13`) |
 | 21 | `InpBalance` | 89 | Trading | BASIC | FILE | **`balance`** | `CfgBalance()` `:224` → `g_acct.SetBalance()` `:1167` |
 | 22 | `InpCommission` | 90 | Trading | ADV | FILE | `commission` | `exec.commission_per_lot` `:1161` |
@@ -297,7 +297,7 @@ live today** (`SetRiskPercent`, `SetSpeedX100`) and **8 are new**.
 A setting that must not be arrived at by leaving a box unticked must also not be arrived at by a
 file an unrelated earlier run wrote. `InpPublish`, `InpAllowControl` and `InpAllowTrade` therefore
 stay inputs, and `InpSlot` joins them because it names the custom symbol the whole session lives in.
-[CONFIRMED FROM CODE] that this is not hypothetical: `host-expert-6` (CONFIRMED, **HIGH**) is exactly
+[CONFIRMED FROM CODE] that this is not hypothetical: `host-expert-6` (CONFIRMED, **MEDIUM**) is exactly
 the failure of a run inheriting an unrelated `setup.ini` — *"a prop evaluation that judges and can
 fail them"*. The consent switches are the ones where that failure would be worst, so they are the
 ones the file never carries.
@@ -355,7 +355,7 @@ nothing saved, and that is not a failure" contract `Restore()` already documents
 
 #### P.5.1 `[run] token` — the fix for `host-expert-6`
 
-[CONFIRMED FROM CODE] `host-expert-6` (CONFIRMED, **HIGH**): pass 2 calls
+[CONFIRMED FROM CODE] `host-expert-6` (CONFIRMED, **MEDIUM**): pass 2 calls
 `CSSRSetupPanel::Restore(g_setup)` **unconditionally** (`mq5:1948`), so any run that never opened the
 form — `InpPickStart=false`, `InpStart>0`, `CfgRandom()`, or a resumable session, the four conditions
 at `:2024` — adopts a stale file and lets it overrule this run's inputs.
@@ -573,7 +573,7 @@ longer has one. This is the same class of stale metric M.1.3 books as `ui-plumbi
 |---|---|---|
 | `ui-dialogs-1` | CONFIRMED **HIGH** | `ReadAll()` walks the table and reads only ids where `m_w.Exists("e"+id)` is true. **The correct pattern is already nine lines below the broken one** — the seed read at `:1181` does exactly this. `Exists()` is `SSR_Widgets.mqh:192` |
 | `ui-dialogs-9` | CONFIRMED LOW | `lo`/`hi` come from the spec, so all 51 rows are clamped, not 6. The three prop numbers stop being the exception the file's own preset loader already refuses (`:342`) |
-| `ui-dialogs-8` | POTENTIAL_RISK MEDIUM | `Num()` (`:283`) is the one place to fix the `,`→`.` rule; with the table it is also the only place a number is read. [RECOMMENDATION] strip separators before the last `,` or `.`, then parse |
+| `ui-dialogs-8` | POTENTIAL_RISK LOW | `Num()` (`:283`) is the one place to fix the `,`→`.` rule; with the table it is also the only place a number is read. [RECOMMENDATION] strip separators before the last `,` or `.`, then parse |
 | `ui-dialogs-15` | CONFIRMED LOW | `MenuClear()` (`:611`) bounds its sweep by `ArraySize(m_presets)`, not 32. Required before the group drop-down ships, because the same sweep serves it |
 | `ui-dialogs-2` | CONFIRMED MEDIUM | an open pseudo-combo must be closed on every step change and on every group change. `m_menu = ""` in `Poll()`'s `next`/`back` arms and in `Choose("grp",…)`. **Must land with the group drop-down**, which makes the combo the normal way to navigate rather than a rarely-used field |
 | `ui-dialogs-13` | CONFIRMED LOW | `m_start_y` is invalidated on step change (`Repaint()` `:656`), so `SetStartText` cannot draw the orange-line caption at a dead coordinate |
@@ -672,7 +672,7 @@ is **zero unreachable-by-accident**.
 | P1 | `SSR_Settings.mqh`: `SSRSettingSpec`, `SSRSettingRows()`, `SSRSettingAll()`, 61 rows | 180 new file | low | the seven-hand-lists problem |
 | P2 | `ReadAll()` gated on `Exists()`; clamps from the spec; `Num()` separator rule | 40 | low | `ui-dialogs-1` (HIGH), `ui-dialogs-9`, `ui-dialogs-8` |
 | P3 | `Save()`/`Restore()` walk the table; 11 new sections, 37 new keys | 60 | low | 37 settings become rememberable |
-| P4 | `[run] token`, stash write, conditional adoption in `OnInit` | 30 | **medium** — it changes which values a run uses | `host-expert-6` (HIGH); one branch of `host-expert-5` (HIGH) |
+| P4 | `[run] token`, stash write, conditional adoption in `OnInit` | 30 | **medium** — it changes which values a run uses | `host-expert-6` (MEDIUM); one branch of `host-expert-5` (MEDIUM) |
 | P5 | `RenderSettings()` becomes a loop; `m_group`/`m_tier`; two new CHOICE arms in `MenuOptions`/`Choose`; `MenuClear` bound; combo closed on step change | 120 | medium | `ui-dialogs-2`, `ui-dialogs-15`, `ui-dialogs-13` |
 | P6 | `SSR_SETUP_H_MAX` and `need` re-derived from the tallest step | 10 | low | a stale metric of the `ui-plumbing-11` class |
 | P7 | `Cfg*()` extended to every stored key; `CollectSettings()` reads the table | 70 | low | `host-expert-10`; `InpResume` gains an accessor |

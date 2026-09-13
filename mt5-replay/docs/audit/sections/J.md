@@ -31,7 +31,7 @@ SSReplayStandalone.mq5:1356   g_journal.SetSession(..., (CfgRandom() ? IntegerTo
 SSReplayStandalone.mq5:418    out.seed = g_picker.Seed();          // into the session file
 ```
 
-So the reproducibility contract is wider than the start-pick: it also covers per-strategy RNG streams (`SSR_StrategyHost.mqh:141`) and the identity written into the journal CSV (`SSR_Journal.mqh:194`, `"# seed,"`).
+[CONFIRMED FROM CODE] So the reproducibility contract is wider than the start-pick: it also covers per-strategy RNG streams (`SSR_StrategyHost.mqh:141`) and the identity written into the journal CSV (`SSR_Journal.mqh:194`, `"# seed,"`).
 
 ---
 
@@ -79,6 +79,7 @@ g_ctrl.SetFidelity(range.has_ticks ? SSR_FIDELITY_FULL_TICK
                                    : SSR_FIDELITY_SYNTHETIC_TICK);
 ```
 
+[CONFIRMED FROM CODE for the probe window and the call site; **[INFERENCE]** for the cross-terminal divergence, which no one has observed]
 and `range.has_ticks` is probed over *the last 24 hours of held data* (`SSR_Mt5Providers.mqh:133-138`), not over the replay window. So identical bars can be walked by real broker ticks on one terminal and by the synthesiser's four-point path on another — different fill order, different stop-versus-target resolution, different trade outcomes from the same seed. Finding **core-engine-4** (CONFIRMED, HIGH) is the sharp end of this: a FULL_TICK window that contains zero broker ticks is consumed silently, and tick availability is never re-evaluated per window.
 
 #### J.2.4 The statement
@@ -198,7 +199,7 @@ Every column in that table is an existing field (`SSRSetupValues.speed`, `.blind
 CSSRPickFilter:  AcceptsWindow(symbol, start_msc, end_msc) -> bool, plus RejectReason()
 ```
 
-with concrete filters: a session-hours filter (server-time hour band — new code, no existing backing), an ATR/range band over the candidate window (new code, but `CSSRBarWindow` can supply the bars), and a calendar filter driven by the existing `CalendarValueHistory(vals, from, to, NULL, currency)` call at `SSR_Calendar.mqh:132-137`.
+**[RECOMMENDATION]** with concrete filters: a session-hours filter (server-time hour band — new code, no existing backing), an ATR/range band over the candidate window (new code, but `CSSRBarWindow` can supply the bars), and a calendar filter driven by the existing `CalendarValueHistory(vals, from, to, NULL, currency)` call at `SSR_Calendar.mqh:132-137`.
 
 **[CONFIRMED FROM CODE — determinism consequence, and it is the important part of this subsection]** Filtering means *rejection sampling*, and rejection sampling consumes RNG draws. Because `Index()` and `InRange()` advance the same shared `m_rng` state (`SSR_RandomPicker.mqh:41`), adding a filter changes the number of draws consumed before acceptance, which changes every later draw. Therefore:
 

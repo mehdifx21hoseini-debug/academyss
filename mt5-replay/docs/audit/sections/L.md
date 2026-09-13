@@ -142,11 +142,14 @@ never re-derived for 245. The code says so itself: `SSR_Panel.mqh:1563-1574` sho
   `"  no stop"`. The two things a trader reads on that row are printed over each other, and the
   same applies to `"  sp 20.0"`.
 * [INFERENCE] The same 50 px moves `posmore` — the `"+%d not shown"` overflow counter — to
-  `x+w-92 = x+153` (`SSR_Panel.mqh:1637`), on the same baseline as `poshint`, which draws
-  `"H halves   B stop to entry   X closes"` (37 characters) from `x+8`. At `SSR_FS_SMALL` (7 pt
-  Tahoma, ≈4.5 px/char) the hint reaches ≈`x+175`. The comment at `:1625-1632` claims the counter
-  now sits "at the far end, where nothing else is" — that was true at 295. Classify as
-  POTENTIAL_RISK: it depends on glyph metrics MQL5 will not report.
+  `x+w-92 = x+153` (`SSR_Panel.mqh:1641`), on the same baseline as `poshint`, which draws
+  `"H halves   B stop to entry   X closes"` (37 characters) from `x+8` (`:1628`). At `SSR_FS_SMALL`
+  (7 pt Tahoma, ≈4.5 px/char) the hint reaches ≈`x+175`. The comment at `:1633-1639` claims the
+  counter now sits "at the far end, where nothing else is" — that was true at 295.
+  **[POTENTIAL_RISK]**, and it can never be better than that from source: it depends on glyph metrics
+  MQL5 will not report. Registered as `new-19` in D.2, which is the register of defects read from
+  source that did **not** go through the refuter process — it is weaker evidence than any
+  `verified.json` CONFIRMED and must always be labelled POTENTIAL_RISK.
 * `ui-panel-6` (CONFIRMED, MEDIUM) — the status strip's fidelity readout is anchored at `x+330`
   in a 310 px panel. The anchor alone is 20 px past the frame; `"SYNTHETIC TICK !"` adds ~70-80 px
   more. **~90 px of text sits on the candles on every frame of every session**, and the

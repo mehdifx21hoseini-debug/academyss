@@ -114,13 +114,14 @@ double b = (seg == 0 ? k1 : (seg == 1 ? k2 : k3));
 double p = a + (b - a) * f;
 ```
 
+[CONFIRMED FROM CODE — the ladder below is arithmetic over two source constants, not a measurement]
 with `k1`/`k2` the two extremes (`:127-128`). The shipped default is `InpTicksPerBar = 8`
 (`SSReplayStandalone.mq5:75`), so `n-1 = 7` and `u` steps by 3/7: `0, 0.43, 0.86, 1.29, 1.71,
 2.14, 2.57, 3`. No `u` equals 1.0 or 2.0, therefore **neither the high nor the low is ever
 emitted**. On a bullish bar the deepest price emitted is `open + 0.857*(low-open)` and the
 highest is `max(low + 0.714*(high-low), high - 0.143*(high-close))`.
 
-This is the same arithmetic that `spikes-audits-1` (CONFIRMED, HIGH) verified in
+[CONFIRMED FROM CODE] This is the same arithmetic that `spikes-audits-1` (CONFIRMED, HIGH) verified in
 `SSR_SpikeKit.mqh:579`, and the verifier for `spikes-audits-2` (CONFIRMED, MEDIUM) quantified it
 for exactly this count: *"With cnt=8 it is 3 of 20"* bars that reach within one point of both
 extremes.
@@ -173,6 +174,7 @@ off-by-one entirely.
 
 #### F.3.6 The silent void: FULL_TICK with no ticks
 
+[CONFIRMED FROM CODE for the code path; **[INFERENCE]** for the ranking word "most serious"]
 The most serious fidelity defect in the engine is not a degradation but the *absence* of one.
 `core-engine-4` (CONFIRMED, HIGH) with its data-layer cause `data-1` (CONFIRMED, HIGH):
 `Discover` probes tick availability over **the last 24 hours of held history**
@@ -188,7 +190,7 @@ m_cursor.Advance(hi, emitted, 0);
 return emitted;
 ```
 
-The clock advances, `Progress()` climbs, the panel chip reads `FULL` — and nothing is drawn and
+[CONFIRMED FROM CODE] The clock advances, `Progress()` climbs, the panel chip reads `FULL` — and nothing is drawn and
 nothing is published. The degradation path is gated on `tp == NULL` only (`:337-346`), which never
 happens for the MT5 source. `CSSRTickProvider::HasTicks(symbol, from, to)` exists
 (`SSR_IDataSource.mqh:179`) and has **no caller**.
@@ -438,7 +440,7 @@ From `10:00:00.000`, `bars=1` → `10:00:59.999` (unchanged). From `10:00:59.999
 
 #### F.8.2 Jump forward
 
-`JumpForward` (`SSR_ReplayController.mqh:1330-1400`) is structurally right: bulk-write everything
+[CONFIRMED FROM CODE] `JumpForward` (`SSR_ReplayController.mqh:1330-1400`) is structurally right: bulk-write everything
 strictly before the target's own bar with `SeedBars`, then emit the partial bar as ticks trimmed
 to the target so it forms correctly. Two defects sit on it:
 
@@ -564,7 +566,7 @@ The 49-character ceiling is the panel's real constraint (`chart-7` confirms the 
 `LeakGuard::Advice` overruns its only consumer), and the 63-char `OBJPROP_TEXT` limit is the hard
 one. This single change is what turns silent navigation into legible navigation.
 
-**(C) A rewind epoch, so rewind is a contract rather than a hint.**
+**(C) A rewind epoch, so rewind is a contract rather than a hint.** **[RECOMMENDATION]**
 The controller gains `long m_epoch`, incremented on every `RestoreSnapshot`, backward `SeekTo`, and
 `Reset`; `OnRewind(msc)` becomes `OnRewind(msc, epoch)`. Every observer that keeps mutable derived
 state — the trading engine's balance, stops, trail peaks, MAE/MFE; a strategy's RNG stream; the

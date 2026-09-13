@@ -31,7 +31,7 @@ Four facts decide the whole design, and three of them are already written in the
 //|  a left-aligned one.
 ```
 
-That is the right model and it is already implemented: `SSRLead`, `SSRTrail`, `SSRCentre`,
+[CONFIRMED FROM CODE] That is the right model and it is already implemented: `SSRLead`, `SSRTrail`, `SSRCentre`,
 `SSRInner`, `SSRColW`, `SSRColX`, `SSRRows`, all mirroring correctly, all unit-tested
 (`SSR_QA_Smoke.mq5:3354-3386`). **The problem is that nothing calls them** — `ui-plumbing-5`
 (CONFIRMED, IMPROVEMENT): the only call sites anywhere in the tree are in the smoke test. The file's
@@ -69,7 +69,7 @@ px/char estimate in L, M and N, and every one of the five confirmed overflow def
 `CheckFrame()` cannot see. Persian is where that stops being affordable: a language whose glyph
 widths nobody on the team can estimate cannot be laid out by estimate.
 
-The correction is not free — `TextGetSize` is a graphics round trip and the panel repaints at
+**[INFERENCE]** The correction is not free — `TextGetSize` is a graphics round trip and the panel repaints at
 10 Hz — so it arrives with a memo cache (Q.4.10), and it does not change one line of the shipped
 paint budget on a still frame.
 
@@ -105,13 +105,13 @@ undo it.*
 | click dispatch by object **name** | `PollClicks:2512`, `Dispatch:2569` | **mirroring moves pixels and never touches a name.** `tab0..tab5`, `spdseg0..19`, `ph<r>`/`pb<r>/px<r>` all dispatch identically in both directions |
 | `OBJ_BUTTON` text is centred | MQL5; no `OBJPROP_ALIGN` on a button | every button in the product is direction-neutral for free (Q.4.4) |
 
-The last two are the reason this is a tractable phase at all: **the rail, the transport, the action
+**[INFERENCE]** The last two are the reason this is a tractable phase at all: **the rail, the transport, the action
 strip, the deal pair, the per-row buttons, the pager and every list row need no text-direction work
 whatsoever.** They need a mirrored `x` and nothing else.
 
 #### Q.1.2 The five surfaces that are still English, and why they gate RTL
 
-A mirrored panel with English text on five of its surfaces is worse than an unmirrored one, because
+**[INFERENCE]** A mirrored panel with English text on five of its surfaces is worse than an unmirrored one, because
 each English island is also an LTR island inside an RTL frame — the exact case Q.6 exists to handle,
 arriving by accident instead of by design. From L.8, with their finding ids:
 
@@ -179,7 +179,7 @@ It is also the **only** bidi control character in all 190 values (the other 44 o
 
 #### Q.2.1 One global, set once, read everywhere
 
-Direction is a property of the **loaded language**, exactly as `g_ssr_lang` already is. It lands in
+**[RECOMMENDATION]** Direction is a property of the **loaded language**, exactly as `g_ssr_lang` already is. It lands in
 `SSR_Strings.mqh` beside the language, because that is the file that knows which language is loaded
 and it is included by everything that draws:
 
@@ -222,7 +222,7 @@ a trap.
 | **mirror** | LTR / RTL | `SSRIsRtl()` | every `x`, every anchor, the rail's edge, fill directions |
 | **script** | Latin / Arabic-script | the catalogue value itself | shaping, run composition, digit policy |
 
-A German translation is Arabic-script-free and LTR: it needs nothing in this section but the
+**[RECOMMENDATION]** A German translation is Arabic-script-free and LTR: it needs nothing in this section but the
 63-character budget A19 already checks. A Persian translation is both. **The code must never infer
 one axis from the other** — in particular, `SSRIsRtl()` must not be used to decide whether a *number*
 is Persian (Q.7.3), and the presence of Arabic characters in a string must not be used to decide
@@ -246,6 +246,7 @@ labels at mirrored coordinates with unmirrored anchors. Write that down at the s
 
 ### Q.3 `SSR_Layout.mqh` — what it needs
 
+[CONFIRMED FROM CODE for what the file already contains; **[RECOMMENDATION]** for the seven additions]
 The file is roughly eighty per cent of the answer already and its signatures do not change. Seven
 things are missing, and each one exists to remove a class of hand-arithmetic rather than to add a
 feature.
@@ -285,7 +286,7 @@ int SSRLeadEdge (const SSRFrame &f, const int off);   // f.x+f.pad+off        | 
 int SSRTrailEdge(const SSRFrame &f, const int off);   // f.x+f.w-f.pad-off    | f.x+f.pad+off
 ```
 
-This is the single most-used addition in the section. Every sentence, every status-ladder warning,
+**[RECOMMENDATION]** This is the single most-used addition in the section. Every sentence, every status-ladder warning,
 every group legend and every left-hand row label is an edge plus an anchor and needs no measurement
 at all.
 
@@ -307,7 +308,7 @@ ENUM_ANCHORPOINT SSRAnchorFor(const ENUM_SSR_ALIGN a)
   }
 ```
 
-`SSR_AL_FORCE_LTR` is not a convenience. It is the declaration that a particular run is an
+**[RECOMMENDATION]** `SSR_AL_FORCE_LTR` is not a convenience. It is the declaration that a particular run is an
 **identifier** — a symbol name, a clock, a build tag, a seed — and must be laid out as Latin
 regardless of the panel's direction (Q.7.6).
 
@@ -320,7 +321,7 @@ inline at `SSR_Panel.mqh:751-753`:
                    W - 2 * SSR_PAD - SSR_RAIL_W - SSR_GAP);
 ```
 
-That is the one expression in the product where the mirror decides **which of two regions gets which
+**[RECOMMENDATION]** That is the one expression in the product where the mirror decides **which of two regions gets which
 edge**, and it must not be written twice. `SSRSplit(panel, rail_w, gap, out_rail, out_sheet)` returns
 both frames with their `rtl` already set; the sheet's width is `SSRInner(panel) - rail_w - gap` in
 both directions, so `245` is arithmetic the compiler does, not a number anyone retypes.

@@ -18,6 +18,7 @@ because it cannot be resolved without a terminal.*
 
 ### M.0 The position, in one page
 
+[CONFIRMED FROM CODE — the refusal below is arithmetic over two drawing routines, not a taste judgement]
 The brief proposes HOME / REPLAY / TRADE / POSITIONS / PERFORMANCE / CHALLENGE / JOURNAL /
 SETTINGS. **Eight cannot be drawn.** The arithmetic, not taste, is what kills it:
 
@@ -38,6 +39,7 @@ n = 7   172 px    fits, 14 px spare      <- the ceiling in Standard
 n = 8   197 px    DOES NOT FIT           <- the brief's model
 ```
 
+[CONFIRMED FROM CODE for the formula and the widths; the Persian glyph count is from `fa.txt`]
 The horizontal fallback is worse: `DrawTabs` (`:1145`) computes `tw = (W - 2*SSR_PAD - (n-1)*2)/n`,
 which at `W = 310`, `n = 8` gives **35 px a tab** — about seven characters of Tahoma 8 pt, for names
 that must also survive Persian (`rtab.prop = ارزیابی`, 7 glyphs). MetaTrader centres button text,
@@ -50,7 +52,7 @@ they make every destination in every one of the three proposals cheaper:
 1. **Navigation is the only thing allowed to delete.** [CONFIRMED FROM CODE] `DrawSheet`'s first
    statement is unconditional — `void DrawSheet(...) { HideSheets(); switch(m_tab) ...`
    (`SSR_Panel.mqh:1267-1269`) — and `HideBody(false)` runs unconditionally at `:729`. Between them
-   (`ui-panel-1` and `ui-panel-2`, both CONFIRMED HIGH) they restore the full 561-write repaint the
+   (`ui-panel-1` and `ui-panel-2`, both CONFIRMED MEDIUM) they restore the full 561-write repaint the
    512-slot cache was built to eliminate.
 2. **An overlay costs a rebuild per frame; a destination costs a rebuild per click.**
 3. **Every destination owns its teardown list**, declared beside its draw function
@@ -84,6 +86,7 @@ backwards, clears the latch **before** acting, and debounces 200 ms per name.
 | a combo box | the wizard's pseudo-combo is a stack of buttons that outlives its step (`ui-dialogs-2`, CONFIRMED). Do not build a second one |
 | text measurement | [CONFIRMED FROM CODE] `Extent()` covers sized objects only and excludes labels **by design** (`SSR_Widgets.mqh:120-128`, invariant I10): *"A label's width depends on the glyphs the font chose and MQL5 will not say."* Every text overflow in L.9 is invisible to the instrument |
 
+[CONFIRMED FROM CODE for the `Edit()` write discipline; **[STATED PREMISE]** that MetaTrader owns the caret — that is platform behaviour, not a line in this tree]
 One exception survives: `OBJ_EDIT`. MetaTrader owns the caret, and `Edit()` writes `OBJPROP_TEXT`
 only on creation or an explicit reset (`SSR_Widgets.mqh:316-324`), so a repaint cannot erase what is
 being typed. That is the only typed input this architecture may use, and it must be **read at a
@@ -108,11 +111,16 @@ early return, which ends in `ObjectFind`.
 | `Remove(id)` | `:627` | 1 find + `ObjectDelete` + `Forget` | — |
 | panel `Text()` hit | `SSR_Panel.mqh:191-198` | — | 1 find + **1 `ObjectSetInteger(COLOR)`** |
 
+[CONFIRMED FROM CODE that the comment says this; **[INFERENCE]** that the measurement behind it is sound — E.1 records that there is no CSV, no run id and no way to re-derive it]
 The anchor is the project's own measurement at `SSR_Widgets.mqh:31-38`: *"561 object properties
 written per STILL frame, and a mean repaint of 39.05 ms — against an engine that pumps every 40."*
 ≈ **0.07 ms per property write**. That number is the currency of this document.
 
-[INFERENCE, from two CONFIRMED findings plus the arithmetic above] **a still frame today:**
+[INFERENCE, from two CONFIRMED findings plus the arithmetic above] **a still frame today.** **Note
+the relationship to section E's 561**, so the two are not read as rival measurements: 561 is what the
+`SSR_Widgets.mqh:31-38` comment records for the repaint that motivated the cache, and **~586 below is
+a derivation for the current rail layout** — different frame, different layout, same unit cost. E.1
+carries the same reconciliation from the other side. Neither number has been measured by this audit.
 
 ```
 DrawSheet -> HideSheets()      154 Remove()  = 154 find + ~25 delete + 154 Forget
@@ -124,6 +132,7 @@ HideBody(false) at :729         57 Hide()    = 57 find + 57 write + 57 Forget
                                where NOTHING CHANGED
 ```
 
+[CONFIRMED FROM CODE for the 10 fps throttle; **[INFERENCE]** for every derived millisecond figure, which rests on the 0.07 ms unit above]
 At 10 fps (`SSReplayStandalone.mq5:3063`) that is ≈ 0.41 s of repaint per second of wall clock, on
 the thread that pumps ticks. **a still frame under this proposal:** no `Remove`, no `Hide`, every
 object takes the `Same()` early return — ~95 `ObjectFind` and ~30 colour writes, ≈ 2 ms; navigation
@@ -181,7 +190,7 @@ repaints from state and never clears the chart (invariant I7).
 [CONFIRMED FROM CODE] The consequence is written in the file (`SSR_Panel.mqh:767-777`): anything
 opened *over* the panel goes back under it on the next repaint, so the panel re-`Show()`s the key
 card every frame. `CSSRKeyCard::Show` begins with `m_w.RemoveAll()` (`SSR_KeyCard.mqh:72`) and then
-recreates ~41 objects — `ui-panel-12` (CONFIRMED, MEDIUM) prices it at ~41 deletes + 41 creates +
+recreates ~41 objects — `ui-panel-12` (CONFIRMED, LOW) prices it at ~41 deletes + 41 creates +
 ~450 writes **per frame while the card is up**.
 
 > **An overlay costs a full rebuild every 100 ms for as long as it is open.
@@ -210,6 +219,7 @@ sense required. The loop **Hides**, it does not Remove (`SSR_Panel.mqh:2093-2094
          m_w.Hide("spdseg" + IntegerToString(t), hidden);
 ```
 
+[CONFIRMED FROM CODE]
 so on an upgrade from a build that drew twenty cells, `spdseg10..spdseg19` still exist on the chart
 and the next `Hide(false)` **un-hides them**, leaving ten orphan cells over the groove. Invariant I7
 (*"removed, not merely undrawn"*) requires a one-shot `Remove` in `Create()`.
@@ -223,7 +233,7 @@ SSR_Panel.mqh:1189-1191   m_w.Remove("follow");  m_w.Remove("bookmark"); m_w.Rem
 SSR_Panel.mqh:1241-1243   m_w.Remove("follow");  m_w.Remove("bookmark"); m_w.Remove("jump");
 ```
 
-— into a single `UpgradeSweep()` called once from `Create()`, guarded by a `m_swept` flag. Under R1
+**[RECOMMENDATION]** — into a single `UpgradeSweep()` called once from `Create()`, guarded by a `m_swept` flag. Under R1
 those nine per-frame `Remove()` calls are pure waste (9 finds + 9 `Forget()` on every still frame);
 once swept they cost nothing, ever again. This is the cheapest line item in the document.
 
@@ -330,7 +340,7 @@ anything else in it — and the rail is six.
 | 4 | `tab4` | Keys | `Keys` | no |
 | 5 | `tab5` | Evaluation | `Eval` / `Eval !` / `PASS` / `FAIL` | **yes** (`prop_on`) |
 
-`25×6 - 3 = 147 px` of a 186 px rail. 39 px spare — one more cell plus 14 px — **left unspent on
+**[RECOMMENDATION]** `25×6 - 3 = 147 px` of a 186 px rail. 39 px spare — one more cell plus 14 px — **left unspent on
 purpose.** A rail at capacity is a rail that cannot absorb a feature.
 
 [CONFIRMED FROM CODE] Constraints this respects:
@@ -362,7 +372,7 @@ the `[panel]` key from `tab` to `dest` so an old value is simply not found.
 
 #### M.3.4 Notice without navigation: a rail cell can raise its hand
 
-The winner has no notice-without-navigation mechanism at all, and that is its largest pedagogical
+**[INFERENCE]** The winner has no notice-without-navigation mechanism at all, and that is its largest pedagogical
 gap: a trainee 85% through today's loss allowance is told only if they happen to click EVAL. Both
 runners-up propose a fix; they disagree on the mechanism, and the disagreement matters.
 
@@ -520,7 +530,10 @@ why `ui-panel-6` went unreported for so long (invariant I10). That argues for **
 audit, not for buttons. And [RECOMMENDATION] the ladder's warning lines deserve their own id
 (`stmsg`) rather than borrowing slot 50 — not because it is a live defect (the ladder hides the
 other four, so it is exclusive by construction) but because slot-sharing between two unrelated texts
-at one coordinate is precisely the shape of `ui-panel-5`. Hygiene, IMPROVEMENT, one id.
+at one coordinate is precisely the shape of `ui-panel-5` — which is CONFIRMED, **MEDIUM**, not
+hygiene: two cache slots writing the object id `setuprow` is a live wrong-text defect there. Here
+the sharing is exclusive by construction, so the cost of the separate id is one slot and the benefit
+is that it stays exclusive by design rather than by accident.
 
 ---
 
@@ -541,7 +554,7 @@ Notation: `slot` is the panel's 128-entry label cache (`SSR_SLOTS 128`, `SSR_Pan
 | status 18 | **four** readouts, not five | below |
 
 **The status strip: five numbers into four slots.**
-[CONFIRMED FROM CODE] `ui-panel-6` (CONFIRMED, **HIGH**) — `SSR_Panel.mqh:2033`:
+[CONFIRMED FROM CODE] `ui-panel-6` (CONFIRMED, **MEDIUM**) — `SSR_Panel.mqh:2033`:
 
 ```
       Text(53, "stfid", x + 330, y + 4,
@@ -569,7 +582,7 @@ x+252   N adrift  F    Clip  8      chartsn   slot 53
 
 [CONFIRMED FROM CODE] `m_state.charts_detached` is filled by `CSSRGroupPort`
 (`SSR_GroupPort.mqh:122`: `out.charts_detached = (m_charts != NULL ? m_charts.DetachedCount() : 0);`)
-and matches **zero times** in `SSR_Panel.mqh`. `chart-10` (CONFIRMED, MEDIUM): *the replay advances,
+and matches **zero times** in `SSR_Panel.mqh`. `chart-10` (CONFIRMED, LOW): *the replay advances,
 the candles stop moving, and the interface says nothing at all.* Spread is the right thing to yield
 the slot — it also appears on the Trade sheet and in the fill toast.
 
@@ -942,11 +955,11 @@ do not replace it.**
 
 **What this destination fixes at once:**
 
-* `ui-panel-12` (CONFIRMED, MEDIUM) — ~41 deletes + 41 creates + ~450 writes **per frame** become
+* `ui-panel-12` (CONFIRMED, LOW) — ~41 deletes + 41 creates + ~450 writes **per frame** become
   ~20 objects drawn once per navigation.
 * `host-expert-4` + `ui-dialogs-14` — a permanently visible rail cell is a discovery path that
   cannot be missed and cannot be consumed unseen.
-* `ui-plumbing-1` (CONFIRMED, MEDIUM) — the card's row text is English literals inside
+* `ui-plumbing-1` (CONFIRMED, LOW) — the card's row text is English literals inside
   `SSRKeyBindings()`, making it the one user-facing surface outside `T()`. Moving the rows into a
   sheet is the moment to add `ENUM_SSR_STR` ids for the 18 `what` strings: 18 catalogue entries + 18
   `fa.txt` rows, catalogue 190 → 208.
@@ -1063,7 +1076,7 @@ hit.
 **HIGH**): `HideSheetArea(true)` at `:682` is undone by `HideBody(false)` at `:729` **inside the same
 `Render()`**, so on a chart that shrinks below 360 px the rail, the `tabline` and the three action
 buttons stay visible at full-layout coordinates — up to 122 px of still-clickable buttons painted on
-the candles below a 128 px panel. `ui-panel-4` (CONFIRMED, MEDIUM) adds that `HideSheetArea`'s list
+the candles below a 128 px panel. `ui-panel-4` (CONFIRMED, LOW) adds that `HideSheetArea`'s list
 stops at `tab3`, stranding the fifth cell even after that is fixed — and the proposed rail has a
 sixth.
 
@@ -1201,7 +1214,7 @@ three and a contrast-table line.
 | four type sizes | `SSR_FS_CLOCK 13`, `TITLE 9`, `BODY 8`, `SMALL 7`, one face | 13 for the clock alone; 9 for identity and the primary; 8 for rows; 7 for provenance. **Do not add a fifth** |
 
 [CONFIRMED FROM CODE] Two tokens are declared in all three palettes and drawn by nothing —
-`SSR_C_THUMB_EDGE` and `SSR_C_TICK` (`ui-plumbing-9`, CONFIRMED, LOW). Spend them on the speed
+`SSR_C_THUMB_EDGE` and `SSR_C_TICK` (`ui-plumbing-9`, CONFIRMED, IMPROVEMENT). Spend them on the speed
 groove's thumb and tick marks under M.1.6 rather than deleting them; the slider gets its outline back
 at zero cost to the palette.
 
@@ -1248,7 +1261,7 @@ you, is the whole difference between this product and a mockup.
   path and the **setup-tag fallback is the correct contingency**. Nothing here closes it.
 * **`ui-dialogs-4` (CONFIRMED, MEDIUM)** — two review observation sentences exceed 63 characters for
   every possible value. Outside `T()`, outside this document, and it should be fixed anyway.
-* **`chart-7` (CONFIRMED, MEDIUM)** — `LeakGuard::Advice` is written far longer than the ~49
+* **`chart-7` (CONFIRMED, LOW)** — `LeakGuard::Advice` is written far longer than the ~49
   characters its only consumer can display. `Clip()` makes the cut honest; shortening the advice at
   source makes it useful. Fix both.
 * **`chart-12` (CONFIRMED, LOW)** — every word the chart layer draws (`"STOP - drag me"`, `BUY`/

@@ -25,13 +25,27 @@ clean profile of the product as it ships.
 //| nothing changed that is 561 writes turned into 77 lookups.        |
 ```
 
-[CONFIRMED FROM CODE] These are the only end-to-end product numbers that exist:
-**561 property writes per still frame**, **39.05 ms mean repaint**, and
-**561 writes → 77 lookups** once the widget cache elides them. Provenance is a
-user's run, recorded in prose; there is no CSV, no run id, and no way to
-re-derive it here. It implies roughly **0.07 ms per `ObjectSet*`** on that
-machine — the only unit cost this project has. [INFERENCE] Every per-frame write
-count below should be read against that unit, not against a guess.
+[CONFIRMED FROM CODE] **What is confirmed from code is that the comment at
+`SSR_Widgets.mqh:31-38` says so** — not that the measurement is sound. This
+section's own thesis (E.9) is that the measurement layer cannot be believed, and
+it does not exempt the one measurement it inherits. **[INFERENCE, resting on that
+comment]** These are the only end-to-end product numbers that exist: **561
+property writes per still frame**, **39.05 ms mean repaint**, and **561 writes →
+77 lookups** once the widget cache elides them. Provenance is a user's run,
+recorded in prose; there is no CSV, no run id, and no way to re-derive it here.
+It implies roughly **0.07 ms per `ObjectSet*`** on that machine — the only unit
+cost this project has. [INFERENCE] Every per-frame write count below should be
+read against that unit, not against a guess.
+
+**[INFERENCE] One reconciliation, so two sections do not hand the reader two
+baselines.** Sections M.1.2 and N.11.2 use **~586** writes for "today's frame",
+not 561. The two are not in conflict and neither is wrong: 561 is the figure the
+`SSR_Widgets.mqh:31-38` comment records for the repaint that motivated the cache,
+and ~586 is M.1.2's **derivation** for the current rail layout — it is tagged
+`[INFERENCE, from two CONFIRMED findings plus the arithmetic]` there and shows its
+working. Read 561 as the inherited measurement and ~586 as the current estimate;
+E.10's ranked list and N.11.2's ledger are therefore about the same frame, one
+measured once and one re-derived.
 
 **2. The 17 spikes** (`MQL5/Scripts|Services|Indicators/SSReplay/Spike/*`,
 harness `Spike/SSR_SpikeKit.mqh`). These were designed to produce the product's
@@ -195,6 +209,7 @@ board therefore shows a still picture on every instrument but the primary. This 
 a *correctness* symptom of a *performance* decision (redraw is per-instance and
 only the primary instance is driven).
 
+[CONFIRMED FROM CODE for the call sites and the cadence; the cost is explicitly unmeasured]
 Also on the 200 ms cadence: `g_publisher.Publish()` for every stream,
 `g_charts.Sync()`, `g_charts2[i].Sync()`, and — when blind mode is on — a
 `g_blind.Apply()` loop over **every managed chart, every 200 ms**
@@ -375,7 +390,7 @@ a bulk re-seed of at most 5 minutes. **How long that takes is unknown**: the spi
 built to answer it (D4) is invalid — see E.9 — and A3's `avg_rebuild_time`,
 labelled as feeding the Reset budget, times a flag rather than the work.
 
-Finding `core-sync-6` (IMPROVEMENT, CONFIRMED) is the storage-side consequence:
+[CONFIRMED FROM CODE] Finding `core-sync-6` (CONFIRMED, IMPROVEMENT) is the storage-side consequence:
 `SnapshotStore::DropFrom` (`SSR_SnapshotStore.mqh:140-160`) leaves holes without
 adjusting `m_count`/`m_head`, so after stepping back through *k* checkpoints the
 next *k* checkpoints overwrite the **oldest survivors** instead of refilling the

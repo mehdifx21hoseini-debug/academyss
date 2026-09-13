@@ -274,6 +274,7 @@ Text(15, "rrrow",  ... m_state.rr > 0.0 ? StringFormat("%.2f R", m_state.rr) : "
 Text(16, "sizerow",... StringFormat(T(SSR_S_LOT), m_state.lot_from_risk));
 ```
 
+[CONFIRMED FROM CODE]
 plus the risk percentage and its money value (`:1350-1359`) and a button whose caption *is* the
 order it will place (`"openln"`, `:1444-1460`, captioned `Place BUY STOP 1.24` or
 `Open LONG 1.24`). The numbers are produced once, in `CSSRGroupPort::ReadState`
@@ -502,7 +503,7 @@ position placed after the cut *without reversing the money it moved*:
       UnwindLegsAfter(i, msc);
 ```
 
-The `continue` is placed *before* the only reversal code in the class, so the position vanishes
+[CONFIRMED FROM CODE] The `continue` is placed *before* the only reversal code in the class, so the position vanishes
 from the log while its realised P/L (`BookExit`, `:222`), its commission (`Open`, `:754`;
 `CheckPendings`, `:356`) and its accrued swap (`AccrueSwap`, `:427`) stay in `m_balance`. The
 '0' key (Reset → `PublishRewind(start_msc)`) therefore leaves an **empty trade log with the
@@ -617,16 +618,23 @@ section even though they are not execution paths. [INFERENCE]
 
 ### G.6 New findings recorded in this section
 
-Not previously in the verified set; each is confirmed from the source quoted above.
+**[CONFIRMED FROM CODE] What these are, and what they are not.** Each is read from the source quoted
+above and is **not** in `verified.json`, which means **none of them went through the three refuters
+and two confirmers that produced the 197 CONFIRMED findings.** They are one reader's assertion with
+a file and a line behind it — weaker evidence than any `verified.json` CONFIRMED, and the severities
+below are self-assigned on C.1's scale without having been tested against C.1's bar. They are
+registered in **D.2** as `new-1` … `new-6` so that a roadmap row can cite them and so that no count
+of the audit's findings silently absorbs them into the 197. The `new-` column below is that register
+id.
 
-| # | File:line | Severity | Claim |
-|---|---|---|---|
-| G-1 | `SSR_Panel.mqh:1354-1355` vs `SSR_TradingEngine.mqh:767,797,810,832` | MEDIUM | The risk-money label is computed from **balance**; every sizing call uses **equity**. With floating P/L the two disagree, and the number shown is not the number risked. [CONFIRMED FROM CODE] |
-| G-2 | `SSR_GroupPort.mqh:1102` vs `:1054-1063` | MEDIUM | `Market()` (deal buttons) passes an empty tag and never applies `m_trail_points`; `MarketAt()` (lines) does both. The Setup name and the trailing distance silently do not apply to button-opened trades, leaving the statement's Tag column blank for them. [CONFIRMED FROM CODE] |
-| G-3 | `SSR_GroupPort.mqh:270-330` | MEDIUM | The whole risk/reward/R/lot preview block is inside `if(m_lines.IsArmed())`, so the market Buy/Sell buttons — which are always live — have no preview at all. [CONFIRMED FROM CODE] |
-| G-4 | `SSR_Panel.mqh:1472-1476` vs `:2113-2114` | LOW | Deal-button dimming is colour only; the dimmed button still executes, opening a trade that contradicts the lines drawn on the chart. [CONFIRMED FROM CODE] |
-| G-5 | `tools/ssr_audit.py` (absence) | MEDIUM | The product's central safety guarantee — no broker call on any path — is stated in five comments and checked by zero of the 21 audits. See A22 in G.1.2. [CONFIRMED FROM CODE] |
-| G-6 | host `:90-95` | IMPROVEMENT | `InpCommission`, `InpSlippage`, `InpSwapLong/Short`, `InpMarginLot` and `InpStopout` all default to **0**: out of the box the account is frictionless apart from spread, and nothing on the panel says so. A trader who never opens the inputs dialog practises a market that cannot lose to costs. Suggest a broker-realistic default set, or a one-line status-strip note when the model is frictionless. [CONFIRMED FROM CODE for the defaults; the consequence is INFERENCE] |
+| # | Register id | File:line | Severity (self-assigned) | Claim |
+|---|---|---|---|---|
+| G-1 | `new-1` | `SSR_Panel.mqh:1354-1355` vs `SSR_TradingEngine.mqh:767,797,810,832` | MEDIUM | The risk-money label is computed from **balance**; every sizing call uses **equity**. With floating P/L the two disagree, and the number shown is not the number risked. [CONFIRMED FROM CODE] |
+| G-2 | `new-2` | `SSR_GroupPort.mqh:1102` vs `:1054-1063` | MEDIUM | `Market()` (deal buttons) passes an empty tag and never applies `m_trail_points`; `MarketAt()` (lines) does both. The Setup name and the trailing distance silently do not apply to button-opened trades, leaving the statement's Tag column blank for them. [CONFIRMED FROM CODE] |
+| G-3 | `new-3` | `SSR_GroupPort.mqh:270-330` | MEDIUM | The whole risk/reward/R/lot preview block is inside `if(m_lines.IsArmed())`, so the market Buy/Sell buttons — which are always live — have no preview at all. [CONFIRMED FROM CODE] |
+| G-4 | `new-4` | `SSR_Panel.mqh:1472-1476` vs `:2113-2114` | LOW | Deal-button dimming is colour only; the dimmed button still executes, opening a trade that contradicts the lines drawn on the chart. [CONFIRMED FROM CODE] |
+| G-5 | `new-5` | `tools/ssr_audit.py` (absence) | MEDIUM | The product's central safety guarantee — no broker call on any path — is stated in five comments and checked by zero of the 21 audits. See A22 in G.1.2. [CONFIRMED FROM CODE] |
+| G-6 | `new-6` | host `SSReplayStandalone.mq5:90-95` | IMPROVEMENT | `InpCommission`, `InpSlippage`, `InpSwapLong/Short`, `InpMarginLot` and `InpStopout` all default to **0**: out of the box the account is frictionless apart from spread, and nothing on the panel says so. A trader who never opens the inputs dialog practises a market that cannot lose to costs. Suggest a broker-realistic default set, or a one-line status-strip note when the model is frictionless. **One consequence worth stating outright, drawn in D's coverage statement:** `CheckStopout` returns immediately when `m_stopout_level <= 0.0 \|\| m_margin_per_lot <= 0.0` (`Trading/SSR_TradingEngine.mqh:438-439`), and both come from `InpStopout` and `InpMarginLot` (installed at `:1168-1169`), so **forced liquidation is dead in the shipped configuration** — and `trading-exec-6`'s "booked, charged, then stopped out" scenario cannot be reached at defaults. [CONFIRMED FROM CODE for the defaults and the guard; the consequence is INFERENCE] |
 
 ---
 

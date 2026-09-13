@@ -159,7 +159,7 @@ is funded by `stspread`, exactly as `chartsn` is (M.4.0), never by a fifth slot.
 
 | Change | Site | Δ writes | Δ objects |
 |---|---|---|---|
-| delete `stfid` (`ui-panel-6`, CONFIRMED HIGH — anchored `x+330` in a 310 px panel) | `DrawStatus:2032-2036` | −6 cold, −1 find/frame | −1 |
+| delete `stfid` (`ui-panel-6`, CONFIRMED MEDIUM — anchored `x+330` in a 310 px panel) | `DrawStatus:2032-2036` | −6 cold, −1 find/frame | −1 |
 | add `chartsn` on slot 53 while `charts_detached > 0` (`chart-10`) | `DrawStatus`, after `stspread` | +6 cold, conditional | +1, exclusive with `stspread` |
 | re-column: `stflt` 116→106, `stopen` 218→196, `stspread` 268→252 | `:2018-2030` | 0 | 0 |
 
@@ -728,9 +728,9 @@ shortened at source, not clipped**, to `"taller panel: 12 positions"` (26).
 
 | Finding | How |
 |---|---|
-| `ui-panel-12` (CONFIRMED, MEDIUM) | `CSSRKeyCard::Show` begins `m_w.RemoveAll()` (`SSR_KeyCard.mqh:72`) and recreates ~41 objects **per frame while up** (~41 deletes + 41 creates + ~450 writes). A page costs **~147 cold writes once per navigation** |
+| `ui-panel-12` (CONFIRMED, LOW) | `CSSRKeyCard::Show` begins `m_w.RemoveAll()` (`SSR_KeyCard.mqh:72`) and recreates ~41 objects **per frame while up** (~41 deletes + 41 creates + ~450 writes). A page costs **~147 cold writes once per navigation** |
 | `host-expert-4` + `ui-dialogs-14` | a permanently drawn rail cell cannot be missed and cannot be consumed unseen |
-| `ui-plumbing-1` (CONFIRMED, MEDIUM) | the card's rows are English literals inside `SSRKeyBindings()`. Moving them into a sheet is the moment to add 18 `ENUM_SSR_STR` ids: catalogue **190 → 208**, plus 18 `fa.txt` rows |
+| `ui-plumbing-1` (CONFIRMED, LOW) | the card's rows are English literals inside `SSRKeyBindings()`. Moving them into a sheet is the moment to add 18 `ENUM_SSR_STR` ids: catalogue **190 → 208**, plus 18 `fa.txt` rows |
 | `ui-plumbing-15` (CONFIRMED, LOW) | `Ctrl+K` is not in the table, so `SSRKeyToCommand(75)` returns `SSR_CMD_NONE` and no generated list can name the palette. Add the binding with `listed = true` — the page then teaches the feature a comment at `:929` wrongly records as lost |
 | `ui-plumbing-3` (CONFIRMED, LOW) | `SSRKeyHint()` (`SSR_Keys.mqh:271`) is a third hand-written list, also saying *"R reset"*. Generate it from the table. **The product then ships one key list instead of four** |
 | `ui-dialogs-16` (IMPROVEMENT) | `ListRO` retires the false affordance here and on PERFORMANCE at the same time |
@@ -913,7 +913,7 @@ Two changes, both already owed:
 
 | | today | N |
 |---|---|---|
-| still frame | ~586 property writes + ~211 `ObjectFind` (M.1.2) | **~95 finds + ~30 colour writes ≈ 2 ms** |
+| still frame | ~586 property writes + ~211 `ObjectFind` (M.1.2 — an **[INFERENCE]** derived for the rail layout, not section E's measured 561; E.1 and M.1.2 both carry the reconciliation) | **~95 finds + ~30 colour writes ≈ 2 ms** |
 | at 10 fps (`SSReplayStandalone.mq5:3063`) | ≈ **0.41 s of repaint per second of wall clock** | ≈ 0.02 s |
 | a navigation click | — | one teardown (~25 `Remove`) + one cold draw (~190) ≈ **15 ms, once** |
 | key card open | +~450 writes **per frame** | it is a page; 0 |
@@ -964,7 +964,7 @@ split, `SheetProp` computing nothing, and both compile-time switches.
   here. PERFORMANCE reads the same generator and does **not** fix them.
 * **`core-engine-5` (CONFIRMED, MEDIUM)** — `bars_consumed` is wrong by 10-1500×. SESSION draws it;
   SESSION does not fix it, which is precisely why it must not sit beside trading measures.
-* **`chart-7` (CONFIRMED, MEDIUM)** — `LeakGuard::Advice` is written far longer than the ~49
+* **`chart-7` (CONFIRMED, LOW)** — `LeakGuard::Advice` is written far longer than the ~49
   characters its consumer can show. `Clip 52` makes the cut honest; shortening it at source makes it
   useful. Do both.
 * **`chart-12` (CONFIRMED, LOW)** — every word the chart layer draws (`"STOP - drag me"`, `BUY`/
