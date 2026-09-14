@@ -673,16 +673,37 @@ public:
 //| Free, because it is not any one widget set's business: it removes |
 //| what EVERY prefix left behind on a chart.                         |
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| `keep` IS A COMMA-SEPARATED LIST, AND IT HAD TO BECOME ONE.      |
+//|                                                                  |
+//| It was a single name, and that was a CRITICAL defect for three   |
+//| builds. This sweep deletes everything called SSR* - and the two   |
+//| labels that carry a chart handover ACROSS the restart are also    |
+//| called SSR*: SSR_ORIGIN_HANDOFF, which says what symbol is being  |
+//| replayed, and SSR_PICK_HANDOFF, which says where the user chose   |
+//| to start. OnInit swept them away 63 lines before it read them, so |
+//| in one-window mode - the shipped default - the second pass found  |
+//| no origin and refused to start, telling the user to set InpSymbol |
+//| by hand.                                                          |
+//|                                                                  |
+//| A LIST, NOT A REORDERING. Moving the sweep below the reads would  |
+//| have fixed this instance and left the hazard: the next object     |
+//| that has to survive a restart would be deleted by a sweep that    |
+//| cannot be told about it. The call site now names what it needs    |
+//| kept, which is a statement that cannot be broken by moving lines. |
+//+------------------------------------------------------------------+
 int SSRPurgeChart(const long chart, const string keep = "")
   {
    int removed = 0;
+   //--- wrapped in commas so "SSR_PICK" cannot match "SSR_PICK_LINE"
+   string guard = (keep == "" ? "" : "," + keep + ",");
    int total   = ObjectsTotal(chart, -1, -1);
    for(int i = total - 1; i >= 0; i--)
      {
       string nm = ObjectName(chart, i, -1, -1);
       if(StringFind(nm, "SSR") != 0)
          continue;
-      if(keep != "" && nm == keep)
+      if(guard != "" && StringFind(guard, "," + nm + ",") >= 0)
          continue;
       if(ObjectDelete(chart, nm))
          removed++;

@@ -636,11 +636,40 @@ public:
       int keep = 0;
       for(int i = 0; i < m_count; i++)
         {
-         //--- the order was PLACED after the cut: it never existed
+         //+------------------------------------------------------------+
+         //| THE ORDER WAS PLACED AFTER THE CUT: IT NEVER EXISTED.      |
+         //|                                                            |
+         //| Dropping the record is not enough, and for three builds    |
+         //| that is all this did. The balance is kept INCREMENTALLY -  |
+         //| an entry debits its commission (line ~754), every exit     |
+         //| credits `realised - fee` through a leg (line ~222) - so a  |
+         //| trade that opened AND closed inside the deleted future had |
+         //| already moved the balance. Forgetting the position left    |
+         //| that money behind: step back over a winning trade and the  |
+         //| profit stayed in the account, over a loser and the loss    |
+         //| stayed too. Free money, or a debt for a trade the replay   |
+         //| says never happened.                                       |
+         //|                                                            |
+         //| So every currency movement it made is taken back first,    |
+         //| in the same two steps the un-fill below uses: the legs     |
+         //| reverse each exit exactly, and `commission - swap` reverses|
+         //| the entry's own. AccrueSwap() at the end cannot do it for  |
+         //| us - it restates from the array, and this position is      |
+         //| about to leave the array.                                  |
+         //+------------------------------------------------------------+
          long placed = (m_pos[i].request_msc > 0 ? m_pos[i].request_msc
                                                  : m_pos[i].open_msc);
          if(placed > msc)
+           {
+            UnwindLegsAfter(i, msc);
+            m_balance += m_pos[i].commission - m_pos[i].swap;
+            if(m_pos[i].ambiguous)
+              {
+               m_pos[i].ambiguous = false;
+               m_ambiguous_count--;
+              }
             continue;
+           }
 
          //--- every exit taken in the deleted future, newest first
          UnwindLegsAfter(i, msc);

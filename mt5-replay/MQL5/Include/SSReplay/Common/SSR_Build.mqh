@@ -19,7 +19,7 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v125 2026-09-12  fewer"
+#define SSR_BUILD "v126 2026-09-14  criticals"
 
 #endif // SSR_BUILD_MQH
 //+------------------------------------------------------------------+

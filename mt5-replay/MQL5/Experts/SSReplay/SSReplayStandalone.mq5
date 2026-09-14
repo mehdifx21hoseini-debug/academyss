@@ -1803,7 +1803,11 @@ int OnInit()
    //--- label slots and only correct itself when a value changed.
    SSRLoadLanguage(InpLanguage);
 
-   SSRPurgeChart(0, SSR_PICK_LINE);
+   //--- THE TWO HANDOVER LABELS MUST SURVIVE THIS. They are called
+   //--- SSR* like everything else, so the sweep deleted them and the
+   //--- second pass of a one-window handover could not tell what it
+   //--- was replaying or where the user chose to start.
+   SSRPurgeChart(0, SSR_PICK_LINE + "," + SSR_HANDOFF + "," + SSR_PICK_STASH);
 
    //+------------------------------------------------------------------+
    //| THE HANDOVER FLAGS ARE CLEARED BEFORE ANYTHING ELSE RUNS.        |
