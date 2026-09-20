@@ -2547,6 +2547,18 @@
       "sha": "227f9f40c37e2c18",
       "file": "exports/academy/academy_eq_lesson_01_v002.md",
       "generated_at": "2026-09-05T22:23:47Z"
+    },
+    {
+      "version": "v003",
+      "sha": "1b402f47e831b2b8",
+      "file": "exports/academy/academy_eq_lesson_01_v003.md",
+      "generated_at": "2026-09-20T17:55:36Z"
+    },
+    {
+      "version": "v004",
+      "sha": "8a815e6cc89164aa",
+      "file": "exports/academy/academy_eq_lesson_01_v004.md",
+      "generated_at": "2026-09-20T17:55:53Z"
     }
   ],
   "academy_eq_lesson_01.json": [
@@ -2561,6 +2573,18 @@
       "sha": "1acf3446c0dc5c6e",
       "file": "exports/academy/academy_eq_lesson_01_v002.json",
       "generated_at": "2026-09-05T22:23:47Z"
+    },
+    {
+      "version": "v003",
+      "sha": "24af832f61c73035",
+      "file": "exports/academy/academy_eq_lesson_01_v003.json",
+      "generated_at": "2026-09-20T17:55:36Z"
+    },
+    {
+      "version": "v004",
+      "sha": "503f07ec6a83c5f9",
+      "file": "exports/academy/academy_eq_lesson_01_v004.json",
+      "generated_at": "2026-09-20T17:55:53Z"
     }
   ],
   "academy_eq_lesson_02.md": [

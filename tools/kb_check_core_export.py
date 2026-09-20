@@ -133,6 +133,7 @@ def main():
         rows = list(reader)
 
     rejected, keys, chunkless, chunk_total = [], collections.defaultdict(list), [], 0
+    titles = collections.defaultdict(list)
     for line, row in enumerate(rows, start=2):
         try:
             parsed = parse_row(row)
@@ -140,12 +141,19 @@ def main():
             rejected.append((line, str(err)))
             continue
         keys[parsed["external_key"]].append(line)
+        titles[parsed["title"]].append(line)
         pieces = chunk_text("%s\n\n%s" % (parsed["title"], parsed["body"]))
         chunk_total += len(pieces)
         if not pieces:
             chunkless.append((line, row["question"][:50]))
 
     clashes = {k: v for k, v in keys.items() if len(v) > 1}
+    # Two rows carrying the same title are two documents a student's question
+    # cannot choose between: retrieval matches on the question text alone, and
+    # the evaluation harness maps a title to exactly one document, so the other
+    # one can never be reached. This is the invariant the exporter's
+    # question_key claim exists to hold.
+    twins = {t: v for t, v in titles.items() if len(v) > 1}
 
     print("file      : %s" % K.rel(args.file))
     print("rows      : %d" % len(rows))
@@ -156,13 +164,17 @@ def main():
     for k, lines in list(clashes.items())[:10]:
         print("            خط‌های %s با یک کلید — دومی اولی را بازنویسی می‌کند"
               % ", ".join(str(x) for x in lines))
+    print("title dup : %d" % len(twins))
+    for t, lines in list(twins.items())[:10]:
+        print("            خط‌های %s عنوان یکسان دارند — «%s»"
+              % (", ".join(str(x) for x in lines), t[:44]))
     print("chunks    : %d (میانگین %.1f در هر مدخل)"
           % (chunk_total, chunk_total / float(len(rows) or 1)))
     print("no chunks : %d" % len(chunkless))
     for line, q in chunkless[:10]:
         print("            خط %d — «%s»" % (line, q))
 
-    ok = not rejected and not clashes and not chunkless
+    ok = not rejected and not clashes and not twins and not chunkless
     print("verdict   : %s" % ("قابل ورود ✅" if ok else "نیازمند اصلاح ❌"))
     return 0 if ok else 1
 
