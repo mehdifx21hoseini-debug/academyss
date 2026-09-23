@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from zoneinfo import ZoneInfo
 
 import pytest
 from sqlalchemy import text
@@ -46,12 +47,16 @@ class FakeChannel:
         return self._next_id
 
 
+TEHRAN = ZoneInfo("Asia/Tehran")
+
+
 def _gate(**kw: object) -> AccountGate:
     defaults = {
         "slug": "mentor-a",
         "bucket": TokenBucket(rate_per_minute=60, burst=5),
         "quiet_start": 23,
         "quiet_end": 8,
+        "tz": TEHRAN,
     }
     return AccountGate(**{**defaults, **kw})  # type: ignore[arg-type]
 

@@ -99,8 +99,11 @@ def bot(monkeypatch: pytest.MonkeyPatch):  # type: ignore[no-untyped-def]
     gate = AccountGate(
         slug="mentor-a",
         bucket=TokenBucket(rate_per_minute=60, burst=5),
-        quiet_start=23,
-        quiet_end=8,
+        # ساعت سکوت خاموش: این فایل درباره‌ی آن نیست و روشن بودنش تست را به ساعت
+        # دیواری ماشین وابسته می‌کند.
+        quiet_start=0,
+        quiet_end=0,
+        tz=UTC,
     )
     instance = bot_module.ControlBot(channels={"mentor-a": None}, gates={"mentor-a": gate})
     yield instance

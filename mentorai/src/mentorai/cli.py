@@ -308,6 +308,7 @@ async def cmd_run_worker(_: argparse.Namespace) -> int:
             ),
             quiet_start=settings.quiet_hours_start,
             quiet_end=settings.quiet_hours_end,
+            tz=settings.tz,
             send_paused=account.send_paused,
         )
         for account in accounts

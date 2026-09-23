@@ -112,11 +112,19 @@ def _answer() -> ModelAnswer:
 
 
 def _gate() -> AccountGate:
+    """دروازه‌ای که ساعت سکوتش خاموش است.
+
+    این فایل درباره‌ی ساعت سکوت نیست، ولی پیش از این ۲۳ تا ۸ می‌گذاشت و زمان را هم
+    به `send` نمی‌داد، پس به ساعت دیواری ماشین وابسته بود: همین سه تست در CI بین
+    ۲۳:۰۰ و ۰۸:۰۰ می‌افتادند و بعدش پاس می‌شدند. آزمونِ ساعت سکوت جای خودش را دارد
+    (`test_safety.py`)؛ اینجا خاموش است تا نتیجه قطعی بماند.
+    """
     return AccountGate(
         slug="mentor-a",
         bucket=TokenBucket(rate_per_minute=60, burst=5),
-        quiet_start=23,
-        quiet_end=8,
+        quiet_start=0,
+        quiet_end=0,
+        tz=UTC,
     )
 
 
