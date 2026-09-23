@@ -83,7 +83,7 @@ docker compose run --rm cli python -m alembic upgrade head
 docker compose run --rm cli mentorai kb-import --file /kb/mentorai_kb_latest.csv
 ```
 
-انتظار: `ساخته شد: 641`. خروجی پایگاه دانش از قبل روی `/kb` سوار شده، پس مسیردهی
+انتظار: `ساخته شد: 643`. خروجی پایگاه دانش از قبل روی `/kb` سوار شده، پس مسیردهی
 دستی لازم نیست.
 
 کیفیت بازیابی را همین‌جا اندازه بگیرید — همان عددی که در `ADR-019` آمده:
@@ -121,7 +121,7 @@ docker compose run --rm cli python -m alembic upgrade head
 docker compose run --rm cli mentorai kb-import --file /kb/mentorai_kb_latest.csv
 ```
 
-انتظار: `ساخته شد: 641`.
+انتظار: `ساخته شد: 643`.
 
 حساب را ثبت و وارد کنید. ورود عمداً دستی است؛ ورود مکرر خودش برای تلگرام سیگنال
 منفی است:
