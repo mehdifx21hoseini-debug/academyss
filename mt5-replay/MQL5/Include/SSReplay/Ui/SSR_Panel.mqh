@@ -947,8 +947,14 @@ private:
       //--- the panel never formats the clock itself: Blind Mode has to
       //--- reach the text, and a second place that knows about blind
       //--- mode is the one that gets forgotten
+      //--- MONOSPACED. This is the one label on the panel that changes
+      //--- every frame, and a clock whose digits have different widths
+      //--- re-flows on every tick - the colon walks, and the eye keeps
+      //--- being called back to it. Tahoma hid this by drawing all ten
+      //--- digits on one advance; now the face guarantees it instead of
+      //--- the product depending on a property of a text face.
       Text(2, "clock", x + SSR_PAD, y, m_state.clock_text,
-           SSR_C_TEXT, SSR_FS_CLOCK);
+           SSR_C_TEXT, SSR_FS_CLOCK, SSR_FONT_MONO);
 
       string pct = StringFormat("%d%%", (int)MathRound(m_state.progress * 100.0));
       if(m_state.pause_reason != "")

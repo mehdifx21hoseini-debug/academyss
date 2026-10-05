@@ -51,7 +51,11 @@
 //--- audit and showed up the moment the layout was rendered at its own
 //--- coordinates. The three rows it has to clear, measured from the
 //--- bottom of the window: buttons at -28 (22 high), hint at -48,
-//--- progress at -62, and the paging row above them ends at +255.
+//--- progress at -66, and the paging row above them ends at +255.
+//--- The gaps are 8, 4 and 6 px. They were 0 at the 7 pt line box and
+//--- would have become overlaps the moment the type went up a point -
+//--- which is the whole reason ssr_layout_check derives its line
+//--- height from SSR_FS_SMALL instead of carrying a copy of it.
 #define SSR_DC_H        (SSR_HEADER_H + 46 + SSR_DC_ROWS * SSR_DC_ROW_H + 76)
 #define SSR_DC_MAX      240            // Market Watch is not unbounded
 #define SSR_DC_WAITS    6              // sync nudges before a row gives up
@@ -344,7 +348,7 @@ public:
      {
       if(!m_open)
          return;
-      m_w.Label("prog", m_x + SSR_DC_C_SYM, m_y + SSR_DC_H - 62,
+      m_w.Label("prog", m_x + SSR_DC_C_SYM, m_y + SSR_DC_H - 66,
                 StatusText(), SSR_C_TEXT_DIM, SSR_FS_SMALL);
       ChartRedraw(m_chart);
      }
@@ -487,7 +491,7 @@ public:
          m_w.Button("down", x + SSR_DC_W - 34, by, 24, 18, "v");
         }
 
-      m_w.Label("prog", x + SSR_DC_C_SYM, y + SSR_DC_H - 62,
+      m_w.Label("prog", x + SSR_DC_C_SYM, y + SSR_DC_H - 66,
                 StatusText(), SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
       //--- WHAT THE WINDOW IS FOR, spelled out. A table of dates with no

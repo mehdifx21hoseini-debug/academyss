@@ -21,14 +21,32 @@
 //|  Three steps, each about eight points of luminance - enough to   |
 //|  read as depth, not enough to look striped.                      |
 //|                                                                  |
-//|  ONE TYPEFACE                                                    |
-//|  There used to be two: Segoe UI for text and Consolas for        |
-//|  numbers. The second existed to stop changing digits jittering.  |
-//|  Tahoma draws all ten digits on the same advance width, so       |
-//|  right-aligned columns and fixed decimal places do that job and  |
-//|  the panel speaks in one voice. SSR_FONT_MONO is kept as a       |
-//|  separate name pointing at the same face, so if a terminal ever  |
-//|  proves otherwise it is one line to split them again.            |
+//|  TWO TYPEFACES, AND THE SPLIT IS BACK ON PURPOSE.                |
+//|                                                                  |
+//|  It was Segoe UI and Consolas, then one face - Tahoma - chosen   |
+//|  for a single property: Tahoma draws all ten digits on the same  |
+//|  advance width, so a clock and a P/L do not jitter as they       |
+//|  change. The note here said that if a terminal ever proved       |
+//|  otherwise it was one line to split them again.                  |
+//|                                                                  |
+//|  What proved otherwise was not a terminal. It was the person     |
+//|  using it: Tahoma reads as heavy and dated beside the native     |
+//|  dialogs it sits next to, and "simple and formal" is a fair      |
+//|  thing to ask of a tool somebody works in for hours.             |
+//|                                                                  |
+//|  So TEXT is Segoe UI - the face Windows itself draws every       |
+//|  dialog in since Vista, which is exactly why it disappears -     |
+//|  and NUMBERS THAT CHANGE are Consolas, a genuinely monospaced    |
+//|  face. That is the better arrangement anyway: alignment now      |
+//|  rests on a face that GUARANTEES equal advances rather than on   |
+//|  a happy property of a proportional one, and the places that     |
+//|  pad columns with spaces finally work for the reason they        |
+//|  always assumed they did.                                        |
+//|                                                                  |
+//|  WHAT IS NOT MEASURED HERE: whether Segoe UI's own digits are    |
+//|  tabular. It does not matter any more - nothing lines up on      |
+//|  them - and SSR_QA_FontProbe prints the answer on the machine    |
+//|  that will run it, under "digits: TABULAR / PROPORTIONAL".       |
 //|                                                                  |
 //|  COLOUR CARRIES MEANING AND NOTHING ELSE - green means running   |
 //|  or long, amber means degraded, red means stopped or short. On a |
@@ -420,13 +438,29 @@
 //--- SSR_CONTRAST: SSR_C_THUMB on SSR_C_PANEL ui
 //--- SSR_CONTRAST: SSR_C_TRACK_FILL on SSR_C_TRACK ui
 
-//--- type. ONE face - see the header.
-#define SSR_FONT           "Tahoma"
-#define SSR_FONT_MONO      "Tahoma"
-#define SSR_FS_TITLE       9
-#define SSR_FS_BODY        8
-#define SSR_FS_CLOCK       13
-#define SSR_FS_SMALL       7
+//--- type. TWO faces - see the header. Both ship with Windows: Segoe UI
+//--- since Vista, Consolas since Vista. SSR_QA_FontProbe reports which
+//--- are really installed rather than silently substituted.
+#define SSR_FONT           "Segoe UI"
+#define SSR_FONT_MONO      "Consolas"
+
+//--- A POINT SIZE IS NOT A POINT SIZE ACROSS FACES.
+//---
+//--- Tahoma carries an unusually large x-height for its size; Segoe UI
+//--- does not. Kept at the old numbers it would read SMALLER than what
+//--- it replaced, which is the opposite of the complaint. Nine point is
+//--- what Windows itself sets body text in, and that is the size this
+//--- face was drawn for.
+//---
+//--- Width is roughly a wash - Segoe UI is the narrower face, so a point
+//--- up lands near where Tahoma was - but "roughly" is not a measurement
+//--- and labels have no width to overflow. tools/ssr_layout_check.py
+//--- re-checks the stacked rows at the new line height, and the probe
+//--- measures the real strings against the real panel widths.
+#define SSR_FS_TITLE       10
+#define SSR_FS_BODY        9
+#define SSR_FS_CLOCK       14
+#define SSR_FS_SMALL       8
 
 //+------------------------------------------------------------------+
 //| Metrics, in pixels.                                              |

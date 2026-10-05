@@ -135,6 +135,32 @@ private:
    long              Mix(const long a, const long b) { return a * 1000003 + b; }
 
    //+------------------------------------------------------------------+
+   //| A NUMBER FOR A TYPEFACE, because the fingerprint is arithmetic.  |
+   //|                                                                  |
+   //| Label used StringLen(font) for this. That worked for exactly as   |
+   //| long as there was one face: the moment the product went back to   |
+   //| a text face and a monospaced one it became "Segoe UI" and         |
+   //| "Consolas" - both eight characters, both the same key, so a       |
+   //| label that changed face at the same place, colour, size and text  |
+   //| would have been judged unchanged and never repainted.             |
+   //|                                                                  |
+   //| Nothing in the product switches a label's face today. That is     |
+   //| the kind of sentence that stops being true quietly, and this is   |
+   //| four lines.                                                       |
+   //+------------------------------------------------------------------+
+   long              FaceKey(const string font)
+     {
+      long k = 2166136261;                      // FNV-1a, as used by Slot
+      int  n = StringLen(font);
+      for(int i = 0; i < n; i++)
+        {
+         k ^= (long)StringGetCharacter(font, i);
+         k = (k * 16777619) & 0x7FFFFFFF;
+        }
+      return k;
+     }
+
+   //+------------------------------------------------------------------+
    //| WHAT THE PAINT ACTUALLY COSTS, COUNTED.                          |
    //|                                                                  |
    //| Phase 11's rule is that the paint budget may not grow, and until |
@@ -229,8 +255,7 @@ public:
                            const string font = SSR_FONT)
      {
       string n = N(id);
-      long   fp = Mix(Mix(Mix(Mix(x, y), (long)col), size),
-                      (long)StringLen(font));
+      long   fp = Mix(Mix(Mix(Mix(x, y), (long)col), size), FaceKey(font));
       if(Same(n, fp, text))
          return true;
       if(ObjectFind(m_chart, n) < 0)
@@ -261,14 +286,15 @@ public:
    bool              Button(const string id, const int x, const int y,
                             const int w, const int h, const string text,
                             const bool engaged = false,
-                            const bool enabled = true)
+                            const bool enabled = true,
+                            const string font = SSR_FONT)
      {
       return ButtonC(id, x, y, w, h, text,
                      engaged ? SSR_C_BTN_ON      : SSR_C_BTN,
                      engaged ? SSR_C_BTN_ON_EDGE : SSR_C_BTN_EDGE,
                      enabled ? (engaged ? SSR_C_BTN_ON_TEXT : SSR_C_BTN_TEXT)
                              : SSR_C_TEXT_FAINT,
-                     SSR_FS_BODY);
+                     SSR_FS_BODY, font);
      }
 
    //+------------------------------------------------------------------+
@@ -358,12 +384,14 @@ public:
    bool              ButtonC(const string id, const int x, const int y,
                              const int w, const int h, const string text,
                              const color bg, const color edge,
-                             const color fg, const int size = SSR_FS_BODY)
+                             const color fg, const int size = SSR_FS_BODY,
+                             const string font = SSR_FONT)
      {
       Extent(x, y, w, h);
       string n = N(id);
-      long   fp = Mix(Mix(Mix(Mix(Mix(Mix(Mix(x, y), w), h),
-                                  (long)bg), (long)edge), (long)fg), size);
+      long   fp = Mix(Mix(Mix(Mix(Mix(Mix(Mix(Mix(x, y), w), h),
+                                      (long)bg), (long)edge), (long)fg), size),
+                      FaceKey(font));
       if(Same(n, fp, text))
          return true;
       if(ObjectFind(m_chart, n) < 0)
@@ -372,8 +400,12 @@ public:
             return false;
          m_created++;
          Common(n);
-         ObjectSetString(m_chart, n, OBJPROP_FONT, SSR_FONT);
         }
+      //--- WRITTEN EVERY TIME, not only at creation. It was set once, so
+      //--- a control that came back under a different face kept the old
+      //--- one for as long as the object survived - which, with the
+      //--- cache above, is the whole life of the panel.
+      ObjectSetString(m_chart, n, OBJPROP_FONT, font);
       ObjectSetInteger(m_chart, n, OBJPROP_XDISTANCE,    x);
       ObjectSetInteger(m_chart, n, OBJPROP_YDISTANCE,    y);
       ObjectSetInteger(m_chart, n, OBJPROP_XSIZE,        w);
@@ -562,10 +594,15 @@ public:
    //--- trades, statistics. MQL5 has no scrollbar and no clipping, so a
    //--- list draws a WINDOW onto its data and the caller pages it. A
    //--- list that drew every row would draw the surplus over the chart.
+   //--- THE FACE IS AN ARGUMENT because a list whose rows are padded
+   //--- with spaces to make columns only lines up in a monospaced one.
+   //--- The review card does exactly that and had been relying on a
+   //--- proportional face to do it, which it never could.
    void              List(const string id, const int x, const int y,
                           const int w, const int row_h,
                           const string &rows[], const int first,
-                          const int shown, const int selected)
+                          const int shown, const int selected,
+                          const string font = SSR_FONT)
      {
       int n = ArraySize(rows);
       int k = n - first;
@@ -582,9 +619,10 @@ public:
          if(idx == selected)
             ButtonC(rid, x, y + i * row_h, w, row_h, rows[idx],
                     SSR_C_BTN_ON, SSR_C_BTN_ON_EDGE, SSR_C_BTN_ON_TEXT,
-                    SSR_FS_BODY);
+                    SSR_FS_BODY, font);
          else
-            Button(rid, x, y + i * row_h, w, row_h, rows[idx]);
+            Button(rid, x, y + i * row_h, w, row_h, rows[idx],
+                   false, true, font);
         }
      }
 

@@ -22,6 +22,7 @@ to see what.
 
 """
 import os
+import re
 from PIL import Image, ImageDraw, ImageFont
 
 OUT = os.path.join(os.path.dirname(os.path.dirname(
@@ -38,20 +39,56 @@ C = dict(
     PRIMARY_TEXT=(27,30,35),
 )
 S = 2                                   # 2x so the text is readable here
-F = "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-FB = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+
+#--- THE SIZES ARE READ, NOT COPIED. A preview carrying its own idea of
+#--- how big the type is stops being a preview the first time the theme
+#--- changes, and does it silently.
+THEME = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                     "MQL5", "Include", "SSReplay", "Ui", "SSR_Theme.mqh")
+PT = {}
+FACE = {}
+for _line in open(THEME, encoding="utf-8"):
+    m = re.match(r"\s*#define\s+(SSR_FS_[A-Z]+)\s+(\d+)", _line)
+    if m:
+        PT[m.group(1)] = int(m.group(2))
+    m = re.match(r'\s*#define\s+(SSR_FONT(?:_MONO)?)\s+"([^"]+)"', _line)
+    if m:
+        FACE[m.group(1)] = m.group(2)
+
+#--- SEGOE UI IS NOT ON THIS MACHINE and there is no faithful free
+#--- substitute for it. Liberation Sans is the closest thing installed -
+#--- Arial metrics, so a little WIDER than Segoe UI, never narrower,
+#--- which makes this preview pessimistic about fit rather than
+#--- flattering. The image says so at the bottom; do not read letterform
+#--- detail off it, only size, spacing and whether things collide.
+F  = "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
+FB = "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf"
+FM = "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf"
+
 # MQL5 font sizes are points; at 96dpi a point is 4/3 of a pixel.
-def f(pt, bold=False): return ImageFont.truetype(FB if bold else F, int(round(pt*4/3*S)))
+def f(pt, bold=False, mono=False):
+    return ImageFont.truetype(FM if mono else (FB if bold else F),
+                              int(round(pt*4/3*S)))
 
 def rect(d,x,y,w,h,bg,edge):
     d.rectangle([x*S,y*S,(x+w)*S-1,(y+h)*S-1], fill=bg, outline=edge, width=max(1,S//2))
-def label(d,x,y,t,col,pt=8,bold=False):
-    d.text((x*S,y*S), t, fill=col, font=f(pt,bold))
-def button(d,x,y,w,h,t,bg=None,edge=None,fg=None,pt=8):
+def label(d,x,y,t,col,pt=None,bold=False,mono=False):
+    d.text((x*S,y*S), t, fill=col, font=f(pt or PT['SSR_FS_BODY'],bold,mono))
+def button(d,x,y,w,h,t,bg=None,edge=None,fg=None,pt=None):
     bg=bg or C['BTN']; edge=edge or C['BTN_EDGE']; fg=fg or C['BTN_TEXT']
     rect(d,x,y,w,h,bg,edge)
-    ft=f(pt); tw=d.textlength(t,font=ft)
+    ft=f(pt or PT['SSR_FS_BODY']); tw=d.textlength(t,font=ft)
     d.text((x*S+(w*S-tw)/2, y*S+(h*S-ft.size*1.25)/2), t, fill=fg, font=ft)
+
+def caption(im):
+    d = ImageDraw.Draw(im)
+    d.text((14*S, (CH-16)*S),
+           "preview - sizes and spacing are the real ones (%s %dpt / %s); "
+           "the FACE is Liberation Sans standing in for %s, which is not on "
+           "the build machine"
+           % (FACE.get('SSR_FONT','?'), PT['SSR_FS_BODY'],
+              FACE.get('SSR_FONT_MONO','?'), FACE.get('SSR_FONT','?')),
+           fill=(96,102,112), font=f(7))
 
 CW, CH = 980, 560                        # a chart-sized canvas
 def chart():
@@ -66,15 +103,15 @@ def splash(d, status, col):
     X,Y,W,H = 14,14,296,112                      # SSR_SPLASH_*
     rect(d,X,Y,W,H,C['PANEL'],C['PANEL_EDGE'])
     rect(d,X+10,Y+10,22,22,C['ACCENT'],C['ACCENT'])
-    label(d,X+15,Y+15,"SS",C['PRIMARY_TEXT'],8,True)
-    label(d,X+40,Y+10,"SS REPLAY",C['TEXT'],13,True)
-    label(d,X+40,Y+29,"market replay  -  manual backtesting  -  training",C['TEXT_DIM'],7)
+    label(d,X+15,Y+15,"SS",C['PRIMARY_TEXT'],PT['SSR_FS_BODY'],True)
+    label(d,X+40,Y+10,"SS REPLAY",C['TEXT'],PT['SSR_FS_CLOCK'],True)
+    label(d,X+40,Y+29,"market replay  -  manual backtesting  -  training",C['TEXT_DIM'],PT['SSR_FS_SMALL'])
     rect(d,X+10,Y+46,W-20,1,C['GROUP_EDGE'],C['GROUP_EDGE'])
-    label(d,X+10,Y+52,"#20242426  demo  SS Academy Markets",C['TEXT_DIM'],7)
-    label(d,X+10,Y+66,"Virtual trades only. Nothing is sent to your broker.",C['RUN'],7)
-    label(d,X+W-86,Y+14,"v127",C['TEXT_FAINT'],7)
-    label(d,X+10,Y+86,"!",C['HOLD'],8,True)
-    label(d,X+34,Y+86,status,col,7)
+    label(d,X+10,Y+52,"#20242426  demo  SS Academy Markets",C['TEXT_DIM'],PT['SSR_FS_SMALL'])
+    label(d,X+10,Y+66,"Virtual trades only. Nothing is sent to your broker.",C['RUN'],PT['SSR_FS_SMALL'])
+    label(d,X+W-86,Y+14,"v127",C['TEXT_FAINT'],PT['SSR_FS_SMALL'])
+    label(d,X+10,Y+86,"!",C['HOLD'],PT['SSR_FS_BODY'],True)
+    label(d,X+34,Y+86,status,col,PT['SSR_FS_SMALL'])
 
 # ------------------------------------------------------------------ home
 def home(d, x, y):
@@ -82,10 +119,10 @@ def home(d, x, y):
     rows = 4                                     # last + random + data + (no saved session)
     H = 34+22+rows*46+30+10
     rect(d,x,y,W,H,C['PANEL'],C['PANEL_EDGE'])
-    label(d,x+12,y+9,"NEW REPLAY",C['TEXT'],8,True)
-    label(d,x+W-40,y+10,"v127",C['TEXT_FAINT'],7)
+    label(d,x+12,y+9,"NEW REPLAY",C['TEXT'],PT['SSR_FS_BODY'],True)
+    label(d,x+W-40,y+10,"v127",C['TEXT_FAINT'],PT['SSR_FS_SMALL'])
     rect(d,x+12,y+28,W-24,1,C['GROUP_EDGE'],C['GROUP_EDGE'])
-    label(d,x+12,y+34,"Virtual trades only - nothing reaches your broker",C['RUN'],7)
+    label(d,x+12,y+34,"Virtual trades only - nothing reaches your broker",C['RUN'],PT['SSR_FS_SMALL'])
     by = y+34+22
     for t,sub,prim in [
         ("Same as last time","M5  -  standard  -  10000.00  -  1.00% risk",True),
@@ -94,7 +131,7 @@ def home(d, x, y):
         ("Data Centre","see which symbols you can replay, and from when",False)]:
         if prim: button(d,x+12,by,W-24,26,t,C['PRIMARY'],C['PRIMARY'],C['PRIMARY_TEXT'])
         else:    button(d,x+12,by,W-24,26,t)
-        label(d,x+14,by+29,sub,C['TEXT_DIM'],7)
+        label(d,x+14,by+29,sub,C['TEXT_DIM'],PT['SSR_FS_SMALL'])
         by += 46
     button(d,x+12,by+4,W-24,22,"Customise...")
     return H
@@ -106,11 +143,11 @@ DCH = 20+46+ROWS*RH+76
 def datacentre(d,x,y,data,sel,status,scanning=True):
     rect(d,x,y,DCW,DCH,C['PANEL'],C['PANEL_EDGE'])
     rect(d,x+1,y+1,DCW-2,20,C['HEADER'],C['GROUP_EDGE'])
-    label(d,x+8,y+5,"DATA CENTRE  -  WHAT THIS TERMINAL HOLDS",C['ACCENT'],9,True)
+    label(d,x+8,y+5,"DATA CENTRE  -  WHAT THIS TERMINAL HOLDS",C['ACCENT'],PT['SSR_FS_TITLE'],True)
     button(d,x+DCW-24,y+3,18,15,"X")
     hy=y+20+6
     for cx,t in [(10,"SYMBOL"),(104,"FROM"),(196,"TO"),(292,"M1 BARS"),(364,"TICKS")]:
-        label(d,x+cx,hy,t,C['TEXT_FAINT'],7)
+        label(d,x+cx,hy,t,C['TEXT_FAINT'],PT['SSR_FS_SMALL'])
     ly=hy+14
     rect(d,x+6,ly,DCW-12,ROWS*RH+4,C['WELL'],C['WELL_EDGE'])
     for r in range(ROWS):
@@ -118,16 +155,16 @@ def datacentre(d,x,y,data,sel,status,scanning=True):
         if r>=len(data): continue
         sym,fr,to,bars,tk,state = data[r]
         if r==sel: rect(d,x+7,ry,DCW-14,RH-1,C['TAB_ON'],C['ACCENT'])
-        label(d,x+12,ry+3,sym,C['TEXT'],7)
+        label(d,x+12,ry+3,sym,C['TEXT'],PT['SSR_FS_SMALL'])
         col = {'ok':C['TEXT_DIM'],'none':C['STOP'],'wait':C['HOLD'],'pend':C['TEXT_FAINT']}[state]
-        label(d,x+104,ry+3,fr,col,7)
-        label(d,x+196,ry+3,to,col,7)
-        label(d,x+292,ry+3,bars,col,7)
-        label(d,x+364,ry+3,tk,C['RUN'] if tk=="real" else C['TEXT_FAINT'],7)
+        label(d,x+104,ry+3,fr,col,PT['SSR_FS_SMALL'])
+        label(d,x+196,ry+3,to,col,PT['SSR_FS_SMALL'])
+        label(d,x+292,ry+3,bars,col,PT['SSR_FS_SMALL'])
+        label(d,x+364,ry+3,tk,C['RUN'] if tk=="real" else C['TEXT_FAINT'],PT['SSR_FS_SMALL'])
     by=ly+ROWS*RH+10
     button(d,x+DCW-62,by,24,18,"^"); button(d,x+DCW-34,by,24,18,"v")
-    label(d,x+10,y+DCH-62,status,C['TEXT_DIM'],7)
-    label(d,x+10,y+DCH-48,"Pick a symbol, then Use it to start a replay there.",C['TEXT_FAINT'],7)
+    label(d,x+10,y+DCH-62,status,C['TEXT_DIM'],PT['SSR_FS_SMALL'])
+    label(d,x+10,y+DCH-48,"Pick a symbol, then Use it to start a replay there.",C['TEXT_FAINT'],PT['SSR_FS_SMALL'])
     fy=y+DCH-22-6
     button(d,x+8,fy,86,22,"Stop" if scanning else "Read again")
     button(d,x+DCW-104,fy,96,22,"Use this symbol",C['PRIMARY'],C['PRIMARY'],C['PRIMARY_TEXT'])
@@ -149,7 +186,8 @@ im,d = chart()
 splash(d,"Drag the line to where you want to start, then START.",C['HOLD'])
 h = home(d, 340, 150)
 d.line([(700*S,60*S),(700*S,520*S)], fill=C['HOLD'], width=2*S)
-d.text((706*S,64*S),"START HERE",fill=C['HOLD'],font=f(8,True))
+d.text((706*S,64*S),"START HERE",fill=C['HOLD'],font=f(PT['SSR_FS_BODY'],True))
+caption(im)
 im.save(OUT + '/01-start.png')
 
 # screen 2 - the data centre over it
@@ -157,6 +195,7 @@ im,d = chart()
 splash(d,"Drag the line to where you want to start, then START.",C['HOLD'])
 home(d, 340, 150)
 datacentre(d,(CW-DCW)//2,(CH-DCH)//2,ROWSET,3,"reading 9 of 11...")
+caption(im)
 im.save(OUT + '/02-datacentre.png')
 
 # screen 3 - scan finished, running
@@ -167,5 +206,6 @@ datacentre(d,(CW-DCW)//2,(CH-DCH)//2,
            [r for r in ROWSET[:9]]+[("WTI","05.01.2020","03.10.2026","1.7M","real","ok"),
                                     ("SP500","14.09.2021","03.10.2026","908k","built","ok")],
            3,"9 of 11 symbols have minute history here",False)
+caption(im)
 im.save(OUT + '/03-done.png')
 print("rendered")

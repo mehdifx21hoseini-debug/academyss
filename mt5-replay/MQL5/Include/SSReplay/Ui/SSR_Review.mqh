@@ -79,9 +79,14 @@ void SSRAddRow(SSRReviewRow &out[], int &i, const string group,
    i++;
   }
 
-//--- the row as one string, padded so the values line up. Tahoma draws
-//--- all ten digits on the same advance width, which is the reason the
-//--- panel uses it and the reason this can be done with spaces.
+//--- The row as one string, padded so the values line up.
+//---
+//--- This only produces a column in a MONOSPACED face, and the comment
+//--- that used to sit here claimed Tahoma's equal-width digits made it
+//--- work. They did not: the padding is done with the LABEL, which is
+//--- letters, and Tahoma's letters are proportional like any other
+//--- text face. The card now draws this list in SSR_FONT_MONO, which
+//--- is the only thing that ever made the arithmetic below true.
 string SSRReviewLine(const SSRReviewRow &r)
   {
    string s = r.label;

@@ -29,19 +29,29 @@
 #property description "Shows the candidate panel fonts at their real sizes and reports which are truly installed."
 
 #include <SSReplay/Common/SSR_Build.mqh>
+//--- THE THEME ITSELF, not a copy of four of its numbers. The sizes
+//--- below used to be written out here under a comment saying they came
+//--- from SSR_Theme.mqh. They did, once. When the faces changed and
+//--- every size went up a point, this file went on measuring the old
+//--- layout and reporting that everything fit - which is worse than not
+//--- measuring, because it looks like evidence.
+#include <SSReplay/Ui/SSR_Theme.mqh>
 
-input string InpFonts    = "Segoe UI,Tahoma,Verdana,Microsoft Sans Serif,Consolas,Lucida Console,Courier New"; // Fonts to probe (comma separated)
+//--- the two the product actually asks for come first, so the lines
+//--- that matter are at the top of the report
+input string InpFonts    = "Segoe UI,Consolas,Tahoma,Verdana,Microsoft Sans Serif,Lucida Console,Courier New"; // Fonts to probe (comma separated)
 input int    InpHoldSec  = 90;    // Seconds to leave the sample on the chart (0 = draw and exit)
 input bool   InpDraw     = true;  // Draw the visual sample (off = report only)
 
 #define PFX      "SSRFP_"
 #define IMPOSSIBLE "ZZ_SSR_No_Such_Face_4711"   // no machine has this
 
-//--- the panel's real point sizes, from SSR_Theme.mqh
-#define FS_SMALL  7
-#define FS_BODY   8
-#define FS_TITLE  9
-#define FS_CLOCK 14
+//--- the panel's real point sizes - the theme's own defines, so these
+//--- cannot be measured at a size the product does not use
+#define FS_SMALL  SSR_FS_SMALL
+#define FS_BODY   SSR_FS_BODY
+#define FS_TITLE  SSR_FS_TITLE
+#define FS_CLOCK  SSR_FS_CLOCK
 //--- fingerprints are taken large, where faces differ most
 #define FS_PRINT 24
 

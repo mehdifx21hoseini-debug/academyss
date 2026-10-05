@@ -125,9 +125,12 @@ public:
       //| carries a verdict is the only one that looks like it does.        |
       //+------------------------------------------------------------------+
       int hy = m_y + 30;
+      //--- the headline number, in the face that keeps a changing
+      //--- figure from shifting under the eye as it updates
       m_w.Label("h1", m_x + 12, hy,
                 StringFormat("%.2f R", m_st.total_r),
-                (m_st.total_r >= 0.0 ? SSR_C_RUN : SSR_C_STOP), SSR_FS_CLOCK);
+                (m_st.total_r >= 0.0 ? SSR_C_RUN : SSR_C_STOP),
+                SSR_FS_CLOCK, SSR_FONT_MONO);
       m_w.Label("h2", m_x + 120, hy + 4,
                 StringFormat(T(SSR_S_TRADES_N), m_st.trades),
                 SSR_C_TEXT, SSR_FS_BODY);
@@ -159,8 +162,15 @@ public:
         }
 
       int ly = m_y + 60;
+      //--- MONOSPACED, because SSRReviewLine pads each label out to
+      //--- column 34 with spaces and then puts the value after it.
+      //--- That only produces a column in a face where every character
+      //--- is the same width. It never did in Tahoma - the digits were
+      //--- equal but the letters doing the padding were not - so these
+      //--- values have been very slightly ragged since the card
+      //--- shipped. One argument fixes it.
       m_w.List("m", m_x + 12, ly, SSR_RV_W - 24, SSR_RV_ROW_H,
-               lines, m_first, SSR_RV_SHOWN, -1);
+               lines, m_first, SSR_RV_SHOWN, -1, SSR_FONT_MONO);
 
       int py = ly + SSR_RV_SHOWN * SSR_RV_ROW_H + 6;
       m_w.Button("up",   m_x + SSR_RV_W - 96, py, 36, 18, T(SSR_S_UP));

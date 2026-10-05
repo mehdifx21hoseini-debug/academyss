@@ -112,7 +112,7 @@ public:
       m_status_col = col;
       if(!m_open)
          return;
-      m_w.Label("stat", SSR_SPLASH_X + 34, SSR_SPLASH_Y + 86,
+      m_w.Label("stat", SSR_SPLASH_X + 34, SSR_SPLASH_Y + 88,
                 m_status, m_status_col, SSR_FS_SMALL);
       ChartRedraw(m_chart);
      }
@@ -150,21 +150,21 @@ public:
 
       //--- THE GUARANTEE, in the accent colour, because it is the one
       //--- sentence on this chart a person needs to believe.
-      m_w.Label("safe", x + 10, y + 66, T(SSR_S_SP_VIRTUAL),
+      m_w.Label("safe", x + 10, y + 68, T(SSR_S_SP_VIRTUAL),
                 SSR_C_RUN, SSR_FS_SMALL);
 
       //--- the warning the video's product puts in green on a blank
       //--- chart: this window is load-bearing, minimise it, do not
       //--- close it.
-      m_w.Label("keepi", x + 10, y + 86, "!", SSR_C_HOLD, SSR_FS_BODY);
-      m_w.Label("keep",  x + 20, y + 86, T(SSR_S_SP_KEEP_OPEN),
+      m_w.Label("keepi", x + 10, y + 88, "!", SSR_C_HOLD, SSR_FS_BODY);
+      m_w.Label("keep",  x + 20, y + 88, T(SSR_S_SP_KEEP_OPEN),
                 SSR_C_HOLD, SSR_FS_SMALL);
 
       m_w.Label("build", x + SSR_SPLASH_W - 86, y + 14, SSR_BUILD_SHORT,
                 SSR_C_TEXT_FAINT, SSR_FS_SMALL);
 
       if(m_status != "")
-         m_w.Label("stat", x + 34, y + 86, m_status, m_status_col, SSR_FS_SMALL);
+         m_w.Label("stat", x + 34, y + 88, m_status, m_status_col, SSR_FS_SMALL);
 
       ChartRedraw(m_chart);
      }

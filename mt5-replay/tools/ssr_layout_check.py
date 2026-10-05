@@ -76,9 +76,16 @@ def main():
     problems = []
 
     theme = defines(os.path.join(UI, "SSR_Theme.mqh"))
-    #--- a label's drawn height. Tahoma at 7pt is 9 px of glyph on a
-    #--- 12 px line; 12 is the number that matters for a collision.
-    TEXT_H = 12
+    #--- A LABEL'S DRAWN HEIGHT, DERIVED FROM THE THEME rather than
+    #--- written here. It was 12 - correct for the 7 pt small size - and
+    #--- the moment the faces changed and every size went up a point it
+    #--- would have been checking the old layout against the new one and
+    #--- passing. Points to pixels is 4/3 at 96 dpi, and a line box is
+    #--- about a quarter taller than its glyphs: 5/3 of the point size,
+    #--- rounded up, which gives 12 at 7 pt and 14 at 8 pt.
+    TEXT_H = -(-theme["SSR_FS_SMALL"] * 5 // 3)
+    print("checking at SSR_FS_SMALL = %d pt, line height %d px"
+          % (theme["SSR_FS_SMALL"], TEXT_H))
 
     #------------------------------------------------------------------
     # The data centre.
@@ -95,7 +102,7 @@ def main():
         ("headings",  hy,             TEXT_H),
         ("well",      ly,             rows * rh + 4),
         ("paging",    ly + rows * rh + 10, 18),
-        ("progress",  H - 62,         TEXT_H),
+        ("progress",  H - 66,         TEXT_H),
         ("hint",      H - 48,         TEXT_H),
         ("buttons",   H - d["SSR_BTN_H"] - 6, d["SSR_BTN_H"]),
     ], H, problems)
@@ -110,8 +117,8 @@ def main():
         ("tagline",  29, TEXT_H),
         ("rule",     46, 1),
         ("account",  52, TEXT_H),
-        ("guarantee",66, TEXT_H),
-        ("status",   86, TEXT_H),
+        ("guarantee",68, TEXT_H),
+        ("status",   88, TEXT_H),
     ], s["SSR_SPLASH_H"], problems)
 
     #------------------------------------------------------------------
