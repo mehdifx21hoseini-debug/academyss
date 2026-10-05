@@ -458,10 +458,276 @@ def option_d():
     return im
 
 
+#====================================================================
+#  THE MAIN PANEL.
+#
+#  THE CONSTRAINT THAT SHAPES IT, checked rather than assumed:
+#  SSR_Panel drives itself through PollClicks(), which reads
+#  OBJPROP_STATE off its own buttons. That works on ANY chart, and it
+#  is the ONE mechanism on purpose - the comment in the file says so:
+#  a panel on the replay chart and a panel on the expert's own chart
+#  must behave identically rather than through two paths, one of which
+#  stops being maintained.
+#
+#  CHARTEVENT_MOUSE_MOVE is handled too, but MetaTrader only delivers
+#  it to the chart a program is attached to. So in two-window mode -
+#  the default - the panel gets clicks and nothing else: no drag, no
+#  hover, no sliding the speed thumb. In one-window mode it gets all
+#  three.
+#
+#  Everything drawn below therefore works from clicks alone. The
+#  slider is already built that way (cells under a slider skin), the
+#  combos open a list on click, and the tabs are buttons. Hover is the
+#  only thing of the reference's that cannot be had, and nothing here
+#  depends on it.
+#====================================================================
+def menurow(d, x, y, w, items, active=None):
+    bx = x + 6
+    for i, t in enumerate(items):
+        ft = f(PT["SSR_FS_BODY"])
+        tw = int(d.textlength(t, font=ft) / S) + 16
+        if i == active:
+            rect(d, bx, y, tw, 20, C["TAB_ON"], C["TAB_EDGE"])
+        txt_c(d, bx, y + 4, tw, t, C["TEXT"])
+        bx += tw
+    d.line([x * S, (y + 20) * S, (x + w) * S, (y + 20) * S], fill=C["GROUP_EDGE"])
+    return y + 21
+
+
+def slider(d, x, y, w, frac):
+    rect(d, x, y + 4, w, 5, C["TRACK"], C["TRACK_EDGE"])
+    fw = int(w * frac)
+    if fw > 2:
+        rect(d, x + 1, y + 5, fw - 2, 3, C["TRACK_FILL"], C["TRACK_FILL"])
+    rect(d, x + fw - 4, y, 9, 13, C["THUMB"], C["THUMB_EDGE"])
+
+
+def deal(d, x, y, w, h, t1, t2, buy):
+    rect(d, x, y, w, h, C["BUY"] if buy else C["SELL"],
+         C["BUY_EDGE"] if buy else C["SELL_EDGE"])
+    txt_c(d, x, y + 5, w, t1, C["DEAL_TEXT"], PT["SSR_FS_SMALL"])
+    txt_c(d, x, y + 18, w, t2, C["DEAL_TEXT"], PT["SSR_FS_BODY"], True)
+
+
+def tabs(d, x, y, w, names, active):
+    tw = w // len(names)
+    for i, t in enumerate(names):
+        on = (i == active)
+        rect(d, x + i * tw, y, tw, 18,
+             C["TAB_ON"] if on else C["TAB"], C["TAB_EDGE"])
+        txt_c(d, x + i * tw, y + 4, tw, t,
+              C["TEXT"] if on else C["TEXT_DIM"], PT["SSR_FS_SMALL"])
+    return y + 18
+
+
+def main_panel(collapsed=False, W=420, name="P1"):
+    PADG = 8
+    COL_L = 186                       # the control column
+    GAP = 6
+    COL_R = W - 2 * PADG - COL_L - GAP
+
+    head_h = 24
+    menu_h = 21
+    tr_h = 62                         # play / clock / speed
+    nav_h = 50                        # prev / symbol+tf / next
+    body_h = 0 if collapsed else 168
+    stat_h = 20
+    H = head_h + menu_h + tr_h + nav_h + body_h + stat_h + 6
+
+    im, d = canvas(W + 420, H + 160)
+    x, y = 210, 60
+    cy = window(d, x, y, W, H, "SS Replay  -  DEMO")
+    cy = menurow(d, x, cy, W,
+                 ["Replay", "Charts", "Account", "Market hours", "News",
+                  "Trades"], 0)
+
+    #--- transport
+    ty = cy + 6
+    button(d, x + PADG, ty, 76, "Pause", primary=True, h=50)
+    txt(d, x + PADG + 86, ty, "20.10.2021 11:47:18", C["TEXT"],
+        PT["SSR_FS_CLOCK"])
+    txt_r(d, x + W - PADG - 78, ty + 4, "Wed", C["TEXT_DIM"], PT["SSR_FS_SMALL"])
+    txt(d, x + PADG + 86, ty + 24, "Speed:  5 x", C["TEXT_DIM"],
+        PT["SSR_FS_SMALL"])
+    slider(d, x + PADG + 86, ty + 36, W - PADG * 2 - 86 - 76, 0.13)
+    button(d, x + W - PADG - 70, ty, 70, "Auto pause", h=22)
+
+    #--- navigation
+    ny = ty + 56
+    button(d, x + PADG, ny, 76, "|<  Prev", h=44)
+    combo(d, x + PADG + 86, ny, 104, "US30.Z26")
+    combo(d, x + PADG + 196, ny, 60, "M5")
+    button(d, x + PADG + 86, ny + 24, 104, "Sync with chart", h=20)
+    link(d, x + PADG + 196, ny + 28, "-00:02:42", PT["SSR_FS_SMALL"])
+    button(d, x + W - PADG - 76, ny, 76, "Next  >|", h=44)
+
+    by = ny + 50
+    if not collapsed:
+        #--- left column: what the next trade will be
+        rows = [("Risk:", "spin", "1.00", "%"),
+                ("Lots:", "spin", "0.10", ""),
+                ("SL pips:", "spin", "0", ""),
+                ("TP pips:", "spin", "0", "")]
+        for i, (lab, _k, val, unit) in enumerate(rows):
+            ry = by + i * 24
+            txt_r(d, x + PADG + 54, ry + 4, lab, C["TEXT"], PT["SSR_FS_SMALL"])
+            spin(d, x + PADG + 60, ry, 76, val)
+            if unit:
+                txt(d, x + PADG + 140, ry + 4, unit, C["TEXT_DIM"],
+                    PT["SSR_FS_SMALL"])
+        ly = by + 4 * 24 + 2
+        for i, (lab, val) in enumerate((("Comment:", "Set"),
+                                        ("Trailing stop:", "Set"),
+                                        ("Blind mode:", "off"))):
+            txt(d, x + PADG, ly + i * 16, lab, C["TEXT_DIM"], PT["SSR_FS_SMALL"])
+            link(d, x + PADG + 86, ly + i * 16, val, PT["SSR_FS_SMALL"])
+        ly += 3 * 16 + 4
+        button(d, x + PADG, ly, 88, "Save order", h=20)
+        button(d, x + PADG + 94, ly, 88, "Load order", h=20)
+
+        #--- right pane: the ticket
+        rx = x + PADG + COL_L + GAP
+        ry = tabs(d, rx, by - 2, COL_R, ["Market order", "Pending"], 0)
+        rect(d, rx, ry, COL_R, body_h - 18, C["PANEL"], C["TAB_EDGE"])
+        txt_c(d, rx, ry + 5, COL_R, "US30.Z26", C["TEXT"], PT["SSR_FS_BODY"],
+              True)
+        dw = (COL_R - 14) // 2
+        deal(d, rx + 5, ry + 22, dw, 34, "Buy @", "35473.6", True)
+        deal(d, rx + 9 + dw, ry + 22, dw, 34, "Sell @", "35469.5", False)
+        info = [("Spread", "405.2 pips", C["TEXT_DIM"]),
+                ("Equity", "10009.60   +0.10%", C["RUN"]),
+                ("Floating P/L", "-4.05", C["STOP"])]
+        for i, (k, v, col) in enumerate(info):
+            iy = ry + 62 + i * 15
+            txt(d, rx + 6, iy, k, C["TEXT_DIM"], PT["SSR_FS_SMALL"])
+            txt_r(d, rx + COL_R - 6, iy, v, col, PT["SSR_FS_SMALL"])
+        #--- THE VERB ABOVE THE ROW, not under it. It was under, and the
+        #--- pane's own bottom border was drawn straight through it -
+        #--- three buttons reading "Winners  Losers  All" with no word
+        #--- anywhere saying what pressing one DOES.
+        txt(d, rx + 6, ry + 110, "close", C["TEXT_DIM"], PT["SSR_FS_SMALL"])
+        cy2 = ry + 122
+        cw = (COL_R - 16) // 3
+        for i, t in enumerate(("Winners", "Losers", "All")):
+            rect(d, rx + 5 + i * (cw + 3), cy2, cw, 22, C["PANEL"], C["STOP"])
+            txt_c(d, rx + 5 + i * (cw + 3), cy2 + 5, cw, t, C["STOP"],
+                  PT["SSR_FS_SMALL"])
+
+    #--- status strip
+    sy = y + H - stat_h - 2
+    rect(d, x + 1, sy, W - 2, stat_h, C["STATUS"], C["GROUP_EDGE"])
+    txt(d, x + PADG, sy + 4, "Live mode", C["TEXT"], PT["SSR_FS_SMALL"], True)
+    txt(d, x + PADG + 62, sy + 4, "|   Running   |   Account in USD",
+        C["TEXT_DIM"], PT["SSR_FS_SMALL"])
+    txt_r(d, x + W - PADG, sy + 4, "Expand" if collapsed else "Collapse",
+          LINK, PT["SSR_FS_SMALL"])
+
+    note(im, "%s - the main panel in the reference's structure%s. Everything "
+             "here is driven by clicks alone, which is what the replay chart "
+             "delivers; drag is a bonus in one-window mode, never a "
+             "requirement." % (name, ", collapsed" if collapsed else ""))
+    return im
+
+
+#====================================================================
+#  P3 - THE NARROW PANEL, and why it is a different layout.
+#
+#  P1's two-pane body cannot be squeezed. Measured rather than
+#  guessed: the control column needs 186, the ticket needs 190 for a
+#  Buy and a Sell side by side with a readable price, plus a 6 px gap
+#  and 16 px of frame - 398 before anything else, and the menu row
+#  wants about 400 on its own. Drawn at 340 it came apart in four
+#  places at once: the menu ran off the frame, the weekday landed on
+#  the clock, the timeframe combo went under Next, and the close row
+#  left the pane.
+#
+#  So a narrow panel does not get a smaller version of P1. It gets the
+#  same STRUCTURE with the ticket as a TAB instead of a side pane -
+#  which is what the product does today, and what the reference itself
+#  does with its Orders window: put it somewhere else rather than
+#  crush it.
+#====================================================================
+def main_panel_narrow(W=320, name="P3"):
+    PADG = 8
+    head_h, menu_h, stat_h = 24, 21, 20
+    tr_h = 54
+    nav_h = 28
+    tab_h = 20
+    #--- ADDED UP, not picked. 6 lead + 34 of deal buttons + four 22 px
+    #--- rows + 2 + three 14 px readouts + 6 trail. It was 150, and the
+    #--- status strip was drawn through Equity and Floating P/L.
+    sheet_h = 6 + 34 + 4 * 22 + 2 + 3 * 14 + 6
+    H = head_h + menu_h + tr_h + nav_h + tab_h + sheet_h + stat_h + 8
+
+    im, d = canvas(W + 520, H + 160)
+    x, y = 210, 60
+    cy = window(d, x, y, W, H, "SS Replay  -  DEMO")
+    #--- four, not six: the long names are on the menu of the wide
+    #--- panel, and a row that does not fit is not a menu
+    cy = menurow(d, x, cy, W, ["Replay", "Account", "Hours", "Trades"], 0)
+
+    ty = cy + 6
+    button(d, x + PADG, ty, 64, "Pause", primary=True, h=44)
+    txt(d, x + PADG + 72, ty, "20.10.2021 11:47:18", C["TEXT"],
+        PT["SSR_FS_CLOCK"])
+    txt(d, x + PADG + 72, ty + 24, "Speed:  5 x", C["TEXT_DIM"],
+        PT["SSR_FS_SMALL"])
+    txt_r(d, x + W - PADG, ty + 24, "Wed", C["TEXT_DIM"], PT["SSR_FS_SMALL"])
+    slider(d, x + PADG + 72, ty + 34, W - PADG * 2 - 72, 0.13)
+
+    ny = ty + 50
+    button(d, x + PADG, ny, 52, "|< Prev", h=22)
+    combo(d, x + PADG + 58, ny, 96, "US30.Z26", h=22)
+    combo(d, x + PADG + 158, ny, 48, "M5", h=22)
+    button(d, x + W - PADG - 52, ny, 52, "Next >|", h=22)
+
+    tabsy = tabs(d, x + PADG, ny + 28, W - 2 * PADG,
+                 ["Order", "Open", "Stats", "Day"], 0)
+    rect(d, x + PADG, tabsy, W - 2 * PADG, sheet_h - 2, C["PANEL"],
+         C["TAB_EDGE"])
+
+    sx = x + PADG + 6
+    sw = W - 2 * PADG - 12
+    dw = (sw - 6) // 2
+    deal(d, sx, tabsy + 6, dw, 34, "Buy @", "35473.6", True)
+    deal(d, sx + dw + 6, tabsy + 6, dw, 34, "Sell @", "35469.5", False)
+    for i, (lab, val, unit) in enumerate((("Risk", "1.00", "%"),
+                                          ("Lots", "0.10", ""),
+                                          ("SL pips", "0", ""),
+                                          ("TP pips", "0", ""))):
+        ry = tabsy + 46 + i * 22
+        txt(d, sx, ry + 4, lab, C["TEXT_DIM"], PT["SSR_FS_SMALL"])
+        spin(d, sx + 70, ry, 76, val)
+        if unit:
+            txt(d, sx + 150, ry + 4, unit, C["TEXT_DIM"], PT["SSR_FS_SMALL"])
+    iy = tabsy + 46 + 4 * 22 + 2
+    for i, (k, v, col) in enumerate((("Spread", "405.2 pips", C["TEXT_DIM"]),
+                                     ("Equity", "10009.60  +0.10%", C["RUN"]),
+                                     ("Floating", "-4.05", C["STOP"]))):
+        txt(d, sx, iy + i * 14, k, C["TEXT_DIM"], PT["SSR_FS_SMALL"])
+        txt_r(d, sx + sw, iy + i * 14, v, col, PT["SSR_FS_SMALL"])
+
+    sy = y + H - stat_h - 2
+    rect(d, x + 1, sy, W - 2, stat_h, C["STATUS"], C["GROUP_EDGE"])
+    txt(d, x + PADG, sy + 4, "Live mode", C["TEXT"], PT["SSR_FS_SMALL"], True)
+    txt(d, x + PADG + 62, sy + 4, "|  Running", C["TEXT_DIM"],
+        PT["SSR_FS_SMALL"])
+    txt_r(d, x + W - PADG, sy + 4, "Collapse", LINK, PT["SSR_FS_SMALL"])
+
+    note(im, "%s - the narrow panel. P1's two-pane body needs about 420 px; "
+             "below that it comes apart. So the ticket becomes a TAB rather "
+             "than a crushed side pane - the same structure, one column."
+         % name)
+    return im
+
+
 if __name__ == "__main__":
     option_a(False, "A").save(os.path.join(OUT, "A-new-replay.png"), quality=95)
     option_a(True, "A2").save(os.path.join(OUT, "A2-accent-titlebar.png"))
     option_b().save(os.path.join(OUT, "B-one-column.png"))
     option_c().save(os.path.join(OUT, "C-home.png"))
     option_d().save(os.path.join(OUT, "D-data-centre.png"))
-    print("wrote 5 options to", OUT)
+    main_panel(False, 420, "P1").save(os.path.join(OUT, "P1-main-panel.png"))
+    main_panel(True, 420, "P2").save(os.path.join(OUT, "P2-collapsed.png"))
+    main_panel_narrow(320, "P3").save(os.path.join(OUT, "P3-narrow.png"))
+    print("wrote 8 options to", OUT)
