@@ -123,6 +123,16 @@ struct SSRUiState
    string             order_why;
    int                pending_count;
 
+   //--- THE NEXT SCHEDULED EVENT, on the replay's own clock.
+   //--- A replay hides the one thing every live screen shows for free:
+   //--- that there is news in four minutes. Nothing about a chart says
+   //--- so, and a trainee who takes a position into a release learns
+   //--- the wrong lesson from the candle that follows.
+   //--- news_msc is 0 when there is nothing ahead, or no calendar.
+   long               news_msc;
+   string             news_label;
+   int                news_importance;
+
    //+------------------------------------------------------------------+
    //| THE EVALUATION, already decided elsewhere.                       |
    //|                                                                  |
@@ -259,6 +269,7 @@ struct SSRUiState
       trade_tag = ""; trail_points = 0.0;
       entry_armed = false; entry_price = 0.0;
       order_name = ""; order_why = ""; pending_count = 0;
+      news_msc = 0; news_label = ""; news_importance = 0;
       prop_on = false; prop_state = 0; prop_state_name = ""; prop_headline = "";
       prop_rules = ""; prop_progress = 0.0; prop_floor = 0.0; prop_days = 0;
       prop_daily_used = 0.0; prop_total_used = 0.0;

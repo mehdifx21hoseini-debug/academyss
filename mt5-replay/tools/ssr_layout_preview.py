@@ -36,7 +36,7 @@ C = dict(
     BTN=(44,48,55), BTN_EDGE=(103,111,124), BTN_TEXT=(230,233,238),
     TAB_ON=(34,37,43), RUN=(79,190,134), HOLD=(227,164,60),
     STOP=(237,118,110), ACCENT=(224,134,58), PRIMARY=(224,134,58),
-    PRIMARY_TEXT=(27,30,35),
+    PRIMARY_TEXT=(27,30,35), LINE_LONG=(88,158,236),
 )
 S = 2                                   # 2x so the text is readable here
 
@@ -180,6 +180,80 @@ ROWSET=[("EURUSD","02.01.2019","03.10.2026","1.8M","real","ok"),
         ("EURTRY","no M1 history","","","","none"),
         ("WTI","reading...","","","","pend"),
         ("SP500","reading...","","","","pend")]
+
+# ---------------------------------------------------- market hours
+#--- drawn from SSR_MarketHours.mqh's own constants and the same UTC
+#--- windows the header there lists, so this is the sheet, not a sketch
+MH = {}
+for _line in open(os.path.join(os.path.dirname(os.path.dirname(
+        os.path.abspath(__file__))), "MQL5", "Include", "SSReplay", "Ui",
+        "SSR_MarketHours.mqh"), encoding="utf-8"):
+    m = re.match(r"\s*#define\s+(SSR_MH_[A-Z]+)\s+(\d+)", _line)
+    if m:
+        MH[m.group(1)] = int(m.group(2))
+
+CENTRES = [("SYD", 22, 7,  C['LINE_LONG']),
+           ("TOK",  0, 9,  C['HOLD']),
+           ("LON",  8, 17, C['RUN']),
+           ("NY",  13, 22, C['STOP'])]
+
+def open_at(fr, to, h):
+    return (fr <= h < to) if fr <= to else (h >= fr or h < to)
+
+def market_hours(d, x, y, now_h, now_m):
+    cw, rh, gut = MH['SSR_MH_CW'], MH['SSR_MH_RH'], MH['SSR_MH_GUTTER']
+    gx = x + gut
+    for h in range(0, 24, 3):
+        label(d, gx + h*cw - 2, y, "%02d" % h, C['TEXT_FAINT'],
+              PT['SSR_FS_SMALL'])
+    cy = y + 13
+    top = cy
+    for i, (nm, fr, to, tint) in enumerate(CENTRES):
+        ry = cy + i*rh
+        label(d, x, ry + 1, nm, C['TEXT_DIM'], PT['SSR_FS_SMALL'])
+        run = None
+        for h in range(25):
+            o = h < 24 and open_at(fr, to, h)
+            if o and run is None:
+                run = h
+            if not o and run is not None:
+                rect(d, gx + run*cw, ry, (h-run)*cw, rh-2, tint, tint)
+                run = None
+    cy += len(CENTRES)*rh
+    ov = [h for h in range(24) if open_at(8,17,h) and open_at(13,22,h)]
+    rect(d, gx + ov[0]*cw, cy+1, (ov[-1]+1-ov[0])*cw, 2,
+         C['ACCENT'], C['ACCENT'])
+    label(d, gx + (ov[-1]+1)*cw + 4, cy-3, "overlap", C['ACCENT'],
+          PT['SSR_FS_SMALL'])
+    cy += 14
+    nx = gx + now_h*cw + (now_m*cw)//60
+    rect(d, nx, top-2, 1, len(CENTRES)*rh+2, C['TEXT'], C['TEXT'])
+    label(d, x, cy, "Wed  %02d:%02d  server time (UTC+3)" % (now_h, now_m),
+          C['TEXT'], PT['SSR_FS_SMALL'])
+    cy += 13
+    label(d, x, cy, "standard UTC hours; DST shifts them",
+          C['TEXT_FAINT'], PT['SSR_FS_SMALL'])
+    return cy + 13 - y
+
+def group(d, x, y, w, h, legend):
+    rect(d, x, y+5, w, h-5, C['PANEL'], C['GROUP_EDGE'])
+    rect(d, x+6, y+1, 7+len(legend)*5, 9, C['PANEL'], C['PANEL'])
+    label(d, x+9, y, legend, C['TEXT_DIM'], PT['SSR_FS_SMALL'])
+
+im, d = chart()
+#--- the sheet, at the width it really gets beside the rail
+SHEET_W = 310 - 16 - 44 - 5
+sx, sy = 60, 60
+rect(d, sx-14, sy-14, SHEET_W+28, 230, C['PANEL'], C['PANEL_EDGE'])
+label(d, sx-6, sy-10, "SESSION", C['ACCENT'], PT['SSR_FS_TITLE'], True)
+group(d, sx, sy+12, SHEET_W, 58, "SESSION")
+label(d, sx+8, sy+26, "bookmarks    3", C['TEXT_DIM'], PT['SSR_FS_SMALL'])
+label(d, sx+8, sy+40, "streams      1   skew 0 ms", C['TEXT_DIM'], PT['SSR_FS_SMALL'])
+label(d, sx+8, sy+54, "charts       clean", C['TEXT_DIM'], PT['SSR_FS_SMALL'])
+group(d, sx, sy+74, SHEET_W, 119, "MARKET HOURS")
+market_hours(d, sx+6, sy+88, 10, 28)
+caption(im)
+im.save(OUT + '/04-market-hours.png')
 
 # screen 1 - what you see the second you attach it
 im,d = chart()

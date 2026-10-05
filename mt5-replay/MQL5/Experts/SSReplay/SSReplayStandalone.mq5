@@ -1347,6 +1347,7 @@ bool BuildSession(string origin, const bool on_replay,
    g_gport.Attach(GetPointer(g_group), GetPointer(g_sink), GetPointer(g_charts));
    //--- and everything the panel may SHOW or DRIVE, handed over one by
    //--- one so the port offers only what this host actually has
+   g_gport.AttachCalendar(GetPointer(g_cal));
    g_gport.AttachBlind(GetPointer(g_blind));
    g_gport.AttachAccount(GetPointer(g_acct));
    g_gport.AttachProp(GetPointer(g_prop));

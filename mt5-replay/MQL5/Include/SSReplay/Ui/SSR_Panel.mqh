@@ -43,6 +43,7 @@
 #include "SSR_Strings.mqh"
 #include "SSR_Layout.mqh"
 #include "SSR_Widgets.mqh"
+#include "SSR_MarketHours.mqh"
 #include "SSR_ReplayPort.mqh"
 #include "SSR_Keys.mqh"
 #include "SSR_Palette.mqh"
@@ -421,9 +422,13 @@ public:
    int               SheetH(void)
      { return (m_tall ? SSR_SHEET_H_TALL : SSR_SHEET_H); }
 
+   //--- COLLAPSED AND COMPACT ARE THE SAME HEIGHT, because they are the
+   //--- same idea arrived at from two directions: one is the chart
+   //--- saying there is no room for the sheets, the other is the user
+   //--- saying they do not want them right now.
    int               BodyH(void)
      {
-      if(m_collapsed) return SSR_HEADER_H + 2;
+      if(m_collapsed) return SSR_PANEL_COMPACT_H;
       if(m_compact)   return SSR_PANEL_COMPACT_H;
       return (m_tall ? SSR_PANEL_TALL_H : SSR_PANEL_H);
      }
@@ -675,8 +680,25 @@ public:
       //+------------------------------------------------------------------+
       int W = SSR_PANEL_W;
       int chart_h = (int)ChartGetInteger(m_chart, CHART_HEIGHT_IN_PIXELS);
+      //+------------------------------------------------------------------+
+      //| COLLAPSE NOW MEANS "THE CONTROLS, WITHOUT THE SHEETS".            |
+      //|                                                                  |
+      //| It used to leave the caption and nothing else - a title bar you   |
+      //| could not drive. So the one moment a person actually wants the    |
+      //| panel smaller, watching price with the chart uncovered, was the   |
+      //| moment it stopped being able to play, pause, step or change       |
+      //| speed, and they had to open it again to touch any of them.        |
+      //|                                                                  |
+      //| Compact mode already drew exactly the right thing for exactly    |
+      //| the right reason - "everything a person touches while the replay  |
+      //| runs, and nothing they only consult" - so collapse is now the     |
+      //| same state asked for by hand instead of by the chart's height.    |
+      //| Nothing is lost: X still takes the whole panel down to one        |
+      //| button, which is what "out of the way entirely" was for.          |
+      //+------------------------------------------------------------------+
       bool was_compact = m_compact;
-      m_compact = (chart_h > 0 && chart_h < SSR_PANEL_H + 24);
+      m_compact = m_collapsed ||
+                  (chart_h > 0 && chart_h < SSR_PANEL_H + 24);
       if(m_compact != was_compact)
         {
          HideSheetArea(m_compact);
@@ -720,12 +742,6 @@ public:
       m_w.Rect("bg",  x, y, W, H, SSR_C_PANEL, SSR_C_PANEL_EDGE);
       DrawCaption(x, y, W);
 
-      if(m_collapsed)
-        {
-         HideBody(true);
-         ChartRedraw(m_chart);
-         return;
-        }
       HideBody(false);
 
       int cy = y + SSR_HEADER_H + 3;
@@ -942,6 +958,32 @@ private:
    //================================================================
    //  CLOCK + PROGRESS - always visible
    //================================================================
+   //+------------------------------------------------------------------+
+   //| THE CLOCK BLOCK IS THREE LINES NOW, AND THE MIDDLE ONE IS NEW.   |
+   //|                                                                  |
+   //| It was two, and they did not fit. The clock is nineteen           |
+   //| characters - "2026.08.27 14:35:00" - and in a monospaced face at  |
+   //| 14 pt that is 195 px starting 8 px in, so it ended at 203 in a    |
+   //| row whose right-hand label started at 192. Eleven pixels of one   |
+   //| drawn through the other, on the single most-looked-at row of the  |
+   //| panel. It was four pixels CLEAR in Tahoma at 13 pt, which is why  |
+   //| nothing had ever shown it: changing the face moved it from just   |
+   //| inside to just outside, and MetaTrader reports neither.           |
+   //|                                                                  |
+   //| So the row was rebuilt rather than shaved, and the space bought   |
+   //| a line that was missing anyway.                                   |
+   //|                                                                  |
+   //| WHAT THE NEW LINE IS FOR. A replay hides the one thing every      |
+   //| live screen gives away free: that there is news in four minutes.  |
+   //| Nothing about a chart says so. A trainee takes a position into a  |
+   //| release, watches the candle that follows, and learns precisely    |
+   //| the wrong lesson from it. The countdown is the cheapest possible  |
+   //| fix and the calendar was already loaded.                          |
+   //|                                                                  |
+   //| A PAUSE REASON TAKES THE LINE. It is the answer to something the  |
+   //| user just did, and for those seconds it outranks a standing       |
+   //| countdown - the same rule the status strip already follows.       |
+   //+------------------------------------------------------------------+
    int               DrawClock(const int x, const int y, const int W)
      {
       //--- the panel never formats the clock itself: Blind Mode has to
@@ -956,23 +998,54 @@ private:
       Text(2, "clock", x + SSR_PAD, y, m_state.clock_text,
            SSR_C_TEXT, SSR_FS_CLOCK, SSR_FONT_MONO);
 
-      string pct = StringFormat("%d%%", (int)MathRound(m_state.progress * 100.0));
-      if(m_state.pause_reason != "")
-         pct += "   " + m_state.pause_reason;
-#ifdef SSR_LAYOUT_RAIL
-      //--- 110, not 160: the panel is 110 px narrower and a pause
-      //--- reason is free text. Clipped rather than allowed to run off
-      //--- the frame, which is what it did at the old offset.
-      Text(3, "prog", x + W - SSR_PAD - 110, y + 6, Clip(pct, 24),
-           SSR_C_TEXT_DIM, SSR_FS_SMALL);
-#else
-      Text(3, "prog", x + W - SSR_PAD - 160, y + 6, pct,
-           SSR_C_TEXT_DIM, SSR_FS_SMALL);
-#endif
+      //--- THE DAY, which the clock does not say and a trader thinks in.
+      //--- "Friday afternoon" is a fact about how a market behaves;
+      //--- "2026.08.27" is not, until you have counted.
+      //--- Hidden under Blind mode: the whole point of that mode is to
+      //--- withhold when you are, and a weekday is a strong hint.
+      m_w.Hide("dow", m_state.blind);
+      if(!m_state.blind && m_state.now_msc > 0)
+        {
+         MqlDateTime dt;
+         TimeToStruct(SSRToTime(m_state.now_msc), dt);
+         Text(56, "dow", x + W - SSR_PAD - 26, y + 6,
+              SSRWeekdayShort(dt.day_of_week), SSR_C_TEXT_DIM, SSR_FS_SMALL);
+        }
 
-      m_w.Progress("bar", x + SSR_PAD, y + 22, W - 2 * SSR_PAD, 6,
+      //--- line two: what is coming, or why we stopped
+      string mid;
+      color  midc = SSR_C_TEXT_DIM;
+      if(m_state.pause_reason != "")
+        {
+         mid  = m_state.pause_reason;
+         midc = SSR_C_HOLD;
+        }
+      else
+         if(m_state.news_msc > 0 && m_state.now_msc > 0)
+           {
+            long left = (m_state.news_msc - m_state.now_msc) / 1000;
+            if(left < 0) left = 0;
+            mid = StringFormat(T(SSR_S_NEWS_IN),
+                               (int)(left / 3600), (int)((left % 3600) / 60),
+                               m_state.news_label);
+            //--- HIGH impact is the one that changes what a person does
+            //--- in the next five minutes, so it is the one that gets a
+            //--- colour. Everything else stays quiet on purpose.
+            midc = (m_state.news_importance >= 2 ? SSR_C_STOP
+                    : (m_state.news_importance == 1 ? SSR_C_HOLD
+                                                    : SSR_C_TEXT_DIM));
+           }
+         else
+            mid = "";
+      Text(3, "news", x + SSR_PAD, y + 26, Clip(mid, 46), midc, SSR_FS_SMALL);
+
+      Text(57, "prog", x + W - SSR_PAD - 34, y + 26,
+           StringFormat("%d%%", (int)MathRound(m_state.progress * 100.0)),
+           SSR_C_TEXT_DIM, SSR_FS_SMALL);
+
+      m_w.Progress("bar", x + SSR_PAD, y + 42, W - 2 * SSR_PAD, 6,
                    m_state.progress, SSRStateColor(m_state.status));
-      return y + 32;
+      return y + 50;
      }
 
    //================================================================
@@ -1880,9 +1953,28 @@ private:
    //----------------------------------------------------------------
    //  SESSION
    //----------------------------------------------------------------
+   //+------------------------------------------------------------------+
+   //| THE SESSION SHEET IS ABOUT TIME NOW.                             |
+   //|                                                                  |
+   //| It used to be housekeeping on top and a printed list of keyboard  |
+   //| shortcuts underneath. The shortcuts are on the key card, which is |
+   //| H and nothing else, so the second half of this sheet was a copy   |
+   //| of a card one key away - and the one thing a replay genuinely     |
+   //| takes away from a trainee had nowhere to live.                    |
+   //|                                                                   |
+   //| What a replay takes away is the FEEL OF THE DAY. On a live screen |
+   //| you know without looking that it is the London morning; stepping  |
+   //| through candles you do not, and that single fact explains most of |
+   //| what the candles are doing. So the keys gave up their half to a   |
+   //| clock with the markets drawn on it.                               |
+   //|                                                                  |
+   //| What the removal cost, on the record rather than in a chat: the   |
+   //| four shortcut lines are gone from this sheet. They are unchanged  |
+   //| on the key card, and the key card is still H.                     |
+   //+------------------------------------------------------------------+
    void              SheetSession(const int x, const int y, const int w)
      {
-      m_w.Group("g1", x, y, w, 68, T(SSR_S_GRP_SESSION));
+      m_w.Group("g1", x, y, w, 58, T(SSR_S_GRP_SESSION));
       Text(40, "ses1", x + 8, y + 14,
            StringFormat("%-12s %d", T(SSR_S_BOOKMARKS), m_state.bookmarks),
            SSR_C_TEXT_DIM);
@@ -1900,19 +1992,21 @@ private:
                                                 : m_state.leak_advice), 62),
            m_state.leak_clean ? SSR_C_TEXT_DIM : SSR_C_HOLD);
 
-      m_w.Group("g2", x, y + 72, w, 68, T(SSR_S_GRP_KEYBOARD));
-      Text(43, "ses4", x + 8, y + 86,
-           T(SSR_S_KEYS_1),
-           SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      Text(44, "keyhint", x + 8, y + 99,
-           T(SSR_S_KEYS_2),
-           SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      Text(45, "ses5", x + 8, y + 112,
-           T(SSR_S_KEYS_3),
-           SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      Text(46, "ses6", x + 8, y + 125,
-           T(SSR_S_KEYS_4),
-           SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      //--- 119 is the grid's own height plus the group's legend. It is
+      //--- NOT written twice: SSRDrawMarketHours returns what it used,
+      //--- and the 58 above plus this has to clear SSR_SHEET_H - which
+      //--- tools/ssr_layout_check.py now checks rather than trusting.
+      m_w.Group("g2", x, y + 62, w, 119, T(SSR_S_GRP_MARKET_HOURS));
+      SSRDrawMarketHours(m_w, "mh", x + 6, y + 76, m_state.now_msc);
+
+      //--- the keyboard rows are REMOVED, not undrawn: this panel never
+      //--- clears the chart, so a label nobody draws any more sits there
+      //--- for ever, and an upgrade would have left four dead lines
+      //--- under the new grid on every chart that had already run.
+      m_w.Remove("ses4");
+      m_w.Remove("keyhint");
+      m_w.Remove("ses5");
+      m_w.Remove("ses6");
      }
 
    //================================================================
@@ -2903,7 +2997,10 @@ public:
          //--- did not.
          if(down && !m_track_drag && !m_dragging)
            {
-            bool on_tag = (m_tag_w > 0 && !m_collapsed && m_tab == (int)SSR_TAB_TRADE &&
+            //--- the tag box lives on the TRADE sheet, and the sheets are
+            //--- what compact drops - so this asks about the sheet, not
+            //--- about the panel.
+            bool on_tag = (m_tag_w > 0 && !m_compact && m_tab == (int)SSR_TAB_TRADE &&
                            mx >= m_tag_x && mx <= m_tag_x + m_tag_w &&
                            my >= m_tag_y && my <= m_tag_y + m_tag_h);
             if(on_tag != m_tag_focus)
@@ -2918,7 +3015,9 @@ public:
 
          //--- the trackbar first: it sits inside the panel body, so the
          //--- caption test below must not get the chance to claim it
-         if(down && !m_track_drag && !m_dragging && !m_collapsed &&
+         //--- the speed track IS drawn when collapsed now, and dragging it
+         //--- is most of the reason to collapse in the first place
+         if(down && !m_track_drag && !m_dragging && !m_closed &&
             OnTrack(mx, my))
            {
             m_track_drag = true;

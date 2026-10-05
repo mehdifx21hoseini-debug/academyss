@@ -32,6 +32,7 @@
 #include "../Trading/SSR_Statistics.mqh"
 #include "../Trading/SSR_Journal.mqh"
 #include "../Session/SSR_SessionManager.mqh"
+#include "../Data/SSR_Calendar.mqh"
 
 //+------------------------------------------------------------------+
 class CSSRGroupPort : public CSSRReplayPort
@@ -40,6 +41,7 @@ private:
    CSSRReplayGroup      *m_group;    // not owned
    CSSRCustomSymbolSink *m_sink;     // the PRIMARY stream's sink; may be NULL
    CSSRChartManager     *m_charts;   // the primary stream's charts; may be NULL
+   CSSRCalendar         *m_cal;      // not owned; may be NULL
 
    //--- Phase 15. All optional: a port with none of these is exactly
    //--- the read-only port it was before, and says so through the
@@ -68,7 +70,7 @@ private:
 
 public:
                      CSSRGroupPort(void)
-     : m_group(NULL), m_sink(NULL), m_charts(NULL), m_blind(NULL),
+     : m_group(NULL), m_sink(NULL), m_charts(NULL), m_cal(NULL), m_blind(NULL),
        m_acct(NULL), m_stats(NULL), m_strategies(NULL), m_sessions(NULL),
        m_risk_percent(0.5), m_stop_points(0.0), m_tp_points(0.0),
        m_lines(NULL), m_journal(NULL), m_prop(NULL),
@@ -86,6 +88,7 @@ public:
 
    //--- everything the panel may show or drive, handed over one by
    //--- one so a host can wire only what it actually has
+   void              AttachCalendar(CSSRCalendar *c)    { m_cal = c; }
    void              AttachBlind(CSSRBlindMode *b)      { m_blind = b; }
    void              AttachAccount(CSSRTradingEngine *a){ m_acct = a; }
    void              AttachStats(CSSRStatsEngine *s)    { m_stats = s; }
@@ -120,6 +123,39 @@ public:
       out.progress  = m_group.Progress();
       out.streams   = m_group.Count();
       out.charts_detached = (m_charts != NULL ? m_charts.DetachedCount() : 0);
+
+      //+------------------------------------------------------------------+
+      //| THE NEXT EVENT AHEAD OF THE REPLAY CLOCK.                        |
+      //|                                                                  |
+      //| A linear walk, on purpose. The list is the handful of events in  |
+      //| the session's window - tens, not thousands - and a cursor that    |
+      //| remembered where it got to would be a second piece of state to    |
+      //| rewind every time the user steps backwards. Rewinding is a first- |
+      //| class action in this product, not an edge case, and the cheapest  |
+      //| correct answer is the one with nothing to invalidate.             |
+      //+------------------------------------------------------------------+
+      if(m_cal != NULL && out.now_msc > 0)
+        {
+         int    cn   = m_cal.Count();
+         long   best = 0;
+         SSRCalendarItem it, hit;
+         hit.Init();
+         for(int ci = 0; ci < cn; ci++)
+           {
+            if(!m_cal.At(ci, it))
+               continue;
+            if(it.msc <= out.now_msc)
+               continue;
+            if(best == 0 || it.msc < best)
+              { best = it.msc; hit = it; }
+           }
+         if(best > 0)
+           {
+            out.news_msc        = best;
+            out.news_label      = hit.Label();
+            out.news_importance = hit.importance;
+           }
+        }
       out.tp_points       = m_tp_points;
       out.skew_msc  = m_group.MaxSkewMsc();
 

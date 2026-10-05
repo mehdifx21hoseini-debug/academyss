@@ -309,6 +309,24 @@ enum ENUM_SSR_STR
    SSR_S_HM_DATA,
    SSR_S_HM_DATA_WHY,
    SSR_S_HM_READY,
+   //--- the market-hours grid
+   SSR_S_NEWS_IN,
+   SSR_S_MH_OVERLAP,
+   SSR_S_MH_NOW,
+   SSR_S_MH_NO_CLOCK,
+   SSR_S_MH_NOTE,
+   SSR_S_GRP_MARKET_HOURS,
+   //--- THE SEVEN DAYS, AND THEY MUST STAY IN THIS ORDER.
+   //--- SSRWeekdayName indexes this block by MqlDateTime.day_of_week,
+   //--- which is 0 for Sunday. A day inserted in the middle would
+   //--- silently rename every one after it.
+   SSR_S_DOW_SUN,
+   SSR_S_DOW_MON,
+   SSR_S_DOW_TUE,
+   SSR_S_DOW_WED,
+   SSR_S_DOW_THU,
+   SSR_S_DOW_FRI,
+   SSR_S_DOW_SAT,
    SSR_S_COUNT                     // must stay last
   };
 
@@ -676,6 +694,30 @@ int SSRStringsEnglish(SSRStringEntry &out[])
    SSRAddString(out, n, SSR_S_HM_READY,     "hm.ready",
                 "Virtual trades only - nothing reaches your broker");
 
+   //--- the market-hours grid
+   SSRAddString(out, n, SSR_S_GRP_MARKET_HOURS, "grp.market.hours",
+                "MARKET HOURS");
+   //--- "in 0h 04m  USD  Core CPI m/m". Hours stay in even when they
+   //--- are zero: a countdown whose shape changes as it runs is one the
+   //--- eye has to re-read instead of glance at.
+   SSRAddString(out, n, SSR_S_NEWS_IN,      "news.in",      "in %dh %02dm  %s");
+   SSRAddString(out, n, SSR_S_MH_OVERLAP,   "mh.overlap",   "overlap");
+   SSRAddString(out, n, SSR_S_MH_NOW,       "mh.now",
+                "%s  %02d:%02d  server time (UTC%+d)");
+   SSRAddString(out, n, SSR_S_MH_NO_CLOCK,  "mh.no.clock",
+                "no replay clock yet");
+   SSRAddString(out, n, SSR_S_MH_NOTE,      "mh.note",
+                "standard UTC hours; DST shifts them");
+
+   //--- the seven days, in day_of_week order, Sunday first
+   SSRAddString(out, n, SSR_S_DOW_SUN,      "dow.sun",      "Sun");
+   SSRAddString(out, n, SSR_S_DOW_MON,      "dow.mon",      "Mon");
+   SSRAddString(out, n, SSR_S_DOW_TUE,      "dow.tue",      "Tue");
+   SSRAddString(out, n, SSR_S_DOW_WED,      "dow.wed",      "Wed");
+   SSRAddString(out, n, SSR_S_DOW_THU,      "dow.thu",      "Thu");
+   SSRAddString(out, n, SSR_S_DOW_FRI,      "dow.fri",      "Fri");
+   SSRAddString(out, n, SSR_S_DOW_SAT,      "dow.sat",      "Sat");
+
    return n;
   }
 
@@ -835,6 +877,22 @@ string T(const ENUM_SSR_STR id)
       return "";
    return g_ssr_str[at].text;
   }
+
+//+------------------------------------------------------------------+
+//| The day's name from MqlDateTime.day_of_week.                     |
+//|                                                                  |
+//| It lives HERE, in the catalogue, rather than in SSR_Time.mqh,     |
+//| because a weekday is a word the user reads and SSR_Time.mqh is a  |
+//| layer below the one that knows about words. A helper in Common    |
+//| that reached up into Ui for its text would be the wrong way up.   |
+//+------------------------------------------------------------------+
+string SSRWeekdayShort(const int day_of_week)
+  {
+   if(day_of_week < 0 || day_of_week > 6)
+      return "";
+   return T((ENUM_SSR_STR)((int)SSR_S_DOW_SUN + day_of_week));
+  }
+
 
 //--- what a translator's file would be called, and how much of it landed
 string SSRLanguage(void)      { return g_ssr_lang; }

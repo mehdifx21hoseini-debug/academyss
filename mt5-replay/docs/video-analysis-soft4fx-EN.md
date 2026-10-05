@@ -103,9 +103,10 @@ its own windows come up" — is precisely where MQL5 is unconstrained.
 | Data Center: every symbol's available range | **nothing at all** | **built** — `SSR_DataCenter.mqh` |
 | start button disabled until the input is valid | partial | unchanged |
 | continuous logarithmic speed slider | already built in v123 | unchanged |
-| panel Collapse / Expand | absent | **not built** |
-| Sessions window (24-hour grid) | the data exists, the window does not | **not built** |
-| countdown to the next news event | the calendar exists, the countdown does not | **not built** |
+| panel Collapse / Expand | existed, but left only the title bar | **reworked** — it keeps the controls now |
+| Sessions window (24-hour grid) | nothing at all | **built** — on the SESSION tab |
+| countdown to the next news event | the calendar existed, the countdown did not | **built** — on the clock row |
+| the weekday beside the clock | absent | **built** |
 
 ### On branding
 

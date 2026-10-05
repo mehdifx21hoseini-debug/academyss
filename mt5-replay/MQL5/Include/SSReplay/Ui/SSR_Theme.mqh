@@ -530,12 +530,25 @@
 //--- for eleven builds and the two rows v69 added went straight past
 //--- the end of it; written this way, a taller sheet moves the frame
 //--- with it and there is no second number to forget.
-#define SSR_PANEL_H        (23 + 32 + 27 + 21 + 21 + SSR_SHEET_H + 18 + 8)
+//--- THE CLOCK BLOCK IS 50, NOT 32. It carries three lines now: the
+//--- clock and the weekday, then the next-event countdown with the
+//--- percentage, then the bar. See DrawClock for why it had to grow -
+//--- in short, nineteen monospaced characters do not fit beside a
+//--- right-hand label in 310 px, and the row it bought was missing.
+#define SSR_CLOCK_BLOCK_H  50
+#define SSR_PANEL_H        (23 + SSR_CLOCK_BLOCK_H + 27 + 21 + 21 + \
+                            SSR_SHEET_H + 18 + 8)
 #define SSR_PANEL_TALL_H   (SSR_PANEL_H + SSR_SHEET_GROW)
-//--- CAPTION 23 + CLOCK/PROGRESS 32 + TRANSPORT 27 + SPEED 21
-//--- + STATUS 18 + MARGIN 7. Everything a person touches while the
-//--- replay runs, and nothing they only consult.
-#define SSR_PANEL_COMPACT_H 128
+//--- CAPTION 23 + the clock block + TRANSPORT 27 + SPEED 21 + STATUS 18
+//--- + MARGIN 7. Everything a person touches while the replay runs, and
+//--- nothing they only consult - which is also exactly what Collapse
+//--- leaves, because they are the same idea reached from two sides.
+//---
+//--- ADDED UP BY THE COMPILER. It was the literal 128, and when the
+//--- clock block grew by eighteen the panel would have gone on claiming
+//--- to be 128 tall while drawing 146 - the frame ending above the
+//--- status strip, which reads as a rendering fault.
+#define SSR_PANEL_COMPACT_H (23 + SSR_CLOCK_BLOCK_H + 27 + 21 + 18 + 7)
 //--- the orange line the setup panel is about. Named here rather than
 //--- in the expert so a chart sweep can keep it while removing
 //--- everything else this product drew.
