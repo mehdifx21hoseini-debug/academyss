@@ -23,21 +23,61 @@ to see what.
 """
 import os
 import re
+import sys
 from PIL import Image, ImageDraw, ImageFont
 
 OUT = os.path.join(os.path.dirname(os.path.dirname(
     os.path.abspath(__file__))), "docs", "ux-ui", "v127")
 os.makedirs(OUT, exist_ok=True)
 
-C = dict(
-    PANEL=(34,37,43), PANEL_EDGE=(103,111,125), HEADER=(27,30,35),
-    WELL=(21,24,28), WELL_EDGE=(103,111,125), GROUP_EDGE=(103,111,125),
-    TEXT=(230,233,238), TEXT_DIM=(176,182,192), TEXT_FAINT=(138,144,153),
-    BTN=(44,48,55), BTN_EDGE=(103,111,124), BTN_TEXT=(230,233,238),
-    TAB_ON=(34,37,43), RUN=(79,190,134), HOLD=(227,164,60),
-    STOP=(237,118,110), ACCENT=(224,134,58), PRIMARY=(224,134,58),
-    PRIMARY_TEXT=(27,30,35), LINE_LONG=(88,158,236),
-)
+#--- THE PALETTE IS READ, NOT COPIED.
+#---
+#--- SSR_Theme.mqh holds three of them in flat #ifdef blocks - RAIL,
+#--- LIGHT and DARK - and exactly one is compiled. A preview carrying
+#--- its own hex values is a preview of a theme nobody is running, and
+#--- it goes stale the moment a colour moves without anything saying so.
+#---
+#--- Pass a block name to see one that is NOT currently built. That is
+#--- the point of this tool today: answering "what would white look
+#--- like" without switching the product over to find out.
+#---
+#---     python3 tools/ssr_layout_preview.py            # the built one
+#---     python3 tools/ssr_layout_preview.py light      # a look ahead
+def palettes(path):
+    out, cur = {}, None
+    for line in open(path, encoding="utf-8"):
+        m = re.match(r"\s*#ifdef\s+SSR_THEME_([A-Z]+)", line)
+        if m:
+            cur = m.group(1).lower()
+            out.setdefault(cur, {})
+            continue
+        if line.startswith("#endif"):
+            cur = None
+            continue
+        if cur is None:
+            continue
+        m = re.match(r"\s*#define\s+SSR_C_([A-Z0-9_]+)\s+C'(\d+),(\d+),(\d+)'", line)
+        if m:
+            out[cur][m.group(1)] = (int(m.group(2)), int(m.group(3)),
+                                    int(m.group(4)))
+    return out
+
+
+def active_theme(path, known):
+    """Which palette block is actually compiled.
+
+    It must be checked against the blocks that EXIST: the file opens
+    with `#define SSR_THEME_MQH`, its own include guard, which matches
+    the same pattern and is not a palette. Returning that gave "no
+    SSR_THEME_MQH block" - the right complaint about the wrong name.
+    """
+    for line in open(path, encoding="utf-8"):
+        m = re.match(r"\s*#define\s+SSR_THEME_([A-Z]+)\s*$", line)
+        if m and m.group(1).lower() in known:
+            return m.group(1).lower()
+    return "rail"
+
+
 S = 2                                   # 2x so the text is readable here
 
 #--- THE SIZES ARE READ, NOT COPIED. A preview carrying its own idea of
@@ -45,6 +85,24 @@ S = 2                                   # 2x so the text is readable here
 #--- changes, and does it silently.
 THEME = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                      "MQL5", "Include", "SSReplay", "Ui", "SSR_Theme.mqh")
+
+PALETTES = palettes(THEME)
+ACTIVE = active_theme(THEME, PALETTES)
+WANT = (sys.argv[1].lower() if len(sys.argv) > 1 else ACTIVE)
+if WANT not in PALETTES:
+    raise SystemExit("no SSR_THEME_%s block in SSR_Theme.mqh; have: %s"
+                     % (WANT.upper(), ", ".join(sorted(PALETTES))))
+C = PALETTES[WANT]
+SUFFIX = "" if WANT == ACTIVE else "-" + WANT
+print("palette: %s%s" % (WANT, "" if WANT == ACTIVE else " (NOT the compiled one, which is %s)" % ACTIVE))
+
+#--- THE CHART BEHIND IS THE USER'S, NOT OURS. MetaTrader owns the chart
+#--- background and this product never sets it - the theme file says so
+#--- in as many words. A light panel is drawn here on a light chart
+#--- because that is the combination a person means by "white", not
+#--- because the expert would make it so.
+CHART_BG   = (246, 246, 246) if WANT == "light" else (13, 15, 18)
+CHART_GRID = (226, 228, 231) if WANT == "light" else (26, 29, 34)
 PT = {}
 FACE = {}
 for _line in open(THEME, encoding="utf-8"):
@@ -88,14 +146,14 @@ def caption(im):
            "the build machine"
            % (FACE.get('SSR_FONT','?'), PT['SSR_FS_BODY'],
               FACE.get('SSR_FONT_MONO','?'), FACE.get('SSR_FONT','?')),
-           fill=(96,102,112), font=f(7))
+           fill=C['TEXT_FAINT'], font=f(7))
 
 CW, CH = 980, 560                        # a chart-sized canvas
 def chart():
-    im = Image.new('RGB',(CW*S,CH*S),(13,15,18))
+    im = Image.new('RGB',(CW*S,CH*S),CHART_BG)
     d = ImageDraw.Draw(im)
-    for gx in range(0,CW,70): d.line([gx*S,0,gx*S,CH*S], fill=(26,29,34), width=1)
-    for gy in range(0,CH,56): d.line([0,gy*S,CW*S,gy*S], fill=(26,29,34), width=1)
+    for gx in range(0,CW,70): d.line([gx*S,0,gx*S,CH*S], fill=CHART_GRID, width=1)
+    for gy in range(0,CH,56): d.line([0,gy*S,CW*S,gy*S], fill=CHART_GRID, width=1)
     return im,d
 
 # ---------------------------------------------------------------- splash
@@ -253,16 +311,16 @@ label(d, sx+8, sy+54, "charts       clean", C['TEXT_DIM'], PT['SSR_FS_SMALL'])
 group(d, sx, sy+74, SHEET_W, 119, "MARKET HOURS")
 market_hours(d, sx+6, sy+88, 10, 28)
 caption(im)
-im.save(OUT + '/04-market-hours.png')
+im.save(OUT + '/04-market-hours' + SUFFIX + '.png')
 
 # screen 1 - what you see the second you attach it
 im,d = chart()
 splash(d,"Drag the line to where you want to start, then START.",C['HOLD'])
 h = home(d, 340, 150)
-d.line([(700*S,60*S),(700*S,520*S)], fill=C['HOLD'], width=2*S)
-d.text((706*S,64*S),"START HERE",fill=C['HOLD'],font=f(PT['SSR_FS_BODY'],True))
+d.line([(700*S,60*S),(700*S,520*S)], fill=C['ACCENT'], width=2*S)
+d.text((706*S,64*S),"START HERE",fill=C['ACCENT'],font=f(PT['SSR_FS_BODY'],True))
 caption(im)
-im.save(OUT + '/01-start.png')
+im.save(OUT + '/01-start' + SUFFIX + '.png')
 
 # screen 2 - the data centre over it
 im,d = chart()
@@ -270,7 +328,7 @@ splash(d,"Drag the line to where you want to start, then START.",C['HOLD'])
 home(d, 340, 150)
 datacentre(d,(CW-DCW)//2,(CH-DCH)//2,ROWSET,3,"reading 9 of 11...")
 caption(im)
-im.save(OUT + '/02-datacentre.png')
+im.save(OUT + '/02-datacentre' + SUFFIX + '.png')
 
 # screen 3 - scan finished, running
 im,d = chart()
@@ -281,5 +339,5 @@ datacentre(d,(CW-DCW)//2,(CH-DCH)//2,
                                     ("SP500","14.09.2021","03.10.2026","908k","built","ok")],
            3,"9 of 11 symbols have minute history here",False)
 caption(im)
-im.save(OUT + '/03-done.png')
+im.save(OUT + '/03-done' + SUFFIX + '.png')
 print("rendered")
