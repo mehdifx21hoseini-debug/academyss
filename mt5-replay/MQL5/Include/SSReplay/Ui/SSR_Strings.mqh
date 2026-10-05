@@ -275,6 +275,40 @@ enum ENUM_SSR_STR
    SSR_S_ACT_JUMP,
    SSR_S_ACT_SESSIONS,
    SSR_S_ACT_FIDELITY,
+   //--- the nameplate on the host chart
+   SSR_S_SP_NAME,
+   SSR_S_SP_TAGLINE,
+   SSR_S_SP_VIRTUAL,
+   SSR_S_SP_KEEP_OPEN,
+   SSR_S_SP_NO_ACCOUNT,
+   SSR_S_SP_PICK,
+   SSR_S_SP_SWITCH,
+   SSR_S_SP_BUILDING,
+   SSR_S_SP_RUNNING,
+   //--- the data centre
+   SSR_S_DC_TITLE,
+   SSR_S_DC_H_SYMBOL,
+   SSR_S_DC_H_FROM,
+   SSR_S_DC_H_TO,
+   SSR_S_DC_H_BARS,
+   SSR_S_DC_H_TICKS,
+   SSR_S_DC_PENDING,
+   SSR_S_DC_NONE,
+   SSR_S_DC_UNSYNCED,
+   SSR_S_DC_REAL,
+   SSR_S_DC_BARS_ONLY,
+   SSR_S_DC_SCANNING,
+   SSR_S_DC_DONE,
+   SSR_S_DC_EMPTY,
+   SSR_S_DC_HINT,
+   SSR_S_DC_STOP,
+   SSR_S_DC_RESCAN,
+   SSR_S_DC_USE,
+   SSR_S_DC_CANNOT,
+   //--- the home window
+   SSR_S_HM_DATA,
+   SSR_S_HM_DATA_WHY,
+   SSR_S_HM_READY,
    SSR_S_COUNT                     // must stay last
   };
 
@@ -583,6 +617,64 @@ int SSRStringsEnglish(SSRStringEntry &out[])
                 "H lists every key. All virtual - nothing reaches a broker.");
    SSRAddString(out, n, SSR_S_FIRSTRUN_4,      "firstrun.4",
                 "Shown once. Delete MQL5/Files/SSReplay/seen.txt for it again.");
+
+
+   //--- the nameplate. Short lines on purpose: MetaTrader draws sixty-
+   //--- three characters of a label and silently stops, and a warning
+   //--- cut off mid-sentence is worse than no warning at all.
+   SSRAddString(out, n, SSR_S_SP_NAME,      "sp.name",      "SS REPLAY");
+   SSRAddString(out, n, SSR_S_SP_TAGLINE,   "sp.tagline",
+                "market replay  -  manual backtesting  -  training");
+   SSRAddString(out, n, SSR_S_SP_VIRTUAL,   "sp.virtual",
+                "Virtual trades only. Nothing is sent to your broker.");
+   SSRAddString(out, n, SSR_S_SP_KEEP_OPEN, "sp.keep.open",
+                "Keep this chart open - you may minimise it.");
+   SSRAddString(out, n, SSR_S_SP_NO_ACCOUNT,"sp.no.account",
+                "no account - the terminal is not logged in");
+   //--- the one line on the nameplate that changes. It replaces the
+   //--- "keep this chart open" warning while something is happening,
+   //--- because at that moment the user wants to know what, not why.
+   SSRAddString(out, n, SSR_S_SP_PICK,      "sp.pick",
+                "Drag the line to where you want to start, then START.");
+   SSRAddString(out, n, SSR_S_SP_SWITCH,    "sp.switch",
+                "Switching this chart to the symbol you chose...");
+   SSRAddString(out, n, SSR_S_SP_BUILDING,  "sp.building",
+                "Building the session - this takes a few seconds.");
+   SSRAddString(out, n, SSR_S_SP_RUNNING,   "sp.running",
+                "Replay is running. Keep this chart open.");
+
+   //--- the data centre
+   SSRAddString(out, n, SSR_S_DC_TITLE,     "dc.title",
+                "DATA CENTRE  -  WHAT THIS TERMINAL HOLDS");
+   SSRAddString(out, n, SSR_S_DC_H_SYMBOL,  "dc.h.symbol",  "SYMBOL");
+   SSRAddString(out, n, SSR_S_DC_H_FROM,    "dc.h.from",    "FROM");
+   SSRAddString(out, n, SSR_S_DC_H_TO,      "dc.h.to",      "TO");
+   SSRAddString(out, n, SSR_S_DC_H_BARS,    "dc.h.bars",    "M1 BARS");
+   SSRAddString(out, n, SSR_S_DC_H_TICKS,   "dc.h.ticks",   "TICKS");
+   SSRAddString(out, n, SSR_S_DC_PENDING,   "dc.pending",   "reading...");
+   SSRAddString(out, n, SSR_S_DC_NONE,      "dc.none",      "no M1 history");
+   SSRAddString(out, n, SSR_S_DC_UNSYNCED,  "dc.unsynced",  "not loaded yet");
+   SSRAddString(out, n, SSR_S_DC_REAL,      "dc.real",      "real");
+   SSRAddString(out, n, SSR_S_DC_BARS_ONLY, "dc.bars.only", "built");
+   SSRAddString(out, n, SSR_S_DC_SCANNING,  "dc.scanning",  "reading %d of %d...");
+   SSRAddString(out, n, SSR_S_DC_DONE,      "dc.done",
+                "%d of %d symbols have minute history here");
+   SSRAddString(out, n, SSR_S_DC_EMPTY,     "dc.empty",
+                "Market Watch is empty - add symbols in MetaTrader first");
+   SSRAddString(out, n, SSR_S_DC_HINT,      "dc.hint",
+                "Pick a symbol, then Use it to start a replay there.");
+   SSRAddString(out, n, SSR_S_DC_STOP,      "dc.stop",      "Stop");
+   SSRAddString(out, n, SSR_S_DC_RESCAN,    "dc.rescan",    "Read again");
+   SSRAddString(out, n, SSR_S_DC_USE,       "dc.use",       "Use this symbol");
+   SSRAddString(out, n, SSR_S_DC_CANNOT,    "dc.cannot",
+                "That symbol has no minute history - pick another.");
+
+   //--- the home window
+   SSRAddString(out, n, SSR_S_HM_DATA,      "hm.data",      "Data Centre");
+   SSRAddString(out, n, SSR_S_HM_DATA_WHY,  "hm.data.why",
+                "see which symbols you can replay, and from when");
+   SSRAddString(out, n, SSR_S_HM_READY,     "hm.ready",
+                "Virtual trades only - nothing reaches your broker");
 
    return n;
   }

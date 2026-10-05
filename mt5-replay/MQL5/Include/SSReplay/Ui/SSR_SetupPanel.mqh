@@ -35,6 +35,7 @@
 #include "SSR_Widgets.mqh"
 #include "../Chart/SSR_BlindMode.mqh"
 #include "../Common/SSR_SessionFile.mqh"
+#include "../Common/SSR_Build.mqh"
 
 //--- where the panel remembers what the user last chose. Also how the
 //--- values cross the handover: the replay chart restarts this program,
@@ -707,6 +708,27 @@ public:
    //| promising it: the symbol, timeframe, balance and risk are read   |
    //| back and printed, so pressing it is a confirmation.               |
    //+------------------------------------------------------------------+
+   //+------------------------------------------------------------------+
+   //| STEP 0 - HOME. The window a person meets first.                  |
+   //|                                                                  |
+   //| Every mature simulator opens on a short list of whole intentions |
+   //| - start something new, carry on with something, look at what     |
+   //| data I have - rather than on a form. This is that list, and it   |
+   //| is deliberately the ONLY screen with no settings on it: a person |
+   //| who wants to be trading in ten seconds never has to read a       |
+   //| field, and a person who wants to configure everything is one     |
+   //| button away from doing so.                                        |
+   //|                                                                  |
+   //| THE FIRST LINE IS THE GUARANTEE, NOT A GREETING.                 |
+   //| The window that opens on somebody's live account's terminal is   |
+   //| the right place to say that nothing here reaches their broker,   |
+   //| and it costs one line.                                           |
+   //|                                                                  |
+   //| EVERY ACTION CARRIES ITS CONSEQUENCE UNDERNEATH.                 |
+   //| "Random session" means nothing on its own. One faint line saying |
+   //| what it will actually do is the difference between a menu and a  |
+   //| guess.                                                            |
+   //+------------------------------------------------------------------+
    void              RenderQuick(void)
      {
       bool have_last    = FileIsExist(SSR_SETUP_FILE);
@@ -714,13 +736,27 @@ public:
                            FileIsExist("SSReplay\\sessions\\" +
                                        m_v.session_name + ".ssr"));
 
-      int rows = (have_last ? 1 : 0) + (have_session ? 1 : 0) + 1;
-      int h    = 34 + rows * 46 + 40;
+      //--- every row is a button and a reason: 26 of button, 20 of
+      //--- reason. Counted here so the frame cannot disagree with what
+      //--- is drawn inside it - the bug that puts a Start button three
+      //--- pixels below the panel it belongs to.
+      int rows = (have_last ? 1 : 0) + (have_session ? 1 : 0) + 2;
+      int h    = 34 + 22 + rows * 46 + 30 + 10;
+
       m_w.Rect("frame", m_x, m_y, SSR_SETUP_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
       m_w.Label("title", m_x + 12, m_y + 9, T(SSR_S_SU_NEW_REPLAY),
                 SSR_C_TEXT, SSR_FS_BODY);
+      m_w.Label("stepn", m_x + SSR_SETUP_W - 40, m_y + 10, SSR_BUILD_SHORT,
+                SSR_C_TEXT_FAINT, SSR_FS_SMALL);
 
-      int by = m_y + 34;
+      //--- the guarantee, where the video's product prints the account
+      m_w.Rect("hrule", m_x + 12, m_y + 28, SSR_SETUP_W - 24, 1,
+               SSR_C_GROUP_EDGE, SSR_C_GROUP_EDGE);
+      m_w.Label("safe", m_x + 12, m_y + 34, T(SSR_S_HM_READY),
+                SSR_C_RUN, SSR_FS_SMALL);
+
+      int by = m_y + 34 + 22;
+
       if(have_last)
         {
          m_w.ButtonC("qlast", m_x + 12, by, SSR_SETUP_W - 24, 26,
@@ -755,6 +791,17 @@ public:
                  T(SSR_S_SU_RANDOM));
       m_w.Label("qrandd", m_x + 14, by + 29,
                 T(SSR_S_SU_RANDOM_WHY),
+                SSR_C_TEXT_DIM, SSR_FS_SMALL);
+      by += 46;
+
+      //--- THE DATA CENTRE, on the first screen rather than buried.
+      //--- The commonest first failure in this product is a symbol the
+      //--- terminal holds no minute bars for, and until now the only
+      //--- way to discover that was to start a session and be refused.
+      m_w.Button("qdata", m_x + 12, by, SSR_SETUP_W - 24, 26,
+                 T(SSR_S_HM_DATA));
+      m_w.Label("qdatad", m_x + 14, by + 29,
+                T(SSR_S_HM_DATA_WHY),
                 SSR_C_TEXT_DIM, SSR_FS_SMALL);
       by += 46;
 
@@ -1051,6 +1098,12 @@ public:
         }
       if(m_w.Pressed("qcust"))
         { m_step = 1; Repaint(); return ""; }
+
+      //--- NOT OPENED HERE. The data centre is a second window on the
+      //--- same chart, and a panel that owned it would have to stay
+      //--- alive to close it. The host owns both, so the host is told.
+      if(m_w.Pressed("qdata"))
+         return "data";
 
       //--- MODE. Applied immediately, because the value it shows IS the
       //--- setting - the same rule the cycling fields have always used.

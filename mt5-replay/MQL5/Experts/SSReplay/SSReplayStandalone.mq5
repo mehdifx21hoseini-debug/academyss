@@ -43,6 +43,8 @@
 #include <SSReplay/Ui/SSR_RevealCard.mqh>
 #include <SSReplay/Ui/SSR_ReviewCard.mqh>
 #include <SSReplay/Ui/SSR_SetupPanel.mqh>
+#include <SSReplay/Ui/SSR_Splash.mqh>
+#include <SSReplay/Ui/SSR_DataCenter.mqh>
 #include <SSReplay/Ui/SSR_RangeDialog.mqh>
 #include <SSReplay/Data/SSR_HistoryCatalog.mqh>
 #include <SSReplay/Trading/SSR_TradingEngine.mqh>
@@ -209,6 +211,13 @@ CSSRCalendarLines    g_cal_lines;
 CSSRFirstRun         g_first;
 CSSRPropEvaluation   g_prop;
 CSSRSetupPanel       g_setup_ui;
+
+//--- THE TWO SURFACES THAT ONLY EXIST BEFORE A SESSION DOES.
+//--- Both live on the host chart, which is the chart this program is
+//--- attached to - so both get real mouse events, unlike the replay
+//--- panel, which does not and never will.
+CSSRSplash           g_splash;
+CSSRDataCenter       g_data;
 
 //+------------------------------------------------------------------+
 //| WHAT THE SESSION IS ACTUALLY BUILT FROM.                         |
@@ -1589,6 +1598,10 @@ bool BuildSession(string origin, const bool on_replay,
      }
 
    g_ready = true;
+   //--- the nameplate stops explaining and starts reporting. In two-window
+   //--- mode this chart now has no other job, and a person looking at it
+   //--- should be able to tell at a glance that it is still load-bearing.
+   g_splash.Status(T(SSR_S_SP_RUNNING), SSR_C_RUN);
 
    PrintFormat("[host] ready  %s -> %s  %s .. %s",
                origin, rsym, SSRFormatMsc(win_start), SSRFormatMsc(win_end));
@@ -2072,6 +2085,18 @@ int OnInit()
             Print("[host] setup restored from MQL5/Files/SSReplay/setup.ini");
          g_setup_ui.Create(ChartID(), sv);
 
+         //+------------------------------------------------------------------+
+         //| AFTER THE PANEL, NEVER BEFORE IT.                                |
+         //|                                                                  |
+         //| CSSRSetupPanel::Create sweeps every object on this chart whose   |
+         //| name begins with "SSR" bar the picker line. A nameplate painted  |
+         //| first is a nameplate that is gone a millisecond later, and the   |
+         //| symptom - "it flashed up and disappeared" - reads as a crash.    |
+         //+------------------------------------------------------------------+
+         g_splash.Create(ChartID());
+         g_splash.Status(T(SSR_S_SP_PICK), SSR_C_HOLD);
+         g_data.Create(ChartID());
+
          g_picking = true;
          EventSetMillisecondTimer(200);
          return INIT_SUCCEEDED;
@@ -2113,6 +2138,8 @@ void OnDeinit(const int reason)
       g_publisher2[i].Withdraw();
 
    g_setup_ui.Destroy();
+   g_data.Destroy();
+   g_splash.Destroy();
    RemovePicker();
    if(reason == REASON_REMOVE || reason == REASON_PROGRAM || reason == REASON_CLOSE)
       ObjectDelete(ChartID(), SSR_PICK_STASH);
@@ -2496,7 +2523,28 @@ void OnTimer()
 
       //--- the setup panel owns the two buttons now; the bare ones stay
       //--- readable so a chart that has one and not the other still works
+      //+------------------------------------------------------------------+
+      //| THE DATA CENTRE'S SCAN RUNS HERE, ONE SYMBOL A TICK.             |
+      //|                                                                  |
+      //| It is deliberately driven from the host timer rather than from a |
+      //| loop of its own: a scan that owns the thread cannot be stopped,  |
+      //| cannot repaint, and takes the terminal with it when a symbol     |
+      //| will not synchronise. Driven from here it is a progress bar that |
+      //| happens to be doing work.                                         |
+      //+------------------------------------------------------------------+
+      if(g_data.IsOpen())
+        {
+         g_data.ScanStep();
+         return;                 // the picker waits while the list is read
+        }
+
       string act = g_setup_ui.Poll();
+
+      if(act == "data")
+        {
+         g_data.Open();
+         return;
+        }
 
       if(act == "here" || ObjectGetInteger(0, SSR_PICK_HERE, OBJPROP_STATE))
         {
@@ -2524,6 +2572,8 @@ void OnTimer()
          CSSRSetupPanel::Save(g_setup);
          Print("[host] setup: ", g_setup_ui.Summary());
          g_setup_ui.Destroy();
+         g_data.Destroy();
+         g_splash.Status(T(SSR_S_SP_BUILDING), SSR_C_RUN);
          if(at <= 0)
            {
             Print("[host] the start line is gone - put it back, or turn "
@@ -3118,6 +3168,36 @@ void OnChartEvent(const int id, const long &lparam,
    //--- THE SETUP PANEL GETS ITS MOUSE FIRST, and before the g_ready
    //--- gate: it exists precisely when the session is NOT ready yet, so
    //--- gating it on readiness is gating it on never.
+   //+------------------------------------------------------------------+
+   //| THE TOP WINDOW GETS THE CLICK. The data centre opens OVER the    |
+   //| setup panel, so asking the panel first would hand it presses     |
+   //| aimed at a window drawn on top of it.                            |
+   //+------------------------------------------------------------------+
+   if(g_data.IsOpen())
+     {
+      string chosen = g_data.Poll(id, sparam);
+      if(chosen != "")
+        {
+         //+------------------------------------------------------------------+
+         //| CHANGING THE CHART'S SYMBOL IS THE WHOLE ACTION.                 |
+         //|                                                                  |
+         //| The origin of a session is the host chart's own symbol, so       |
+         //| "use this one" means "make this chart that symbol". MetaTrader   |
+         //| restarts this program on the change, and OnInit picks the new    |
+         //| instrument up on its own - the same restart the handover has     |
+         //| used since the beginning, rather than a second code path that    |
+         //| would have to be kept in step with it.                           |
+         //+------------------------------------------------------------------+
+         Print("[host] data centre: switching this chart to ", chosen);
+         g_data.Close();
+         g_splash.Status(T(SSR_S_SP_SWITCH), SSR_C_HOLD);
+         if(!ChartSetSymbolPeriod(0, chosen, _Period))
+            Print("[host] could not switch this chart to ", chosen,
+                  " err=", GetLastError());
+        }
+      return;
+     }
+
    if(g_setup_ui.IsOpen() && g_setup_ui.OnChartEvent(id, lparam, dparam, sparam))
       return;
 

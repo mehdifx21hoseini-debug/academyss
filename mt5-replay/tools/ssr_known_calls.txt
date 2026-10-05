@@ -6,6 +6,7 @@
 # something newly introduced and not yet defined.
 # tree compiles, so none can be a missing definition. A13 flags
 # tree compiles.
+AccountInfoInteger
 AccountInfoString
 ArrayCopy
 ArrayInitialize
