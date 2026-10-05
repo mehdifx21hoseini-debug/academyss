@@ -848,8 +848,32 @@ private:
    //================================================================
    void              DrawCaption(const int x, const int y, const int W)
      {
-      m_w.Rect("hdr", x + 1, y + 1, W - 2, SSR_HEADER_H, SSR_C_HEADER, SSR_C_GROUP_EDGE);
-      Text(0, "title", x + SSR_PAD, y + 4, "SS Replay", SSR_C_ACCENT, SSR_FS_TITLE);
+      //+------------------------------------------------------------------+
+      //| A TITLE BAR, IN THE BRAND COLOUR.                                |
+      //|                                                                  |
+      //| It was a grey strip with the name written on it in the accent.    |
+      //| The reference draws a real title bar - a mark, a name, and the    |
+      //| window buttons at the far right - and that is most of why its     |
+      //| dialogs read as windows rather than as rectangles somebody drew   |
+      //| on a chart.                                                       |
+      //|                                                                  |
+      //| MEASURED BEFORE IT WAS DRAWN, because white on a mid-blue is      |
+      //| exactly the pairing that looks fine to the person who picked it   |
+      //| and fails for everyone else: PRIMARY_TEXT on ACCENT is 10.32:1,   |
+      //| and the chips' WELL face on ACCENT is 9.55:1. The build stamp     |
+      //| uses PANEL rather than a dimmed white, at 8.74:1, because there   |
+      //| is no "dim" step in this palette that is still legible.           |
+      //+------------------------------------------------------------------+
+      m_w.Rect("hdr", x + 1, y + 1, W - 2, SSR_HEADER_H,
+               SSR_C_ACCENT, SSR_C_ACCENT);
+      //--- the mark: a light plate with the initials in the brand colour,
+      //--- which is the inverse of the nameplate on the host chart and
+      //--- reads as the same identity rather than a second one
+      m_w.Rect("mark", x + 5, y + 4, 14, 14, SSR_C_PANEL, SSR_C_PANEL);
+      Text(58, "markt", x + 7, y + 6, SSR_BRAND_MARK, SSR_C_ACCENT,
+           SSR_FS_SMALL);
+      Text(0, "title", x + 24, y + 4, "SS Replay", SSR_C_PRIMARY_TEXT,
+           SSR_FS_TITLE);
 
       //+------------------------------------------------------------------+
       //| WHICH BUILD IS THIS?                                             |
@@ -863,8 +887,7 @@ private:
       string tag = SSR_BUILD;
       int sp = StringFind(tag, " ");
       if(sp > 0) tag = StringSubstr(tag, 0, sp);
-      Text(55, "build", x + SSR_PAD + 58, y + 6, tag,
-           SSR_C_TEXT_FAINT, SSR_FS_SMALL);
+      Text(55, "build", x + 82, y + 6, tag, SSR_C_PANEL, SSR_FS_SMALL);
 
       //+------------------------------------------------------------------+
       //| THE CAPTION IS A STATUS LINE, NOT A TITLE BAR.                   |
@@ -881,9 +904,11 @@ private:
       //| it is a mode, not a measurement, and it was sitting among four    |
       //| numbers pretending to be a fifth.                                 |
       //+------------------------------------------------------------------+
-      string right = SSRStateName(m_state.status);
-      Text(1, "capinfo", x + 88, y + 5, right,
-           SSRStateColor(m_state.status), SSR_FS_SMALL);
+      //--- THE STATE BECOMES A CHIP. It was a word in SSRStateColor on a
+      //--- grey strip; on the brand bar those state colours are dark on
+      //--- dark - RUN green on the accent is under 2:1 - so it gets the
+      //--- same light plate the modes already use, and keeps its colour.
+      m_w.Remove("capinfo");
       //+------------------------------------------------------------------+
       //| THE SYMBOL IS NOT REPEATED HERE.                                 |
       //|                                                                  |
@@ -900,7 +925,9 @@ private:
       //--- chips, laid out left to right from a fixed start. Each one
       //--- reports the width it took, so adding a mode later moves the
       //--- next chip instead of landing on top of it.
-      int cx = x + 140;
+      int cx = x + 118;
+      cx += m_w.Chip("chstate", cx, y + 4, SSRStateName(m_state.status),
+                     SSRStateColor(m_state.status), SSR_C_WELL) + 4;
       bool degraded = (m_state.fidelity_effective != m_state.fidelity);
       cx += m_w.Chip("chfid", cx, y + 4,
                      SSRFidelityShort(m_state.fidelity_effective) +
@@ -949,10 +976,28 @@ private:
       m_w.Remove("keys");
       m_w.Remove("move");
 
-      m_w.Button("collapse", x + W - 42, y + 3, 18, SSR_HEADER_H - 5,
-                 m_collapsed ? "+" : "-");
-      m_w.ButtonC("close", x + W - 22, y + 3, 18, SSR_HEADER_H - 5, "X",
-                  SSR_C_BTN, SSR_C_BTN_EDGE, SSR_C_STOP, SSR_FS_BODY);
+      //+------------------------------------------------------------------+
+      //| THREE BUTTONS, AND ALL THREE DO SOMETHING.                       |
+      //|                                                                  |
+      //| Minimise is Collapse, which now leaves the controls rather than   |
+      //| the title bar. Maximise is the tall panel - SSR_CMD_PANEL_SIZE,   |
+      //| which already existed and had no way in but a key. Close is       |
+      //| close. A fourth glyph for symmetry would be a control that does   |
+      //| nothing, which is worse than a gap.                               |
+      //|                                                                  |
+      //| Drawn flat ON the bar, with no face of their own, because that    |
+      //| is what a title-bar button looks like on this platform and a      |
+      //| raised grey button here would read as the one thing to press.     |
+      //+------------------------------------------------------------------+
+      m_w.ButtonC("collapse", x + W - 60, y + 2, 19, SSR_HEADER_H - 3,
+                  m_collapsed ? "+" : SSR_GLYPH_MIN,
+                  SSR_C_ACCENT, SSR_C_ACCENT, SSR_C_PRIMARY_TEXT, SSR_FS_BODY);
+      m_w.ButtonC("panelsize", x + W - 41, y + 2, 19, SSR_HEADER_H - 3,
+                  SSR_GLYPH_MAX,
+                  SSR_C_ACCENT, SSR_C_ACCENT, SSR_C_PRIMARY_TEXT, SSR_FS_SMALL);
+      m_w.ButtonC("close", x + W - 22, y + 2, 19, SSR_HEADER_H - 3,
+                  SSR_GLYPH_CLOSE,
+                  SSR_C_ACCENT, SSR_C_ACCENT, SSR_C_PRIMARY_TEXT, SSR_FS_BODY);
      }
 
    //================================================================
@@ -2166,8 +2211,9 @@ private:
    //+------------------------------------------------------------------+
    void              HideCaption(const bool hidden)
      {
-      string cap[] = {"bg","hdr","title","build","capinfo",
-                      "collapse","close",
+      string cap[] = {"bg","hdr","title","build","mark","markt",
+                      "collapse","panelsize","close",
+                      "chstate","chstate_bg",
                       "chfid","chfid_bg","chblind","chblind_bg",
                       "chprop","chprop_bg"};
       for(int i = 0; i < ArraySize(cap); i++)
@@ -2837,7 +2883,8 @@ public:
       else if(what == "flipbtn")  c = SSR_CMD_LINES_FLIP;
       else if(what == "spup")     c = SSR_CMD_SPEED_UP;
       else if(what == "spdn")     c = SSR_CMD_SPEED_DOWN;
-      else if(what == "collapse") c = SSR_CMD_COLLAPSE;
+      else if(what == "collapse")  c = SSR_CMD_COLLAPSE;
+      else if(what == "panelsize") c = SSR_CMD_PANEL_SIZE;
       else if(what == "keys")     c = SSR_CMD_KEYS;
 
       //--- the palette is opened here rather than through a command,

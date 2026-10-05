@@ -90,8 +90,8 @@
 //| below the primary text and not three - which is exactly what the  |
 //| dark ramp found at 233 / 186 / 149.                               |
 //+------------------------------------------------------------------+
-#define SSR_THEME_RAIL
-//#define SSR_THEME_LIGHT
+//#define SSR_THEME_RAIL
+#define SSR_THEME_LIGHT
 //#define SSR_THEME_DARK
 
 //--- exactly one of the three is defined above. Flat blocks rather
@@ -457,6 +457,28 @@
 //--- and labels have no width to overflow. tools/ssr_layout_check.py
 //--- re-checks the stacked rows at the new line height, and the probe
 //--- measures the real strings against the real panel widths.
+//+------------------------------------------------------------------+
+//| THE THREE TITLE-BAR GLYPHS, WRITTEN AS CODE POINTS.              |
+//|                                                                  |
+//| Not as literal characters. This file is pure ASCII and stays that |
+//| way: a header re-saved as ANSI by any tool in the chain turns a   |
+//| pasted glyph into a question mark, and the symptom - a window     |
+//| button that reads "?" - looks like a missing font rather than a   |
+//| mangled file. ShortToString costs one call on a cached draw and   |
+//| cannot be corrupted by an encoding.                               |
+//|                                                                  |
+//| WHICH CHARACTERS, AND WHY THESE. The project has already paid for |
+//| guessing at a font's repertoire once: Wingdings was chosen for    |
+//| the transport buttons, drew nothing in a real test, and was       |
+//| replaced by WGL4 shapes. EN DASH and WHITE SQUARE are WGL4, which |
+//| every Windows font carries; MULTIPLICATION SIGN is Latin-1, which |
+//| is older and safer still. None of the three is a private-use      |
+//| symbol from a decorative face.                                    |
+//+------------------------------------------------------------------+
+#define SSR_GLYPH_MIN      ShortToString(0x2013)   // EN DASH
+#define SSR_GLYPH_MAX      ShortToString(0x25A1)   // WHITE SQUARE
+#define SSR_GLYPH_CLOSE    ShortToString(0x00D7)   // MULTIPLICATION SIGN
+
 #define SSR_FS_TITLE       10
 #define SSR_FS_BODY        9
 #define SSR_FS_CLOCK       14
@@ -515,7 +537,19 @@
 //| and the sheet must not lose the ten pixels to pay for it - at 245  |
 //| it is already fifty narrower than the one that ships today.        |
 //+------------------------------------------------------------------+
-#define SSR_LAYOUT_RAIL
+//--- OFF, for the window layout the reference uses.
+//---
+//--- The rail exists because 310 px cannot afford a horizontal tab
+//--- strip AND a sheet; it stands the tabs on their side to buy back
+//--- the width. That trade stops being necessary at 420, where the
+//--- strip fits across the top the way every dialog on the platform
+//--- draws one - and the strip is what the reference's menu row IS.
+//---
+//--- Measured before switching, not after: the two-pane body needs 186
+//--- for a control column, 190 for a Buy and a Sell side by side with a
+//--- readable price, 6 of gap and 16 of frame. 398, before a menu row
+//--- that wants about 400 on its own. 310 was never going to hold it.
+//#define SSR_LAYOUT_RAIL
 
 #ifdef SSR_LAYOUT_RAIL
 #define SSR_PANEL_W        310

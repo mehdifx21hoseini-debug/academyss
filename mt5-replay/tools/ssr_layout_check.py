@@ -138,6 +138,13 @@ def check(name, rows, bottom, problems):
 def main():
     problems = []
 
+    def catalogue(key):
+        src = open(os.path.join(UI, "SSR_Strings.mqh"), encoding="utf-8").read()
+        m = re.search(r'SSRAddString\(out, n, SSR_S_%s,\s*"[^"]*",\s*\n?\s*"([^"]*)"'
+                      % key, src)
+        return m.group(1) if m else ""
+
+
     theme = defines(os.path.join(UI, "SSR_Theme.mqh"))
     #--- A LABEL'S DRAWN HEIGHT, DERIVED FROM THE THEME rather than
     #--- written here. It was 12 - correct for the 7 pt small size - and
@@ -251,12 +258,6 @@ def main():
     # Small labels that have to fit a known box. Upper-bound widths, so
     # a pass here is not proof - but a failure is.
     #------------------------------------------------------------------
-    def catalogue(key):
-        src = open(os.path.join(UI, "SSR_Strings.mqh"), encoding="utf-8").read()
-        m = re.search(r'SSRAddString\(out, n, SSR_S_%s,\s*"[^"]*",\s*\n?\s*"([^"]*)"'
-                      % key, src)
-        return m.group(1) if m else ""
-
     sheet_inner = sheet_w - 6
 
     #--- WHERE THE OVERLAP LABEL STARTS, read from the same table that
@@ -297,6 +298,37 @@ def main():
             problems.append(
                 "%s: \"%s\" is at most %d px wide in a %d px box - over by %d"
                 % (where, txt[:40], w_, budget, w_ - budget))
+
+    #------------------------------------------------------------------
+    # The title bar. Chips grow from the left, the three window buttons
+    # are pinned to the right, and nothing in either reports a collision
+    # - the chips are drawn by a loop that returns its own width, so a
+    # longer state name just walks further right until it is under a
+    # button nobody can press any more.
+    #------------------------------------------------------------------
+    CHIP = lambda t: 10 + len(t) * 6          # CSSRWidgets::Chip
+    #--- THE REAL WORST CASES, read out of the source rather than
+    #--- invented: the longest SSRStateName, the longest fidelity short
+    #--- name plus the " !" it gains when degraded, and the two mode
+    #--- chips from the catalogue.
+    types_src = open(os.path.join(ROOT, "MQL5", "Include", "SSReplay",
+                                  "Common", "SSR_Types.mqh"),
+                     encoding="utf-8").read()
+    states = re.findall(r'case SSR_STATE_[A-Z]+:\s*return "([A-Z]+)"', types_src)
+    fids = re.findall(r'case SSR_FIDELITY_[A-Z_]+:\s*return "([A-Z]+)"', types_src)
+    chips = [max(states, key=len) if states else "RESETTING",
+             (max(fids, key=len) if fids else "SYNTH") + " !",
+             catalogue("BLIND"), catalogue("PROP")]
+    cx = 118                                   # DrawCaption's start
+    for t in chips:
+        cx += CHIP(t) + 4
+    buttons_x = theme["SSR_PANEL_W"] - 60      # the minimise button
+    print("caption: chips end at x %d, window buttons start at x %d"
+          % (cx, buttons_x))
+    if cx > buttons_x:
+        problems.append(
+            "title bar: the mode chips reach x %d and the window buttons "
+            "start at x %d - over by %d" % (cx, buttons_x, cx - buttons_x))
 
     if problems:
         for p_ in problems:

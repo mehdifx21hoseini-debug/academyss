@@ -1,11 +1,5 @@
 #
-# Every one is a MetaTrader built-in, a cast, or a macro: the
-# Names called across the tree that are declared nowhere in it.
-# Regenerate with tools/ssr_known_calls.py, and only when the
-# any name outside this list, which by construction can only be
-# something newly introduced and not yet defined.
-# tree compiles, so none can be a missing definition. A13 flags
-# tree compiles.
+A13
 AccountInfoInteger
 AccountInfoString
 ArrayCopy
@@ -60,6 +54,7 @@ DoubleToString
 EnumToString
 EventKillTimer
 EventSetMillisecondTimer
+Every
 FileClose
 FileDelete
 FileFindClose
@@ -99,6 +94,8 @@ MathMin
 MathPow
 MathRound
 MathSqrt
+MetaTrader
+Names
 NormalizeDouble
 ObjectCreate
 ObjectDelete
@@ -115,6 +112,7 @@ ObjectsTotal
 PeriodSeconds
 Print
 PrintFormat
+Regenerate
 ResetLastError
 SSR_BULK_THRESHOLD_MSC
 SSR_CHECKPOINT_INTERVAL_MSC
@@ -123,6 +121,7 @@ SSR_INVALID_TIME
 SSR_PAUSE_DEFAULT
 SSR_SESSION_GAP_MSC
 SeriesInfoInteger
+ShortToString
 Sleep
 StringFind
 StringFormat
@@ -155,11 +154,29 @@ TimeLocal
 TimeToString
 TimeToStruct
 TimeTradeServer
+a
+across
+and
+any
+are
 bar_calls
+be
 broker
+built-in,
+by
+called
+can
+cast,
 closed
 closed_reads
+compiles,
+compiles.
+construction
 ctx
+declared
+defined.
+definition.
+flags
 followed
 forming_seen_closed
 got_future
@@ -167,13 +184,40 @@ iClose
 iHigh
 iLow
 iTime
+in
+introduced
+is
+it.
 last_bar_time
 last_from
 last_to
+list,
+macro:
 market
+missing
+name
+newly
+none
+not
 now_at_bar
+nowhere
+one
+only
 opened
+or
+outside
 scrolled
+so
+something
 symbol
 tf_changed
+that
+the
+this
+tools/ssr_known_calls.py,
+tree
 tried_future
+when
+which
+with
+yet
