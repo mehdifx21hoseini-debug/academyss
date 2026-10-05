@@ -154,6 +154,7 @@ TimeLocal
 TimeToString
 TimeToStruct
 TimeTradeServer
+ZeroMemory
 a
 across
 and

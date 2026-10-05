@@ -1395,6 +1395,33 @@ def audit_a19():
         ids = [x.group(1) for x in re.finditer(r"^\s*(SSR_S_\w+)", m.group(1), re.M)]
         ids = [i for i in ids if i != "SSR_S_COUNT"]
         listed = set(re.findall(r"SSRAddString\(out, n, (SSR_S_\w+),", src))
+        #+------------------------------------------------------------------+
+        #| AND THE OTHER DIRECTION: T(SSR_S_X) WHERE X DOES NOT EXIST.      |
+        #|                                                                  |
+        #| This is a COMPILE ERROR - "undeclared identifier" - and the whole |
+        #| point of these audits is to find what a compiler would, on a      |
+        #| machine that has no compiler. It was missing, and it cost a round |
+        #| trip: a rewrite of SheetTrade called T(SSR_S_PUT_LINES) for a      |
+        #| button whose string has always been SSR_S_PLACE_LINES, every       |
+        #| audit passed, and the user found it by building.                   |
+        #|                                                                   |
+        #| The check above had been walking the enum looking for entries with |
+        #| no text. It never walked the CALLS looking for names with no entry. |
+        #+------------------------------------------------------------------+
+        known = set(ids)
+        for path in FILES:
+            if os.path.basename(path) == os.path.basename(strings):
+                continue
+            code = strip_comments(FILES[path])
+            for um in re.finditer(r"\bT\(\s*(SSR_S_\w+)\s*\)", code):
+                if um.group(1) in known:
+                    continue
+                report("A19", path, code[:um.start()].count("\n") + 1,
+                       "T(%s) names a string that is not in ENUM_SSR_STR. "
+                       "That is an undeclared identifier: it will not "
+                       "compile, and nothing else here was looking for it."
+                       % um.group(1))
+
         for i in ids:
             if i not in listed:
                 report("A19", strings, 1,

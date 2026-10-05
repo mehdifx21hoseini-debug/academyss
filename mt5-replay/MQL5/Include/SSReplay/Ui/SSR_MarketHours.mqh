@@ -128,7 +128,13 @@ int SSRDrawMarketHours(CSSRWidgets &w, const string pfx,
    int  now_col  = -1;
    int  now_min  = 0;
    bool have_now = (now_msc > 0);
+   //--- ZEROED AT BIRTH. It is only filled inside the branch below and
+   //--- only read inside the matching branch further down, so this can
+   //--- never be read uninitialised - but the compiler cannot prove
+   //--- that across two ifs, and a warning nobody can act on is a
+   //--- warning that teaches people to ignore the list.
    MqlDateTime nt;
+   ZeroMemory(nt);
    if(have_now)
      {
       TimeToStruct(SSRToTime(now_msc), nt);

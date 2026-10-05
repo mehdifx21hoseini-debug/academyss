@@ -1574,7 +1574,7 @@ private:
       if(!m_state.lines_armed)
         {
          m_w.Button("armbtn", rx + 8, gy + 13, rw - 16, SSR_BTN_H,
-                    T(SSR_S_PUT_LINES));
+                    T(SSR_S_PLACE_LINES), false, m_state.can_trade);
          m_w.Hide("armbtn", false);
          Text(18, "hintrow", rx + 8, gy + 40,
               m_state.can_trade
