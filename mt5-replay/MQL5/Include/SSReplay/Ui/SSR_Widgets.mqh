@@ -651,6 +651,42 @@ public:
      { Remove(id + "_bg"); Remove(id + "_ac"); Remove(id); }
 
    //--- teardown -----------------------------------------------------
+   //+------------------------------------------------------------------+
+   //| AN IMAGE. MetaTrader draws one from a .bmp, and only from a .bmp |
+   //| - a resource compiled into the program with #resource, or a file |
+   //| under the terminal's own folders.                                 |
+   //|                                                                  |
+   //| A MISSING ONE MUST NOT TAKE THE PAGE WITH IT. If the name does    |
+   //| not resolve, ObjectSetString fails, the half-made object is       |
+   //| removed, and this returns false. Every caller so far draws words  |
+   //| as well as a picture, and the words are the part that matters.    |
+   //+------------------------------------------------------------------+
+   bool              Bitmap(const string id, const int x, const int y,
+                            const int w, const int h, const string res)
+     {
+      Extent(x, y, w, h);
+      string n = N(id);
+      if(ObjectFind(m_chart, n) < 0)
+        {
+         if(!ObjectCreate(m_chart, n, OBJ_BITMAP_LABEL, 0, 0, 0))
+            return false;
+         m_created++;
+         Common(n);
+         ObjectSetInteger(m_chart, n, OBJPROP_ANCHOR, ANCHOR_LEFT_UPPER);
+         if(!ObjectSetString(m_chart, n, OBJPROP_BMPFILE, res))
+           {
+            ObjectDelete(m_chart, n);
+            return false;
+           }
+        }
+      ObjectSetInteger(m_chart, n, OBJPROP_XDISTANCE, x);
+      ObjectSetInteger(m_chart, n, OBJPROP_YDISTANCE, y);
+      ObjectSetInteger(m_chart, n, OBJPROP_XSIZE,     w);
+      ObjectSetInteger(m_chart, n, OBJPROP_YSIZE,     h);
+      m_writes += 4;
+      return true;
+     }
+
    void              Hide(const string id, const bool hidden)
      {
       string n = N(id);

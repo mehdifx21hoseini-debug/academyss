@@ -300,6 +300,30 @@ def main():
                 % (where, txt[:40], w_, budget, w_ - budget))
 
     #------------------------------------------------------------------
+    # The order ticket, now that it is two columns. Both columns and the
+    # gap have to fit the sheet, and the taller of the two has to fit
+    # SSR_SHEET_H - the sheet does not scroll.
+    #------------------------------------------------------------------
+    sheet_w2 = theme["SSR_PANEL_W"] - 2 * theme["SSR_PAD"]
+    if sheet_w2 >= theme["SSR_TICKET_2COL"]:
+        lw = theme["SSR_TICKET_LEFT_W"]
+        rw = sheet_w2 - lw - theme["SSR_GAP"]
+        left_h = 68 + 30 + 4 + 30        # risk+tag, then buy over sell
+        right_h = 128                    # the stop/target group
+        print("ticket: two columns, left %d + gap %d + right %d = %d of %d; "
+              "tallest column %d of %d"
+              % (lw, theme["SSR_GAP"], rw, lw + theme["SSR_GAP"] + rw,
+                 sheet_w2, max(left_h, right_h), theme["SSR_SHEET_H"]))
+        if rw < 155:
+            problems.append(
+                "order ticket: the right column is %d px and the stop row "
+                "needs 155" % rw)
+        if max(left_h, right_h) > theme["SSR_SHEET_H"]:
+            problems.append(
+                "order ticket: the tallest column is %d px in a %d px sheet"
+                % (max(left_h, right_h), theme["SSR_SHEET_H"]))
+
+    #------------------------------------------------------------------
     # The title bar. Chips grow from the left, the three window buttons
     # are pinned to the right, and nothing in either reports a collision
     # - the chips are drawn by a loop that returns its own width, so a

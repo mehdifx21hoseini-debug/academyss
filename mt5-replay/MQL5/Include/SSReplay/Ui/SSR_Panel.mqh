@@ -768,10 +768,26 @@ public:
          DrawSheet(x + SSR_PAD + SSR_RAIL_W + SSR_GAP, cy + 4,
                    W - 2 * SSR_PAD - SSR_RAIL_W - SSR_GAP);
 #else
+         //+------------------------------------------------------------------+
+         //| THE TABS ARE THE MENU ROW, AND THE SHEET GETS THE WHOLE WIDTH.   |
+         //|                                                                  |
+         //| It used to be a 104 px column of three buttons beside a 290 px   |
+         //| sheet. That column is the SAME three actions the rail layout     |
+         //| already lays out horizontally in DrawActions - same ids, same    |
+         //| dispatch - so standing them in a row under the tabs costs        |
+         //| nothing and hands the sheet 404 px instead of 290.                |
+         //|                                                                  |
+         //| Which is what pays for the two-column ticket below. A side       |
+         //| column of buttons and a two-column sheet cannot both have the    |
+         //| width; the buttons were the half that did not need it.            |
+         //|                                                                  |
+         //| DrawSide is gone rather than left unused: its three buttons      |
+         //| carry the same names DrawActions draws, so nothing is orphaned   |
+         //| on the chart and nothing in PollClicks had to change.             |
+         //+------------------------------------------------------------------+
          cy = DrawTabs(x, cy, W);
-         DrawSide(x + SSR_PAD, cy + 4);
-         DrawSheet(x + SSR_PAD + SSR_SIDE_W + SSR_GAP, cy + 4,
-                   W - 2 * SSR_PAD - SSR_SIDE_W - SSR_GAP);
+         cy = DrawActions(x, cy, W);
+         DrawSheet(x + SSR_PAD, cy + 4, W - 2 * SSR_PAD);
 #endif
          //--- the side column is six buttons whatever the height, so a
          //--- tall panel leaves it alone rather than stretching it into
@@ -1303,25 +1319,9 @@ private:
    //  moment must not be behind a tab - and every one of these six
    //  reaches an engine feature that exists.
    //================================================================
-   void              DrawSide(const int x, const int y)
-     {
-      int h = SSR_BTN_H, gp = 3, cy = y;
-
-      //--- the same three are gone here, so the fallback layout and the
-      //--- rail layout offer the same set rather than disagreeing about
-      //--- what the product has
-      m_w.Remove("follow");
-      m_w.Remove("bookmark");
-      m_w.Remove("jump");
-
-      m_w.Button("lines", x, cy, SSR_SIDE_W, h,
-                 m_state.lines_armed ? T(SSR_S_LINES_ON) : T(SSR_S_LINES_OFF),
-                 m_state.lines_armed, m_state.can_trade);       cy += h + gp;
-      m_w.Button("sessions", x, cy, SSR_SIDE_W, h, T(SSR_S_SESSIONS),
-                 false, m_state.connected);                     cy += h + gp;
-      m_w.Button("fidelity", x, cy, SSR_SIDE_W, h, T(SSR_S_FIDELITY),
-                 false, m_state.connected);
-     }
+   //--- DrawSide was here. Both layouts draw these three through
+   //--- DrawActions now; a second function painting the same ids at
+   //--- different coordinates is how two surfaces drift apart.
 
    //================================================================
    //  THE RAIL - the tabs, standing up
@@ -1467,20 +1467,52 @@ private:
    //----------------------------------------------------------------
    //  TRADE
    //----------------------------------------------------------------
+   //+------------------------------------------------------------------+
+   //| THE TICKET IS TWO COLUMNS NOW.                                   |
+   //|                                                                  |
+   //| The sheet was 290 px beside a column of three buttons, so this   |
+   //| had to be one stack: risk, then the tag, then stop and target,   |
+   //| then the deal buttons, 180 px tall and most of it one item wide. |
+   //| Standing those three buttons in a row under the tabs hands the   |
+   //| sheet 404 px, and 404 is enough to put WHAT YOU SET beside WHAT  |
+   //| YOU PRESS - which is the shape of every order ticket worth       |
+   //| copying, the reference's included.                               |
+   //|                                                                  |
+   //| Left: the size of the trade, and the two ways to take it at      |
+   //| market. Right: the trade the LINES describe, which is the richer |
+   //| half and the one a trainee should be looking at.                  |
+   //|                                                                  |
+   //| Every id and every cache slot is unchanged. Only geometry moved, |
+   //| so PollClicks, the slot cache and the hide lists all still refer |
+   //| to exactly what they referred to before.                          |
+   //|                                                                  |
+   //| IT STILL FITS ONE COLUMN. Below SSR_TICKET_2COL the old stack is |
+   //| drawn instead, because the 310 px rail layout is one #define     |
+   //| away and a sheet that silently overflows when somebody flips it  |
+   //| back is not a layout, it is a trap.                               |
+   //+------------------------------------------------------------------+
    void              SheetTrade(const int x, const int y, const int w)
      {
-      //--- risk
-      m_w.Group("g1", x, y, w, 36, T(SSR_S_GRP_RISK));
+      bool two = (w >= SSR_TICKET_2COL);
+      int  lw  = (two ? SSR_TICKET_LEFT_W : w);
+      int  rx  = (two ? x + lw + SSR_GAP : x);
+      int  rw  = (two ? w - lw - SSR_GAP : w);
+      int  ry  = (two ? y : y + 60);
+
+      //================================================================
+      //  LEFT - what you set, and the two ways to take it at market
+      //================================================================
+      m_w.Group("g1", x, y, lw, 36, T(SSR_S_GRP_RISK));
       Text(10, "risklbl", x + 8, y + 13, T(SSR_S_RISK_PER_TRADE), SSR_C_TEXT_DIM);
       //--- the money answers "how much is that", and it sits with the
       //--- label rather than between the steppers, where it used to run
       //--- underneath the + button
       Text(19, "riskmon", x + 88, y + 13,
            Money(m_state.balance * m_state.risk_percent / 100.0), SSR_C_TEXT_DIM);
-      m_w.Button("riskdn", x + w - 84, y + 10, 16, 16, "-");
-      Text(11, "riskval", x + w - 62, y + 13,
+      m_w.Button("riskdn", x + lw - 84, y + 10, 16, 16, "-");
+      Text(11, "riskval", x + lw - 62, y + 13,
            StringFormat("%.2f %%", m_state.risk_percent), SSR_C_TEXT);
-      m_w.Button("riskup", x + w - 18, y + 10, 16, 16, "+");
+      m_w.Button("riskup", x + lw - 18, y + 10, 16, 16, "+");
 
       //+------------------------------------------------------------------+
       //| WHICH SETUP IS THIS?                                             |
@@ -1495,10 +1527,39 @@ private:
       //| rule the setup panel follows, for the same reason.                |
       //+------------------------------------------------------------------+
       m_w.Label("taglbl", x + 8, y + 42, T(SSR_S_SETUP), SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      m_tag_x = x + 48; m_tag_y = y + 38; m_tag_w = w - 56; m_tag_h = 18;
+      m_tag_x = x + 48; m_tag_y = y + 38; m_tag_w = lw - 56; m_tag_h = 18;
       m_w.Edit("tagbox", m_tag_x, m_tag_y, m_tag_w, m_tag_h, m_state.trade_tag, false);
       m_w.Hide("tagbox", false);
 
+      //--- the deal buttons. The side the lines did not draw is dimmed,
+      //--- so the chart and the dialog cannot disagree.
+      //--- STACKED when there are two columns: a 180 px column splits
+      //--- into two 87 px buttons, and "Sell 35469.549" does not fit in
+      //--- 87 px at any size a person would press.
+      int dy = y + (two ? 68 : 156);
+      int dw = (two ? lw : (w - SSR_GAP) / 2);
+      int dh = (two ? 30 : 24);
+      bool dim_buy  = !m_state.can_trade ||
+                      (m_state.lines_armed && !m_state.line_long);
+      bool dim_sell = !m_state.can_trade ||
+                      (m_state.lines_armed &&  m_state.line_long);
+
+      m_w.ButtonC("buy", x, dy, dw, dh,
+                  StringFormat(T(SSR_S_BUY_BTN), Price(m_state.ask)),
+                  dim_buy ? SSR_C_DEAL_DIM : SSR_C_BUY,
+                  dim_buy ? SSR_C_DEAL_DIM : SSR_C_BUY_EDGE,
+                  SSR_C_DEAL_TEXT, SSR_FS_TITLE);
+      m_w.ButtonC("sell",
+                  (two ? x : x + dw + SSR_GAP),
+                  (two ? dy + dh + 4 : dy), dw, dh,
+                  StringFormat(T(SSR_S_SELL_BTN), Price(m_state.bid)),
+                  dim_sell ? SSR_C_DEAL_DIM : SSR_C_SELL,
+                  dim_sell ? SSR_C_DEAL_DIM : SSR_C_SELL_EDGE,
+                  SSR_C_DEAL_TEXT, SSR_FS_TITLE);
+
+      //================================================================
+      //  RIGHT - the trade the lines describe
+      //================================================================
       //+------------------------------------------------------------------+
       //| STOP AND TARGET ARE LINES.                                       |
       //|                                                                  |
@@ -1507,14 +1568,15 @@ private:
       //| chart is chosen by structure, and structure is the entire        |
       //| reason a person practises on a replay.                           |
       //+------------------------------------------------------------------+
-      int gy = y + 60;
-      m_w.Group("g2", x, gy, w, 92, T(SSR_S_GRP_STOP_TARGET));
+      int gy = ry;
+      m_w.Group("g2", rx, gy, rw, (two ? 128 : 92), T(SSR_S_GRP_STOP_TARGET));
 
       if(!m_state.lines_armed)
         {
-         m_w.Button("armbtn", x + 8, gy + 13, w - 16, SSR_BTN_H,
-                    T(SSR_S_PLACE_LINES), false, m_state.can_trade);
-         Text(18, "hintrow", x + 8, gy + 40,
+         m_w.Button("armbtn", rx + 8, gy + 13, rw - 16, SSR_BTN_H,
+                    T(SSR_S_PUT_LINES));
+         m_w.Hide("armbtn", false);
+         Text(18, "hintrow", rx + 8, gy + 40,
               m_state.can_trade
               ? T(SSR_S_THEN_DRAG)
               : T(SSR_S_WAITING_PRICE),
@@ -1522,24 +1584,25 @@ private:
         }
       else
         {
+         m_w.Hide("armbtn", true);
          //--- the side is read from the geometry, never asked for
-         Text(12, "setuprow", x + 8, gy + 12,
+         Text(12, "setuprow", rx + 8, gy + 12,
               m_state.line_long ? T(SSR_S_LONG_SETUP)
                                 : T(SSR_S_SHORT_SETUP),
               m_state.line_long ? SSR_C_RUN : SSR_C_STOP, SSR_FS_SMALL);
 
-         Text(13, "slrow", x + 8, gy + 24,
+         Text(13, "slrow", rx + 8, gy + 24,
               StringFormat(T(SSR_S_STOP_ROW),
                            Price(m_state.sl_price),
                            Money(-m_state.risk_money, true)), SSR_C_TEXT);
-         Text(14, "tprow", x + 8, gy + 36,
+         Text(14, "tprow", rx + 8, gy + 36,
               StringFormat(T(SSR_S_TARGET_ROW),
                            Price(m_state.tp_price),
                            Money(m_state.reward_money, true)), SSR_C_TEXT);
-         Text(15, "rrrow", x + w - 96, gy + 24,
+         Text(15, "rrrow", rx + rw - 96, gy + 24,
               m_state.rr > 0.0 ? StringFormat("%.2f R", m_state.rr) : "- R",
               SSR_C_TEXT_DIM);
-         Text(16, "sizerow", x + w - 96, gy + 36,
+         Text(16, "sizerow", rx + rw - 96, gy + 36,
               m_state.lot_from_risk > 0.0
               ? StringFormat(T(SSR_S_LOT), m_state.lot_from_risk)
               : T(SSR_S_NO_SIZE),
@@ -1553,11 +1616,9 @@ private:
          //--- a trader spends the session on. Measured: 3 labels
          //--- rewritten on a frame where nothing had changed.
          if(m_state.order_why != "")
-            Text(17, "setuprow", x + 8, gy + 12, m_state.order_why,
+            Text(17, "setuprow", rx + 8, gy + 12, m_state.order_why,
                  SSR_C_STOP, SSR_FS_SMALL);
 
-         //--- ONE press opens what the lines describe. The side is not
-         //--- asked for: it is already drawn on the chart.
          //+------------------------------------------------------------------+
          //| THE BUTTON SAYS WHAT IT WILL DO, and it is not always the same.  |
          //|                                                                  |
@@ -1565,7 +1626,7 @@ private:
          //| describes, named. A button that reads "Open LONG" and places a    |
          //| buy stop is a button that lied to the person who pressed it.      |
          //+------------------------------------------------------------------+
-         m_w.ButtonC("openln", x + 8, gy + 46, w - 16, 22,
+         m_w.ButtonC("openln", rx + 8, gy + 50, rw - 16, 24,
                      m_state.lot_from_risk > 0.0
                      ? (m_state.entry_armed
                         ? StringFormat(T(SSR_S_PLACE_ORDER),
@@ -1582,48 +1643,24 @@ private:
                      m_state.lot_from_risk <= 0.0 ? SSR_C_DEAL_DIM
                      : (m_state.line_long ? SSR_C_BUY_EDGE : SSR_C_SELL_EDGE),
                      SSR_C_DEAL_TEXT, SSR_FS_TITLE);
-         int bw3 = (w - 28) / 3;
-         m_w.Button("flipbtn", x + 8, gy + 70, bw3, 18, T(SSR_S_FLIP));
-         m_w.Button("enbtn",   x + 14 + bw3, gy + 70, bw3, 18,
+         int bw3 = (rw - 28) / 3;
+         m_w.Button("flipbtn", rx + 8, gy + 78, bw3, 18, T(SSR_S_FLIP));
+         m_w.Button("enbtn",   rx + 14 + bw3, gy + 78, bw3, 18,
                     m_state.entry_armed ? T(SSR_S_AT_MARKET)
                                         : T(SSR_S_ENTRY_LINE));
-         m_w.Button("clrbtn",  x + 20 + bw3 * 2, gy + 70, bw3, 18, T(SSR_S_REMOVE));
+         m_w.Button("clrbtn",  rx + 20 + bw3 * 2, gy + 78, bw3, 18,
+                    T(SSR_S_REMOVE));
         }
-
-      //--- the deal buttons. The side the lines did not draw is dimmed,
-      //--- so the chart and the dialog cannot disagree.
-      int dy = gy + 96;
-      int dw = (w - SSR_GAP) / 2;
-      bool dim_buy  = !m_state.can_trade ||
-                      (m_state.lines_armed && !m_state.line_long);
-      bool dim_sell = !m_state.can_trade ||
-                      (m_state.lines_armed &&  m_state.line_long);
-
-      m_w.ButtonC("buy", x, dy, dw, 24,
-                  StringFormat(T(SSR_S_BUY_BTN), Price(m_state.ask)),
-                  dim_buy ? SSR_C_DEAL_DIM : SSR_C_BUY,
-                  dim_buy ? SSR_C_DEAL_DIM : SSR_C_BUY_EDGE,
-                  SSR_C_DEAL_TEXT, SSR_FS_TITLE);
-      m_w.ButtonC("sell", x + dw + SSR_GAP, dy, dw, 24,
-                  StringFormat(T(SSR_S_SELL_BTN), Price(m_state.bid)),
-                  dim_sell ? SSR_C_DEAL_DIM : SSR_C_SELL,
-                  dim_sell ? SSR_C_DEAL_DIM : SSR_C_SELL_EDGE,
-                  SSR_C_DEAL_TEXT, SSR_FS_TITLE);
 
       //+------------------------------------------------------------------+
       //| THE SPREAD AND THE REFUSAL LIVE IN THE STATUS STRIP NOW.         |
       //|                                                                  |
       //| Both were rows under the deal buttons, and between them they     |
       //| cost the sheet twenty-eight pixels for two things nobody         |
-      //| PRESSES. The panel needed 414 px and the default MetaTrader      |
-      //| window with the Toolbox open gives 363, so every one of those    |
-      //| users lost the whole tabbed half of the panel to compact mode -  |
-      //| measured on this project's own smoke test, twice.                |
-      //|                                                                  |
-      //| The rule that came out of it: the sheet holds what you OPERATE,  |
-      //| the strip holds what you CONSULT and what the panel needs to     |
-      //| tell you. The strip already did exactly this for the reset       |
-      //| confirmation.                                                     |
+      //| PRESSES. The rule that came out of it: the sheet holds what you  |
+      //| OPERATE, the strip holds what you CONSULT. Widening the sheet    |
+      //| does not undo that - it bought a second column, not a licence    |
+      //| to put numbers back where the hands go.                           |
       //+------------------------------------------------------------------+
      }
 

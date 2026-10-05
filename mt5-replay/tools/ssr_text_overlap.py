@@ -201,7 +201,14 @@ def scan(path, frame_w):
                     pt = DEF.get("SSR_FS_TITLE", 10)
             mono = any("MONO" in x for x in a)
             out.append(dict(fn=fn_at(m.start()), x=X, y=Y,
-                            w=px(n, pt, mono), h=int(pt * 5 / 3),
+                            w=px(n, pt, mono),
+                            #--- THE GLYPHS, NOT THE LINE BOX. At 5/3 of the
+                            #--- point size this was measuring the leading as
+                            #--- well, so any two rows set 14 px apart at 9 pt
+                            #--- reported a 1 px "overlap" - which is the
+                            #--- normal, correct spacing of a tight list and
+                            #--- not a fault. Ink can only collide with ink.
+                            h=int(pt * 4 / 3),
                             txt=a[it][:46],
                             line=code[:m.start()].count("\n") + 1))
     return out

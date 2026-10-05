@@ -280,6 +280,7 @@ enum ENUM_SSR_STR
    SSR_S_SP_TAGLINE,
    SSR_S_SP_VIRTUAL,
    SSR_S_SP_KEEP_OPEN,
+   SSR_S_SP_RUNS_HERE,
    SSR_S_SP_NO_ACCOUNT,
    SSR_S_SP_PICK,
    SSR_S_SP_SWITCH,
@@ -646,7 +647,9 @@ int SSRStringsEnglish(SSRStringEntry &out[])
    SSRAddString(out, n, SSR_S_SP_VIRTUAL,   "sp.virtual",
                 "Virtual trades only. Nothing is sent to your broker.");
    SSRAddString(out, n, SSR_S_SP_KEEP_OPEN, "sp.keep.open",
-                "Keep this chart open - you may minimise it.");
+                "Keep this chart open. You may minimise it.");
+   SSRAddString(out, n, SSR_S_SP_RUNS_HERE, "sp.runs.here",
+                "The replay runs from here.");
    SSRAddString(out, n, SSR_S_SP_NO_ACCOUNT,"sp.no.account",
                 "no account - the terminal is not logged in");
    //--- the one line on the nameplate that changes. It replaces the

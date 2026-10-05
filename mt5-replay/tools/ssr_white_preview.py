@@ -48,21 +48,27 @@ def page(home_w=360, btn_h=34, name="W1", gap=12, note_txt=""):
 
     #--- the name and the lines, written ON the page. No frame, no plate.
     tx = 36 + int(lg.width/S) + 34
-    txt(d, tx, 46, "SS Replay", (26,26,26), 26, True)
-    txt(d, tx, 84, "market replay  -  manual backtesting  -  training",
-        (110,110,110), 11)
-    txt(d, tx, 118, "Keep this chart open. You may minimise it.",
-        C["RUN"], 11)
-    txt(d, tx, 140, "The replay runs from here.", C["RUN"], 11)
-    if note_txt:
-        txt(d, tx, 170, note_txt, (120,120,120), 10)
+    #--- the offsets below are SSR_Splash::Render's own, so the picture
+    #--- and the code cannot say different things
+    y0 = 34
+    txt(d, tx, y0+8,   "SS Replay", C["TEXT"], PT["SSR_FS_PAGE"], True)
+    txt(d, tx, y0+40,  "market replay  -  manual backtesting  -  training",
+        C["TEXT_DIM"], PT["SSR_FS_TITLE"])
+    txt(d, tx, y0+76,  "Keep this chart open. You may minimise it.",
+        C["RUN"], PT["SSR_FS_TITLE"])
+    txt(d, tx, y0+98,  "The replay runs from here.", C["RUN"], PT["SSR_FS_TITLE"])
+    txt(d, tx, y0+128, "#20242426  demo  SS Academy Markets",
+        C["TEXT_FAINT"], PT["SSR_FS_BODY"])
+    txt(d, tx, y0+148, "Virtual trades only. Nothing is sent to your broker.",
+        C["TEXT_FAINT"], PT["SSR_FS_BODY"])
+    txt(d, tx, y0+168, "v129", C["TEXT_FAINT"], PT["SSR_FS_SMALL"])
 
     #--- the Home dialog, to the reference's proportions
     W = home_w
     H = 44 + 46 + 4*(btn_h+gap) + 18
     #--- clear of the text block, the way the reference sits its dialog
     #--- to the right of and below the lines it must not cover
-    x = CW - W - 150
+    x = CW - W - 190
     y = 190
     rect(d, x, y, W, H, C["PANEL"], C["PANEL_EDGE"])
     rect(d, x+1, y+1, W-2, 24, (255,255,255), C["PANEL_EDGE"])
@@ -93,7 +99,9 @@ def page(home_w=360, btn_h=34, name="W1", gap=12, note_txt=""):
            % (name, W, btn_h), fill=(150,150,150), font=f(8))
     return im
 
-page(360, 34, "W1").save(os.path.join(OUT, "W1-white-360.png"))
+#--- 360 is the width that was chosen; the others are kept so the
+#--- comparison that produced the choice can be reproduced.
+page(360, 34, "v129 - shipped").save(os.path.join(OUT, "shipped-360.png"))
 page(420, 38, "W2", 14).save(os.path.join(OUT, "W2-white-420.png"))
 page(480, 42, "W3", 16).save(os.path.join(OUT, "W3-white-480.png"))
 print("wrote 3")

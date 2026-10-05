@@ -102,6 +102,7 @@
 //--- the wells sunk below it. Same three steps as the dark palette,
 //--- a little warmer and a little closer together.
 #define SSR_C_PANEL        C'34,37,43'
+#define SSR_C_PAGE         C'21,24,28'    // the host page
 #define SSR_C_PANEL_EDGE   C'103,111,125'
 #define SSR_C_HEADER       C'27,30,35'
 #define SSR_C_WELL         C'21,24,28'
@@ -156,6 +157,7 @@
 
 #ifdef SSR_THEME_LIGHT
 #define SSR_C_PANEL        C'236,236,236'   // the dialog face
+#define SSR_C_PAGE         C'255,255,255'   // the host page
 #define SSR_C_PANEL_EDGE   C'88,92,98'      // outer frame, dark on any chart
 #define SSR_C_HEADER       C'230,231,234'   // caption strip
 #define SSR_C_WELL         C'246,246,246'   // sunken areas: lists, tracks
@@ -229,6 +231,7 @@
 
 #ifdef SSR_THEME_DARK
 #define SSR_C_PANEL        C'38,42,51'      // the face, lifted off the chart
+#define SSR_C_PAGE         C'18,20,24'    // the host page
 #define SSR_C_PANEL_EDGE   C'108,116,130'   // outer frame - see A18
 #define SSR_C_HEADER       C'33,36,44'      // caption strip, RECESSED - see below
 #define SSR_C_WELL         C'24,27,33'      // sunken areas: lists, tracks
@@ -479,6 +482,20 @@
 #define SSR_GLYPH_MAX      ShortToString(0x25A1)   // WHITE SQUARE
 #define SSR_GLYPH_CLOSE    ShortToString(0x00D7)   // MULTIPLICATION SIGN
 
+//+------------------------------------------------------------------+
+//| A NOTE ON THE MARK AND THE PAGE.                                 |
+//|                                                                  |
+//| The academy bitmap is compiled in flattened onto WHITE, because   |
+//| BMP carries no alpha and the light page is what it sits on. Under |
+//| a dark palette SSR_C_PAGE is dark and that mark would show a      |
+//| white plate behind it. Written down rather than discovered: a     |
+//| dark page needs its own flattening of the same artwork, and this  |
+//| is the line that says so.                                        |
+//+------------------------------------------------------------------+
+
+//--- the one size that is not panel furniture: the product's name on
+//--- the host page, set the way the reference sets its own
+#define SSR_FS_PAGE        20
 #define SSR_FS_TITLE       10
 #define SSR_FS_BODY        9
 #define SSR_FS_CLOCK       14
@@ -594,7 +611,21 @@
 #define SSR_BTN_H          22
 #define SSR_GAP            5
 
-#define SSR_SIDE_W         104     // the always-visible button column
+//+------------------------------------------------------------------+
+//| WHEN THE ORDER TICKET BECOMES TWO COLUMNS.                       |
+//|                                                                  |
+//| 340 is the floor, measured rather than chosen: the left column is |
+//| 180 - the narrowest that holds "Sell  35469.549" on a button a    |
+//| person will press - the gap is 5, and the right column needs 155  |
+//| for "Stop  35469.549  (-100.00)" at body size. 340 exactly, so    |
+//| the test is >= and anything narrower draws the single stack it    |
+//| always drew. The 310 rail layout is one #define away and a sheet  |
+//| that silently overflows when somebody flips back is a trap.       |
+//+------------------------------------------------------------------+
+#define SSR_TICKET_2COL    340
+#define SSR_TICKET_LEFT_W  180
+
+#define SSR_SIDE_W         104     // kept: the compact fallback still cites it
 #define SSR_TAB_H          21
 #define SSR_STATUS_H       18
 

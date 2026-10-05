@@ -29,6 +29,22 @@
 #property description "SS Replay - standalone replay host"
 #property version   "1.00"
 
+//+------------------------------------------------------------------+
+//| THE ACADEMY MARK, COMPILED IN.                                   |
+//|                                                                  |
+//| #resource puts the bitmap inside the .ex5, so there is no second  |
+//| file to install beside the expert, nothing to lose when the       |
+//| folder is copied, and no version of the picture that can drift    |
+//| from the version of the program. CSSRSplash draws it by the name  |
+//| below and carries on without it if it is ever missing - the words |
+//| on that page do not depend on the picture.                        |
+//|                                                                  |
+//| MetaTrader draws images from .bmp and nothing else, so the PNG in |
+//| the repository is converted on the way in. BMP has no alpha; the  |
+//| page behind it is white, which is what it was flattened onto.     |
+//+------------------------------------------------------------------+
+#resource "Images\\ssr-logo.bmp"
+
 #include <SSReplay/Common/SSR_Types.mqh>
 #include <SSReplay/Common/SSR_Time.mqh>
 #include <SSReplay/Common/SSR_Log.mqh>
@@ -216,6 +232,20 @@ CSSRSetupPanel       g_setup_ui;
 //--- Both live on the host chart, which is the chart this program is
 //--- attached to - so both get real mouse events, unlike the replay
 //--- panel, which does not and never will.
+//--- THE HANDOVER GETS A DEADLINE, NOT ONE ATTEMPT.
+//--- g_switch_deadline is set the first time a handover is wanted and
+//--- the retry runs until it passes. 0 means "not started".
+//--- FIFTEEN SECONDS. The seed writes tens of thousands of M1 bars and
+//--- the terminal has to index them; the measured rate on this project's
+//--- own reference machine is about 35,000 bars a second, so a 288,000
+//--- bar warm-up is eight seconds of writing before the first read can
+//--- succeed. Fifteen leaves room for a slower disk without leaving a
+//--- user staring at an unchanged chart for a minute.
+#define SSR_HANDOVER_WAIT_MS 15000
+
+ulong                g_switch_deadline = 0;
+int                  g_switch_tries    = 0;
+
 CSSRSplash           g_splash;
 CSSRDataCenter       g_data;
 
@@ -2630,9 +2660,42 @@ void OnTimer()
    if(g_switch_to != "")
      {
       string rs = g_switch_to;
-      g_switch_to = "";
+
+      //+------------------------------------------------------------------+
+      //| THE HANDOVER RETRIES. IT USED TO GET ONE SHOT.                   |
+      //|                                                                  |
+      //| Reported: "I press start, a new chart window opens, the panel     |
+      //| stays on the old one, and the new window is empty."               |
+      //|                                                                  |
+      //| That is this block, and all three symptoms are one cause. The     |
+      //| line below used to be g_switch_to = "" - consumed on the FIRST    |
+      //| tick after the session was built. At that instant the custom      |
+      //| symbol has been created but the seed is still writing bars into   |
+      //| it, so the "does it have bars" guard quite correctly says no, the |
+      //| chart is left alone, and the fallback opens a window on the very  |
+      //| symbol that just failed the bars test - which is why the new      |
+      //| window had nothing in it. One tick later it would have passed.    |
+      //|                                                                  |
+      //| So the want is kept until it is satisfied or a deadline passes.   |
+      //| A refusal is not a verdict any more; it is "not yet".             |
+      //|                                                                  |
+      //| FIFTEEN SECONDS, measured on the clock rather than counted in     |
+      //| ticks, because the pump interval is an input and a count would    |
+      //| mean something different at 10 ms than at 200.                    |
+      //+------------------------------------------------------------------+
+      if(g_switch_deadline == 0)
+        {
+         g_switch_deadline = GetTickCount64() + SSR_HANDOVER_WAIT_MS;
+         g_switch_tries    = 0;
+        }
+      g_switch_tries++;
+      bool out_of_time = (GetTickCount64() > g_switch_deadline);
+
       if(!SymbolSelect(rs, true))
         {
+         if(!out_of_time)
+            return;                    // Market Watch may still take it
+         g_switch_to = "";
          PrintFormat("[host] %s will not go into Market Watch, so this chart "
                      "cannot show it. Staying on two windows.", rs);
         }
@@ -2666,9 +2729,21 @@ void OnTimer()
 
          if(!rs_exists || !rs_shown || rs_bars <= 0)
            {
-            PrintFormat("[host] NOT handing this chart over: %s %s, %s, %d "
+            //--- NOT YET is not NO. The seed may still be writing; come
+            //--- back on the next tick until the deadline says otherwise.
+            if(!out_of_time)
+              {
+               if(g_switch_tries == 1)
+                  PrintFormat("[host] waiting for %s to be ready before "
+                              "handing this chart over...", rs);
+               return;
+              }
+            g_switch_to = "";
+            PrintFormat("[host] NOT handing this chart over after %d tries in "
+                        "%d ms: %s %s, %s, %d "
                         "M1 bar(s) after priming. Your chart is untouched - "
                         "the replay is on its own window.",
+                        g_switch_tries, (int)SSR_HANDOVER_WAIT_MS,
                         rs,
                         (rs_exists ? "exists" : "DOES NOT EXIST"),
                         (rs_shown ? "is in Market Watch"
@@ -2726,7 +2801,13 @@ void OnTimer()
             return;
            }
 
-         g_switching = true;
+         g_switch_to       = "";
+         g_switch_deadline = 0;
+         g_switching       = true;
+         if(g_switch_tries > 1)
+            PrintFormat("[host] %s became ready after %d tries - handing the "
+                        "chart over now, no second window needed.",
+                        rs, g_switch_tries);
          PrintFormat("[host] handing this chart over to %s - SS Replay will "
                      "restart once on it. This is expected.", rs);
 
