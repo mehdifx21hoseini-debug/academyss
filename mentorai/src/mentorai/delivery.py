@@ -58,6 +58,9 @@ class Claimed:
     telegram_chat_id: int
     answered_telegram_message_id: int
     account_slug: str
+    # کلید قطع حساب، همان لحظه‌ی برداشتن از پایگاه داده. `mentorai pause` فقط پایگاه
+    # داده را عوض می‌کند و کارگرِ در حال اجرا راه دیگری برای فهمیدنش ندارد.
+    account_paused: bool
 
 
 async def enqueue(
@@ -128,7 +131,7 @@ async def _with_context(session: AsyncSession, record: object) -> Claimed | None
         await session.execute(
             text(
                 """
-                select c.telegram_chat_id, m.telegram_message_id, a.slug
+                select c.telegram_chat_id, m.telegram_message_id, a.slug, a.send_paused
                 from conversations c
                 join messages m on m.id = :answered_message_id
                 join mentor_accounts a on a.id = c.account_id
@@ -157,6 +160,7 @@ async def _with_context(session: AsyncSession, record: object) -> Claimed | None
         telegram_chat_id=context.telegram_chat_id,
         answered_telegram_message_id=context.telegram_message_id,
         account_slug=context.slug,
+        account_paused=context.send_paused,
     )
 
 

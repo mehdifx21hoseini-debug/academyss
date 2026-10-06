@@ -423,9 +423,14 @@ def test_a_healthy_drawdown_does_not_get_the_recovery_path() -> None:
 
 
 def test_the_reply_follows_the_mentor_answer_structure() -> None:
-    """ساختار تأییدشده: سلام، تأیید آنچه درست بوده، اصلاح، و بستن با انرژی."""
+    """ساختار تأییدشده: سلام، تأیید آنچه درست بوده، اصلاح، و بستن با انرژی.
+
+    ساعت ثابت است: سلام از ساعت ۱۷ به وقت تهران عوض می‌شود، و بدون `now` این تست
+    هر عصر می‌افتاد.
+    """
     text = review.render(
-        statement.StatementMetrics(source="computed", trades=40, profit_factor=1.6)
+        statement.StatementMetrics(source="computed", trades=40, profit_factor=1.6),
+        now=datetime(2026, 9, 2, 10, 0, tzinfo=TEHRAN),
     )
 
     assert text.startswith(review.GREETING)

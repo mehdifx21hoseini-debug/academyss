@@ -269,6 +269,12 @@ async def deliver_claimed(
             await delivery.abandon(session, claimed.id, f"کانالی برای {claimed.account_slug} نیست")
         return SendStatus.failed
 
+    # دروازه هنگام شروع کارگر ساخته می‌شود، ولی کلید قطع در پایگاه داده است و
+    # `mentorai pause` از فرایند دیگری عوضش می‌کند. پیش از این، دروازه همان مقدارِ
+    # لحظه‌ی شروع را نگه می‌داشت: «قطع فوری» تا راه‌اندازی دوباره هیچ اثری نداشت.
+    # حالا هر ارسال مقدار تازه را می‌بیند، در هر دو جهت.
+    gate.send_paused = claimed.account_paused
+
     send = await push(
         chat_id=claimed.telegram_chat_id,
         answered_telegram_message_id=claimed.answered_telegram_message_id,

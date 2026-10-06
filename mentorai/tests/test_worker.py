@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
 from datetime import UTC, datetime
 from pathlib import Path
@@ -14,6 +15,7 @@ from tests.test_sender import FakeChannel
 from mentorai import drafts
 from mentorai.ai.client import ScriptedClient
 from mentorai.ai.schema import ModelAnswer
+from mentorai.cli import cmd_pause
 from mentorai.conversation import escalate
 from mentorai.db.models import Conversation, Draft, MentorAccount, Message, ReplyMode, Sender
 from mentorai.knowledge.embeddings import HashingEmbedder
@@ -375,6 +377,76 @@ async def test_approved_draft_is_sent_from_the_mentor_account(
     assert channel.sent == [(900, "دوره مقدماتی شانزده جلسه دارد.")]
     assert channel.reads == [(900, 7)], "علامت خوانده‌شدن تا همان پیام پاسخ‌داده‌شده"
     assert (await session.get_one(Draft, draft_id)).status == "sent"
+
+
+async def _approved_draft(
+    session: AsyncSession, incoming: Message, embedder: HashingEmbedder
+) -> int:
+    await process_message(
+        session,
+        incoming.id,
+        model_client=ScriptedClient(_answer()),
+        embedder=embedder,
+        channels={"mentor-a": FakeChannel()},
+        gates={"mentor-a": _gate()},
+        notifier=RecordingNotifier(),
+        sleep=False,
+    )
+    await session.commit()
+    draft_id = (await session.execute(select(Draft))).scalar_one().id
+    await drafts.approve(session, draft_id, by="mentor-a")
+    await session.commit()
+    return draft_id
+
+
+async def test_pause_from_the_cli_stops_a_worker_that_is_already_running(
+    session: AsyncSession,
+    account: MentorAccount,
+    kb: None,
+    incoming: Message,
+    embedder: HashingEmbedder,
+) -> None:
+    """کلید قطع باید بدون راه‌اندازی دوباره اثر کند.
+
+    دروازه همان‌طور ساخته می‌شود که `run-worker` در لحظه‌ی شروع می‌سازد: باز. بعد
+    `mentorai pause` از فرایندی دیگر اجرا می‌شود. پیش از این، کارگر هرگز نمی‌فهمید.
+    """
+    draft_id = await _approved_draft(session, incoming, embedder)
+    gate = _gate()
+    assert not gate.send_paused
+
+    await cmd_pause(argparse.Namespace(slug="mentor-a", reason="بررسی", resume=False))
+
+    channel = FakeChannel()
+    result = await send_draft_now(
+        draft_id, channels={"mentor-a": channel}, gates={"mentor-a": gate}, sleep=False
+    )
+
+    assert result == "blocked"
+    assert channel.sent == [], "حساب متوقف است؛ هیچ پیامی نباید برود"
+    assert channel.reads == [], "حتی علامت خوانده‌شدن"
+
+
+async def test_resume_from_the_cli_reaches_a_worker_started_while_paused(
+    session: AsyncSession,
+    account: MentorAccount,
+    kb: None,
+    incoming: Message,
+    embedder: HashingEmbedder,
+) -> None:
+    draft_id = await _approved_draft(session, incoming, embedder)
+    gate = _gate()
+    gate.send_paused = True  # کارگر وقتی شروع شد که حساب متوقف بود
+
+    await cmd_pause(argparse.Namespace(slug="mentor-a", reason=None, resume=True))
+
+    channel = FakeChannel()
+    result = await send_draft_now(
+        draft_id, channels={"mentor-a": channel}, gates={"mentor-a": gate}, sleep=False
+    )
+
+    assert result == "sent"
+    assert channel.sent == [(900, "دوره مقدماتی شانزده جلسه دارد.")]
 
 
 async def test_edited_draft_sends_the_mentor_text(

@@ -23,6 +23,10 @@ COPY pyproject.toml ./
 COPY src ./src
 RUN pip install --no-cache-dir --no-deps .
 
+# پیکربندی مهاجرت. بدون آن `alembic upgrade head` روی سرور با «No 'script_location'»
+# می‌افتد؛ مسیر داخلش نسبت به WORKDIR یعنی /app است.
+COPY alembic.ini ./
+
 # غیر روت. اگر فرایند به خطر بیفتد، دسترسی ریشه نداشته باشد.
 RUN useradd --create-home --uid 10001 mentorai
 USER mentorai

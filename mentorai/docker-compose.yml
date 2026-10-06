@@ -11,8 +11,11 @@ services:
       - ./docker/initdb:/docker-entrypoint-initdb.d:ro
     ports:
       - "127.0.0.1:5432:5432"
+    # از راه TCP، نه سوکت. بار اول، تصویر پستگرس یک سرور موقت فقط روی سوکت بالا
+    # می‌آورد تا افزونه‌ها را بسازد؛ آزمون سوکت همان موقع «آماده» می‌گوید و مهاجرتی
+    # که پشتش اجرا شود با «connection refused» می‌افتد. سرور موقت به TCP گوش نمی‌دهد.
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mentorai"]
+      test: ["CMD-SHELL", "pg_isready -U mentorai -h 127.0.0.1"]
       interval: 5s
       timeout: 3s
       retries: 20
