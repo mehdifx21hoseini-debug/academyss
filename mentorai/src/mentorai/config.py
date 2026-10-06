@@ -58,6 +58,9 @@ class Settings(BaseSettings):
     transcriber_url: str = ""
     transcriber_model: str = ""
     transcriber_api_key: SecretStr | None = None
+    # رونویسی روی پردازنده کند است: ویس ۲۱ ثانیه‌ای با large-v3 حدود ۶۰ ثانیه طول
+    # کشید. مهلت پیشین ۶۰ ثانیه بود و همین ویس را درست سر مرز قطع می‌کرد.
+    transcriber_timeout_seconds: float = Field(default=180.0, gt=0, le=600)
 
     # سقف هزینه‌ی مدل. صفر یعنی «هیچ فراخوانی مجاز نیست»، نه «بی‌نهایت» — سقف
     # نداشتن اصلاً گزینه نیست (`ADR-026`).

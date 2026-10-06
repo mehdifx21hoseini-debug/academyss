@@ -120,3 +120,14 @@ jobs:
 
       - name: The entrypoint runs inside the image
         run: docker run --rm mentorai:ci mentorai --help
+
+      # تصویر رونویسی ویس (ADR-033). مدل دانلود نمی‌شود — سه گیگ است و در اجرا
+      # روی volume می‌آید — ولی نصب از قفل با هش و بارگذاری خود سرویس اینجا آزموده
+      # می‌شود. همین مرحله است که شکستن av 19 را در ساخت می‌گرفت.
+      - name: Build the voice transcription image
+        run: docker build -t mentorai-transcriber:ci transcriber
+
+      - name: The transcription service imports inside its image
+        run: >-
+          docker run --rm mentorai-transcriber:ci
+          python -c "import faster_whisper, av; from transcriber.app import create_app; create_app(lambda: None); print('ok', av.__version__)"

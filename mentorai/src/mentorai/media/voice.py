@@ -38,7 +38,46 @@ MAX_AUDIO_BYTES = 20 * 1024 * 1024
 MAX_TRANSCRIPT_CHARS = 4_000
 # رونویسی کوتاه‌تر از این معمولاً سکوت یا نویز است، نه سؤال.
 MIN_TRANSCRIPT_CHARS = 3
-REQUEST_TIMEOUT_SECONDS = 60.0
+
+# واژه‌هایی که Whisper بدون راهنما اشتباه می‌شنود. اندازه‌گیری روی ویس فارسی آزمایشی:
+# بی این فهرست «حد ضرر» شد «حد زره» و «ریسک به ریوارد» شد «ریسک بگیباره»؛ با آن، هر
+# دو درست آمدند. هر واژه‌ی این فهرست در پایگاه دانش آکادمی هست — تستی همین را
+# می‌سنجد، تا فهرست با حدس پر نشود.
+#
+# این فهرست در فرستنده است، نه در سرویس رونویسی: واژگان دانش آکادمی است، و همین
+# فهرست با هر سرویس دیگری که رابط استاندارد را داشته باشد هم کار می‌کند.
+VOCABULARY: tuple[str, ...] = (
+    "حد ضرر",
+    "حد سود",
+    "دراوداون",
+    "ریسک به ریوارد",
+    "ریسک فری",
+    "پین بار",
+    "کی بار",
+    "بک تست",
+    "فوروارد تست",
+    "پروفیت فکتور",
+    "وین ریت",
+    "استیتمنت",
+    "ژورنال",
+    "متاتریدر",
+    "پرایس اکشن",
+    "سایکل",
+    "کندل",
+    "تایم فریم",
+    "اسپرد",
+    "لات",
+    "پیپ",
+    "مارجین",
+    "اکویتی",
+    "بالانس",
+    "بروکر",
+    "تتر",
+    "حساب ریل",
+    "حساب دمو",
+)
+# به شکل جمله، نه فهرست خشک: Whisper پیش‌متن را ادامه‌ی گفتار می‌بیند.
+VOCABULARY_PROMPT = "سلام وقتتون بخیر. " + "، ".join(VOCABULARY) + "."
 
 
 class Transcriber(Protocol):
@@ -58,9 +97,17 @@ class HttpTranscriber:
     هم با یک سرویس ابری کار می‌کند و هم با سروری که خود آکادمی بالا می‌آورد.
     """
 
-    def __init__(self, *, base_url: str, model: str, api_key: str | None = None) -> None:
+    def __init__(
+        self,
+        *,
+        base_url: str,
+        model: str,
+        api_key: str | None = None,
+        timeout_seconds: float = 180.0,
+    ) -> None:
         self._url = base_url.rstrip("/") + "/audio/transcriptions"
         self._api_key = api_key
+        self._timeout = timeout_seconds
         self.model = model
 
     async def transcribe(
@@ -70,14 +117,19 @@ class HttpTranscriber:
 
         headers = {"Authorization": f"Bearer {self._api_key}"} if self._api_key else {}
         try:
-            async with httpx2.AsyncClient(timeout=REQUEST_TIMEOUT_SECONDS) as client:
+            async with httpx2.AsyncClient(timeout=self._timeout) as client:
                 response = await client.post(
                     self._url,
                     headers=headers,
                     files={"file": (filename, audio, media_type)},
                     # زبان صریح داده می‌شود: تشخیص خودکار روی ویس کوتاه فارسی
                     # گاهی زبان دیگری حدس می‌زند و رونویسی بی‌معنی می‌شود.
-                    data={"model": self.model, "language": "fa", "response_format": "json"},
+                    data={
+                        "model": self.model,
+                        "language": "fa",
+                        "response_format": "json",
+                        "prompt": VOCABULARY_PROMPT,
+                    },
                 )
         except Exception as exc:  # noqa: BLE001 - هر شکستی به ارجاع ختم می‌شود
             return None, f"{type(exc).__name__}: {exc}"
@@ -109,6 +161,7 @@ def build_transcriber() -> Transcriber | None:
         base_url=settings.transcriber_url,
         model=settings.transcriber_model,
         api_key=key.get_secret_value() if key is not None else None,
+        timeout_seconds=settings.transcriber_timeout_seconds,
     )
 
 
