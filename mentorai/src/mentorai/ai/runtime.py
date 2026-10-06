@@ -10,10 +10,11 @@ from __future__ import annotations
 import enum
 from dataclasses import dataclass
 
+import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from mentorai.ai import budget
+from mentorai.ai import budget, guard
 from mentorai.ai.client import ModelCall, ModelClient
 from mentorai.ai.decision import deterministic_trigger
 from mentorai.ai.prompt import SYSTEM_PROMPT, build_user_content
@@ -26,6 +27,8 @@ from mentorai.media import review
 from mentorai.media import store as media_store
 from mentorai.media.statement import StatementMetrics
 from mentorai.memory import store as memory_store
+
+log = structlog.get_logger(__name__)
 
 # زیر این آستانه، پاسخ ارسال نمی‌شود. عدد اولیه محافظه‌کارانه انتخاب شده؛ کالیبره
 # کردنش کار داده است نه سلیقه، و برای همین confidence در هر اجرا ثبت می‌شود.
@@ -50,6 +53,7 @@ class SilenceReason(enum.StrEnum):
     low_confidence = "low_confidence"
     budget_exhausted = "budget_exhausted"
     empty_answer = "empty_answer"
+    ungrounded_money = "ungrounded_money"
 
 
 @dataclass(frozen=True)
@@ -324,6 +328,12 @@ async def handle_message(
         silence_reason = SilenceReason.empty_answer.value
     elif answer.confidence < confidence_threshold:
         silence_reason = SilenceReason.low_confidence.value
+    elif (bad := guard.ungrounded_money(answer.answer, hits=hits, question=question)) is not None:
+        # عددی با واحد پول که در هیچ منبع رسمی و در خود سؤال نبود. این بررسی در
+        # کد است و به اطمینان مدل کاری ندارد: قیمت اشتباه، بدترین خطای ممکن این
+        # سیستم است و برخلاف توضیح ناقص، قابل جبران نیست.
+        log.error("ungrounded_money_blocked", message_id=message.id, amount=bad)
+        silence_reason = SilenceReason.ungrounded_money.value
 
     if silence_reason is not None:
         run = await _record(
