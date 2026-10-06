@@ -17,7 +17,7 @@ from pathlib import Path
 import httpx
 import httpx2
 import pytest
-from transcriber.app import MAX_AUDIO_BYTES, AudioUnreadable, create_app
+from transcriber.app import MAX_AUDIO_BYTES, AudioUnreadable, create_app, measure_duration
 
 from mentorai.media import voice
 
@@ -35,7 +35,8 @@ class FakeEngine:
         self.running = 0
         self.max_running = 0
 
-    def duration(self, audio: bytes) -> float:
+    def duration(self, audio: bytes, *, stop_after: float) -> float:
+        self.stop_after = stop_after
         if self.broken:
             raise AudioUnreadable("InvalidDataError")
         return self.seconds
@@ -104,6 +105,7 @@ async def test_a_voice_too_long_is_refused_before_transcription(
 
     assert response.status_code == 413
     assert engine.calls == [], "ویس بلند رونویسی شد"
+    assert engine.stop_after == 180, "سقف به سنجش مدت نرسید؛ فایل تا آخر رمزگشایی می‌شود"
 
 
 async def test_a_file_over_the_size_cap_is_refused(
@@ -233,3 +235,40 @@ def test_the_vocabulary_fits_whisper_prompt_window() -> None:
     from transcriber.app import MAX_PROMPT_CHARS
 
     assert len(voice.VOCABULARY_PROMPT) <= MAX_PROMPT_CHARS
+
+
+# ---------------------------------------------------------------------------
+# سنجش مدت، بدون رمزگشایی کامل
+# ---------------------------------------------------------------------------
+
+
+def test_measuring_stops_as_soon_as_the_cap_is_passed() -> None:
+    """شکستی که می‌بندد: فایل کوچکی که ساعت‌ها صدا دارد، حافظه‌ی سرویس را تمام کند.
+
+    اندازه‌گیری شد: یک فایل اپوس **دو مگابایتی** با کمترین نرخ، ۹۰ دقیقه صدا داشت و
+    رمزگشایی کامل آن ۹۰۰ مگ حافظه و ۹ ثانیه پردازنده گرفت — فقط برای فهمیدن اینکه
+    بلند است. سقف حجم ۲۰ مگابایت است، یعنی حدود ۱۵ ساعت صدا.
+
+    این تست یک جریان **پانزده‌ساعته** از قاب می‌دهد — همان چیزی که در سقف ۲۰ مگابایت
+    جا می‌شود. اگر سنجش سر سقف بایستد، فقط سه دقیقه‌اش را می‌خواند. جریان عمداً
+    بی‌پایان نیست: اگر روزی سنجش دوباره تا آخر برود، این تست باید با پیام روشن
+    شکست بخورد، نه اینکه گیر کند و کار CI را تا مهلتش بخوابانند.
+    """
+    read = 0
+    fifteen_hours = int(15 * 3600 / 0.02)
+
+    def endless():  # type: ignore[no-untyped-def]
+        nonlocal read
+        for _ in range(fifteen_hours):
+            read += 1
+            yield (960, 48_000)  # قاب ۲۰ میلی‌ثانیه‌ای اپوس
+
+    seconds = measure_duration(endless(), stop_after=180)
+
+    assert seconds > 180
+    assert read <= 180 / 0.02 + 1, f"{read} قاب خوانده شد؛ سنجش سر سقف نایستاد"
+
+
+def test_a_short_voice_is_measured_whole() -> None:
+    frames = [(960, 48_000)] * 250  # ۵ ثانیه
+    assert measure_duration(frames, stop_after=180) == pytest.approx(5.0)

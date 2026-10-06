@@ -31,7 +31,7 @@ from mentorai.db.models import (
     ModelUsage,
     Sender,
 )
-from mentorai.media.extract import Extraction
+from mentorai.media.extract import Extraction, Refusal
 from mentorai.memory import job as memory_job
 from mentorai.telegram.gateway import AccountGateway, _Attachment
 from mentorai.telegram.normalize import InboundMessage, build_inbound
@@ -274,20 +274,27 @@ async def _job_kinds(session: AsyncSession) -> list[str]:
 
 
 class _FakeFile:
-    def __init__(self, *, mime: str, name: str, size: int) -> None:
+    def __init__(
+        self, *, mime: str, name: str, size: int, duration: float | None = None
+    ) -> None:
         self.mime_type = mime
         self.name = name
         self.size = size
+        self.duration = duration
 
 
 class _FakeMessage:
     """پیام تلگرامی، فقط با همان چیزی که `_read_attachment` واقعاً لمس می‌کند."""
 
-    def __init__(self, payload: bytes, *, mime: str, name: str) -> None:
-        self.file = _FakeFile(mime=mime, name=name, size=len(payload))
+    def __init__(
+        self, payload: bytes, *, mime: str, name: str, duration: float | None = None
+    ) -> None:
+        self.file = _FakeFile(mime=mime, name=name, size=len(payload), duration=duration)
         self._payload = payload
+        self.downloaded = False
 
     async def download_media(self, file: type[bytes]) -> bytes:
+        self.downloaded = True
         return self._payload
 
 
@@ -335,3 +342,22 @@ async def test_reading_a_file_does_not_freeze_the_telegram_connection(
     assert ticks > 5, (
         f"در تمام مدت تجزیه فقط {ticks} تپش اجرا شد — یعنی حلقه‌ی رویداد مسدود بوده"
     )
+
+
+
+async def test_a_voice_over_the_cap_is_not_even_downloaded(
+    account: MentorAccount, gateway: AccountGateway
+) -> None:
+    """ویس یک‌ساعته دانلود نمی‌شود تا بعد سرویس رونویسی ردش کند.
+
+    مدتی که تلگرام گزارش می‌کند فقط پیش‌گیری است — فرستنده می‌تواند جعلش کند — و
+    سنجش قطعی در خود سرویس انجام می‌شود. ولی برای ویس واقعاً بلند، پهنای باند و
+    زمان هدر نمی‌رود.
+    """
+    message = _FakeMessage(b"OggS", mime="audio/ogg", name="voice.ogg", duration=3600)
+    attachment = await gateway._read_attachment(message, "voice")
+
+    assert attachment is not None
+    assert attachment.extraction.kind == "rejected"
+    assert attachment.extraction.refused == Refusal.too_large
+    assert message.downloaded is False, "ویس بلند دانلود شد"

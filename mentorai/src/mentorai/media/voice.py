@@ -35,6 +35,11 @@ ALLOWED_TYPES = frozenset(
     }
 )
 MAX_AUDIO_BYTES = 20 * 1024 * 1024
+# ویس بلندتر از این دانلود نمی‌شود و به منتور می‌رود. همان سقف سرویس رونویسی
+# (`MAX_AUDIO_SECONDS` در `transcriber/app.py`). مدتی که تلگرام گزارش می‌کند را
+# فرستنده می‌تواند جعل کند، پس این فقط پیش‌گیری است: سنجش قطعی در خود سرویس
+# انجام می‌شود، با شمارش قاب‌های رمزگشایی‌شده.
+MAX_AUDIO_SECONDS = 180
 MAX_TRANSCRIPT_CHARS = 4_000
 # رونویسی کوتاه‌تر از این معمولاً سکوت یا نویز است، نه سؤال.
 MIN_TRANSCRIPT_CHARS = 3
@@ -170,6 +175,15 @@ def is_supported(media_type: str | None, size_bytes: int | None) -> bool:
     if media_type not in ALLOWED_TYPES:
         return False
     return size_bytes is None or size_bytes <= MAX_AUDIO_BYTES
+
+
+def is_too_long(duration_seconds: float | None) -> bool:
+    """ویسی که تلگرام می‌گوید از سقف بلندتر است — پیش از دانلود.
+
+    یک ویس یک‌ساعته را دانلود کردن تا سرویس رونویسی ردش کند، پهنای باند و زمان
+    هدر می‌دهد. مدت نامعلوم بلند حساب نمی‌شود؛ سرویس خودش می‌سنجد.
+    """
+    return duration_seconds is not None and duration_seconds > MAX_AUDIO_SECONDS
 
 
 async def transcribe(

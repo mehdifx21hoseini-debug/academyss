@@ -31,7 +31,7 @@ import io
 import logging
 import os
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from contextlib import asynccontextmanager
 from typing import Annotated, Any, Protocol
 
@@ -59,10 +59,29 @@ class AudioUnreadable(Exception):
     """فایل صوتی باز نشد. به ۴۰۰ تبدیل می‌شود، نه خطای سرور."""
 
 
+def measure_duration(frames: Iterable[tuple[int, int]], *, stop_after: float) -> float:
+    """مدت صدا، از روی قاب‌های رمزگشایی‌شده — و توقف به‌محض گذشتن از سقف.
+
+    هر قاب `(تعداد نمونه، نرخ نمونه)` است. هیچ نمونه‌ای نگه داشته نمی‌شود؛ فقط
+    شمرده می‌شود. پس حافظه ثابت است و کار پردازنده حداکثر به اندازه‌ی رمزگشایی
+    `stop_after` ثانیه صدا، هرقدر هم فایل بلند باشد.
+
+    چرا نه فراداده‌ی فایل: مدتی که فایل درباره‌ی خودش می‌گوید جعل‌شدنی است. شمارش
+    قاب‌ها همان چیزی است که رونویسی واقعاً با آن روبه‌رو می‌شود.
+    """
+    seconds = 0.0
+    for samples, rate in frames:
+        if rate > 0:
+            seconds += samples / rate
+        if seconds > stop_after:
+            return seconds
+    return seconds
+
+
 class Engine(Protocol):
     name: str
 
-    def duration(self, audio: bytes) -> float: ...
+    def duration(self, audio: bytes, *, stop_after: float) -> float: ...
 
     def transcribe(self, audio: bytes, *, language: str, prompt: str | None) -> str: ...
 
@@ -86,14 +105,26 @@ class WhisperEngine:
             path, device="cpu", compute_type="int8", cpu_threads=cpu_threads
         )
 
-    def duration(self, audio: bytes) -> float:
-        from faster_whisper.audio import decode_audio
+    def duration(self, audio: bytes, *, stop_after: float) -> float:
+        """مدت، بدون رمزگشایی کامل.
+
+        نسخه‌ی پیشین کل فایل را به نمونه‌های ۱۶ کیلوهرتزی باز می‌کرد و **بعد** مدت را
+        با سقف می‌سنجید. یک فایل اپوس دو مگابایتی با کمترین نرخ، ۹۰ دقیقه صدا دارد:
+        ۹۰۰ مگ حافظه و ۹ ثانیه پردازنده فقط برای فهمیدن اینکه بلند است. در سقف ۲۰
+        مگابایتی یعنی حدود ۱۵ ساعت صدا و چند گیگ حافظه — کنار مدلی که خودش چهار گیگ
+        است، سرویس می‌میرد.
+        """
+        import av
 
         try:
-            samples = decode_audio(io.BytesIO(audio), sampling_rate=16_000)
+            with av.open(io.BytesIO(audio), mode="r") as container:
+                frames = (
+                    (frame.samples, frame.sample_rate)
+                    for frame in container.decode(audio=0)
+                )
+                return measure_duration(frames, stop_after=stop_after)
         except Exception as exc:  # noqa: BLE001 - هر خطای رمزگشایی یعنی فایل خراب
             raise AudioUnreadable(type(exc).__name__) from exc
-        return len(samples) / 16_000
 
     def transcribe(self, audio: bytes, *, language: str, prompt: str | None) -> str:
         try:
@@ -179,7 +210,7 @@ def create_app(
         started = time.monotonic()
         async with one_at_a_time:
             try:
-                seconds = await asyncio.to_thread(engine.duration, audio)
+                seconds = await asyncio.to_thread(engine.duration, audio, stop_after=limit)
                 if seconds > limit:
                     log.info("audio_too_long seconds=%.0f limit=%.0f", seconds, limit)
                     raise HTTPException(413, "audio too long")

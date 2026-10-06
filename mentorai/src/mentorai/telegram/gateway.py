@@ -144,6 +144,18 @@ class AccountGateway:
                 size_bytes=size or None,
                 sha256=None,
             )
+        if media_type in ("voice", "audio", "video_note") and voice.is_too_long(
+            getattr(handle, "duration", None)
+        ):
+            # ویس بلند دانلود نمی‌شود. منتور ویس بلند را خودش گوش می‌دهد.
+            return _Attachment(
+                extraction=media_extract.Extraction(
+                    kind="rejected", refused=media_extract.Refusal.too_large
+                ),
+                mime=mime,
+                size_bytes=size or None,
+                sha256=None,
+            )
         if media_type == "photo" and not vision.is_supported(mime or "image/jpeg", size):
             return _Attachment(
                 extraction=media_extract.Extraction(
