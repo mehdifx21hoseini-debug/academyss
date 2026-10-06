@@ -32,6 +32,7 @@ enum ENUM_SSR_CMD
    SSR_CMD_FIDELITY_CYCLE,
    SSR_CMD_REPLAY_FROM_HERE,
    SSR_CMD_COLLAPSE,
+   SSR_CMD_QUIT,            // take the expert off and give the chart back
    SSR_CMD_SESSIONS,         // open the saved-session list
    //--- the stop and target are lines now, so they need verbs
    SSR_CMD_LINES_TOGGLE,     // put them on the chart / take them off
@@ -259,6 +260,7 @@ string SSRCmdName(const ENUM_SSR_CMD c)
       case SSR_CMD_FIDELITY_CYCLE:   return "fidelity";
       case SSR_CMD_REPLAY_FROM_HERE: return "replay from here";
       case SSR_CMD_COLLAPSE:         return "collapse";
+      case SSR_CMD_QUIT:             return "quit";
       case SSR_CMD_SESSIONS:         return "sessions";
       case SSR_CMD_OPEN_LINES:       return "take the trade";
       case SSR_CMD_REVIEW:           return "review";

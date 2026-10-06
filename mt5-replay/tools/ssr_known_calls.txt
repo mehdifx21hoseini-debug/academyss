@@ -55,6 +55,7 @@ EnumToString
 EventKillTimer
 EventSetMillisecondTimer
 Every
+ExpertRemove
 FileClose
 FileDelete
 FileFindClose

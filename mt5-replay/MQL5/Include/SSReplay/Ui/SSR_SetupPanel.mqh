@@ -783,8 +783,18 @@ public:
                 SSR_C_PRIMARY_TEXT, SSR_FS_SMALL);
       m_w.Label("title", m_x + 32, m_y + 10, "SS Replay",
                 SSR_C_TEXT, SSR_FS_TITLE);
-      m_w.Label("stepn", m_x + SSR_HOME_W - 46, m_y + 11, SSR_BUILD_SHORT,
+      m_w.Label("stepn", m_x + SSR_HOME_W - 70, m_y + 11, SSR_BUILD_SHORT,
                 SSR_C_TEXT_FAINT, SSR_FS_SMALL);
+      //+------------------------------------------------------------------+
+      //| THE X IS HERE TOO, because this is the window a person meets      |
+      //| first and the one they are most likely to want out of. It closes  |
+      //| the expert and gives the chart back - the same thing the running  |
+      //| panel's X does, so the button does not change meaning halfway     |
+      //| through the product.                                               |
+      //+------------------------------------------------------------------+
+      m_w.ButtonC("quit", m_x + SSR_HOME_W - 26, m_y + 7, 19, 19,
+                  SSR_GLYPH_CLOSE, SSR_C_HEADER, SSR_C_HEADER,
+                  SSR_C_STOP, SSR_FS_BODY);
 
       //--- the two centred lines the reference puts here: what you are
       //--- connected to, then under it what kind of account it is
@@ -1133,6 +1143,12 @@ public:
       //--- alive to close it. The host owns both, so the host is told.
       if(m_w.Pressed("qdata"))
          return "data";
+
+      //--- NOT ACTED ON HERE. The host owns the program's life; a panel
+      //--- that removed the expert would be destroying the object whose
+      //--- click it is still inside.
+      if(m_w.Pressed("quit"))
+         return "quit";
 
       //--- MODE. Applied immediately, because the value it shows IS the
       //--- setting - the same rule the cycling fields have always used.

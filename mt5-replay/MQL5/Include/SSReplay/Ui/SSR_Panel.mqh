@@ -94,7 +94,6 @@ private:
    bool              m_saved;
 
    bool              m_collapsed;
-   bool              m_closed;      // hidden entirely; one button brings it back
    bool              m_compact;     // the chart is too short for the full panel
    //+------------------------------------------------------------------+
    //| TWO FLAGS, BECAUSE A WISH AND A FACT ARE NOT THE SAME THING.     |
@@ -277,7 +276,7 @@ public:
        m_last_btn(""), m_last_btn_ms(0), m_prefix("SSRP_"),
        m_x(12), m_y(24), m_saved_mouse_move(0), m_saved_mouse_scroll(1),
        m_saved_quick_nav(1), m_saved_key_control(1),
-       m_saved(false), m_collapsed(false), m_closed(false), m_compact(false),
+       m_saved(false), m_collapsed(false), m_compact(false),
        m_pro(false), m_tall(false), m_pro_why(""), m_pro_said(0),
        m_pending_cmd(SSR_CMD_NONE),
        m_last_ticket(0), m_toast_text(""), m_toast_until(0),
@@ -646,21 +645,18 @@ public:
       //+------------------------------------------------------------------+
       //| CLOSED MEANS CLOSED - BUT NOT UNREACHABLE.                       |
       //|                                                                  |
-      //| The X takes the whole panel off the chart. What it leaves is one |
-      //| small button, because a control that removes its own only way    |
-      //| back is a trap: the alternative would be detaching and           |
-      //| reattaching the tool, which restarts the entire session.         |
+      //| The X now closes the EXPERT, so there is no hidden-panel state   |
+      //| left to come back from. That used to be a trap worth solving -   |
+      //| a control that removed its own only way back - and the solution  |
+      //| was a small reopen button. Close meaning close removes the trap  |
+      //| instead of guarding it.                                           |
       //+------------------------------------------------------------------+
-      if(m_closed)
-        {
-         HideBody(true);
-         HideCaption(true);
-         m_w.Button("reopen", m_x, m_y, 76, SSR_HEADER_H, "SS Replay");
-         ChartRedraw(m_chart);
-         return;
-        }
-      //--- coming back from closed: the caption was hidden by hand, so
-      //--- it has to be shown by hand. HideBody does not own these.
+      //--- THE "HIDDEN TO ONE BUTTON" STATE IS GONE WITH THE X THAT MADE
+      //--- IT. Close now closes the expert, and Collapse - which keeps the
+      //--- controls - is what anybody pressing X to get the panel out of
+      //--- the way was actually after. The reopen button is REMOVED rather
+      //--- than merely undrawn, because an upgrade from a build that left
+      //--- one on the chart would otherwise leave it there for ever.
       m_w.Remove("reopen");
       HideCaption(false);
 
@@ -2814,8 +2810,23 @@ public:
                         : "refused (" + m_port.TradeError() + ")");
          return SSR_CMD_NONE;
         }
-      if(what == "close")  { m_closed = true;  return SSR_CMD_NONE; }
-      if(what == "reopen") { m_closed = false; return SSR_CMD_NONE; }
+      //+------------------------------------------------------------------+
+      //| THE X CLOSES THE EXPERT NOW. IT USED TO HIDE THE PANEL.          |
+      //|                                                                  |
+      //| Three title-bar buttons that behave like a window's: minimise is |
+      //| Collapse, maximise is the tall panel, and close CLOSES. An X that |
+      //| leaves the program running and the chart repainted is the one     |
+      //| button on a title bar whose meaning everybody already knows, used |
+      //| for something else.                                               |
+      //|                                                                  |
+      //| Hiding is not lost: Collapse leaves the controls, which is what   |
+      //| anybody pressing X to "get it out of the way" actually wanted.    |
+      //|                                                                  |
+      //| The host does the removing. This class must not call             |
+      //| ExpertRemove itself - it would be destroying the object that is   |
+      //| in the middle of handling a click.                                |
+      //+------------------------------------------------------------------+
+      if(what == "close")  { return SSR_CMD_QUIT; }
 
       //+------------------------------------------------------------------+
       //| THE THREE ROW BUTTONS.                                           |
@@ -3103,7 +3114,7 @@ public:
          //--- caption test below must not get the chance to claim it
          //--- the speed track IS drawn when collapsed now, and dragging it
          //--- is most of the reason to collapse in the first place
-         if(down && !m_track_drag && !m_dragging && !m_closed &&
+         if(down && !m_track_drag && !m_dragging &&
             OnTrack(mx, my))
            {
             m_track_drag = true;

@@ -573,6 +573,11 @@ int OpenExtraStreams(const long win_start, const long win_end,
 //| change because objects belong to the chart, not to the symbol.   |
 //+------------------------------------------------------------------+
 #define SSR_HANDOFF  "SSR_ORIGIN_HANDOFF"
+//--- THE PERIOD RIDES ACROSS TOO, in its own object rather than packed
+//--- into the one above. That text is read in three places and one of
+//--- them prefixes it with "!" to poison the next run; adding a
+//--- separator to it would mean teaching all three about a format.
+#define SSR_HANDOFF_TF "SSR_ORIGIN_HANDOFF_TF"
 
 void StashOrigin(const string origin)
   {
@@ -583,6 +588,27 @@ void StashOrigin(const string origin)
    ObjectSetInteger(0, SSR_HANDOFF, OBJPROP_SELECTABLE, false);
    ObjectSetInteger(0, SSR_HANDOFF, OBJPROP_HIDDEN, true);
    ObjectSetString (0, SSR_HANDOFF, OBJPROP_TEXT, origin);
+  }
+
+//--- what timeframe this chart was on before the handover took it, so
+//--- that putting it back puts it back exactly. 0 = never stashed.
+void StashOriginPeriod(const ENUM_TIMEFRAMES tf)
+  {
+   if(ObjectFind(0, SSR_HANDOFF_TF) < 0)
+      ObjectCreate(0, SSR_HANDOFF_TF, OBJ_LABEL, 0, 0, 0);
+   ObjectSetInteger(0, SSR_HANDOFF_TF, OBJPROP_XDISTANCE, -1000);
+   ObjectSetInteger(0, SSR_HANDOFF_TF, OBJPROP_YDISTANCE, -1000);
+   ObjectSetInteger(0, SSR_HANDOFF_TF, OBJPROP_SELECTABLE, false);
+   ObjectSetInteger(0, SSR_HANDOFF_TF, OBJPROP_HIDDEN, true);
+   ObjectSetString (0, SSR_HANDOFF_TF, OBJPROP_TEXT, IntegerToString((int)tf));
+  }
+
+ENUM_TIMEFRAMES ReadStashedPeriod(void)
+  {
+   if(ObjectFind(0, SSR_HANDOFF_TF) < 0)
+      return (ENUM_TIMEFRAMES)0;
+   return (ENUM_TIMEFRAMES)(int)StringToInteger(
+             ObjectGetString(0, SSR_HANDOFF_TF, OBJPROP_TEXT));
   }
 
 string ReadStashedOrigin(void)
@@ -1832,6 +1858,7 @@ bool BuildSession(string origin, const bool on_replay,
    if(one_chart_ok && !g_on_replay_chart)
      {
       StashOrigin(origin);
+      StashOriginPeriod((ENUM_TIMEFRAMES)_Period);
       g_switch_to = g_sink.ReplaySymbol();
       if(g_switch_to == "")
          Print("[host] no replay symbol name to hand this chart over to; "
@@ -1863,7 +1890,8 @@ int OnInit()
    //--- SSR* like everything else, so the sweep deleted them and the
    //--- second pass of a one-window handover could not tell what it
    //--- was replaying or where the user chose to start.
-   SSRPurgeChart(0, SSR_PICK_LINE + "," + SSR_HANDOFF + "," + SSR_PICK_STASH);
+   SSRPurgeChart(0, SSR_PICK_LINE + "," + SSR_HANDOFF + "," +
+                  SSR_HANDOFF_TF + "," + SSR_PICK_STASH);
 
    //+------------------------------------------------------------------+
    //| THE HANDOVER FLAGS ARE CLEARED BEFORE ANYTHING ELSE RUNS.        |
@@ -2264,9 +2292,16 @@ void OnDeinit(const int reason)
       //+------------------------------------------------------------------+
       if(g_on_replay_chart && g_origin != "")
         {
+         //--- the period it was on BEFORE the handover, not the one the
+         //--- replay left it on. "my chart back" means both.
+         ENUM_TIMEFRAMES back_tf = ReadStashedPeriod();
+         if(back_tf == 0)
+            back_tf = (ENUM_TIMEFRAMES)_Period;
          ObjectDelete(ChartID(), SSR_HANDOFF);
-         if(ChartSetSymbolPeriod(ChartID(), g_origin, _Period))
-            PrintFormat("[host] this chart is back on %s", g_origin);
+         ObjectDelete(ChartID(), SSR_HANDOFF_TF);
+         if(ChartSetSymbolPeriod(ChartID(), g_origin, back_tf))
+            PrintFormat("[host] this chart is back on %s %s", g_origin,
+                        EnumToString(back_tf));
          else
             PrintFormat("[host] could not put this chart back on %s (%d) - "
                         "switch it yourself; the replay symbol may survive "
@@ -2607,6 +2642,14 @@ void OnTimer()
       if(act == "data")
         {
          g_data.Open();
+         return;
+        }
+
+      if(act == "quit")
+        {
+         Print("[host] closing on request - putting this chart back the way "
+               "it was.");
+         ExpertRemove();
          return;
         }
 
@@ -3268,6 +3311,29 @@ void RunHostCommand(const ENUM_SSR_CMD cmd)
    if(cmd == SSR_CMD_REVIEW)
      {
       OpenReview();
+      return;
+     }
+   //+------------------------------------------------------------------+
+   //| CLOSE MEANS CLOSE: THE EXPERT COMES OFF AND THE CHART GOES BACK. |
+   //|                                                                  |
+   //| ExpertRemove does not return immediately - it asks MetaTrader to  |
+   //| unload this program once the current handler is finished - which  |
+   //| is exactly why the panel returns a command instead of calling it: |
+   //| the click is still being handled inside the object that would be  |
+   //| destroyed.                                                        |
+   //|                                                                  |
+   //| Everything the user wants back is already in OnDeinit and runs on |
+   //| every reason: the blank page gives the chart's twelve colours     |
+   //| back, blind mode restores every chart it touched, and a chart     |
+   //| that was handed over goes back to its own symbol AND the period   |
+   //| it was on before. Nothing new had to be written here; it had to   |
+   //| be reachable.                                                     |
+   //+------------------------------------------------------------------+
+   if(cmd == SSR_CMD_QUIT)
+     {
+      Print("[host] closing on request - putting this chart back the way "
+            "it was.");
+      ExpertRemove();
       return;
      }
    if(cmd == SSR_CMD_SESSIONS)
