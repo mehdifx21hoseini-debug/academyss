@@ -126,7 +126,10 @@ class ControlBot:
             _render(question, draft.proposed_text),
             buttons=[
                 [
-                    Button.inline("✅ تأیید و ارسال", f"approve:{draft.id}".encode()),
+                    Button.inline(
+                        "✅ تأیید و ارسال",
+                        f"approve:{draft.id}:{draft.revision}".encode(),
+                    ),
                     Button.inline("🚫 رد", f"reject:{draft.id}".encode()),
                 ]
             ],
@@ -279,10 +282,15 @@ class ControlBot:
 
     async def _on_callback(self, event: events.CallbackQuery.Event) -> None:
         raw = (event.data or b"").decode()
-        action, _, draft_id_raw = raw.partition(":")
+        action, _, rest = raw.partition(":")
+        draft_id_raw, _, revision_raw = rest.partition(":")
         if action not in {"approve", "reject"} or not draft_id_raw.isdigit():
             return
         draft_id = int(draft_id_raw)
+        # نسخه‌ای که این دکمه با خودش آورده. کارت‌های پیش از این قابلیت شماره
+        # ندارند و «۰» حساب می‌شوند — که درست است: پیش‌نویسی که متنش عوض شده
+        # نسخه‌اش حتماً بالاتر از صفر است، پس دکمه‌ی کهنه‌اش نمی‌خورد.
+        shown_revision = int(revision_raw) if revision_raw.isdigit() else 0
         actor = f"control:{event.sender_id}"
 
         async with session_scope() as session:
@@ -298,6 +306,18 @@ class ControlBot:
                 )
                 await event.answer(str(exc), alert=True)
                 return
+            # تأیید باید به همان متنی بخورد که منتور دیده. اگر متن پیشنهادی بعد
+            # از ساخته شدن این کارت عوض شده باشد — مثلاً با دستور کوتاه خودش —
+            # این دکمه کهنه است و زدنش یعنی تأیید چیزی که ندیده. رد کردن کهنه
+            # نیست: نرفتن پیام، هر نسخه‌ای باشد، همان نتیجه را دارد.
+            if action == "approve":
+                current = await session.get_one(Draft, draft_id)
+                if current.revision != shown_revision:
+                    await event.answer(
+                        "متن این پیش‌نویس عوض شده. نسخه‌ی تازه را ببینید و همان را تأیید کنید.",
+                        alert=True,
+                    )
+                    return
             try:
                 if action == "reject":
                     await drafts.reject(session, draft_id, by=actor)
@@ -403,12 +423,16 @@ class ControlBot:
                     target=str(draft_id),
                 )
             )
+            await session.flush()
+            revision = (await session.get_one(Draft, draft_id)).revision
 
         await event.reply(
             f"✍️ این را نوشتم:\n\n{result.text}",
             buttons=[
                 [
-                    Button.inline("✅ تأیید و ارسال", f"approve:{draft_id}".encode()),
+                    Button.inline(
+                        "✅ تأیید و ارسال", f"approve:{draft_id}:{revision}".encode()
+                    ),
                     Button.inline("🚫 رد", f"reject:{draft_id}".encode()),
                 ]
             ],

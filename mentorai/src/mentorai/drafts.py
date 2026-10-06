@@ -88,6 +88,9 @@ async def repropose(session: AsyncSession, draft_id: int, *, body: str) -> Draft
         raise ValueError("متن پیشنهادی خالی است")
     draft = await _claim(session, draft_id)
     draft.proposed_text = body.strip()
+    # شماره‌ی نسخه بالا می‌رود تا دکمه‌ی تأییدِ کارت قبلی — که متن قبلی را نشان
+    # می‌دهد — دیگر نخورد. وگرنه منتور چیزی را تأیید می‌کند که ندیده است.
+    draft.revision += 1
     # `decided_by` و `status` دست‌نخورده می‌مانند: هیچ تصمیمی گرفته نشده.
     return draft
 

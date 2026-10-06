@@ -602,3 +602,109 @@ async def test_a_plain_reply_still_sends_the_mentor_text_verbatim(
     # `edited` می‌شود. این همان تفاوتی است که `repropose` از آن دوری می‌کند.
     assert draft.final_text == "متن دستی خود منتور"
     assert draft.status == drafts.DraftStatus.edited.value
+
+
+async def test_a_stale_approve_button_cannot_send_the_new_text(
+    session: AsyncSession, linked: MentorAccount, bot, monkeypatch: pytest.MonkeyPatch
+) -> None:  # type: ignore[no-untyped-def]
+    """شکستی که می‌بندد: منتور چیزی را تأیید کند که ندیده است.
+
+    سناریو: کارت اول با متن «الف» فرستاده شد. منتور دستور کوتاه داد و متن «ب» شد و
+    کارت تازه آمد. ولی کارت اول هنوز در گفتگوست، با دکمه‌ی تأییدش و متن «الف» روی
+    صفحه. اگر آن دکمه را بزند، «ب» می‌رود.
+
+    کل ادعای ایمنی این سیستم همین است که آدم هر پیام را **دیده** و تأیید کرده. اگر
+    متنی که دید با متنی که رفت یکی نباشد، آن ادعا دروغ است.
+    """
+    import mentorai.control.bot as bot_module
+
+    sent: list[int] = []
+
+    async def _fake_send(draft_id: int, **_: object) -> str:
+        sent.append(draft_id)
+        return "sent"
+
+    monkeypatch.setattr(bot_module, "send_draft_now", _fake_send)
+
+    client = _ExpandingClient("متن تازه که منتور آن را روی کارت قدیمی ندیده")
+    event, draft = await _instruct(
+        bot, session, linked, "+ بگو صبر کنه", client=client
+    )
+    await session.refresh(draft)
+    assert draft.revision == 1, "نسخه بالا نرفت"
+
+    # دکمه‌ی کارت **قدیمی**: نسخه‌ی صفر را حمل می‌کند.
+    stale = FakeEvent(data=f"approve:{draft.id}:0".encode(), sender_id=OPERATOR)
+    await bot._on_callback(stale)
+
+    assert sent == [], "تأییدِ کارت کهنه، متن تازه را فرستاد"
+    await session.refresh(draft)
+    assert draft.status == drafts.DraftStatus.pending.value
+    assert "عوض شده" in stale.said
+
+
+async def test_the_fresh_approve_button_works(
+    session: AsyncSession, linked: MentorAccount, bot, monkeypatch: pytest.MonkeyPatch
+) -> None:  # type: ignore[no-untyped-def]
+    """نیمه‌ی دیگر: بستن نسخه‌ی کهنه نباید تأیید درست را هم ببندد."""
+    import mentorai.control.bot as bot_module
+
+    sent: list[int] = []
+
+    async def _fake_send(draft_id: int, **_: object) -> str:
+        sent.append(draft_id)
+        return "sent"
+
+    monkeypatch.setattr(bot_module, "send_draft_now", _fake_send)
+
+    client = _ExpandingClient("متن تازه")
+    _, draft = await _instruct(bot, session, linked, "+ بگو صبر کنه", client=client)
+    await session.refresh(draft)
+
+    fresh = FakeEvent(data=f"approve:{draft.id}:{draft.revision}".encode(), sender_id=OPERATOR)
+    await bot._on_callback(fresh)
+
+    assert sent == [draft.id], fresh.said
+
+
+async def test_rejecting_from_a_stale_card_is_still_allowed(
+    session: AsyncSession, linked: MentorAccount, bot
+) -> None:  # type: ignore[no-untyped-def]
+    """رد کردن کهنه نمی‌شود: نرفتن پیام، هر نسخه‌ای باشد، همان نتیجه را دارد.
+
+    اگر رد هم نسخه می‌خواست، منتور برای متوقف کردن یک پاسخ مجبور بود کارت درست را
+    پیدا کند — و در آن فاصله پیام می‌رفت.
+    """
+    client = _ExpandingClient("متن تازه")
+    _, draft = await _instruct(bot, session, linked, "+ بگو صبر کنه", client=client)
+
+    stale_reject = FakeEvent(data=f"reject:{draft.id}".encode(), sender_id=OPERATOR)
+    await bot._on_callback(stale_reject)
+
+    await session.refresh(draft)
+    assert draft.status == drafts.DraftStatus.rejected.value
+
+
+async def test_an_untouched_draft_approves_from_a_card_without_a_revision(
+    session: AsyncSession, linked: MentorAccount, bot, monkeypatch: pytest.MonkeyPatch
+) -> None:  # type: ignore[no-untyped-def]
+    """کارت‌هایی که پیش از این قابلیت ساخته شده‌اند نباید قفل شوند.
+
+    داده‌ی دکمه‌ی قدیمی شماره ندارد و صفر حساب می‌شود. برای پیش‌نویسی که متنش عوض
+    نشده، صفر همان نسخه‌ی درست است.
+    """
+    import mentorai.control.bot as bot_module
+
+    sent: list[int] = []
+
+    async def _fake_send(draft_id: int, **_: object) -> str:
+        sent.append(draft_id)
+        return "sent"
+
+    monkeypatch.setattr(bot_module, "send_draft_now", _fake_send)
+    _, draft = await _conversation_with_draft(session, linked)
+
+    old_style = FakeEvent(data=f"approve:{draft.id}".encode(), sender_id=OPERATOR)
+    await bot._on_callback(old_style)
+
+    assert sent == [draft.id], old_style.said

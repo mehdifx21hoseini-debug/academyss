@@ -23,6 +23,7 @@ from sqlalchemy import (
     ForeignKey,
     Index,
     Integer,
+    SmallInteger,
     String,
     Text,
     UniqueConstraint,
@@ -434,6 +435,9 @@ class Draft(Base):
         ForeignKey("conversations.id", ondelete="CASCADE"), nullable=False
     )
     proposed_text: Mapped[str] = mapped_column(Text, nullable=False)
+    # هر بار که متن پیشنهادی عوض می‌شود یکی بالا می‌رود. دکمه‌ی تأیید این شماره را
+    # با خودش حمل می‌کند، تا تأییدِ یک کارتِ کهنه متن تازه را نفرستد.
+    revision: Mapped[int] = mapped_column(SmallInteger, nullable=False, server_default="0")
     final_text: Mapped[str | None] = mapped_column(Text)
     status: Mapped[str] = mapped_column(String(16), nullable=False, server_default="pending")
     decided_by: Mapped[str | None] = mapped_column(String(120))
