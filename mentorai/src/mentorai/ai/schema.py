@@ -4,7 +4,9 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-PROMPT_VERSION = "v1"
+# v2: قاعده‌ی چندپیامی شدن پاسخ به دستور اضافه شد. نسخه عوض می‌شود تا در
+# `ai_runs` بشود پاسخ‌های پیش و پس از آن را از هم جدا کرد.
+PROMPT_VERSION = "v2"
 
 
 class ModelAnswer(BaseModel):

@@ -4,6 +4,18 @@
 {% block content %}
 <h1>خلاصه</h1>
 
+{# سلامت سامانه، بالای همه چیز. اگر کارگر مرده باشد بقیه‌ی اعداد این صفحه
+   کهنه‌اند و بی‌معنی — پس اول این دیده می‌شود (ADR-032). #}
+{% if health.level.value != 'ok' %}
+<p class="alarm">
+  وضعیت سامانه: {{ health_label }}
+  &mdash;
+  {% for check in health.checks if check.level.value != 'ok' %}
+    {{ check.name }}: {{ check.detail }}{% if not loop.last %} · {% endif %}
+  {% endfor %}
+</p>
+{% endif %}
+
 {% if kpis.open_escalations %}
 <p class="alarm">
   {{ digits(kpis.open_escalations) }} پیام در انتظار پاسخ منتور است{% if kpis.oldest_open_hours %}؛

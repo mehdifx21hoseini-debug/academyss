@@ -1,0 +1,169 @@
+# CI برای کد MENTORAI.
+#
+# هدف این نیست که «تست‌ها سبز باشند». هدف این است که هیچ تغییری بی‌صدا از
+# بررسی رد نشود. پس روی هر پوش و هر PR اجرا می‌شود، نه فقط روی شاخه‌ی اصلی.
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+# اجرای قدیمی همان شاخه لغو می‌شود؛ فقط آخرین حالت کد اهمیت دارد.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    working-directory: mentorai
+
+jobs:
+  check:
+    name: lint · types · migrations · tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      db:
+        # همان تصویری که docker-compose استفاده می‌کند: پستگرس ۱۶ به‌همراه pgvector.
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: mentorai
+          POSTGRES_PASSWORD: mentorai
+          POSTGRES_DB: mentorai_test
+        ports:
+          - 5432:5432
+        # نام پایگاه داده در health-cmd صریح است، وگرنه pg_isready سراغ پایگاهی
+        # هم‌نام کاربر می‌رود که وجود ندارد و لاگ سرویس پر از FATAL می‌شود. سرویس
+        # بدون آن هم سالم اعلام می‌شد؛ این فقط نویز را برمی‌دارد.
+        #
+        # توجه: داخل یک اسکالر تاشده‌ی YAML (>-) نمی‌شود توضیح گذاشت؛ خودِ متن
+        # توضیح جزو مقدار می‌شود و گزینه‌های داکر را خراب می‌کند.
+        options: >-
+          --health-cmd "pg_isready -U mentorai -d mentorai_test"
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 20
+
+    env:
+      # همان مقادیری که tests/conftest.py پیش‌فرض می‌گذارد. اینجا صریح نوشته شده‌اند
+      # تا اگر پیش‌فرض عوض شد، CI هم عمداً عوض شود نه اتفاقی.
+      DATABASE_URL: postgresql+asyncpg://mentorai:mentorai@localhost:5432/mentorai_test
+      SESSION_ENCRYPTION_KEY: TfB5m6h0nsGGmZ2Zt2sD1u9wY9NClsMkVQ8mXvJqZ7A=
+      TELEGRAM_API_ID: '12345'
+      TELEGRAM_API_HASH: test-hash
+      PIP_DISABLE_PIP_VERSION_CHECK: '1'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # افزونه‌ها در محیط تولید با اسکریپت initdb و ابرکاربر ساخته می‌شوند
+      # (docker/initdb/01-extensions.sql). سرویس‌های GitHub اسکریپت initdb سوار
+      # نمی‌کنند، پس همان کار اینجا صریح انجام می‌شود.
+      - name: Create database extensions
+        run: |
+          PGPASSWORD=mentorai psql -h localhost -U mentorai -d mentorai_test \
+            -c "CREATE EXTENSION IF NOT EXISTS vector;" \
+            -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+
+      # از فایل قفل با هش. اگر بسته‌ای روی PyPI عوض شده باشد، همین‌جا شکست می‌خورد.
+      - name: Install locked dependencies
+        run: pip install --require-hashes -r requirements-dev.lock
+
+      - name: Install the package
+        run: pip install --no-deps .
+
+      - name: Lint
+        run: ruff check src tests
+
+      - name: Type check
+        run: mypy
+
+      # مهاجرت‌ها فقط «اجرا می‌شوند» کافی نیست؛ باید برگشت‌پذیر هم باشند. این گام
+      # روی یک پایگاه داده‌ی جدا اجرا می‌شود تا با پایگاه داده‌ی تست تداخل نکند.
+      - name: Validate migrations are reversible
+        env:
+          DATABASE_URL: postgresql+asyncpg://mentorai:mentorai@localhost:5432/mentorai_migrations
+        run: |
+          PGPASSWORD=mentorai createdb -h localhost -U mentorai mentorai_migrations
+          PGPASSWORD=mentorai psql -h localhost -U mentorai -d mentorai_migrations \
+            -c "CREATE EXTENSION IF NOT EXISTS vector;" \
+            -c "CREATE EXTENSION IF NOT EXISTS pg_trgm;"
+          python -m alembic upgrade head
+          python -m alembic downgrade base
+          python -m alembic upgrade head
+
+      # عمداً `python -m pytest` و نه `pytest`. آن یکی پوشه‌ی جاری را در مسیر
+      # ایمپورت نمی‌گذارد، و تست‌هایی که از `tests.test_sender` چیزی می‌گیرند
+      # هنگام جمع‌آوری شکست می‌خورند. همان دستوری که README می‌گوید.
+      - name: Tests
+        run: python -m pytest -q
+
+  build:
+    name: docker image builds from the lock
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      # ساخت واقعی تصویر. این تنها جایی است که مسیر
+      # `pip install --require-hashes` روی همان تصویر پایه‌ی تولید آزموده می‌شود.
+      # working-directory پیش‌فرض این فایل «mentorai» است و روی این کار هم اعمال
+      # می‌شود، پس زمینه‌ی ساخت همین‌جاست، نه mentorai/mentorai.
+      - name: Build image
+        run: docker build -t mentorai:ci .
+
+      - name: The entrypoint runs inside the image
+        run: docker run --rm mentorai:ci mentorai --help
+
+      # روز اول روی سرور، همین دستورها به همین ترتیب (docs/SERVER_SETUP.md). تست‌ها
+      # مهاجرت را از روی مخزن اجرا می‌کنند، پس فایلی که به تصویر نرسد — همان‌طور که
+      # alembic.ini نرسیده بود — فقط اینجا دیده می‌شود. حساب تلگرامی در کار نیست.
+      - name: Day-one setup runs with compose, as on the server
+        run: |
+          scripts/init-env.sh
+          sed -i -e 's/^TELEGRAM_API_ID=.*/TELEGRAM_API_ID=1/' \
+                 -e 's/^TELEGRAM_API_HASH=.*/TELEGRAM_API_HASH=ci/' .env
+          docker compose up -d --wait db
+          docker compose run --rm cli python -m alembic upgrade head
+          docker compose run --rm cli mentorai kb-import --file /kb/mentorai_kb_latest.csv
+          docker compose up -d --wait panel
+          # healthz نه readyz: بدون حساب و کارگر، readyz درست «down» می‌گوید.
+          curl -fsS --retry 15 --retry-all-errors --retry-delay 1 http://127.0.0.1:8000/healthz
+          # قالب‌ها و فایل‌های ثابت داخل بسته‌اند، نه فقط در مخزن.
+          curl -fsS -o /dev/null http://127.0.0.1:8000/login
+          curl -fsS -o /dev/null http://127.0.0.1:8000/static/panel.css
+
+      # پشتیبانی که بازگردانده نشود، پشتیبان نیست. همان اسکریپتی که cron روی سرور اجرا
+      # می‌کند، و بازگردانی در یک پایگاه داده‌ی جدا.
+      - name: The nightly backup restores
+        run: |
+          BACKUP_DIR="$RUNNER_TEMP/backups" scripts/backup.sh
+          test "$(stat -c %a "$RUNNER_TEMP"/backups/mentorai-*.dump)" = 600
+          docker compose exec -T db psql -U mentorai -d postgres -c "create database restore_check"
+          docker compose exec -T db pg_restore -U mentorai -d restore_check --no-owner \
+            < "$(ls "$RUNNER_TEMP"/backups/mentorai-*.dump)"
+          restored=$(docker compose exec -T db psql -U mentorai -d restore_check -tAc \
+            "select count(*) from knowledge_documents")
+          echo "restored knowledge documents: $restored"
+          test "$restored" -gt 0
+
+      - name: Compose logs on failure
+        if: failure()
+        run: docker compose logs --no-color
+
+      # تصویر رونویسی ویس (ADR-033). مدل دانلود نمی‌شود — سه گیگ است و در اجرا
+      # روی volume می‌آید — ولی نصب از قفل با هش و بارگذاری خود سرویس اینجا آزموده
+      # می‌شود. همین مرحله است که شکستن av 19 را در ساخت می‌گرفت.
+      - name: Build the voice transcription image
+        run: docker build -t mentorai-transcriber:ci transcriber
+
+      - name: The transcription service imports inside its image
+        run: >-
+          docker run --rm mentorai-transcriber:ci
+          python -c "import faster_whisper, av; from transcriber.app import create_app; create_app(lambda: None); print('ok', av.__version__)"

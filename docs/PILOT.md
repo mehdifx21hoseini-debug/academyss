@@ -16,8 +16,8 @@
 
 | مورد | مقدار | چرا |
 |---|---|---|
-| پردازنده | ۲ هسته | پستگرس، دروازه، کارگر و پنل کنار هم |
-| رم | ۴ گیگابایت | پستگرس با pgvector راحت جا می‌شود |
+| پردازنده | ۴ هسته | پستگرس، دروازه، کارگر، پنل و رونویسی ویس کنار هم |
+| رم | **۸ گیگابایت** | مدل رونویسی ویس به‌تنهایی حدود ۴ گیگ می‌گیرد (`ADR-033`). بدون ویس، ۴ گیگ کافی است |
 | دیسک | ۴۰ تا ۶۰ گیگ SSD | پایگاه داده و تاریخچه‌ی مکالمه‌ها |
 | سیستم | Ubuntu 24.04 LTS | تصویرهای داکر پروژه روی همین آزموده‌اند |
 | شبکه | IP ثابت، دسترسی مستقیم به تلگرام | ورود حساب و اتصال دائم |
@@ -78,12 +78,12 @@ docker compose run --rm cli python -c "from cryptography.fernet import Fernet; p
 نمی‌شود.
 
 ```powershell
-docker compose up -d db
+docker compose up -d --wait db
 docker compose run --rm cli python -m alembic upgrade head
 docker compose run --rm cli mentorai kb-import --file /kb/mentorai_kb_latest.csv
 ```
 
-انتظار: `ساخته شد: 641`. خروجی پایگاه دانش از قبل روی `/kb` سوار شده، پس مسیردهی
+انتظار: `ساخته شد: 643`. خروجی پایگاه دانش از قبل روی `/kb` سوار شده، پس مسیردهی
 دستی لازم نیست.
 
 کیفیت بازیابی را همین‌جا اندازه بگیرید — همان عددی که در `ADR-019` آمده:
@@ -110,18 +110,19 @@ docker compose up -d panel
 
 ## راه‌اندازی
 
-این‌ها روی سرور اجرا می‌شوند. اگر مرحله‌ی صفر را انجام داده‌اید، همین مسیر است با
-مقادیر واقعی.
+راهنمای کامل و قدم‌به‌قدم، از خرید سرور تا اولین پیش‌نویس: `docs/SERVER_SETUP.md`.
+خلاصه‌ی همان مسیر اینجاست.
 
 ```bash
 cd mentorai
-cp .env.example .env            # مقادیر واقعی را پر کنید
-docker compose up -d db
+scripts/init-env.sh             # رمز پایگاه داده و کلید نشست را می‌سازد
+nano .env                       # بقیه‌ی مقادیر واقعی
+docker compose up -d --wait db
 docker compose run --rm cli python -m alembic upgrade head
 docker compose run --rm cli mentorai kb-import --file /kb/mentorai_kb_latest.csv
 ```
 
-انتظار: `ساخته شد: 641`.
+انتظار: `ساخته شد: 643`.
 
 حساب را ثبت و وارد کنید. ورود عمداً دستی است؛ ورود مکرر خودش برای تلگرام سیگنال
 منفی است:
@@ -138,6 +139,17 @@ docker compose run --rm -it cli mentorai login --slug mentor-a
 docker compose run --rm cli mentorai exclude-chat \
     --slug mentor-a --peer-id 123456789 --reason "همکار"
 ```
+
+ویس را بالا بیاورید (`ADR-033`). بار اول مدل حدود ۳ گیگ دانلود می‌کند و چند دقیقه طول
+می‌کشد؛ تا وقتی آماده نشده، ویس‌ها مثل قبل به منتور می‌روند و چیزی گم نمی‌شود:
+
+```bash
+docker compose --profile voice up -d transcriber
+docker compose --profile voice ps transcriber     # تا «healthy» شود صبر کنید
+```
+
+`.env` از قبل `TRANSCRIBER_URL=http://transcriber:8000/v1` و `TRANSCRIBER_MODEL=large-v3`
+را دارد. اگر ویس نمی‌خواهید، این دو را خالی کنید و این مرحله را رد کنید.
 
 حالا سیستم را بالا بیاورید:
 
@@ -195,9 +207,12 @@ docker compose up -d panel
 ## اگر چیزی خراب شد
 
 ```bash
-mentorai pause --slug mentor-a --reason "بررسی"     # قطع فوری ارسال
-mentorai pause --slug mentor-a --resume
+docker compose run --rm cli mentorai pause --slug mentor-a --reason "بررسی"   # قطع فوری ارسال
+docker compose run --rm cli mentorai pause --slug mentor-a --resume
 ```
+
+کارگرِ در حال اجرا را لازم نیست دوباره راه انداخت: هر ارسال وضعیت توقف را همان لحظه
+از پایگاه داده می‌خواند.
 
 حساب‌ها مستقل‌اند؛ توقف یکی بقیه را متوقف نمی‌کند. اگر تلگرام هشدار محدودیت داد، فوراً
 متوقف کنید و تا روشن شدن علت ادامه ندهید — اعتبار حساب گران‌ترین دارایی این سیستم است.

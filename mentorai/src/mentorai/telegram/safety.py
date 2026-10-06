@@ -8,7 +8,7 @@ from __future__ import annotations
 import asyncio
 import time as _time
 from dataclasses import dataclass, field
-from datetime import UTC, datetime, time, timedelta
+from datetime import UTC, datetime, time, timedelta, tzinfo
 
 
 @dataclass
@@ -50,12 +50,18 @@ class TokenBucket:
         self.consume()
 
 
-def in_quiet_hours(now: datetime, *, start_hour: int, end_hour: int) -> bool:
+def in_quiet_hours(now: datetime, *, start_hour: int, end_hour: int, tz: tzinfo) -> bool:
     """آیا الان در بازه‌ی سکوت است.
 
     بازه‌ای که از نیمه‌شب رد می‌شود، مثل ۲۳ تا ۸، درست اداره می‌شود.
+
+    `tz` اجباری است و عمداً پیش‌فرض ندارد. ساعت سکوت یعنی ساعتِ **دانشجو**، و
+    لحظه‌ای که به اینجا می‌رسد UTC است. تا پیش از این tzinfo دور ریخته می‌شد و
+    مقایسه روی ساعت UTC انجام می‌گرفت، یعنی سکوتِ ۲۳ تا ۸ تهران در عمل ۰۲:۳۰ تا
+    ۱۱:۳۰ تهران اجرا می‌شد: تمام صبح ساکت، و نیمه‌شب پیام‌فرست. پیش‌فرض داشتن این
+    پارامتر یعنی همان اشتباه بی‌صدا برمی‌گردد.
     """
-    current = now.timetz().replace(tzinfo=None)
+    current = now.astimezone(tz).time()
     start = time(hour=start_hour)
     end = time(hour=end_hour)
     if start == end:
@@ -73,6 +79,8 @@ class AccountGate:
     bucket: TokenBucket
     quiet_start: int
     quiet_end: int
+    # منطقه‌ی زمانی‌ای که ساعت سکوت با آن سنجیده می‌شود — ساعتِ دانشجو، نه ساعت سرور.
+    tz: tzinfo
     send_paused: bool = False
     flood_wait_until: datetime | None = None
 
@@ -81,7 +89,9 @@ class AccountGate:
             return "send_paused"
         if self.flood_wait_until is not None and now < self.flood_wait_until:
             return "flood_wait"
-        if in_quiet_hours(now, start_hour=self.quiet_start, end_hour=self.quiet_end):
+        if in_quiet_hours(
+            now, start_hour=self.quiet_start, end_hour=self.quiet_end, tz=self.tz
+        ):
             return "quiet_hours"
         return None
 

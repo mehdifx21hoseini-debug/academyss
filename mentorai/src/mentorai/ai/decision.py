@@ -16,6 +16,9 @@ from mentorai.text.matching import contains_phrase
 
 
 class EscalationTrigger(enum.StrEnum):
+    # اول فهرست است تا وقتی پیامی هم این را دارد و هم چیز دیگری را، دلیل ثبت‌شده
+    # همین باشد: حساس‌ترین پیامی که این سیستم می‌گیرد.
+    identity_question = "identity_question"
     explicit_human_request = "explicit_human_request"
     money = "money"
     complaint = "complaint"
@@ -25,6 +28,21 @@ class EscalationTrigger(enum.StrEnum):
 # عبارت‌ها به شکل نرمال‌شده نوشته شده‌اند: بدون نیم‌فاصله، با «ی» و «ک» فارسی.
 # مقایسه هم روی متن نرمال‌شده انجام می‌شود، پس نگارش‌های مختلف همگی می‌گیرند.
 RULES: dict[EscalationTrigger, tuple[str, ...]] = {
+    # عبارت‌هایی که بی‌هیچ زمینه‌ای فقط یک معنی دارند. بقیه با قاعده‌ی جفتی پایین
+    # گرفته می‌شوند.
+    EscalationTrigger.identity_question: (
+        "ربات یا آدم",
+        "ربات یا انسان",
+        "آدم یا ربات",
+        "آدم هستی",
+        "آدم هستید",
+        "آدم واقعی",
+        "واقعا خودتی",
+        "واقعا خودتونید",
+        "خودت جواب میدی",
+        "خودتون جواب میدید",
+        "خودتون جواب میدین",
+    ),
     EscalationTrigger.explicit_human_request: (
         "منتور",
         "پشتیبانی",
@@ -51,8 +69,6 @@ RULES: dict[EscalationTrigger, tuple[str, ...]] = {
         "عودت",
         "پولم",
         "پول من",
-        "قیمت",
-        "هزینه",
         "شهریه",
         "تخفیف",
         "اقساط",
@@ -80,6 +96,99 @@ RULES: dict[EscalationTrigger, tuple[str, ...]] = {
 }
 
 
+# واژه‌هایی که تنها آمدنشان معنی مالی ندارد.
+#
+# «قیمت» هم قیمت دوره است و هم پرایس اکشن؛ «هزینه» هم شهریه است و هم هزینه‌ی هر
+# معامله. تا پیش از این هر دو تنها در فهرست مالی بودند و ۱۵ پرسش کاملاً آموزشی
+# پایگاه دانش را برای همیشه به منتور می‌سپردند — از جمله «فشردگی قیمت چیه؟» و
+# «چرا حد ضررم با قیمت بدتری خورد؟» که سیستم پاسخ درستشان را در رتبه‌ی اول پیدا
+# می‌کند و دور می‌ریخت (ADR-028).
+#
+# حالا فقط وقتی ارجاع می‌سازند که کنارشان چیزی از خود آکادمی باشد.
+PRICE_WORDS: tuple[str, ...] = (
+    # شکل‌های پسونددار لازم نیست نوشته شوند: `contains_phrase` پسوندهای فارسی را
+    # خودش می‌پذیرد، پس «هزینه» عبارتِ «هزینه‌ی دوره» را هم می‌گیرد (نیم‌فاصله در
+    # نرمال‌سازی حذف می‌شود) و «قیمت» عبارتِ «قیمت‌ها» را. ولی «ارز» پسوند نیست،
+    # پس «رمز» همچنان «رمزارز» را نمی‌گیرد.
+    "قیمت",
+    "هزینه",
+    "مبلغ",
+)
+
+ACADEMY_WORDS: tuple[str, ...] = (
+    "دوره",
+    "کلاس",
+    "اشتراک",
+    "پکیج",
+    "منتورینگ",
+    "ثبت نام",
+    "ثبتنام",
+    "عضویت",
+)
+
+
+def _is_academy_price_question(normalized: str) -> bool:
+    """پرسش مالی درباره‌ی خود آکادمی، نه درباره‌ی بازار.
+
+    هر دو طرف لازم است: واژه‌ی قیمت به‌تنهایی در گفتگوی معامله‌گری روزمره است، و
+    واژه‌ی آکادمی به‌تنهایی هم همین‌طور.
+    """
+    return any(contains_phrase(normalized, w) for w in PRICE_WORDS) and any(
+        contains_phrase(normalized, w) for w in ACADEMY_WORDS
+    )
+
+
+# «ربات هستی؟» — تصمیم مالک: پیام خوانده‌نشده بماند و خود منتور جواب بدهد.
+#
+# چرا قاعده‌ی جفتی و نه واژه‌ی تنها. در فارکس «ربات» یعنی اکسپرت معاملاتی، و
+# «ربات معامله‌گر خوبه؟» یا «یه ربات معاملاتی معرفی کن» پرسش آموزشی‌اند. اگر «ربات»
+# تنها کافی بود، این پرسش‌ها نه‌تنها بی‌پاسخ می‌ماندند، بلکه **کل گفتگو** دوازده
+# ساعت به منتور سپرده می‌شد. همان درسی که `ADR-028` برای «قیمت» داد.
+#
+# پس دو طرف لازم است: واژه‌ای از جنس «ماشین»، و واژه‌ای که آن را به **طرف گفتگو**
+# نسبت می‌دهد.
+IDENTITY_WORDS: tuple[str, ...] = (
+    "ربات",
+    "بات",
+    "هوش مصنوعی",
+    "ai",
+    "chatgpt",
+    "gpt",
+    "چت جی پی تی",
+    "چت جیپیتی",
+    "جی پی تی",
+    "منشی",
+    "اتوماتیک",
+    "خودکار",
+)
+
+ADDRESS_WORDS: tuple[str, ...] = (
+    "هستی",
+    "هستید",
+    "هستین",
+    "تویی",
+    "شمایی",
+    "جواب میده",
+    "جواب میدی",
+    "جواب میدید",
+    "جواب میدین",
+    "پاسخ میده",
+    "پاسخ میدی",
+    "پاسخ میدید",
+    "داره جواب",
+    "پشت این اکانت",
+    "پشت اکانت",
+    "داری جواب",
+)
+
+
+def _is_identity_question(normalized: str) -> bool:
+    """پرسش درباره‌ی هویت طرف گفتگو، نه درباره‌ی ابزار معاملاتی."""
+    return any(contains_phrase(normalized, w) for w in IDENTITY_WORDS) and any(
+        contains_phrase(normalized, w) for w in ADDRESS_WORDS
+    )
+
+
 def deterministic_trigger(message_text: str) -> EscalationTrigger | None:
     """اگر پیام یکی از موضوعات همیشه-انسانی را لمس کند، همان را برگردان.
 
@@ -93,5 +202,11 @@ def deterministic_trigger(message_text: str) -> EscalationTrigger | None:
         return None
     for trigger in EscalationTrigger:
         if any(contains_phrase(normalized, phrase) for phrase in RULES[trigger]):
+            return trigger
+        # قاعده‌ی جفتی دقیقاً در جایگاه مالی بررسی می‌شود تا ترتیب قطعی بماند:
+        # یک پیام همیشه همان دلیل را می‌دهد.
+        if trigger is EscalationTrigger.money and _is_academy_price_question(normalized):
+            return trigger
+        if trigger is EscalationTrigger.identity_question and _is_identity_question(normalized):
             return trigger
     return None

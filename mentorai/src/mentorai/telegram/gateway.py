@@ -20,7 +20,8 @@ from telethon.sessions import StringSession
 from telethon.tl.functions.account import UpdateStatusRequest
 
 from mentorai import escalation
-from mentorai.ai.client import VisionClient
+from mentorai.ai import budget
+from mentorai.ai.client import RawCall, VisionClient
 from mentorai.config import get_settings
 from mentorai.conversation import assistant_may_answer
 from mentorai.db.crypto import decrypt_session
@@ -30,7 +31,13 @@ from mentorai.jobs import queue
 from mentorai.media import extract as media_extract
 from mentorai.media import store as media_store
 from mentorai.media import vision, voice
-from mentorai.telegram.normalize import build_inbound, detect_media_type, skip_reason
+from mentorai.memory import job as memory_job
+from mentorai.telegram.normalize import (
+    InboundMessage,
+    build_inbound,
+    detect_media_type,
+    skip_reason,
+)
 from mentorai.telegram.store import excluded_peer_ids, record_inbound
 
 log = structlog.get_logger(__name__)
@@ -48,6 +55,10 @@ class _Attachment:
     mime: str | None
     size_bytes: int | None
     sha256: str | None
+    # فراخوانی مدل برای توصیف تصویر، اگر انجام شده باشد. خواندن فایل عمداً بیرون از
+    # هر تراکنشی انجام می‌شود، پس مصرف اینجا حمل می‌شود تا در همان نشستی ثبت شود که
+    # خود پیام ثبت می‌شود (ADR-026).
+    model_call: RawCall | None = None
 
 
 class AccountGateway:
@@ -133,6 +144,18 @@ class AccountGateway:
                 size_bytes=size or None,
                 sha256=None,
             )
+        if media_type in ("voice", "audio", "video_note") and voice.is_too_long(
+            getattr(handle, "duration", None)
+        ):
+            # ویس بلند دانلود نمی‌شود. منتور ویس بلند را خودش گوش می‌دهد.
+            return _Attachment(
+                extraction=media_extract.Extraction(
+                    kind="rejected", refused=media_extract.Refusal.too_large
+                ),
+                mime=mime,
+                size_bytes=size or None,
+                sha256=None,
+            )
         if media_type == "photo" and not vision.is_supported(mime or "image/jpeg", size):
             return _Attachment(
                 extraction=media_extract.Extraction(
@@ -170,37 +193,60 @@ class AccountGateway:
                 sha256=None,
             )
 
+        model_call: RawCall | None = None
         if media_type == "photo":
-            extraction = await self._read_image(data, mime or "image/jpeg")
+            extraction, model_call = await self._read_image(data, mime or "image/jpeg")
         elif media_type in ("voice", "audio", "video_note"):
             extraction = await self._read_voice(data, mime or "audio/ogg", name or "voice.ogg")
         else:
-            extraction = media_extract.extract(data, filename=name, mime=mime)
+            # خواندن فایل کار پردازنده است و همگام: باز کردن یک zip، پیمایش تا
+            # ۵۰۰۰ سطر، تجزیه‌ی HTML. اگر روی همین حلقه اجرا شود، تا پایانش اتصال
+            # MTProto این حساب هیچ کاری نمی‌کند — نه پیامی می‌گیرد، نه ضربان
+            # می‌فرستد. یک فایل ۸ مگابایتی یعنی ثانیه‌ها سکوت کامل (ADR-029).
+            #
+            # `to_thread` انتخاب شد نه فرایند جدا: کار محدود به GIL نیست تا حد
+            # زیادی — بیشترش رمزگشایی zip و کار روی رشته است — و فرایند جدا یعنی
+            # سریال کردن بایت‌ها و یک استخر برای نگهداری. ساده‌ترین چیزی که مسئله
+            # را حل می‌کند.
+            extraction = await asyncio.to_thread(
+                media_extract.extract, data, filename=name, mime=mime
+            )
 
         return _Attachment(
             extraction=extraction,
+            model_call=model_call,
             mime=mime,
             size_bytes=len(data),
             sha256=media_store.fingerprint(data),
         )
 
-    async def _read_image(self, data: bytes, mime: str) -> media_extract.Extraction:
+    async def _read_image(
+        self, data: bytes, mime: str
+    ) -> tuple[media_extract.Extraction, RawCall | None]:
         """توصیف تصویر، یا رد شدن.
 
         در حالت «فقط دریافت» هیچ مدلی در دسترس نیست و تصویر رد می‌شود؛ یعنی همان
         رفتار قبلی: به منتور می‌رود.
         """
         if self._vision is None:
-            return media_extract.Extraction(
-                kind="rejected", refused=media_extract.Refusal.unsupported_format
+            return (
+                media_extract.Extraction(
+                    kind="rejected", refused=media_extract.Refusal.unsupported_format
+                ),
+                None,
             )
-        description, error = await vision.describe(self._vision, image=data, media_type=mime)
+        description, error, call = await vision.describe(
+            self._vision, image=data, media_type=mime
+        )
         if description is None:
             log.warning("image_not_read", account=self.slug, reason=error)
-            return media_extract.Extraction(
-                kind="rejected", refused=media_extract.Refusal.unreadable
+            return (
+                media_extract.Extraction(
+                    kind="rejected", refused=media_extract.Refusal.unreadable
+                ),
+                call,
             )
-        return media_extract.Extraction(kind="image", text=description)
+        return media_extract.Extraction(kind="image", text=description), call
 
     async def _read_voice(self, data: bytes, mime: str, filename: str) -> media_extract.Extraction:
         """رونویسی ویس، یا رد شدن.
@@ -263,13 +309,41 @@ class AccountGateway:
         # دانلود و خواندن فایل بیرون از هر تراکنش انجام می‌شود. نگه داشتن یک اتصال
         # پایگاه داده در طول یک انتقال شبکه، استخر اتصال را زیر بار واقعی خالی می‌کند.
         attachment = await self._read_attachment(message, inbound.media_type)
+        await self.persist(inbound, attachment)
 
+    async def persist(
+        self, inbound: InboundMessage, attachment: _Attachment | None = None
+    ) -> None:
+        """ثبت پیام و تصمیم درباره‌ی کارهایی که باید ساخته شوند.
+
+        از `_on_message` جدا شده تا بدون تلگرام قابل آزمودن باشد: تا وقتی این منطق
+        داخل کنترل‌کننده‌ی رویداد بود، آزمودنش یعنی جعل کردن کل شیء رویداد Telethon،
+        و در عمل یعنی آزموده نشدن. رفتار عوض نشده؛ فقط مرز جابه‌جا شده.
+        """
         async with session_scope() as session:
             account = await session.get_one(MentorAccount, self.account_id)
             # پیام خروجی، پاسخ خود منتور است. ثبتش هم تاریخچه‌ی مکالمه را کامل می‌کند
             # و هم داده‌ی واقعی پاسخ منتور را می‌سازد که برای پایگاه دانش لازم است.
             sender = Sender.mentor if inbound.is_outgoing else Sender.student
             result = await record_inbound(session, account, inbound, sender=sender)
+
+            # مصرف توصیف تصویر **پیش از** بررسی تکراری بودن ثبت می‌شود، چون
+            # فراخوانی مدل پیش از رسیدن به اینجا انجام شده و پولش خرج شده — چه این
+            # تحویل تکراری باشد چه نه. اگر بعد از `return` بیاید، خرج تحویل‌های
+            # تکراری از سقف پنهان می‌ماند.
+            #
+            # ⚠️ خودِ توصیف دوباره‌ی یک تصویر تکراری اتلاف است. تشخیص تکراری عمداً
+            # با درج اتمی انجام می‌شود و آن پس از دانلود است، پس رفعش یک بررسی
+            # ارزان پیش از دانلود می‌خواهد. اینجا فقط پولش شمرده می‌شود.
+            if attachment is not None and attachment.model_call is not None:
+                await budget.record(
+                    session,
+                    purpose=budget.Purpose.image_description,
+                    model=attachment.model_call.model,
+                    input_tokens=attachment.model_call.input_tokens,
+                    output_tokens=attachment.model_call.output_tokens,
+                    cache_read_tokens=attachment.model_call.cache_read_tokens,
+                )
 
             if result.is_duplicate:
                 log.info("duplicate_delivery", account=self.slug, chat_id=inbound.chat_id)
@@ -297,6 +371,22 @@ class AccountGateway:
                     session,
                     "answer_message",
                     {"conversation_id": result.conversation_id, "message_id": result.message_id},
+                )
+
+            # استخراج حافظه عمداً به فعال بودن دستیار گره نخورده است: `recent_turns`
+            # پیام‌های منتور را هم برچسب می‌زند، یعنی از ابتدا برای مکالمه‌ای هم که
+            # منتور در دستش دارد طراحی شده. واقعیت‌های دانشجو در آن مکالمه هم گفته
+            # می‌شوند (ADR-027).
+            #
+            # هر پیام یک فراخوانی مدل نمی‌سازد؛ `should_extract` هر پنج پیام دانشجو
+            # یک بار اجازه می‌دهد، و سقف هزینه داخل خود کار دوباره بررسی می‌شود.
+            if sender is Sender.student and await memory_job.should_extract(
+                session, result.conversation_id
+            ):
+                await queue.enqueue(
+                    session,
+                    memory_job.JOB_KIND,
+                    {"conversation_id": result.conversation_id},
                 )
 
         log.info(

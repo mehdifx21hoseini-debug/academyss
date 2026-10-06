@@ -31,6 +31,10 @@ from mentorai.db.models import (
 # دلایلی که کل مکالمه را به منتور می‌سپارند. بقیه‌ی دلایل سکوت موردی‌اند.
 HANDOFF_REASONS = frozenset(
     {
+        # تصمیم مالک: دانشجویی که پرسیده «ربات هستی؟» باید از خود منتور جواب
+        # بگیرد، و پیام بعدی‌اش هم. اگر دستیار بلافاصله پس از این پرسش دوباره
+        # جواب بدهد، خودش جواب پرسش را داده است.
+        "rule_identity_question",
         "rule_explicit_human_request",
         "rule_money",
         "rule_complaint",

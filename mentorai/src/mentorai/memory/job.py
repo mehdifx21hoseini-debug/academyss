@@ -11,6 +11,7 @@ from __future__ import annotations
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from mentorai.ai import budget
 from mentorai.ai.client import ModelClient
 from mentorai.db.models import Conversation, MemorySource, Message, Sender
 from mentorai.memory.extract import MemoryExtractor
@@ -72,8 +73,22 @@ async def run(
 ) -> MemoryReport:
     """یافته‌ها را از مکالمه بگیر، از سیاست بگذران، و آنچه قبول شد را ذخیره کن."""
     conversation = await session.get_one(Conversation, conversation_id)
+    # سقف هزینه اینجا هم اعمال می‌شود. استخراج حافظه کار پس‌زمینه است، پس وقتی
+    # بودجه تنگ است اولین چیزی است که باید کنار برود — نه پاسخ به دانشجو.
+    if not (await budget.check(session, purpose=budget.Purpose.memory_extraction)).may_call:
+        return MemoryReport()
+
     turns = await recent_turns(session, conversation_id, window=window)
-    candidates = await MemoryExtractor(model_client).extract(turns)
+    candidates, call = await MemoryExtractor(model_client).extract(turns)
+    if call is not None:
+        await budget.record(
+            session,
+            purpose=budget.Purpose.memory_extraction,
+            model=call.model,
+            input_tokens=call.input_tokens,
+            output_tokens=call.output_tokens,
+            cache_read_tokens=call.cache_read_tokens,
+        )
     return await apply_candidates(
         session,
         student_id=conversation.student_id,

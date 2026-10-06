@@ -11,8 +11,11 @@ services:
       - ./docker/initdb:/docker-entrypoint-initdb.d:ro
     ports:
       - "127.0.0.1:5432:5432"
+    # از راه TCP، نه سوکت. بار اول، تصویر پستگرس یک سرور موقت فقط روی سوکت بالا
+    # می‌آورد تا افزونه‌ها را بسازد؛ آزمون سوکت همان موقع «آماده» می‌گوید و مهاجرتی
+    # که پشتش اجرا شود با «connection refused» می‌افتد. سرور موقت به TCP گوش نمی‌دهد.
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U mentorai"]
+      test: ["CMD-SHELL", "pg_isready -U mentorai -h 127.0.0.1"]
       interval: 5s
       timeout: 3s
       retries: 20
@@ -60,5 +63,29 @@ services:
       - "127.0.0.1:8000:8000"
     restart: unless-stopped
 
+  # رونویسی ویس، روی همین سرور (ADR-033). صدای دانشجو از سرور بیرون نمی‌رود.
+  #
+  # پروفایل `voice` دارد: با `docker compose --profile voice up -d` بالا می‌آید. حدود
+  # چهار گیگ حافظه می‌گیرد، پس روی سرور چهارگیگی جا نمی‌شود — `docs/PILOT.md`.
+  #
+  # هیچ درگاهی بیرون باز نمی‌شود. فقط `app` از شبکه‌ی داخلی به آن می‌رسد، با
+  # TRANSCRIBER_URL=http://transcriber:8000/v1
+  #
+  # `app` به این سرویس وابسته نیست، عمداً: اگر رونویسی بیفتد، ویس مثل قبل به منتور
+  # می‌رود و بقیه‌ی سیستم کار می‌کند.
+  transcriber:
+    build: ./transcriber
+    profiles: ["voice"]
+    environment:
+      WHISPER_MODEL: ${WHISPER_MODEL:-large-v3}
+      WHISPER_CPU_THREADS: ${WHISPER_CPU_THREADS:-0}
+      MAX_AUDIO_SECONDS: ${MAX_AUDIO_SECONDS:-180}
+    volumes:
+      - whisper_models:/models
+    expose:
+      - "8000"
+    restart: unless-stopped
+
 volumes:
   db_data:
+  whisper_models:

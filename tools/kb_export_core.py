@@ -297,6 +297,18 @@ def external_key(source_class, category, question):
     return re.sub(r"\s+", " ", t).strip().lower()
 
 
+def question_key(question):
+    """Normalised question text, for deciding which record owns a phrasing.
+
+    Deliberately narrower than external_key: no class, no category. Retrieval
+    matches on the question text alone, so that is the thing two records can
+    collide on."""
+    t = re.sub(r"[يى]", "ی", question)
+    t = re.sub(r"[ك]", "ک", t)
+    t = re.sub(r"[\u200b-\u200f\ufeff]", "", t)
+    return re.sub(r"\s+", " ", t).strip().lower()
+
+
 def strength_key(obj):
     """Sort order for claiming a question: approved first, then Academy-sourced,
     then higher confidence, then id for a stable run. Processing in this order
@@ -329,10 +341,10 @@ def main():
 
     rows, eval_rows = [], []
     claimed = {}
-    collisions, moved = [], []
+    moved, qualified = [], []
     skipped = {"style": 0, "meta": 0, "quarantine": 0, "review_required": 0,
                "general": 0, "governance": 0, "no_answer": 0,
-               "no_question": 0, "duplicate_question": 0}
+               "no_question": 0}
     stats = {"official": 0, "mentor": 0,
              "fact": 0, "policy": 0, "guidance": 0}
 
@@ -390,20 +402,37 @@ def main():
 
         # Take the first phrasing no stronger record has already claimed.
         # Records are processed strongest-first, so whoever claims a question
-        # is the one that should own it. A record whose every phrasing is
-        # already taken is dropped and named in the report — never silently.
+        # is the one that should own it.
+        #
+        # The claim is on the question text ALONE, deliberately not on
+        # (class|category|question) the way external_key is. Those two keys
+        # answer different questions. external_key reproduces CORE's import
+        # key, so it must include the category or rows would overwrite each
+        # other on import. But retrieval never sees the category: it matches on
+        # the question text, so two records carrying the same phrasing in
+        # different categories compete with each other no matter what their
+        # categories are. Thirteen of them did — «اسپرد چیه؟» existed twice,
+        # and the Academy's own teaching had to outrank a generic glossary
+        # entry to be the one the student got.
+        #
+        # Each record still gets a real student phrasing from its own source;
+        # it simply takes its next one.
         primary = None
         for candidate in qs:
-            key = external_key(source_class, category, candidate)
+            key = question_key(candidate)
             if key not in claimed:
                 primary = candidate
                 claimed[key] = oid
                 break
             moved.append((oid, candidate, claimed[key]))
         if primary is None:
-            collisions.append((oid, qs[0]))
-            skipped["duplicate_question"] += 1
-            continue
+            # Every phrasing is taken. Qualify the first one with this record's
+            # own category rather than dropping the record: a knowledge base
+            # that loses rows is the worst outcome, and the category is a fact
+            # the record already carries — nothing is invented.
+            primary = "%s (%s)" % (qs[0], category)
+            claimed[question_key(primary)] = oid
+            qualified.append((oid, qs[0], primary))
         qs = [primary] + [q for q in qs if q != primary]
 
         rows.append({
@@ -468,10 +497,10 @@ def main():
         print("moved: %d phrasing(s) already owned by a stronger record" % len(moved))
         for loser, question, winner in moved[:6]:
             print("       %s yielded «%s» to %s" % (loser, question[:40], winner))
-    if collisions:
-        print("clash: %d record(s) dropped — every phrasing already claimed:" % len(collisions))
-        for oid, question in collisions:
-            print("       %s  «%s»" % (oid, question[:52]))
+    if qualified:
+        print("qual : %d record(s) kept with a category-qualified question:" % len(qualified))
+        for oid, was, now in qualified:
+            print("       %s  «%s» → «%s»" % (oid, was, now))
     return 0
 
 

@@ -16,7 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from mentorai.ai.client import ScriptedClient
 from mentorai.ai.runtime import SilenceReason, handle_message
-from mentorai.ai.schema import ModelAnswer
+from mentorai.ai.schema import PROMPT_VERSION, ModelAnswer
 from mentorai.config import get_settings
 from mentorai.db.models import AiRun, Escalation, MentorAccount, Message, Outcome, Sender
 from mentorai.knowledge.embeddings import HashingEmbedder
@@ -490,6 +490,57 @@ async def test_low_confidence_is_silent(
     assert result.reason == SilenceReason.low_confidence.value
 
 
+async def test_a_confident_invented_price_is_still_silenced(
+    session: AsyncSession, account: MentorAccount, knowledge: None, embedder: HashingEmbedder
+) -> None:
+    """شکستی که می‌بندد: مدل با اطمینان کامل، قیمتی بگوید که هیچ منبعی ندارد.
+
+    این تست عمداً از همه‌ی دروازه‌های دیگر رد می‌شود — `needs_human` خاموش، پاسخ
+    پر، اطمینان ۰٬۹۹ — تا ثابت کند محافظ قیمت **مستقل** از قضاوت مدل کار می‌کند.
+    قیمت اشتباه، بدترین خطای این سیستم است و دستور مدل یک درخواست است نه تضمین.
+    """
+    message = await _incoming(session, account, "دوره مقدماتی چند جلسه است؟")
+    client = ScriptedClient(
+        ModelAnswer(
+            answer="دوره مقدماتی پانزده جلسه دارد و شهریه‌اش ۴۵۰ هزار تومان است.",
+            confidence=0.99,
+            needs_human=False,
+            reason="از منبع رسمی",
+        )
+    )
+
+    result = await handle_message(session, message, model_client=client, embedder=embedder)
+    await session.commit()
+
+    assert result.outcome is Outcome.silence
+    assert result.reason == SilenceReason.ungrounded_money.value
+    assert result.answer_text is None, "پاسخ با قیمت ساختگی به تحویل رسید"
+
+
+async def test_an_educational_number_is_not_mistaken_for_a_price(
+    session: AsyncSession, account: MentorAccount, knowledge: None, embedder: HashingEmbedder
+) -> None:
+    """نیمه‌ی دیگر: محافظ نباید لایه‌ی آموزشی را خفه کند.
+
+    بیشتر پایگاه دانش عدد دارد — درصد، پیپ، تعداد جلسه. اگر محافظ این‌ها را قیمت
+    حساب کند، سیستم به‌جای محافظه‌کار شدن، لال می‌شود.
+    """
+    message = await _incoming(session, account, "دوره مقدماتی چند جلسه است؟")
+    client = ScriptedClient(
+        ModelAnswer(
+            answer="دوره مقدماتی پانزده جلسه دارد و قانون ۲ درصد را در جلسه ۱۰ توضیح می‌دهد.",
+            confidence=0.95,
+            needs_human=False,
+            reason="از منبع رسمی",
+        )
+    )
+
+    result = await handle_message(session, message, model_client=client, embedder=embedder)
+    await session.commit()
+
+    assert result.outcome is Outcome.answer, f"پاسخ آموزشی بی‌دلیل رد شد: {result.reason}"
+
+
 async def test_empty_answer_is_silent(
     session: AsyncSession, account: MentorAccount, knowledge: None, embedder: HashingEmbedder
 ) -> None:
@@ -558,7 +609,9 @@ async def test_run_records_retrieval_scores(
     first = run.retrieved[0]
     assert {"chunk_id", "document_id", "score", "source_class", "authority"} <= set(first)
     assert run.model == "scripted-test-only"
-    assert run.prompt_version == "v1"
+    # نسخه‌ی واقعی ادعا می‌شود، نه یک رشته‌ی ثابت: ادعا این است که آنچه ثبت شده
+    # همان دستوری است که اجرا شد، نه اینکه نسخه هیچ‌وقت عوض نشود.
+    assert run.prompt_version == PROMPT_VERSION
     assert run.latency_ms is not None
 
 

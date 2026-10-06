@@ -8,12 +8,16 @@ from __future__ import annotations
 
 import io
 import zipfile
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 import pytest
 
 from mentorai.media import office, review, statement
 from mentorai.media.extract import Refusal, extract
 from mentorai.media.numbers import parse_number
+
+TEHRAN = ZoneInfo("Asia/Tehran")
 
 MT4_COLUMNS = [
     "Ticket",
@@ -419,9 +423,14 @@ def test_a_healthy_drawdown_does_not_get_the_recovery_path() -> None:
 
 
 def test_the_reply_follows_the_mentor_answer_structure() -> None:
-    """ساختار تأییدشده: سلام، تأیید آنچه درست بوده، اصلاح، و بستن با انرژی."""
+    """ساختار تأییدشده: سلام، تأیید آنچه درست بوده، اصلاح، و بستن با انرژی.
+
+    ساعت ثابت است: سلام از ساعت ۱۷ به وقت تهران عوض می‌شود، و بدون `now` این تست
+    هر عصر می‌افتاد.
+    """
     text = review.render(
-        statement.StatementMetrics(source="computed", trades=40, profit_factor=1.6)
+        statement.StatementMetrics(source="computed", trades=40, profit_factor=1.6),
+        now=datetime(2026, 9, 2, 10, 0, tzinfo=TEHRAN),
     )
 
     assert text.startswith(review.GREETING)
@@ -573,7 +582,7 @@ async def test_an_image_is_described_not_judged() -> None:
     from mentorai.media import vision
 
     client = ScriptedClient(raw_text="چارت EURUSD در تایم چهار ساعته با دو خط افقی.")
-    text, error = await vision.describe(client, image=b"fake-bytes", media_type="image/jpeg")
+    text, error, _ = await vision.describe(client, image=b"fake-bytes", media_type="image/jpeg")
 
     assert error is None
     assert text == "چارت EURUSD در تایم چهار ساعته با دو خط افقی."
@@ -588,7 +597,7 @@ async def test_an_unsupported_image_type_never_reaches_the_model() -> None:
     from mentorai.media import vision
 
     client = ScriptedClient(raw_text="نباید فراخوانی شود")
-    text, error = await vision.describe(client, image=b"x", media_type="image/tiff")
+    text, error, _ = await vision.describe(client, image=b"x", media_type="image/tiff")
 
     assert text is None and error is not None
     assert client.calls == []
@@ -600,7 +609,7 @@ async def test_an_oversized_image_never_reaches_the_model() -> None:
 
     client = ScriptedClient(raw_text="نباید فراخوانی شود")
     payload = b"x" * (vision.MAX_IMAGE_BYTES + 1)
-    text, _ = await vision.describe(client, image=payload, media_type="image/jpeg")
+    text, _, _call = await vision.describe(client, image=payload, media_type="image/jpeg")
 
     assert text is None
     assert client.calls == []
@@ -611,7 +620,7 @@ async def test_a_model_failure_reading_an_image_is_not_a_description() -> None:
     from mentorai.media import vision
 
     client = ScriptedClient(error="APITimeoutError")
-    text, error = await vision.describe(client, image=b"x", media_type="image/png")
+    text, error, _ = await vision.describe(client, image=b"x", media_type="image/png")
 
     assert text is None and error is not None
 
@@ -701,3 +710,58 @@ def test_no_transcriber_is_configured_by_default() -> None:
         assert voice.build_transcriber() is None
     finally:
         get_settings.cache_clear()
+
+
+# ---------------------------------------------------------------------------
+# سلام و بدرقه ثابت نیستند
+# ---------------------------------------------------------------------------
+
+
+def _review(seed: int, *, hour: int = 10) -> str:
+    return review.render(
+        statement.StatementMetrics(source="computed", trades=40, profit_factor=1.6),
+        seed=seed,
+        now=datetime(2026, 9, 2, hour, 0, tzinfo=TEHRAN),
+    )
+
+
+def test_two_students_do_not_get_the_same_sentence() -> None:
+    """شکستی که می‌بندد: هر استیتمنتی همان یک جمله‌ی تکراری را بگیرد.
+
+    دو دانشجویی که با هم حرف می‌زنند، یا یک دانشجو که دو بار استیتمنت می‌فرستد،
+    عینِ یک جمله را می‌دیدند — و تکرار دقیق یک جمله، امضای یک قالب است نه یک آدم.
+    """
+    openings = {_review(seed).split("\n\n")[0] for seed in range(4)}
+    closings = {_review(seed).split("\n\n")[-1] for seed in range(4)}
+
+    assert len(openings) > 1, "سلام برای همه یکی بود"
+    assert len(closings) > 1, "بدرقه برای همه یکی بود"
+
+
+def test_the_same_statement_always_renders_the_same_text() -> None:
+    """انتخاب قطعی است، نه تصادفی.
+
+    پیش‌نویس ممکن است دوباره ساخته شود و منتور نباید متنی ببیند که زیر دستش عوض
+    می‌شود. تصادفی بودن هم تست را بی‌معنی می‌کرد.
+    """
+    assert _review(7) == _review(7)
+
+
+def test_the_greeting_follows_the_academy_clock() -> None:
+    """«روزتون بخیر» ساعت نه شب، خودش یک نشانه است."""
+    assert "روزتون بخیر" in _review(0, hour=10) or "روز بخیر" in _review(0, hour=10)
+    assert "شبتون بخیر" in _review(0, hour=21)
+
+
+def test_every_phrasing_keeps_the_approved_structure() -> None:
+    """تنوع نباید ساختار تأییدشده را خراب کند: سلام، تأیید، اصلاح، بستن با انرژی."""
+    for seed in range(6):
+        for hour in (10, 21):
+            text = review.render(
+                statement.StatementMetrics(source="computed", trades=40, profit_factor=1.6),
+                seed=seed,
+                now=datetime(2026, 9, 2, hour, 0, tzinfo=TEHRAN),
+            )
+            assert text.startswith("سلام"), f"seed={seed} hour={hour} با سلام شروع نشد"
+            assert "قدم درستیه" in text, "بخش تأیید حذف شد"
+            assert "پرقدرت" in text.split("\n\n")[-1], "بدرقه‌ی امضایی آکادمی نیامد"

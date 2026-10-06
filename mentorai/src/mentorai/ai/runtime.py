@@ -10,9 +10,11 @@ from __future__ import annotations
 import enum
 from dataclasses import dataclass
 
+import structlog
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from mentorai.ai import budget, guard
 from mentorai.ai.client import ModelCall, ModelClient
 from mentorai.ai.decision import deterministic_trigger
 from mentorai.ai.prompt import SYSTEM_PROMPT, build_user_content
@@ -26,6 +28,8 @@ from mentorai.media import store as media_store
 from mentorai.media.statement import StatementMetrics
 from mentorai.memory import store as memory_store
 
+log = structlog.get_logger(__name__)
+
 # زیر این آستانه، پاسخ ارسال نمی‌شود. عدد اولیه محافظه‌کارانه انتخاب شده؛ کالیبره
 # کردنش کار داده است نه سلیقه، و برای همین confidence در هر اجرا ثبت می‌شود.
 CONFIDENCE_THRESHOLD = 0.7
@@ -38,6 +42,7 @@ STATEMENT_REASON = "statement_review"
 
 
 class SilenceReason(enum.StrEnum):
+    rule_identity_question = "rule_identity_question"
     rule_money = "rule_money"
     rule_complaint = "rule_complaint"
     rule_account = "rule_account"
@@ -47,7 +52,9 @@ class SilenceReason(enum.StrEnum):
     model_error = "model_error"
     model_flagged = "model_flagged"
     low_confidence = "low_confidence"
+    budget_exhausted = "budget_exhausted"
     empty_answer = "empty_answer"
+    ungrounded_money = "ungrounded_money"
 
 
 @dataclass(frozen=True)
@@ -145,14 +152,17 @@ async def _record(
     return run
 
 
-def _statement_answer(metrics: StatementMetrics) -> str:
+def _statement_answer(metrics: StatementMetrics, *, seed: int) -> str:
     """پیش‌نویس بررسی استیتمنت.
 
     عمداً بدون فراخوانی مدل ساخته می‌شود. اعداد اینجا محاسبه شده‌اند و قطعی‌اند؛ عبور
     دادنشان از مدل فقط یک جای تازه برای تغییر عدد می‌سازد، بدون اینکه چیزی اضافه کند.
     منتور در حالت پیش‌نویس متن را می‌بیند و هر جا لازم بود اصلاحش می‌کند.
+
+    `seed` شناسه‌ی پیام است و شکلِ سلام و بدرقه را تعیین می‌کند — تا دو دانشجو یک
+    جمله‌ی یکسان نگیرند، ولی یک استیتمنت دوباره ساخته‌شده همان متن را بدهد.
     """
-    return review.render(metrics)
+    return review.render(metrics, seed=seed)
 
 
 async def _media_silence(session: AsyncSession, message: Message) -> RunResult:
@@ -204,7 +214,7 @@ async def _handle_media(
     if metrics is None:
         return await _media_silence(session, message), None
 
-    answer = _statement_answer(metrics)
+    answer = _statement_answer(metrics, seed=message.id)
     run = await _record(
         session,
         message=message,
@@ -266,12 +276,38 @@ async def handle_message(
             outcome=Outcome.silence, reason=SilenceReason.no_sources.value, ai_run_id=run.id
         )
 
+    # سقف هزینه پیش از فراخوانی بررسی می‌شود. اگر پر باشد، همان سکوتی رخ می‌دهد که
+    # هر شکست دیگری: پیام خوانده‌نشده می‌ماند و منتور خودش می‌بیندش (ADR-026).
+    if not (await budget.check(session, purpose=budget.Purpose.answer)).may_call:
+        run = await _record(
+            session,
+            message=message,
+            outcome=Outcome.silence,
+            reason=SilenceReason.budget_exhausted.value,
+            hits=hits,
+        )
+        return RunResult(
+            outcome=Outcome.silence,
+            reason=SilenceReason.budget_exhausted.value,
+            ai_run_id=run.id,
+        )
+
     history = await _recent_history(session, message.conversation_id, message.id)
     conversation = await session.get_one(Conversation, message.conversation_id)
     memories = memory_store.render(await memory_store.load_active(session, conversation.student_id))
     call = await model_client.complete(
         system=SYSTEM_PROMPT,
         user=build_user_content(question=question, hits=hits, history=history, memories=memories),
+    )
+    # ثبت مصرف بی‌قیدوشرط است، حتی وقتی فراخوانی خطا داد: توکن مصرف‌شده حتی در
+    # پاسخ ناقص هم پول است.
+    await budget.record(
+        session,
+        purpose=budget.Purpose.answer,
+        model=call.model,
+        input_tokens=call.input_tokens,
+        output_tokens=call.output_tokens,
+        cache_read_tokens=call.cache_read_tokens,
     )
 
     if call.answer is None:
@@ -296,6 +332,12 @@ async def handle_message(
         silence_reason = SilenceReason.empty_answer.value
     elif answer.confidence < confidence_threshold:
         silence_reason = SilenceReason.low_confidence.value
+    elif (bad := guard.ungrounded_money(answer.answer, hits=hits)) is not None:
+        # عددی با واحد پول که در هیچ منبع رسمی و در خود سؤال نبود. این بررسی در
+        # کد است و به اطمینان مدل کاری ندارد: قیمت اشتباه، بدترین خطای ممکن این
+        # سیستم است و برخلاف توضیح ناقص، قابل جبران نیست.
+        log.error("ungrounded_money_blocked", message_id=message.id, amount=bad)
+        silence_reason = SilenceReason.ungrounded_money.value
 
     if silence_reason is not None:
         run = await _record(

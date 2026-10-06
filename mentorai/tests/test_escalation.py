@@ -150,6 +150,39 @@ async def test_sensitive_topic_hands_the_whole_conversation_over(
     assert assistant_may_answer(conversation) is False
 
 
+async def test_an_identity_question_stays_unread_and_hands_the_conversation_over(
+    session: AsyncSession, account: MentorAccount, kb: None, embedder: HashingEmbedder
+) -> None:
+    """تصمیم مالک: «ربات هستی؟» خوانده‌نشده بماند و خود منتور جواب بدهد.
+
+    سه چیز باید هم‌زمان درست باشد: مدل اصلاً صدا زده نشود، هیچ چیزی در تلگرام
+    خوانده علامت نخورد، و پیام بعدی دانشجو هم به منتور برسد — چون اگر دستیار
+    بلافاصله پس از این پرسش دوباره جواب بدهد، خودش جواب پرسش را داده است.
+    """
+    message = await _msg(session, account, "ربات هستی؟", message_id=1)
+    channel = FakeChannel()
+    client = ScriptedClient(_answer())
+    outcome = await process_message(
+        session,
+        message.id,
+        model_client=client,
+        embedder=embedder,
+        channels={"mentor-a": channel},
+        gates={},
+        notifier=None,
+        sleep=False,
+    )
+    await session.commit()
+
+    assert outcome.outcome == "silence"
+    assert outcome.detail == "rule_identity_question"
+    assert client.calls == [], "برای پرسش هویت مدل صدا زده شد"
+    assert channel.reads == [], "پیام خوانده علامت خورد"
+    conversation = await session.get_one(Conversation, message.conversation_id)
+    assert conversation.status == ConversationStatus.awaiting_mentor.value
+    assert assistant_may_answer(conversation) is False
+
+
 async def test_ordinary_failure_leaves_the_conversation_active(
     session: AsyncSession, account: MentorAccount, kb: None, embedder: HashingEmbedder
 ) -> None:

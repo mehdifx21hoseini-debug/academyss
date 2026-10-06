@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import argparse
 import csv
 from datetime import UTC, datetime
 from pathlib import Path
@@ -14,6 +15,7 @@ from tests.test_sender import FakeChannel
 from mentorai import drafts
 from mentorai.ai.client import ScriptedClient
 from mentorai.ai.schema import ModelAnswer
+from mentorai.cli import cmd_pause
 from mentorai.conversation import escalate
 from mentorai.db.models import Conversation, Draft, MentorAccount, Message, ReplyMode, Sender
 from mentorai.knowledge.embeddings import HashingEmbedder
@@ -23,7 +25,7 @@ from mentorai.media.extract import Extraction
 from mentorai.telegram.normalize import build_inbound
 from mentorai.telegram.safety import AccountGate, TokenBucket
 from mentorai.telegram.store import record_inbound
-from mentorai.worker import process_message, send_approved_draft
+from mentorai.worker import drain_deliveries, notify_draft, process_message, send_draft_now
 
 NOON = datetime(2026, 9, 2, 12, 0, tzinfo=UTC)
 
@@ -112,11 +114,19 @@ def _answer() -> ModelAnswer:
 
 
 def _gate() -> AccountGate:
+    """دروازه‌ای که ساعت سکوتش خاموش است.
+
+    این فایل درباره‌ی ساعت سکوت نیست، ولی پیش از این ۲۳ تا ۸ می‌گذاشت و زمان را هم
+    به `send` نمی‌داد، پس به ساعت دیواری ماشین وابسته بود: همین سه تست در CI بین
+    ۲۳:۰۰ و ۰۸:۰۰ می‌افتادند و بعدش پاس می‌شدند. آزمونِ ساعت سکوت جای خودش را دارد
+    (`test_safety.py`)؛ اینجا خاموش است تا نتیجه قطعی بماند.
+    """
     return AccountGate(
         slug="mentor-a",
         bucket=TokenBucket(rate_per_minute=60, burst=5),
-        quiet_start=23,
-        quiet_end=8,
+        quiet_start=0,
+        quiet_end=0,
+        tz=UTC,
     )
 
 
@@ -145,6 +155,10 @@ async def test_draft_mode_creates_a_draft_and_sends_nothing(
     assert outcome.outcome == "drafted"
     assert channel.sent == [], "در حالت پیش‌نویس هیچ چیزی به دانشجو نمی‌رود"
     assert channel.reads == [], "و پیام خوانده علامت نمی‌خورد"
+
+    # اعلان پس از تثبیت تراکنش فرستاده می‌شود، نه داخلش (ADR-031).
+    assert outcome.detail is not None
+    await notify_draft(int(outcome.detail), notifier)
     assert notifier.sent == [("mentor-a", "دوره مقدماتی شانزده جلسه دارد.")]
 
 
@@ -193,6 +207,12 @@ async def test_the_mentor_sees_what_was_heard_in_a_voice_message(
     await session.commit()
 
     assert outcome.outcome == "drafted"
+    assert notifier.questions == [], "اعلان نباید داخل تراکنش فرستاده شده باشد"
+
+    # همان ترتیبی که حلقه‌ی کارگر دارد: اول تثبیت، بعد اعلان (ADR-031).
+    assert outcome.detail is not None
+    await notify_draft(int(outcome.detail), notifier)
+
     assert "دوره مقدماتی چیست؟" in notifier.questions[0]
     assert "ویس دانشجو" in notifier.questions[0]
 
@@ -220,7 +240,15 @@ async def test_auto_mode_sends_directly(
     )
     await session.commit()
 
-    assert outcome.outcome == "sent"
+    # ارسال دیگر داخل همان تراکنش انجام نمی‌شود؛ فقط در صندوق خروج قرار می‌گیرد.
+    assert outcome.outcome == "queued"
+    assert channel.sent == [], "پیش از خالی شدن صندوق خروج نباید چیزی رفته باشد"
+
+    await drain_deliveries(
+        channels={"mentor-a": channel}, gates={"mentor-a": _gate()}, sleep=False
+    )
+    session.expire_all()
+
     assert channel.sent == [(900, "دوره مقدماتی شانزده جلسه دارد.")]
     assert channel.reads == [(900, 7)]
 
@@ -247,7 +275,7 @@ async def test_switching_mode_needs_no_code_change(
         notifier=None,
         sleep=False,
     )
-    assert outcome.outcome == "sent"
+    assert outcome.outcome == "queued"
 
 
 async def test_silence_leaves_no_trace_and_creates_no_draft(
@@ -336,20 +364,89 @@ async def test_approved_draft_is_sent_from_the_mentor_account(
     await session.commit()
 
     draft = (await session.execute(select(Draft))).scalar_one()
-    await drafts.approve(session, draft.id, by="mentor-a")
-    outcome = await send_approved_draft(
+    draft_id = draft.id
+    await drafts.approve(session, draft_id, by="mentor-a")
+    await session.commit()
+    result = await send_draft_now(
+        draft_id, channels={"mentor-a": channel}, gates={"mentor-a": _gate()}, sleep=False
+    )
+    # نتیجه در نشست دیگری نوشته شده؛ این نشست باید دوباره بخواند.
+    session.expire_all()
+
+    assert result == "sent"
+    assert channel.sent == [(900, "دوره مقدماتی شانزده جلسه دارد.")]
+    assert channel.reads == [(900, 7)], "علامت خوانده‌شدن تا همان پیام پاسخ‌داده‌شده"
+    assert (await session.get_one(Draft, draft_id)).status == "sent"
+
+
+async def _approved_draft(
+    session: AsyncSession, incoming: Message, embedder: HashingEmbedder
+) -> int:
+    await process_message(
         session,
-        draft.id,
-        channels={"mentor-a": channel},
+        incoming.id,
+        model_client=ScriptedClient(_answer()),
+        embedder=embedder,
+        channels={"mentor-a": FakeChannel()},
         gates={"mentor-a": _gate()},
+        notifier=RecordingNotifier(),
         sleep=False,
     )
     await session.commit()
+    draft_id = (await session.execute(select(Draft))).scalar_one().id
+    await drafts.approve(session, draft_id, by="mentor-a")
+    await session.commit()
+    return draft_id
 
-    assert outcome.outcome == "sent"
+
+async def test_pause_from_the_cli_stops_a_worker_that_is_already_running(
+    session: AsyncSession,
+    account: MentorAccount,
+    kb: None,
+    incoming: Message,
+    embedder: HashingEmbedder,
+) -> None:
+    """کلید قطع باید بدون راه‌اندازی دوباره اثر کند.
+
+    دروازه همان‌طور ساخته می‌شود که `run-worker` در لحظه‌ی شروع می‌سازد: باز. بعد
+    `mentorai pause` از فرایندی دیگر اجرا می‌شود. پیش از این، کارگر هرگز نمی‌فهمید.
+    """
+    draft_id = await _approved_draft(session, incoming, embedder)
+    gate = _gate()
+    assert not gate.send_paused
+
+    await cmd_pause(argparse.Namespace(slug="mentor-a", reason="بررسی", resume=False))
+
+    channel = FakeChannel()
+    result = await send_draft_now(
+        draft_id, channels={"mentor-a": channel}, gates={"mentor-a": gate}, sleep=False
+    )
+
+    assert result == "blocked"
+    assert channel.sent == [], "حساب متوقف است؛ هیچ پیامی نباید برود"
+    assert channel.reads == [], "حتی علامت خوانده‌شدن"
+
+
+async def test_resume_from_the_cli_reaches_a_worker_started_while_paused(
+    session: AsyncSession,
+    account: MentorAccount,
+    kb: None,
+    incoming: Message,
+    embedder: HashingEmbedder,
+) -> None:
+    draft_id = await _approved_draft(session, incoming, embedder)
+    gate = _gate()
+    gate.send_paused = True  # کارگر وقتی شروع شد که حساب متوقف بود
+
+    await cmd_pause(argparse.Namespace(slug="mentor-a", reason=None, resume=True))
+
+    channel = FakeChannel()
+    result = await send_draft_now(
+        draft_id, channels={"mentor-a": channel}, gates={"mentor-a": gate}, sleep=False
+    )
+
+    assert result == "sent"
     assert channel.sent == [(900, "دوره مقدماتی شانزده جلسه دارد.")]
-    assert channel.reads == [(900, 7)], "علامت خوانده‌شدن تا همان پیام پاسخ‌داده‌شده"
-    assert (await session.get_one(Draft, draft.id)).status == "sent"
 
 
 async def test_edited_draft_sends_the_mentor_text(
@@ -373,10 +470,46 @@ async def test_edited_draft_sends_the_mentor_text(
     await session.commit()
 
     draft = (await session.execute(select(Draft))).scalar_one()
-    await drafts.edit(session, draft.id, by="mentor-a", body="متن اصلاح‌شده منتور")
-    await send_approved_draft(
-        session, draft.id, channels={"mentor-a": channel}, gates={"mentor-a": _gate()}, sleep=False
-    )
+    draft_id = draft.id
+    await drafts.edit(session, draft_id, by="mentor-a", body="متن اصلاح‌شده منتور")
     await session.commit()
+    await send_draft_now(
+        draft_id, channels={"mentor-a": channel}, gates={"mentor-a": _gate()}, sleep=False
+    )
+    session.expire_all()
 
     assert channel.sent == [(900, "متن اصلاح‌شده منتور")]
+
+
+async def test_the_control_message_id_survives_the_notification(
+    session: AsyncSession,
+    account: MentorAccount,
+    kb: None,
+    incoming: Message,
+    embedder: HashingEmbedder,
+) -> None:
+    """شکستی که می‌بندد: منتور روی کارت پیش‌نویس ریپلای بزند و هیچ اتفاقی نیفتد.
+
+    اجازه‌سنجی ریپلای از روی `control_message_id` انجام می‌شود. حالا که اعلان
+    بیرون از تراکنش ساخت پیش‌نویس فرستاده می‌شود، ذخیره‌ی این شناسه در تراکنشی
+    جداست و می‌تواند بی‌صدا از قلم بیفتد.
+    """
+    notifier = RecordingNotifier()
+    outcome = await process_message(
+        session,
+        incoming.id,
+        model_client=ScriptedClient(_answer()),
+        embedder=embedder,
+        channels={"mentor-a": FakeChannel()},
+        gates={"mentor-a": _gate()},
+        notifier=notifier,
+        sleep=False,
+    )
+    await session.commit()
+    assert outcome.detail is not None
+
+    assert await notify_draft(int(outcome.detail), notifier) is True
+
+    session.expire_all()
+    draft = await session.get_one(Draft, int(outcome.detail))
+    assert draft.control_message_id == 12345

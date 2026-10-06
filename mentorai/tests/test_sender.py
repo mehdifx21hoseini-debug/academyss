@@ -2,11 +2,15 @@
 
 مهم‌ترین چیزی که اینجا سنجیده می‌شود: وقتی ارسال انجام نمی‌شود، هیچ اثری در تلگرام
 گذاشته نمی‌شود — نه علامت خوانده‌شدن، نه نشانگر تایپ (ADR-009).
+
+`push` عمداً هیچ نشستی نمی‌گیرد و چیزی نمی‌نویسد؛ ثبت نتیجه کار `record_sent` است
+در تراکنشی جدا (ADR-030). صندوق خروج و ماشین حالتش در `test_delivery.py`.
 """
 
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from zoneinfo import ZoneInfo
 
 import pytest
 from sqlalchemy import text
@@ -15,7 +19,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from mentorai.db.models import Conversation, MentorAccount, Message, Sender
 from mentorai.telegram.normalize import build_inbound
 from mentorai.telegram.safety import AccountGate, TokenBucket
-from mentorai.telegram.sender import FloodWait, SendStatus, deliver_answer
+from mentorai.telegram.sender import (
+    MAX_PARTS,
+    FloodWait,
+    SendStatus,
+    push,
+    record_sent,
+    split_messages,
+)
 from mentorai.telegram.store import record_inbound
 
 NOON = datetime(2026, 9, 2, 12, 0, tzinfo=UTC)
@@ -43,12 +54,16 @@ class FakeChannel:
         return self._next_id
 
 
+TEHRAN = ZoneInfo("Asia/Tehran")
+
+
 def _gate(**kw: object) -> AccountGate:
     defaults = {
         "slug": "mentor-a",
         "bucket": TokenBucket(rate_per_minute=60, burst=5),
         "quiet_start": 23,
         "quiet_end": 8,
+        "tz": TEHRAN,
     }
     return AccountGate(**{**defaults, **kw})  # type: ignore[arg-type]
 
@@ -82,20 +97,27 @@ async def test_answer_is_sent_and_recorded(session: AsyncSession, scenario) -> N
     account, conversation, message = scenario
     channel = FakeChannel()
 
-    result = await deliver_answer(
-        session,
-        account=account,
-        conversation=conversation,
-        answered_message=message,
+    result = await push(
+        chat_id=conversation.telegram_chat_id,
+        answered_telegram_message_id=message.telegram_message_id,
         body="شانزده جلسه.",
         gate=_gate(),
         channel=channel,
         now=NOON,
         sleep=False,
     )
+    assert result.status is SendStatus.sent
+    assert result.telegram_message_id is not None
+    record_sent(
+        session,
+        conversation=conversation,
+        answered_message=message,
+        body="شانزده جلسه.",
+        telegram_message_id=result.telegram_message_id,
+        now=NOON,
+    )
     await session.commit()
 
-    assert result.status is SendStatus.sent
     assert channel.sent == [(700, "شانزده جلسه.")]
     senders = list(
         (await session.execute(text("select sender from messages order by id"))).scalars()
@@ -108,16 +130,23 @@ async def test_read_receipt_stops_at_the_answered_message(session: AsyncSession,
     account, conversation, message = scenario
     channel = FakeChannel()
 
-    await deliver_answer(
-        session,
-        account=account,
-        conversation=conversation,
-        answered_message=message,
+    result = await push(
+        chat_id=conversation.telegram_chat_id,
+        answered_telegram_message_id=message.telegram_message_id,
         body="پاسخ",
         gate=_gate(),
         channel=channel,
         now=NOON,
         sleep=False,
+    )
+    assert result.telegram_message_id is not None
+    record_sent(
+        session,
+        conversation=conversation,
+        answered_message=message,
+        body="پاسخ",
+        telegram_message_id=result.telegram_message_id,
+        now=NOON,
     )
     await session.commit()
 
@@ -138,11 +167,9 @@ async def test_blocked_account_leaves_no_trace_in_telegram(
     account, conversation, message = scenario
     channel = FakeChannel()
 
-    result = await deliver_answer(
-        session,
-        account=account,
-        conversation=conversation,
-        answered_message=message,
+    result = await push(
+        chat_id=conversation.telegram_chat_id,
+        answered_telegram_message_id=message.telegram_message_id,
         body="پاسخ",
         gate=_gate(**gate_kwargs),
         channel=channel,
@@ -162,11 +189,9 @@ async def test_flood_wait_backs_off_the_whole_account(session: AsyncSession, sce
     gate = _gate()
     channel = FakeChannel(fail_with=FloodWait(30))
 
-    result = await deliver_answer(
-        session,
-        account=account,
-        conversation=conversation,
-        answered_message=message,
+    result = await push(
+        chat_id=conversation.telegram_chat_id,
+        answered_telegram_message_id=message.telegram_message_id,
         body="پاسخ",
         gate=gate,
         channel=channel,
@@ -186,11 +211,9 @@ async def test_send_failure_does_not_record_an_assistant_message(
     account, conversation, message = scenario
     channel = FakeChannel(fail_with=RuntimeError("network"))
 
-    result = await deliver_answer(
-        session,
-        account=account,
-        conversation=conversation,
-        answered_message=message,
+    result = await push(
+        chat_id=conversation.telegram_chat_id,
+        answered_telegram_message_id=message.telegram_message_id,
         body="پاسخ",
         gate=_gate(),
         channel=channel,
@@ -205,3 +228,192 @@ async def test_send_failure_does_not_record_an_assistant_message(
     ).scalar_one()
     assert count == 0
     assert conversation.last_answered_message_id is None
+
+
+# ---------------------------------------------------------------------------
+# پاسخ چندپیامی
+# ---------------------------------------------------------------------------
+
+
+class PartiallyFailingChannel(FakeChannel):
+    """کانالی که پس از n پیام موفق، رد می‌کند.
+
+    حالتی را می‌سازد که چندپیامی شدن تازه ممکنش کرده: نیمی از پاسخ رفته و نیمی نه.
+    """
+
+    def __init__(self, *, succeed: int, then: Exception) -> None:
+        super().__init__()
+        self._succeed = succeed
+        self._then = then
+
+    async def send(self, chat_id: int, body: str) -> int:
+        if len(self.sent) >= self._succeed:
+            raise self._then
+        self._next_id += 1
+        self.sent.append((chat_id, body))
+        return self._next_id
+
+
+@pytest.mark.parametrize(
+    ("body", "expected"),
+    [
+        ("یک جمله.", ["یک جمله."]),
+        ("اول.\n\nدوم.", ["اول.", "دوم."]),
+        # خط خالی با فاصله هم خط خالی است؛ مدل همیشه تمیز نمی‌نویسد.
+        ("اول.\n   \nدوم.", ["اول.", "دوم."]),
+        # شکست تک‌خطی پیام جدا نیست: بند همان بند است.
+        ("خط اول\nخط دوم", ["خط اول\nخط دوم"]),
+        ("  \n\n  ", []),
+        ("", []),
+    ],
+)
+def test_the_blank_line_is_the_message_boundary(body: str, expected: list[str]) -> None:
+    """مرز، خط خالی است — نه تعداد کاراکتر.
+
+    شکستن مکانیکی روی طول، جمله را از وسط نصف می‌کند. خط خالی یعنی مدل خودش گفته
+    «اینجا پیام تمام شد»، و منتور هم با همان خط خالی جایش را عوض می‌کند.
+    """
+    assert split_messages(body) == expected
+
+
+def test_too_many_parts_are_joined_not_dropped() -> None:
+    """پاسخ بریده، از پیام بلند بدتر است."""
+    body = "\n\n".join(f"تکه {i}" for i in range(1, 8))
+    parts = split_messages(body)
+
+    assert len(parts) == MAX_PARTS
+    assert "تکه 7" in parts[-1], "تکه‌های اضافه دور ریخته شدند"
+    for i in range(1, 8):
+        assert f"تکه {i}" in "\n\n".join(parts)
+
+
+async def test_a_three_part_answer_arrives_as_three_messages() -> None:
+    """شکستی که می‌بندد: یک پاراگراف مرتب، جایی که منتور سه جمله‌ی کوتاه می‌فرستد.
+
+    در ۱۱۶ پاسخ واقعی منتورهای آکادمی، ۴۸٪ بیش از یک پیام بود. سیستم همیشه یک پیام
+    می‌فرستاد، و این از هر انتخاب کلمه‌ای بیشتر لو می‌داد.
+    """
+    channel = FakeChannel()
+    result = await push(
+        chat_id=700,
+        answered_telegram_message_id=42,
+        body="سلام وقتتون بخیر.\n\nاز ویدیوی اول شروع کنید.\n\nپرقدرت پیش برید.",
+        gate=_gate(),
+        channel=channel,
+        now=NOON,
+        sleep=False,
+    )
+
+    assert result.status is SendStatus.sent
+    assert result.parts_sent == 3
+    assert [body for _, body in channel.sent] == [
+        "سلام وقتتون بخیر.",
+        "از ویدیوی اول شروع کنید.",
+        "پرقدرت پیش برید.",
+    ]
+    # علامت خوانده‌شدن یک بار، نشانگر تایپ پیش از هر پیام: تایپِ تلگرام چند ثانیه‌ای
+    # منقضی می‌شود، پس برای پیام سوم باید دوباره فرستاده شود.
+    assert len(channel.reads) == 1
+    assert len(channel.typing) == 3
+
+
+async def test_an_answer_without_a_blank_line_is_still_one_message() -> None:
+    """رفتار پیشین باید دست‌نخورده بماند."""
+    channel = FakeChannel()
+    result = await push(
+        chat_id=700,
+        answered_telegram_message_id=42,
+        body="دوره مقدماتی پانزده جلسه دارد.",
+        gate=_gate(),
+        channel=channel,
+        now=NOON,
+        sleep=False,
+    )
+
+    assert result.parts_sent == 1
+    assert channel.sent == [(700, "دوره مقدماتی پانزده جلسه دارد.")]
+
+
+async def test_a_flood_wait_mid_burst_reports_what_already_went() -> None:
+    """مهم‌ترین تست چندپیامی شدن.
+
+    سناریو: پیام اول رفت، پیام دوم `FloodWait` خورد. اگر `parts_sent` گزارش نشود،
+    تلاش دوباره از اول شروع می‌کند و دانشجو پیام اول را **دو بار** می‌گیرد — همان
+    شکستی که کل صندوق خروج برای جلوگیری از آن ساخته شده (`ADR-030`).
+    """
+    channel = PartiallyFailingChannel(succeed=1, then=FloodWait(30))
+    result = await push(
+        chat_id=700,
+        answered_telegram_message_id=42,
+        body="تکه یک.\n\nتکه دو.\n\nتکه سه.",
+        gate=_gate(),
+        channel=channel,
+        now=NOON,
+        sleep=False,
+    )
+
+    assert result.status is SendStatus.blocked
+    assert result.reason == "flood_wait"
+    assert result.parts_sent == 1, "تعداد قطعه‌های رفته گزارش نشد"
+    assert [body for _, body in channel.sent] == ["تکه یک."]
+
+
+async def test_the_retry_resumes_and_never_repeats_a_sent_part() -> None:
+    """نیمه‌ی دوم همان تضمین: ادامه از قطعه‌ی بعدی، نه از اول."""
+    channel = FakeChannel()
+    result = await push(
+        chat_id=700,
+        answered_telegram_message_id=42,
+        body="تکه یک.\n\nتکه دو.\n\nتکه سه.",
+        gate=_gate(),
+        channel=channel,
+        now=NOON,
+        sleep=False,
+        start_at=1,
+    )
+
+    assert result.status is SendStatus.sent
+    assert result.parts_sent == 2
+    assert [body for _, body in channel.sent] == ["تکه دو.", "تکه سه."]
+    assert "تکه یک." not in [body for _, body in channel.sent], "قطعه‌ی رفته دوباره فرستاده شد"
+    # علامت خوانده‌شدن در تلاش اول زده شده؛ دوباره زدنش کار بی‌خودِ شبکه است.
+    assert channel.reads == []
+
+
+async def test_a_resume_past_the_end_sends_nothing() -> None:
+    """اگر همه‌ی قطعه‌ها رفته باشند، تلاش دوباره نباید چیزی بفرستد."""
+    channel = FakeChannel()
+    result = await push(
+        chat_id=700,
+        answered_telegram_message_id=42,
+        body="تکه یک.\n\nتکه دو.",
+        gate=_gate(),
+        channel=channel,
+        now=NOON,
+        sleep=False,
+        start_at=2,
+    )
+
+    assert result.parts_sent == 0
+    assert channel.sent == [], "پس از رفتن همه‌ی قطعه‌ها دوباره فرستاده شد"
+
+
+async def test_a_blocked_gate_sends_no_part_at_all() -> None:
+    """دروازه پیش از تقسیم بررسی می‌شود: ساعت سکوت یعنی هیچ قطعه‌ای، نه قطعه‌ی اول."""
+    channel = FakeChannel()
+    quiet = datetime(2026, 9, 2, 1, 0, tzinfo=TEHRAN)
+
+    result = await push(
+        chat_id=700,
+        answered_telegram_message_id=42,
+        body="تکه یک.\n\nتکه دو.",
+        gate=_gate(),
+        channel=channel,
+        now=quiet,
+        sleep=False,
+    )
+
+    assert result.status is SendStatus.blocked
+    assert result.parts_sent == 0
+    assert channel.sent == []
+    assert channel.reads == [], "در ساعت سکوت پیام خوانده علامت خورد"
