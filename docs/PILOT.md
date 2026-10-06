@@ -78,7 +78,7 @@ docker compose run --rm cli python -c "from cryptography.fernet import Fernet; p
 نمی‌شود.
 
 ```powershell
-docker compose up -d db
+docker compose up -d --wait db
 docker compose run --rm cli python -m alembic upgrade head
 docker compose run --rm cli mentorai kb-import --file /kb/mentorai_kb_latest.csv
 ```
@@ -110,13 +110,14 @@ docker compose up -d panel
 
 ## راه‌اندازی
 
-این‌ها روی سرور اجرا می‌شوند. اگر مرحله‌ی صفر را انجام داده‌اید، همین مسیر است با
-مقادیر واقعی.
+راهنمای کامل و قدم‌به‌قدم، از خرید سرور تا اولین پیش‌نویس: `docs/SERVER_SETUP.md`.
+خلاصه‌ی همان مسیر اینجاست.
 
 ```bash
 cd mentorai
-cp .env.example .env            # مقادیر واقعی را پر کنید
-docker compose up -d db
+scripts/init-env.sh             # رمز پایگاه داده و کلید نشست را می‌سازد
+nano .env                       # بقیه‌ی مقادیر واقعی
+docker compose up -d --wait db
 docker compose run --rm cli python -m alembic upgrade head
 docker compose run --rm cli mentorai kb-import --file /kb/mentorai_kb_latest.csv
 ```
@@ -206,9 +207,12 @@ docker compose up -d panel
 ## اگر چیزی خراب شد
 
 ```bash
-mentorai pause --slug mentor-a --reason "بررسی"     # قطع فوری ارسال
-mentorai pause --slug mentor-a --resume
+docker compose run --rm cli mentorai pause --slug mentor-a --reason "بررسی"   # قطع فوری ارسال
+docker compose run --rm cli mentorai pause --slug mentor-a --resume
 ```
+
+کارگرِ در حال اجرا را لازم نیست دوباره راه انداخت: هر ارسال وضعیت توقف را همان لحظه
+از پایگاه داده می‌خواند.
 
 حساب‌ها مستقل‌اند؛ توقف یکی بقیه را متوقف نمی‌کند. اگر تلگرام هشدار محدودیت داد، فوراً
 متوقف کنید و تا روشن شدن علت ادامه ندهید — اعتبار حساب گران‌ترین دارایی این سیستم است.

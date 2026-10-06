@@ -139,6 +139,20 @@ jobs:
           curl -fsS -o /dev/null http://127.0.0.1:8000/login
           curl -fsS -o /dev/null http://127.0.0.1:8000/static/panel.css
 
+      # پشتیبانی که بازگردانده نشود، پشتیبان نیست. همان اسکریپتی که cron روی سرور اجرا
+      # می‌کند، و بازگردانی در یک پایگاه داده‌ی جدا.
+      - name: The nightly backup restores
+        run: |
+          BACKUP_DIR="$RUNNER_TEMP/backups" scripts/backup.sh
+          test "$(stat -c %a "$RUNNER_TEMP"/backups/mentorai-*.dump)" = 600
+          docker compose exec -T db psql -U mentorai -d postgres -c "create database restore_check"
+          docker compose exec -T db pg_restore -U mentorai -d restore_check --no-owner \
+            < "$(ls "$RUNNER_TEMP"/backups/mentorai-*.dump)"
+          restored=$(docker compose exec -T db psql -U mentorai -d restore_check -tAc \
+            "select count(*) from knowledge_documents")
+          echo "restored knowledge documents: $restored"
+          test "$restored" -gt 0
+
       - name: Compose logs on failure
         if: failure()
         run: docker compose logs --no-color
