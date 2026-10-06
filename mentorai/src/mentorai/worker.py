@@ -265,6 +265,8 @@ async def deliver_claimed(
         gate=gate,
         channel=channel,
         sleep=sleep,
+        # ادامه از جایی که تلاش قبلی رسیده بود، نه از اول.
+        start_at=claimed.sent_parts,
     )
 
     async with session_scope() as session:
@@ -279,15 +281,28 @@ async def deliver_claimed(
                 telegram_message_id=send.telegram_message_id,
             )
             await delivery.mark_sent(
-                session, claimed.id, telegram_message_id=send.telegram_message_id
+                session,
+                claimed.id,
+                telegram_message_id=send.telegram_message_id,
+                parts_sent=send.parts_sent,
             )
             await _settle_draft(session, claimed.answered_message_id, sent=True)
         elif send.status is SendStatus.blocked:
             # می‌دانیم چیزی نرفته — سقف نرخ، ساعات سکوت، یا FloodWait. امن است.
-            await delivery.retry_later(session, claimed.id, error=send.reason or "blocked")
+            #
+            # ولی اگر پاسخ چندپیامی بوده و رد شدن وسط کار رخ داده، قطعه‌هایی که
+            # رفته‌اند ثبت می‌شوند تا تلاش بعدی از قطعه‌ی بعدی شروع کند.
+            await delivery.retry_later(
+                session,
+                claimed.id,
+                error=send.reason or "blocked",
+                parts_sent=send.parts_sent,
+            )
         else:
             # نامعلوم. شاید رفته باشد. هرگز دوباره فرستاده نمی‌شود.
-            await delivery.abandon(session, claimed.id, send.reason or "unknown")
+            await delivery.abandon(
+                session, claimed.id, send.reason or "unknown", parts_sent=send.parts_sent
+            )
             await _settle_draft(session, claimed.answered_message_id, sent=False)
     return send.status
 

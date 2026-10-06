@@ -212,3 +212,106 @@ async def test_counts_by_status_sees_the_dead_queue(
     await session.commit()
 
     assert (await delivery.counts_by_status(session)).get("abandoned") == 1
+
+
+# ---------------------------------------------------------------------------
+# پاسخ چندپیامی: تضمین «هیچ ارسال دوباره» در حضور قطعه‌ها
+# ---------------------------------------------------------------------------
+
+
+async def test_a_partial_send_resumes_from_the_next_part(
+    session: AsyncSession, answered: Message
+) -> None:
+    """شکستی که می‌بندد: دانشجو قطعه‌ی اول پاسخ را دو بار بگیرد.
+
+    چندپیامی شدنِ پاسخ یک راه تازه برای ارسال دوباره باز کرد که پیش از این وجود
+    نداشت: اگر قطعه‌ی اول برود و قطعه‌ی دوم `FloodWait` بخورد، تلاش دوباره — که
+    برای `FloodWait` صریحاً امن و لازم است — از ابتدا شروع می‌کند.
+
+    `sent_parts` تنها چیزی است که جلویش را می‌گیرد، و در خود پایگاه داده نگه داشته
+    می‌شود نه در حافظه‌ی فرایند، چون فرایند ممکن است بین دو تلاش مرده باشد.
+    """
+    delivery_id = await _enqueue(session, answered, "تکه یک.\n\nتکه دو.\n\nتکه سه.")
+    assert delivery_id is not None
+
+    first = await delivery.claim_next(session)
+    assert first is not None
+    assert first.sent_parts == 0, "تلاش اول باید از قطعه‌ی صفر شروع کند"
+
+    # قطعه‌ی اول رفت، بعد تلگرام رد کرد.
+    await delivery.retry_later(
+        session, delivery_id, error="flood_wait", retry_in=timedelta(0), parts_sent=1
+    )
+    await session.commit()
+
+    second = await delivery.claim_next(session)
+    assert second is not None
+    assert second.sent_parts == 1, "تلاش دوم از اول شروع می‌کرد و قطعه‌ی رفته را تکرار می‌کرد"
+    assert second.body == "تکه یک.\n\nتکه دو.\n\nتکه سه.", "متن کامل باید بماند"
+
+
+async def test_progress_accumulates_across_several_retries(
+    session: AsyncSession, answered: Message
+) -> None:
+    """دو بار رد شدن پشت‌سرهم: شمارش جمع می‌شود، جایگزین نمی‌شود."""
+    delivery_id = await _enqueue(session, answered, "یک.\n\nدو.\n\nسه.\n\nچهار.")
+    assert delivery_id is not None
+
+    await delivery.claim_next(session)
+    await delivery.retry_later(
+        session, delivery_id, error="flood_wait", retry_in=timedelta(0), parts_sent=1
+    )
+    await session.commit()
+
+    await delivery.claim_next(session)
+    await delivery.retry_later(
+        session, delivery_id, error="flood_wait", retry_in=timedelta(0), parts_sent=2
+    )
+    await session.commit()
+
+    third = await delivery.claim_next(session)
+    assert third is not None
+    assert third.sent_parts == 3
+
+
+async def test_an_abandoned_partial_send_keeps_its_progress(
+    session: AsyncSession, answered: Message
+) -> None:
+    """سطر رهاشده دوباره فرستاده نمی‌شود، ولی ثبت چه رفته لازم است.
+
+    منتور باید بتواند ببیند دانشجو نصف پاسخ را گرفته، نه هیچ‌چیز. بدون این عدد،
+    کسی که سطر را نگاه می‌کند نمی‌داند باید چه چیزی را دستی تکمیل کند.
+    """
+    delivery_id = await _enqueue(session, answered, "یک.\n\nدو.")
+    assert delivery_id is not None
+    await delivery.claim_next(session)
+    await delivery.abandon(session, delivery_id, "TimeoutError", parts_sent=1)
+    await session.commit()
+
+    assert await _status(session, delivery_id) == "abandoned"
+    row = (
+        await session.execute(
+            text("select sent_parts from deliveries where id = :id"), {"id": delivery_id}
+        )
+    ).scalar_one()
+    assert row == 1
+
+
+async def test_a_single_message_answer_counts_one_part(
+    session: AsyncSession, answered: Message
+) -> None:
+    """پاسخ یک‌پیامی هم شمارش می‌شود، تا سطرهای قدیمی و تازه یک معنی داشته باشند."""
+    delivery_id = await _enqueue(session, answered, "یک جمله.")
+    assert delivery_id is not None
+    await delivery.claim_next(session)
+    await delivery.mark_sent(session, delivery_id, telegram_message_id=901, parts_sent=1)
+    await session.commit()
+
+    row = (
+        await session.execute(
+            text("select status, sent_parts from deliveries where id = :id"),
+            {"id": delivery_id},
+        )
+    ).one()
+    assert row.status == "sent"
+    assert row.sent_parts == 1

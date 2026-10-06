@@ -52,6 +52,9 @@ class Claimed:
     body: str
     attempts: int
     max_attempts: int
+    # قطعه‌هایی که تلاش‌های قبلی فرستاده‌اند. ارسال از همین شماره ادامه می‌دهد؛
+    # بدون این، تلاش دوباره قطعه‌ی اول را برای دانشجو تکرار می‌کرد.
+    sent_parts: int
     telegram_chat_id: int
     answered_telegram_message_id: int
     account_slug: str
@@ -109,7 +112,7 @@ async def claim_next(session: AsyncSession) -> Claimed | None:
                 for update skip locked
             )
             returning d.id, d.conversation_id, d.answered_message_id, d.body,
-                      d.attempts, d.max_attempts
+                      d.attempts, d.max_attempts, d.sent_parts
             """
         )
     )
@@ -150,6 +153,7 @@ async def _with_context(session: AsyncSession, record: object) -> Claimed | None
         body=record.body,  # type: ignore[attr-defined]
         attempts=record.attempts,  # type: ignore[attr-defined]
         max_attempts=record.max_attempts,  # type: ignore[attr-defined]
+        sent_parts=record.sent_parts,  # type: ignore[attr-defined]
         telegram_chat_id=context.telegram_chat_id,
         answered_telegram_message_id=context.telegram_message_id,
         account_slug=context.slug,
@@ -174,7 +178,7 @@ async def claim(session: AsyncSession, delivery_id: int) -> Claimed | None:
                 for update skip locked
             )
             returning d.id, d.conversation_id, d.answered_message_id, d.body,
-                      d.attempts, d.max_attempts
+                      d.attempts, d.max_attempts, d.sent_parts
             """
         ),
         {"id": delivery_id},
@@ -194,26 +198,37 @@ async def status_of(session: AsyncSession, delivery_id: int) -> str | None:
 
 
 async def mark_sent(
-    session: AsyncSession, delivery_id: int, *, telegram_message_id: int
+    session: AsyncSession, delivery_id: int, *, telegram_message_id: int, parts_sent: int = 1
 ) -> None:
     await session.execute(
         text(
             """
             update deliveries
-            set status = 'sent', telegram_message_id = :tg, sent_at = now(), last_error = null
+            set status = 'sent', telegram_message_id = :tg, sent_at = now(), last_error = null,
+                sent_parts = sent_parts + :parts_sent
             where id = :id
             """
         ),
-        {"id": delivery_id, "tg": telegram_message_id},
+        {"id": delivery_id, "tg": telegram_message_id, "parts_sent": parts_sent},
     )
 
 
 async def retry_later(
-    session: AsyncSession, delivery_id: int, *, error: str, retry_in: timedelta = RETRY_AFTER
+    session: AsyncSession,
+    delivery_id: int,
+    *,
+    error: str,
+    retry_in: timedelta = RETRY_AFTER,
+    parts_sent: int = 0,
 ) -> None:
     """فقط برای شکستی که **می‌دانیم** ارسال نشده.
 
     اگر تلاش‌ها تمام شده باشد به صف مرده می‌رود، نه اینکه بی‌صدا ناپدید شود.
+
+    `parts_sent` قطعه‌هایی است که همین تلاش موفق فرستاد پیش از آنکه رد شود. جمع
+    می‌شود، نه جایگزین: تلاش بعدی از قطعه‌ی بعدی شروع می‌کند. اگر این عدد نگه داشته
+    نشود، پاسخ چندپیامی که وسطش `FloodWait` خورده، در تلاش دوم قطعه‌های رفته را
+    دوباره برای دانشجو می‌فرستد.
     """
     await session.execute(
         text(
@@ -222,15 +237,23 @@ async def retry_later(
             set status = case when attempts >= max_attempts then 'failed' else 'pending' end,
                 last_error = :error,
                 run_after = now() + cast(:retry_in as interval),
+                sent_parts = sent_parts + :parts_sent,
                 claimed_at = null
             where id = :id
             """
         ),
-        {"id": delivery_id, "error": error[:4000], "retry_in": retry_in},
+        {
+            "id": delivery_id,
+            "error": error[:4000],
+            "retry_in": retry_in,
+            "parts_sent": parts_sent,
+        },
     )
 
 
-async def abandon(session: AsyncSession, delivery_id: int, error: str) -> None:
+async def abandon(
+    session: AsyncSession, delivery_id: int, error: str, *, parts_sent: int = 0
+) -> None:
     """نتیجه نامعلوم است. هرگز دوباره فرستاده نمی‌شود.
 
     این محافظه‌کارانه‌ترین حالت ممکن است و عمدی: شاید دانشجو پیام را گرفته باشد.
@@ -239,10 +262,10 @@ async def abandon(session: AsyncSession, delivery_id: int, error: str) -> None:
     """
     await session.execute(
         text(
-            "update deliveries set status = 'abandoned', last_error = :error, claimed_at = null "
-            "where id = :id"
+            "update deliveries set status = 'abandoned', last_error = :error, "
+            "sent_parts = sent_parts + :parts_sent, claimed_at = null where id = :id"
         ),
-        {"id": delivery_id, "error": error[:4000]},
+        {"id": delivery_id, "error": error[:4000], "parts_sent": parts_sent},
     )
 
 
