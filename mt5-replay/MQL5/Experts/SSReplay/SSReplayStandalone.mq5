@@ -1629,10 +1629,22 @@ bool BuildSession(string origin, const bool on_replay,
      }
 
    g_ready = true;
-   //--- the nameplate stops explaining and starts reporting. In two-window
-   //--- mode this chart now has no other job, and a person looking at it
-   //--- should be able to tell at a glance that it is still load-bearing.
-   g_splash.Status(T(SSR_S_SP_RUNNING), SSR_C_RUN);
+   //+------------------------------------------------------------------+
+   //| THE PAGE COMES BACK ONLY IF THIS CHART IS NOT THE REPLAY.        |
+   //|                                                                  |
+   //| Two windows: this one has no other job, so the branded page with  |
+   //| "keep this chart open" on it is exactly right.                    |
+   //| One window: this chart IS the replay and must show candles. The   |
+   //| page stays down, and the panel on top of it says everything the   |
+   //| page would have.                                                  |
+   //+------------------------------------------------------------------+
+   if(g_replay_chart != 0 && g_replay_chart != ChartID())
+     {
+      g_splash.Resume();
+      g_splash.Status(T(SSR_S_SP_RUNNING), SSR_C_RUN);
+     }
+   else
+      g_splash.Suspend();
 
    PrintFormat("[host] ready  %s -> %s  %s .. %s",
                origin, rsym, SSRFormatMsc(win_start), SSRFormatMsc(win_end));
@@ -2569,6 +2581,27 @@ void OnTimer()
          return;                 // the picker waits while the list is read
         }
 
+      //+------------------------------------------------------------------+
+      //| THE BLANK PAGE IS FOR THE HOME SCREEN ONLY.                      |
+      //|                                                                  |
+      //| A white chart with no candles is the right background for a       |
+      //| dialog and exactly the wrong one for the next step, which is      |
+      //| dragging a line to the bar you want to start on. So the page      |
+      //| steps aside the moment the user leaves Home, and comes back if    |
+      //| they go back. Tracked here rather than inside the page, because   |
+      //| the page has no idea what the wizard is doing.                    |
+      //+------------------------------------------------------------------+
+      static int s_last_step = -1;
+      int step_now = g_setup_ui.Step();
+      if(step_now != s_last_step)
+        {
+         s_last_step = step_now;
+         if(step_now == 0)
+            g_splash.Resume();
+         else
+            g_splash.Suspend();
+        }
+
       string act = g_setup_ui.Poll();
 
       if(act == "data")
@@ -2604,7 +2637,22 @@ void OnTimer()
          Print("[host] setup: ", g_setup_ui.Summary());
          g_setup_ui.Destroy();
          g_data.Destroy();
-         g_splash.Status(T(SSR_S_SP_BUILDING), SSR_C_RUN);
+         //+------------------------------------------------------------------+
+         //| THE CHART GOES BACK BEFORE ANYTHING IS BUILT.                    |
+         //|                                                                  |
+         //| The page blanks every colour that can put ink on this chart,      |
+         //| candles included. In one-window mode THIS chart is about to       |
+         //| become the replay chart, and a replay chart whose candle          |
+         //| colours are all white is a tool that looks completely broken -    |
+         //| the clock runs, the buttons work, and nothing moves. That is      |
+         //| the worst failure this page could cause, so it is undone here,    |
+         //| before the build, rather than relied on to be undone later.       |
+         //|                                                                  |
+         //| Resume() is called again further down, but only on a host chart   |
+         //| that did NOT become the replay chart - where a branded page is    |
+         //| the right thing to leave behind.                                  |
+         //+------------------------------------------------------------------+
+         g_splash.Suspend();
          if(at <= 0)
            {
             Print("[host] the start line is gone - put it back, or turn "

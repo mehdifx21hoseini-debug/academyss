@@ -622,6 +622,26 @@
 //| always drew. The 310 rail layout is one #define away and a sheet  |
 //| that silently overflows when somebody flips back is a trap.       |
 //+------------------------------------------------------------------+
+//+------------------------------------------------------------------+
+//| THE HOME DIALOG, MEASURED OFF THE REFERENCE RATHER THAN CHOSEN.  |
+//|                                                                  |
+//| Sampled from frame 430: the window is 339 wide between its own    |
+//| borders, its title bar 35 tall, the side margin 31, each action    |
+//| 38 tall, and 14 apart. The width is 360 because that was chosen,   |
+//| and the margin keeps its proportion rather than its pixel count.   |
+//|                                                                  |
+//| HEAD is the block of two centred lines under the title bar - the   |
+//| account, then what kind of account - measured at 14 + 22 + 44 of   |
+//| air before the first button.                                       |
+//+------------------------------------------------------------------+
+#define SSR_HOME_W         360
+#define SSR_HOME_TITLE      34
+#define SSR_HOME_HEAD       80
+#define SSR_HOME_PAD        33
+#define SSR_HOME_BTN_H      38
+#define SSR_HOME_GAP        14
+#define SSR_HOME_FOOT       22
+
 #define SSR_TICKET_2COL    340
 #define SSR_TICKET_LEFT_W  180
 

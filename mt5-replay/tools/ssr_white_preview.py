@@ -15,6 +15,12 @@ C = {m.group(1): (int(m.group(2)), int(m.group(3)), int(m.group(4)))
      for m in re.finditer(r"#define SSR_C_([A-Z0-9_]+)\s+C'(\d+),(\d+),(\d+)'", blk)}
 PT = {m.group(1): int(m.group(2)) for m in
       re.finditer(r"#define (SSR_FS_[A-Z]+)\s+(\d+)", src)}
+M = {m.group(1): int(m.group(2)) for m in
+     re.finditer(r"#define (SSR_HOME_[A-Z_]+|SSR_SPLASH_[A-Z_]+|SSR_LOGO_[A-Z]+)\s+(\d+)", src)}
+SP = open(os.path.join(UI, "SSR_Splash.mqh"), encoding="utf-8").read()
+for m in re.finditer(r"#define (SSR_SPLASH_[A-Z_]+|SSR_LOGO_[A-Z]+)\s+(\d+)", SP):
+    M[m.group(1)] = int(m.group(2))
+M["SSR_SPLASH_TX"] = M["SSR_SPLASH_X"] + M["SSR_LOGO_W"] + 34
 
 S = 2
 FR = "/usr/share/fonts/truetype/liberation/LiberationSans-Regular.ttf"
@@ -36,72 +42,73 @@ CW, CH = 1040, 560
 NAVY = (31, 56, 110)          # from the academy mark
 GOLD = (212, 175, 112)
 
-def page(home_w=360, btn_h=34, name="W1", gap=12, note_txt=""):
+def page(home_w=None, btn_h=None, name="v130", gap=None, note_txt=""):
+    """Drawn from SSR_Splash and SSR_SetupPanel's own constants."""
+    W  = home_w or M["SSR_HOME_W"]
+    BH = btn_h or M["SSR_HOME_BTN_H"]
+    GP = gap if gap is not None else M["SSR_HOME_GAP"]
+
     im = Image.new("RGB", (CW*S, CH*S), (255,255,255))
     d = ImageDraw.Draw(im)
 
-    #--- the logo, top left, where the reference puts its product shot
     lg = Image.open(LOGO).convert("RGBA")
-    target_h = 150*S
-    lg = lg.resize((int(lg.width*target_h/lg.height), target_h), Image.LANCZOS)
-    im.paste(lg, (36*S, 34*S), lg)
+    th = M["SSR_LOGO_H"]*S
+    lg = lg.resize((int(lg.width*th/lg.height), th), Image.LANCZOS)
+    im.paste(lg, (M["SSR_SPLASH_X"]*S, M["SSR_SPLASH_Y"]*S), lg)
 
-    #--- the name and the lines, written ON the page. No frame, no plate.
-    tx = 36 + int(lg.width/S) + 34
-    #--- the offsets below are SSR_Splash::Render's own, so the picture
-    #--- and the code cannot say different things
-    y0 = 34
+    tx = M["SSR_SPLASH_TX"]; y0 = M["SSR_SPLASH_Y"]
     txt(d, tx, y0+8,   "SS Replay", C["TEXT"], PT["SSR_FS_PAGE"], True)
     txt(d, tx, y0+40,  "market replay  -  manual backtesting  -  training",
         C["TEXT_DIM"], PT["SSR_FS_TITLE"])
     txt(d, tx, y0+76,  "Keep this chart open. You may minimise it.",
         C["RUN"], PT["SSR_FS_TITLE"])
     txt(d, tx, y0+98,  "The replay runs from here.", C["RUN"], PT["SSR_FS_TITLE"])
-    txt(d, tx, y0+128, "#20242426  demo  SS Academy Markets",
+    txt(d, tx, y0+128, "#20242426  demo  WM Markets Ltd",
         C["TEXT_FAINT"], PT["SSR_FS_BODY"])
     txt(d, tx, y0+148, "Virtual trades only. Nothing is sent to your broker.",
         C["TEXT_FAINT"], PT["SSR_FS_BODY"])
-    txt(d, tx, y0+168, "v129", C["TEXT_FAINT"], PT["SSR_FS_SMALL"])
+    txt(d, tx, y0+168, "v130", C["TEXT_FAINT"], PT["SSR_FS_SMALL"])
 
-    #--- the Home dialog, to the reference's proportions
-    W = home_w
-    H = 44 + 46 + 4*(btn_h+gap) + 18
-    #--- clear of the text block, the way the reference sits its dialog
-    #--- to the right of and below the lines it must not cover
-    x = CW - W - 190
-    y = 190
+    #--- the dialog, beside the page the way SSR_SetupPanel places it
+    n = 4
+    H = (M["SSR_HOME_TITLE"] + M["SSR_HOME_HEAD"] + n*BH + (n-1)*GP
+         + M["SSR_HOME_FOOT"])
+    x = M["SSR_SPLASH_TX"] + M["SSR_SPLASH_TEXT_W"] + 24
+    y = (CH - H)//2
     rect(d, x, y, W, H, C["PANEL"], C["PANEL_EDGE"])
-    rect(d, x+1, y+1, W-2, 24, (255,255,255), C["PANEL_EDGE"])
-    rect(d, x+7, y+6, 13, 13, NAVY)
-    txt(d, x+9, y+7, "S", (255,255,255), PT["SSR_FS_SMALL"], True)
-    txt(d, x+26, y+6, "SS Replay", (26,26,26), PT["SSR_FS_BODY"], True)
-    for i,g in enumerate(("–","□","✕")):
-        txtc(d, x+W-20*(3-i)-4, y+6, 20, g, (90,94,100), PT["SSR_FS_SMALL"])
+    rect(d, x+1, y+1, W-2, M["SSR_HOME_TITLE"]-1, C["HEADER"], C["GROUP_EDGE"])
+    rect(d, x+9, y+9, 16, 16, C["ACCENT"])
+    txt(d, x+12, y+11, "SS", C["PRIMARY_TEXT"], PT["SSR_FS_SMALL"], True)
+    txt(d, x+32, y+10, "SS Replay", C["TEXT"], PT["SSR_FS_TITLE"], True)
+    txt(d, x+W-46, y+11, "v130", C["TEXT_FAINT"], PT["SSR_FS_SMALL"])
 
-    txtc(d, x, y+38, W, "Connected to account #20242426", C["RUN"], PT["SSR_FS_BODY"])
-    txtc(d, x, y+56, W, "Demo  -  virtual trades only", (110,110,110), PT["SSR_FS_SMALL"])
+    hy = y + M["SSR_HOME_TITLE"] + 14
+    txt(d, x+24, hy, "Connected to  #20242426  demo", C["RUN"], PT["SSR_FS_BODY"])
+    txt(d, x+24, hy+22, "Virtual trades only - nothing reaches your broker",
+        C["TEXT_DIM"], PT["SSR_FS_SMALL"])
 
-    by = y + 84
-    bw = W - 2*22                      # the reference's own side margin
-    for t, prim in (("New replay", True), ("Load a saved session", False),
-                    ("Data Centre", False), ("Close", False)):
+    bx = x + M["SSR_HOME_PAD"]; bw = W - 2*M["SSR_HOME_PAD"]
+    by = y + M["SSR_HOME_TITLE"] + M["SSR_HOME_HEAD"]
+    for t, prim in (("Same as last time", True), ("Customise...", False),
+                    ("Random session", False), ("Data Centre", False)):
         if prim:
-            rect(d, x+22, by, bw, btn_h, C["PRIMARY"], C["PRIMARY_EDGE"])
-            txtc(d, x+22, by+(btn_h-14)//2, bw, t, C["PRIMARY_TEXT"], PT["SSR_FS_BODY"])
+            rect(d, bx, by, bw, BH, C["PRIMARY"], C["PRIMARY_EDGE"])
+            txtc(d, bx, by+(BH-14)//2, bw, t, C["PRIMARY_TEXT"], PT["SSR_FS_BODY"])
         else:
-            rect(d, x+22, by, bw, btn_h, C["BTN"], C["BTN_EDGE"])
-            txtc(d, x+22, by+(btn_h-14)//2, bw, t, C["BTN_TEXT"], PT["SSR_FS_BODY"])
-        by += btn_h + gap
+            rect(d, bx, by, bw, BH, C["BTN"], C["BTN_EDGE"])
+            txtc(d, bx, by+(BH-14)//2, bw, t, C["BTN_TEXT"], PT["SSR_FS_BODY"])
+        by += BH + GP
 
-    d.text((26*S,(CH-18)*S), "%s - host chart as a white page: the academy "
-           "mark, the expert's name, and the notes written straight onto it. "
-           "No card, no border. Home dialog %d px wide, buttons %d px tall."
-           % (name, W, btn_h), fill=(150,150,150), font=f(8))
+    d.text((26*S,(CH-18)*S),
+           "%s - the host chart blanked completely (no candles), the page "
+           "written on it, and the Home dialog beside the text at the "
+           "measured proportions: %d wide, title %d, buttons %d, gap %d."
+           % (name, W, M["SSR_HOME_TITLE"], BH, GP),
+           fill=(150,150,150), font=f(8))
     return im
 
-#--- 360 is the width that was chosen; the others are kept so the
-#--- comparison that produced the choice can be reproduced.
-page(360, 34, "v129 - shipped").save(os.path.join(OUT, "shipped-360.png"))
-page(420, 38, "W2", 14).save(os.path.join(OUT, "W2-white-420.png"))
-page(480, 42, "W3", 16).save(os.path.join(OUT, "W3-white-480.png"))
-print("wrote 3")
+
+OUT2 = os.path.join(ROOT, "docs", "ux-ui", "v130")
+os.makedirs(OUT2, exist_ok=True)
+page().save(os.path.join(OUT2, "home.png"))
+print("wrote", os.path.join(OUT2, "home.png"))

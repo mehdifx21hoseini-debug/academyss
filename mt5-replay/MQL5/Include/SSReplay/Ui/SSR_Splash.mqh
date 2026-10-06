@@ -57,7 +57,10 @@
 #define SSR_LOGO_W      128
 #define SSR_LOGO_H      150
 #define SSR_SPLASH_TX   (SSR_SPLASH_X + SSR_LOGO_W + 34)   // the text column
-#define SSR_SPLASH_W    520      // the widest line this page draws
+//--- the widest line the text column draws, so the Home dialog can be
+//--- put beside it instead of on top of it
+#define SSR_SPLASH_TEXT_W 320
+#define SSR_SPLASH_W    (SSR_SPLASH_TX + SSR_SPLASH_TEXT_W)
 #define SSR_SPLASH_H    (SSR_LOGO_H + 20)
 
 //--- the compiled-in mark. The expert declares the #resource; this is
@@ -76,8 +79,8 @@ private:
 
    //--- what the chart looked like before this page took it
    bool              m_took;
-   long              m_was_show_grid, m_was_fore, m_was_bg, m_was_fg;
-   long              m_was_show_ohlc, m_was_show_price, m_was_show_date;
+   long              m_was_col[12];
+   long              m_was_grid, m_was_ohlc, m_was_price, m_was_date;
 
    //+------------------------------------------------------------------+
    //| THE ACCOUNT LINE IS A FACT ABOUT THE TERMINAL, not about the     |
@@ -104,9 +107,8 @@ private:
 public:
                      CSSRSplash(void)
      : m_chart(0), m_open(false), m_status(""), m_status_col(SSR_C_TEXT_DIM),
-       m_took(false), m_was_show_grid(0), m_was_fore(0), m_was_bg(0),
-       m_was_fg(0), m_was_show_ohlc(0), m_was_show_price(0),
-       m_was_show_date(0) {}
+       m_took(false), m_was_grid(0), m_was_ohlc(0), m_was_price(0),
+       m_was_date(0) { ArrayInitialize(m_was_col, 0); }
 
                     ~CSSRSplash(void) { Destroy(); }
 
@@ -121,12 +123,24 @@ public:
       Render();
      }
 
+   //+------------------------------------------------------------------+
+   //| THE CHART IS GIVEN BACK BEFORE ANY OTHER TEST.                   |
+   //|                                                                  |
+   //| It used to be behind "if not open, return". That is fine until a  |
+   //| path exists where the page took the chart and then closed itself  |
+   //| some other way - and the cost of being wrong is a user staring at |
+   //| an all-white chart whose candles are painted white, which reads   |
+   //| as a dead tool and is the single worst thing this file can do.    |
+   //| GiveChartBack already no-ops when it has nothing to restore.      |
+   //+------------------------------------------------------------------+
    void              Destroy(void)
      {
-      if(m_chart == 0 || !m_open)
+      if(m_chart == 0)
+         return;
+      GiveChartBack();
+      if(!m_open)
          return;
       m_w.RemoveAll();
-      GiveChartBack();
       m_open = false;
      }
 
@@ -154,42 +168,107 @@ public:
    //| A tool that repaints somebody's chart and cannot undo it is a    |
    //| tool they stop trusting the second time they open it.            |
    //+------------------------------------------------------------------+
+   //--- every chart colour this page blanks, and the order is the order
+   //--- they are saved and put back in
+   static int        ChartColourCount(void) { return 12; }
+   int               ColourProp(const int i)
+     {
+      switch(i)
+        {
+         case 0:  return CHART_COLOR_BACKGROUND;
+         case 1:  return CHART_COLOR_FOREGROUND;
+         case 2:  return CHART_COLOR_GRID;
+         case 3:  return CHART_COLOR_CHART_UP;
+         case 4:  return CHART_COLOR_CHART_DOWN;
+         case 5:  return CHART_COLOR_CHART_LINE;
+         case 6:  return CHART_COLOR_CANDLE_BULL;
+         case 7:  return CHART_COLOR_CANDLE_BEAR;
+         case 8:  return CHART_COLOR_VOLUME;
+         case 9:  return CHART_COLOR_BID;
+         case 10: return CHART_COLOR_ASK;
+         default: return CHART_COLOR_LAST;
+        }
+     }
+
+   //+------------------------------------------------------------------+
+   //| A BLANK PAGE MEANS BLANK. THE CANDLES GO TOO.                    |
+   //|                                                                  |
+   //| The first version set only the background and the foreground, so  |
+   //| what the user got was their own candles on a white field - the    |
+   //| chart's colours against a background chosen for a different one.  |
+   //| They were right to call it a mess, and right that the reference    |
+   //| looks "as if the whole thing is a picture": its host chart draws   |
+   //| no price at all. Sampled from the frame, every pixel of it is      |
+   //| 255,255,255.                                                      |
+   //|                                                                  |
+   //| So every colour that can put ink on this chart goes to the page    |
+   //| colour, and every one of them is read first and put back in        |
+   //| GiveChartBack. Twelve properties, one loop, no list to forget.     |
+   //+------------------------------------------------------------------+
    void              TakeChart(void)
      {
       if(m_took)
          return;
-      m_was_show_grid  = ChartGetInteger(m_chart, CHART_SHOW_GRID);
-      m_was_fore       = ChartGetInteger(m_chart, CHART_FOREGROUND);
-      m_was_bg         = ChartGetInteger(m_chart, CHART_COLOR_BACKGROUND);
-      m_was_fg         = ChartGetInteger(m_chart, CHART_COLOR_FOREGROUND);
-      m_was_show_ohlc  = ChartGetInteger(m_chart, CHART_SHOW_OHLC);
-      m_was_show_price = ChartGetInteger(m_chart, CHART_SHOW_PRICE_SCALE);
-      m_was_show_date  = ChartGetInteger(m_chart, CHART_SHOW_DATE_SCALE);
+      for(int i = 0; i < ChartColourCount(); i++)
+         m_was_col[i] = ChartGetInteger(m_chart, (ENUM_CHART_PROPERTY_INTEGER)ColourProp(i));
+      m_was_grid  = ChartGetInteger(m_chart, CHART_SHOW_GRID);
+      m_was_ohlc  = ChartGetInteger(m_chart, CHART_SHOW_OHLC);
+      m_was_price = ChartGetInteger(m_chart, CHART_SHOW_PRICE_SCALE);
+      m_was_date  = ChartGetInteger(m_chart, CHART_SHOW_DATE_SCALE);
       m_took = true;
 
-      //--- a blank white page. The candles are not hidden - the chart
-      //--- simply stops drawing its furniture, so nothing competes with
-      //--- the words and nothing has to be put back by hand.
-      ChartSetInteger(m_chart, CHART_COLOR_BACKGROUND, SSR_C_PAGE);
-      ChartSetInteger(m_chart, CHART_COLOR_FOREGROUND, SSR_C_PAGE);
+      for(int i = 0; i < ChartColourCount(); i++)
+         ChartSetInteger(m_chart, (ENUM_CHART_PROPERTY_INTEGER)ColourProp(i),
+                         SSR_C_PAGE);
       ChartSetInteger(m_chart, CHART_SHOW_GRID,        false);
       ChartSetInteger(m_chart, CHART_SHOW_OHLC,        false);
       ChartSetInteger(m_chart, CHART_SHOW_PRICE_SCALE, false);
       ChartSetInteger(m_chart, CHART_SHOW_DATE_SCALE,  false);
+      ChartRedraw(m_chart);
      }
 
    void              GiveChartBack(void)
      {
       if(!m_took)
          return;
-      ChartSetInteger(m_chart, CHART_COLOR_BACKGROUND, m_was_bg);
-      ChartSetInteger(m_chart, CHART_COLOR_FOREGROUND, m_was_fg);
-      ChartSetInteger(m_chart, CHART_SHOW_GRID,        m_was_show_grid);
-      ChartSetInteger(m_chart, CHART_FOREGROUND,       m_was_fore);
-      ChartSetInteger(m_chart, CHART_SHOW_OHLC,        m_was_show_ohlc);
-      ChartSetInteger(m_chart, CHART_SHOW_PRICE_SCALE, m_was_show_price);
-      ChartSetInteger(m_chart, CHART_SHOW_DATE_SCALE,  m_was_show_date);
+      for(int i = 0; i < ChartColourCount(); i++)
+         ChartSetInteger(m_chart, (ENUM_CHART_PROPERTY_INTEGER)ColourProp(i),
+                         m_was_col[i]);
+      ChartSetInteger(m_chart, CHART_SHOW_GRID,        m_was_grid);
+      ChartSetInteger(m_chart, CHART_SHOW_OHLC,        m_was_ohlc);
+      ChartSetInteger(m_chart, CHART_SHOW_PRICE_SCALE, m_was_price);
+      ChartSetInteger(m_chart, CHART_SHOW_DATE_SCALE,  m_was_date);
       m_took = false;
+      ChartRedraw(m_chart);
+     }
+
+   //+------------------------------------------------------------------+
+   //| THE PAGE STEPS ASIDE WHEN THE CHART IS NEEDED.                   |
+   //|                                                                  |
+   //| A blank white chart is the right background for a Home dialog and |
+   //| exactly the wrong one for choosing WHERE to start: that is done   |
+   //| by dragging a line across the candles, and there are no candles    |
+   //| on a blank page.                                                  |
+   //|                                                                  |
+   //| The reference never has this problem because it picks its start    |
+   //| by typing a date. Rather than take the dragging away - it is the   |
+   //| better way to choose, and the whole reason this tool exists - the  |
+   //| page simply gets out of the way for that one step and comes back   |
+   //| afterwards.                                                        |
+   //+------------------------------------------------------------------+
+   void              Suspend(void)
+     {
+      if(!m_open)
+         return;
+      m_w.RemoveAll();
+      GiveChartBack();
+     }
+
+   void              Resume(void)
+     {
+      if(!m_open)
+         return;
+      Render();
      }
 
    //+------------------------------------------------------------------+

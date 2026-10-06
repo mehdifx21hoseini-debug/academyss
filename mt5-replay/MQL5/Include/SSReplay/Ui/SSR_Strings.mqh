@@ -310,6 +310,7 @@ enum ENUM_SSR_STR
    SSR_S_HM_DATA,
    SSR_S_HM_DATA_WHY,
    SSR_S_HM_READY,
+   SSR_S_HM_CONNECTED,
    //--- the market-hours grid
    SSR_S_NEWS_IN,
    SSR_S_MH_OVERLAP,
@@ -696,6 +697,7 @@ int SSRStringsEnglish(SSRStringEntry &out[])
                 "see which symbols you can replay, and from when");
    SSRAddString(out, n, SSR_S_HM_READY,     "hm.ready",
                 "Virtual trades only - nothing reaches your broker");
+   SSRAddString(out, n, SSR_S_HM_CONNECTED, "hm.connected", "Connected to");
 
    //--- the market-hours grid
    SSRAddString(out, n, SSR_S_GRP_MARKET_HOURS, "grp.market.hours",

@@ -191,22 +191,6 @@ def main():
         ("status",   88, TEXT_H),
     ], s["SSR_SPLASH_H"], problems)
 
-    #------------------------------------------------------------------
-    # The home screen. Its height is computed from the row count, so it
-    # is checked at both ends: two actions (nothing saved yet) and four.
-    #------------------------------------------------------------------
-    p = dict(theme)
-    p.update(defines(os.path.join(UI, "SSR_SetupPanel.mqh"), theme))
-    for n in (2, 4):
-        H = 34 + 22 + n * 46 + 30 + 10
-        stack = [("title", 9, TEXT_H), ("rule", 28, 1), ("guarantee", 34, TEXT_H)]
-        by = 34 + 22
-        for i in range(n):
-            stack.append(("action %d" % (i + 1), by, 26))
-            stack.append(("reason %d" % (i + 1), by + 29, TEXT_H))
-            by += 46
-        stack.append(("customise", by + 4, 22))
-        check("home (%d actions)" % n, stack, H, problems)
 
     #------------------------------------------------------------------
     # The session sheet. Two groups inside SSR_SHEET_H, where the second
@@ -322,6 +306,32 @@ def main():
             problems.append(
                 "order ticket: the tallest column is %d px in a %d px sheet"
                 % (max(left_h, right_h), theme["SSR_SHEET_H"]))
+
+    #------------------------------------------------------------------
+    # The Home dialog, and whether it clears the host page beside it.
+    #------------------------------------------------------------------
+    sp = dict(theme)
+    sp.update(defines(os.path.join(UI, "SSR_Splash.mqh"), theme))
+    hp = dict(theme)
+    hp.update(defines(os.path.join(UI, "SSR_SetupPanel.mqh"), theme))
+    for n in (3, 5):
+        H = (theme["SSR_HOME_TITLE"] + theme["SSR_HOME_HEAD"]
+             + n * theme["SSR_HOME_BTN_H"] + (n - 1) * theme["SSR_HOME_GAP"]
+             + theme["SSR_HOME_FOOT"])
+        stack = [("title bar", 0, theme["SSR_HOME_TITLE"]),
+                 ("account", theme["SSR_HOME_TITLE"] + 14, TEXT_H),
+                 ("mode", theme["SSR_HOME_TITLE"] + 36, TEXT_H)]
+        by = theme["SSR_HOME_TITLE"] + theme["SSR_HOME_HEAD"]
+        for i in range(n):
+            stack.append(("action %d" % (i + 1), by, theme["SSR_HOME_BTN_H"]))
+            by += theme["SSR_HOME_BTN_H"] + theme["SSR_HOME_GAP"]
+        check("home (%d actions)" % n, stack, H, problems)
+
+    beside = sp["SSR_SPLASH_TX"] + sp["SSR_SPLASH_TEXT_W"] + 24
+    print("home: dialog starts at x %d, page text ends at %d"
+          % (beside, sp["SSR_SPLASH_TX"] + sp["SSR_SPLASH_TEXT_W"]))
+    if beside < sp["SSR_SPLASH_TX"] + sp["SSR_SPLASH_TEXT_W"]:
+        problems.append("home dialog starts inside the host page's text")
 
     #------------------------------------------------------------------
     # The title bar. Chips grow from the left, the three window buttons

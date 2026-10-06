@@ -36,6 +36,7 @@
 #include "../Chart/SSR_BlindMode.mqh"
 #include "../Common/SSR_SessionFile.mqh"
 #include "../Common/SSR_Build.mqh"
+#include "SSR_Splash.mqh"   // for the page metrics it must not land on
 
 //--- where the panel remembers what the user last chose. Also how the
 //--- values cross the handover: the replay chart restarts this program,
@@ -533,8 +534,25 @@ public:
         {
          int cw2 = (int)ChartGetInteger(chart_id, CHART_WIDTH_IN_PIXELS);
          int ch2 = (int)ChartGetInteger(chart_id, CHART_HEIGHT_IN_PIXELS);
+         //+------------------------------------------------------------------+
+         //| CLEAR OF THE PAGE, NOT ON TOP OF IT.                             |
+         //|                                                                  |
+         //| Centred, this landed squarely on the host page's own heading and |
+         //| warning lines - two surfaces drawing into the same pixels, which  |
+         //| is exactly what the user photographed. The page's text column     |
+         //| starts at SSR_SPLASH_TX and its longest line is about 320 px, so  |
+         //| the dialog starts after that, and only falls back to centred on   |
+         //| a chart too narrow to hold both side by side - where the page     |
+         //| suppresses its own text for the same reason.                      |
+         //+------------------------------------------------------------------+
+         int beside = SSR_SPLASH_TX + SSR_SPLASH_TEXT_W + 24;
          if(cw2 > 0)
-            m_x = (cw2 > SSR_SETUP_W + 16 ? (cw2 - SSR_SETUP_W) / 2 : 8);
+           {
+            if(cw2 >= beside + SSR_SETUP_W + 16)
+               m_x = beside;
+            else
+               m_x = (cw2 > SSR_SETUP_W + 16 ? (cw2 - SSR_SETUP_W) / 2 : 8);
+           }
          if(ch2 > 0)
             m_y = (ch2 > SSR_SETUP_H_MAX + 16 ? (ch2 - SSR_SETUP_H_MAX) / 2 : 8);
          if(m_x < 0) m_x = 0;
@@ -545,6 +563,11 @@ public:
       Render();
       m_first_paint = false;
      }
+
+   //--- which step is showing. The host needs it to know whether the
+   //--- blank page may stay up: step 0 is the Home dialog and wants a
+   //--- clean background; every step after it is about the candles.
+   int               Step(void) { return m_step; }
 
    void              SetStartText(const string t)
      {
@@ -709,26 +732,35 @@ public:
    //| back and printed, so pressing it is a confirmation.               |
    //+------------------------------------------------------------------+
    //+------------------------------------------------------------------+
-   //| STEP 0 - HOME. The window a person meets first.                  |
+   //| STEP 0 - HOME, TO THE REFERENCE'S OWN MEASUREMENTS.              |
    //|                                                                  |
-   //| Every mature simulator opens on a short list of whole intentions |
-   //| - start something new, carry on with something, look at what     |
-   //| data I have - rather than on a form. This is that list, and it   |
-   //| is deliberately the ONLY screen with no settings on it: a person |
-   //| who wants to be trading in ten seconds never has to read a       |
-   //| field, and a person who wants to configure everything is one     |
-   //| button away from doing so.                                        |
+   //| Not to a guess at them. Sampled off frame 430 of the video:       |
+   //| the dialog is 339 wide, its title bar 35 tall and WHITE with dark |
+   //| text, the side margin is 31, each button is 38 tall and they are  |
+   //| 14 apart. Those are the numbers below, at the 360 width that was  |
+   //| chosen.                                                           |
    //|                                                                  |
-   //| THE FIRST LINE IS THE GUARANTEE, NOT A GREETING.                 |
-   //| The window that opens on somebody's live account's terminal is   |
-   //| the right place to say that nothing here reaches their broker,   |
-   //| and it costs one line.                                           |
-   //|                                                                  |
-   //| EVERY ACTION CARRIES ITS CONSEQUENCE UNDERNEATH.                 |
-   //| "Random session" means nothing on its own. One faint line saying |
-   //| what it will actually do is the difference between a menu and a  |
-   //| guess.                                                            |
+   //| WHAT WENT: the explanation under each button. The reference has   |
+   //| none, the rows made the panel twice as tall as it needed to be,   |
+   //| and at the sizes the light theme uses they were the lines that    |
+   //| ran into the host page behind them. A button whose words do not   |
+   //| say what it does is the thing to fix, not a caption under it.     |
    //+------------------------------------------------------------------+
+   //--- the same sentence the host page prints, for the same reason: a
+   //--- person about to practise should see which account this is
+   //--- attached to, and that nothing here will reach it.
+   string            AccountLine(void)
+     {
+      long   login = AccountInfoInteger(ACCOUNT_LOGIN);
+      long   mode  = AccountInfoInteger(ACCOUNT_TRADE_MODE);
+      string kind  = (mode == ACCOUNT_TRADE_MODE_REAL    ? "real"
+                      : (mode == ACCOUNT_TRADE_MODE_DEMO ? "demo" : "contest"));
+      if(login <= 0)
+         return T(SSR_S_SP_NO_ACCOUNT);
+      return StringFormat("%s  #%d  %s", T(SSR_S_HM_CONNECTED),
+                          (int)login, kind);
+     }
+
    void              RenderQuick(void)
      {
       bool have_last    = FileIsExist(SSR_SETUP_FILE);
@@ -736,77 +768,74 @@ public:
                            FileIsExist("SSReplay\\sessions\\" +
                                        m_v.session_name + ".ssr"));
 
-      //--- every row is a button and a reason: 26 of button, 20 of
-      //--- reason. Counted here so the frame cannot disagree with what
-      //--- is drawn inside it - the bug that puts a Start button three
-      //--- pixels below the panel it belongs to.
-      int rows = (have_last ? 1 : 0) + (have_session ? 1 : 0) + 2;
-      int h    = 34 + 22 + rows * 46 + 30 + 10;
+      int n = 3 + (have_last ? 1 : 0) + (have_session ? 1 : 0);
+      int H = SSR_HOME_TITLE + SSR_HOME_HEAD +
+              n * SSR_HOME_BTN_H + (n - 1) * SSR_HOME_GAP + SSR_HOME_FOOT;
 
-      m_w.Rect("frame", m_x, m_y, SSR_SETUP_W, h, SSR_C_PANEL, SSR_C_PANEL_EDGE);
-      m_w.Label("title", m_x + 12, m_y + 9, T(SSR_S_SU_NEW_REPLAY),
-                SSR_C_TEXT, SSR_FS_BODY);
-      m_w.Label("stepn", m_x + SSR_SETUP_W - 40, m_y + 10, SSR_BUILD_SHORT,
+      m_w.Rect("frame", m_x, m_y, SSR_HOME_W, H,
+               SSR_C_PANEL, SSR_C_PANEL_EDGE);
+
+      //--- the title bar: light, with the mark carrying the brand
+      m_w.Rect("hdr", m_x + 1, m_y + 1, SSR_HOME_W - 2, SSR_HOME_TITLE - 1,
+               SSR_C_HEADER, SSR_C_GROUP_EDGE);
+      m_w.Rect("mark", m_x + 9, m_y + 9, 16, 16, SSR_C_ACCENT, SSR_C_ACCENT);
+      m_w.Label("markt", m_x + 12, m_y + 11, SSR_BRAND_MARK,
+                SSR_C_PRIMARY_TEXT, SSR_FS_SMALL);
+      m_w.Label("title", m_x + 32, m_y + 10, "SS Replay",
+                SSR_C_TEXT, SSR_FS_TITLE);
+      m_w.Label("stepn", m_x + SSR_HOME_W - 46, m_y + 11, SSR_BUILD_SHORT,
                 SSR_C_TEXT_FAINT, SSR_FS_SMALL);
 
-      //--- the guarantee, where the video's product prints the account
-      m_w.Rect("hrule", m_x + 12, m_y + 28, SSR_SETUP_W - 24, 1,
-               SSR_C_GROUP_EDGE, SSR_C_GROUP_EDGE);
-      m_w.Label("safe", m_x + 12, m_y + 34, T(SSR_S_HM_READY),
-                SSR_C_RUN, SSR_FS_SMALL);
+      //--- the two centred lines the reference puts here: what you are
+      //--- connected to, then under it what kind of account it is
+      int hy = m_y + SSR_HOME_TITLE + 14;
+      m_w.Label("acc", m_x + 24, hy, AccountLine(), SSR_C_RUN, SSR_FS_BODY);
+      m_w.Label("safe", m_x + 24, hy + 22, T(SSR_S_HM_READY),
+                SSR_C_TEXT_DIM, SSR_FS_SMALL);
 
-      int by = m_y + 34 + 22;
+      int bx = m_x + SSR_HOME_PAD;
+      int bw = SSR_HOME_W - 2 * SSR_HOME_PAD;
+      int by = m_y + SSR_HOME_TITLE + SSR_HOME_HEAD;
+      bool primary_taken = false;
 
       if(have_last)
         {
-         m_w.ButtonC("qlast", m_x + 12, by, SSR_SETUP_W - 24, 26,
+         m_w.ButtonC("qlast", bx, by, bw, SSR_HOME_BTN_H,
                      T(SSR_S_SU_SAME_AS_LAST),
                      SSR_C_PRIMARY, SSR_C_PRIMARY_EDGE,
                      SSR_C_PRIMARY_TEXT, SSR_FS_BODY);
-         m_w.Label("qlastd", m_x + 14, by + 29,
-                   StringFormat(T(SSR_S_SU_SUMMARY),
-                                SSRSetupTfName(m_v.chart_tf),
-                                SSRSetupBlindName(m_v.blind),
-                                DoubleToString(m_v.balance, 2),
-                                m_v.risk_percent),
-                   SSR_C_TEXT_DIM, SSR_FS_SMALL);
-         by += 46;
+         by += SSR_HOME_BTN_H + SSR_HOME_GAP;
+         primary_taken = true;
         }
       else
-        { m_w.Remove("qlast"); m_w.Remove("qlastd"); }
+         m_w.Remove("qlast");
+      //--- the caption lines are REMOVED, not undrawn: this panel never
+      //--- clears the chart, so a label nobody draws again stays for ever
+      m_w.Remove("qlastd"); m_w.Remove("qcontd");
+      m_w.Remove("qrandd"); m_w.Remove("qdatad");
+      m_w.Remove("hrule");
+
+      if(primary_taken)
+         m_w.Button("qcust", bx, by, bw, SSR_HOME_BTN_H, T(SSR_S_SU_CUSTOMISE));
+      else
+         m_w.ButtonC("qcust", bx, by, bw, SSR_HOME_BTN_H,
+                     T(SSR_S_SU_CUSTOMISE), SSR_C_PRIMARY, SSR_C_PRIMARY_EDGE,
+                     SSR_C_PRIMARY_TEXT, SSR_FS_BODY);
+      by += SSR_HOME_BTN_H + SSR_HOME_GAP;
 
       if(have_session)
         {
-         m_w.Button("qcont", m_x + 12, by, SSR_SETUP_W - 24, 26,
+         m_w.Button("qcont", bx, by, bw, SSR_HOME_BTN_H,
                     T(SSR_S_SU_CONTINUE) + m_v.session_name + "\"");
-         m_w.Label("qcontd", m_x + 14, by + 29,
-                   T(SSR_S_SU_CONTINUE_WHY),
-                   SSR_C_TEXT_DIM, SSR_FS_SMALL);
-         by += 46;
+         by += SSR_HOME_BTN_H + SSR_HOME_GAP;
         }
       else
-        { m_w.Remove("qcont"); m_w.Remove("qcontd"); }
+         m_w.Remove("qcont");
 
-      m_w.Button("qrand", m_x + 12, by, SSR_SETUP_W - 24, 26,
-                 T(SSR_S_SU_RANDOM));
-      m_w.Label("qrandd", m_x + 14, by + 29,
-                T(SSR_S_SU_RANDOM_WHY),
-                SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      by += 46;
+      m_w.Button("qrand", bx, by, bw, SSR_HOME_BTN_H, T(SSR_S_SU_RANDOM));
+      by += SSR_HOME_BTN_H + SSR_HOME_GAP;
 
-      //--- THE DATA CENTRE, on the first screen rather than buried.
-      //--- The commonest first failure in this product is a symbol the
-      //--- terminal holds no minute bars for, and until now the only
-      //--- way to discover that was to start a session and be refused.
-      m_w.Button("qdata", m_x + 12, by, SSR_SETUP_W - 24, 26,
-                 T(SSR_S_HM_DATA));
-      m_w.Label("qdatad", m_x + 14, by + 29,
-                T(SSR_S_HM_DATA_WHY),
-                SSR_C_TEXT_DIM, SSR_FS_SMALL);
-      by += 46;
-
-      m_w.Button("qcust", m_x + 12, by + 4, SSR_SETUP_W - 24, 22,
-                 T(SSR_S_SU_CUSTOMISE));
+      m_w.Button("qdata", bx, by, bw, SSR_HOME_BTN_H, T(SSR_S_HM_DATA));
      }
 
    void              RenderSettings(void)

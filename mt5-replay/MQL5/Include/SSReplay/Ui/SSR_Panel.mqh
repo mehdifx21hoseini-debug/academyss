@@ -873,22 +873,24 @@ private:
       //| dialogs read as windows rather than as rectangles somebody drew   |
       //| on a chart.                                                       |
       //|                                                                  |
-      //| MEASURED BEFORE IT WAS DRAWN, because white on a mid-blue is      |
-      //| exactly the pairing that looks fine to the person who picked it   |
-      //| and fails for everyone else: PRIMARY_TEXT on ACCENT is 10.32:1,   |
-      //| and the chips' WELL face on ACCENT is 9.55:1. The build stamp     |
-      //| uses PANEL rather than a dimmed white, at 8.74:1, because there   |
-      //| is no "dim" step in this palette that is still legible.           |
+      //| THE BAR IS LIGHT, NOT THE BRAND COLOUR.                          |
+      //|                                                                  |
+      //| It was filled with the accent for one build. Sampled from the     |
+      //| reference's own frames, its title bars are white with dark text   |
+      //| - both the Home dialog's and the running panel's - and a navy     |
+      //| band across the top was the first thing called out as not         |
+      //| matching. The brand is carried by the MARK, which is the way a    |
+      //| title bar carries one on this platform.                            |
       //+------------------------------------------------------------------+
       m_w.Rect("hdr", x + 1, y + 1, W - 2, SSR_HEADER_H,
-               SSR_C_ACCENT, SSR_C_ACCENT);
+               SSR_C_HEADER, SSR_C_GROUP_EDGE);
       //--- the mark: a light plate with the initials in the brand colour,
       //--- which is the inverse of the nameplate on the host chart and
       //--- reads as the same identity rather than a second one
-      m_w.Rect("mark", x + 5, y + 4, 14, 14, SSR_C_PANEL, SSR_C_PANEL);
-      Text(58, "markt", x + 7, y + 6, SSR_BRAND_MARK, SSR_C_ACCENT,
+      m_w.Rect("mark", x + 5, y + 4, 14, 14, SSR_C_ACCENT, SSR_C_ACCENT);
+      Text(58, "markt", x + 7, y + 6, SSR_BRAND_MARK, SSR_C_PRIMARY_TEXT,
            SSR_FS_SMALL);
-      Text(0, "title", x + 24, y + 4, "SS Replay", SSR_C_PRIMARY_TEXT,
+      Text(0, "title", x + 24, y + 4, "SS Replay", SSR_C_TEXT,
            SSR_FS_TITLE);
 
       //+------------------------------------------------------------------+
@@ -903,7 +905,7 @@ private:
       string tag = SSR_BUILD;
       int sp = StringFind(tag, " ");
       if(sp > 0) tag = StringSubstr(tag, 0, sp);
-      Text(55, "build", x + 82, y + 6, tag, SSR_C_PANEL, SSR_FS_SMALL);
+      Text(55, "build", x + 82, y + 6, tag, SSR_C_TEXT_FAINT, SSR_FS_SMALL);
 
       //+------------------------------------------------------------------+
       //| THE CAPTION IS A STATUS LINE, NOT A TITLE BAR.                   |
@@ -1007,13 +1009,13 @@ private:
       //+------------------------------------------------------------------+
       m_w.ButtonC("collapse", x + W - 60, y + 2, 19, SSR_HEADER_H - 3,
                   m_collapsed ? "+" : SSR_GLYPH_MIN,
-                  SSR_C_ACCENT, SSR_C_ACCENT, SSR_C_PRIMARY_TEXT, SSR_FS_BODY);
+                  SSR_C_HEADER, SSR_C_HEADER, SSR_C_TEXT_DIM, SSR_FS_BODY);
       m_w.ButtonC("panelsize", x + W - 41, y + 2, 19, SSR_HEADER_H - 3,
                   SSR_GLYPH_MAX,
-                  SSR_C_ACCENT, SSR_C_ACCENT, SSR_C_PRIMARY_TEXT, SSR_FS_SMALL);
+                  SSR_C_HEADER, SSR_C_HEADER, SSR_C_TEXT_DIM, SSR_FS_SMALL);
       m_w.ButtonC("close", x + W - 22, y + 2, 19, SSR_HEADER_H - 3,
                   SSR_GLYPH_CLOSE,
-                  SSR_C_ACCENT, SSR_C_ACCENT, SSR_C_PRIMARY_TEXT, SSR_FS_BODY);
+                  SSR_C_HEADER, SSR_C_HEADER, SSR_C_STOP, SSR_FS_BODY);
      }
 
    //================================================================

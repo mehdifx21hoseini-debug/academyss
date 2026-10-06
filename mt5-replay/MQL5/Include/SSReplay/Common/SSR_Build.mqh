@@ -19,14 +19,14 @@
 #ifndef SSR_BUILD_MQH
 #define SSR_BUILD_MQH
 
-#define SSR_BUILD "v129 2026-10-05  one window"
+#define SSR_BUILD "v130 2026-10-06  blank page"
 
 //--- the same stamp with nothing but the version in it, for the places
 //--- that have room for six characters and not for thirty: the chart
 //--- nameplate's corner, a window caption. One definition, so the long
 //--- form and the short form can never disagree about which build this
 //--- is.
-#define SSR_BUILD_SHORT "v129"
+#define SSR_BUILD_SHORT "v130"
 
 //--- THE LOGOTYPE. Deliberately not a catalogue string: a brand mark is
 //--- the one piece of text on screen that must read the same in every
