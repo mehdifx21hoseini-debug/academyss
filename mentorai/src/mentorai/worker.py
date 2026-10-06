@@ -72,6 +72,17 @@ _MEDIA_LABELS = {
 }
 
 
+async def question_for_draft(session: AsyncSession, draft: Draft) -> str:
+    """همان پرسشی که کنار این پیش‌نویس به منتور نشان داده شد.
+
+    ربات کنترل برای مسیر «دستور کوتاه» لازمش دارد: مدل باید بداند پاسخ به چه چیزی
+    است، وگرنه دستور «بگو از ویدیو ۱۰ شروع کنه» بی‌زمینه باز می‌شود.
+    """
+    run = await session.get_one(AiRun, draft.ai_run_id)
+    message = await session.get_one(Message, run.message_id)
+    return await _mentor_question(session, message)
+
+
 async def _mentor_question(session: AsyncSession, message: Message) -> str:
     """پرسشی که منتور کنار پیش‌نویس می‌بیند.
 

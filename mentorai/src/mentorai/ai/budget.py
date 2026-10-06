@@ -70,6 +70,7 @@ class Purpose(enum.StrEnum):
     answer = "answer"
     image_description = "image_description"
     memory_extraction = "memory_extraction"
+    instruction_expansion = "instruction_expansion"
 
 
 class BudgetState(enum.StrEnum):

@@ -102,14 +102,8 @@ def test_the_student_own_number_does_not_ground_a_price() -> None:
     """
     hits = [_hit("سرمایه‌ی شروع باید پولی باشد که از دست رفتنش به زندگی آسیب نزند.")]
 
-    assert (
-        ungrounded_money(
-            "بله ۵۰ هزار تومان است",
-            hits=hits,
-            question="قیمت دوره ۵۰ هزار تومانه؟",
-        )
-        == "50000:تومان"
-    )
+    # سؤال دانشجو اصلاً به تابع داده نمی‌شود: منبع نیست، پس پارامتری هم ندارد.
+    assert ungrounded_money("بله ۵۰ هزار تومان است", hits=hits) == "50000:تومان"
 
 
 def test_one_bad_amount_among_good_ones_still_blocks() -> None:
@@ -208,3 +202,32 @@ def test_a_readable_amount_is_not_flagged_as_unreadable() -> None:
     """نیمه‌ی دیگر: بسته شدن به‌خاطر نخواندن نباید به همه چیز تعمیم پیدا کند."""
     assert not has_unreadable_amount("قیمت دوره ۵۰۰ هزار تومان است")
     assert not has_unreadable_amount("پین بار سایه‌ی بلند دارد")
+
+
+def test_the_mentor_own_words_are_an_official_source() -> None:
+    """وقتی منتور در ربات کنترل می‌نویسد «بگو قیمت فلان است»، او آکادمی است.
+
+    تفاوتش با عدد سؤال دانشجو همین است: یکی حدس مشتری است، یکی حرف صاحب‌کار.
+    بی این استثنا، مسیر «دستور کوتاه منتور» برای هر قیمتی بسته می‌شد — یعنی
+    محافظ، خودِ منتور را هم سانسور می‌کرد.
+    """
+    assert (
+        ungrounded_money(
+            "شهریه دوره ۸۰۰ هزار تومان است",
+            hits=[],
+            mentor_text="بگو شهریه ۸۰۰ هزار تومانه",
+        )
+        is None
+    )
+
+
+def test_the_mentor_grounding_is_still_exact() -> None:
+    """استثنای منتور، اجازه‌ی آزاد نیست: عدد باید همان عددِ خودش باشد."""
+    assert (
+        ungrounded_money(
+            "شهریه دوره ۹۰۰ هزار تومان است",
+            hits=[],
+            mentor_text="بگو شهریه ۸۰۰ هزار تومانه",
+        )
+        == "900000:تومان"
+    )

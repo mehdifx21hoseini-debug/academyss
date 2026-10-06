@@ -331,7 +331,7 @@ async def handle_message(
         silence_reason = SilenceReason.empty_answer.value
     elif answer.confidence < confidence_threshold:
         silence_reason = SilenceReason.low_confidence.value
-    elif (bad := guard.ungrounded_money(answer.answer, hits=hits, question=question)) is not None:
+    elif (bad := guard.ungrounded_money(answer.answer, hits=hits)) is not None:
         # عددی با واحد پول که در هیچ منبع رسمی و در خود سؤال نبود. این بررسی در
         # کد است و به اطمینان مدل کاری ندارد: قیمت اشتباه، بدترین خطای ممکن این
         # سیستم است و برخلاف توضیح ناقص، قابل جبران نیست.

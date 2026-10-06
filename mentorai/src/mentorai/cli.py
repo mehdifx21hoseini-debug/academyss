@@ -316,7 +316,7 @@ async def cmd_run_worker(_: argparse.Namespace) -> int:
 
     bot: ControlBot | None = None
     if settings.control_bot_token is not None:
-        bot = ControlBot(channels=channels, gates=gates)
+        bot = ControlBot(channels=channels, gates=gates, model_client=model_client)
         await bot.start()
     else:
         print("هشدار: CONTROL_BOT_TOKEN تنظیم نشده؛ پیش‌نویس‌ها فقط ذخیره می‌شوند", file=sys.stderr)

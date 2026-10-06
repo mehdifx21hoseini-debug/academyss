@@ -11,6 +11,7 @@
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 from typing import Any
 
@@ -19,6 +20,7 @@ from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from mentorai import drafts
+from mentorai.ai.client import RawCall
 from mentorai.config import get_settings
 from mentorai.db.models import (
     AiRun,
@@ -61,7 +63,7 @@ class FakeEvent:
         self.edits: list[str] = []
         self.answers: list[tuple[str, bool]] = []
 
-    async def reply(self, body: str) -> None:
+    async def reply(self, body: str, **_: Any) -> None:
         self.replies.append(body)
 
     async def edit(self, body: str, **_: Any) -> None:
@@ -106,6 +108,11 @@ def bot(monkeypatch: pytest.MonkeyPatch):  # type: ignore[no-untyped-def]
         tz=UTC,
     )
     instance = bot_module.ControlBot(channels={"mentor-a": None}, gates={"mentor-a": gate})
+    # ربات با کلاینت مدل، برای مسیر دستور کوتاه. همان دروازه و همان تنظیمات، تا
+    # تفاوت دو تست فقط همان چیزی باشد که سنجیده می‌شود.
+    instance.build_with_model = lambda client: bot_module.ControlBot(  # type: ignore[attr-defined]
+        channels={"mentor-a": None}, gates={"mentor-a": gate}, model_client=client
+    )
     yield instance
     get_settings.cache_clear()
 
@@ -377,3 +384,221 @@ async def test_pending_lists_the_accounts_own_open_escalations(
     await bot._on_pending(event)
 
     assert str(conversation.telegram_chat_id) in event.said
+
+
+# ---------------------------------------------------------------------------
+# دستور کوتاه منتور
+# ---------------------------------------------------------------------------
+
+
+class _ExpandingClient:
+    """کلاینت آزمایشی برای مسیر بسط. از `raw` استفاده می‌کند، نه `complete`."""
+
+    model = "scripted-test-only"
+    effort = "low"
+
+    def __init__(self, answer: str | None = "متن کامل", *, error: str | None = None) -> None:
+        self._answer = answer
+        self._error = error
+        self.calls: list[tuple[str, str]] = []
+
+    async def raw(self, *, system: str, user: str, schema: dict[str, object]) -> RawCall:
+        self.calls.append((system, user))
+        text = None if self._answer is None else json.dumps({"answer": self._answer})
+        return RawCall(
+            text=text,
+            model=self.model,
+            latency_ms=1,
+            input_tokens=10,
+            output_tokens=5,
+            error=self._error,
+        )
+
+    async def complete(self, *, system: str, user: str) -> object:  # pragma: no cover
+        raise AssertionError("مسیر بسط نباید complete را صدا بزند")
+
+
+async def _instruct(
+    bot,
+    session: AsyncSession,
+    linked: MentorAccount,
+    text: str,
+    *,
+    client=None,
+    sender=OPERATOR,
+    chat=CONTROL_CHAT,
+):  # type: ignore[no-untyped-def]
+    _, draft = await _conversation_with_draft(session, linked)
+    event = FakeEvent(text=text, sender_id=sender, chat_id=chat, reply_to=FakeControlMessage(77))
+    instance = bot.build_with_model(client) if client is not None else bot
+    await instance._on_reply(event)
+    return event, draft
+
+
+async def test_a_stranger_cannot_expand_an_instruction(
+    session: AsyncSession, linked: MentorAccount, bot
+) -> None:  # type: ignore[no-untyped-def]
+    """مهم‌ترین تست این مسیر. دستور کوتاه یک راه تازه برای نوشتن از طرف منتور است.
+
+    اگر اجازه چک نشود، هر کسی که ربات را پیدا کند می‌تواند متنی بسازد که از حساب
+    منتور به دانشجو می‌رود.
+    """
+    client = _ExpandingClient()
+    event, draft = await _instruct(
+        bot, session, linked, "+ بگو از ویدیو ۱۰ شروع کنه", client=client, sender=STRANGER
+    )
+
+    assert client.calls == [], "برای غریبه مدل صدا زده شد"
+    await session.refresh(draft)
+    assert draft.proposed_text == "پاسخ پیشنهادی", "غریبه پیش‌نویس را عوض کرد"
+
+
+async def test_an_operator_in_the_wrong_chat_cannot_expand(
+    session: AsyncSession, linked: MentorAccount, bot
+) -> None:  # type: ignore[no-untyped-def]
+    """اپراتور بودن کافی نیست: گفتگو هم باید همان گفتگوی وصل‌شده باشد."""
+    client = _ExpandingClient()
+    event, draft = await _instruct(
+        bot, session, linked, "+ بگو صبر کنه", client=client, chat=1111
+    )
+
+    assert client.calls == []
+    await session.refresh(draft)
+    assert draft.proposed_text == "پاسخ پیشنهادی"
+
+
+async def test_an_instruction_is_expanded_and_comes_back_for_approval(
+    session: AsyncSession, linked: MentorAccount, bot
+) -> None:  # type: ignore[no-untyped-def]
+    """شکستی که می‌بندد: منتور مجبور باشد کل متن را خودش تایپ کند.
+
+    و نکته‌ی اصلی این مسیر: بسط دادن **ارسال نیست**. متن جای پیش‌نویس می‌نشیند و
+    منتور همان‌طور که قبلاً تأیید می‌کرد تأیید می‌کند — آدم از مدار بیرون نمی‌رود.
+    """
+    client = _ExpandingClient("سلام وقتتون بخیر.\n\nاز ویدیوی دهم شروع کنید.")
+    event, draft = await _instruct(
+        bot, session, linked, "+ بگو از ویدیو ۱۰ شروع کنه", client=client
+    )
+
+    assert len(client.calls) == 1, "مدل یک بار صدا زده نشد"
+    _, user = client.calls[0]
+    assert "بگو از ویدیو ۱۰ شروع کنه" in user, "دستور منتور به مدل نرسید"
+
+    await session.refresh(draft)
+    assert draft.proposed_text == "سلام وقتتون بخیر.\n\nاز ویدیوی دهم شروع کنید."
+    assert draft.status == drafts.DraftStatus.pending.value, "بسط، پیش‌نویس را نهایی کرد"
+    assert draft.final_text is None, "بسط به‌جای پیشنهاد، تصمیم ثبت کرد"
+    assert draft.decided_by is None, "بسط تصمیم‌گیرنده ثبت کرد"
+    assert "تأیید" in event.said or "نوشتم" in event.said
+
+
+async def test_an_empty_instruction_asks_for_one_without_calling_the_model(
+    session: AsyncSession, linked: MentorAccount, bot
+) -> None:  # type: ignore[no-untyped-def]
+    client = _ExpandingClient()
+    event, _ = await _instruct(bot, session, linked, "+", client=client)
+
+    assert client.calls == [], "برای دستور خالی مدل صدا زده شد"
+    assert "بنویسید چه بگوید" in event.said
+
+
+async def test_the_path_says_so_when_it_is_not_configured(
+    session: AsyncSession, linked: MentorAccount, bot
+) -> None:  # type: ignore[no-untyped-def]
+    """بی کلاینت مدل، مسیر خاموش است — ولی بی‌صدا نه.
+
+    سکوت اینجا یعنی منتور فکر می‌کند دستورش رفته و منتظر می‌ماند.
+    """
+    event, draft = await _instruct(bot, session, linked, "+ بگو صبر کنه")
+
+    assert "فعال نیست" in event.said
+    await session.refresh(draft)
+    assert draft.proposed_text == "پاسخ پیشنهادی"
+
+
+async def test_a_model_failure_leaves_the_draft_untouched(
+    session: AsyncSession, linked: MentorAccount, bot
+) -> None:  # type: ignore[no-untyped-def]
+    """جهت شکست به سمت منتور: پیش‌نویس قبلی می‌ماند و خودش خبر می‌گیرد."""
+    client = _ExpandingClient(None, error="timeout")
+    event, draft = await _instruct(bot, session, linked, "+ بگو صبر کنه", client=client)
+
+    assert "نشد" in event.said
+    await session.refresh(draft)
+    assert draft.proposed_text == "پاسخ پیشنهادی"
+
+
+async def test_a_number_the_mentor_did_not_say_is_blocked(
+    session: AsyncSession, linked: MentorAccount, bot
+) -> None:  # type: ignore[no-untyped-def]
+    """محافظ قیمت در این مسیر هم هست.
+
+    دستور منتور درباره‌ی قیمت نبود و مدل عددی اضافه کرد. همان قاعده‌ی همیشگی:
+    قیمتی که آکادمی نگفته، نمی‌رود.
+    """
+    client = _ExpandingClient("دوره شهریه‌اش ۹۰۰ هزار تومان است.")
+    event, draft = await _instruct(
+        bot, session, linked, "+ بگو دوره پانزده جلسه داره", client=client
+    )
+
+    assert "رد شد" in event.said
+    await session.refresh(draft)
+    assert draft.proposed_text == "پاسخ پیشنهادی", "متن با عدد ساختگی جای پیش‌نویس نشست"
+
+
+async def test_a_number_the_mentor_did_say_goes_through(
+    session: AsyncSession, linked: MentorAccount, bot
+) -> None:  # type: ignore[no-untyped-def]
+    """نیمه‌ی دیگر: محافظ نباید خودِ منتور را سانسور کند.
+
+    او آدمِ آکادمی است؛ وقتی قیمت می‌گوید، همان اعلام رسمی است.
+    """
+    client = _ExpandingClient("شهریه دوره ۸۰۰ هزار تومان است.")
+    event, draft = await _instruct(
+        bot, session, linked, "+ بگو شهریه ۸۰۰ هزار تومانه", client=client
+    )
+
+    await session.refresh(draft)
+    assert draft.proposed_text == "شهریه دوره ۸۰۰ هزار تومان است.", event.said
+
+
+async def test_the_expansion_is_counted_against_the_model_budget(
+    session: AsyncSession, linked: MentorAccount, bot
+) -> None:  # type: ignore[no-untyped-def]
+    """هر فراخوانی مدل پول است و باید به سقف بخورد، وگرنه سقف دور زده می‌شود."""
+    client = _ExpandingClient("متن کامل")
+    await _instruct(bot, session, linked, "+ بگو صبر کنه", client=client)
+
+    rows = (
+        await session.execute(
+            text("select count(*) from model_usage where purpose = 'instruction_expansion'")
+        )
+    ).scalar_one()
+    assert rows == 1
+
+
+async def test_a_plain_reply_still_sends_the_mentor_text_verbatim(
+    session: AsyncSession, linked: MentorAccount, bot, monkeypatch: pytest.MonkeyPatch
+) -> None:  # type: ignore[no-untyped-def]
+    """رفتار پیشین دست‌نخورده: ریپلای بی‌پیشوند یعنی «عیناً همین را بفرست»."""
+    import mentorai.control.bot as bot_module
+
+    sent: list[int] = []
+
+    async def _fake_send(draft_id: int, **_: object) -> str:
+        sent.append(draft_id)
+        return "sent"
+
+    monkeypatch.setattr(bot_module, "send_draft_now", _fake_send)
+    client = _ExpandingClient()
+    event, draft = await _instruct(
+        bot, session, linked, "متن دستی خود منتور", client=client
+    )
+
+    assert client.calls == [], "ریپلای ساده نباید مدل را صدا بزند"
+    assert sent == [draft.id]
+    await session.refresh(draft)
+    # ریپلای ساده یک **تصمیم** است: متن در `final_text` می‌نشیند و پیش‌نویس
+    # `edited` می‌شود. این همان تفاوتی است که `repropose` از آن دوری می‌کند.
+    assert draft.final_text == "متن دستی خود منتور"
+    assert draft.status == drafts.DraftStatus.edited.value

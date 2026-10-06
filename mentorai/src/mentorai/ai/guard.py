@@ -14,6 +14,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Sequence
 from decimal import Decimal, InvalidOperation
 
 from mentorai.knowledge.retrieval import Hit
@@ -120,7 +121,9 @@ def has_unreadable_amount(text: str) -> bool:
     return units > len(money_amounts(normalized))
 
 
-def ungrounded_money(answer: str, *, hits: list[Hit], question: str = "") -> str | None:
+def ungrounded_money(
+    answer: str, *, hits: Sequence[Hit] = (), mentor_text: str = ""
+) -> str | None:
     """مبلغی که هیچ منبع رسمی‌ای **به‌عنوان مبلغ** نگفته — یا `None`.
 
     **چرا این سخت‌ترین قاعده‌ی سیستم است.** بدترین خطای ممکن این دستیار، گفتن یک
@@ -139,6 +142,10 @@ def ungrounded_money(answer: str, *, hits: list[Hit], question: str = "") -> str
        این یعنی پرسش قیمتِ آکادمی همیشه از قاعده‌ی قطعی `rule_money` یا از همین
        محافظ رد می‌شود و به منتور می‌رسد — و همین درست است.
 
+       ولی `mentor_text` منبع **است**. وقتی خودِ منتور در ربات کنترل می‌نویسد
+       «بگو قیمت فلان است»، او آدمِ آکادمی است و همان اعلام رسمی است. تفاوت
+       با سؤال دانشجو همین است: یکی حدس مشتری است، یکی حرف صاحب‌کار.
+
     ۳. **منبع `mentor` کافی نیست.** تجربه‌ی شخصی منتور، اعلام رسمی آکادمی نیست؛
        همان تفکیکی که بند ۳ دستور مدل می‌کشد و اینجا اجرا می‌شود.
 
@@ -153,7 +160,7 @@ def ungrounded_money(answer: str, *, hits: list[Hit], question: str = "") -> str
     if not amounts:
         return None
 
-    allowed: set[str] = set()
+    allowed: set[str] = set(money_amounts(mentor_text))
     for hit in hits:
         if hit.source_class == "official":
             allowed.update(money_amounts(hit.content))

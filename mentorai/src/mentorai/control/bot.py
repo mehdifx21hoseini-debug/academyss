@@ -18,6 +18,8 @@ from sqlalchemy import select
 from telethon import Button, TelegramClient, events
 
 from mentorai import drafts, escalation
+from mentorai.ai import budget, expand, guard
+from mentorai.ai.client import ModelClient
 from mentorai.config import get_settings
 from mentorai.control.auth import (
     ControlNotPermitted,
@@ -30,7 +32,7 @@ from mentorai.db.models import AuditLog, Conversation, Draft, MentorAccount
 from mentorai.db.session import session_scope
 from mentorai.telegram.safety import AccountGate
 from mentorai.telegram.sender import OutboundChannel
-from mentorai.worker import send_draft_now
+from mentorai.worker import question_for_draft, send_draft_now
 
 log = structlog.get_logger(__name__)
 
@@ -39,13 +41,21 @@ _LINK_USAGE = "برای اتصال این گفتگو به یک حساب: /link <
 _LINK_REFUSED = "انجام نشد."
 
 
+# پیشوندی که ریپلای را از «این را عیناً بفرست» به «این را بگو، خودت کاملش کن» عوض
+# می‌کند. یک نویسه‌ی تک، چون منتور با موبایل تایپ می‌کند؛ و نویسه‌ای که هیچ پاسخ
+# واقعی فارسی با آن شروع نمی‌شود.
+INSTRUCTION_PREFIX = "+"
+
+
 def _render(question: str, proposed: str) -> str:
     return (
         "📩 پیام دانشجو:\n"
         f"{question}\n\n"
         "✍️ پاسخ پیشنهادی:\n"
         f"{proposed}\n\n"
-        "برای اصلاح، همین پیام را ریپلای کنید و متن درست را بنویسید."
+        "برای اصلاح، همین پیام را ریپلای کنید و متن درست را بنویسید.\n"
+        f"یا با «{INSTRUCTION_PREFIX}» شروع کنید و فقط بگویید چه بگوید — "
+        f"مثلاً «{INSTRUCTION_PREFIX} بگو از ویدیو ۱۰ شروع کنه»."
     )
 
 
@@ -74,10 +84,14 @@ class ControlBot:
         *,
         channels: Mapping[str, OutboundChannel],
         gates: Mapping[str, AccountGate],
+        model_client: ModelClient | None = None,
     ) -> None:
         settings = get_settings()
         if settings.control_bot_token is None:
             raise ValueError("CONTROL_BOT_TOKEN تنظیم نشده است")
+        # بدون کلاینت مدل، مسیر دستور کوتاه خاموش است و منتور همان سه کار قبلی را
+        # دارد. خاموش بودنش به منتور گفته می‌شود، بی‌صدا رد نمی‌شود.
+        self._model_client = model_client
         self._token = settings.control_bot_token.get_secret_value()
         self._client = TelegramClient(
             "control-bot", settings.telegram_api_id, settings.telegram_api_hash.get_secret_value()
@@ -303,13 +317,122 @@ class ControlBot:
         else:
             await event.edit(f"⚠️ ارسال نشد. {_failure_text(result)}")
 
+    async def _expand_instruction(
+        self, event: events.NewMessage.Event, replied: object, instruction: str
+    ) -> None:
+        """دستور کوتاه منتور را باز کن و برای تأیید برگردان.
+
+        ترتیب عمدی است و هیچ‌کدام قابل حذف نیست: اول اجازه، بعد سقف هزینه، بعد
+        فراخوانی مدل، بعد محافظ قیمت، و آخر ثبت در پیش‌نویس. بسط دادن **ارسال
+        نیست**؛ متن جای پیش‌نویس می‌نشیند و منتور همان‌طور که قبلاً تأیید می‌کرد
+        تأیید می‌کند. آدم از مدار بیرون نمی‌رود.
+        """
+        if not instruction:
+            await event.reply(
+                f"بعد از «{INSTRUCTION_PREFIX}» بنویسید چه بگوید. "
+                f"مثلاً «{INSTRUCTION_PREFIX} بگو از ویدیو ۱۰ شروع کنه»."
+            )
+            return
+        if self._model_client is None:
+            await event.reply(
+                "مسیر دستور کوتاه فعال نیست. متن کامل را ریپلای کنید تا همان فرستاده شود."
+            )
+            return
+
+        async with session_scope() as session:
+            # همان مسیر اجازه‌ی ریپلای ساده: محدود به همین گفتگو، چون شناسه‌ی پیام
+            # تلگرام فقط داخل یک گفتگو یکتاست.
+            try:
+                draft, _ = await authorise_draft_by_control_message(
+                    session,
+                    int(replied.id),  # type: ignore[attr-defined]
+                    chat_id=int(event.chat_id),
+                    sender_id=event.sender_id,
+                )
+            except ControlNotPermitted:
+                return
+            draft_id = draft.id
+            question = await question_for_draft(session, draft)
+            if not (await budget.check(session, purpose=budget.Purpose.answer)).may_call:
+                await event.reply("سقف هزینه‌ی مدل پر شده. متن کامل را ریپلای کنید.")
+                return
+
+        result = await expand.expand(
+            self._model_client, instruction=instruction, question=question
+        )
+
+        async with session_scope() as session:
+            # ثبت مصرف بی‌قیدوشرط، حتی وقتی فراخوانی شکست خورده: توکن مصرف‌شده در
+            # پاسخ ناقص هم پول است.
+            await budget.record(
+                session,
+                purpose=budget.Purpose.instruction_expansion,
+                model=result.call.model,
+                input_tokens=result.call.input_tokens,
+                output_tokens=result.call.output_tokens,
+                cache_read_tokens=result.call.cache_read_tokens,
+            )
+
+        if result.text is None:
+            await event.reply(
+                f"نشد متن را بسازم: {result.reason}\nمتن کامل را ریپلای کنید تا همان برود."
+            )
+            return
+
+        # محافظ قیمت همین‌جا هم اجرا می‌شود، ولی دستور خود منتور منبع مجاز است:
+        # او آدمِ آکادمی است. چیزی که می‌گیرد، عددی است که مدل **اضافه** کرده.
+        bad = guard.ungrounded_money(result.text, mentor_text=instruction)
+        if bad is not None:
+            log.error("expansion_blocked_money", draft_id=draft_id, amount=bad)
+            await event.reply(
+                "متن ساخته‌شده عددی داشت که در دستور شما نبود، پس رد شد. "
+                "اگر عدد لازم است خودتان در دستور بنویسید."
+            )
+            return
+
+        async with session_scope() as session:
+            try:
+                await drafts.repropose(session, draft_id, body=result.text)
+            except (drafts.DraftNotPending, ValueError) as exc:
+                await event.reply(str(exc))
+                return
+            session.add(
+                AuditLog(
+                    actor=f"control:{event.sender_id}",
+                    action="draft_expanded_from_instruction",
+                    target=str(draft_id),
+                )
+            )
+
+        await event.reply(
+            f"✍️ این را نوشتم:\n\n{result.text}",
+            buttons=[
+                [
+                    Button.inline("✅ تأیید و ارسال", f"approve:{draft_id}".encode()),
+                    Button.inline("🚫 رد", f"reject:{draft_id}".encode()),
+                ]
+            ],
+        )
+
     async def _on_reply(self, event: events.NewMessage.Event) -> None:
-        """ریپلای روی پیام پیش‌نویس، یعنی منتور متن را اصلاح کرده."""
+        """ریپلای روی پیام پیش‌نویس.
+
+        دو معنی دارد و پیشوند از هم جدایشان می‌کند. ریپلای ساده یعنی «این متن را
+        عیناً بفرست» — رفتار همیشگی. ریپلای با پیشوند یعنی «این را بگو، خودت
+        کاملش کن»: دستور کوتاه منتور با لحن آکادمی باز می‌شود و **دوباره برای
+        تأیید** به او برمی‌گردد، نه اینکه فرستاده شود.
+        """
         body = (event.raw_text or "").strip()
         if not body or body.startswith("/"):
             return
         replied = await event.get_reply_message()
         if replied is None:
+            return
+
+        if body.startswith(INSTRUCTION_PREFIX):
+            await self._expand_instruction(
+                event, replied, body[len(INSTRUCTION_PREFIX) :].strip()
+            )
             return
 
         async with session_scope() as session:
