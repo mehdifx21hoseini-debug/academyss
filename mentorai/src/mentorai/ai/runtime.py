@@ -151,14 +151,17 @@ async def _record(
     return run
 
 
-def _statement_answer(metrics: StatementMetrics) -> str:
+def _statement_answer(metrics: StatementMetrics, *, seed: int) -> str:
     """پیش‌نویس بررسی استیتمنت.
 
     عمداً بدون فراخوانی مدل ساخته می‌شود. اعداد اینجا محاسبه شده‌اند و قطعی‌اند؛ عبور
     دادنشان از مدل فقط یک جای تازه برای تغییر عدد می‌سازد، بدون اینکه چیزی اضافه کند.
     منتور در حالت پیش‌نویس متن را می‌بیند و هر جا لازم بود اصلاحش می‌کند.
+
+    `seed` شناسه‌ی پیام است و شکلِ سلام و بدرقه را تعیین می‌کند — تا دو دانشجو یک
+    جمله‌ی یکسان نگیرند، ولی یک استیتمنت دوباره ساخته‌شده همان متن را بدهد.
     """
-    return review.render(metrics)
+    return review.render(metrics, seed=seed)
 
 
 async def _media_silence(session: AsyncSession, message: Message) -> RunResult:
@@ -210,7 +213,7 @@ async def _handle_media(
     if metrics is None:
         return await _media_silence(session, message), None
 
-    answer = _statement_answer(metrics)
+    answer = _statement_answer(metrics, seed=message.id)
     run = await _record(
         session,
         message=message,

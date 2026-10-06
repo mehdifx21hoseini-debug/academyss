@@ -15,6 +15,9 @@
 
 from __future__ import annotations
 
+from datetime import UTC, datetime
+
+from mentorai.config import get_settings
 from mentorai.media.statement import StatementMetrics
 
 TARGET_PROFIT_FACTOR = 1.5
@@ -24,10 +27,58 @@ IDEAL_DRAWDOWN_RANGE = (5.0, 6.0)
 STOP_TRADING_DRAWDOWN_PCT = 30.0
 
 # ایموجی‌ها از همان مجموعه‌ی کم و ثابتی‌اند که در پاسخ‌های واقعی منتورها دیده شده.
-GREETING = "سلام به شما عزیز، روزتون بخیر 🌱"
+# سلام و بدرقه **ثابت نیستند**، و این عمدی است.
+#
+# پیش از این هر استیتمنتی دقیقاً همان یک جمله را می‌گرفت. دانشجویی که دو بار
+# استیتمنت می‌فرستد، یا دو دانشجویی که با هم حرف می‌زنند، همان یک جمله‌ی تکراری را
+# می‌بینند — و تکرار عینِ یک جمله، امضای یک قالب است نه یک آدم.
+#
+# همه‌ی عبارت‌ها از پاسخ‌های واقعی منتورها در `raw_sources/mentor_qa/` درآمده‌اند،
+# نه از سلیقه‌ی سیستم. «سلام به شما عزیز، روزتون بخیر» پرتکرارترین بود (۱۰ بار) و
+# اول فهرست مانده.
+_GREETINGS_DAY: tuple[str, ...] = (
+    "سلام به شما عزیز، روزتون بخیر 🌱",
+    "سلام به شما عزیز، روز بخیر",
+    "سلام، روزتون بخیر 🌹",
+    "سلام، روزتون بخیر و شادی 🌱",
+)
+# داده‌ی منتورها روزمحور است، چون در ساعات کاری جواب می‌دهند. شکل شبانه همان ساختار
+# را می‌گیرد؛ «روزتون بخیر» ساعت نه شب، خودش یک نشانه است. این سلیقه‌ی نگارشی است
+# نه ادعای واقعی، پس بیرون از قاعده‌ی «هیچ چیز اختراع نشود» می‌ماند.
+_GREETINGS_EVENING: tuple[str, ...] = (
+    "سلام به شما عزیز، شبتون بخیر 🌱",
+    "سلام، شبتون بخیر 🌹",
+)
+# مرز روز و شب. پیش از ۸ و پس از ۲۳ ساعات سکوت است، پس بازه‌ی واقعی ۸ تا ۲۳ است.
+EVENING_FROM_HOUR = 17
+
 # عبارت امضایی آکادمی؛ تمرکز بر فرایند به‌جای نتیجه.
-CLOSING_HARD = "تمرکزتون رو روی اجرای درست پلن بذارید، نه سود و ضرر. پرقدرت پیش برید 🌹"
-CLOSING_GOOD = "مسیرتون درسته، همینو ادامه بدید. پرقدرت پیش برید 🌹"
+_CLOSINGS_HARD: tuple[str, ...] = (
+    "تمرکزتون رو روی اجرای درست پلن بذارید، نه سود و ضرر. پرقدرت پیش برید 🌹",
+    "تمرکزتون روی اجرای درست پلن باشه، نه نتیجه‌ی یک معامله. پرقدرت ادامه بدید 🌹",
+    "نتیجه‌ی یک یا دو معامله مهم نیست، اجرای درست پلن مهمه. پرقدرت در کنارتون هستیم 🌹",
+)
+_CLOSINGS_GOOD: tuple[str, ...] = (
+    "مسیرتون درسته، همینو ادامه بدید. پرقدرت پیش برید 🌹",
+    "مسیرتون درسته، همین روند رو حفظ کنید. پرقدرت ادامه بدید 🌹",
+    "عالیه، همینو ادامه بدید. پرقدرت مثل همیشه در کنارتون هستیم 🌹",
+)
+
+# پرتکرارترین شکل‌ها، برای جایی که یک نمونه‌ی ثابت لازم است.
+GREETING = _GREETINGS_DAY[0]
+CLOSING_HARD = _CLOSINGS_HARD[0]
+CLOSING_GOOD = _CLOSINGS_GOOD[0]
+
+
+def _pick(pool: tuple[str, ...], seed: int) -> str:
+    """انتخاب از فهرست، قطعی برای یک ورودی مشخص.
+
+    عمداً تصادفی نیست. دو دلیل: پاسخ باید تکرارپذیر باشد چون ممکن است یک
+    پیش‌نویس دوباره ساخته شود و منتور نباید متن عوض‌شده ببیند؛ و تست تصادفی،
+    تست نیست. `seed` شناسه‌ی پیام است، پس دو دانشجو دو عبارت می‌گیرند و یک
+    استیتمنت همیشه همان عبارت را.
+    """
+    return pool[seed % len(pool)]
 # منتور پیش از نسخه دادن می‌پرسد.
 QUESTION = "یه سؤال هم دارم: استاپ‌هاتون طبق پلن بوده؟ جواب همین، از خود اعداد بیشتر کمک می‌کنه."
 HANDOVER = "هر کجا سؤالی بود در خدمتم."
@@ -120,11 +171,21 @@ def _recovery_path(m: StatementMetrics) -> str | None:
     )
 
 
-def render(metrics: StatementMetrics) -> str:
-    """پاسخ کامل، همان‌طور که به دانشجو می‌رسد."""
+def render(
+    metrics: StatementMetrics, *, seed: int = 0, now: datetime | None = None
+) -> str:
+    """پاسخ کامل، همان‌طور که به دانشجو می‌رسد.
+
+    `seed` شناسه‌ی پیام است و تعیین می‌کند کدام شکلِ سلام و بدرقه بیاید. `now`
+    به وقت آکادمی است و روز را از شب جدا می‌کند.
+    """
+    moment = (now or datetime.now(UTC)).astimezone(get_settings().tz)
+    greetings = (
+        _GREETINGS_EVENING if moment.hour >= EVENING_FROM_HOUR else _GREETINGS_DAY
+    )
     healthy = _healthy(metrics)
     parts = [
-        GREETING,
+        _pick(greetings, seed),
         _opening(metrics),
         _numbers(metrics),
         _profit_factor(metrics),
@@ -132,6 +193,6 @@ def render(metrics: StatementMetrics) -> str:
         _recovery_path(metrics),
         None if healthy else QUESTION,
         HANDOVER if healthy else None,
-        CLOSING_GOOD if healthy else CLOSING_HARD,
+        _pick(_CLOSINGS_GOOD if healthy else _CLOSINGS_HARD, seed),
     ]
     return "\n\n".join(part for part in parts if part)
