@@ -42,6 +42,7 @@ STATEMENT_REASON = "statement_review"
 
 
 class SilenceReason(enum.StrEnum):
+    rule_identity_question = "rule_identity_question"
     rule_money = "rule_money"
     rule_complaint = "rule_complaint"
     rule_account = "rule_account"

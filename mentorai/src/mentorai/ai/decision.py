@@ -16,6 +16,9 @@ from mentorai.text.matching import contains_phrase
 
 
 class EscalationTrigger(enum.StrEnum):
+    # اول فهرست است تا وقتی پیامی هم این را دارد و هم چیز دیگری را، دلیل ثبت‌شده
+    # همین باشد: حساس‌ترین پیامی که این سیستم می‌گیرد.
+    identity_question = "identity_question"
     explicit_human_request = "explicit_human_request"
     money = "money"
     complaint = "complaint"
@@ -25,6 +28,21 @@ class EscalationTrigger(enum.StrEnum):
 # عبارت‌ها به شکل نرمال‌شده نوشته شده‌اند: بدون نیم‌فاصله، با «ی» و «ک» فارسی.
 # مقایسه هم روی متن نرمال‌شده انجام می‌شود، پس نگارش‌های مختلف همگی می‌گیرند.
 RULES: dict[EscalationTrigger, tuple[str, ...]] = {
+    # عبارت‌هایی که بی‌هیچ زمینه‌ای فقط یک معنی دارند. بقیه با قاعده‌ی جفتی پایین
+    # گرفته می‌شوند.
+    EscalationTrigger.identity_question: (
+        "ربات یا آدم",
+        "ربات یا انسان",
+        "آدم یا ربات",
+        "آدم هستی",
+        "آدم هستید",
+        "آدم واقعی",
+        "واقعا خودتی",
+        "واقعا خودتونید",
+        "خودت جواب میدی",
+        "خودتون جواب میدید",
+        "خودتون جواب میدین",
+    ),
     EscalationTrigger.explicit_human_request: (
         "منتور",
         "پشتیبانی",
@@ -120,6 +138,57 @@ def _is_academy_price_question(normalized: str) -> bool:
     )
 
 
+# «ربات هستی؟» — تصمیم مالک: پیام خوانده‌نشده بماند و خود منتور جواب بدهد.
+#
+# چرا قاعده‌ی جفتی و نه واژه‌ی تنها. در فارکس «ربات» یعنی اکسپرت معاملاتی، و
+# «ربات معامله‌گر خوبه؟» یا «یه ربات معاملاتی معرفی کن» پرسش آموزشی‌اند. اگر «ربات»
+# تنها کافی بود، این پرسش‌ها نه‌تنها بی‌پاسخ می‌ماندند، بلکه **کل گفتگو** دوازده
+# ساعت به منتور سپرده می‌شد. همان درسی که `ADR-028` برای «قیمت» داد.
+#
+# پس دو طرف لازم است: واژه‌ای از جنس «ماشین»، و واژه‌ای که آن را به **طرف گفتگو**
+# نسبت می‌دهد.
+IDENTITY_WORDS: tuple[str, ...] = (
+    "ربات",
+    "بات",
+    "هوش مصنوعی",
+    "ai",
+    "chatgpt",
+    "gpt",
+    "چت جی پی تی",
+    "چت جیپیتی",
+    "جی پی تی",
+    "منشی",
+    "اتوماتیک",
+    "خودکار",
+)
+
+ADDRESS_WORDS: tuple[str, ...] = (
+    "هستی",
+    "هستید",
+    "هستین",
+    "تویی",
+    "شمایی",
+    "جواب میده",
+    "جواب میدی",
+    "جواب میدید",
+    "جواب میدین",
+    "پاسخ میده",
+    "پاسخ میدی",
+    "پاسخ میدید",
+    "داره جواب",
+    "پشت این اکانت",
+    "پشت اکانت",
+    "داری جواب",
+)
+
+
+def _is_identity_question(normalized: str) -> bool:
+    """پرسش درباره‌ی هویت طرف گفتگو، نه درباره‌ی ابزار معاملاتی."""
+    return any(contains_phrase(normalized, w) for w in IDENTITY_WORDS) and any(
+        contains_phrase(normalized, w) for w in ADDRESS_WORDS
+    )
+
+
 def deterministic_trigger(message_text: str) -> EscalationTrigger | None:
     """اگر پیام یکی از موضوعات همیشه-انسانی را لمس کند، همان را برگردان.
 
@@ -137,5 +206,7 @@ def deterministic_trigger(message_text: str) -> EscalationTrigger | None:
         # قاعده‌ی جفتی دقیقاً در جایگاه مالی بررسی می‌شود تا ترتیب قطعی بماند:
         # یک پیام همیشه همان دلیل را می‌دهد.
         if trigger is EscalationTrigger.money and _is_academy_price_question(normalized):
+            return trigger
+        if trigger is EscalationTrigger.identity_question and _is_identity_question(normalized):
             return trigger
     return None
