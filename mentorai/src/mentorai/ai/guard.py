@@ -14,61 +14,141 @@
 from __future__ import annotations
 
 import re
+from decimal import Decimal, InvalidOperation
 
 from mentorai.knowledge.retrieval import Hit
 from mentorai.text import normalize_for_search
 
-# واحدهایی که عدد کنارشان «مبلغ» است، نه «اندازه».
+# واحدهایی که عدد کنارشان «مبلغ» است، نه «اندازه». هر نگارش به یک شکل متعارف
+# نگاشت می‌شود تا «تومن» و «تومان» یک واحد حساب شوند.
 #
-# «درصد» عمداً اینجا نیست: «قانون ۲ درصد» آموزش است نه قیمت، و بیشتر پایگاه دانش
-# از همین جنس است. «پیپ» و «لات» هم به همین دلیل نیستند.
-MONEY_UNITS: tuple[str, ...] = (
-    "تومان",
-    "تومن",
-    "ریال",
-    "دلار",
-    "یورو",
-    "درهم",
-    "تتر",
+# «درصد»، «پیپ» و «لات» عمداً اینجا نیستند: «قانون ۲ درصد» آموزش است نه قیمت، و
+# بیشتر پایگاه دانش از همین جنس است. اگر این‌ها هم مبلغ حساب می‌شدند، محافظ
+# به‌جای محافظه‌کار شدن، کل لایه‌ی آموزشی را خفه می‌کرد.
+#
+# نشانه‌ها و واژه‌های لاتین هم هستند، با اینکه بند ۸ دستور مدل واژه‌ی لاتین را
+# ممنوع کرده: محافظ نباید به درست کار کردن قاعده‌ی دیگری تکیه کند.
+_UNITS: dict[str, str] = {
+    "تومان": "تومان",
+    "تومن": "تومان",
+    "ریال": "ریال",
+    "دلار": "دلار",
+    "$": "دلار",
+    "usd": "دلار",
+    "یورو": "یورو",
+    "€": "یورو",
+    "eur": "یورو",
+    "درهم": "درهم",
+    "تتر": "تتر",
+    "usdt": "تتر",
+}
+
+# واژه‌های مقیاس. نادیده گرفتنشان یعنی «۵۰۰ تومان» و «۵۰۰ هزار تومان» یک مبلغ
+# حساب شوند — یک خطای هزاربرابری که محافظ را بی‌معنی می‌کند.
+_SCALES: dict[str, int] = {"هزار": 1_000, "میلیون": 1_000_000, "میلیارد": 1_000_000_000}
+
+_UNIT_ALT = "|".join(re.escape(u) for u in sorted(_UNITS, key=len, reverse=True))
+_SCALE_ALT = "|".join(_SCALES)
+
+# عدد، بعد صفر یا چند واژه‌ی مقیاس، بعد واحد پول.
+_AMOUNT = re.compile(
+    r"(?P<number>\d[\d.,٫٬\s]*?)"
+    r"(?P<scales>(?:\s*(?:" + _SCALE_ALT + r"))*)"
+    r"\s*(?P<unit>" + _UNIT_ALT + r")",
 )
 
-# عددی که کنار واحد پول نشسته. فاصله‌ی میان‌شان می‌تواند واژه‌ی مقیاس باشد:
-# «۵۰۰ هزار تومان» یا «۲ میلیون تومان».
-_SCALE = r"(?:\s*(?:هزار|میلیون|میلیارد))*"
-_AMOUNT = re.compile(
-    r"(\d[\d,٬.]*)" + _SCALE + r"\s*(?:" + "|".join(MONEY_UNITS) + r")",
-)
+# واحد پولی که عددِ خوانا پیش از خودش ندارد: «پانصد هزار تومان»، «مبلغ تومانی».
+# این حالت **بسته** می‌شود، نه نادیده گرفته — محافظی که نمی‌تواند بخواند، نباید
+# اجازه بدهد.
+_BARE_UNIT = re.compile(r"(?<![\d\s])?(?:^|[^\d\s])\s*(?:" + _UNIT_ALT + r")")
+
+
+def _value(raw: str) -> Decimal | None:
+    """عدد فارسی یا لاتین را با جداکننده‌های رایجش بخوان.
+
+    `٬` و `,` جداکننده‌ی هزارگان‌اند و حذف می‌شوند. `٫` و `.` اعشارند — ولی فقط
+    وقتی یک بار آمده باشند و یک یا دو رقم پشتشان باشد، چون «۱.۵۰۰.۰۰۰» در فارسی
+    هزارگان است نه اعشار. تا پیش از این همه‌ی جداکننده‌ها حذف می‌شدند و «۱.۵ دلار»
+    به ۱۵ تبدیل می‌شد.
+    """
+    text = re.sub(r"[\s,٬]", "", raw).replace("٫", ".")
+    if text.count(".") == 1:
+        head, tail = text.split(".")
+        if not (1 <= len(tail) <= 2):
+            text = head + tail
+    else:
+        text = text.replace(".", "")
+    try:
+        return Decimal(text) if text else None
+    except InvalidOperation:
+        return None
 
 
 def money_amounts(text: str) -> list[str]:
-    """مبلغ‌های متن، به شکل نرمال‌شده‌ی رقمی.
+    """مبلغ‌های متن، به شکل متعارف «ارزش:واحد».
+
+    مقیاس در خود ارزش ضرب می‌شود و واحد همراهش می‌ماند، پس «۵۰۰ هزار تومان» و
+    «۵۰۰ تومان» و «۵۰۰ هزار دلار» سه مبلغ متفاوت‌اند. مقایسه‌ی رشته‌ی خالی رقم‌ها
+    این سه را یکی می‌دید.
 
     روی متن نرمال‌شده کار می‌کند، پس «۵۰۰» و «500» یکی حساب می‌شوند — وگرنه محافظ
     را می‌شد تنها با عوض کردن شکل ارقام دور زد.
     """
-    normalized = normalize_for_search(text)
-    return [_digits(m.group(1)) for m in _AMOUNT.finditer(normalized)]
+    normalized = normalize_for_search(text).lower()
+    found: list[str] = []
+    for match in _AMOUNT.finditer(normalized):
+        value = _value(match.group("number"))
+        if value is None:
+            continue
+        for scale, factor in _SCALES.items():
+            if scale in match.group("scales"):
+                value *= factor
+        unit = _UNITS[match.group("unit")]
+        found.append(f"{value.normalize():f}:{unit}")
+    return found
 
 
-def _digits(raw: str) -> str:
-    return re.sub(r"[^\d]", "", raw)
+def has_unreadable_amount(text: str) -> bool:
+    """واحد پولی که محافظ نتوانست عددش را بخواند.
+
+    «پانصد هزار تومان» با حرف نوشته شده و الگوی رقمی نمی‌گیردش. جهت درست اینجا
+    بستن است: محافظی که ادعا می‌کند مبلغی ندیده، در حالی که واحد پول در متن هست،
+    دقیقاً همان حالتی است که یک قیمت ساختگی از آن رد می‌شود.
+    """
+    normalized = normalize_for_search(text).lower()
+    units = len(re.findall(r"(?:" + _UNIT_ALT + r")", normalized))
+    return units > len(money_amounts(normalized))
 
 
 def ungrounded_money(answer: str, *, hits: list[Hit], question: str = "") -> str | None:
-    """مبلغی که در هیچ منبع رسمی و در خود سؤال نیست — یا `None`.
+    """مبلغی که هیچ منبع رسمی‌ای **به‌عنوان مبلغ** نگفته — یا `None`.
 
     **چرا این سخت‌ترین قاعده‌ی سیستم است.** بدترین خطای ممکن این دستیار، گفتن یک
     قیمت اشتباه به دانشجوست: برخلاف توضیح آموزشی ناقص، این یکی قابل جبران نیست و
-    مستقیم به پول آدم‌ها می‌خورد. پس شرط، تکرار عینِ عدد از منبع است، نه قضاوت
+    مستقیم به پول آدم‌ها می‌خورد. پس شرط، تکرار عینِ مبلغ از منبع است، نه قضاوت
     مدل درباره‌ی اینکه «منبع داشتم یا نه».
 
-    سؤال خود دانشجو هم منبع مجاز است: اگر او پرسیده «با ۱۰۰ دلار می‌شه شروع کرد؟»،
-    تکرار همان ۱۰۰ در پاسخ، اختراع قیمت نیست.
+    سه چیز اینجا عمدی و سخت‌گیرانه است:
+
+    ۱. **فقط مبلغ‌های منبع مجازند، نه هر عددی که در منبع هست.** سندی که می‌گوید
+       «دوره ۱۵ جلسه دارد» عدد ۱۵ را دارد، ولی آن شماره‌ی جلسه است نه قیمت.
+       پذیرفتن هر عدد، «شهریه ۱۵ هزار تومان است» را تأیید می‌کرد.
+
+    ۲. **سؤال دانشجو منبع نیست.** اگر او بپرسد «قیمت دوره ۵۰ هزار تومانه؟»،
+       تکرار همان عدد در پاسخ، حدس خودش را به اعلام رسمی آکادمی تبدیل می‌کند.
+       این یعنی پرسش قیمتِ آکادمی همیشه از قاعده‌ی قطعی `rule_money` یا از همین
+       محافظ رد می‌شود و به منتور می‌رسد — و همین درست است.
+
+    ۳. **منبع `mentor` کافی نیست.** تجربه‌ی شخصی منتور، اعلام رسمی آکادمی نیست؛
+       همان تفکیکی که بند ۳ دستور مدل می‌کشد و اینجا اجرا می‌شود.
 
     جهت خطا عمدی است. اگر منبع رسمی «پانصد هزار تومان» را با حرف نوشته باشد و مدل
     «۵۰۰ هزار تومان» بنویسد، این تابع ردش می‌کند و پیام به منتور می‌رود. سکوتِ
     بی‌دلیل، بهای ارزانی است در برابر قیمتِ ساختگی.
     """
+    if has_unreadable_amount(answer):
+        return "مبلغ ناخوانا"
+
     amounts = money_amounts(answer)
     if not amounts:
         return None
@@ -77,8 +157,6 @@ def ungrounded_money(answer: str, *, hits: list[Hit], question: str = "") -> str
     for hit in hits:
         if hit.source_class == "official":
             allowed.update(money_amounts(hit.content))
-            allowed.update(_digits(x) for x in re.findall(r"\d[\d,٬.]*", hit.content))
-    allowed.update(_digits(x) for x in re.findall(r"\d[\d,٬.]*", normalize_for_search(question)))
 
     for amount in amounts:
         if amount not in allowed:
@@ -86,4 +164,4 @@ def ungrounded_money(answer: str, *, hits: list[Hit], question: str = "") -> str
     return None
 
 
-__all__ = ["MONEY_UNITS", "money_amounts", "ungrounded_money"]
+__all__ = ["has_unreadable_amount", "money_amounts", "ungrounded_money"]

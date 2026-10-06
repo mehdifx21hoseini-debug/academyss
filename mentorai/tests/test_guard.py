@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import pytest
 
-from mentorai.ai.guard import money_amounts, ungrounded_money
+from mentorai.ai.guard import has_unreadable_amount, money_amounts, ungrounded_money
 from mentorai.knowledge.retrieval import Hit
 
 
@@ -38,14 +38,17 @@ def _hit(content: str, *, source_class: str = "official", chunk_id: int = 1) -> 
 @pytest.mark.parametrize(
     ("text", "expected"),
     [
-        ("قیمت دوره ۵۰۰ هزار تومان است", ["500"]),
+        ("قیمت دوره ۵۰۰ هزار تومان است", ["500000:تومان"]),
         # ارقام لاتین و فارسی یکی حساب می‌شوند، وگرنه محافظ را می‌شد با عوض کردن
         # شکل ارقام دور زد.
-        ("قیمت دوره 500 هزار تومان است", ["500"]),
-        ("با ۱۰۰ دلار شروع کنید", ["100"]),
-        ("۲ میلیون تومان", ["2"]),
-        ("۱,۵۰۰,۰۰۰ ریال", ["1500000"]),
-        ("هم ۵۰ دلار و هم ۳۰۰ تومان", ["50", "300"]),
+        ("قیمت دوره 500 هزار تومان است", ["500000:تومان"]),
+        ("با ۱۰۰ دلار شروع کنید", ["100:دلار"]),
+        ("۲ میلیون تومان", ["2000000:تومان"]),
+        ("۱,۵۰۰,۰۰۰ ریال", ["1500000:ریال"]),
+        ("هم ۵۰ دلار و هم ۳۰۰ تومان", ["50:دلار", "300:تومان"]),
+        # نشانه و واژه‌ی لاتین هم واحد پول‌اند. بند ۸ دستور مدل واژه‌ی لاتین را
+        # ممنوع کرده، ولی محافظ نباید به درست کار کردن قاعده‌ی دیگری تکیه کند.
+        ("۱۰۰ $ و 50 USDT", ["100:دلار", "50:تتر"]),
         # «درصد» واحد پول نیست: «قانون ۲ درصد» آموزش است، و بیشتر پایگاه دانش از
         # همین جنس است. اگر درصد هم مبلغ حساب می‌شد، محافظ کل لایه‌ی آموزشی را
         # خفه می‌کرد.
@@ -68,7 +71,7 @@ def test_an_invented_price_is_blocked() -> None:
     """شکستی که می‌بندد: مدل قیمتی بگوید که در هیچ منبعی نیست."""
     hits = [_hit("دوره مقدماتی پانزده جلسه دارد و شامل متاتریدر است.")]
 
-    assert ungrounded_money("قیمت دوره ۵۰۰ هزار تومان است", hits=hits) == "500"
+    assert ungrounded_money("قیمت دوره ۵۰۰ هزار تومان است", hits=hits) == "500000:تومان"
 
 
 def test_a_price_repeated_from_an_official_source_passes() -> None:
@@ -84,20 +87,28 @@ def test_a_price_from_a_mentor_source_is_not_enough() -> None:
     """
     hits = [_hit("فکر کنم دوره ۵۰۰ هزار تومان بود.", source_class="mentor")]
 
-    assert ungrounded_money("قیمت دوره ۵۰۰ هزار تومان است", hits=hits) == "500"
+    assert ungrounded_money("قیمت دوره ۵۰۰ هزار تومان است", hits=hits) == "500000:تومان"
 
 
-def test_echoing_the_student_own_number_is_not_inventing_a_price() -> None:
-    """اگر دانشجو پرسیده «با ۱۰۰ دلار می‌شه؟»، تکرار همان ۱۰۰ اختراع نیست."""
+def test_the_student_own_number_does_not_ground_a_price() -> None:
+    """عدد سؤال، منبع نیست — و این عمدی و سخت‌گیرانه است.
+
+    اگر دانشجو بپرسد «قیمت دوره ۵۰ هزار تومانه؟» و پاسخ همان عدد را تکرار کند،
+    حدس خودِ او به اعلام رسمی آکادمی تبدیل می‌شود. اول این تابع عدد سؤال را منبع
+    مجاز می‌شمرد؛ بازبینی امنیتی همین را گرفت.
+
+    بهایش این است که «با ۱۰۰ دلار می‌شه شروع کرد؟» هم به منتور می‌رود. برای
+    پرسشی که به سرمایه‌ی آدم مربوط است، همین درست است.
+    """
     hits = [_hit("سرمایه‌ی شروع باید پولی باشد که از دست رفتنش به زندگی آسیب نزند.")]
 
     assert (
         ungrounded_money(
-            "با ۱۰۰ دلار هم می‌توانید شروع کنید",
+            "بله ۵۰ هزار تومان است",
             hits=hits,
-            question="با ۱۰۰ دلار می‌شه شروع کرد؟",
+            question="قیمت دوره ۵۰ هزار تومانه؟",
         )
-        is None
+        == "50000:تومان"
     )
 
 
@@ -105,7 +116,10 @@ def test_one_bad_amount_among_good_ones_still_blocks() -> None:
     """کافی است یک عدد ساختگی باشد. پاسخ نیمه‌درست، درست نیست."""
     hits = [_hit("شهریه دوره ۵۰۰ هزار تومان است.")]
 
-    assert ungrounded_money("دوره ۵۰۰ هزار تومان و منتورینگ ۹۹۹ هزار تومان است", hits=hits) == "999"
+    assert (
+        ungrounded_money("دوره ۵۰۰ هزار تومان و منتورینگ ۹۹۹ هزار تومان است", hits=hits)
+        == "999000:تومان"
+    )
 
 
 def test_an_answer_with_no_money_is_untouched() -> None:
@@ -116,7 +130,7 @@ def test_an_answer_with_no_money_is_untouched() -> None:
 
 
 def test_no_sources_means_any_amount_is_ungrounded() -> None:
-    assert ungrounded_money("قیمت ۵۰۰ هزار تومان است", hits=[]) == "500"
+    assert ungrounded_money("قیمت ۵۰۰ هزار تومان است", hits=[]) == "500000:تومان"
 
 
 def test_a_digit_shape_swap_does_not_slip_past() -> None:
@@ -126,4 +140,71 @@ def test_a_digit_shape_swap_does_not_slip_past() -> None:
     """
     hits = [_hit("شهریه ۵۰۰ هزار تومان است.")]
     assert ungrounded_money("قیمت 500 هزار تومان است", hits=hits) is None
-    assert ungrounded_money("قیمت 700 هزار تومان است", hits=hits) == "700"
+    assert ungrounded_money("قیمت 700 هزار تومان است", hits=hits) == "700000:تومان"
+
+
+# ---------------------------------------------------------------------------
+# سه راه فرار که بازبینی امنیتی گرفت
+# ---------------------------------------------------------------------------
+
+
+def test_a_non_money_number_in_a_source_does_not_ground_a_price() -> None:
+    """بدترین راه فرارِ نسخه‌ی اول محافظ.
+
+    سند رسمی می‌گوید «دوره ۱۵ جلسه دارد». عدد ۱۵ در آن هست — ولی شماره‌ی جلسه
+    است، نه قیمت. نسخه‌ی اول هر عددِ منبع را مجاز می‌شمرد، پس «شهریه ۱۵ هزار
+    تومان است» از محافظ رد می‌شد: یک قیمت کاملاً ساختگی، با مُهر تأیید.
+
+    حالا فقط چیزی مجاز است که در منبع **به‌عنوان مبلغ** آمده باشد.
+    """
+    hits = [_hit("دوره مقدماتی ۱۵ جلسه دارد و قانون ۲ درصد را آموزش می‌دهد.")]
+
+    assert ungrounded_money("شهریه دوره ۱۵ هزار تومان است", hits=hits) == "15000:تومان"
+
+
+def test_the_scale_word_is_part_of_the_amount() -> None:
+    """بی‌توجهی به مقیاس، یک خطای هزاربرابری است.
+
+    منبع «۵۰۰ تومان» گفته و پاسخ «۵۰۰ هزار تومان». نسخه‌ی اول هر دو را «۵۰۰»
+    می‌دید و اجازه می‌داد.
+    """
+    hits = [_hit("هزینه‌ی انتقال ۵۰۰ تومان است.")]
+
+    assert ungrounded_money("قیمت دوره ۵۰۰ هزار تومان است", hits=hits) == "500000:تومان"
+    # و برعکسش هم نباید بگذرد.
+    assert ungrounded_money("هزینه ۵۰۰ تومان است", hits=hits) is None
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        # اعشار: یک جداکننده با یک یا دو رقم پشتش.
+        ("۱.۵ دلار", ["1.5:دلار"]),
+        ("۱٫۵ دلار", ["1.5:دلار"]),
+        # هزارگان: جداکننده‌های متعدد، یا بیش از دو رقم پشت نقطه.
+        ("۱,۵۰۰,۰۰۰ ریال", ["1500000:ریال"]),
+        ("۱.۵۰۰.۰۰۰ ریال", ["1500000:ریال"]),
+        ("۱٬۵۰۰ تومان", ["1500:تومان"]),
+    ],
+)
+def test_separators_are_read_the_way_persian_writes_them(
+    text: str, expected: list[str]
+) -> None:
+    """نسخه‌ی اول همه‌ی جداکننده‌ها را حذف می‌کرد، پس «۱.۵ دلار» می‌شد ۱۵ دلار."""
+    assert money_amounts(text) == expected
+
+
+def test_an_amount_spelled_in_words_fails_closed() -> None:
+    """محافظی که نمی‌تواند بخواند، نباید اجازه بدهد.
+
+    «پانصد هزار تومان» الگوی رقمی ندارد. نسخه‌ی اول نتیجه می‌گرفت «مبلغی نیست» و
+    رد می‌کرد به بیرون — دقیقاً همان حالتی که یک قیمت ساختگی از آن می‌گذرد.
+    """
+    assert has_unreadable_amount("قیمت دوره پانصد هزار تومان است")
+    assert ungrounded_money("قیمت دوره پانصد هزار تومان است", hits=[]) == "مبلغ ناخوانا"
+
+
+def test_a_readable_amount_is_not_flagged_as_unreadable() -> None:
+    """نیمه‌ی دیگر: بسته شدن به‌خاطر نخواندن نباید به همه چیز تعمیم پیدا کند."""
+    assert not has_unreadable_amount("قیمت دوره ۵۰۰ هزار تومان است")
+    assert not has_unreadable_amount("پین بار سایه‌ی بلند دارد")
