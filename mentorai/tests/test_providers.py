@@ -160,3 +160,34 @@ async def test_a_broken_configuration_is_reported_without_a_traceback(
 
     assert code == 1
     assert "پیکربندی هوش مصنوعی ناقص است" in capsys.readouterr().err
+
+
+def test_model_check_image_is_a_valid_png() -> None:
+    """مدل تصویر معیوب را درست رد می‌کند؛ پس تصویر آزمایشی باید سالم باشد.
+
+    یک بار PNG دست‌نویس با چک‌سام غلط، `model-check` را روی سرور ❌ کرد
+    (`Could not process image`) و هیچ آزمونی با مدل ساختگی آن را نگرفت.
+    """
+    import struct
+    import zlib
+
+    from mentorai.model_check import _PIXEL
+
+    assert _PIXEL[:8] == b"\x89PNG\r\n\x1a\n"
+    chunks: list[tuple[bytes, bytes]] = []
+    pos = 8
+    while pos < len(_PIXEL):
+        (length,) = struct.unpack(">I", _PIXEL[pos : pos + 4])
+        kind = _PIXEL[pos + 4 : pos + 8]
+        body = _PIXEL[pos + 8 : pos + 8 + length]
+        (crc,) = struct.unpack(">I", _PIXEL[pos + 8 + length : pos + 12 + length])
+        assert zlib.crc32(kind + body) & 0xFFFFFFFF == crc, kind
+        chunks.append((kind, body))
+        pos += 12 + length
+    assert pos == len(_PIXEL)
+    assert [kind for kind, _ in chunks] == [b"IHDR", b"IDAT", b"IEND"]
+
+    width, height, depth, color = struct.unpack(">IIBB", chunks[0][1][:10])
+    assert (depth, color) == (8, 2)  # RGB، ۸ بیت
+    raw = zlib.decompress(chunks[1][1])
+    assert len(raw) == height * (1 + width * 3)  # هر سطر: یک بایت فیلتر + پیکسل‌ها
