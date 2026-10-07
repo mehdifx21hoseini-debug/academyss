@@ -280,6 +280,10 @@ class AccountGateway:
             return
 
         peer = await event.get_sender()
+        # در گفتگوی خصوصی، «chat» طرف مقابل است. فرستنده برای پیام خروجی خود حساب است،
+        # پس ربات بودن را از گفتگو می‌خوانیم نه از فرستنده؛ وگرنه پیام‌های خود منتور به
+        # ربات (مثل `/link`) ثبت می‌شد و گفتگو را به دست منتور می‌داد (ADR-038).
+        chat = await event.get_chat()
         inbound = build_inbound(
             account_slug=self.slug,
             chat_id=int(event.chat_id),
@@ -294,6 +298,7 @@ class AccountGateway:
             sent_at=message.date,
             is_private=bool(event.is_private),
             is_outgoing=bool(message.out),
+            is_bot_chat=bool(getattr(chat, "bot", False)),
         )
 
         async with session_scope() as session:
