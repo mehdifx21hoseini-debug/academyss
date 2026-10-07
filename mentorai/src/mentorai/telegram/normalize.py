@@ -12,9 +12,15 @@ from typing import Any
 
 from mentorai.text import normalize_for_storage
 
+# گفتگوی سرویسی «Telegram» که کد ورود و اعلان‌های امنیتی از آن می‌رسد. کد ورود به
+# حساب نباید هرگز به مدل برسد یا پیش‌نویس بسازد (ADR-038).
+TELEGRAM_SERVICE_ID = 777000
+
 
 class SkipReason(enum.StrEnum):
     not_private = "not_private"
+    service_chat = "service_chat"
+    bot_chat = "bot_chat"
     excluded_chat = "excluded_chat"
     assistant_disabled = "assistant_disabled"
     empty = "empty"
@@ -35,6 +41,8 @@ class InboundMessage:
     sent_at: datetime
     is_private: bool
     is_outgoing: bool
+    # طرف مقابل گفتگو یک ربات است. با مقدار پیش‌فرض، سازنده‌های قدیمی نمی‌شکنند.
+    is_bot_chat: bool = False
 
 
 _MEDIA_ATTRS = (
@@ -76,6 +84,7 @@ def build_inbound(
     sent_at: datetime,
     is_private: bool,
     is_outgoing: bool,
+    is_bot_chat: bool = False,
 ) -> InboundMessage:
     text = normalize_for_storage(raw_text) if raw_text else None
     return InboundMessage(
@@ -92,6 +101,7 @@ def build_inbound(
         sent_at=sent_at,
         is_private=is_private,
         is_outgoing=is_outgoing,
+        is_bot_chat=is_bot_chat,
     )
 
 
@@ -103,10 +113,15 @@ def skip_reason(
     """چرا این پیام نباید پردازش شود، یا None اگر باید بشود.
 
     طبق ADR-008: گفتگوی خصوصی دونفره پیش‌فرض پردازش می‌شود، گروه و کانال هرگز، و
-    گفتگوهای فهرست استثنا کنار گذاشته می‌شوند.
+    گفتگوهای فهرست استثنا کنار گذاشته می‌شوند. طبق ADR-038 گفتگوی سرویسی تلگرام
+    (۷۷۷۰۰۰) و گفتگو با هر ربات هم همیشه کنار گذاشته می‌شوند، بی‌نیاز از فهرست استثنا.
     """
     if not message.is_private:
         return SkipReason.not_private
+    if TELEGRAM_SERVICE_ID in (message.chat_id, message.sender_user_id):
+        return SkipReason.service_chat
+    if message.is_bot_chat:
+        return SkipReason.bot_chat
     if message.chat_id in excluded_peer_ids or message.sender_user_id in excluded_peer_ids:
         return SkipReason.excluded_chat
     if message.text is None and message.media_type is None:

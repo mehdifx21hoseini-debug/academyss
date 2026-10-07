@@ -60,3 +60,35 @@ def test_text_is_normalised_on_the_way_in() -> None:
 
 def test_whitespace_only_text_becomes_none() -> None:
     assert _msg(raw_text="   ").text is None
+
+
+def test_the_telegram_service_chat_is_always_skipped() -> None:
+    """کد ورود به حساب از گفتگوی ۷۷۷۰۰۰ می‌رسد؛ نباید هرگز به مدل برسد (ADR-038)."""
+    msg = _msg(chat_id=777000, sender_user_id=777000, raw_text="Login code: 12345")
+
+    assert skip_reason(msg, excluded_peer_ids=frozenset()) is SkipReason.service_chat
+
+
+def test_a_message_sent_by_the_service_account_is_skipped_whatever_the_chat_id() -> None:
+    """در گفتگوی خصوصی فرستنده و گفتگو یکی‌اند؛ ولی قاعده هر دو را می‌پاید، مثل فهرست استثنا."""
+    msg = _msg(chat_id=100, sender_user_id=777000)
+
+    assert skip_reason(msg, excluded_peer_ids=frozenset()) is SkipReason.service_chat
+
+
+def test_a_bot_chat_is_always_skipped_even_for_the_mentors_own_messages() -> None:
+    incoming = _msg(chat_id=555, sender_user_id=555, is_bot_chat=True)
+    outgoing = _msg(chat_id=555, sender_user_id=999, is_bot_chat=True, is_outgoing=True)
+
+    assert skip_reason(incoming, excluded_peer_ids=frozenset()) is SkipReason.bot_chat
+    assert skip_reason(outgoing, excluded_peer_ids=frozenset()) is SkipReason.bot_chat
+
+
+def test_an_ordinary_private_chat_is_unaffected_by_the_bot_rules() -> None:
+    assert skip_reason(_msg(is_bot_chat=False), excluded_peer_ids=frozenset()) is None
+
+
+def test_a_group_is_still_reported_as_a_group_not_as_a_bot() -> None:
+    msg = _msg(is_private=False, is_bot_chat=True)
+
+    assert skip_reason(msg, excluded_peer_ids=frozenset()) is SkipReason.not_private

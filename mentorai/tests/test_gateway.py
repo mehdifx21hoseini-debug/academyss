@@ -361,3 +361,100 @@ async def test_a_voice_over_the_cap_is_not_even_downloaded(
     assert attachment.extraction.kind == "rejected"
     assert attachment.extraction.refused == Refusal.too_large
     assert message.downloaded is False, "ویس بلند دانلود شد"
+
+
+# ---------------------------------------------------------------------------
+# ربات‌ها و گفتگوی سرویسی تلگرام (ADR-038)
+# ---------------------------------------------------------------------------
+
+
+class _FakeUser:
+    def __init__(self, user_id: int, *, bot: bool = False) -> None:
+        self.id = user_id
+        self.bot = bot
+        self.username = None
+        self.first_name = "x"
+        self.last_name = None
+
+
+class _FakeTelegramMessage:
+    def __init__(self, message_id: int, body: str, *, out: bool) -> None:
+        self.id = message_id
+        self.message = body
+        self.date = datetime.now(UTC)
+        self.reply_to = None
+        self.out = out
+
+
+class _FakeEvent:
+    """رویداد تلگرام، فقط با همان چیزی که `_on_message` واقعاً لمس می‌کند."""
+
+    def __init__(self, *, chat: _FakeUser, sender: _FakeUser, body: str, out: bool) -> None:
+        self.message = _FakeTelegramMessage(1, body, out=out)
+        self.chat_id = chat.id
+        self.sender_id = sender.id
+        self.is_private = True
+        self._chat = chat
+        self._sender = sender
+
+    async def get_sender(self) -> _FakeUser:
+        return self._sender
+
+    async def get_chat(self) -> _FakeUser:
+        return self._chat
+
+
+async def _stored(session: AsyncSession) -> tuple[int, int]:
+    session.expire_all()
+    messages = (await session.execute(select(func.count(Message.id)))).scalar_one()
+    conversations = (await session.execute(select(func.count(Conversation.id)))).scalar_one()
+    return int(messages), int(conversations)
+
+
+async def test_an_ordinary_student_message_is_recorded_through_the_event_handler(
+    session: AsyncSession, gateway: AccountGateway
+) -> None:
+    student = _FakeUser(8000)
+    await gateway._on_message(_FakeEvent(chat=student, sender=student, body="سلام", out=False))
+
+    assert await _stored(session) == (1, 1)
+
+
+async def test_messages_from_a_bot_are_not_recorded(
+    session: AsyncSession, gateway: AccountGateway
+) -> None:
+    """کارت‌های ربات کنترل به حساب منتور می‌رسند؛ نباید «پیام دانشجو» حساب شوند."""
+    control_bot = _FakeUser(8966390519, bot=True)
+    card = "📩 پیام دانشجو: سلام\n\n✍️ پاسخ پیشنهادی"
+
+    await gateway._on_message(
+        _FakeEvent(chat=control_bot, sender=control_bot, body=card, out=False)
+    )
+
+    assert await _stored(session) == (0, 0)
+
+
+async def test_the_mentors_own_message_to_a_bot_is_not_recorded_either(
+    session: AsyncSession, gateway: AccountGateway
+) -> None:
+    """`/link mentor-a` را منتور به ربات می‌فرستد. اگر ثبت شود، گفتگو به دست منتور می‌افتد."""
+    control_bot = _FakeUser(8966390519, bot=True)
+    me = _FakeUser(7794743880)
+
+    await gateway._on_message(
+        _FakeEvent(chat=control_bot, sender=me, body="/link mentor-a", out=True)
+    )
+
+    assert await _stored(session) == (0, 0)
+
+
+async def test_the_telegram_service_chat_is_not_recorded(
+    session: AsyncSession, gateway: AccountGateway
+) -> None:
+    service = _FakeUser(777000)
+
+    await gateway._on_message(
+        _FakeEvent(chat=service, sender=service, body="Login code: 12345", out=False)
+    )
+
+    assert await _stored(session) == (0, 0)
