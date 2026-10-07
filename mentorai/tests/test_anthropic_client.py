@@ -88,10 +88,10 @@ async def test_the_configured_model_and_limits_are_what_the_api_receives(
     fake_api: Any, env: Any
 ) -> None:
     env(
-        ANTHROPIC_MODEL="claude-opus-5-5",
-        ANTHROPIC_EFFORT="low",
-        ANTHROPIC_MAX_TOKENS="6000",
-        ANTHROPIC_TIMEOUT_SECONDS="75",
+        AI_MODEL="claude-opus-5-5",
+        AI_EFFORT="low",
+        AI_MAX_TOKENS="6000",
+        AI_TIMEOUT_SECONDS="75",
     )
     client = AnthropicClient.from_settings()
 
@@ -107,20 +107,22 @@ async def test_the_configured_model_and_limits_are_what_the_api_receives(
     assert call.model == "claude-opus-5-5", "نام مدل واقعی در ثبت اجرا می‌آید"
 
 
-def test_the_defaults_are_the_chosen_model_with_room_to_think(env: Any) -> None:
+def test_the_defaults_are_the_chosen_model_with_room_to_think(fake_api: Any, env: Any) -> None:
     env()
     settings = get_settings()
+    client = AnthropicClient.from_settings()
 
-    assert settings.anthropic_model == "claude-sonnet-5-5"
-    assert settings.anthropic_effort == "medium"
+    assert settings.ai_provider == "anthropic"
+    assert client.model == "claude-sonnet-5-5"
+    assert client.effort == "medium"
     # فکر کردن مدل از همین سقف کم می‌شود. ۲۰۴۸ پیشین پاسخ را نصفه می‌گذاشت.
-    assert settings.anthropic_max_tokens >= 4096
+    assert settings.ai_max_tokens >= 4096
 
 
-def test_every_model_the_settings_can_pick_by_default_has_a_price(env: Any) -> None:
+def test_every_model_the_settings_can_pick_by_default_has_a_price(fake_api: Any, env: Any) -> None:
     """وگرنه سقف هزینه با نرخ جایگزین حساب می‌شود و عددش دیگر واقعی نیست."""
     env()
-    assert get_settings().anthropic_model in budget.PRICES
+    assert AnthropicClient.from_settings().model in budget.PRICES
     for model in ("claude-opus-5-5", "claude-sonnet-5-5"):
         assert budget.price_for(model)[1], f"{model} در جدول قیمت نیست"
 
@@ -186,9 +188,9 @@ async def test_a_normal_finish_is_parsed(fake_api: Any, env: Any) -> None:
 
 def test_a_mistyped_model_name_stops_the_start_not_every_call(fake_api: Any, env: Any) -> None:
     """وگرنه از بیرون «همه‌چیز سالم است، فقط جواب نمی‌دهد» دیده می‌شود."""
-    env(ANTHROPIC_MODEL="claude-sonet-5-5")
+    env(AI_MODEL="claude-sonet-5-5")
 
-    with pytest.raises(ValueError, match="شناخته‌شده نیست"):
+    with pytest.raises(ValueError, match="قیمت شناخته‌شده ندارد"):
         AnthropicClient.from_settings()
 
 
@@ -196,16 +198,38 @@ def test_a_model_that_rejects_the_effort_parameter_is_refused_at_start(
     fake_api: Any, env: Any
 ) -> None:
     """Haiku 4.5 پارامتر effort را نمی‌پذیرد؛ این کلاینت همیشه آن را می‌فرستد."""
-    env(ANTHROPIC_MODEL="claude-haiku-4-5")
+    env(AI_MODEL="claude-haiku-4-5")
 
     with pytest.raises(ValueError, match="effort"):
         AnthropicClient.from_settings()
 
 
-def test_an_unknown_effort_level_is_rejected_by_the_settings(env: Any) -> None:
-    from pydantic import ValidationError
+def test_an_unknown_effort_level_is_refused_at_start(fake_api: Any, env: Any) -> None:
+    env(AI_EFFORT="turbo")
 
-    env(ANTHROPIC_EFFORT="turbo")
+    with pytest.raises(ValueError, match="AI_EFFORT"):
+        AnthropicClient.from_settings()
 
-    with pytest.raises(ValidationError):
-        get_settings()
+
+# ---------------------------------------------------------------------------
+# شکل خروجی که هر مصرف‌کننده می‌خواهد
+# ---------------------------------------------------------------------------
+
+
+async def test_each_caller_gets_the_output_shape_it_asked_for(fake_api: Any, env: Any) -> None:
+    """باگی که تا اینجا دیده نشده بود: `raw()` آرگومان `schema` را نادیده می‌گرفت.
+
+    حافظه‌ی دانشجو و بسط دستور منتور هر دو شکل خود را می‌فرستند، ولی همیشه شکل
+    «پاسخ» به API می‌رسید. حافظه هم بی‌خطا و بی‌اثر می‌ماند، چون `candidates` پیش‌فرض
+    خالی دارد: هیچ‌چیز هیچ‌وقت ثبت نمی‌شد و هیچ‌کس نمی‌فهمید.
+    """
+    from mentorai.ai.expand import SCHEMA as EXPANSION_SCHEMA
+    from mentorai.memory.extract import EXTRACTION_SCHEMA
+
+    env()
+    client = AnthropicClient.from_settings()
+
+    for wanted in (EXTRACTION_SCHEMA, EXPANSION_SCHEMA):
+        await client.raw(system="س", user="ک", schema=wanted)
+        sent = fake_api.client.messages.sent["output_config"]["format"]["schema"]
+        assert sent == wanted

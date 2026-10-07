@@ -281,7 +281,7 @@ async def cmd_run_worker(_: argparse.Namespace) -> int:
     `run-gateway` برای وقتی است که بخواهید فقط دریافت و ذخیره را داشته باشید، بدون
     اینکه هیچ پاسخی تولید شود.
     """
-    from mentorai.ai.client import AnthropicClient
+    from mentorai.ai.providers import build_client
     from mentorai.control.bot import ControlBot
     from mentorai.telegram.channel import TelethonChannel
     from mentorai.telegram.safety import AccountGate, TokenBucket
@@ -294,7 +294,13 @@ async def cmd_run_worker(_: argparse.Namespace) -> int:
         return 1
 
     # همان کلاینت هم برای پاسخ و هم برای خواندن تصویر. سرویس تازه‌ای در کار نیست.
-    model_client = AnthropicClient.from_settings()
+    try:
+        model_client = build_client()
+    except ValueError as exc:
+        # پیش از وصل شدن به تلگرام. پیکربندی ناقص هوش مصنوعی نباید حساب را وصل کند و
+        # بعد سیستمی بسازد که جواب نمی‌دهد.
+        print(f"پیکربندی هوش مصنوعی ناقص است: {exc}", file=sys.stderr)
+        return 1
     gateways = [AccountGateway(a, vision_client=model_client) for a in accounts]
     for gateway in gateways:
         await gateway.start()
@@ -340,6 +346,23 @@ async def cmd_run_worker(_: argparse.Namespace) -> int:
         for gateway in gateways:
             await gateway.stop()
     return 0
+
+
+async def cmd_model_check(args: argparse.Namespace) -> int:
+    """بررسی زنده‌ی ارائه‌دهنده‌ی هوش مصنوعی: هر مسیر مدل، یک بار، با ورودی ساختگی."""
+    from pathlib import Path
+
+    from mentorai.ai.providers import build_client
+    from mentorai.model_check import render, run_checks
+
+    try:
+        client = build_client()
+    except ValueError as exc:
+        print(f"پیکربندی هوش مصنوعی ناقص است: {exc}", file=sys.stderr)
+        return 1
+    steps = await run_checks(client, image_path=Path(args.image) if args.image else None)
+    print(render(client, steps))
+    return 0 if all(s.ok for s in steps) else 1
 
 
 async def cmd_run_gateway(_: argparse.Namespace) -> int:
@@ -415,6 +438,12 @@ def main() -> int:
     panel_user.add_argument("--role", choices=("mentor", "admin"), required=True)
     panel_user.add_argument("--slug", default=None, help="حساب منتور؛ فقط برای نقش منتور")
     panel_user.set_defaults(func=cmd_panel_user)
+
+    check = sub.add_parser(
+        "model-check", help="بررسی زنده‌ی مدل هوش مصنوعی (چند سنت هزینه، بدون داده‌ی دانشجو)"
+    )
+    check.add_argument("--image", default=None, help="تصویر دلخواه برای آزمون خواندن تصویر")
+    check.set_defaults(func=cmd_model_check)
 
     run = sub.add_parser("run-gateway", help="اجرای دروازه برای همه حساب‌های فعال")
     run.set_defaults(func=cmd_run_gateway)
