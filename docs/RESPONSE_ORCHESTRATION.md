@@ -616,6 +616,8 @@ Escalation برای پاسخ جزئی: دلیل `partial_academy_fact` (ستون
 - **🔒 تأیید:** اجرای migration روی سرور، بعد از پشتیبان‌گیری.
 
 ### RO-2: لایه‌ی کدِ خالص و محافظ‌های فوری (بدون مدل)
+
+> **بازتعریف مالک (۲۰۲۶-۱۰-۰۷، ADR-046).** RO-2 اکنون «مرحله‌ی فهم و چندبخشی» است و فقط به‌صورت بازپخش سایه (`mentorai understand-run`) پیاده شده، بدون اتصال به خط زنده. محتوای زیر (محافظ‌ها، قاعده‌ی بحران، قواعد روی ویس) به **RO-2b** رفته و دست‌نخورده منتظر است.
 - **جدید:** `ai/verify.py`، `ai/domain.py`، `ai/planner.py`، `ai/domain_terms.py` (داده).
 - **ویرایش:** `ai/guard.py` (تعمیم اعداد؛ `ungrounded_money` دست‌نخورده)، `ai/decision.py` (`crisis` اولین trigger)، `escalation.py` (`rule_crisis` در `HANDOFF_REASONS`، ترتیب `open_escalations` با بحران اول)، `web/queries.py`، `ai/runtime.py` (اعمال محافظ‌ها روی مسیر قدیمی طبق `OUTPUT_GUARDS`، **و اجرای قواعد قطعی روی رونویسی ویس**).
 - **تست:** `test_verify.py`، `test_domain.py`، `test_planner.py`، `test_decision.py`، `test_escalation.py` — همه با آزمون جهش و مثال‌های منفی.
@@ -631,7 +633,9 @@ Escalation برای پاسخ جزئی: دلیل `partial_academy_fact` (ستون
 - **🔒 تأیید:** آستانه‌های ربط؛ و تصمیم مدل تعبیه‌سازی (شامل خروج داده، هزینه، سرور).
 
 ### RO-4: لایه‌ی مدل و ارکستریتور (بدون ترافیک واقعی)
-- **جدید:** `ai/understanding.py`، `ai/compose.py`، `ai/orchestrator.py`، `eval/response_probes.csv` (بدون داده‌ی دانشجو؛ شامل پروب‌های مبهم و پروب «پول‌های بزرگ»، فقط برای مشاهده).
+
+> `ai/understanding.py` از RO-2 (ADR-046) موجود است؛ RO-4 آن را به ارکستریتور وصل می‌کند و `test_the_live_flow_does_not_call_the_understanding_stage_yet` را آگاهانه وارونه می‌کند.
+- **جدید:** `ai/compose.py`، `ai/orchestrator.py`، `eval/response_probes.csv` (بدون داده‌ی دانشجو؛ شامل پروب‌های مبهم و پروب «پول‌های بزرگ»، فقط برای مشاهده).
 - **ویرایش:** `ai/runtime.py` (انتخاب engine)، `cli.py` (`probe-run`)، `ai/providers.py` (نمونه‌ی دوم کلاینت).
 - **تست:** `test_understanding.py`، `test_compose.py`، `test_orchestrator.py` با `ScriptedClient`؛ تغییرناپذیرهای §۱۶ و §۱۰؛ جهش‌آزمایی.
 - ⚠️ رفتار واقعی Claude با آزمون خودکار قطعی نمی‌شود؛ با `probe-run` و بررسی آماری سنجیده می‌شود.

@@ -449,6 +449,65 @@ async def cmd_compare_report(args: argparse.Namespace) -> int:
     return 0
 
 
+async def cmd_understand_run(args: argparse.Namespace) -> int:
+    """بازپخش مرحله‌ی فهم روی پیام‌های واقعی (RO-2، حالت سایه).
+
+    فقط‌خواندنی است و به پاسخ‌دهی زنده کاری ندارد: به پایگاه داده نمی‌نویسد، چیزی نمی‌فرستد
+    و فقط وقتی هزینه دارد که شما این دستور را بزنید (`--dry-run` هزینه ندارد).
+    """
+    from pathlib import Path
+
+    from mentorai import model_compare as mc
+    from mentorai import understanding_replay as ur
+    from mentorai.ai.providers import build_client
+
+    client = None
+    if not args.dry_run:
+        try:
+            client = build_client()
+        except ValueError as exc:
+            print(f"پیکربندی هوش مصنوعی ناقص است: {exc}", file=sys.stderr)
+            return 1
+
+    try:
+        async with session_scope() as session:
+            if args.cases:
+                cases = mc.load_cases(Path(args.cases), limit=args.limit, seed=args.seed)
+            else:
+                cases = await mc.sample_from_database(session, limit=args.from_db, seed=args.seed)
+            if not cases:
+                print("هیچ پرسشی پیدا نشد", file=sys.stderr)
+                return 1
+            print(f"{len(cases)} پرسش برای فهم")
+            data = await ur.run_replay(
+                session,
+                cases,
+                client,
+                max_cost_usd=args.max_cost_usd,
+                dry_run=args.dry_run,
+                progress=lambda line: print(line, flush=True),
+            )
+    except mc.CompareError as exc:
+        print(f"انجام نشد: {exc}", file=sys.stderr)
+        return 1
+
+    if args.dry_run:
+        print(ur.summarise(data))
+        print("هیچ فایلی نوشته نشد.")
+        return 0
+    if not data.cases:
+        print("هیچ پرسشی به مدل نرسید؛ چیزی نوشته نشد", file=sys.stderr)
+        return 1
+
+    paths = ur.write_replay(data, Path(args.out))
+    print("خلاصه (بی‌متن):")
+    print(ur.summarise(data))
+    print(f"\nخلاصه:           {paths['summary']}")
+    print(f"خروجی کامل (خصوصی): {paths['replay']}")
+    print("⚠️ replay.json پیام واقعی دانشجو دارد. در مخزن نگذارید و جای امن نگه دارید.")
+    return 0
+
+
 async def cmd_run_gateway(_: argparse.Namespace) -> int:
     async with session_scope() as session:
         accounts = list(
@@ -555,6 +614,24 @@ def main() -> int:
     crep.add_argument("--key", required=True, help="key.json که compare-run ساخت")
     crep.add_argument("--graded", required=True, help="برگه‌ی پرشده (csv یا xlsx)")
     crep.set_defaults(func=cmd_compare_report)
+
+    urun = sub.add_parser(
+        "understand-run",
+        help="بازپخش مرحله‌ی فهم روی پیام‌های واقعی (فقط‌خواندنی، بدون اثر روی پاسخ‌دهی؛ "
+        "هزینه‌ی مدل دارد)",
+    )
+    usource = urun.add_mutually_exclusive_group(required=True)
+    usource.add_argument("--cases", help="CSV با ستون question")
+    usource.add_argument("--from-db", type=int, help="چند پیام واقعی دانشجو از پایگاه داده")
+    urun.add_argument("--limit", type=int, default=60, help="سقف پرسش برای --cases")
+    urun.add_argument("--seed", type=int, default=7)
+    urun.add_argument("--max-cost-usd", type=float, default=1.0)
+    urun.add_argument(
+        "--out",
+        default="/out/understanding-replay" if _os.path.isdir("/out") else "understanding-replay",
+    )
+    urun.add_argument("--dry-run", action="store_true", help="فقط پرسش‌ها را بشمار؛ مدل صدا نزن")
+    urun.set_defaults(func=cmd_understand_run)
 
     run = sub.add_parser("run-gateway", help="اجرای دروازه برای همه حساب‌های فعال")
     run.set_defaults(func=cmd_run_gateway)
