@@ -294,7 +294,7 @@ async def cmd_run_worker(_: argparse.Namespace) -> int:
         return 1
 
     # همان کلاینت هم برای پاسخ و هم برای خواندن تصویر. سرویس تازه‌ای در کار نیست.
-    model_client = AnthropicClient()
+    model_client = AnthropicClient.from_settings()
     gateways = [AccountGateway(a, vision_client=model_client) for a in accounts]
     for gateway in gateways:
         await gateway.start()

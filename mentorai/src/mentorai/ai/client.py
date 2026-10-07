@@ -11,22 +11,28 @@ import base64
 import json
 import time
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, Literal, Protocol
+from typing import Any, Literal, Protocol
 
+import structlog
 from pydantic import ValidationError
 
 from mentorai.ai.schema import JSON_SCHEMA, ModelAnswer
 
-if TYPE_CHECKING:
-    pass
+log = structlog.get_logger(__name__)
 
 Effort = Literal["low", "medium", "high", "xhigh", "max"]
 
-DEFAULT_MODEL = "claude-opus-5"
+# مقدار واقعی از `.env` می‌آید (`ANTHROPIC_MODEL`)؛ این‌ها فقط برای ساخت مستقیم
+# کلاینت در آزمون و ابزارند. انتخاب و دلیلش در `ADR-034`.
+DEFAULT_MODEL = "claude-sonnet-5-5"
 # تلاش مدل. برای گفتگوی کوتاه با قوانین صریح، متوسط نقطه‌ی معقولی است؛ عدد نهایی
 # باید با اندازه‌گیری روی مجموعه‌ی ارزیابی انتخاب شود، نه با حدس.
 DEFAULT_EFFORT: Effort = "medium"
-DEFAULT_MAX_TOKENS = 2048
+DEFAULT_MAX_TOKENS = 8000
+
+# مدل‌هایی که پارامتر effort را نمی‌پذیرند. این کلاینت همیشه effort می‌فرستد، پس
+# با این‌ها هر فراخوانی رد می‌شد و کل سیستم بی‌صدا ساکت می‌ماند.
+_NO_EFFORT_MODELS = frozenset({"claude-haiku-4-5"})
 
 
 @dataclass(frozen=True)
@@ -45,6 +51,9 @@ class RawCall:
     output_tokens: int = 0
     cache_read_tokens: int = 0
     error: str | None = None
+    # چرا مدل ایستاد (end_turn، max_tokens، refusal، ...). برای تشخیص «پاسخ بریده
+    # شد» از «پاسخ بد بود»، که درمان‌شان متفاوت است.
+    stop_reason: str | None = None
 
 
 @dataclass(frozen=True)
@@ -117,6 +126,34 @@ class AnthropicClient:
         self._max_tokens = max_tokens
         self._client = AsyncAnthropic(timeout=timeout)
 
+    @classmethod
+    def from_settings(cls) -> AnthropicClient:
+        """کلاینت با مدل و سقف‌های `.env`.
+
+        مدل ناشناخته یا نامناسب همین‌جا رد می‌شود، هنگام روشن شدن. اگر نمی‌شد،
+        غلط تایپی در نام مدل یعنی هر فراخوانی خطا بدهد و سیستم ساکت بماند — دقیقاً
+        همان چیزی که از بیرون شبیه «همه‌چیز سالم، فقط جواب نمی‌دهد» دیده می‌شود.
+        """
+        from mentorai.ai.budget import PRICES
+        from mentorai.config import get_settings
+
+        settings = get_settings()
+        model = settings.anthropic_model
+        if model not in PRICES:
+            known = ", ".join(sorted(PRICES))
+            raise ValueError(
+                f"ANTHROPIC_MODEL={model!r} شناخته‌شده نیست. مدل‌های شناخته‌شده: {known}. "
+                "قیمتش هم باید در جدول `budget.PRICES` باشد، وگرنه سقف هزینه واقعی نیست."
+            )
+        if model in _NO_EFFORT_MODELS:
+            raise ValueError(f"{model} پارامتر effort را نمی‌پذیرد و با این کلاینت کار نمی‌کند.")
+        return cls(
+            model=model,
+            effort=settings.anthropic_effort,
+            max_tokens=settings.anthropic_max_tokens,
+            timeout=settings.anthropic_timeout_seconds,
+        )
+
     async def raw(self, *, system: str, user: str, schema: dict[str, object]) -> RawCall:
         """یک فراخوانی با خروجی ساختاریافته. هرگز استثنا پرتاب نمی‌کند."""
         started = time.monotonic()
@@ -145,6 +182,25 @@ class AnthropicClient:
         """اندازه‌گیری‌ها و متن پاسخ، مشترک بین همه‌ی فراخوانی‌ها."""
         usage: Any = getattr(response, "usage", None)
         body = next((b.text for b in response.content if b.type == "text"), None)
+        stop_reason = getattr(response, "stop_reason", None)
+
+        # پاسخی که نیمه‌کاره بریده شده هرگز موفق حساب نمی‌شود، حتی اگر تصادفاً
+        # JSON معتبر باشد. فکر کردن مدل هم از همین سقف کم می‌شود؛ بریده شدن یعنی
+        # سقف کم است، نه اینکه مدل «پاسخی نداشته».
+        error: str | None = None
+        if stop_reason == "max_tokens":
+            error = f"پاسخ مدل به سقف {self._max_tokens} توکن خورد و بریده شد"
+            body = None
+        elif stop_reason == "refusal":
+            details: Any = getattr(response, "stop_details", None)
+            category = getattr(details, "category", None)
+            error = f"مدل پاسخ را رد کرد (دسته: {category or 'نامشخص'})"
+            body = None
+        elif body is None:
+            error = "پاسخ مدل هیچ بلوک متنی نداشت"
+
+        if error is not None:
+            log.warning("model_call_failed", model=self.model, stop_reason=stop_reason, error=error)
         return RawCall(
             text=body,
             model=self.model,
@@ -152,7 +208,8 @@ class AnthropicClient:
             input_tokens=int(getattr(usage, "input_tokens", 0) or 0),
             output_tokens=int(getattr(usage, "output_tokens", 0) or 0),
             cache_read_tokens=int(getattr(usage, "cache_read_input_tokens", 0) or 0),
-            error=None if body is not None else "پاسخ مدل هیچ بلوک متنی نداشت",
+            error=error,
+            stop_reason=stop_reason,
         )
 
     async def describe_image(
