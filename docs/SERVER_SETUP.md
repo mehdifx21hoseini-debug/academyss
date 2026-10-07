@@ -428,10 +428,15 @@ docker compose up -d app panel
 ```bash
 cd ~/academyss && git pull
 cd mentorai
-docker compose build
+docker compose --profile tools build
 docker compose run --rm cli python -m alembic upgrade head
 docker compose up -d app panel
 ```
+
+⚠️ `--profile tools` لازم است. سرویس `cli` (مهاجرت، `model-check`، ورود حساب) پروفایل
+دارد و `docker compose build` ساده آن را نمی‌سازد؛ تصویرش قدیمی می‌ماند و مهاجرت و
+بررسی‌ها با کد قدیمی اجرا می‌شوند، بی‌آن‌که خطایی دیده شود. (`docker compose run`
+پروفایل را برای *اجرا* فعال می‌کند، نه برای *ساخت*.)
 
 اگر پایگاه دانش هم تغییر کرده:
 
