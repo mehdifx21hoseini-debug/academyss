@@ -626,6 +626,8 @@ Escalation برای پاسخ جزئی: دلیل `partial_academy_fact` (ستون
 - **ثبت‌شده، اجرا نمی‌شود:** اعلان بحران (§۱۰) در این مرحله پیاده نمی‌شود.
 
 ### RO-3: بازیابی v2 (آفلاین) و تصمیم تعبیه‌سازی
+
+> **بازتعریف مالک (۲۰۲۶-۱۰-۰۷، ADR-047).** RO-3 اکنون «سایه‌ی بازیابی» است: فهم v2 به `search` فعلی وصل شده و فقط گزارش می‌دهد (`mentorai retrieval-shadow-run`)، بدون تغییر در بازیابی. محتوای زیر (بازیابی v2، benchmark تعبیه‌سازی) به **RO-3b** رفته و دست‌نخورده منتظر است.
 - **جدید:** `text/stopwords.py`، `knowledge/relevance.py`. **ویرایش:** `knowledge/retrieval.py` (تابع **جدید**؛ `search` دست‌نخورده)، `knowledge/evaluate.py`، `cli.py` (`kb-eval --v2`).
 - **DB:** ندارد.
 - **تست:** `test_retrieval_v2.py` روی Postgres واقعی؛ `test_relevance.py`؛ پرسش بی‌ربط سطح «هیچ» می‌گیرد؛ `search` قدیمی بایت‌به‌بایت همان نتیجه را می‌دهد.

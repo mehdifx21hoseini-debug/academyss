@@ -508,6 +508,66 @@ async def cmd_understand_run(args: argparse.Namespace) -> int:
     return 0
 
 
+async def cmd_retrieval_shadow_run(args: argparse.Namespace) -> int:
+    """سایه‌ی بازیابی: فهم v2 را به بازیابی فعلی وصل کن و فقط گزارش بده (RO-3).
+
+    فقط‌خواندنی است و به پاسخ‌دهی زنده کاری ندارد: به پایگاه داده نمی‌نویسد، چیزی نمی‌فرستد، و
+    بازیابی فعلی را بی‌تغییر صدا می‌زند. هزینه‌اش فقط فراخوانی مدلِ فهم است (`--dry-run` ندارد).
+    """
+    from pathlib import Path
+
+    from mentorai import model_compare as mc
+    from mentorai.ai import retrieval_shadow as rs
+    from mentorai.ai.providers import build_client
+
+    client = None
+    if not args.dry_run:
+        try:
+            client = build_client()
+        except ValueError as exc:
+            print(f"پیکربندی هوش مصنوعی ناقص است: {exc}", file=sys.stderr)
+            return 1
+
+    try:
+        async with session_scope() as session:
+            if args.cases:
+                cases = mc.load_cases(Path(args.cases), limit=args.limit, seed=args.seed)
+            else:
+                cases = await mc.sample_from_database(session, limit=args.from_db, seed=args.seed)
+            if not cases:
+                print("هیچ پرسشی پیدا نشد", file=sys.stderr)
+                return 1
+            print(f"{len(cases)} پرسش برای فهم و بازیابی")
+            data = await rs.run_retrieval_shadow(
+                session,
+                cases,
+                client,
+                embedder=_embedder(),
+                max_cost_usd=args.max_cost_usd,
+                dry_run=args.dry_run,
+                progress=lambda line: print(line, flush=True),
+            )
+    except mc.CompareError as exc:
+        print(f"انجام نشد: {exc}", file=sys.stderr)
+        return 1
+
+    if args.dry_run:
+        print(rs.summarise(data))
+        print("هیچ فایلی نوشته نشد.")
+        return 0
+    if not data.messages:
+        print("هیچ پرسشی به مدل نرسید؛ چیزی نوشته نشد", file=sys.stderr)
+        return 1
+
+    paths = rs.write_shadow(data, Path(args.out))
+    print("خلاصه (بی‌متن):")
+    print(rs.summarise(data))
+    print(f"\nخلاصه:           {paths['summary']}")
+    print(f"خروجی کامل (خصوصی): {paths['json']}")
+    print("⚠️ retrieval_shadow.json پیام واقعی دانشجو دارد. در مخزن نگذارید و جای امن نگه دارید.")
+    return 0
+
+
 async def cmd_run_gateway(_: argparse.Namespace) -> int:
     async with session_scope() as session:
         accounts = list(
@@ -632,6 +692,24 @@ def main() -> int:
     )
     urun.add_argument("--dry-run", action="store_true", help="فقط پرسش‌ها را بشمار؛ مدل صدا نزن")
     urun.set_defaults(func=cmd_understand_run)
+
+    rrun = sub.add_parser(
+        "retrieval-shadow-run",
+        help="سایه‌ی بازیابی: فهم v2 + بازیابی فعلی روی پیام‌های واقعی (فقط‌خواندنی، بدون اثر "
+        "روی پاسخ‌دهی؛ هزینه‌ی مدل فهم دارد)",
+    )
+    rsource = rrun.add_mutually_exclusive_group(required=True)
+    rsource.add_argument("--cases", help="CSV با ستون question")
+    rsource.add_argument("--from-db", type=int, help="چند پیام واقعی دانشجو از پایگاه داده")
+    rrun.add_argument("--limit", type=int, default=60, help="سقف پرسش برای --cases")
+    rrun.add_argument("--seed", type=int, default=7)
+    rrun.add_argument("--max-cost-usd", type=float, default=1.0)
+    rrun.add_argument(
+        "--out",
+        default="/out/retrieval-shadow" if _os.path.isdir("/out") else "retrieval-shadow",
+    )
+    rrun.add_argument("--dry-run", action="store_true", help="فقط پرسش‌ها را بشمار؛ مدل صدا نزن")
+    rrun.set_defaults(func=cmd_retrieval_shadow_run)
 
     run = sub.add_parser("run-gateway", help="اجرای دروازه برای همه حساب‌های فعال")
     run.set_defaults(func=cmd_run_gateway)
