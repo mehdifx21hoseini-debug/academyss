@@ -10,6 +10,7 @@
 from __future__ import annotations
 
 import enum
+import re
 
 from mentorai.text import normalize_for_search
 from mentorai.text.matching import contains_phrase
@@ -157,6 +158,7 @@ IDENTITY_WORDS: tuple[str, ...] = (
     "چت جی پی تی",
     "چت جیپیتی",
     "جی پی تی",
+    "ای آی",
     "منشی",
     "اتوماتیک",
     "خودکار",
@@ -179,14 +181,43 @@ ADDRESS_WORDS: tuple[str, ...] = (
     "پشت این اکانت",
     "پشت اکانت",
     "داری جواب",
+    "نیستی",
+    "نیستید",
+    "نیستین",
+    "حرف میزنم",
+    "صحبت میکنم",
 )
+
+# «تو رباتی؟» — فعل ربطی به واژه چسبیده و فعل جدایی در جمله نیست، پس جفت بالا نمی‌گیرد.
+# اما «رباتی» یعنی «یک ربات» هم می‌تواند باشد («رباتی معرفی کن»)، پس تنها وقتی می‌گیرد که
+# **کل پیام** همین پرسش کوتاه باشد: ضمیر + (یه) + ربات، یا خودِ «رباتی». «شما ربات دارید؟»
+# و «ربات شما کار نمی‌کنه» پرسش محصول‌اند و نباید بگیرند؛ اکسپرت آکادمی را همه «ربات» می‌گویند.
+_BOT_NOUN = r"(?:ربات|رباط|بات)"
+_AI_NOUN = r"(?:هوش مصنوعی|ای آی|ایآی)"
+_PRONOUN = r"(?:تو|شما|تویی|شمایی)"
+_COPULA = r"(?:ی|ید|ین)"
+_DIRECT_IDENTITY = (
+    # تو رباتی؟ / شما رباتید؟ / تو یه ربات؟ / تو رباط / تو هوش مصنوعی؟
+    re.compile(rf"^{_PRONOUN} (?:(?:یه|یک) )?(?:{_BOT_NOUN}{_COPULA}?|{_AI_NOUN})$"),
+    # رباتی؟ / یه رباتی؟
+    re.compile(rf"^(?:(?:یه|یک) )?{_BOT_NOUN}{_COPULA}$"),
+)
+_EDGE_PUNCTUATION = re.compile(r"^[\s؟?!.،,؛;:…]+|[\s؟?!.،,؛;:…]+$")
+
+
+def _is_direct_identity_question(normalized: str) -> bool:
+    """«تو رباتی؟» — کل پیام همان پرسش کوتاه است (نگاه کنید به `_DIRECT_IDENTITY`)."""
+    core = _EDGE_PUNCTUATION.sub("", normalized)
+    core = re.sub(r"\s+", " ", core)
+    return any(pattern.match(core) for pattern in _DIRECT_IDENTITY)
 
 
 def _is_identity_question(normalized: str) -> bool:
     """پرسش درباره‌ی هویت طرف گفتگو، نه درباره‌ی ابزار معاملاتی."""
-    return any(contains_phrase(normalized, w) for w in IDENTITY_WORDS) and any(
+    paired = any(contains_phrase(normalized, w) for w in IDENTITY_WORDS) and any(
         contains_phrase(normalized, w) for w in ADDRESS_WORDS
     )
+    return paired or _is_direct_identity_question(normalized)
 
 
 def deterministic_trigger(message_text: str) -> EscalationTrigger | None:
