@@ -22,6 +22,7 @@ from mentorai.db.models import (
     Message,
     MessageMedia,
     Outcome,
+    SilenceClass,
     Student,
 )
 
@@ -39,6 +40,9 @@ class Kpis:
     drafts_approved: int
     drafts_edited: int
     knowledge_documents: int
+    # سکوت عمدی (خارج از حوزه). در `runs_7d` و `silent_7d` نیست. پیش‌فرض صفر می‌ماند
+    # تا هر سازنده‌ی قدیمی بی‌تغییر کار کند.
+    intentional_7d: int = 0
 
     @property
     def answer_rate(self) -> float:
@@ -89,11 +93,17 @@ async def kpis(session: AsyncSession, principal: Principal) -> Kpis:
         int((datetime.now(UTC) - oldest).total_seconds() // 3600) if oldest is not None else None
     )
 
+    # سکوت عمدی (`intentional`، فقط خارج از حوزه) از شمارش پاسخ و سکوت بیرون است و جدا
+    # شمرده می‌شود (ADR-042). اجراهای قدیمی `silence_class` تهی دارند و **مثل پیش از این**
+    # شمرده می‌شوند: `is_distinct_from` تهی را «غیرعمدی» می‌خواند.
     runs_stmt = _scope(
         select(AiRun.outcome, func.count(AiRun.id))
         .select_from(AiRun)
         .join(Conversation, Conversation.id == AiRun.conversation_id)
-        .where(AiRun.created_at >= since)
+        .where(
+            AiRun.created_at >= since,
+            AiRun.silence_class.is_distinct_from(SilenceClass.intentional.value),
+        )
         .group_by(AiRun.outcome),
         principal,
     )
@@ -102,6 +112,18 @@ async def kpis(session: AsyncSession, principal: Principal) -> Kpis:
     }
     answered = int(by_outcome.get(Outcome.answer.value, 0))
     silent = int(by_outcome.get(Outcome.silence.value, 0))
+
+    intentional_stmt = _scope(
+        select(func.count(AiRun.id))
+        .select_from(AiRun)
+        .join(Conversation, Conversation.id == AiRun.conversation_id)
+        .where(
+            AiRun.created_at >= since,
+            AiRun.silence_class == SilenceClass.intentional.value,
+        ),
+        principal,
+    )
+    intentional = int((await session.execute(intentional_stmt)).scalar_one())
 
     drafts_stmt = _scope(
         select(Draft.status, func.count(Draft.id))
@@ -132,6 +154,7 @@ async def kpis(session: AsyncSession, principal: Principal) -> Kpis:
         drafts_approved=int(by_status.get("approved", 0)) + int(by_status.get("sent", 0)),
         drafts_edited=int(by_status.get("edited", 0)),
         knowledge_documents=int(documents),
+        intentional_7d=intentional,
     )
 
 

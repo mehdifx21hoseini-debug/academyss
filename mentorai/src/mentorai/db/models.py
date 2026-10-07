@@ -366,6 +366,22 @@ class Outcome(enum.StrEnum):
     silence = "silence"
 
 
+class SilenceClass(enum.StrEnum):
+    """کلاس یک اجرای **ساکت** (ADR-042).
+
+    فقط برای `outcome = silence` است. پاسخ، حتی پاسخ جزئی، سکوت نیست و کلاس ندارد.
+    شاخص‌ها بر اساس کلاس می‌شمارند، نه خود دلیل، تا سکوت عمدی با خطای سیستم و با
+    نیاز واقعی به منتور قاطی نشود.
+    """
+
+    # سکوت عمدی و مطلوب (فقط خارج از حوزه): ردیف ارجاع نمی‌سازد.
+    intentional = "intentional"
+    # یک آدم باید نگاه کند.
+    needs_human = "needs_human"
+    # خطا یا نقص خود سیستم.
+    system_fault = "system_fault"
+
+
 class DraftStatus(enum.StrEnum):
     pending = "pending"
     approved = "approved"
@@ -393,6 +409,13 @@ class AiRun(Base):
     __tablename__ = "ai_runs"
     __table_args__ = (
         CheckConstraint("outcome in ('answer', 'silence')", name="ck_ai_run_outcome"),
+        # کلاس فقط برای سکوت است. پاسخ، حتی جزئی، کلاس ندارد؛ و اجراهای قدیمی (تهی)
+        # بدون backfill معتبر می‌مانند.
+        CheckConstraint(
+            "silence_class is null or (outcome = 'silence' and silence_class in "
+            "('intentional', 'needs_human', 'system_fault'))",
+            name="ck_ai_run_silence_class",
+        ),
         UniqueConstraint("message_id", name="uq_ai_run_message"),
         Index("ix_ai_runs_conversation", "conversation_id", "created_at"),
         Index("ix_ai_runs_created_at", "created_at"),
@@ -407,6 +430,9 @@ class AiRun(Base):
     )
     outcome: Mapped[str] = mapped_column(String(16), nullable=False)
     reason: Mapped[str] = mapped_column(String(64), nullable=False)
+    # `SilenceClass`، فقط برای `outcome = silence`. تهی برای پاسخ‌ها و برای همه‌ی اجراهای
+    # پیش از RO-1: برای آن‌ها کلاس از روی `reason` مشتق می‌شود (`silence_class_of`).
+    silence_class: Mapped[str | None] = mapped_column(String(16))
     confidence: Mapped[float | None] = mapped_column(Float)
     model: Mapped[str | None] = mapped_column(String(120))
     prompt_version: Mapped[str] = mapped_column(String(32), nullable=False)

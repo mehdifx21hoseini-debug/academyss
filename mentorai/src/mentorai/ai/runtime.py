@@ -21,7 +21,15 @@ from mentorai.ai.decision import deterministic_trigger
 from mentorai.ai.prompt import SYSTEM_PROMPT, build_user_content
 from mentorai.ai.schema import PROMPT_VERSION, ModelAnswer
 from mentorai.config import get_settings
-from mentorai.db.models import AiRun, Conversation, Escalation, Message, Outcome, Sender
+from mentorai.db.models import (
+    AiRun,
+    Conversation,
+    Escalation,
+    Message,
+    Outcome,
+    Sender,
+    SilenceClass,
+)
 from mentorai.knowledge.embeddings import EmbeddingProvider
 from mentorai.knowledge.retrieval import Hit, search
 from mentorai.media import review
@@ -56,6 +64,41 @@ class SilenceReason(enum.StrEnum):
     budget_exhausted = "budget_exhausted"
     empty_answer = "empty_answer"
     ungrounded_money = "ungrounded_money"
+    # سکوت عمدی برای پیام قطعاً خارج از حوزه (ADR-042). **موتور فعلی هرگز آن را تولید
+    # نمی‌کند**؛ فقط لایه‌ی ثبت آن را می‌شناسد تا موتور بعدی (RO-4) روی آن بنشیند.
+    out_of_domain = "out_of_domain"
+
+
+# کلاس هر دلیل سکوت (ADR-042). صریح است، نه حدسی: هر عضو `SilenceReason` باید اینجا
+# باشد و تستی همین را می‌سنجد، تا دلیل تازه بی‌صدا به پیش‌فرض نیفتد.
+#
+# پنج `rule_*` بر پایه‌ی رفتار فعلی کد `needs_human` هستند: همگی `HANDOFF_REASONS`‌اند،
+# یعنی گفتگو برای منتور ارجاع می‌شود (`escalation.py`).
+_SILENCE_CLASS: dict[str, SilenceClass] = {
+    SilenceReason.rule_identity_question.value: SilenceClass.needs_human,
+    SilenceReason.rule_money.value: SilenceClass.needs_human,
+    SilenceReason.rule_complaint.value: SilenceClass.needs_human,
+    SilenceReason.rule_account.value: SilenceClass.needs_human,
+    SilenceReason.rule_explicit_human_request.value: SilenceClass.needs_human,
+    SilenceReason.unsupported_media.value: SilenceClass.needs_human,
+    SilenceReason.no_sources.value: SilenceClass.needs_human,
+    SilenceReason.model_flagged.value: SilenceClass.needs_human,
+    SilenceReason.low_confidence.value: SilenceClass.needs_human,
+    SilenceReason.ungrounded_money.value: SilenceClass.needs_human,
+    SilenceReason.model_error.value: SilenceClass.system_fault,
+    SilenceReason.budget_exhausted.value: SilenceClass.system_fault,
+    SilenceReason.empty_answer.value: SilenceClass.system_fault,
+    SilenceReason.out_of_domain.value: SilenceClass.intentional,
+}
+
+
+def silence_class_of(reason: str) -> SilenceClass:
+    """کلاس یک دلیل سکوت. خالص است و به پایگاه داده دست نمی‌زند.
+
+    **دلیل ناشناخته `needs_human` است** (جهت امن): سکوتی که نمی‌شناسیم نباید به‌عنوان
+    «عمدی» از شاخص انتظار و از فهرست ارجاع‌ها بیرون برود.
+    """
+    return _SILENCE_CLASS.get(reason, SilenceClass.needs_human)
 
 
 @dataclass(frozen=True)
@@ -120,11 +163,15 @@ async def _record(
     confidence: float | None = None,
     response_text: str | None = None,
 ) -> AiRun:
+    # کلاس فقط برای سکوت است؛ پاسخ، حتی پاسخ جزئی، کلاس ندارد.
+    silence_class = silence_class_of(reason) if outcome is Outcome.silence else None
+
     run = AiRun(
         conversation_id=message.conversation_id,
         message_id=message.id,
         outcome=outcome.value,
         reason=reason,
+        silence_class=silence_class.value if silence_class is not None else None,
         confidence=confidence,
         model=call.model if call else None,
         prompt_version=PROMPT_VERSION,
@@ -140,7 +187,9 @@ async def _record(
     session.add(run)
     await session.flush()
 
-    if outcome is Outcome.silence:
+    # سکوت عمدی (خارج از حوزه) **ردیف ارجاع نمی‌سازد**: پیامی نیست که منتور باید جواب بدهد،
+    # پس نباید وارد `/pending` و شاخص انتظار شود. فقط `ai_runs` می‌ماند (ADR-042).
+    if silence_class is not None and silence_class is not SilenceClass.intentional:
         # ارجاع برای دانشجو نامرئی است؛ این ثبت تنها راه دیدن آن است.
         session.add(
             Escalation(

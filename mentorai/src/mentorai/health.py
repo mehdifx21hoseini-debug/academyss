@@ -146,13 +146,22 @@ async def spend(session: AsyncSession) -> Check:
 
 async def _rates(session: AsyncSession) -> dict[str, object]:
     """اعدادی که آزمایش هفتگی با آن‌ها سنجیده می‌شود."""
+    # سکوت عمدی (`intentional`، فقط خارج از حوزه) از نرخ‌ها بیرون است و جدا شمرده می‌شود
+    # (ADR-042). اجراهای قدیمی `silence_class` تهی دارند و **مثل پیش از این** شمرده
+    # می‌شوند؛ `is distinct from` تهی را «غیرعمدی» می‌خواند.
     runs = dict(
         (r.outcome, int(r.n))
         for r in (
             await session.execute(
-                text("select outcome, count(*) as n from ai_runs group by outcome")
+                text(
+                    "select outcome, count(*) as n from ai_runs "
+                    "where silence_class is distinct from 'intentional' group by outcome"
+                )
             )
         ).all()
+    )
+    intentional = await _scalar(
+        session, "select count(*) from ai_runs where silence_class = 'intentional'"
     )
     drafts = dict(
         (r.status, int(r.n))
@@ -173,7 +182,9 @@ async def _rates(session: AsyncSession) -> dict[str, object]:
         + drafts.get("rejected", 0)
     )
     return {
-        "ai_runs": total_runs,
+        # همه‌ی اجراها، شامل سکوت عمدی؛ نرخ‌های زیر فقط روی اجراهای غیرعمدی‌اند.
+        "ai_runs": total_runs + intentional,
+        "intentional_runs": intentional,
         "answer_rate": round(runs.get("answer", 0) / total_runs, 3) if total_runs else None,
         "silence_rate": round(runs.get("silence", 0) / total_runs, 3) if total_runs else None,
         "drafts": drafts,

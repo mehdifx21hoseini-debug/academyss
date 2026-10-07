@@ -292,13 +292,15 @@ async def test_a_voice_without_a_transcript_goes_to_the_mentor(
     assert result.reason == SilenceReason.unsupported_media.value
 
 
-async def test_a_voice_transcript_still_hits_the_deterministic_rules(
+async def test_a_caption_on_a_voice_message_hits_the_deterministic_rules(
     session: AsyncSession, account: MentorAccount, knowledge: None, embedder: HashingEmbedder
 ) -> None:
-    """قاعده‌ی قطعی روی متن پیام اجرا می‌شود، پس ویسی که درباره‌ی پول است هم می‌گیرد.
+    """قاعده‌ی قطعی روی **متن** پیام (کپشن) اجرا می‌شود، پس ویسی که کپشن مالی دارد می‌گیرد.
 
-    اینجا خود پیام کپشن مالی دارد؛ اگر روزی رونویسی هم به قاعده‌ها داده شود، این تست
-    همان جای درست را نگه می‌دارد.
+    ⚠️ این تست «رونویسی» را نمی‌سنجد، با اینکه پیش از این نامش چنین می‌گفت. رونویسی
+    ویس (`text="سلام حالت چطوره"` در همین تست) اصلاً به قواعد داده نمی‌شود؛ آن رفتار
+    در `test_current_voice_transcript_is_not_given_to_the_rules` (فایل
+    `test_current_gaps.py`) ثبت شده و اصلاحش در RO-2 است.
     """
     message = await _incoming(session, account, "رسید واریزم", media_type="voice")
     await _with_media(session, message, kind="voice", text="سلام حالت چطوره")
