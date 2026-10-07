@@ -61,6 +61,9 @@ class Claimed:
     # کلید قطع حساب، همان لحظه‌ی برداشتن از پایگاه داده. `mentorai pause` فقط پایگاه
     # داده را عوض می‌کند و کارگرِ در حال اجرا راه دیگری برای فهمیدنش ندارد.
     account_paused: bool
+    # آیا پس از پیامی که پاسخ می‌گیرد، دانشجو پیام تازه‌تری هم فرستاده؟ حالت `smart`
+    # نقل پیام (ریپلای) فقط از همین می‌فهمد که پاسخ به کدام پیام است (ADR-040).
+    newer_student_message: bool = False
 
 
 async def enqueue(
@@ -131,7 +134,13 @@ async def _with_context(session: AsyncSession, record: object) -> Claimed | None
         await session.execute(
             text(
                 """
-                select c.telegram_chat_id, m.telegram_message_id, a.slug, a.send_paused
+                select c.telegram_chat_id, m.telegram_message_id, a.slug, a.send_paused,
+                       exists (
+                           select 1 from messages n
+                           where n.conversation_id = c.id
+                             and n.sender = 'student'
+                             and n.telegram_message_id > m.telegram_message_id
+                       ) as newer_student_message
                 from conversations c
                 join messages m on m.id = :answered_message_id
                 join mentor_accounts a on a.id = c.account_id
@@ -161,6 +170,7 @@ async def _with_context(session: AsyncSession, record: object) -> Claimed | None
         answered_telegram_message_id=context.telegram_message_id,
         account_slug=context.slug,
         account_paused=context.send_paused,
+        newer_student_message=bool(context.newer_student_message),
     )
 
 

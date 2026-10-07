@@ -14,7 +14,7 @@ import enum
 import re
 from dataclasses import dataclass
 from datetime import UTC, datetime
-from typing import Protocol
+from typing import Literal, Protocol
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -83,7 +83,27 @@ class FloodWait(Exception):
 class OutboundChannel(Protocol):
     async def mark_read(self, chat_id: int, max_message_id: int) -> None: ...
     async def set_typing(self, chat_id: int) -> None: ...
-    async def send(self, chat_id: int, body: str) -> int: ...
+    async def send(self, chat_id: int, body: str, reply_to: int | None = None) -> int: ...
+
+
+ReplyQuote = Literal["off", "smart", "always"]
+
+
+def reply_target(
+    mode: ReplyQuote, *, answered_telegram_message_id: int, newer_student_message: bool
+) -> int | None:
+    """پیامی که پاسخ باید نقلش کند، یا `None` برای ارسال ساده (ADR-040).
+
+    - `off`: هرگز.
+    - `always`: همیشه پیامی که پاسخ می‌گیرد.
+    - `smart`: فقط وقتی دانشجو پس از آن پیام، پیام تازه‌تری هم فرستاده. آنجا بدون نقل
+      معلوم نیست پاسخ مال کدام پیام است؛ در حالت عادی (آخرین پیام) نقل اضافه است.
+    """
+    if mode == "always":
+        return answered_telegram_message_id
+    if mode == "smart" and newer_student_message:
+        return answered_telegram_message_id
+    return None
 
 
 async def push(
@@ -96,6 +116,7 @@ async def push(
     now: datetime | None = None,
     sleep: bool = True,
     start_at: int = 0,
+    reply_to_message_id: int | None = None,
 ) -> SendResult:
     """پاسخ را بفرست، یا اگر اجازه نیست هیچ کاری نکن.
 
@@ -116,6 +137,11 @@ async def push(
     `start_at` قطعه‌ای است که از آن شروع می‌کنیم. اگر تلاش قبلی وسط کار رد شده
     باشد، قطعه‌های رفته دوباره فرستاده نمی‌شوند؛ `parts_sent` در نتیجه می‌گوید این
     تلاش چند قطعه پیش رفت تا فراخوانی‌کننده بتواند ثبتش کند.
+
+    `reply_to_message_id` پیامی است که قطعه‌ی **اول** آن را نقل می‌کند (ریپلای تلگرام).
+    فقط قطعه‌ی اول: اگر هر چهار قطعه نقل بگیرند، گفتگو شبیه رگبار ربات می‌شود و
+    آدم این‌طور نمی‌نویسد. وقتی تلاش از وسط ادامه می‌یابد (`start_at` > 0)، قطعه‌ی اول
+    قبلاً رفته و نقل هم رفته؛ قطعه‌های بعدی هیچ‌وقت نقل نمی‌گیرند.
     """
     moment = now or datetime.now(UTC)
 
@@ -143,7 +169,8 @@ async def push(
             await channel.set_typing(chat_id)
             if sleep:
                 await asyncio.sleep(human_delay_seconds(len(part)))
-            message_id = await channel.send(chat_id, part)
+            quote = reply_to_message_id if index == 0 and start_at == 0 else None
+            message_id = await channel.send(chat_id, part, reply_to=quote)
         except FloodWait as exc:
             # تلگرام صریحاً رد کرده، پس **می‌دانیم** این قطعه نرفته. تنها شکستی که
             # تلاش دوباره‌اش امن است — ولی فقط از همین قطعه به بعد.

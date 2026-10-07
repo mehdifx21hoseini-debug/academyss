@@ -44,6 +44,11 @@ class Settings(BaseSettings):
     # حالت پاسخشان «پیش‌نویس» است.
     draft_delivery: Literal["control_bot", "chat"] = "control_bot"
 
+    # آیا پاسخ، پیام دانشجو را «ریپلای» (نقل) کند (ADR-040). `off`: هرگز. `smart`: فقط وقتی
+    # دانشجو بعد از آن پیام، پیام تازه‌ای هم فرستاده و پاسخ می‌تواند مبهم باشد.
+    # `always`: همیشه. فقط قطعه‌ی اولِ پاسخ نقل می‌گیرد؛ ادامه‌اش ساده می‌آید.
+    reply_quote: Literal["off", "smart", "always"] = "always"
+
     quiet_hours_start: int = Field(default=23, ge=0, le=23)
     quiet_hours_end: int = Field(default=8, ge=0, le=23)
     timezone: str = "Asia/Tehran"
