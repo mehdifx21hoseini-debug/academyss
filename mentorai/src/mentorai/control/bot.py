@@ -16,6 +16,7 @@ from datetime import UTC, datetime
 import structlog
 from sqlalchemy import select
 from telethon import Button, TelegramClient, events
+from telethon.sessions import StringSession
 
 from mentorai import drafts, escalation
 from mentorai.ai import budget, expand, guard
@@ -93,8 +94,13 @@ class ControlBot:
         # دارد. خاموش بودنش به منتور گفته می‌شود، بی‌صدا رد نمی‌شود.
         self._model_client = model_client
         self._token = settings.control_bot_token.get_secret_value()
+        # نشست درون حافظه، نه فایل: کانتینر با کاربر غیر روت اجرا می‌شود و پوشه‌ی کاری‌اش
+        # قابل‌نوشتن نیست. ربات با هر روشن شدن دوباره با توکن وارد می‌شود، که برای ربات
+        # عادی است و چیزی برای نگه‌داشتن ندارد.
         self._client = TelegramClient(
-            "control-bot", settings.telegram_api_id, settings.telegram_api_hash.get_secret_value()
+            StringSession(),
+            settings.telegram_api_id,
+            settings.telegram_api_hash.get_secret_value(),
         )
         self._channels = channels
         self._gates = gates
