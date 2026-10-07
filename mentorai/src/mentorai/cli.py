@@ -365,6 +365,83 @@ async def cmd_model_check(args: argparse.Namespace) -> int:
     return 0 if all(s.ok for s in steps) else 1
 
 
+async def cmd_compare_run(args: argparse.Namespace) -> int:
+    """اجرای مقایسه‌ی کور: هر پرسش را به همه‌ی نامزدها بده و برگه‌ی داور را بساز."""
+    from pathlib import Path
+
+    from mentorai import model_compare as mc
+
+    settings = get_settings()
+    try:
+        candidates = mc.parse_candidates(args.candidate)
+        make_client = mc.default_client_factory(settings)
+        async with session_scope() as session:
+            if args.cases:
+                cases = mc.load_cases(Path(args.cases), limit=args.limit, seed=args.seed)
+            else:
+                cases = await mc.sample_from_database(session, limit=args.from_db, seed=args.seed)
+            if not cases:
+                print("هیچ پرسشی پیدا نشد", file=sys.stderr)
+                return 1
+            print(f"{len(cases)} پرسش، {len(candidates)} نامزد:")
+            for c in candidates:
+                assert c.price is not None
+                print(f"  {c.id}: {c.name} ({c.price.input_usd}/{c.price.output_usd} دلار)")
+            run = await mc.run_comparison(
+                session,
+                cases,
+                candidates,
+                make_client=make_client,
+                embedder=_embedder(),
+                seed=args.seed,
+                max_cost_usd=args.max_cost_usd,
+                dry_run=args.dry_run,
+                progress=lambda line: print(line, flush=True),
+            )
+    except mc.CompareError as exc:
+        print(f"انجام نشد: {exc}", file=sys.stderr)
+        return 1
+
+    excluded = ", ".join(f"{k}: {v}" for k, v in sorted(run.excluded.items())) or "هیچ"
+    print(f"به نامزدها رسید: {len(run.cases)} پرسش | کنار گذاشته (مدل نمی‌دیدشان): {excluded}")
+    if args.dry_run:
+        print("--dry-run بود: هیچ فراخوانی مدلی انجام نشد و فایلی نوشته نشد.")
+        return 0
+    if not run.cases:
+        print("هیچ پرسشی به مدل‌ها نرسید؛ چیزی نوشته نشد", file=sys.stderr)
+        return 1
+    paths = mc.write_run(run, Path(args.out))
+    print(
+        f"هزینه‌ی واقعی: {run.spent_usd:.3f} دلار" + (" (به سقف خورد)" if run.stopped_early else "")
+    )
+    print(f"برگه‌ی داور:   {paths['sheet']}")
+    print(f"راهنمای داور:  {paths['guide']}")
+    print(f"کلید (خصوصی):  {paths['key']}  ← تا پایان داوری به داور ندهید")
+    print("⚠️ این فایل‌ها پیام واقعی دانشجو دارند. در مخزن نگذارید و جای امن نگه دارید.")
+    return 0
+
+
+async def cmd_compare_report(args: argparse.Namespace) -> int:
+    """گزارش پس از داوری: کلید و برگه‌ی پرشده را یکی کن."""
+    from pathlib import Path
+
+    from mentorai import model_compare as mc
+
+    key_path = Path(args.key)
+    try:
+        report = mc.make_report(key_path, Path(args.graded))
+    except mc.CompareError as exc:
+        print(f"انجام نشد: {exc}", file=sys.stderr)
+        return 1
+    print(report)
+    try:
+        saved = mc.write_report(report, key_path.parent)
+        print(f"\nذخیره شد: {saved}")
+    except OSError:
+        pass  # پوشه‌ی کلید فقط‌خواندنی است؛ گزارش همین‌جا چاپ شد
+    return 0
+
+
 async def cmd_run_gateway(_: argparse.Namespace) -> int:
     async with session_scope() as session:
         accounts = list(
@@ -444,6 +521,33 @@ def main() -> int:
     )
     check.add_argument("--image", default=None, help="تصویر دلخواه برای آزمون خواندن تصویر")
     check.set_defaults(func=cmd_model_check)
+
+    import os as _os
+
+    crun = sub.add_parser(
+        "compare-run",
+        help="مقایسه‌ی کور مدل‌ها: اجرا و ساخت برگه‌ی داور (هزینه‌ی واقعی دارد)",
+    )
+    crun.add_argument(
+        "--candidate",
+        action="append",
+        required=True,
+        help="provider:model[:effort][@ورودی/خروجی]؛ دست‌کم دو بار",
+    )
+    source = crun.add_mutually_exclusive_group(required=True)
+    source.add_argument("--cases", help="CSV با ستون question")
+    source.add_argument("--from-db", type=int, help="چند پیام واقعی دانشجو از پایگاه داده")
+    crun.add_argument("--limit", type=int, default=60, help="سقف پرسش برای --cases")
+    crun.add_argument("--seed", type=int, default=7)
+    crun.add_argument("--max-cost-usd", type=float, default=5.0)
+    crun.add_argument("--out", default="/out" if _os.path.isdir("/out") else "model-compare")
+    crun.add_argument("--dry-run", action="store_true", help="فقط پرسش‌ها را بشمار؛ مدل صدا نزن")
+    crun.set_defaults(func=cmd_compare_run)
+
+    crep = sub.add_parser("compare-report", help="گزارش مقایسه‌ی کور از برگه‌ی پرشده")
+    crep.add_argument("--key", required=True, help="key.json که compare-run ساخت")
+    crep.add_argument("--graded", required=True, help="برگه‌ی پرشده (csv یا xlsx)")
+    crep.set_defaults(func=cmd_compare_report)
 
     run = sub.add_parser("run-gateway", help="اجرای دروازه برای همه حساب‌های فعال")
     run.set_defaults(func=cmd_run_gateway)

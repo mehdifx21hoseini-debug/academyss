@@ -407,6 +407,7 @@ docker compose up -d app panel
 | **قطع فوری ارسال** | `docker compose run --rm cli mentorai pause --slug mentor-a --reason "بررسی"` |
 | ادامه‌ی ارسال | `docker compose run --rm cli mentorai pause --slug mentor-a --resume` |
 | خاموش کردن کامل | `docker compose stop app` |
+| مقایسه‌ی کور مدل‌ها | `docs/MODEL_COMPARISON.md` |
 | حافظه | `free -h` و `docker stats --no-stream` |
 
 `pause` بدون راه‌اندازی دوباره اثر می‌کند: ارسال بعدی همان لحظه متوقف می‌شود. دریافت و

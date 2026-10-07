@@ -8,6 +8,7 @@
 from __future__ import annotations
 
 import enum
+from collections.abc import Sequence
 from dataclasses import dataclass
 
 import structlog
@@ -18,7 +19,7 @@ from mentorai.ai import budget, guard
 from mentorai.ai.client import ModelCall, ModelClient
 from mentorai.ai.decision import deterministic_trigger
 from mentorai.ai.prompt import SYSTEM_PROMPT, build_user_content
-from mentorai.ai.schema import PROMPT_VERSION
+from mentorai.ai.schema import PROMPT_VERSION, ModelAnswer
 from mentorai.config import get_settings
 from mentorai.db.models import AiRun, Conversation, Escalation, Message, Outcome, Sender
 from mentorai.knowledge.embeddings import EmbeddingProvider
@@ -232,6 +233,35 @@ async def _handle_media(
     )
 
 
+def silence_reason_for(
+    answer: ModelAnswer,
+    hits: Sequence[Hit],
+    *,
+    confidence_threshold: float = CONFIDENCE_THRESHOLD,
+) -> tuple[str | None, str | None]:
+    """(دلیل سکوت، جزئیات). دلیل `None` یعنی این پاسخ می‌رود.
+
+    خالص است و به پایگاه داده دست نمی‌زند، تا مقایسه‌ی مدل‌ها (`model_compare.py`) دقیقاً
+    همین دروازه را بگذراند و نه نسخه‌ای که با گذر زمان از آن جدا شود. ترتیب مهم است:
+    اولی که بگیرد دلیل ثبت‌شده است.
+
+    جزئیات فقط برای سکوت قیمتی پر است: همان عددی که منبعی نداشت.
+    """
+    if answer.needs_human:
+        return SilenceReason.model_flagged.value, None
+    if not answer.answer.strip():
+        return SilenceReason.empty_answer.value, None
+    if answer.confidence < confidence_threshold:
+        return SilenceReason.low_confidence.value, None
+    # عددی با واحد پول که در هیچ منبع رسمی و در خود سؤال نبود. این بررسی در کد است و به
+    # اطمینان مدل کاری ندارد: قیمت اشتباه، بدترین خطای ممکن این سیستم است و برخلاف
+    # توضیح ناقص، قابل جبران نیست.
+    bad = guard.ungrounded_money(answer.answer, hits=hits)
+    if bad is not None:
+        return SilenceReason.ungrounded_money.value, bad
+    return None, None
+
+
 async def handle_message(
     session: AsyncSession,
     message: Message,
@@ -325,19 +355,11 @@ async def handle_message(
         )
 
     answer = call.answer
-    silence_reason: str | None = None
-    if answer.needs_human:
-        silence_reason = SilenceReason.model_flagged.value
-    elif not answer.answer.strip():
-        silence_reason = SilenceReason.empty_answer.value
-    elif answer.confidence < confidence_threshold:
-        silence_reason = SilenceReason.low_confidence.value
-    elif (bad := guard.ungrounded_money(answer.answer, hits=hits)) is not None:
-        # عددی با واحد پول که در هیچ منبع رسمی و در خود سؤال نبود. این بررسی در
-        # کد است و به اطمینان مدل کاری ندارد: قیمت اشتباه، بدترین خطای ممکن این
-        # سیستم است و برخلاف توضیح ناقص، قابل جبران نیست.
-        log.error("ungrounded_money_blocked", message_id=message.id, amount=bad)
-        silence_reason = SilenceReason.ungrounded_money.value
+    silence_reason, blocked_amount = silence_reason_for(
+        answer, hits, confidence_threshold=confidence_threshold
+    )
+    if silence_reason == SilenceReason.ungrounded_money.value:
+        log.error("ungrounded_money_blocked", message_id=message.id, amount=blocked_amount)
 
     if silence_reason is not None:
         run = await _record(
