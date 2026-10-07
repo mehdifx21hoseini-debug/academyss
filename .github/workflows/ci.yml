@@ -132,6 +132,11 @@ jobs:
           docker compose up -d --wait db
           docker compose run --rm cli python -m alembic upgrade head
           docker compose run --rm cli mentorai kb-import --file /kb/mentorai_kb_latest.csv
+          # مقایسه‌ی کور، شمارش خشک: مسیر فرمان در تصویر، حجم‌های /kb و /out و بازیابی از
+          # پایگاه داده بدون هیچ کلید و هزینه‌ای آزموده می‌شود.
+          docker compose run --rm cli mentorai compare-run \
+            --candidate anthropic:claude-sonnet-5-5 --candidate anthropic:claude-opus-5-5 \
+            --cases /kb/mentorai_eval_latest.csv --limit 20 --dry-run
           docker compose up -d --wait panel
           # healthz نه readyz: بدون حساب و کارگر، readyz درست «down» می‌گوید.
           curl -fsS --retry 15 --retry-all-errors --retry-delay 1 http://127.0.0.1:8000/healthz

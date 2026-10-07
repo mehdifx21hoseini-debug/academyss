@@ -45,6 +45,9 @@ services:
     # دستور ساده باشد و به مسیردهی دستی نیاز نداشته باشد.
     volumes:
       - ../exports/core:/kb:ro
+      # خروجی `compare-run`. پوشه باید پیش از آن ساخته و برای کاربر کانتینر (۱۰۰۰۱) باز
+      # شود: `mkdir -p model-compare && chown 10001 model-compare && chmod 700 model-compare`
+      - ./model-compare:/out
     depends_on:
       db:
         condition: service_healthy
