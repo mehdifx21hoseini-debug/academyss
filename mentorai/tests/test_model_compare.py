@@ -202,6 +202,69 @@ def test_personal_details_are_masked_but_market_numbers_are_not() -> None:
     assert "۱۹۰۰" in masked and "0.1" in masked, "عدد بازار خود پرسش است"
 
 
+@pytest.mark.parametrize(
+    "written",
+    [
+        "0912 345 6789",
+        "0912-345-6789",
+        "+98 912 345 6789",
+        "6037-9912-3456-7890",
+        "۰۹۱۲ ۳۴۵ ۶۷۸۹",
+        "شماره‌ام 09123456789 است",
+    ],
+)
+def test_a_phone_or_card_number_is_masked_however_it_is_written(written: str) -> None:
+    masked = mc.mask_personal(f"لطفاً زنگ بزنید {written} ممنون")
+
+    assert mc.MASK in masked
+    digits_left = "".join(ch for ch in masked.translate(mc._DIGITS) if ch.isdigit())
+    assert len(digits_left) < 4, f"رقم‌های شماره جا ماند: {masked}"
+
+
+def test_short_numbers_dates_and_decimals_are_left_alone() -> None:
+    kept = "قیمت 1900 و 1950 با لات 0.1 و تاریخ 2026-10-07 و عدد 0.00012345"
+    assert mc.mask_personal(kept) == kept
+
+
+@pytest.mark.parametrize(
+    "dangerous",
+    ['=HYPERLINK("http://evil.test","x")', "+1+1", "-2+3", "@SUM(1)", "  =1+1", "\t=1"],
+)
+def test_nothing_a_student_or_a_model_wrote_can_run_as_a_formula(dangerous: str) -> None:
+    """منتور برگه را در اکسل باز می‌کند؛ متن دانشجو و پاسخ مدل نامطمئن‌اند."""
+    run = _fake_run(1)
+    run.cases[0].question = dangerous
+    run.cases[0].sources = dangerous
+    run.cases[0].results[run.candidates[0].id].text = dangerous
+    run.cases[0].results[run.candidates[1].id].text = "عادی"
+
+    cells = [c for row in csv.reader(io.StringIO(mc.build_sheet(run))) for c in row]
+
+    assert dangerous not in cells, "سلول بدون پیشوند به اکسل می‌رسد"
+    for cell in cells:
+        assert cell.lstrip()[:1] not in ("=", "+", "-", "@", "\t", "\r") or not cell.strip()
+    assert "'" + dangerous in cells
+
+
+def test_ordinary_text_is_not_touched() -> None:
+    for fine in ("سلام، دوره چیست؟", "— پاسخی نداد —", "3 جلسه است", ""):
+        assert mc.safe_cell(fine) == fine
+
+
+def test_a_case_id_from_a_file_can_never_start_a_formula(tmp_path: Path) -> None:
+    path = tmp_path / "cases.csv"
+    path.write_text(
+        "id,question\n=cmd|x,سؤال شماره یک چیست؟\n-5,سؤال شماره دو چیست؟\n,سؤال سه چیست؟\n"
+        "a b/c,سؤال چهار چیست؟\n",
+        encoding="utf-8",
+    )
+
+    ids = [c.id for c in mc.load_cases(path, limit=10, seed=1)]
+
+    assert ids == ["_cmd_x", "q-5", "q3", "a_b_c"]
+    assert all(i[0] not in "=+-@" for i in ids)
+
+
 def test_cases_are_read_deduplicated_and_sampled_reproducibly(tmp_path: Path) -> None:
     path = tmp_path / "cases.csv"
     rows = [f"سؤال شماره {i} چیست؟" for i in range(50)] + ["سؤال شماره 3 چیست؟"]

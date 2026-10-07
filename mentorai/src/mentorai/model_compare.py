@@ -224,14 +224,18 @@ class Case:
 _DIGITS = str.maketrans("۰۱۲۳۴۵۶۷۸۹٠١٢٣٤٥٦٧٨٩", "01234567890123456789")
 _EMAIL = re.compile(r"[\w.+-]+@[\w-]+\.[\w.-]+")
 _HANDLE = re.compile(r"(?<![\w@])@[A-Za-z0-9_]{4,}")
-_LONG_DIGITS = re.compile(r"\d{9,}")
+# رقم‌ها با یک فاصله یا خط تیره هم‌چسب حساب می‌شوند: شماره و کارت را همین‌طور می‌نویسند
+# («0912 345 6789»، «6037-9912-3456-7890»). نقطه و ویرگول عمداً نیست، تا «0.00012345» اعشار
+# بماند. بهایش: چند عدد بازار پشت‌هم («1900 1950 2000») و تاریخ با ساعت هم پوشانده
+# می‌شوند؛ در برگه‌ای که به دست آدم‌ها می‌رسد، پوشاندن اضافه از جا ماندن شماره بهتر است.
+_LONG_DIGITS = re.compile(r"\d(?:[\s-]?\d){8,}")
 MASK = "[حذف‌شده]"
 
 
 def mask_personal(value: str) -> str:
     """ایمیل، نام کاربری تلگرام و رشته‌ی ۹ رقمی و بیشتر (تلفن، کارت، حساب) را بپوشان.
 
-    عددهای کوتاه‌تر می‌مانند: «قیمت ۱۹۰۰» یا «لات ۰٫۱» خود پرسش‌اند. ارقام فارسی و عربی
+    عددهای کوتاه‌تر (کمتر از ۹ رقم) می‌مانند: «قیمت ۱۹۰۰» یا «لات ۰٫۱» خود پرسش‌اند. ارقام فارسی و عربی
     هم گرفته می‌شوند؛ جدول ترجمه هم‌طول است تا جای هر بازه در متن اصلی همان بماند.
     """
     value = _EMAIL.sub(MASK, value)
@@ -256,8 +260,20 @@ def load_cases(path: Path, *, limit: int, seed: int) -> list[Case]:
         if not question or key in seen:
             continue
         seen.add(key)
-        cases.append(Case(id=(row.get("id") or f"q{index}").strip(), question=question))
+        cases.append(Case(id=_safe_id(row.get("id"), f"q{index}"), question=question))
     return _sample(cases, limit=limit, seed=seed)
+
+
+def _safe_id(raw: str | None, fallback: str) -> str:
+    """شناسه‌ی پرسش: حروف و رقم و `_.-`، و هرگز با نشانه‌ی فرمول شروع نمی‌شود.
+
+    شناسه در برگه تمیز نمی‌شود (باید پس از داوری عیناً به کلید برگردد)، پس باید از همین‌جا
+    امن باشد.
+    """
+    cleaned = re.sub(r"[^\w.-]", "_", (raw or "").strip())
+    if not cleaned:
+        return fallback
+    return f"q{cleaned}" if cleaned[0] in "=+-@" else cleaned
 
 
 async def sample_from_database(session: AsyncSession, *, limit: int, seed: int) -> list[Case]:
@@ -484,17 +500,33 @@ def sheet_header(count: int) -> list[str]:
     return [*header, "توضیح"]
 
 
+_FORMULA_START = ("=", "+", "-", "@", "\t", "\r")
+
+
+def safe_cell(value: str) -> str:
+    """سلولی که اکسل آن را فرمول نمی‌خواند.
+
+    متن دانشجو و پاسخ مدل **نامطمئن‌اند** و منتور برگه را در اکسل باز می‌کند؛ پیامی که با
+    `=` یا `+` یا `-` یا `@` شروع شود، مثل `=HYPERLINK(...)`، اجرا می‌شود. راه استاندارد
+    (OWASP): یک `'` جلوی آن. اکسل آن را در CSV عیناً نشان می‌دهد، که برای خواندن اشکالی ندارد.
+    فاصله‌ی ابتدایی هم نادیده گرفته می‌شود، چون اکسل بعضی نسخه‌ها آن را حذف می‌کند.
+    """
+    return "'" + value if value.lstrip()[:1] in _FORMULA_START and value.strip() else value
+
+
 def build_sheet(run: RunData) -> str:
     """CSV برای داور. هیچ نام مدل و ارائه‌دهنده‌ای در آن نیست."""
     buffer = io.StringIO()
     writer = csv.writer(buffer, lineterminator="\n")
     writer.writerow(sheet_header(len(run.candidates)))
     for case in run.cases:
-        row: list[str] = [case.id, case.question, case.sources]
+        # شناسه تمیز نمی‌شود، چون پس از داوری با همان مقدار به کلید برمی‌گردد؛ پیش‌تر در
+        # `_safe_id` از ورودی‌ها پاک شده است.
+        row: list[str] = [case.id, safe_cell(case.question), safe_cell(case.sources)]
         for cid in case.order:
             result = case.results[cid]
             row += [
-                result.text if result.text else NO_ANSWER,
+                safe_cell(result.text) if result.text else NO_ANSWER,
                 SENT if result.outcome == "answer" else SILENT,
                 "",
                 "",
