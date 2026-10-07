@@ -20,11 +20,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from mentorai import delivery, drafts, escalation, health
 from mentorai.ai.client import ModelClient
 from mentorai.ai.runtime import handle_message
+from mentorai.config import get_settings
 from mentorai.conversation import assistant_may_answer
 from mentorai.db.models import (
     AiRun,
     Conversation,
     Draft,
+    DraftDelivery,
     DraftStatus,
     MentorAccount,
     Message,
@@ -152,10 +154,12 @@ async def process_message(
             ai_run_id=result.ai_run_id,
             conversation_id=conversation.id,
             proposed_text=result.answer_text,
+            delivery=DraftDelivery(get_settings().draft_delivery),
         )
-        # اعلان به ربات کنترل اینجا فرستاده **نمی‌شود**. آن هم یک ارسال تلگرامی
-        # است و اینجا داخل تراکنش هستیم؛ اگر تراکنش برگردد، منتور کارتی می‌بیند
-        # که پیش‌نویسش وجود ندارد. پس از تثبیت فرستاده می‌شود (ADR-031).
+        # اعلان به منتور (کارت در ربات کنترل، یا نوشتن در کادر خود گفتگو) اینجا انجام
+        # **نمی‌شود**. آن هم یک کار تلگرامی است و اینجا داخل تراکنش هستیم؛ اگر
+        # تراکنش برگردد، منتور پیش‌نویسی می‌بیند که وجود ندارد. پس از تثبیت انجام
+        # می‌شود (ADR-031).
         return JobOutcome("drafted", str(draft.id))
 
     if account.slug not in channels or account.slug not in gates:

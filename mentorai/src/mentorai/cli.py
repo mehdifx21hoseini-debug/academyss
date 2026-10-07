@@ -284,8 +284,9 @@ async def cmd_run_worker(_: argparse.Namespace) -> int:
     from mentorai.ai.providers import build_client
     from mentorai.control.bot import ControlBot
     from mentorai.telegram.channel import TelethonChannel
+    from mentorai.telegram.chat_draft import choose_notifier
     from mentorai.telegram.safety import AccountGate, TokenBucket
-    from mentorai.worker import run_forever
+    from mentorai.worker import DraftNotifier, run_forever
 
     settings = get_settings()
     accounts = await _load_accounts()
@@ -324,8 +325,14 @@ async def cmd_run_worker(_: argparse.Namespace) -> int:
     if settings.control_bot_token is not None:
         bot = ControlBot(channels=channels, gates=gates, model_client=model_client)
         await bot.start()
-    else:
+    elif settings.draft_delivery == "control_bot":
         print("هشدار: CONTROL_BOT_TOKEN تنظیم نشده؛ پیش‌نویس‌ها فقط ذخیره می‌شوند", file=sys.stderr)
+
+    # محل تحویل پیش‌نویس (ADR-036). در حالت `chat` ربات کنترل برای پیش‌نویس‌ها به کار
+    # نمی‌آید و هر پیش‌نویس در کادر نوشتن گفتگوی خودش گذاشته می‌شود.
+    notifier: DraftNotifier | None = choose_notifier(
+        settings.draft_delivery, bot, {g.slug: g.client for g in gateways}
+    )
 
     tasks = [
         run_forever(
@@ -334,7 +341,7 @@ async def cmd_run_worker(_: argparse.Namespace) -> int:
             embedder=_embedder(),
             channels=channels,
             gates=gates,
-            notifier=bot,
+            notifier=notifier,
         )
     ]
     if bot is not None:
