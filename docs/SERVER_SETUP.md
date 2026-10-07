@@ -453,6 +453,7 @@ docker compose up -d app panel
 | ادامه‌ی ارسال | `docker compose run --rm cli mentorai pause --slug mentor-a --resume` |
 | خاموش کردن کامل | `docker compose stop app` |
 | مقایسه‌ی کور مدل‌ها | `docs/MODEL_COMPARISON.md` |
+| ریپلای (نقل پیام دانشجو) | `REPLY_QUOTE` در `.env`: `always` (پیش‌فرض)، `smart`، `off` — بعد `docker compose up -d app` |
 | حافظه | `free -h` و `docker stats --no-stream` |
 
 `pause` بدون راه‌اندازی دوباره اثر می‌کند: ارسال بعدی همان لحظه متوقف می‌شود. دریافت و

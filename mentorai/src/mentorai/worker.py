@@ -39,7 +39,7 @@ from mentorai.knowledge.embeddings import EmbeddingProvider
 from mentorai.media import store as media_store
 from mentorai.memory import job as memory_job
 from mentorai.telegram.safety import AccountGate
-from mentorai.telegram.sender import OutboundChannel, SendStatus, push, record_sent
+from mentorai.telegram.sender import OutboundChannel, SendStatus, push, record_sent, reply_target
 
 log = structlog.get_logger(__name__)
 
@@ -288,6 +288,11 @@ async def deliver_claimed(
         sleep=sleep,
         # ادامه از جایی که تلاش قبلی رسیده بود، نه از اول.
         start_at=claimed.sent_parts,
+        reply_to_message_id=reply_target(
+            get_settings().reply_quote,
+            answered_telegram_message_id=claimed.answered_telegram_message_id,
+            newer_student_message=claimed.newer_student_message,
+        ),
     )
 
     async with session_scope() as session:

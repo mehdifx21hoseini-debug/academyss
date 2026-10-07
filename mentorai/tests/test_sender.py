@@ -37,6 +37,8 @@ class FakeChannel:
         self.reads: list[tuple[int, int]] = []
         self.typing: list[int] = []
         self.sent: list[tuple[int, str]] = []
+        # پیامی که هر قطعه‌ی رفته نقلش کرد (None = نقل نداشت)، هم‌ردیف با `sent`.
+        self.quotes: list[int | None] = []
         self._fail_with = fail_with
         self._next_id = 900
 
@@ -46,11 +48,12 @@ class FakeChannel:
     async def set_typing(self, chat_id: int) -> None:
         self.typing.append(chat_id)
 
-    async def send(self, chat_id: int, body: str) -> int:
+    async def send(self, chat_id: int, body: str, reply_to: int | None = None) -> int:
         if self._fail_with is not None:
             raise self._fail_with
         self._next_id += 1
         self.sent.append((chat_id, body))
+        self.quotes.append(reply_to)
         return self._next_id
 
 
@@ -246,11 +249,12 @@ class PartiallyFailingChannel(FakeChannel):
         self._succeed = succeed
         self._then = then
 
-    async def send(self, chat_id: int, body: str) -> int:
+    async def send(self, chat_id: int, body: str, reply_to: int | None = None) -> int:
         if len(self.sent) >= self._succeed:
             raise self._then
         self._next_id += 1
         self.sent.append((chat_id, body))
+        self.quotes.append(reply_to)
         return self._next_id
 
 
