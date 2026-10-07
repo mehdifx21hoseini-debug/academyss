@@ -568,6 +568,31 @@ async def cmd_retrieval_shadow_run(args: argparse.Namespace) -> int:
     return 0
 
 
+async def cmd_decision_shadow_run(args: argparse.Namespace) -> int:
+    """سایه‌ی شواهد و تصمیم: از خروجی RO-3 برای هر بخش تصمیم بگیر؛ پاسخ نساز (RO-4).
+
+    فقط یک فایل را می‌خواند (`retrieval_shadow.json`): مدل صدا زده نمی‌شود، به پایگاه داده و
+    بازیابی و تلگرام کاری ندارد و هیچ هزینه‌ای ندارد.
+    """
+    from pathlib import Path
+
+    from mentorai.ai import decision_shadow as ds
+
+    try:
+        data = ds.load_and_decide(Path(args.from_shadow))
+    except ds.DecisionError as exc:
+        print(f"انجام نشد: {exc}", file=sys.stderr)
+        return 1
+
+    paths = ds.write_decision(data, Path(args.out))
+    print("خلاصه (بی‌متن):")
+    print(ds.summarise(data))
+    print(f"\nخلاصه:           {paths['summary']}")
+    print(f"خروجی کامل (خصوصی): {paths['json']}")
+    print("⚠️ decision_shadow.json متن پوشانده‌ی پیام دانشجو دارد. در مخزن نگذارید.")
+    return 0
+
+
 async def cmd_run_gateway(_: argparse.Namespace) -> int:
     async with session_scope() as session:
         accounts = list(
@@ -710,6 +735,20 @@ def main() -> int:
     )
     rrun.add_argument("--dry-run", action="store_true", help="فقط پرسش‌ها را بشمار؛ مدل صدا نزن")
     rrun.set_defaults(func=cmd_retrieval_shadow_run)
+
+    drun = sub.add_parser(
+        "decision-shadow-run",
+        help="سایه‌ی شواهد و تصمیم از روی خروجی retrieval-shadow-run (بدون مدل، بدون هزینه، "
+        "بدون پایگاه داده، بدون اثر روی پاسخ‌دهی)",
+    )
+    drun.add_argument(
+        "--from-shadow", required=True, help="retrieval_shadow.json که retrieval-shadow-run ساخت"
+    )
+    drun.add_argument(
+        "--out",
+        default="/out/decision-shadow" if _os.path.isdir("/out") else "decision-shadow",
+    )
+    drun.set_defaults(func=cmd_decision_shadow_run)
 
     run = sub.add_parser("run-gateway", help="اجرای دروازه برای همه حساب‌های فعال")
     run.set_defaults(func=cmd_run_gateway)

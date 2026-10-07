@@ -636,6 +636,8 @@ Escalation برای پاسخ جزئی: دلیل `partial_academy_fact` (ستون
 
 ### RO-4: لایه‌ی مدل و ارکستریتور (بدون ترافیک واقعی)
 
+> **بازتعریف مالک (۲۰۲۶-۱۰-۰۷، ADR-048).** RO-4 اکنون «سایه‌ی شواهد و تصمیم» است: ماتریس §۷ به‌صورت قطعی در کد (`ai/decision_shadow.py`) روی خروجی RO-3 اجرا می‌شود و فقط تصمیم ثبت می‌کند (`mentorai decision-shadow-run`). فراخوانی ۲ و ارکستریتور به **RO-4b** رفته‌اند و دست‌نخورده منتظرند.
+
 > `ai/understanding.py` از RO-2 (ADR-046) موجود است؛ RO-4 آن را به ارکستریتور وصل می‌کند و `test_the_live_flow_does_not_call_the_understanding_stage_yet` را آگاهانه وارونه می‌کند.
 - **جدید:** `ai/compose.py`، `ai/orchestrator.py`، `eval/response_probes.csv` (بدون داده‌ی دانشجو؛ شامل پروب‌های مبهم و پروب «پول‌های بزرگ»، فقط برای مشاهده).
 - **ویرایش:** `ai/runtime.py` (انتخاب engine)، `cli.py` (`probe-run`)، `ai/providers.py` (نمونه‌ی دوم کلاینت).

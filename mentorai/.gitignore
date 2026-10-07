@@ -21,3 +21,6 @@ understanding-replay/
 
 # خروجی سایه‌ی بازیابی (`retrieval-shadow-run`): متن پوشانده‌شده‌ی پیام دانشجو دارد.
 retrieval-shadow/
+
+# خروجی سایه‌ی تصمیم (`decision-shadow-run`): متن پوشانده‌شده‌ی پیام دانشجو دارد.
+decision-shadow/
