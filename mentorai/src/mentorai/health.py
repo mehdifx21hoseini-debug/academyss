@@ -163,7 +163,15 @@ async def _rates(session: AsyncSession) -> dict[str, object]:
         ).all()
     )
     total_runs = sum(runs.values())
-    decided = drafts.get("sent", 0) + drafts.get("edited", 0) + drafts.get("rejected", 0)
+    # «تأییدشده» هم تصمیم است. در مسیر ربات کنترل زود به `sent` می‌رسد، ولی پیش‌نویس
+    # داخل گفتگو (ADR-036) همان‌جا `approved` می‌ماند؛ بدون شمردنش، نرخ رد را
+    # بزرگ‌تر از واقع نشان می‌داد.
+    decided = (
+        drafts.get("sent", 0)
+        + drafts.get("approved", 0)
+        + drafts.get("edited", 0)
+        + drafts.get("rejected", 0)
+    )
     return {
         "ai_runs": total_runs,
         "answer_rate": round(runs.get("answer", 0) / total_runs, 3) if total_runs else None,

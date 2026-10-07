@@ -373,6 +373,14 @@ class DraftStatus(enum.StrEnum):
     rejected = "rejected"
     sent = "sent"
     failed = "failed"
+    # سیستم خودش کنارش گذاشت، بی‌آنکه منتور تصمیمی بگیرد. رد (`rejected`) نیست: آن
+    # تصمیم منتور است و در آمار شرط خروج از حالت پیش‌نویس می‌شمارد (ADR-010).
+    withdrawn = "withdrawn"
+
+
+class DraftDelivery(enum.StrEnum):
+    control_bot = "control_bot"
+    chat = "chat"
 
 
 class AiRun(Base):
@@ -421,9 +429,11 @@ class Draft(Base):
     __tablename__ = "drafts"
     __table_args__ = (
         CheckConstraint(
-            "status in ('pending', 'approved', 'edited', 'rejected', 'sent', 'failed')",
+            "status in ('pending', 'approved', 'edited', 'rejected', 'sent', 'failed', "
+            "'withdrawn')",
             name="ck_draft_status",
         ),
+        CheckConstraint("delivery in ('control_bot', 'chat')", name="ck_draft_delivery"),
         UniqueConstraint("ai_run_id", name="uq_draft_ai_run"),
     )
 
@@ -443,6 +453,8 @@ class Draft(Base):
     decided_by: Mapped[str | None] = mapped_column(String(120))
     decided_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     control_message_id: Mapped[int | None] = mapped_column(BigInteger)
+    # کجا به منتور رسید: ربات کنترل، یا کادر نوشتن خود گفتگو (ADR-036).
+    delivery: Mapped[str] = mapped_column(String(16), nullable=False, server_default="control_bot")
     created_at: Mapped[datetime] = _created_at()
 
 

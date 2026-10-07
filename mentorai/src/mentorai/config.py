@@ -38,6 +38,12 @@ class Settings(BaseSettings):
     # خالی یعنی هیچ‌کس. فهرست سفید است، نه سیاه: ناشناخته یعنی بدون دسترسی.
     control_operator_ids: str = ""
 
+    # پیش‌نویس به منتور کجا برسد (ADR-036). `control_bot`: کارت با دکمه‌ی تأیید در
+    # ربات کنترل. `chat`: متن در کادر نوشتن خود گفتگوی دانشجو در حساب منتور گذاشته
+    # می‌شود، چیزی ارسال نمی‌شود و منتور خودش می‌فرستد. فقط روی حساب‌هایی اثر دارد که
+    # حالت پاسخشان «پیش‌نویس» است.
+    draft_delivery: Literal["control_bot", "chat"] = "control_bot"
+
     quiet_hours_start: int = Field(default=23, ge=0, le=23)
     quiet_hours_end: int = Field(default=8, ge=0, le=23)
     timezone: str = "Asia/Tehran"

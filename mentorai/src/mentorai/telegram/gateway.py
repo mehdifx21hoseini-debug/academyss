@@ -19,7 +19,7 @@ from telethon import TelegramClient, events
 from telethon.sessions import StringSession
 from telethon.tl.functions.account import UpdateStatusRequest
 
-from mentorai import escalation
+from mentorai import drafts, escalation
 from mentorai.ai import budget
 from mentorai.ai.client import RawCall, VisionClient
 from mentorai.config import get_settings
@@ -362,9 +362,19 @@ class AccountGateway:
             # وضعیت مکالمه هم دخیل است، نه فقط کلید روشن و خاموش: مکالمه‌ای که به
             # منتور ارجاع شده، تا فعال‌سازی صریح هیچ کاری تولید نمی‌کند.
             if sender is Sender.mentor:
-                # روشن‌ترین نشانه‌ی در دست گرفتن مکالمه. دستیار کنار می‌رود و
-                # ارجاع‌های باز بسته می‌شوند.
-                await escalation.on_mentor_message(session, result.conversation)
+                # اگر پیش‌نویسی در کادر نوشتن همین گفتگو گذاشته شده بود، این پیام
+                # تصمیم منتور درباره‌ی آن است (ADR-036): همان متن یا ویرایش‌شده‌اش
+                # یعنی منتور پیشنهاد دستیار را پذیرفته، پس دستیار کنار نمی‌رود.
+                resolution = await drafts.resolve_from_chat(
+                    session,
+                    result.conversation_id,
+                    inbound.text or "",
+                    sent_at=inbound.sent_at,
+                )
+                if resolution is None or resolution.took_over:
+                    # روشن‌ترین نشانه‌ی در دست گرفتن مکالمه. دستیار کنار می‌رود و
+                    # ارجاع‌های باز بسته می‌شوند.
+                    await escalation.on_mentor_message(session, result.conversation)
 
             if sender is Sender.student and assistant_may_answer(result.conversation):
                 await queue.enqueue(

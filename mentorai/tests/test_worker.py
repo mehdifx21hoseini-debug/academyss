@@ -16,6 +16,7 @@ from mentorai import drafts
 from mentorai.ai.client import ScriptedClient
 from mentorai.ai.schema import ModelAnswer
 from mentorai.cli import cmd_pause
+from mentorai.config import get_settings
 from mentorai.conversation import escalate
 from mentorai.db.models import Conversation, Draft, MentorAccount, Message, ReplyMode, Sender
 from mentorai.knowledge.embeddings import HashingEmbedder
@@ -160,6 +161,43 @@ async def test_draft_mode_creates_a_draft_and_sends_nothing(
     assert outcome.detail is not None
     await notify_draft(int(outcome.detail), notifier)
     assert notifier.sent == [("mentor-a", "دوره مقدماتی شانزده جلسه دارد.")]
+
+
+@pytest.mark.parametrize(("setting", "expected"), [(None, "control_bot"), ("chat", "chat")])
+async def test_the_delivery_setting_decides_where_the_draft_goes(
+    session: AsyncSession,
+    account: MentorAccount,
+    kb: None,
+    incoming: Message,
+    embedder: HashingEmbedder,
+    monkeypatch: pytest.MonkeyPatch,
+    setting: str | None,
+    expected: str,
+) -> None:
+    """`DRAFT_DELIVERY` از `.env` تا خود پیش‌نویس می‌رسد (ADR-036)."""
+    if setting is None:
+        monkeypatch.delenv("DRAFT_DELIVERY", raising=False)
+    else:
+        monkeypatch.setenv("DRAFT_DELIVERY", setting)
+    get_settings.cache_clear()
+    try:
+        outcome = await process_message(
+            session,
+            incoming.id,
+            model_client=ScriptedClient(_answer()),
+            embedder=embedder,
+            channels={"mentor-a": FakeChannel()},
+            gates={"mentor-a": _gate()},
+            notifier=RecordingNotifier(),
+            sleep=False,
+        )
+        await session.commit()
+    finally:
+        get_settings.cache_clear()
+
+    assert outcome.detail is not None
+    draft = await session.get_one(Draft, int(outcome.detail))
+    assert draft.delivery == expected
 
 
 async def test_the_mentor_sees_what_was_heard_in_a_voice_message(
