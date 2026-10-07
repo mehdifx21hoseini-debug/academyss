@@ -108,7 +108,19 @@ class Decision:
 
 
 def price_for(model: str) -> tuple[Price, bool]:
-    """قیمت مدل، و اینکه آیا واقعاً شناخته‌شده بود."""
+    """قیمت مدل، و اینکه آیا واقعاً شناخته‌شده بود.
+
+    قیمتی که مالک در `.env` گذاشته (AI_PRICE_INPUT_USD و AI_PRICE_OUTPUT_USD) برای مدل
+    فعلی مقدم است: ارائه‌دهنده قیمت را عوض می‌کند و جدول داخل کد نباید مجبور به
+    استقرار دوباره کند. برای مدلی که در جدول نیست تنها راه شناخته شدن همین است.
+    """
+    settings = get_settings()
+    if (
+        model == settings.ai_model
+        and settings.ai_price_input_usd is not None
+        and settings.ai_price_output_usd is not None
+    ):
+        return Price(settings.ai_price_input_usd, settings.ai_price_output_usd), True
     price = PRICES.get(model)
     if price is None:
         return _FALLBACK, False

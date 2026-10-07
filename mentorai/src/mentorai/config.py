@@ -10,7 +10,7 @@ from functools import lru_cache
 from typing import Literal
 from zoneinfo import ZoneInfo
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # مقادیر مجاز `embedding_model`. رشته‌ی خالی یعنی مسیر برداری اصلاً اجرا نشود.
@@ -20,7 +20,11 @@ KNOWN_EMBEDDING_MODELS = frozenset({"", "hashing-test-only"})
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    # `env_ignore_empty`: «AI_PRICE_INPUT_USD=» در `.env.example` یعنی «نگذاشته‌ام». بدون آن،
+    # pydantic رشته‌ی خالی را عدد حساب می‌کند و خطا می‌دهد؛ هر کسی `.env.example` را کپی
+    # می‌کرد، سیستمش روشن نمی‌شد. برای فیلد اجباری هم بهتر است: «DATABASE_URL=» خالی
+    # دیگر بی‌صدا پذیرفته نمی‌شود، «مقدار لازم است» می‌گوید.
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore", env_ignore_empty=True)
 
     database_url: SecretStr
     session_encryption_key: SecretStr
@@ -76,18 +80,52 @@ class Settings(BaseSettings):
     # از چند درصد سقف، هشدار در لاگ نوشته شود.
     ai_budget_alert_fraction: float = Field(default=0.8, gt=0, le=1)
 
-    # مدل گفتگو و خواندن تصویر و حافظه. از اینجا خوانده می‌شود، نه از کد: عوض کردنش
-    # باید یک خط در `.env` باشد، چون انتخاب نهایی با سنجش روی پیام‌های واقعی انجام
-    # می‌شود (`ADR-034`). نام ناشناخته هنگام روشن شدن رد می‌شود، نه در هر فراخوانی.
-    anthropic_model: str = "claude-sonnet-5-5"
-    # عمق فکر کردن مدل. باید مدلی را انتخاب کرد که این پارامتر را بپذیرد؛ Haiku 4.5
-    # نمی‌پذیرد و هر فراخوانی را رد می‌کند.
-    anthropic_effort: Literal["low", "medium", "high", "xhigh", "max"] = "medium"
+    # ارائه‌دهنده و مدل هوش مصنوعی. تنها جایی است که داده‌ی دانشجو از سرور بیرون می‌رود
+    # (`ADR-034`، `ADR-035`). از `.env` می‌آید، نه از کد: انتخاب نهایی با سنجش روی پیام‌های
+    # واقعی انجام می‌شود و باید یک خط تغییر باشد.
+    #
+    # مدل برای ارائه‌دهنده‌ی anthropic اختیاری است (پیش‌فرض: Sonnet 5.5)؛ برای openai
+    # **اجباری** است، چون نام مدل OpenAI را در کد حدس نمی‌زنیم.
+    ai_provider: Literal["anthropic", "openai"] = "anthropic"
+    ai_model: str = ""
+    # عمق فکر کردن. خالی یعنی پیش‌فرض ارائه‌دهنده: anthropic → medium، openai → چیزی
+    # فرستاده نمی‌شود و خود مدل تصمیم می‌گیرد. مقدار مجاز به ارائه‌دهنده بستگی دارد و
+    # هنگام روشن شدن سنجیده می‌شود.
+    ai_effort: str = ""
     # سقف خروجی **شامل فکر کردن مدل**. ۲۰۴۸ پیشین برای مدلی که پیش‌فرضش فکر کردن
     # است کم بود: فکر بخشی از سقف را می‌خورد و پاسخ نصفه می‌ماند. پرداخت فقط برای
     # توکن‌های تولیدشده است، پس بالا بودن سقف هزینه‌ای ندارد.
-    anthropic_max_tokens: int = Field(default=8000, ge=1024, le=64000)
-    anthropic_timeout_seconds: float = Field(default=90.0, gt=0, le=600)
+    ai_max_tokens: int = Field(default=8000, ge=1024, le=64000)
+    ai_timeout_seconds: float = Field(default=90.0, gt=0, le=600)
+    # قیمت هر میلیون توکن، به دلار. برای مدلی که در `budget.PRICES` نیست **هر دو لازم‌اند**،
+    # وگرنه سیستم روشن نمی‌شود: سقف هزینه بدون قیمت واقعی بی‌معناست. اگر مدل در جدول
+    # باشد هم این مقدار مقدم است، تا تغییر قیمت ارائه‌دهنده نیاز به تغییر کد نداشته باشد.
+    ai_price_input_usd: float | None = Field(default=None, ge=0)
+    ai_price_output_usd: float | None = Field(default=None, ge=0)
+
+    # فقط وقتی AI_PROVIDER=openai. نشانی پایه برای سرویس سازگار یا سرور خودی عوض
+    # می‌شود؛ باید https باشد، مگر localhost.
+    openai_api_key: SecretStr | None = None
+    openai_base_url: str = "https://api.openai.com/v1"
+
+    @model_validator(mode="after")
+    def _prices_come_as_a_pair_for_a_named_model(self) -> Settings:
+        """قیمت نیمه‌کاره یا بی‌نامِ مدل، بی‌صدا نادیده گرفته می‌شد و سقف را بی‌اعتبار می‌کرد."""
+        given = (self.ai_price_input_usd is not None, self.ai_price_output_usd is not None)
+        if any(given) and not all(given):
+            raise ValueError("AI_PRICE_INPUT_USD و AI_PRICE_OUTPUT_USD باید با هم بیایند")
+        if any(given) and not self.ai_model:
+            raise ValueError("قیمت فقط برای مدلی معنی دارد که AI_MODEL آن را نام برده باشد")
+        return self
+
+    @field_validator("openai_base_url")
+    @classmethod
+    def _base_url_is_encrypted(cls, v: str) -> str:
+        url = v.strip().rstrip("/")
+        local = url.startswith(("http://localhost", "http://127.0.0.1"))
+        if not (url.startswith("https://") or local):
+            raise ValueError("OPENAI_BASE_URL باید https باشد (مگر localhost)")
+        return url
 
     # آیا دستیار از روی توصیف تصویر پاسخ بسازد یا نه. پیش‌فرض خاموش است: تصویر
     # خوانده و ذخیره می‌شود تا منتور کیفیتش را ببیند، ولی تا تأیید مالک، پاسخی از

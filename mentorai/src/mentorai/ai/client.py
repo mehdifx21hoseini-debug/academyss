@@ -22,7 +22,7 @@ log = structlog.get_logger(__name__)
 
 Effort = Literal["low", "medium", "high", "xhigh", "max"]
 
-# مقدار واقعی از `.env` می‌آید (`ANTHROPIC_MODEL`)؛ این‌ها فقط برای ساخت مستقیم
+# مقدار واقعی از `.env` می‌آید (`AI_MODEL`)؛ این‌ها فقط برای ساخت مستقیم
 # کلاینت در آزمون و ابزارند. انتخاب و دلیلش در `ADR-034`.
 DEFAULT_MODEL = "claude-sonnet-5-5"
 # تلاش مدل. برای گفتگوی کوتاه با قوانین صریح، متوسط نقطه‌ی معقولی است؛ عدد نهایی
@@ -33,6 +33,7 @@ DEFAULT_MAX_TOKENS = 8000
 # مدل‌هایی که پارامتر effort را نمی‌پذیرند. این کلاینت همیشه effort می‌فرستد، پس
 # با این‌ها هر فراخوانی رد می‌شد و کل سیستم بی‌صدا ساکت می‌ماند.
 _NO_EFFORT_MODELS = frozenset({"claude-haiku-4-5"})
+_ANTHROPIC_EFFORTS = ("low", "medium", "high", "xhigh", "max")
 
 
 @dataclass(frozen=True)
@@ -81,9 +82,27 @@ class ModelCall:
         )
 
 
+def answer_from_raw(raw: RawCall) -> ModelCall:
+    """پاسخ خام را به `ModelCall` تبدیل کن. مشترک بین همه‌ی ارائه‌دهنده‌ها.
+
+    تفسیر یکی است تا «خروجی بی‌شکل» برای هر مدلی یک معنی بدهد: ساکت می‌ماند.
+    """
+    if raw.text is None:
+        return ModelCall.from_raw(raw, None)
+    try:
+        answer = ModelAnswer.model_validate(json.loads(raw.text))
+    except (json.JSONDecodeError, ValidationError) as exc:
+        return ModelCall.from_raw(raw, None, error=f"خروجی مدل با شکل مورد انتظار نخواند: {exc}")
+    return ModelCall.from_raw(raw, answer)
+
+
 class ModelClient(Protocol):
     model: str
-    effort: Effort
+
+    @property
+    def effort(self) -> str | None:
+        """عمقی که مدل با آن فکر کرد، برای ثبت در `ai_runs`. None یعنی چیزی فرستاده نشد."""
+        ...
 
     async def raw(self, *, system: str, user: str, schema: dict[str, object]) -> RawCall: ...
 
@@ -102,6 +121,13 @@ class VisionClient(Protocol):
     async def describe_image(
         self, *, system: str, prompt: str, image: bytes, media_type: str
     ) -> RawCall: ...
+
+
+class ChatAndVision(ModelClient, VisionClient, Protocol):
+    """آنچه `run-worker` از یک ارائه‌دهنده می‌خواهد: پاسخ متنی و خواندن تصویر.
+
+    هر ارائه‌دهنده‌ی تازه فقط باید این را پیاده کند (`mentorai/ai/providers.py`).
+    """
 
 
 class AnthropicClient:
@@ -134,24 +160,30 @@ class AnthropicClient:
         غلط تایپی در نام مدل یعنی هر فراخوانی خطا بدهد و سیستم ساکت بماند — دقیقاً
         همان چیزی که از بیرون شبیه «همه‌چیز سالم، فقط جواب نمی‌دهد» دیده می‌شود.
         """
-        from mentorai.ai.budget import PRICES
+        from mentorai.ai.budget import price_for
         from mentorai.config import get_settings
 
         settings = get_settings()
-        model = settings.anthropic_model
-        if model not in PRICES:
-            known = ", ".join(sorted(PRICES))
+        model = settings.ai_model or DEFAULT_MODEL
+        if not price_for(model)[1]:
             raise ValueError(
-                f"ANTHROPIC_MODEL={model!r} شناخته‌شده نیست. مدل‌های شناخته‌شده: {known}. "
-                "قیمتش هم باید در جدول `budget.PRICES` باشد، وگرنه سقف هزینه واقعی نیست."
+                f"AI_MODEL={model!r} قیمت شناخته‌شده ندارد. آن را به `budget.PRICES` اضافه کنید "
+                "یا AI_PRICE_INPUT_USD و AI_PRICE_OUTPUT_USD را بگذارید؛ بدون قیمت، "
+                "سقف هزینه واقعی نیست."
             )
         if model in _NO_EFFORT_MODELS:
             raise ValueError(f"{model} پارامتر effort را نمی‌پذیرد و با این کلاینت کار نمی‌کند.")
+        effort = settings.ai_effort or DEFAULT_EFFORT
+        if effort not in _ANTHROPIC_EFFORTS:
+            raise ValueError(
+                f"AI_EFFORT={effort!r} برای anthropic مجاز نیست. مقادیر مجاز: "
+                f"{', '.join(_ANTHROPIC_EFFORTS)}"
+            )
         return cls(
             model=model,
-            effort=settings.anthropic_effort,
-            max_tokens=settings.anthropic_max_tokens,
-            timeout=settings.anthropic_timeout_seconds,
+            effort=effort,  # type: ignore[arg-type]
+            max_tokens=settings.ai_max_tokens,
+            timeout=settings.ai_timeout_seconds,
         )
 
     async def raw(self, *, system: str, user: str, schema: dict[str, object]) -> RawCall:
@@ -164,7 +196,7 @@ class AnthropicClient:
                 system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
                 messages=[{"role": "user", "content": user}],
                 output_config={
-                    "format": {"type": "json_schema", "schema": JSON_SCHEMA},
+                    "format": {"type": "json_schema", "schema": schema},
                     "effort": self.effort,
                 },
             )
@@ -256,16 +288,7 @@ class AnthropicClient:
         return self._finish(response, started)
 
     async def complete(self, *, system: str, user: str) -> ModelCall:
-        raw = await self.raw(system=system, user=user, schema=JSON_SCHEMA)
-        if raw.text is None:
-            return ModelCall.from_raw(raw, None)
-        try:
-            answer = ModelAnswer.model_validate(json.loads(raw.text))
-        except (json.JSONDecodeError, ValidationError) as exc:
-            return ModelCall.from_raw(
-                raw, None, error=f"خروجی مدل با شکل مورد انتظار نخواند: {exc}"
-            )
-        return ModelCall.from_raw(raw, answer)
+        return answer_from_raw(await self.raw(system=system, user=user, schema=JSON_SCHEMA))
 
 
 class ScriptedClient:
