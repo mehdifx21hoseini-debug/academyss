@@ -46,10 +46,12 @@ class Price:
 # قیمت‌های رسمی Anthropic. هر تغییری در این جدول باید با مستندات رسمی بررسی شود،
 # نه از حافظه. `tests/test_budget.py` می‌سنجد که مدل پیش‌فرض کد اینجا قیمت دارد.
 PRICES: dict[str, Price] = {
+    "claude-opus-5-5": Price(4.00, 20.00),
     "claude-opus-5": Price(5.00, 25.00),
     "claude-opus-4-8": Price(5.00, 25.00),
     "claude-opus-4-7": Price(5.00, 25.00),
     "claude-opus-4-6": Price(5.00, 25.00),
+    "claude-sonnet-5-5": Price(2.00, 10.00),
     "claude-sonnet-5": Price(2.00, 10.00),
     "claude-sonnet-4-6": Price(3.00, 15.00),
     "claude-haiku-4-5": Price(1.00, 5.00),
