@@ -262,8 +262,13 @@ async def run_retrieval_shadow(
     max_cost_usd: float = 1.0,
     dry_run: bool = False,
     progress: Callable[[str], None] | None = None,
+    skip_part: Callable[[Part], str | None] | None = None,
 ) -> ShadowData:
-    """هر پیام را بفهم، سپس هر بخش را (جز موارد کنارگذاشته) به بازیابی فعلی بده. فقط می‌خواند."""
+    """هر پیام را بفهم، سپس هر بخش را (جز موارد کنارگذاشته) به بازیابی فعلی بده. فقط می‌خواند.
+
+    `skip_part` اختیاری است (پیش‌فرض: هیچ؛ رفتار همان است): اگر برای یک بخش دلیل برگرداند، آن بخش
+    بازیابی نمی‌شود و با همان دلیل ثبت می‌شود. فقط ابزارهای سایه (مثل e2e) از آن استفاده می‌کنند.
+    """
     replay = await run_replay(
         session, cases, client, max_cost_usd=max_cost_usd, dry_run=dry_run, progress=progress
     )
@@ -294,6 +299,10 @@ async def run_retrieval_shadow(
         record.scope_confidence = understanding.scope_confidence
         record.adjustments = list(result.adjustments)
         for part in understanding.parts:
+            extra = skip_part(part) if skip_part is not None else None
+            if extra is not None and skip_reason(part) is None:
+                record.parts.append(PartRecord(outcome.id, part, extra, None))
+                continue
             record.parts.append(await shadow_part(session, outcome.id, part, embedder=embedder))
     return data
 

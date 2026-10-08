@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 import structlog
-from sqlalchemy import select
+from sqlalchemy import select, text
 from telethon import TelegramClient
 from telethon.sessions import StringSession
 
@@ -724,6 +724,91 @@ async def cmd_ro5b_evidence_shadow_run(args: argparse.Namespace) -> int:
     return 0
 
 
+async def cmd_e2e_shadow_run(args: argparse.Namespace) -> int:
+    """سایه‌ی سرتاسری پاسخ‌دهی: فهم ← بازیابی ← ربط شواهد ← تصمیم ← نوشتن. فقط‌خواندنی.
+
+    هیچ پیامی به تلگرام نمی‌رود و کل کار در یک تراکنش `READ ONLY` است (نوشتن رد می‌شود).
+    فقط شمارش چاپ می‌شود؛ پاسخ‌ها در `e2e_shadow.json` و `e2e_review.csv` (خصوصی) می‌مانند.
+    """
+    import json
+    from pathlib import Path
+
+    from mentorai import model_compare as mc
+    from mentorai.ai import e2e_shadow as e2e
+    from mentorai.ai.providers import build_client
+
+    selection = None
+    categories = None
+    if args.select_from:
+        try:
+            raw = Path(args.select_from).read_text(encoding="utf-8")
+            categories = e2e.categorize_ro5a(json.loads(raw))
+        except (OSError, json.JSONDecodeError):
+            print("انجام نشد: فایل انتخاب نمونه باز یا خوانده نشد", file=sys.stderr)
+            return 1
+        except mc.CompareError as exc:
+            print(f"انجام نشد: {exc}", file=sys.stderr)
+            return 1
+
+    async with session_scope() as session:
+        # کل مسیر، حتی خواندنِ زمینه و بازیابی، در یک تراکنش فقط‌خواندنی؛ نوشتن رد می‌شود.
+        await session.execute(text("SET TRANSACTION READ ONLY"))
+        missing = 0
+        if categories is not None:
+            eligible = await mc.sample_from_database(session, limit=mc.DB_POOL, seed=args.seed)
+            selection = e2e.select_messages(categories, limit=args.limit, seed=args.seed)
+            cases, missing = e2e.cases_for(selection, eligible)
+        else:
+            cases = await mc.sample_from_database(session, limit=args.limit, seed=args.seed)
+        if not cases:
+            print("هیچ پیامی برای نمونه پیدا نشد", file=sys.stderr)
+            return 1
+        print(f"{len(cases)} پیام انتخاب شد (درخواستی: {args.limit}، seed={args.seed})")
+        if selection is not None:
+            coverage = "، ".join(f"{k}: {v}" for k, v in selection.coverage.items())
+            print(f"پوشش نمونه (از خروجی مدل): {coverage}")
+            if selection.shortfall:
+                lacking = "، ".join(f"{k}: {v}" for k, v in selection.shortfall.items())
+                print(f"⚠️ کمبود پوشش (کمتر از حداقل): {lacking}")
+            if missing:
+                print(f"⚠️ {missing} پیام انتخاب‌شده دیگر در نمونه‌ی قابل‌استفاده نبود")
+        print(f"سقف هزینه: {args.max_cost_usd:.2f} دلار (بین چهار مرحله مشترک)")
+        print("هزینه‌ی هر پیام فرض نمی‌شود؛ هر مرحله پس از نخستین فراخوانی اندازه‌گیری می‌شود.")
+        if args.dry_run:
+            print("--dry-run بود: مدل صدا زده نشد و فایلی نوشته نشد.")
+            return 0
+
+        try:
+            client = build_client()
+        except Exception as exc:  # noqa: BLE001 - هر کمبود پیکربندی یعنی مدل در دسترس نیست
+            print(f"مدل در دسترس نیست ({type(exc).__name__}); اجرا انجام نشد.", file=sys.stderr)
+            return 1
+
+        try:
+            data = await e2e.run_e2e(
+                session,
+                cases,
+                client,
+                embedder=_embedder(),
+                seed=args.seed,
+                requested=args.limit,
+                max_cost_usd=args.max_cost_usd,
+                selection=selection,
+                missing_selected=missing,
+                progress=lambda line: print(line, flush=True),
+            )
+        except mc.CompareError as exc:
+            print(f"انجام نشد: {exc}", file=sys.stderr)
+            return 1
+
+    paths = e2e.write_outputs(data, Path(args.out))
+    print(e2e.render_summary(data))
+    print(f"\nJSON (خصوصی):  {paths['json']}")
+    print(f"CSV بازبینی:   {paths['csv']}")
+    print("⚠️ هر دو فایل پیام و پاسخ (پوشانده‌شده) دارند. در مخزن نگذارید.")
+    return 0
+
+
 async def cmd_run_gateway(_: argparse.Namespace) -> int:
     async with session_scope() as session:
         accounts = list(
@@ -915,6 +1000,25 @@ def main() -> int:
         "--max-parts", type=int, default=None, help="حداکثر بخش (نمونه‌ی تصادفیِ دارای seed)"
     )
     r5b.set_defaults(func=cmd_ro5b_evidence_shadow_run)
+
+    e2e = sub.add_parser(
+        "e2e-shadow-run",
+        help="سایه‌ی سرتاسری پاسخ‌دهی: فهم ← بازیابی ← ربط شواهد ← تصمیم ← نوشتن "
+        "(فقط‌خواندنی؛ هیچ پیامی ارسال نمی‌شود؛ هزینه‌ی مدل دارد)",
+    )
+    e2e.add_argument(
+        "--select-from",
+        default=None,
+        help="خروجی RO-5A (ro5a_shadow_evaluation.json) برای انتخاب نمونه با پوشش دسته‌ها",
+    )
+    e2e.add_argument("--limit", type=int, default=20, help="چند پیام (پیش‌فرض ۲۰)")
+    e2e.add_argument("--seed", type=int, default=7)
+    e2e.add_argument(
+        "--max-cost-usd", type=float, required=True, help="سقف هزینه؛ اجباری، بدون پیش‌فرض"
+    )
+    e2e.add_argument("--out", default="/out/e2e" if _os.path.isdir("/out") else "e2e")
+    e2e.add_argument("--dry-run", action="store_true", help="فقط نمونه؛ مدل صدا نزن")
+    e2e.set_defaults(func=cmd_e2e_shadow_run)
 
     run = sub.add_parser("run-gateway", help="اجرای دروازه برای همه حساب‌های فعال")
     run.set_defaults(func=cmd_run_gateway)
