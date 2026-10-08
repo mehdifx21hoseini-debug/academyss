@@ -24,3 +24,6 @@ retrieval-shadow/
 
 # خروجی سایه‌ی تصمیم (`decision-shadow-run`): متن پوشانده‌شده‌ی پیام دانشجو دارد.
 decision-shadow/
+
+# خروجی ارزیابی RO-5A (`ro5a-shadow-run`): متن پوشانده‌شده‌ی پیام دانشجو دارد.
+ro5a/

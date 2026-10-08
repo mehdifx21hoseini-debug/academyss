@@ -593,6 +593,65 @@ async def cmd_decision_shadow_run(args: argparse.Namespace) -> int:
     return 0
 
 
+async def cmd_ro5a_shadow_run(args: argparse.Namespace) -> int:
+    """ارزیابی سایه‌ی واقعی (RO-5A): نمونه ← فهم ← بازیابی ← تصمیم ← گزارش. فقط‌خواندنی.
+
+    به پایگاه داده نمی‌نویسد و چیزی نمی‌فرستد. فراخوانی مدل فقط برای فهم است و سقفش
+    `--max-cost-usd` (اجباری) است. بدون کلید/پیکربندی مدل، اجرا متوقف نمی‌شود و وضعیت
+    `model_unavailable` ثبت می‌شود.
+    """
+    from pathlib import Path
+
+    from mentorai import model_compare as mc
+    from mentorai.ai import ro5a_shadow as ro5a
+    from mentorai.ai.providers import build_client
+
+    async with session_scope() as session:
+        cases = await mc.sample_from_database(session, limit=args.from_db, seed=args.seed)
+        if not cases:
+            print("هیچ پیامی برای نمونه پیدا نشد", file=sys.stderr)
+            return 1
+        print(f"{len(cases)} پیام انتخاب شد (درخواستی: {args.from_db}، seed={args.seed})")
+        print(f"سقف هزینه: {args.max_cost_usd:.2f} دلار")
+        print("هزینه‌ی هر پیام فرض نمی‌شود؛ پس از نخستین فراخوانی اندازه‌گیری می‌شود.")
+        if args.dry_run:
+            print("--dry-run بود: مدل صدا زده نشد و فایلی نوشته نشد.")
+            return 0
+
+        client = None
+        try:
+            client = build_client()
+        except Exception as exc:  # noqa: BLE001 - هر کمبود پیکربندی یعنی مدل در دسترس نیست
+            print(
+                f"⚠️ مدل در دسترس نیست ({type(exc).__name__}). ارزیابی مدل انجام نمی‌شود "
+                "و فقط نمونه با وضعیت model_unavailable ثبت می‌شود.",
+                file=sys.stderr,
+            )
+
+        try:
+            evaluation = await ro5a.run_ro5a(
+                session,
+                cases,
+                client,
+                embedder=_embedder(),
+                seed=args.seed,
+                requested=args.from_db,
+                max_cost_usd=args.max_cost_usd,
+                progress=lambda line: print(line, flush=True),
+            )
+        except mc.CompareError as exc:
+            print(f"انجام نشد: {exc}", file=sys.stderr)
+            return 1
+
+    paths = ro5a.write_outputs(evaluation, Path(args.out))
+    print(ro5a.render_summary(evaluation))
+    print(f"\nJSON (خصوصی):     {paths['json']}")
+    print(f"خلاصه (بی‌متن):   {paths['summary']}")
+    print(f"CSV بازبینی:      {paths['csv']}")
+    print("⚠️ JSON و CSV پیام (پوشانده‌شده)ی دانشجو دارند. در مخزن نگذارید.")
+    return 0
+
+
 async def cmd_run_gateway(_: argparse.Namespace) -> int:
     async with session_scope() as session:
         accounts = list(
@@ -749,6 +808,20 @@ def main() -> int:
         default="/out/decision-shadow" if _os.path.isdir("/out") else "decision-shadow",
     )
     drun.set_defaults(func=cmd_decision_shadow_run)
+
+    r5 = sub.add_parser(
+        "ro5a-shadow-run",
+        help="ارزیابی سایه‌ی واقعی RO-5A: نمونه‌ی پیام‌های ذخیره‌شده ← فهم ← بازیابی ← تصمیم "
+        "← گزارش (فقط‌خواندنی؛ هزینه‌ی مدل فهم دارد)",
+    )
+    r5.add_argument("--from-db", type=int, required=True, help="چند پیام واقعی دانشجو")
+    r5.add_argument("--seed", type=int, default=7)
+    r5.add_argument(
+        "--max-cost-usd", type=float, required=True, help="سقف هزینه؛ اجباری، بدون پیش‌فرض"
+    )
+    r5.add_argument("--out", default="/out/ro5a" if _os.path.isdir("/out") else "ro5a")
+    r5.add_argument("--dry-run", action="store_true", help="فقط تعداد نمونه؛ مدل صدا نزن")
+    r5.set_defaults(func=cmd_ro5a_shadow_run)
 
     run = sub.add_parser("run-gateway", help="اجرای دروازه برای همه حساب‌های فعال")
     run.set_defaults(func=cmd_run_gateway)
