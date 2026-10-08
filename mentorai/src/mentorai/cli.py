@@ -652,6 +652,78 @@ async def cmd_ro5a_shadow_run(args: argparse.Namespace) -> int:
     return 0
 
 
+async def cmd_ro5b_evidence_shadow_run(args: argparse.Namespace) -> int:
+    """سایه‌ی ربط شواهد (RO-5B): خروجی موجود بازیابی ← ارزیابی ربط هر قطعه ← گزارش.
+
+    به پایگاه داده فقط می‌خواند (متن کامل قطعه‌ها، تراکنش `READ ONLY`) و چیزی نمی‌فرستد و
+    تصمیمی را تغییر نمی‌دهد. مدل فقط ارزیاب است و سقف هزینه‌اش `--max-cost-usd` (اجباری) است.
+    """
+    from pathlib import Path
+
+    from mentorai import model_compare as mc
+    from mentorai.ai import ro5b_evidence_shadow as ro5b
+    from mentorai.ai.providers import build_client
+
+    path = Path(args.from_shadow)
+    try:
+        loaded = ro5b.load_input(path)
+    except mc.CompareError as exc:
+        print(f"انجام نشد: {exc}", file=sys.stderr)
+        return 1
+    plan = ro5b.plan_run(loaded, max_parts=args.max_parts, seed=args.seed)
+    print(
+        f"{plan.parts_in_file} بخش در فایل ({plan.messages} پیام) | قابل‌ارزیابی: {plan.eligible} | "
+        f"انتخاب‌شده: {plan.selected}"
+    )
+    print(f"قطعه‌ی برنامه‌ریزی‌شده (حداکثر {ro5b.TOP_K} برای هر بخش): {plan.chunks}")
+    print(f"سقف هزینه: {args.max_cost_usd:.2f} دلار")
+    print("هزینه‌ی هر بخش فرض نمی‌شود؛ پس از نخستین فراخوانی اندازه‌گیری می‌شود.")
+    if plan.selected == 0:
+        print("هیچ بخشی برای ارزیابی نیست (بازیابی‌شده و دارای قطعه).", file=sys.stderr)
+        return 1
+
+    needed = ro5b.required_chunk_ids(plan)
+    async with session_scope() as session:
+        contents = await ro5b.load_chunk_contents(session, needed)
+    print(f"متن کامل قطعه در پایگاه داده: {len(contents)} از {len(needed)} (فقط خواندن)")
+    if args.dry_run:
+        print("--dry-run بود: مدل صدا زده نشد و فایلی نوشته نشد.")
+        return 0
+
+    client = None
+    try:
+        client = build_client()
+    except Exception as exc:  # noqa: BLE001 - هر کمبود پیکربندی یعنی مدل در دسترس نیست
+        print(
+            f"⚠️ مدل در دسترس نیست ({type(exc).__name__}). ارزیابی انجام نمی‌شود و بخش‌ها با "
+            "وضعیت model_unavailable ثبت می‌شوند.",
+            file=sys.stderr,
+        )
+
+    try:
+        evaluation = await ro5b.run_ro5b(
+            loaded,
+            contents,
+            client,
+            input_name=path.name,
+            seed=args.seed,
+            max_parts=args.max_parts,
+            max_cost_usd=args.max_cost_usd,
+            progress=lambda line: print(line, flush=True),
+        )
+    except mc.CompareError as exc:
+        print(f"انجام نشد: {exc}", file=sys.stderr)
+        return 1
+
+    paths = ro5b.write_outputs(evaluation, Path(args.out))
+    print(ro5b.render_summary(evaluation))
+    print(f"\nJSON (خصوصی):     {paths['json']}")
+    print(f"خلاصه (بی‌متن):   {paths['summary']}")
+    print(f"CSV بازبینی:      {paths['csv']}")
+    print("⚠️ JSON و CSV پرسش (پوشانده‌شده)ی دانشجو دارند. در مخزن نگذارید.")
+    return 0
+
+
 async def cmd_run_gateway(_: argparse.Namespace) -> int:
     async with session_scope() as session:
         accounts = list(
@@ -822,6 +894,27 @@ def main() -> int:
     r5.add_argument("--out", default="/out/ro5a" if _os.path.isdir("/out") else "ro5a")
     r5.add_argument("--dry-run", action="store_true", help="فقط تعداد نمونه؛ مدل صدا نزن")
     r5.set_defaults(func=cmd_ro5a_shadow_run)
+
+    r5b = sub.add_parser(
+        "ro5b-evidence-shadow-run",
+        help="سایه‌ی ربط شواهد RO-5B: ربط واقعی قطعه‌های بازیابی‌شده را ارزیابی می‌کند "
+        "(فقط‌خواندنی؛ تصمیم را تغییر نمی‌دهد؛ هزینه‌ی مدل ارزیاب دارد)",
+    )
+    r5b.add_argument(
+        "--from-shadow",
+        required=True,
+        help="retrieval_shadow.json (RO-3) یا ro5a_shadow_evaluation.json (RO-5A)",
+    )
+    r5b.add_argument(
+        "--max-cost-usd", type=float, required=True, help="سقف هزینه؛ اجباری، بدون پیش‌فرض"
+    )
+    r5b.add_argument("--out", default="/out/ro5b" if _os.path.isdir("/out") else "ro5b")
+    r5b.add_argument("--dry-run", action="store_true", help="فقط شمارش؛ مدل صدا نزن")
+    r5b.add_argument("--seed", type=int, default=7, help="فقط برای نمونه‌گیری با --max-parts")
+    r5b.add_argument(
+        "--max-parts", type=int, default=None, help="حداکثر بخش (نمونه‌ی تصادفیِ دارای seed)"
+    )
+    r5b.set_defaults(func=cmd_ro5b_evidence_shadow_run)
 
     run = sub.add_parser("run-gateway", help="اجرای دروازه برای همه حساب‌های فعال")
     run.set_defaults(func=cmd_run_gateway)
