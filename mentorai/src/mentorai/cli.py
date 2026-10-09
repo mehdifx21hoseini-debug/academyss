@@ -805,6 +805,7 @@ async def cmd_e2e_shadow_run(args: argparse.Namespace) -> int:
     print(e2e.render_summary(data))
     print(f"\nJSON (خصوصی):  {paths['json']}")
     print(f"CSV بازبینی:   {paths['csv']}")
+    print(f"دستورها (هش‌دار): {paths['prompts']}")
     print("⚠️ هر دو فایل پیام و پاسخ (پوشانده‌شده) دارند. در مخزن نگذارید.")
     return 0
 

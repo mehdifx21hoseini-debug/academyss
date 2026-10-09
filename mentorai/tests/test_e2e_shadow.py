@@ -43,10 +43,12 @@ from mentorai.ai import prompt as production_prompt
 from mentorai.ai import retrieval_shadow as rs
 from mentorai.ai import ro5b_evidence_shadow as r5
 from mentorai.ai import understanding
+from mentorai.ai import understanding as und
 from mentorai.ai.client import RawCall, ScriptedClient
 from mentorai.db.models import MentorAccount
 from mentorai.db.session import get_engine
 from mentorai.model_compare import MASK
+from mentorai.model_compare import mask_personal as mask_text
 
 PHONE = "09121234567"
 EMAIL = "student@example.com"
@@ -707,9 +709,10 @@ async def test_the_full_run_connects_all_stages_and_writes_only_where_the_decisi
 
     assert code == 0
     out = tmp_path / "out"
-    assert sorted(p.name for p in out.iterdir()) == ["e2e_review.csv", "e2e_shadow.json"]
-    for path in out.iterdir():
+    assert sorted(p.name for p in out.iterdir()) == ["e2e_review.csv", "e2e_shadow.json", "prompts"]
+    for path in (out / "e2e_review.csv", out / "e2e_shadow.json"):
         assert stat.S_IMODE(path.stat().st_mode) == 0o600
+    assert stat.S_IMODE((out / "prompts").stat().st_mode) == 0o700
     doc = json.loads((out / "e2e_shadow.json").read_text(encoding="utf-8"))
     by_text = {m["masked_student_message"].split(":")[0]: m for m in doc["messages"]}
 
@@ -1095,8 +1098,9 @@ async def test_personal_data_never_reaches_the_model_or_any_output(
     await cli.cmd_e2e_shadow_run(_args(tmp_path))
 
     everything = "\n".join(user for calls in client.stage_calls.values() for user in calls)
-    for path in (tmp_path / "out").iterdir():
-        everything += path.read_text(encoding="utf-8")
+    for path in sorted((tmp_path / "out").rglob("*")):
+        if path.is_file():
+            everything += path.read_text(encoding="utf-8")
     for secret in (PHONE, EMAIL, key):
         assert secret not in everything
     assert MASK in everything
@@ -1313,3 +1317,638 @@ def test_multi_part_answers_are_joined_with_a_blank_line_and_gaps_are_skipped() 
     )
 
     assert message.generated_answer == "الف\n\nب"
+
+
+# ---------------------------------------------------------------------------
+# ۱۰) قابلیت بازبینی: فیلدهای تازه فقط افزوده می‌شوند و رفتار تغییر نمی‌کند
+# ---------------------------------------------------------------------------
+
+GOLDEN = Path(__file__).parent / "data" / "e2e_golden_legacy.json"
+
+NEW_RUN_KEYS = {"retrieval", "prompts", "code"}
+NEW_MESSAGE_KEYS = {"understanding"}
+NEW_PART_KEYS = {
+    "writer_cost_usd",
+    "search_queries",
+    "retrieval",
+    "evidence",
+    "evidence_notes",
+    "decision_corrections",
+}
+
+
+async def _run_scenario(
+    session: AsyncSession,
+    account: MentorAccount,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    out: str = "out",
+) -> tuple[dict[str, Any], str, _Pipeline, _FakeSearch, list[int]]:
+    client, fake, ids = await _scenario(session, account, monkeypatch)
+    _patch_client(monkeypatch, client)
+    code = await cli.cmd_e2e_shadow_run(_args(tmp_path, out=str(tmp_path / out)))
+    assert code == 0
+    doc = json.loads((tmp_path / out / "e2e_shadow.json").read_text(encoding="utf-8"))
+    csv_text = (tmp_path / out / "e2e_review.csv").read_text(encoding="utf-8")
+    return doc, csv_text, client, fake, ids
+
+
+async def test_the_previous_outputs_and_the_model_inputs_are_unchanged_by_the_review_fields(
+    session: AsyncSession,
+    account: MentorAccount,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """نمونه‌ی طلایی با کدِ پیش از افزودن فیلدهای بازبینی گرفته شده (commit c8d3a66)."""
+    golden = json.loads(GOLDEN.read_text(encoding="utf-8"))
+    doc, csv_text, client, _, _ = await _run_scenario(session, account, tmp_path, monkeypatch)
+    doc.pop("created")
+
+    # ورودیِ هر سه مرحله‌ی مدل کلمه‌به‌کلمه همان است: رفتار تصمیم، شواهد و نوشتن عوض نشده.
+    assert client.stage_calls == golden["stage_calls"]
+    # CSV بازبینی و همه‌ی کلیدهای قبلی JSON عیناً همان‌اند.
+    assert csv_text == golden["csv"]
+    old = golden["document"]
+    assert doc["version"] == old["version"] and doc["limitations"] == old["limitations"]
+    assert set(doc["run"]) == set(old["run"]) | NEW_RUN_KEYS
+    assert {k: doc["run"][k] for k in old["run"]} == old["run"]
+    assert len(doc["messages"]) == len(old["messages"])
+    for new_message, old_message in zip(doc["messages"], old["messages"], strict=True):
+        assert set(new_message) == set(old_message) | NEW_MESSAGE_KEYS
+        for key in old_message:
+            if key != "parts":
+                assert new_message[key] == old_message[key], key
+        assert len(new_message["parts"]) == len(old_message["parts"])
+        for new_part, old_part in zip(new_message["parts"], old_message["parts"], strict=True):
+            assert set(new_part) == set(old_part) | NEW_PART_KEYS
+            assert {k: new_part[k] for k in old_part} == old_part
+
+
+async def test_two_identical_runs_give_identical_documents_so_they_can_be_compared(
+    session: AsyncSession,
+    account: MentorAccount,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    first, _, client, _, _ = await _run_scenario(session, account, tmp_path, monkeypatch, out="a")
+    _patch_client(monkeypatch, _Pipeline(client.routes, client.verdicts))
+    assert await cli.cmd_e2e_shadow_run(_args(tmp_path, out=str(tmp_path / "b"))) == 0
+    second = json.loads((tmp_path / "b" / "e2e_shadow.json").read_text(encoding="utf-8"))
+    first.pop("created")
+    second.pop("created")
+
+    assert first == second
+
+
+async def test_the_search_queries_and_the_retrieval_run_of_the_same_run_are_recorded(
+    session: AsyncSession,
+    account: MentorAccount,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    doc, _, _, fake, ids = await _run_scenario(session, account, tmp_path, monkeypatch)
+    by_text = {m["masked_student_message"].split(":")[0]: m for m in doc["messages"]}
+
+    academy = by_text["نمونه-الف"]["parts"][0]
+    assert academy["search_queries"] == ["q-ac"]
+    assert academy["retrieval"]["queries"] == [
+        {"index": 1, "query": "q-ac", "hit_count": 2, "error": None}
+    ]
+    assert (
+        academy["retrieval"]["hit_count"] == 2 and academy["retrieval"]["duplicates_removed"] == 0
+    )
+    first = academy["retrieval"]["hits"][0]
+    assert first["chunk_id"] == ids[0] and first["source_class"] == "official"
+    assert first["score"] > academy["retrieval"]["hits"][1]["score"]
+    assert first["found_by"] == [{"query_index": 1, "rank": 1}]
+
+    social = by_text["نمونه-ج"]["parts"][0]
+    assert social["retrieval_skipped"] == e2e.SKIP_SOCIAL
+    assert social["retrieval"]["queries"] == [] and social["retrieval"]["hits"] == []
+
+    # عبارت‌های ذخیره‌شده دقیقاً همان‌هایی‌اند که به جست‌وجوی واقعی همان اجرا رفتند.
+    searched = {
+        q
+        for m in doc["messages"]
+        for p in m["parts"]
+        if not p["retrieval_skipped"]
+        for q in p["search_queries"]
+    }
+    assert {q for q, _ in fake.calls} == searched
+    assert {
+        q["query"] for m in doc["messages"] for p in m["parts"] for q in p["retrieval"]["queries"]
+    } == searched
+
+
+async def test_a_failed_search_query_is_recorded_with_its_error_type_only(
+    session: AsyncSession,
+    account: MentorAccount,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, fake, _ = await _scenario(session, account, monkeypatch)
+    fake.results["q-weak"] = RuntimeError(f"db down {EMAIL}")
+    _patch_client(monkeypatch, client)
+    assert await cli.cmd_e2e_shadow_run(_args(tmp_path)) == 0
+    doc = json.loads((tmp_path / "out" / "e2e_shadow.json").read_text(encoding="utf-8"))
+
+    part = next(
+        m["parts"][0] for m in doc["messages"] if m["masked_student_message"].startswith("نمونه-و")
+    )
+    assert part["retrieval"]["queries"] == [
+        {"index": 1, "query": "q-weak", "hit_count": 0, "error": "RuntimeError"}
+    ]
+    assert part["evidence"]["final"]["retrieval_errors"] == 1
+    assert part["evidence"]["status"] is None or part["evidence"]["chunks"] == []
+    assert EMAIL not in json.dumps(doc, ensure_ascii=False)
+
+
+async def test_each_chunk_records_the_raw_model_verdict_the_final_verdict_and_every_change(
+    session: AsyncSession,
+    account: MentorAccount,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _, ids = await _scenario(session, account, monkeypatch)
+    # ارزیاب ادعای «مستقیم» می‌کند ولی پشتیبانی نمی‌دهد؛ کد آن را به «مفید» پایین می‌آورد.
+    client.verdicts[ids[0]] = ("direct", False, True, f"ادعا {PHONE}")
+    _patch_client(monkeypatch, client)
+    assert await cli.cmd_e2e_shadow_run(_args(tmp_path)) == 0
+    doc = json.loads((tmp_path / "out" / "e2e_shadow.json").read_text(encoding="utf-8"))
+
+    part = next(
+        m["parts"][0]
+        for m in doc["messages"]
+        if m["masked_student_message"].startswith("نمونه-الف")
+    )
+    chunks = {c["chunk_id"]: c for c in part["evidence"]["chunks"]}
+    lowered = chunks[ids[0]]
+    assert lowered["rank"] == 1 and lowered["source_class"] == "official"
+    assert lowered["authority"] == "fact" and lowered["status"] == "evaluated"
+    assert lowered["model_relevance"] == "direct" and lowered["relevance"] == "useful"
+    assert lowered["supports_question"] is False
+    assert lowered["adjustments"] == [r5.ADJ_DIRECT_NO_SUPPORT]
+    assert PHONE not in lowered["reason"] and MASK in lowered["reason"]
+    other = chunks[ids[1]]
+    assert other["model_relevance"] == other["relevance"] == "useful"
+    assert other["adjustments"] == [] and other["supports_question"] is True
+    assert isinstance(other["original_score"], float) and other["found_by"] == [
+        {"query_index": 1, "rank": 2}
+    ]
+    assert part["evidence"]["aggregate"]["evidence_quality"] == "moderate"
+    both = sorted([ids[0], ids[1]])
+    assert part["evidence"]["proposal"] == {
+        "level": "weak",
+        "supporting_chunk_ids": both,
+        "supports_part_of_question": True,
+    }, "پیشنهاد واقعیِ ارزیاب به تصمیم، نه بازمحاسبه"
+    assert part["evidence"]["final"]["level"] == "weak"
+    assert part["evidence"]["final"]["supporting_chunk_ids"] == both
+    assert part["evidence"]["final"]["supports_part_of_question"] is True
+    assert part["decision_strategy"] == "mixed"
+    assert part["evidence"]["cost_usd"] > 0 and part["evidence"]["status"] == "evaluated"
+    assert part["writer_cost_usd"] > 0
+
+
+def _unit_ro3(
+    *, hits: list[dict[str, Any]], topic: str, fact_class: str, queries: tuple[str, ...]
+) -> dict[str, Any]:
+    doc = _ro3_doc(
+        [_ro3_part("m1", 1, hits=hits, topic=topic, fact_class=fact_class, queries=queries)]
+    )
+    doc["messages"][0].update(
+        {
+            "scope_confidence": 0.5,
+            "adjustments": ["queries_fallback_to_question:1", f"x {PHONE}"],
+            "understanding_detail": f"bad {EMAIL}",
+            "ambiguity": "none",
+        }
+    )
+    return doc
+
+
+async def _assembled(
+    doc: dict[str, Any], contents: dict[int, str], verdicts: dict[int, Verdict]
+) -> tuple[e2e.MessageOutput, e2e.Ro5bAssessor]:
+    loaded = r5.parse_input(doc)
+    judged = await r5.run_ro5b(
+        loaded,
+        contents,
+        _Pipeline({}, verdicts),
+        input_name="x",
+        seed=1,
+        max_parts=None,
+        max_cost_usd=5.0,
+    )
+    assessor = e2e.Ro5bAssessor(judged.results)
+    decision = ds.decide_document(doc, assessor)
+    evidence = {(r.message_id, r.part_id): r for r in judged.results}
+    messages, _ = e2e._assemble(doc, decision, evidence, contents, assessor)
+    return messages[0], assessor
+
+
+async def test_evidence_notes_and_the_proposal_show_where_the_code_lowered_the_claim() -> None:
+    doc = _unit_ro3(
+        hits=[_hit(1, source="mentor"), _hit(2, score=0.015)],
+        topic="academy_process",
+        fact_class="academy_fact",
+        queries=("q1",),
+    )
+
+    message, assessor = await _assembled(doc, {1: "a", 2: "b"}, {1: ACADEMY_YES, 2: NOPE})
+
+    part = message.parts[0]
+    proposal = part.evidence_detail["proposal"]
+    final = part.evidence_detail["final"]
+    assert proposal == {
+        "level": "strong",
+        "supporting_chunk_ids": [1],
+        "supports_part_of_question": False,
+    }, "ارزیاب قطعه‌ی منتور را مستقیم دانسته بود"
+    assert final["level"] == "weak" and final["supporting_chunk_ids"] == []
+    assert final["candidate_chunk_ids"] == [2], "قطعه‌ی منتور برای واقعیت آکادمی نامزد نیست"
+    assert part.evidence_notes == [
+        "non_official_hits_ignored",
+        "unretrieved_supporting_ids_dropped",
+        "strong_without_valid_support_lowered",
+    ]
+    assert (
+        part.strategy == "silence"
+        and part.decision_reason == "academy_fact_weak_evidence_unverified"
+    )
+    assert assessor.proposals[("m1", 1)].level is ds.EvidenceLevel.strong
+
+
+async def test_understanding_and_decision_corrections_are_recorded_and_masked() -> None:
+    doc = _unit_ro3(
+        hits=[_hit(1)], topic="broker_wallet", fact_class="none", queries=(f"q {EMAIL}", "q2")
+    )
+    doc["parts"][0]["retrieval"]["queries"][0]["query"] = f"q {EMAIL}"  # بدون ماسک در منبع
+
+    message, _ = await _assembled(doc, {1: "a"}, {1: ACADEMY_YES})
+
+    assert message.understanding["scope_confidence"] == 0.5
+    assert message.understanding["adjustments"] == ["queries_fallback_to_question:1", f"x {MASK}"]
+    assert message.understanding["detail"] == f"bad {MASK}"
+    part = message.parts[0]
+    assert part.decision_corrections == ["fact_class_upgraded:none->academy_fact"]
+    assert part.search_queries == [f"q {MASK}", "q2"], "عبارت‌ها دوباره پوشانده می‌شوند"
+    assert part.retrieval["queries"][0]["query"] == f"q {MASK}"
+    assert EMAIL not in json.dumps(e2e._part_document(part), ensure_ascii=False)
+
+
+async def test_a_failed_understanding_records_its_detail(
+    session: AsyncSession,
+    account: MentorAccount,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    doc, _, _, _, _ = await _run_scenario(session, account, tmp_path, monkeypatch)
+
+    broken = next(m for m in doc["messages"] if m["understanding_error"])
+    assert broken["understanding"] == {
+        "scope_confidence": None,
+        "adjustments": [],
+        "detail": "json",
+    }
+
+
+def test_recording_the_assessors_proposal_does_not_change_what_it_returns() -> None:
+    results: list[r5.PartResult] = []
+    assessor = e2e.Ro5bAssessor(results)
+    part = ds.PartInput(
+        message_id="m1",
+        part_id=1,
+        standalone_question="q",
+        scope=understanding.Scope.in_domain,
+        topic=understanding.Topic.risk_management,
+        fact_class=understanding.FactClass.general_knowledge,
+        method_intent=understanding.MethodIntent.none,
+        method_names=(),
+        skipped=None,
+        queries_total=1,
+        query_errors=0,
+        hits=(ds.HitRef(1, "official"),),
+    )
+
+    returned = assessor.assess(part, part.hits)
+
+    assert returned == ds.EvidenceProposal(ds.EvidenceLevel.weak)
+    assert assessor.proposals == {("m1", 1): returned}
+    assert assessor.assess(part, ()) == ds.EvidenceProposal(ds.EvidenceLevel.none)
+
+
+def test_the_prompt_manifest_gives_a_stable_version_hash_and_text_for_every_model_stage() -> None:
+    import hashlib
+
+    manifest = e2e.prompt_manifest()
+
+    assert set(manifest) == {"understanding", "evidence", "writer"}
+    assert manifest["understanding"]["version"] == understanding.UNDERSTANDING_PROMPT_VERSION
+    assert manifest["evidence"]["version"] == r5.PROMPT_VERSION
+    assert manifest["writer"]["version"] == e2e.WRITER_PROMPT_VERSION
+    for name, text in (
+        ("understanding", understanding.SYSTEM_PROMPT),
+        ("evidence", r5.SYSTEM_PROMPT),
+        ("writer", e2e.WRITER_SYSTEM_PROMPT),
+    ):
+        entry = manifest[name]
+        assert entry["text"] == text
+        assert entry["sha256"] == hashlib.sha256(text.encode("utf-8")).hexdigest()
+        assert len(entry["schema_sha256"]) == 64
+    assert manifest["writer"]["mode_brief"] == dict(e2e.MODE_BRIEF)
+    assert manifest == e2e.prompt_manifest(), "پایدار: دو بار یک نتیجه"
+    assert len({manifest[n]["sha256"] for n in manifest}) == 3
+
+
+def test_a_changed_prompt_or_schema_changes_its_hash(monkeypatch: pytest.MonkeyPatch) -> None:
+    before = e2e.prompt_manifest()
+
+    monkeypatch.setattr(e2e, "WRITER_SYSTEM_PROMPT", e2e.WRITER_SYSTEM_PROMPT + "\nقانون تازه")
+    monkeypatch.setattr(r5, "JSON_SCHEMA", {**r5.JSON_SCHEMA, "title": "x"})
+    monkeypatch.setitem(e2e.MODE_BRIEF, "clarify", "دستور دیگر")
+    after = e2e.prompt_manifest()
+
+    assert after["writer"]["sha256"] != before["writer"]["sha256"]
+    assert after["evidence"]["schema_sha256"] != before["evidence"]["schema_sha256"]
+    assert after["writer"]["mode_brief_sha256"] != before["writer"]["mode_brief_sha256"]
+    assert after["understanding"] == before["understanding"]
+
+
+def test_the_stored_prompts_contain_no_personal_data() -> None:
+    """دستورها ثابت‌اند و چیزی برای ماسک ندارند؛ اگر روزی داشتند، این آزمون می‌شکند."""
+    for entry in e2e.prompt_manifest().values():
+        assert mask_text(entry["text"]) == entry["text"]
+        for value in entry.get("mode_brief", {}).values():
+            assert mask_text(value) == value
+
+
+async def test_the_run_records_the_prompts_and_the_retrieval_settings(
+    session: AsyncSession,
+    account: MentorAccount,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    doc, _, _, _, _ = await _run_scenario(session, account, tmp_path, monkeypatch)
+
+    assert doc["run"]["prompts"] == e2e.prompt_metadata()
+    assert doc["run"]["retrieval"]["embedder"] == "none (text only)"
+    assert doc["run"]["retrieval"]["source_classes"] == ["official", "mentor"]
+    assert doc["run"]["retrieval"]["limit_per_query"] == 8
+
+
+async def test_no_knowledge_base_text_or_title_enters_the_new_fields(
+    session: AsyncSession,
+    account: MentorAccount,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    doc, _, _, _, _ = await _run_scenario(session, account, tmp_path, monkeypatch)
+
+    text = json.dumps(doc, ensure_ascii=False)
+    assert "SENTINEL" not in text, "متن قطعه‌های پایگاه دانش ذخیره نمی‌شود"
+    assert "سند " not in text, "عنوان قطعه‌ها ذخیره نمی‌شود"
+    for message in doc["messages"]:
+        for part in message["parts"]:
+            for hit in part["retrieval"]["hits"]:
+                assert "title" not in hit and "content_preview" not in hit
+            for chunk in part["evidence"]["chunks"]:
+                assert "title" not in chunk and "content_preview" not in chunk
+    assert PHONE not in text
+
+
+def test_the_review_sheet_columns_and_the_terminal_summary_are_untouched() -> None:
+    assert e2e.REVIEW_COLUMNS == (
+        "message_id",
+        "part_id",
+        "masked_student_message",
+        "standalone_question",
+        "decision_strategy",
+        "decision_reason",
+        "fact_class",
+        "understood_fact_class",
+        "topic",
+        "scope",
+        "retrieved_chunk_ids",
+        "evidence_quality",
+        "evidence_level",
+        "writer_chunk_ids",
+        "generated_answer",
+        "writer_status",
+        "needs_human",
+        "silence_reason",
+        "human_note",
+    )
+
+
+def test_a_chunk_detail_masks_the_reason_even_if_the_source_did_not() -> None:
+    chunk = r5.ChunkResult(
+        chunk_id=5,
+        rank=2,
+        original_score=0.0161,
+        source_class="mentor",
+        authority="guidance",
+        title="عنوان محرمانه",
+        found_by=((1, 2),),
+        content_preview="متن محرمانه",
+        status=r5.CHUNK_EVALUATED,
+        model_relevance=r5.Relevance.direct,
+        relevance=r5.Relevance.useful,
+        supports_question=False,
+        academy_fact_supported=False,
+        reason=f"تماس {PHONE}",
+        adjustments=(r5.ADJ_DIRECT_NO_SUPPORT,),
+    )
+
+    detail = e2e._chunk_detail(chunk)
+
+    assert detail["reason"] == f"تماس {MASK}"
+    assert detail == {
+        "rank": 2,
+        "chunk_id": 5,
+        "source_class": "mentor",
+        "authority": "guidance",
+        "original_score": 0.0161,
+        "found_by": [{"query_index": 1, "rank": 2}],
+        "status": "evaluated",
+        "model_relevance": "direct",
+        "relevance": "useful",
+        "supports_question": False,
+        "academy_fact_supported": False,
+        "reason": f"تماس {MASK}",
+        "adjustments": [r5.ADJ_DIRECT_NO_SUPPORT],
+    }, "عنوان و متن قطعه هرگز وارد خروجی نمی‌شود"
+
+
+# ---------------------------------------------------------------------------
+# ۱۱) دستورها بیرون از JSON، اثر انگشت کد، و قفل نسخه‌ی دستورها
+# ---------------------------------------------------------------------------
+
+PINS = Path(__file__).parent / "data" / "e2e_prompt_pins.json"
+_PIN_KEYS = ("version", "sha256", "schema_sha256", "mode_brief_sha256")
+
+
+def prompt_pin_problems(current: dict[str, Any], pins: dict[str, Any]) -> list[str]:
+    """تغییرِ دستور (متن، شِما یا دستور حالت‌ها) بدون تغییر نسخه، یا بدون به‌روز کردن قفل."""
+    problems: list[str] = []
+    for stage, pin in pins.items():
+        now = {k: current[stage][k] for k in _PIN_KEYS if k in current[stage]}
+        if now == pin:
+            continue
+        changed = [k for k in pin if k != "version" and now.get(k) != pin[k]]
+        if changed and now["version"] == pin["version"]:
+            problems.append(f"{stage}: {', '.join(changed)} عوض شد ولی نسخه بالا نرفت")
+        else:
+            problems.append(f"{stage}: قفل tests/data/e2e_prompt_pins.json به‌روز نشده")
+    problems += [f"{stage}: مرحله‌ی تازه بدون قفل" for stage in current if stage not in pins]
+    return problems
+
+
+def test_a_prompt_change_without_a_version_bump_is_detected() -> None:
+    pins = json.loads(PINS.read_text(encoding="utf-8"))
+
+    assert prompt_pin_problems(e2e.prompt_metadata(), pins) == [], (
+        "اگر عمداً دستوری را عوض کردی: نسخه‌اش را بالا ببر و قفل را به‌روز کن"
+    )
+
+
+def test_the_pin_check_catches_every_kind_of_silent_change(monkeypatch: pytest.MonkeyPatch) -> None:
+    pins = json.loads(PINS.read_text(encoding="utf-8"))
+
+    monkeypatch.setattr(e2e, "WRITER_SYSTEM_PROMPT", e2e.WRITER_SYSTEM_PROMPT + " قانون تازه")
+    text = prompt_pin_problems(e2e.prompt_metadata(), pins)
+    monkeypatch.undo()
+    monkeypatch.setattr(r5, "JSON_SCHEMA", {**r5.JSON_SCHEMA, "title": "x"})
+    schema = prompt_pin_problems(e2e.prompt_metadata(), pins)
+    monkeypatch.undo()
+    monkeypatch.setitem(e2e.MODE_BRIEF, "clarify", "دستور دیگر")
+    modes = prompt_pin_problems(e2e.prompt_metadata(), pins)
+    monkeypatch.undo()
+    monkeypatch.setattr(und, "SYSTEM_PROMPT", und.SYSTEM_PROMPT + " ")
+    understanding_text = prompt_pin_problems(e2e.prompt_metadata(), pins)
+    monkeypatch.undo()
+    # نسخه بالا رفته ولی قفل به‌روز نشده
+    monkeypatch.setattr(e2e, "WRITER_PROMPT_VERSION", "writer-v2")
+    stale = prompt_pin_problems(e2e.prompt_metadata(), pins)
+
+    assert text == ["writer: sha256 عوض شد ولی نسخه بالا نرفت"]
+    assert schema == ["evidence: schema_sha256 عوض شد ولی نسخه بالا نرفت"]
+    assert modes == ["writer: mode_brief_sha256 عوض شد ولی نسخه بالا نرفت"]
+    assert understanding_text == ["understanding: sha256 عوض شد ولی نسخه بالا نرفت"]
+    assert stale == ["writer: قفل tests/data/e2e_prompt_pins.json به‌روز نشده"]
+
+
+async def test_the_json_has_no_prompt_text_only_versions_hashes_and_file_names(
+    session: AsyncSession,
+    account: MentorAccount,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    doc, _, _, _, _ = await _run_scenario(session, account, tmp_path, monkeypatch)
+
+    raw = (tmp_path / "out" / "e2e_shadow.json").read_text(encoding="utf-8")
+    for text in (und.SYSTEM_PROMPT, r5.SYSTEM_PROMPT, e2e.WRITER_SYSTEM_PROMPT):
+        assert text[:60] not in raw and text[-60:] not in raw
+    for brief in e2e.MODE_BRIEF.values():
+        assert brief not in raw
+    for stage, entry in doc["run"]["prompts"].items():
+        assert "text" not in entry and "mode_brief" not in entry, stage
+        assert set(entry) >= {"version", "sha256", "schema_sha256", "file", "schema_file"}
+        assert entry["file"] == f"prompts/{entry['sha256']}.txt"
+        assert entry["schema_file"] == f"prompts/{entry['schema_sha256']}.json"
+    writer = doc["run"]["prompts"]["writer"]
+    assert writer["mode_brief_file"] == f"prompts/{writer['mode_brief_sha256']}.json"
+
+
+async def test_each_prompt_is_written_once_as_a_private_file_named_by_its_hash(
+    session: AsyncSession,
+    account: MentorAccount,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import hashlib
+
+    doc, _, _, _, _ = await _run_scenario(session, account, tmp_path, monkeypatch)
+
+    folder = tmp_path / "out" / "prompts"
+    files = sorted(folder.iterdir())
+    # سه دستور، سه شِما و یک دستور حالت‌ها؛ فارغ از اینکه چند پیام اجرا شده (۷ پیام).
+    assert len(doc["messages"]) == 7 and len(files) == 7
+    assert stat.S_IMODE(folder.stat().st_mode) == 0o700
+    for path in files:
+        assert stat.S_IMODE(path.stat().st_mode) == 0o600
+        content = path.read_bytes()
+        assert hashlib.sha256(content).hexdigest() == path.stem, "نام فایل همان هش محتواست"
+    # هر ارجاعِ JSON به فایلی موجود می‌رسد و محتوایش همان دستور واقعی است.
+    prompts = doc["run"]["prompts"]
+    assert (tmp_path / "out" / prompts["writer"]["file"]).read_text(encoding="utf-8") == (
+        e2e.WRITER_SYSTEM_PROMPT
+    )
+    assert (tmp_path / "out" / prompts["understanding"]["file"]).read_text(encoding="utf-8") == (
+        und.SYSTEM_PROMPT
+    )
+    assert (tmp_path / "out" / prompts["evidence"]["file"]).read_text(encoding="utf-8") == (
+        r5.SYSTEM_PROMPT
+    )
+    modes = json.loads((tmp_path / "out" / prompts["writer"]["mode_brief_file"]).read_text("utf-8"))
+    assert modes == dict(e2e.MODE_BRIEF)
+    schema = json.loads((tmp_path / "out" / prompts["writer"]["schema_file"]).read_text("utf-8"))
+    assert schema == e2e.WRITER_SCHEMA
+
+
+def test_prompt_files_never_contain_personal_data_and_match_the_metadata() -> None:
+    files = e2e.prompt_files()
+    meta = e2e.prompt_metadata()
+
+    referenced = {
+        value
+        for entry in meta.values()
+        for key, value in entry.items()
+        if key in {"file", "schema_file", "mode_brief_file"}
+    }
+    assert referenced == set(files)
+    assert all(mask_text(content) == content for content in files.values())
+
+
+def test_the_code_fingerprint_names_each_file_and_hashes_its_real_bytes() -> None:
+    import hashlib
+
+    fingerprint = e2e.code_fingerprint()
+
+    assert [f["file"] for f in fingerprint] == [
+        "mentorai/ai/e2e_shadow.py",
+        "mentorai/ai/ro5b_evidence_shadow.py",
+        "mentorai/ai/decision_shadow.py",
+        "mentorai/ai/retrieval_shadow.py",
+        "mentorai/ai/understanding.py",
+    ]
+    for entry in fingerprint:
+        real = SRC / entry["file"].removeprefix("mentorai/")
+        assert entry["sha256"] == hashlib.sha256(real.read_bytes()).hexdigest()
+        assert entry["module"] == entry["file"].removesuffix(".py").replace("/", ".")
+    assert len({f["sha256"] for f in fingerprint}) == 5
+
+
+def test_the_file_hash_changes_with_the_content_and_is_none_for_a_missing_file(
+    tmp_path: Path,
+) -> None:
+    target = tmp_path / "x.py"
+    target.write_text("a = 1\n", encoding="utf-8")
+    first = e2e._file_sha(target)
+    target.write_text("a = 2\n", encoding="utf-8")
+
+    assert first != e2e._file_sha(target)
+    assert e2e._file_sha(tmp_path / "missing.py") is None
+
+
+async def test_the_run_records_the_code_fingerprint(
+    session: AsyncSession,
+    account: MentorAccount,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    doc, _, _, _, _ = await _run_scenario(session, account, tmp_path, monkeypatch)
+
+    assert doc["run"]["code"] == e2e.code_fingerprint()
+    assert all(len(entry["sha256"]) == 64 for entry in doc["run"]["code"])

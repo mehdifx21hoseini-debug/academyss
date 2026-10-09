@@ -1,0 +1,18 @@
+{
+ "evidence": {
+  "schema_sha256": "388eb9974baa3f8f9af19e39d3c9e3be2c75a1136eafa3bf1e1e395ad3fefc79",
+  "sha256": "4d04e864696333a623f2e1dbf5836e19e4334fc07ae86b0c82017cb6d066b4b9",
+  "version": "evidence-relevance-v1"
+ },
+ "understanding": {
+  "schema_sha256": "ab3a9c7037d9c9e26744bd30c1faa6fa48a84bdad119087e1009cb03f75060c0",
+  "sha256": "539e34e365eb39a39fa946de9781d4857961e20cf5220c10c29fa5e6ecb941a1",
+  "version": "understand-v2"
+ },
+ "writer": {
+  "mode_brief_sha256": "8d9a11ed618558ac37c48abe92e82cef5acb3a5de85a297dc2b4f380d66a7926",
+  "schema_sha256": "b39f4f8ba32094ddc65b135c44f8d5cf1bbb6cc13d0b12c8290e6d7eb32e6131",
+  "sha256": "b043021a4cada3085674ed3c25105e51e657e067062487c1bed35e8a97412dac",
+  "version": "writer-v1"
+ }
+}

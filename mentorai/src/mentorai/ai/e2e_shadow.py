@@ -35,6 +35,16 @@
 هر مرحله پس از نخستین فراخوانیِ اندازه‌گیری‌شده، هزینه‌ی کل خودش را با باقیِ سقف مقایسه می‌کند و
 عبور از سقف اجرا را متوقف می‌کند (بدون خروجی).
 
+### قابلیت بازبینی (فقط خروجی؛ رفتار هیچ مرحله‌ای تغییر نمی‌کند)
+JSON هر بخش را با همه‌ی آنچه واقعاً در همان اجرا رخ داد ثبت می‌کند: عبارت‌های جست‌وجو و نتیجه‌ی
+بازیابی، حکم خام و نهایی ارزیاب برای هر قطعه، پیشنهاد ارزیاب و نتیجه‌ی نهایی تصمیم با یادداشت‌ها،
+و اصلاح‌های فهم و تصمیم. در سطح اجرا، نسخه، هش و متن دستورهای فهم، ارزیابی شواهد و نوشتن ثبت می‌شود
+تا دو اجرا قابل‌مقایسه باشند. متن دستورها در JSON **نیست**: فقط نسخه، هش و نام فایل؛ خودِ متن (و
+شِما و دستور حالت‌ها) یک‌بار برای هر دستور در `prompts/<هش>.txt|json` (مجوز ۶۰۰) نوشته می‌شود.
+اثر انگشت SHA-256 فایل‌های مؤثر بر رفتار هم در `run.code` ثبت می‌شود. متن کامل قطعه و عنوان آن
+ثبت **نمی‌شود**. کلیدهای قبلی بدون تغییر
+مانده‌اند و CSV و خلاصه‌ی ترمینال عیناً مثل قبل‌اند.
+
 ### حریم خصوصی
 پیام دانشجو، پرسش‌ها، متن قطعه و پاسخ‌ها پیش از ارسال به مدل و پیش از هر خروجی پوشانده می‌شوند. ترمینال
 فقط شمارش چاپ می‌کند (هیچ متن پیام و پاسخی). خروجی‌ها مجوز ۶۰۰ دارند.
@@ -43,6 +53,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import io
 import json
 import random
@@ -60,6 +71,7 @@ from mentorai.ai import budget
 from mentorai.ai import decision_shadow as ds
 from mentorai.ai import retrieval_shadow as rs
 from mentorai.ai import ro5b_evidence_shadow as r5
+from mentorai.ai import understanding as und
 from mentorai.ai.client import ModelClient, RawCall
 from mentorai.ai.understanding import Part
 from mentorai.knowledge.embeddings import EmbeddingProvider
@@ -290,8 +302,17 @@ class Ro5bAssessor:
 
     def __init__(self, results: Sequence[r5.PartResult]) -> None:
         self._by_key = {(r.message_id, r.part_id): r for r in results}
+        # فقط برای ثبت در خروجی: همان پیشنهادی که تصمیم واقعاً گرفت (رفتار را تغییر نمی‌دهد).
+        self.proposals: dict[tuple[str, int], ds.EvidenceProposal] = {}
 
     def assess(self, part: ds.PartInput, candidates: tuple[ds.HitRef, ...]) -> ds.EvidenceProposal:
+        proposal = self._propose(part, candidates)
+        self.proposals[(part.message_id, part.part_id)] = proposal
+        return proposal
+
+    def _propose(
+        self, part: ds.PartInput, candidates: tuple[ds.HitRef, ...]
+    ) -> ds.EvidenceProposal:
         result = self._by_key.get((part.message_id, part.part_id))
         aggregate = result.aggregate if result is not None else None
         quality = aggregate.evidence_quality if aggregate is not None else None
@@ -493,6 +514,12 @@ class PartOutput:
     writer_detail: str | None = None
     generated_answer: str = ""
     cost_usd: float = 0.0
+    # --- فقط برای بازبینی (ADR-051)؛ هیچ‌کدام در تصمیم یا نوشتن نقشی ندارند ---
+    search_queries: list[str] = field(default_factory=list)
+    retrieval: dict[str, Any] = field(default_factory=dict)
+    evidence_detail: dict[str, Any] = field(default_factory=dict)
+    evidence_notes: list[str] = field(default_factory=list)
+    decision_corrections: list[str] = field(default_factory=list)
 
     @property
     def silence_reason(self) -> str | None:
@@ -515,6 +542,7 @@ class MessageOutput:
     ambiguity: str | None
     understanding_error: str | None
     parts: list[PartOutput] = field(default_factory=list)
+    understanding: dict[str, Any] = field(default_factory=dict)
 
     @property
     def generated_answer(self) -> str:
@@ -541,6 +569,9 @@ class E2EData:
     missing_selected: int
     evidence_stats: dict[str, Any]
     messages: list[MessageOutput]
+    prompts: dict[str, Any] = field(default_factory=dict)
+    retrieval_config: dict[str, Any] = field(default_factory=dict)
+    code: list[dict[str, Any]] = field(default_factory=list)
 
     @property
     def spent_usd(self) -> float:
@@ -554,6 +585,211 @@ def _join(values: Sequence[Any]) -> str:
 # ---------------------------------------------------------------------------
 # اجرا
 # ---------------------------------------------------------------------------
+
+
+def _sha(text: str) -> str:
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _schema_sha(schema: Mapping[str, object]) -> str:
+    return _sha(json.dumps(schema, sort_keys=True, ensure_ascii=False))
+
+
+def prompt_manifest() -> dict[str, Any]:
+    """نسخه، هش و متنِ دستورهای سه مرحله‌ی مدل، برای مقایسه‌ی دو اجرا.
+
+    فقط دستورهای **ثابت** (سیستمی) و شِمای خروجی؛ هیچ متن دانشجو یا پایگاه دانش نیست (آزمونی
+    می‌سنجد ماسک چیزی در آن‌ها نمی‌پوشاند).
+    """
+    return {
+        "understanding": {
+            "version": und.UNDERSTANDING_PROMPT_VERSION,
+            "sha256": _sha(und.SYSTEM_PROMPT),
+            "schema_sha256": _schema_sha(und.JSON_SCHEMA),
+            "text": und.SYSTEM_PROMPT,
+        },
+        "evidence": {
+            "version": r5.PROMPT_VERSION,
+            "sha256": _sha(r5.SYSTEM_PROMPT),
+            "schema_sha256": _schema_sha(r5.JSON_SCHEMA),
+            "text": r5.SYSTEM_PROMPT,
+        },
+        "writer": {
+            "version": WRITER_PROMPT_VERSION,
+            "sha256": _sha(WRITER_SYSTEM_PROMPT),
+            "schema_sha256": _schema_sha(WRITER_SCHEMA),
+            "mode_brief_sha256": _schema_sha(MODE_BRIEF),
+            "text": WRITER_SYSTEM_PROMPT,
+            "mode_brief": dict(MODE_BRIEF),
+        },
+    }
+
+
+PROMPTS_DIR = "prompts"
+
+
+def _canonical_json(value: object) -> str:
+    """همان نمایشی که هش شِما و دستورهای حالت از آن گرفته می‌شود (محتوای فایل = ورودی هش)."""
+    return json.dumps(value, sort_keys=True, ensure_ascii=False)
+
+
+def prompt_metadata() -> dict[str, Any]:
+    """نسخه، هش و نام فایلِ دستورهای سه مرحله؛ بدون هیچ متنی. همین در JSON می‌رود."""
+    result: dict[str, Any] = {}
+    for stage, entry in prompt_manifest().items():
+        meta = {
+            "version": entry["version"],
+            "sha256": entry["sha256"],
+            "schema_sha256": entry["schema_sha256"],
+            "file": f"{PROMPTS_DIR}/{entry['sha256']}.txt",
+            "schema_file": f"{PROMPTS_DIR}/{entry['schema_sha256']}.json",
+        }
+        if "mode_brief_sha256" in entry:
+            meta["mode_brief_sha256"] = entry["mode_brief_sha256"]
+            meta["mode_brief_file"] = f"{PROMPTS_DIR}/{entry['mode_brief_sha256']}.json"
+        result[stage] = meta
+    return result
+
+
+def prompt_files() -> dict[str, str]:
+    """مسیر نسبی ← محتوای فایل برای هر دستور، شِما و دستور حالت‌ها. هر محتوا فقط یک‌بار (نام = هش)."""
+    sources = {
+        "understanding": (und.SYSTEM_PROMPT, und.JSON_SCHEMA, None),
+        "evidence": (r5.SYSTEM_PROMPT, r5.JSON_SCHEMA, None),
+        "writer": (WRITER_SYSTEM_PROMPT, WRITER_SCHEMA, MODE_BRIEF),
+    }
+    files: dict[str, str] = {}
+    for text, schema, modes in sources.values():
+        files[f"{PROMPTS_DIR}/{_sha(text)}.txt"] = text
+        schema_text = _canonical_json(schema)
+        files[f"{PROMPTS_DIR}/{_sha(schema_text)}.json"] = schema_text
+        if modes is not None:
+            modes_text = _canonical_json(modes)
+            files[f"{PROMPTS_DIR}/{_sha(modes_text)}.json"] = modes_text
+    return files
+
+
+def _file_sha(path: str | Path) -> str | None:
+    try:
+        return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    except OSError:
+        return None
+
+
+def code_fingerprint() -> list[dict[str, Any]]:
+    """اثر انگشت SHA-256 فایل‌های مؤثر بر رفتار این اجرا.
+
+    هشِ دستورها قالب ورودی هر مرحله و قاعده‌های کد (سقف پشتوانه، قاعده‌ی اجتماعی، نگاشت شواهد،
+    ماتریس تصمیم، ...) را نمی‌پوشاند؛ این اثر انگشت می‌پوشاند. نام فایل نسبی است
+    (`mentorai/ai/<file>.py`) تا معلوم باشد هر هش مال کدام فایل است.
+    """
+    modules = (
+        ("mentorai.ai.e2e_shadow", __file__),
+        ("mentorai.ai.ro5b_evidence_shadow", r5.__file__),
+        ("mentorai.ai.decision_shadow", ds.__file__),
+        ("mentorai.ai.retrieval_shadow", rs.__file__),
+        ("mentorai.ai.understanding", und.__file__),
+    )
+    return [
+        {
+            "module": name,
+            "file": "/".join(Path(path).parts[-3:]),
+            "sha256": _file_sha(path),
+        }
+        for name, path in modules
+    ]
+
+
+def _masked_list(values: Sequence[Any]) -> list[str]:
+    return [mask_personal(str(v)) for v in values]
+
+
+def _retrieval_detail(raw: Mapping[str, Any]) -> dict[str, Any]:
+    """اجرای بازیابی یک بخش: عبارت‌ها و نتیجه‌ها؛ بدون عنوان و بدون هیچ متنِ قطعه."""
+    body = raw.get("retrieval") or {}
+    return {
+        "hit_count": body.get("hit_count"),
+        "duplicates_removed": body.get("duplicates_removed"),
+        "queries": [
+            {
+                "index": q.get("index"),
+                "query": mask_personal(str(q.get("query", ""))),
+                "hit_count": q.get("hit_count"),
+                "error": q.get("error"),
+            }
+            for q in body.get("queries", [])
+        ],
+        "hits": [
+            {
+                "chunk_id": h["chunk_id"],
+                "source_class": h.get("source_class"),
+                "authority": h.get("authority"),
+                "score": h.get("score"),
+                "vector_rank": h.get("vector_rank"),
+                "text_rank": h.get("text_rank"),
+                "matched_by": h.get("matched_by"),
+                "found_by": [
+                    {"query_index": f.get("query_index"), "rank": f.get("rank")}
+                    for f in h.get("found_by", [])
+                ],
+            }
+            for h in body.get("hits", [])
+        ],
+    }
+
+
+def _chunk_detail(c: r5.ChunkResult) -> dict[str, Any]:
+    """حکم ارزیاب برای یک قطعه: خام، نهایی پس از اصلاح کد، دلیل و تغییرات. بدون عنوان و متن."""
+    return {
+        "rank": c.rank,
+        "chunk_id": c.chunk_id,
+        "source_class": c.source_class,
+        "authority": c.authority,
+        "original_score": c.original_score,
+        "found_by": [{"query_index": q, "rank": r} for q, r in c.found_by],
+        "status": c.status,
+        "model_relevance": c.model_relevance.value if c.model_relevance else None,
+        "relevance": c.relevance.value if c.relevance else None,
+        "supports_question": c.supports_question,
+        "academy_fact_supported": c.academy_fact_supported,
+        "reason": mask_personal(c.reason),
+        "adjustments": list(c.adjustments),
+    }
+
+
+def _evidence_detail(
+    result: r5.PartResult | None,
+    decided: ds.PartDecision,
+    proposal: ds.EvidenceProposal | None,
+) -> dict[str, Any]:
+    final = decided.evidence
+    return {
+        "status": result.status if result is not None else None,
+        "detail": mask_personal(result.detail) if result is not None and result.detail else None,
+        "aggregate": r5._aggregate_document(result.aggregate) if result is not None else None,
+        "extra_evaluations": result.extra_evaluations if result is not None else 0,
+        "duplicate_evaluations": result.duplicate_evaluations if result is not None else 0,
+        "cost_usd": round(result.cost_usd, 6) if result is not None else 0.0,
+        "proposal": (
+            None
+            if proposal is None
+            else {
+                "level": proposal.level.value,
+                "supporting_chunk_ids": list(proposal.supporting_chunk_ids),
+                "supports_part_of_question": proposal.supports_part_of_question,
+            }
+        ),
+        "final": {
+            "level": final.level.value,
+            "supporting_chunk_ids": list(final.supporting_chunk_ids),
+            "candidate_chunk_ids": list(final.candidate_chunk_ids),
+            "supports_part_of_question": final.supports_part_of_question,
+            "hit_count": final.hit_count,
+            "retrieval_skipped": final.retrieval_skipped,
+            "retrieval_errors": final.retrieval_errors,
+        },
+        "chunks": [_chunk_detail(c) for c in result.chunks] if result is not None else [],
+    }
 
 
 def _support_for(
@@ -581,8 +817,10 @@ def _assemble(
     decision: ds.DecisionData,
     evidence: Mapping[tuple[str, int], r5.PartResult],
     contents: Mapping[int, str],
+    assessor: Ro5bAssessor | None = None,
 ) -> tuple[list[MessageOutput], list[tuple[PartOutput, ds.PartDecision, MessageOutput]]]:
     shadow_parts = {(p["message_id"], p["part_id"]): p for p in ro3["parts"]}
+    shadow_messages = {m["message_id"]: m for m in ro3["messages"]}
     messages: list[MessageOutput] = []
     writing: list[tuple[PartOutput, ds.PartDecision, MessageOutput]] = []
     for decided_message in decision.messages:
@@ -592,6 +830,14 @@ def _assemble(
             ambiguity=decided_message.ambiguity.value if decided_message.ambiguity else None,
             understanding_error=decided_message.error,
         )
+        raw_message = shadow_messages.get(decided_message.message_id, {})
+        out.understanding = {
+            "scope_confidence": raw_message.get("scope_confidence"),
+            "adjustments": _masked_list(raw_message.get("adjustments") or []),
+            "detail": mask_personal(str(raw_message["understanding_detail"]))
+            if raw_message.get("understanding_detail")
+            else None,
+        }
         messages.append(out)
         for decided in decided_message.parts:
             part = decided.part
@@ -623,6 +869,16 @@ def _assemble(
                 supporting_chunk_ids=list(decided.evidence.supporting_chunk_ids),
                 writer_chunk_ids=[c.chunk_id for c in support],
             )
+            output.search_queries = _masked_list(shadow_parts[key].get("search_queries") or [])
+            output.retrieval = _retrieval_detail(shadow_parts[key])
+            proposal = assessor.proposals.get(key) if assessor is not None else None
+            output.evidence_detail = _evidence_detail(result, decided, proposal)
+            output.evidence_notes = list(decided.evidence.notes)
+            if decided.effective_fact_class != part.fact_class:
+                output.decision_corrections.append(
+                    f"fact_class_upgraded:{part.fact_class.value}->"
+                    f"{decided.effective_fact_class.value}"
+                )
             out.parts.append(output)
             if decided.decision.strategy in _STRATEGIES_WITH_AN_ANSWER:
                 writing.append((output, decided, out))
@@ -710,8 +966,9 @@ async def run_e2e(
     spend["evidence"] = judged.spent_usd
     evidence = {(r.message_id, r.part_id): r for r in judged.results}
 
-    decision = ds.decide_document(ro3, Ro5bAssessor(judged.results))
-    messages, writing = _assemble(ro3, decision, evidence, contents)
+    assessor = Ro5bAssessor(judged.results)
+    decision = ds.decide_document(ro3, assessor)
+    messages, writing = _assemble(ro3, decision, evidence, contents, assessor)
     spend["writing"] = await _write_all(
         client,
         writing,
@@ -736,6 +993,9 @@ async def run_e2e(
         missing_selected=missing_selected,
         evidence_stats=r5.compute_stats(judged.results),
         messages=messages,
+        prompts=prompt_metadata(),
+        retrieval_config=dict(ro3.get("retrieval") or {}),
+        code=code_fingerprint(),
     )
 
 
@@ -766,6 +1026,12 @@ def _part_document(p: PartOutput) -> dict[str, Any]:
         "writer_status": p.writer_status,
         "writer_detail": p.writer_detail,
         "generated_answer": p.generated_answer,
+        "writer_cost_usd": round(p.cost_usd, 6),
+        "search_queries": p.search_queries,
+        "retrieval": p.retrieval,
+        "evidence": p.evidence_detail,
+        "evidence_notes": p.evidence_notes,
+        "decision_corrections": p.decision_corrections,
     }
 
 
@@ -775,6 +1041,7 @@ def _message_document(m: MessageOutput) -> dict[str, Any]:
         "masked_student_message": m.masked_message,
         "ambiguity": m.ambiguity,
         "understanding_error": m.understanding_error,
+        "understanding": m.understanding,
         "decision_strategy": _join([p.strategy for p in m.parts]),
         "fact_class": _join([p.fact_class for p in m.parts]),
         "topic": _join([p.topic for p in m.parts]),
@@ -815,6 +1082,9 @@ def e2e_document(data: E2EData) -> dict[str, Any]:
                     "missing_from_database": data.missing_selected,
                 }
             ),
+            "retrieval": data.retrieval_config,
+            "prompts": data.prompts,
+            "code": data.code,
             "max_cost_usd": data.max_cost_usd,
             "spent_usd": round(data.spent_usd, 6),
             "spend_by_stage_usd": {k: round(v, 6) for k, v in data.spend.items()},
@@ -907,12 +1177,16 @@ def render_summary(data: E2EData) -> str:
 
 
 def write_outputs(data: E2EData, out_dir: Path) -> dict[str, Path]:
-    """دو فایل خصوصی (مجوز ۶۰۰)."""
+    """دو فایل خصوصی (مجوز ۶۰۰) و پوشه‌ی `prompts/` با یک فایل برای هر دستور (نه برای هر پیام)."""
     _private_dir(out_dir)
     paths = {"json": out_dir / E2E_NAME, "csv": out_dir / REVIEW_NAME}
     _write_private(paths["json"], json.dumps(e2e_document(data), ensure_ascii=False, indent=2))
     # BOM: اکسل بدون آن فارسی را خراب می‌خواند.
     _write_private(paths["csv"], "﻿" + render_review_csv(data))
+    _private_dir(out_dir / PROMPTS_DIR)
+    for relative, content in prompt_files().items():
+        _write_private(out_dir / relative, content)
+    paths["prompts"] = out_dir / PROMPTS_DIR
     return paths
 
 
@@ -942,6 +1216,11 @@ __all__ = [
     "e2e_document",
     "is_social",
     "message_categories",
+    "PROMPTS_DIR",
+    "code_fingerprint",
+    "prompt_files",
+    "prompt_manifest",
+    "prompt_metadata",
     "render_review_csv",
     "render_summary",
     "run_e2e",

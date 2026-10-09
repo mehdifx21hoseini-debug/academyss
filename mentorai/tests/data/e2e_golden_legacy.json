@@ -1,0 +1,328 @@
+{
+ "csv": "﻿message_id,part_id,masked_student_message,standalone_question,decision_strategy,decision_reason,fact_class,understood_fact_class,topic,scope,retrieved_chunk_ids,evidence_quality,evidence_level,writer_chunk_ids,generated_answer,writer_status,needs_human,silence_reason,human_note\nm1,1,نمونه-الف: شرایط ارسال تمرین چیست؟ شماره‌ی من [حذف‌شده],شرایط ارسال تمرین چیست؟,kb_grounded,academy_fact_strong_evidence,academy_fact,academy_fact,academy_process,in_domain,1;2,strong,strong,1,پاسخ آزمایشی kb_grounded,written,false,,\nm2,1,نمونه-ب: ریسک به ریوارد یعنی چه؟,ریسک به ریوارد چیست؟,mixed,general_knowledge_weak_evidence,general_knowledge,general_knowledge,risk_management,in_domain,3,weak,weak,,پاسخ آزمایشی mixed,written,false,,\nm3,1,نمونه-ج: سلام وقت بخیر,سلام,general_knowledge,no_fact_class_default_general_knowledge,none,none,other,in_domain,,,none,,پاسخ آزمایشی general_knowledge,written,false,,\nm4,1,نمونه-د: الان بخرم یا نه؟,الان بخرم؟,silence,trade_advice,trade_advice,trade_advice,trading_education,in_domain,,,none,,,not_needed,true,trade_advice,\nm5,1,نمونه-ه: چرا کار نمی‌کند؟,چرا کار نمی‌کند؟,clarify,clarification_needed,none,none,metatrader_tools,in_domain,,none,none,,پاسخ آزمایشی clarify,written,false,,\nm6,1,نمونه-و: قانون برداشت چیست؟,قانون برداشت چیست؟,silence,academy_fact_weak_evidence_unverified,academy_fact,academy_fact,broker_wallet,in_domain,3,weak,weak,,,not_needed,true,academy_fact_weak_evidence_unverified,\nm7,,نمونه-ز: این JSON نمی‌شود,,,,,,,,,,,,,,true,understanding_invalid_output,\n",
+ "document": {
+  "limitations": [
+   "answers_are_unreviewed: پاسخ‌ها را هیچ ارزیابی خودکاری نسنجیده؛ آدم باید بخواند و درباره‌شان تصمیم بگیرد (`human_note` خالی است).",
+   "single_model_for_all_stages: فهم، ارزیاب شواهد و نویسنده همان مدل پیکربندی‌شده‌ی سامانه‌اند.",
+   "no_history_or_memory_in_writing: نویسنده فقط پیام فعلی و پرسش مستقل‌شده را می‌بیند، نه تاریخچه و نه حافظه‌ی دانشجو؛ پاسخ‌های وابسته به زمینه ممکن است ساده‌تر از مسیر زنده باشند.",
+   "multi_part_answers_are_joined: برای پیام چندبخشی، پاسخ بخش‌ها جدا نوشته و فقط پشت هم چیده می‌شود؛ یک پاسخ یکدست ساخته نمی‌شود.",
+   "support_is_what_the_evidence_stage_accepted: نویسنده فقط قطعه‌هایی را می‌بیند که تصمیم به‌عنوان پشتوانه‌ی معتبر پذیرفته؛ برای `academy_fact` فقط منبع رسمی.",
+   "evidence_assessor_is_an_llm: شواهد را همان ارزیاب مدل زبانیِ RO-5B سنجیده (قابل‌اتکا نیست مگر با برچسب انسانی)؛ `moderate` به شواهد `weak` با پشتیبانیِ جزئی نگاشت می‌شود.",
+   "categories_are_model_derived: دسته‌های انتخاب نمونه از خروجی مدل فهم گرفته شده‌اند.",
+   "no_decision_change: هیچ‌یک از تصمیم‌ها، آستانه‌ها یا مسیر زنده تغییر نکرده است."
+  ],
+  "messages": [
+   {
+    "ambiguity": "none",
+    "decision_strategy": "kb_grounded",
+    "evidence_quality": "strong",
+    "fact_class": "academy_fact",
+    "generated_answer": "پاسخ آزمایشی kb_grounded",
+    "masked_student_message": "نمونه-الف: شرایط ارسال تمرین چیست؟ شماره‌ی من [حذف‌شده]",
+    "message_id": "m1",
+    "needs_human": false,
+    "parts": [
+     {
+      "decision_reason": "academy_fact_strong_evidence",
+      "decision_strategy": "kb_grounded",
+      "evaluated_chunk_ids": [
+       1,
+       2
+      ],
+      "evidence_level": "strong",
+      "evidence_quality": "strong",
+      "fact_class": "academy_fact",
+      "generated_answer": "پاسخ آزمایشی kb_grounded",
+      "needs_human": false,
+      "part_id": 1,
+      "retrieval_skipped": null,
+      "retrieved_chunk_ids": [
+       1,
+       2
+      ],
+      "scope": "in_domain",
+      "silence_reason": null,
+      "standalone_question": "شرایط ارسال تمرین چیست؟",
+      "supporting_chunk_ids": [
+       1
+      ],
+      "topic": "academy_process",
+      "understood_fact_class": "academy_fact",
+      "writer_chunk_ids": [
+       1
+      ],
+      "writer_detail": null,
+      "writer_status": "written"
+     }
+    ],
+    "retrieved_chunk_ids": [
+     1,
+     2
+    ],
+    "silence_reason": null,
+    "topic": "academy_process",
+    "understanding_error": null
+   },
+   {
+    "ambiguity": "none",
+    "decision_strategy": "mixed",
+    "evidence_quality": "weak",
+    "fact_class": "general_knowledge",
+    "generated_answer": "پاسخ آزمایشی mixed",
+    "masked_student_message": "نمونه-ب: ریسک به ریوارد یعنی چه؟",
+    "message_id": "m2",
+    "needs_human": false,
+    "parts": [
+     {
+      "decision_reason": "general_knowledge_weak_evidence",
+      "decision_strategy": "mixed",
+      "evaluated_chunk_ids": [
+       3
+      ],
+      "evidence_level": "weak",
+      "evidence_quality": "weak",
+      "fact_class": "general_knowledge",
+      "generated_answer": "پاسخ آزمایشی mixed",
+      "needs_human": false,
+      "part_id": 1,
+      "retrieval_skipped": null,
+      "retrieved_chunk_ids": [
+       3
+      ],
+      "scope": "in_domain",
+      "silence_reason": null,
+      "standalone_question": "ریسک به ریوارد چیست؟",
+      "supporting_chunk_ids": [],
+      "topic": "risk_management",
+      "understood_fact_class": "general_knowledge",
+      "writer_chunk_ids": [],
+      "writer_detail": null,
+      "writer_status": "written"
+     }
+    ],
+    "retrieved_chunk_ids": [
+     3
+    ],
+    "silence_reason": null,
+    "topic": "risk_management",
+    "understanding_error": null
+   },
+   {
+    "ambiguity": "none",
+    "decision_strategy": "general_knowledge",
+    "evidence_quality": "—",
+    "fact_class": "none",
+    "generated_answer": "پاسخ آزمایشی general_knowledge",
+    "masked_student_message": "نمونه-ج: سلام وقت بخیر",
+    "message_id": "m3",
+    "needs_human": false,
+    "parts": [
+     {
+      "decision_reason": "no_fact_class_default_general_knowledge",
+      "decision_strategy": "general_knowledge",
+      "evaluated_chunk_ids": [],
+      "evidence_level": "none",
+      "evidence_quality": null,
+      "fact_class": "none",
+      "generated_answer": "پاسخ آزمایشی general_knowledge",
+      "needs_human": false,
+      "part_id": 1,
+      "retrieval_skipped": "social_no_retrieval",
+      "retrieved_chunk_ids": [],
+      "scope": "in_domain",
+      "silence_reason": null,
+      "standalone_question": "سلام",
+      "supporting_chunk_ids": [],
+      "topic": "other",
+      "understood_fact_class": "none",
+      "writer_chunk_ids": [],
+      "writer_detail": null,
+      "writer_status": "written"
+     }
+    ],
+    "retrieved_chunk_ids": [],
+    "silence_reason": null,
+    "topic": "other",
+    "understanding_error": null
+   },
+   {
+    "ambiguity": "none",
+    "decision_strategy": "silence",
+    "evidence_quality": "—",
+    "fact_class": "trade_advice",
+    "generated_answer": "",
+    "masked_student_message": "نمونه-د: الان بخرم یا نه؟",
+    "message_id": "m4",
+    "needs_human": true,
+    "parts": [
+     {
+      "decision_reason": "trade_advice",
+      "decision_strategy": "silence",
+      "evaluated_chunk_ids": [],
+      "evidence_level": "none",
+      "evidence_quality": null,
+      "fact_class": "trade_advice",
+      "generated_answer": "",
+      "needs_human": true,
+      "part_id": 1,
+      "retrieval_skipped": "trade_advice",
+      "retrieved_chunk_ids": [],
+      "scope": "in_domain",
+      "silence_reason": "trade_advice",
+      "standalone_question": "الان بخرم؟",
+      "supporting_chunk_ids": [],
+      "topic": "trading_education",
+      "understood_fact_class": "trade_advice",
+      "writer_chunk_ids": [],
+      "writer_detail": null,
+      "writer_status": "not_needed"
+     }
+    ],
+    "retrieved_chunk_ids": [],
+    "silence_reason": "trade_advice",
+    "topic": "trading_education",
+    "understanding_error": null
+   },
+   {
+    "ambiguity": "needs_clarification",
+    "decision_strategy": "clarify",
+    "evidence_quality": "none",
+    "fact_class": "none",
+    "generated_answer": "پاسخ آزمایشی clarify",
+    "masked_student_message": "نمونه-ه: چرا کار نمی‌کند؟",
+    "message_id": "m5",
+    "needs_human": false,
+    "parts": [
+     {
+      "decision_reason": "clarification_needed",
+      "decision_strategy": "clarify",
+      "evaluated_chunk_ids": [],
+      "evidence_level": "none",
+      "evidence_quality": "none",
+      "fact_class": "none",
+      "generated_answer": "پاسخ آزمایشی clarify",
+      "needs_human": false,
+      "part_id": 1,
+      "retrieval_skipped": null,
+      "retrieved_chunk_ids": [],
+      "scope": "in_domain",
+      "silence_reason": null,
+      "standalone_question": "چرا کار نمی‌کند؟",
+      "supporting_chunk_ids": [],
+      "topic": "metatrader_tools",
+      "understood_fact_class": "none",
+      "writer_chunk_ids": [],
+      "writer_detail": null,
+      "writer_status": "written"
+     }
+    ],
+    "retrieved_chunk_ids": [],
+    "silence_reason": null,
+    "topic": "metatrader_tools",
+    "understanding_error": null
+   },
+   {
+    "ambiguity": "none",
+    "decision_strategy": "silence",
+    "evidence_quality": "weak",
+    "fact_class": "academy_fact",
+    "generated_answer": "",
+    "masked_student_message": "نمونه-و: قانون برداشت چیست؟",
+    "message_id": "m6",
+    "needs_human": true,
+    "parts": [
+     {
+      "decision_reason": "academy_fact_weak_evidence_unverified",
+      "decision_strategy": "silence",
+      "evaluated_chunk_ids": [
+       3
+      ],
+      "evidence_level": "weak",
+      "evidence_quality": "weak",
+      "fact_class": "academy_fact",
+      "generated_answer": "",
+      "needs_human": true,
+      "part_id": 1,
+      "retrieval_skipped": null,
+      "retrieved_chunk_ids": [
+       3
+      ],
+      "scope": "in_domain",
+      "silence_reason": "academy_fact_weak_evidence_unverified",
+      "standalone_question": "قانون برداشت چیست؟",
+      "supporting_chunk_ids": [],
+      "topic": "broker_wallet",
+      "understood_fact_class": "academy_fact",
+      "writer_chunk_ids": [],
+      "writer_detail": null,
+      "writer_status": "not_needed"
+     }
+    ],
+    "retrieved_chunk_ids": [
+     3
+    ],
+    "silence_reason": "academy_fact_weak_evidence_unverified",
+    "topic": "broker_wallet",
+    "understanding_error": null
+   },
+   {
+    "ambiguity": null,
+    "decision_strategy": "",
+    "evidence_quality": "",
+    "fact_class": "",
+    "generated_answer": "",
+    "masked_student_message": "نمونه-ز: این JSON نمی‌شود",
+    "message_id": "m7",
+    "needs_human": true,
+    "parts": [],
+    "retrieved_chunk_ids": [],
+    "silence_reason": "understanding_invalid_output",
+    "topic": "",
+    "understanding_error": "invalid_output"
+   }
+  ],
+  "run": {
+   "embedder": "none (text only)",
+   "evidence_prompt_version": "evidence-relevance-v1",
+   "excluded_by_deterministic_rules": {},
+   "max_cost_usd": 5.0,
+   "messages": 7,
+   "model": "scripted-test-only",
+   "requested": 20,
+   "seed": 7,
+   "selection": null,
+   "spend_by_stage_usd": {
+    "evidence": 0.0018,
+    "understanding": 0.0042,
+    "writing": 0.0024
+   },
+   "spent_usd": 0.0084,
+   "stopped_early": false,
+   "understanding_prompt_version": "understand-v2",
+   "writer_prompt_version": "writer-v1"
+  },
+  "version": 1
+ },
+ "stage_calls": {
+  "evidence": [
+   "پرسش (مستقل‌شده):\nشرایط ارسال تمرین چیست؟\n\nموضوع: academy_process\nنوع واقعیت: academy_fact\nعبارت‌های جست‌وجو (فقط زمینه؛ ربط را با پرسش بسنج):\n- q-ac\n\nقطعه‌ها (2 مورد):\n\n=== chunk_id=1 ===\nعنوان: سند 1\nمتن:\nSENTINEL-DIRECT مبلغ و شرط ارسال تمرین\n\n=== chunk_id=2 ===\nعنوان: سند 2\nمتن:\nSENTINEL-USEFUL توضیح تکمیلی\n\nاکنون برای هر chunk_id بالا یک ارزیابی بده.",
+   "پرسش (مستقل‌شده):\nریسک به ریوارد چیست؟\n\nموضوع: risk_management\nنوع واقعیت: general_knowledge\nعبارت‌های جست‌وجو (فقط زمینه؛ ربط را با پرسش بسنج):\n- q-gk\n\nقطعه‌ها (1 مورد):\n\n=== chunk_id=3 ===\nعنوان: سند 3\nمتن:\nSENTINEL-WEAK هم‌موضوع\n\nاکنون برای هر chunk_id بالا یک ارزیابی بده.",
+   "پرسش (مستقل‌شده):\nقانون برداشت چیست؟\n\nموضوع: broker_wallet\nنوع واقعیت: academy_fact\nعبارت‌های جست‌وجو (فقط زمینه؛ ربط را با پرسش بسنج):\n- q-weak\n\nقطعه‌ها (1 مورد):\n\n=== chunk_id=3 ===\nعنوان: سند 3\nمتن:\nSENTINEL-WEAK هم‌موضوع\n\nاکنون برای هر chunk_id بالا یک ارزیابی بده."
+  ],
+  "understanding": [
+   "پیام فعلی دانشجو که باید بفهمی:\nنمونه-الف: شرایط ارسال تمرین چیست؟ شماره‌ی من [حذف‌شده]",
+   "چند پیام آخر همین مکالمه، فقط برای فهمیدن پیام فعلی:\n- دانشجو: نمونه-الف: شرایط ارسال تمرین چیست؟ شماره‌ی من [حذف‌شده]\n\n---\n\nپیام فعلی دانشجو که باید بفهمی:\nنمونه-ب: ریسک به ریوارد یعنی چه؟",
+   "چند پیام آخر همین مکالمه، فقط برای فهمیدن پیام فعلی:\n- دانشجو: نمونه-الف: شرایط ارسال تمرین چیست؟ شماره‌ی من [حذف‌شده]\n- دانشجو: نمونه-ب: ریسک به ریوارد یعنی چه؟\n\n---\n\nپیام فعلی دانشجو که باید بفهمی:\nنمونه-ج: سلام وقت بخیر",
+   "چند پیام آخر همین مکالمه، فقط برای فهمیدن پیام فعلی:\n- دانشجو: نمونه-الف: شرایط ارسال تمرین چیست؟ شماره‌ی من [حذف‌شده]\n- دانشجو: نمونه-ب: ریسک به ریوارد یعنی چه؟\n- دانشجو: نمونه-ج: سلام وقت بخیر\n\n---\n\nپیام فعلی دانشجو که باید بفهمی:\nنمونه-د: الان بخرم یا نه؟",
+   "چند پیام آخر همین مکالمه، فقط برای فهمیدن پیام فعلی:\n- دانشجو: نمونه-الف: شرایط ارسال تمرین چیست؟ شماره‌ی من [حذف‌شده]\n- دانشجو: نمونه-ب: ریسک به ریوارد یعنی چه؟\n- دانشجو: نمونه-ج: سلام وقت بخیر\n- دانشجو: نمونه-د: الان بخرم یا نه؟\n\n---\n\nپیام فعلی دانشجو که باید بفهمی:\nنمونه-ه: چرا کار نمی‌کند؟",
+   "چند پیام آخر همین مکالمه، فقط برای فهمیدن پیام فعلی:\n- دانشجو: نمونه-ب: ریسک به ریوارد یعنی چه؟\n- دانشجو: نمونه-ج: سلام وقت بخیر\n- دانشجو: نمونه-د: الان بخرم یا نه؟\n- دانشجو: نمونه-ه: چرا کار نمی‌کند؟\n\n---\n\nپیام فعلی دانشجو که باید بفهمی:\nنمونه-و: قانون برداشت چیست؟",
+   "چند پیام آخر همین مکالمه، فقط برای فهمیدن پیام فعلی:\n- دانشجو: نمونه-ج: سلام وقت بخیر\n- دانشجو: نمونه-د: الان بخرم یا نه؟\n- دانشجو: نمونه-ه: چرا کار نمی‌کند؟\n- دانشجو: نمونه-و: قانون برداشت چیست؟\n\n---\n\nپیام فعلی دانشجو که باید بفهمی:\nنمونه-ز: این JSON نمی‌شود"
+  ],
+  "writer": [
+   "حالت: پاسخ بده؛ پایه‌ی پاسخ همان پشتوانه است. چیزی بیشتر از آن به‌عنوان واقعیت نگو.\n\n---\n\nموضوع: academy_process | نوع واقعیت: academy_fact\n\n---\n\nپشتوانه:\n\n[id=1 source=official authority=fact]\nSENTINEL-DIRECT مبلغ و شرط ارسال تمرین\n\n---\n\nپیام کامل دانشجو:\nنمونه-الف: شرایط ارسال تمرین چیست؟ شماره‌ی من [حذف‌شده]\n\n---\n\nپرسشِ همین بخش:\nشرایط ارسال تمرین چیست؟",
+   "حالت: پاسخ بده با پشتوانه‌ی موجود و دانش عمومی. هر چه واقعیتِ اختصاصی آکادمی است فقط از پشتوانه بگو؛ اگر پشتوانه‌ای نیست یا ناقص است، چیزی از خودت نساز.\n\n---\n\nموضوع: risk_management | نوع واقعیت: general_knowledge\n\n---\n\nپشتوانه:\n\nهیچ پشتوانه‌ای از پایگاه دانش برای این بخش نیست.\n\n---\n\nپیام کامل دانشجو:\nنمونه-ب: ریسک به ریوارد یعنی چه؟\n\n---\n\nپرسشِ همین بخش:\nریسک به ریوارد چیست؟",
+   "حالت: پاسخ بده با دانش عمومی خودت. درباره‌ی چیزی که اختصاصی این آکادمی است (قیمت، قانون، برنامه، روال) حرفی نزن.\n\n---\n\nموضوع: other | نوع واقعیت: none\n\n---\n\nپشتوانه:\n\nهیچ پشتوانه‌ای از پایگاه دانش برای این بخش نیست.\n\n---\n\nپیام کامل دانشجو:\nنمونه-ج: سلام وقت بخیر\n\n---\n\nپرسشِ همین بخش:\nسلام",
+   "حالت: سؤال روشن‌کننده: فقط یک سؤال کوتاه و طبیعی بپرس و هیچ توضیحی نده.\n\n---\n\nموضوع: metatrader_tools | نوع واقعیت: none\n\n---\n\nپشتوانه:\n\nهیچ پشتوانه‌ای از پایگاه دانش برای این بخش نیست.\n\n---\n\nپیام کامل دانشجو:\nنمونه-ه: چرا کار نمی‌کند؟\n\n---\n\nپرسشِ همین بخش:\nچرا کار نمی‌کند؟"
+  ]
+ }
+}
