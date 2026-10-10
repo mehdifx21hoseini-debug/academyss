@@ -20,6 +20,7 @@ from mentorai.ai.client import ModelCall, ModelClient
 from mentorai.ai.decision import deterministic_trigger
 from mentorai.ai.prompt import build_system_prompt, build_user_content
 from mentorai.ai.schema import PROMPT_VERSION, ModelAnswer
+from mentorai.ai.style import humanize_punctuation
 from mentorai.config import get_settings
 from mentorai.db.models import (
     AiRun,
@@ -50,6 +51,12 @@ HISTORY_TURNS = 4
 # دلیل ثبت‌شده برای پاسخی که از محاسبه‌ی استیتمنت آمده، نه از مدل.
 STATEMENT_REASON = "statement_review"
 
+# حالت آزمایشی (`KB_MISS_NOTICE`): وقتی جواب در پایگاه دانش نیست، به‌جای سکوت این جمله فرستاده
+# می‌شود تا در دوره‌ی تست معلوم باشد کجای پایگاه دانش خالی است. پیش‌فرض خاموش است و روی
+# شاگرد واقعی هرگز نباید روشن بماند. دلیل ثبت‌شده «kb_miss_notice:<دلیل اصلی سکوت>» است.
+KB_MISS_NOTICE_TEXT = "این توی نالج‌بیس نیست."
+KB_MISS_ANSWER_REASON = "kb_miss_notice"
+
 
 class SilenceReason(enum.StrEnum):
     rule_identity_question = "rule_identity_question"
@@ -68,6 +75,17 @@ class SilenceReason(enum.StrEnum):
     # سکوت عمدی برای پیام قطعاً خارج از حوزه (ADR-042). **موتور فعلی هرگز آن را تولید
     # نمی‌کند**؛ فقط لایه‌ی ثبت آن را می‌شناسد تا موتور بعدی (RO-4) روی آن بنشیند.
     out_of_domain = "out_of_domain"
+
+
+# دلیل‌هایی که یعنی «جواب در پایگاه دانش نیست». قاعده‌های قطعی (پول، شکایت، هویت، درخواست
+# منتور)، رسانه، خطا و بودجه عمداً در این فهرست نیستند و در حالت آزمایشی هم ساکت می‌مانند.
+KB_MISS_REASONS = frozenset(
+    {
+        SilenceReason.no_sources.value,
+        SilenceReason.model_flagged.value,
+        SilenceReason.low_confidence.value,
+    }
+)
 
 
 # کلاس هر دلیل سکوت (ADR-042). صریح است، نه حدسی: هر عضو `SilenceReason` باید اینجا
@@ -312,6 +330,35 @@ def silence_reason_for(
     return None, None
 
 
+async def _kb_miss_notice(
+    session: AsyncSession,
+    message: Message,
+    *,
+    reason: str,
+    hits: list[Hit],
+    call: ModelCall | None = None,
+    effort: str | None = None,
+    confidence: float | None = None,
+) -> RunResult:
+    run = await _record(
+        session,
+        message=message,
+        outcome=Outcome.answer,
+        reason=f"{KB_MISS_ANSWER_REASON}:{reason}",
+        hits=hits,
+        call=call,
+        effort=effort,
+        confidence=confidence,
+        response_text=KB_MISS_NOTICE_TEXT,
+    )
+    return RunResult(
+        outcome=Outcome.answer,
+        reason=run.reason,
+        ai_run_id=run.id,
+        answer_text=KB_MISS_NOTICE_TEXT,
+    )
+
+
 async def handle_message(
     session: AsyncSession,
     message: Message,
@@ -344,6 +391,10 @@ async def handle_message(
         question = from_image or question
 
     hits = await search(session, question, embedder=embedder)
+    if not hits and get_settings().kb_miss_notice:
+        return await _kb_miss_notice(
+            session, message, reason=SilenceReason.no_sources.value, hits=[]
+        )
     if not hits:
         run = await _record(
             session,
@@ -412,6 +463,17 @@ async def handle_message(
     if silence_reason == SilenceReason.ungrounded_money.value:
         log.error("ungrounded_money_blocked", message_id=message.id, amount=blocked_amount)
 
+    if silence_reason in KB_MISS_REASONS and get_settings().kb_miss_notice:
+        return await _kb_miss_notice(
+            session,
+            message,
+            reason=silence_reason,
+            hits=hits,
+            call=call,
+            effort=model_client.effort,
+            confidence=answer.confidence,
+        )
+
     if silence_reason is not None:
         run = await _record(
             session,
@@ -426,6 +488,7 @@ async def handle_message(
         )
         return RunResult(outcome=Outcome.silence, reason=silence_reason, ai_run_id=run.id)
 
+    final_text = humanize_punctuation(answer.answer)
     run = await _record(
         session,
         message=message,
@@ -435,11 +498,11 @@ async def handle_message(
         call=call,
         effort=model_client.effort,
         confidence=answer.confidence,
-        response_text=answer.answer,
+        response_text=final_text,
     )
     return RunResult(
         outcome=Outcome.answer,
         reason=run.reason,
         ai_run_id=run.id,
-        answer_text=answer.answer,
+        answer_text=final_text,
     )

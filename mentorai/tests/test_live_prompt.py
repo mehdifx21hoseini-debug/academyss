@@ -2,7 +2,7 @@
 
 ⚠️ این آزمون‌ها **لحن را اثبات نمی‌کنند**؛ قرارداد کد را می‌سنجند: بندهای ایمنی نسبت به v2 تکان
 نخورده‌اند، نام منتور هر حساب جایگزین می‌شود و نشانه‌ی جایگزینی هیچ‌وقت به مدل نمی‌رسد، نسخه‌ی
-ثبت‌شده v3 است، و متن زنده با فایل آزمایش‌شده (`tone-variants/persona-v3.1.json`) یکی است.
+ثبت‌شده v3.2 است، و متن زنده با فایل آزمایش‌شده (`tone-variants/persona-v3.2.json`) یکی است.
 کیفیت فارسی را فقط داوری انسانی (conversation-eval) می‌سنجد.
 """
 
@@ -29,12 +29,12 @@ from mentorai.db.models import AiRun, MentorAccount, Outcome
 embedder = _rt.embedder
 knowledge = _rt.knowledge
 
-VARIANT_FILE = Path(__file__).resolve().parents[1] / "tone-variants" / "persona-v3.1.json"
+VARIANT_FILE = Path(__file__).resolve().parents[1] / "tone-variants" / "persona-v3.2.json"
 
 # پین‌ها: عوض شدن متن دستور باید عمدی باشد. اگر عمداً عوضش کردید، نسخه را بالا ببرید
 # (`schema.PROMPT_VERSION`)، فایل آزمایش‌شده را هم‌تراز کنید و این هش را به‌روز کنید.
 V2_SHA256 = "2e9a098d0c8cb0a87aa6b53ed19a4e63d65c27c8f4e2d798f4ef57e4631ecdeb"
-TEMPLATE_SHA256 = "283faca4e38c05543d01ed4bdcc2dd757e100385eab57bf14abfe6d245903069"
+TEMPLATE_SHA256 = "8a8ec9be2b690f575ea35ac1e8168b8c993c5b2e1fcf5fa4bbd9514963541f28"
 SAFETY_RULES = (3, 4, 5, 6, 10, 11)
 
 
@@ -53,7 +53,7 @@ def test_the_live_template_is_pinned_and_synced_with_the_tested_variant_file() -
         "متن زنده باید همان باشد که آزمایش و داوری شد؛ اول فایل tone-variants را عوض کنید"
     )
     assert _sha(pr.SYSTEM_PROMPT_TEMPLATE) == TEMPLATE_SHA256
-    assert PROMPT_VERSION == "v3"
+    assert PROMPT_VERSION == "v3.2"
 
 
 def test_the_safety_rules_are_byte_identical_to_v2() -> None:
@@ -117,7 +117,7 @@ async def test_the_live_pipeline_sends_the_mentors_own_name_and_records_v3(
     assert account.mentor_name in system and pr.MENTOR_PLACEHOLDER not in system
     assert pr.MENTOR_PLACEHOLDER not in user
     run = (await session.execute(select(AiRun))).scalar_one()
-    assert run.prompt_version == "v3"
+    assert run.prompt_version == "v3.2"
 
 
 async def test_two_mentor_accounts_each_get_their_own_name(

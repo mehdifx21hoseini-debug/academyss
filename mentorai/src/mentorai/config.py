@@ -143,6 +143,10 @@ class Settings(BaseSettings):
     # آن ساخته نمی‌شود (ADR-022).
     answer_from_images: bool = False
 
+    # حالت آزمایشی: به‌جای سکوتِ «جواب در پایگاه دانش نیست»، جمله‌ای ثابت فرستاده شود تا
+    # خالی‌های پایگاه دانش دیده شوند. پیش‌فرض خاموش؛ روی شاگرد واقعی روشن نماند.
+    kb_miss_notice: bool = False
+
     log_level: str = "INFO"
 
     @field_validator("timezone")
