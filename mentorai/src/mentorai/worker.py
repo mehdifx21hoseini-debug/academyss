@@ -144,7 +144,7 @@ async def process_message(
         # ولی همه‌ی سکوت‌ها یکی نیستند. اگر دلیل از آن‌هایی است که اصلاً کار دستیار
         # نیست — پول، شکایت، حساب، درخواست منتور — پیام بعدی هم کار دستیار نیست و
         # کل مکالمه سپرده می‌شود. سکوت موردی مکالمه را فعال می‌گذارد.
-        if escalation.is_handoff(result.reason):
+        if escalation.is_handoff(result.reason) and get_settings().handoff_enabled:
             await escalation.hand_off(session, conversation, reason=result.reason)
         return JobOutcome("silence", result.reason)
 

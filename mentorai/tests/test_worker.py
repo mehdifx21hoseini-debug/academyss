@@ -551,3 +551,57 @@ async def test_the_control_message_id_survives_the_notification(
     session.expire_all()
     draft = await session.get_one(Draft, int(outcome.detail))
     assert draft.control_message_id == 12345
+
+
+async def test_with_handoff_disabled_a_rule_silence_keeps_the_conversation_active(
+    session: AsyncSession,
+    account: MentorAccount,
+    kb: None,
+    embedder: HashingEmbedder,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """دوره‌ی تست: پیام پولی ساکت می‌ماند ولی گفتگو به منتور سپرده نمی‌شود."""
+    monkeypatch.setenv("HANDOFF_ENABLED", "false")
+    get_settings.cache_clear()
+    try:
+        inbound = build_inbound(
+            account_slug=account.slug,
+            chat_id=902,
+            message_id=9,
+            sender_user_id=902,
+            username=None,
+            first_name="دانشجو",
+            last_name=None,
+            raw_text="رسید واریزم رو فرستادم",
+            media_type=None,
+            reply_to_message_id=None,
+            sent_at=NOON,
+            is_private=True,
+            is_outgoing=False,
+        )
+        result = await record_inbound(session, account, inbound, sender=Sender.student)
+        await session.commit()
+        assert result.message_id is not None
+
+        outcome = await process_message(
+            session,
+            result.message_id,
+            model_client=ScriptedClient(_answer()),
+            embedder=embedder,
+            channels={"mentor-a": FakeChannel()},
+            gates={"mentor-a": _gate()},
+            notifier=RecordingNotifier(),
+            sleep=False,
+        )
+        await session.commit()
+
+        assert outcome.outcome == "silence"
+        status = (
+            await session.execute(
+                text("select status from conversations where telegram_chat_id = 902")
+            )
+        ).scalar_one()
+        assert status == "active"
+    finally:
+        monkeypatch.delenv("HANDOFF_ENABLED", raising=False)
+        get_settings.cache_clear()
