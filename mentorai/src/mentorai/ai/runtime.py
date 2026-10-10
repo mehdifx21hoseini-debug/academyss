@@ -488,7 +488,7 @@ async def handle_message(
         )
         return RunResult(outcome=Outcome.silence, reason=silence_reason, ai_run_id=run.id)
 
-    final_text = humanize_punctuation(answer.answer)
+    final_text = humanize_punctuation(answer.answer, seed=message.id)
     run = await _record(
         session,
         message=message,

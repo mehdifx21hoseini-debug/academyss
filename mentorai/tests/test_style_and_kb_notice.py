@@ -136,3 +136,27 @@ async def test_notice_mode_never_overrides_the_hard_rules(
 def test_the_notice_text_has_no_forbidden_punctuation() -> None:
     assert not FORBIDDEN.search(KB_MISS_NOTICE_TEXT)
     assert Path(__file__).exists()
+
+
+def test_the_final_period_is_dropped_most_of_the_time_but_not_always_and_is_deterministic() -> None:
+    text = "سلام عزیز، بفرمایید."
+    results = [humanize_punctuation(text, seed=s) for s in range(400)]
+
+    kept = sum(1 for r in results if r.endswith("."))
+    assert 40 < kept < 160, "نقطه باید گاهی بماند، نه همیشه و نه هرگز"
+    assert results == [humanize_punctuation(text, seed=s) for s in range(400)]
+    assert all(r.rstrip(".") == "سلام عزیز، بفرمایید" for r in results)
+
+
+def test_period_thinning_handles_each_chunk_and_never_empties_the_text() -> None:
+    out = humanize_punctuation("یک.\n\nدو.\n\nسه.", seed=7)
+
+    assert out.count("\n\n") == 2 and all(part.strip(". ") for part in out.split("\n\n"))
+    assert humanize_punctuation(".", seed=1)
+
+
+def test_the_prompt_asks_for_a_respectful_invitation_and_not_a_cold_command() -> None:
+    flat = " ".join(pr.SYSTEM_PROMPT_TEMPLATE.replace("\\\n", "").split())
+
+    assert "بفرمایید عزیز در خدمتم" in flat
+    assert "هرگز دستوری و سرد نگو" in flat and "سؤالتون رو بگید" in flat

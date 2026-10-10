@@ -107,7 +107,7 @@ async def incoming(session: AsyncSession, account: MentorAccount) -> Message:
 
 def _answer() -> ModelAnswer:
     return ModelAnswer(
-        answer="دوره مقدماتی شانزده جلسه دارد.",
+        answer="دوره مقدماتی شانزده جلسه دارد",
         confidence=0.95,
         needs_human=False,
         reason="منبع رسمی",
@@ -160,7 +160,7 @@ async def test_draft_mode_creates_a_draft_and_sends_nothing(
     # اعلان پس از تثبیت تراکنش فرستاده می‌شود، نه داخلش (ADR-031).
     assert outcome.detail is not None
     await notify_draft(int(outcome.detail), notifier)
-    assert notifier.sent == [("mentor-a", "دوره مقدماتی شانزده جلسه دارد.")]
+    assert notifier.sent == [("mentor-a", "دوره مقدماتی شانزده جلسه دارد")]
 
 
 @pytest.mark.parametrize(("setting", "expected"), [(None, "control_bot"), ("chat", "chat")])
@@ -287,7 +287,7 @@ async def test_auto_mode_sends_directly(
     )
     session.expire_all()
 
-    assert channel.sent == [(900, "دوره مقدماتی شانزده جلسه دارد.")]
+    assert channel.sent == [(900, "دوره مقدماتی شانزده جلسه دارد")]
     assert channel.reads == [(900, 7)]
 
 
@@ -412,7 +412,7 @@ async def test_approved_draft_is_sent_from_the_mentor_account(
     session.expire_all()
 
     assert result == "sent"
-    assert channel.sent == [(900, "دوره مقدماتی شانزده جلسه دارد.")]
+    assert channel.sent == [(900, "دوره مقدماتی شانزده جلسه دارد")]
     assert channel.reads == [(900, 7)], "علامت خوانده‌شدن تا همان پیام پاسخ‌داده‌شده"
     assert (await session.get_one(Draft, draft_id)).status == "sent"
 
@@ -484,7 +484,7 @@ async def test_resume_from_the_cli_reaches_a_worker_started_while_paused(
     )
 
     assert result == "sent"
-    assert channel.sent == [(900, "دوره مقدماتی شانزده جلسه دارد.")]
+    assert channel.sent == [(900, "دوره مقدماتی شانزده جلسه دارد")]
 
 
 async def test_edited_draft_sends_the_mentor_text(

@@ -110,7 +110,9 @@ async def test_confident_answer_is_produced(
     await session.commit()
 
     assert result.outcome is Outcome.answer
-    assert result.answer_text == "دوره مقدماتی شانزده جلسه دارد."
+    # نقطه‌ی آخر گاهی برداشته می‌شود (ai/style)؛ محتوا همان است.
+    assert result.answer_text is not None
+    assert result.answer_text.rstrip(".") == "دوره مقدماتی شانزده جلسه دارد"
 
 
 async def test_sensitive_topic_is_silent_and_never_calls_the_model(
