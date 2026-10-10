@@ -5,7 +5,9 @@
 تصمیم) بازسازی می‌کند و آن را با نسخه‌ای می‌سنجد که **فقط** بندهای لحن دستور (۷ تا ۹) و یک
 پیوست نمونه‌ی اختیاری را عوض کرده است.
 
-- **بازوی A**: دستور فعلی (`prompt.SYSTEM_PROMPT`) با همان توابعی که مسیر زنده صدا می‌زند.
+- **بازوی A**: خط پایه‌ی v2 (`prompt.SYSTEM_PROMPT_V2`، دستوری که پیش از «صدای منتور» زنده بود)
+  با همان توابعی که مسیر زنده صدا می‌زند. از ADR-053 به بعد مسیر زنده v3 است؛ A دیگر «فعلی»
+  نیست، «خط پایه» است.
 - **بازوی C**: همان ورودی، همان سندها و همان دروازه‌ها؛ فقط `system` متفاوت. بندهای دیگر
   دستور (منبع، قیمت، وعده‌ی سود، افشا) باید بایت‌به‌بایت برابر A بمانند، وگرنه ابزار رد می‌کند.
 
@@ -54,14 +56,18 @@ from mentorai import model_compare as mc
 from mentorai.ai.budget import price_for
 from mentorai.ai.client import DEFAULT_MODEL, ModelClient
 from mentorai.ai.decision import deterministic_trigger
-from mentorai.ai.prompt import SYSTEM_PROMPT, build_user_content
+from mentorai.ai.prompt import (
+    MENTOR_PLACEHOLDER,
+    SYSTEM_PROMPT_V2,
+    build_user_content,
+    clean_mentor_name,
+)
 from mentorai.ai.runtime import (
     CONFIDENCE_THRESHOLD,
     HISTORY_TURNS,
     _recent_history,
     silence_reason_for,
 )
-from mentorai.ai.schema import PROMPT_VERSION
 from mentorai.config import get_settings
 from mentorai.db.models import Conversation, Identity, MentorAccount, Message, Student
 from mentorai.knowledge.embeddings import EmbeddingProvider
@@ -69,6 +75,7 @@ from mentorai.knowledge.retrieval import Hit, search
 from mentorai.memory import store as memory_store
 
 EVAL_VERSION = 1
+BASELINE_PROMPT_VERSION = "v2"
 KIND_PREPARED = "conversation-eval-prepared"
 KIND_KEY = "conversation-eval-key"
 
@@ -98,7 +105,6 @@ LOCKED_RULES = frozenset({3, 4, 5, 6, 10, 11})
 if (TONE_RULES | PERSONA_RULES) & LOCKED_RULES:  # نه assert: با -O حذف می‌شود
     raise RuntimeError("بند قفل (ایمنی) نباید در هیچ نوع نسخه‌ای قابل تغییر باشد")
 # نام منتورِ همان حساب در دستور C جایگزین می‌شود (هر حساب نام خودش را دارد).
-MENTOR_PLACEHOLDER = "{mentor_name}"
 MAX_HEADER_CHARS = 2_000
 MAX_RULE_CHARS = 2_000
 MAX_APPENDIX_CHARS = 9_000
@@ -346,7 +352,7 @@ def load_variant(path: Path) -> ToneVariant:
     return parse_variant(raw)
 
 
-def build_variant_prompt(variant: ToneVariant, base: str = SYSTEM_PROMPT) -> str:
+def build_variant_prompt(variant: ToneVariant, base: str = SYSTEM_PROMPT_V2) -> str:
     """دستور پایه، با بندهای مجازِ جایگزین (و سرآغاز در نسخه‌ی persona) و پیوست.
 
     بندهای قفل هرگز لمس نمی‌شوند.
@@ -364,7 +370,7 @@ def build_variant_prompt(variant: ToneVariant, base: str = SYSTEM_PROMPT) -> str
 
 def non_tone_differences(
     candidate: str,
-    base: str = SYSTEM_PROMPT,
+    base: str = SYSTEM_PROMPT_V2,
     *,
     mutable: frozenset[int] = TONE_RULES,
     header_mutable: bool = False,
@@ -518,7 +524,7 @@ def worst_case_usd(
 def _system_for(arm: str, variant_prompt: str | None, case: dict[str, Any] | None = None) -> str:
     """دستور سیستمی بازو؛ دستور C ممکن است برای هر حساب نام منتور خودش را داشته باشد."""
     if arm == ARM_A:
-        return SYSTEM_PROMPT
+        return SYSTEM_PROMPT_V2
     if variant_prompt is None:
         raise EvalError("بازوی C نسخه‌ی لحن لازم دارد")
     system = (case or {}).get("systems", {}).get(arm, variant_prompt)
@@ -527,10 +533,7 @@ def _system_for(arm: str, variant_prompt: str | None, case: dict[str, Any] | Non
     return str(system)
 
 
-def _clean_name(value: str) -> str:
-    """نام منتور برای گذاشتن در دستور: بدون آکولاد و خط‌جدید، کوتاه."""
-    cleaned = re.sub(r"[{}\r\n\t]", " ", value)
-    return re.sub(r"\s+", " ", cleaned).strip()[:80] or "منتور"
+_clean_name = clean_mentor_name
 
 
 async def _mentor_name(session: AsyncSession, conversation: Conversation) -> str:
@@ -675,9 +678,9 @@ async def prepare(
         "embedder": "none (text only)" if embedder is None else type(embedder).__name__,
         "prompts": {
             ARM_A: {
-                "version": PROMPT_VERSION,
-                "sha256": _sha(SYSTEM_PROMPT),
-                "chars": len(SYSTEM_PROMPT),
+                "version": BASELINE_PROMPT_VERSION,
+                "sha256": _sha(SYSTEM_PROMPT_V2),
+                "chars": len(SYSTEM_PROMPT_V2),
             },
             **(
                 {
@@ -1427,6 +1430,7 @@ __all__ = [
     "ARM_A",
     "ARM_C",
     "CRITERIA",
+    "MENTOR_PLACEHOLDER",
     "EvalError",
     "EvalRun",
     "ToneVariant",

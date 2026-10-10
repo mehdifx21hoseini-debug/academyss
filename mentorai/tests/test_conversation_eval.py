@@ -28,7 +28,8 @@ from mentorai import cli
 from mentorai import model_compare as mc
 from mentorai.ai import conversation_eval as ce
 from mentorai.ai.client import ModelCall, ScriptedClient
-from mentorai.ai.prompt import SYSTEM_PROMPT
+from mentorai.ai.prompt import SYSTEM_PROMPT_V2 as SYSTEM_PROMPT
+from mentorai.ai.prompt import build_system_prompt
 from mentorai.ai.runtime import HISTORY_TURNS, handle_message
 from mentorai.ai.schema import ModelAnswer
 from mentorai.db.models import MemorySource, MentorAccount, Message, Outcome, Sender
@@ -536,7 +537,9 @@ async def test_arm_a_builds_exactly_the_input_the_live_pipeline_sends(
     run = await ce.run_eval(document, _Answers(), arms=["A"], max_cost_usd=50.0)
 
     live_system, live_user = live_client.calls[0]
-    assert live_system == SYSTEM_PROMPT
+    # مسیر زنده از ADR-053 دستور v3 با نام منتور دارد؛ بازوی A خط پایه‌ی v2 است. ورودی کاربر
+    # (بازیابی، تاریخچه، حافظه) کلمه‌به‌کلمه یکی است.
+    assert live_system == build_system_prompt(MENTOR_NAME)
     assert live_user == case["user"], "ورودی مدل کلمه‌به‌کلمه همان مسیر زنده است"
     assert result.outcome is Outcome.answer
     assert run.results[case["label"]]["A"].outcome == "answer"

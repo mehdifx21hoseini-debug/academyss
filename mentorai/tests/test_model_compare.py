@@ -20,7 +20,7 @@ from tests.test_media import xlsx
 from mentorai import cli
 from mentorai import model_compare as mc
 from mentorai.ai.client import ModelCall
-from mentorai.ai.prompt import SYSTEM_PROMPT
+from mentorai.ai.prompt import build_system_prompt
 from mentorai.ai.runtime import silence_reason_for
 from mentorai.ai.schema import ModelAnswer
 from mentorai.db.models import ExcludedChat, MentorAccount, Sender
@@ -350,7 +350,7 @@ async def test_every_candidate_gets_the_same_documents_and_the_production_prompt
 
     assert len(run.cases) == 2 and len(a.calls) == len(b.calls) == 2
     assert a.calls == b.calls, "ورودی دو مدل باید بایت‌به‌بایت یکی باشد"
-    assert all(system == SYSTEM_PROMPT for system, _ in a.calls)
+    assert all(system == build_system_prompt() for system, _ in a.calls)
     assert "شانزده جلسه" in a.calls[0][1], "سند بازیابی‌شده در ورودی است"
 
 

@@ -24,7 +24,7 @@ from mentorai import cli
 from mentorai import understanding_replay as replay
 from mentorai.ai import understanding as u
 from mentorai.ai.client import RawCall, ScriptedClient
-from mentorai.ai.prompt import SYSTEM_PROMPT as LEGACY_PROMPT
+from mentorai.ai.prompt import build_system_prompt
 from mentorai.ai.runtime import handle_message
 from mentorai.db.models import Base, Conversation, MentorAccount, Message, Outcome, StudentMemory
 from mentorai.knowledge.embeddings import HashingEmbedder
@@ -193,7 +193,11 @@ async def test_replay_leaves_the_live_decision_on_a_real_message_unchanged(
         after.reason,
         after.answer_text,
     )
-    assert before_client.calls[0][0] == after_client.calls[0][0] == LEGACY_PROMPT
+    assert (
+        before_client.calls[0][0]
+        == after_client.calls[0][0]
+        == build_system_prompt(account.mentor_name)
+    )
     assert len(before_client.calls) == len(after_client.calls) == 1
     runs = (await session.execute(text("select count(*) from ai_runs"))).scalar_one()
     assert runs == 2, "بازپخش هیچ اجرای تازه‌ای نساخت"
@@ -359,7 +363,7 @@ async def test_a_voice_message_still_goes_through_the_legacy_prompt_only(
 
     assert result.outcome is Outcome.answer and result.reason != "rule_money"
     assert len(client.calls) == 1
-    assert client.calls[0][0] == LEGACY_PROMPT
+    assert client.calls[0][0] == build_system_prompt(account.mentor_name)
     assert u.SYSTEM_PROMPT not in client.calls[0][0]
 
 

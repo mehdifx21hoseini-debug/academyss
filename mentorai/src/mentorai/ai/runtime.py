@@ -18,13 +18,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from mentorai.ai import budget, guard
 from mentorai.ai.client import ModelCall, ModelClient
 from mentorai.ai.decision import deterministic_trigger
-from mentorai.ai.prompt import SYSTEM_PROMPT, build_user_content
+from mentorai.ai.prompt import build_system_prompt, build_user_content
 from mentorai.ai.schema import PROMPT_VERSION, ModelAnswer
 from mentorai.config import get_settings
 from mentorai.db.models import (
     AiRun,
     Conversation,
     Escalation,
+    MentorAccount,
     Message,
     Outcome,
     Sender,
@@ -373,9 +374,10 @@ async def handle_message(
 
     history = await _recent_history(session, message.conversation_id, message.id)
     conversation = await session.get_one(Conversation, message.conversation_id)
+    account = await session.get_one(MentorAccount, conversation.account_id)
     memories = memory_store.render(await memory_store.load_active(session, conversation.student_id))
     call = await model_client.complete(
-        system=SYSTEM_PROMPT,
+        system=build_system_prompt(account.mentor_name),
         user=build_user_content(question=question, hits=hits, history=history, memories=memories),
     )
     # ثبت مصرف بی‌قیدوشرط است، حتی وقتی فراخوانی خطا داد: توکن مصرف‌شده حتی در

@@ -19,7 +19,7 @@ from pathlib import Path
 from mentorai.ai import budget
 from mentorai.ai.client import ChatAndVision, RawCall
 from mentorai.ai.expand import expand
-from mentorai.ai.prompt import SYSTEM_PROMPT, build_user_content
+from mentorai.ai.prompt import build_system_prompt, build_user_content
 from mentorai.ai.schema import PROMPT_VERSION
 from mentorai.knowledge.retrieval import Hit
 from mentorai.media import vision
@@ -77,7 +77,7 @@ def _facts(call: RawCall) -> str:
 async def check_answer(client: ChatAndVision) -> Step:
     """مسیر پاسخ به دانشجو، با همان دستور سیستمی و همان قالب ورودی تولید."""
     call = await client.complete(
-        system=SYSTEM_PROMPT, user=build_user_content(question=_QUESTION, hits=[_DOC])
+        system=build_system_prompt(), user=build_user_content(question=_QUESTION, hits=[_DOC])
     )
     raw = RawCall(
         text="x",

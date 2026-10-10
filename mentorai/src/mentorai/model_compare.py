@@ -57,7 +57,7 @@ from mentorai.ai.client import (
     ChatAndVision,
 )
 from mentorai.ai.decision import deterministic_trigger
-from mentorai.ai.prompt import SYSTEM_PROMPT, build_user_content
+from mentorai.ai.prompt import build_system_prompt, build_user_content
 from mentorai.ai.runtime import CONFIDENCE_THRESHOLD, silence_reason_for
 from mentorai.ai.schema import PROMPT_VERSION
 from mentorai.config import Settings
@@ -383,7 +383,7 @@ async def _ask(
     hits: Sequence[Hit],
     threshold: float,
 ) -> CandidateResult:
-    call = await client.complete(system=SYSTEM_PROMPT, user=user)
+    call = await client.complete(system=build_system_prompt(), user=user)
     assert candidate.price is not None
     cost = cost_of(
         candidate.price,

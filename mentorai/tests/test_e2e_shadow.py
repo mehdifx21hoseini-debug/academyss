@@ -424,9 +424,13 @@ def test_prompt_text_states_the_owner_rules_for_the_writer() -> None:
 
 
 def test_prompt_text_keeps_the_production_style_rules_in_sync() -> None:
-    """سبکِ پاسخ همان سبک مسیر زنده است؛ اگر آن عوض شود، این آزمون یادآوری می‌کند."""
+    """نویسنده‌ی سایه هنوز سبک v2 را دارد (ADR-053: مسیر زنده v3 شد و این سایه دست نخورد).
+
+    این آزمون هم‌ترازی با **v2** را نگه می‌دارد، نه با مسیر زنده. اگر روزی نویسنده‌ی سایه به v3 رسید،
+    این را عوض کنید.
+    """
     for phrase in ("هرگز از پرانتز استفاده نکن", "کلمه‌ی لاتین", "ضمیر «شما»", "خط خالی"):
-        assert phrase in production_prompt.SYSTEM_PROMPT, phrase
+        assert phrase in production_prompt.SYSTEM_PROMPT_V2, phrase
         assert phrase in e2e.WRITER_SYSTEM_PROMPT, phrase
 
 
