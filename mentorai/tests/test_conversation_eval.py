@@ -40,6 +40,7 @@ from mentorai.telegram.normalize import build_inbound
 from mentorai.telegram.store import record_inbound
 
 SRC = Path(ce.__file__).resolve().parents[2]
+TONE_VARIANTS = Path(__file__).resolve().parents[1] / "tone-variants"
 MODULE = Path(ce.__file__)
 MODEL = "claude-sonnet-5-5"
 
@@ -631,6 +632,21 @@ def test_a_variant_that_touches_anything_but_tone_is_rejected(
 ) -> None:
     with pytest.raises(ce.EvalError, match=message):
         ce.parse_variant(variant)
+
+
+@pytest.mark.parametrize("name", sorted(p.name for p in TONE_VARIANTS.glob("*.json")))
+def test_every_committed_tone_variant_is_valid_and_changes_only_the_tone(name: str) -> None:
+    """نسخه‌های لحنِ نگه‌داشته‌شده در مخزن همان قراردادی را دارند که ابزار اجرا می‌کند."""
+    variant = ce.load_variant(TONE_VARIANTS / name)
+    prompt = ce.build_variant_prompt(variant)
+
+    assert ce.non_tone_differences(prompt) == []
+    assert variant.version and set(variant.rules) <= ce.TONE_RULES
+    assert mc.mask_personal(prompt) == prompt, "نسخه‌ی لحن داده‌ی شخصی ندارد"
+
+
+def test_the_committed_tone_variants_exist() -> None:
+    assert (TONE_VARIANTS / "tone-v2-draft.json").is_file()
 
 
 async def test_arm_c_gets_the_identical_input_and_only_the_system_prompt_differs(
