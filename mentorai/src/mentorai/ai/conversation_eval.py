@@ -87,8 +87,21 @@ NAME_MASK = "[نام]"
 # بندهایی که فقط «لحن» اند و بازوی C اجازه دارد عوضشان کند. بقیه (منبع، قیمت، وعده‌ی سود،
 # سیگنال، داده بودن متن دانشجو، افشا، استفاده‌ی شناسه‌ها) نباید تکان بخورند.
 TONE_RULES = frozenset({7, 8, 9})
+# نسخه‌ی «صدای منتور» علاوه بر لحن، سرآغاز و بندهای ۱ و ۲ (چارچوب منبع) را هم می‌تواند عوض کند.
+# بندهای ۳ تا ۶ و ۱۰ و ۱۱ (قیمت و شرایط فقط از منبع رسمی، قانون عیناً، بدون وعده‌ی سود و
+# سیگنال، داده بودن متن دانشجو، افشا، شناسه‌ها) در هر حالتی قفل‌اند.
+PERSONA_RULES = frozenset({1, 2, 7, 8, 9})
+KIND_TONE = "tone"
+KIND_PERSONA = "persona"
+MUTABLE_RULES = {KIND_TONE: TONE_RULES, KIND_PERSONA: PERSONA_RULES}
+LOCKED_RULES = frozenset({3, 4, 5, 6, 10, 11})
+if (TONE_RULES | PERSONA_RULES) & LOCKED_RULES:  # نه assert: با -O حذف می‌شود
+    raise RuntimeError("بند قفل (ایمنی) نباید در هیچ نوع نسخه‌ای قابل تغییر باشد")
+# نام منتورِ همان حساب در دستور C جایگزین می‌شود (هر حساب نام خودش را دارد).
+MENTOR_PLACEHOLDER = "{mentor_name}"
+MAX_HEADER_CHARS = 2_000
 MAX_RULE_CHARS = 2_000
-MAX_APPENDIX_CHARS = 6_000
+MAX_APPENDIX_CHARS = 9_000
 # پیوست نمونه‌ها پس از بند آخر و پشت این جداکننده می‌آید تا هرگز به بند ۱۱ نچسبد.
 APPENDIX_SEPARATOR = "\n----- نمونه‌ها و راهنمای لحن -----\n"
 
@@ -247,35 +260,59 @@ class ToneVariant:
     version: str
     rules: dict[int, str]
     appendix: str = ""
+    kind: str = KIND_TONE
+    header: str = ""
 
     def to_dict(self) -> dict[str, Any]:
         return {
             "version": self.version,
+            "kind": self.kind,
+            "header": self.header,
             "rules": {str(n): body for n, body in sorted(self.rules.items())},
             "appendix": self.appendix,
         }
 
+    @property
+    def uses_mentor_name(self) -> bool:
+        pieces = [self.header, self.appendix, *self.rules.values()]
+        return any(MENTOR_PLACEHOLDER in piece for piece in pieces)
+
 
 def parse_variant(raw: object) -> ToneVariant:
-    """نسخه‌ی لحن از JSON: `{version, rules: {"7": "...", ...}, appendix}`.
+    """نسخه‌ی لحن از JSON: `{version, kind, header, rules: {"7": "...", ...}, appendix}`.
 
-    فقط بندهای لحن (۷ تا ۹) و پیوست اجازه‌ی تغییر دارند. متن نباید داده‌ی شخصی داشته باشد.
+    `kind=tone` (پیش‌فرض): فقط بندهای ۷ تا ۹ و پیوست. `kind=persona`: سرآغاز و بندهای ۱، ۲، ۷ تا ۹
+    و پیوست؛ بندهای ۳ تا ۶ و ۱۰ و ۱۱ در هر حالتی قفل‌اند. `{mentor_name}` در متن، هنگام
+    آماده‌سازی با نام منتورِ همان حساب جایگزین می‌شود. متن نباید داده‌ی شخصی داشته باشد.
     """
     if not isinstance(raw, dict):
         raise EvalError("فایل نسخه‌ی لحن باید یک شیء JSON باشد")
-    unknown = set(raw) - {"version", "rules", "appendix"}
+    unknown = set(raw) - {"version", "kind", "header", "rules", "appendix"}
     if unknown:
         raise EvalError(f"کلید ناشناخته در نسخه‌ی لحن: {', '.join(sorted(unknown))}")
     version = raw.get("version")
     if not isinstance(version, str) or not version.strip():
         raise EvalError("نسخه‌ی لحن «version» لازم دارد")
+    kind = raw.get("kind", KIND_TONE)
+    if kind not in MUTABLE_RULES:
+        raise EvalError(f"نوع نسخه نامعتبر: {kind!r} (مجاز: {', '.join(MUTABLE_RULES)})")
+    mutable = MUTABLE_RULES[kind]
+    header = raw.get("header", "")
+    if not isinstance(header, str):
+        raise EvalError("«header» باید متن باشد")
+    header = header.strip()
+    if header and kind != KIND_PERSONA:
+        raise EvalError("سرآغاز را فقط نسخه‌ی persona می‌تواند عوض کند")
+    if len(header) > MAX_HEADER_CHARS or _RULE_START.search(header):
+        raise EvalError(f"سرآغاز باید تا {MAX_HEADER_CHARS} نویسه باشد و بند شماره‌دار نداشته باشد")
     raw_rules = raw.get("rules", {})
     if not isinstance(raw_rules, dict):
         raise EvalError("«rules» باید شیء باشد")
     rules: dict[int, str] = {}
     for key, body in raw_rules.items():
-        if not isinstance(key, str) or not key.isdigit() or int(key) not in TONE_RULES:
-            raise EvalError(f"بند {key!r} لحن نیست؛ فقط بندهای {sorted(TONE_RULES)} قابل تغییرند")
+        if not isinstance(key, str) or not key.isdigit() or int(key) not in mutable:
+            what = "لحن نیست" if kind == KIND_TONE else "قفل است"
+            raise EvalError(f"بند {key!r} {what}؛ فقط بندهای {sorted(mutable)} قابل تغییرند")
         if not isinstance(body, str) or not body.strip():
             raise EvalError(f"متن بند {key} خالی است")
         if len(body) > MAX_RULE_CHARS:
@@ -284,14 +321,20 @@ def parse_variant(raw: object) -> ToneVariant:
     appendix = raw.get("appendix", "")
     if not isinstance(appendix, str) or len(appendix) > MAX_APPENDIX_CHARS:
         raise EvalError(f"«appendix» باید متنی تا {MAX_APPENDIX_CHARS} نویسه باشد")
-    variant = ToneVariant(version=version.strip(), rules=rules, appendix=appendix.strip())
-    if not variant.rules and not variant.appendix:
+    variant = ToneVariant(
+        version=version.strip(),
+        rules=rules,
+        appendix=appendix.strip(),
+        kind=kind,
+        header=header,
+    )
+    if not variant.rules and not variant.appendix and not variant.header:
         raise EvalError("نسخه‌ی لحن هیچ تغییری ندارد")
-    pieces = [*variant.rules.values(), variant.appendix]
+    pieces = [variant.header, *variant.rules.values(), variant.appendix]
     if any(mc.mask_personal(piece) != piece for piece in pieces):
         raise EvalError("نسخه‌ی لحن داده‌ی شخصی (تلفن، ایمیل، نام کاربری) دارد")
     # ساخت و اعتبارسنجی بنیادین همین‌جا، تا خطا پیش از هر کاری دیده شود.
-    validate_variant_prompt(build_variant_prompt(variant))
+    validate_variant(variant)
     return variant
 
 
@@ -304,8 +347,13 @@ def load_variant(path: Path) -> ToneVariant:
 
 
 def build_variant_prompt(variant: ToneVariant, base: str = SYSTEM_PROMPT) -> str:
-    """دستور پایه، با بندهای لحنِ جایگزین و پیوست. هیچ بند دیگری لمس نمی‌شود."""
+    """دستور پایه، با بندهای مجازِ جایگزین (و سرآغاز در نسخه‌ی persona) و پیوست.
+
+    بندهای قفل هرگز لمس نمی‌شوند.
+    """
     header, rules = split_prompt(base)
+    if variant.header:
+        header = variant.header.rstrip() + "\n\n"
     for number, body in variant.rules.items():
         rules[number] = f"{_persian(number)}. {body}\n"
     prompt = header + "".join(rules[n] for n in sorted(rules))
@@ -314,18 +362,24 @@ def build_variant_prompt(variant: ToneVariant, base: str = SYSTEM_PROMPT) -> str
     return prompt
 
 
-def non_tone_differences(candidate: str, base: str = SYSTEM_PROMPT) -> list[str]:
-    """هرچه در دستور نامزد جز بندهای لحن با پایه فرق دارد. خالی یعنی فقط لحن عوض شده."""
+def non_tone_differences(
+    candidate: str,
+    base: str = SYSTEM_PROMPT,
+    *,
+    mutable: frozenset[int] = TONE_RULES,
+    header_mutable: bool = False,
+) -> list[str]:
+    """هرچه در دستور نامزد جز بندهای مجاز با پایه فرق دارد. خالی یعنی فقط بخش مجاز عوض شده."""
     base_header, base_rules = split_prompt(base)
     problems: list[str] = []
     main, separator, appendix = candidate.partition(APPENDIX_SEPARATOR)
     if separator and _RULE_START.search(appendix):
         problems.append("پیوست (بند شماره‌دار نباید داشته باشد)")
     header, rules = split_prompt(main)
-    if header != base_header:
+    if header != base_header and not header_mutable:
         problems.append("سرآغاز")
     for number in sorted(set(base_rules) | set(rules)):
-        if number in TONE_RULES:
+        if number in mutable:
             if number not in rules:
                 problems.append(f"بند {number} حذف شده")
             continue
@@ -334,10 +388,21 @@ def non_tone_differences(candidate: str, base: str = SYSTEM_PROMPT) -> list[str]
     return problems
 
 
-def validate_variant_prompt(candidate: str) -> None:
-    problems = non_tone_differences(candidate)
+def validate_variant_prompt(candidate: str, variant: ToneVariant | None = None) -> None:
+    kind = variant.kind if variant is not None else KIND_TONE
+    problems = non_tone_differences(
+        candidate, mutable=MUTABLE_RULES[kind], header_mutable=kind == KIND_PERSONA
+    )
     if problems:
-        raise EvalError("دستور C فقط باید لحن را عوض کند؛ تغییر در: " + "، ".join(problems))
+        scope = "لحن" if kind == KIND_TONE else "بخش‌های مجاز نسخه‌ی persona"
+        raise EvalError(f"دستور C فقط باید {scope} را عوض کند؛ تغییر در: " + "، ".join(problems))
+
+
+def validate_variant(variant: ToneVariant) -> str:
+    """دستور ساخته‌شده از نسخه، پس از بررسی اینکه فقط بخش‌های مجازش عوض شده."""
+    prompt = build_variant_prompt(variant)
+    validate_variant_prompt(prompt, variant)
+    return prompt
 
 
 # ---------------------------------------------------------------------------
@@ -450,12 +515,27 @@ def worst_case_usd(
     return usd * attempts
 
 
-def _system_for(arm: str, variant_prompt: str | None) -> str:
+def _system_for(arm: str, variant_prompt: str | None, case: dict[str, Any] | None = None) -> str:
+    """دستور سیستمی بازو؛ دستور C ممکن است برای هر حساب نام منتور خودش را داشته باشد."""
     if arm == ARM_A:
         return SYSTEM_PROMPT
     if variant_prompt is None:
         raise EvalError("بازوی C نسخه‌ی لحن لازم دارد")
-    return variant_prompt
+    system = (case or {}).get("systems", {}).get(arm, variant_prompt)
+    if MENTOR_PLACEHOLDER in system:
+        raise EvalError("نام منتور در دستور C جایگزین نشده است؛ آماده‌سازی را دوباره بسازید")
+    return str(system)
+
+
+def _clean_name(value: str) -> str:
+    """نام منتور برای گذاشتن در دستور: بدون آکولاد و خط‌جدید، کوتاه."""
+    cleaned = re.sub(r"[{}\r\n\t]", " ", value)
+    return re.sub(r"\s+", " ", cleaned).strip()[:80] or "منتور"
+
+
+async def _mentor_name(session: AsyncSession, conversation: Conversation) -> str:
+    account = await session.get(MentorAccount, conversation.account_id)
+    return account.mentor_name if account is not None else ""
 
 
 async def _student_names(session: AsyncSession, conversation: Conversation) -> list[str]:
@@ -502,9 +582,7 @@ async def prepare(
     settings = get_settings()
     model = settings.ai_model or DEFAULT_MODEL
     max_out = max_output_tokens or settings.ai_max_tokens
-    variant_prompt = build_variant_prompt(variant) if variant is not None else None
-    if variant_prompt is not None:
-        validate_variant_prompt(variant_prompt)
+    variant_prompt = validate_variant(variant) if variant is not None else None
 
     pool = await mc.sample_from_database(session, limit=mc.DB_POOL, seed=seed)
     random.Random(seed).shuffle(pool)
@@ -548,10 +626,14 @@ async def prepare(
             names,
         )
         user = build_user_content(question=question, hits=hits, history=history, memories=memories)
+        systems: dict[str, str] = {}
+        if variant is not None and variant_prompt is not None and variant.uses_mentor_name:
+            name = _clean_name(await _mentor_name(session, conversation))
+            systems[ARM_C] = variant_prompt.replace(MENTOR_PLACEHOLDER, name)
         worst = {
             arm: worst_case_usd(
                 model,
-                system_chars=len(_system_for(arm, variant_prompt)),
+                system_chars=len(_system_for(arm, variant_prompt, {"systems": systems})),
                 user_chars=len(user),
                 max_output_tokens=max_out,
             )
@@ -566,6 +648,7 @@ async def prepare(
                 "memories": memories,
                 "hits": [hit_to_dict(h) for h in hits],
                 "user": user,
+                **({"systems": systems} if systems else {}),
                 "worst_case_usd": worst,
             }
         )
@@ -600,6 +683,7 @@ async def prepare(
                 {
                     ARM_C: {
                         "version": variant.version if variant is not None else "",
+                        "kind": variant.kind if variant is not None else "",
                         "sha256": _sha(variant_prompt),
                         "chars": len(variant_prompt),
                     }
@@ -870,7 +954,7 @@ async def run_eval(
         pair_charged = 0.0
         violated = False
         for arm in order:
-            system = _system_for(arm, variant_prompt)
+            system = _system_for(arm, variant_prompt, case)
             call = await client.complete(system=system, user=case["user"])
             run.calls += 1
             measured = (

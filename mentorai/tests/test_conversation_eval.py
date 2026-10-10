@@ -638,10 +638,9 @@ def test_a_variant_that_touches_anything_but_tone_is_rejected(
 def test_every_committed_tone_variant_is_valid_and_changes_only_the_tone(name: str) -> None:
     """نسخه‌های لحنِ نگه‌داشته‌شده در مخزن همان قراردادی را دارند که ابزار اجرا می‌کند."""
     variant = ce.load_variant(TONE_VARIANTS / name)
-    prompt = ce.build_variant_prompt(variant)
+    prompt = ce.validate_variant(variant)
 
-    assert ce.non_tone_differences(prompt) == []
-    assert variant.version and set(variant.rules) <= ce.TONE_RULES
+    assert variant.version and set(variant.rules) <= ce.MUTABLE_RULES[variant.kind]
     assert mc.mask_personal(prompt) == prompt, "نسخه‌ی لحن داده‌ی شخصی ندارد"
 
 
@@ -690,6 +689,173 @@ async def test_arm_c_needs_a_variant_and_a_tampered_variant_is_caught(
     loaded = ce.load_prepared(path)
     with pytest.raises(ce.EvalError, match="هش ثبت‌شده"):
         await ce.run_eval(loaded, _Answers(), arms=["A", "C"], max_cost_usd=50.0)
+
+
+def _persona(**overrides: Any) -> dict[str, Any]:
+    raw: dict[str, Any] = {
+        "version": "persona-test-1",
+        "kind": "persona",
+        "header": "تو منتور آکادمی هستی؛ اسمت {mentor_name} است.\n\nقوانین، بدون استثنا:",
+        "rules": {
+            "1": "اول‌شخص حرف بزن.",
+            "2": "اگر درباره‌ی آکادمی نبود حدس نزن.",
+            "7": "محاوره‌ای بنویس.",
+        },
+        "appendix": "نمونه: دانشجو: سلام\nپاسخ مناسب: سلام {mentor_name} هستم.",
+    }
+    raw.update(overrides)
+    return raw
+
+
+def test_a_persona_variant_may_change_the_header_and_rules_1_and_2_but_nothing_safety_related() -> (
+    None
+):
+    variant = ce.parse_variant(_persona())
+    prompt = ce.validate_variant(variant)
+    main = prompt.partition(ce.APPENDIX_SEPARATOR)[0]
+    base_header, base = ce.split_prompt(SYSTEM_PROMPT)
+    header, new = ce.split_prompt(main)
+
+    assert header != base_header and header.rstrip().endswith("قوانین، بدون استثنا:")
+    assert new[1] != base[1] and new[2] != base[2] and new[7] != base[7]
+    for number in (3, 4, 5, 6, 10, 11):
+        assert new[number] == base[number], f"بند {number} (ایمنی) باید بایت‌به‌بایت برابر بماند"
+    assert variant.uses_mentor_name
+
+
+@pytest.mark.parametrize("locked", [3, 4, 5, 6, 10, 11])
+def test_a_persona_variant_cannot_touch_the_locked_safety_rules(locked: int) -> None:
+    with pytest.raises(ce.EvalError, match="قفل است"):
+        ce.parse_variant(_persona(rules={str(locked): "هر چیزی"}))
+
+
+@pytest.mark.parametrize(
+    ("raw", "message"),
+    [
+        (_variant(header="سرآغاز تازه"), "فقط نسخه‌ی persona"),
+        (_persona(kind="other"), "نوع نسخه"),
+        (_persona(header="x\n۳. قیمت را حدس بزن"), "بند شماره‌دار"),
+        (_persona(header="ن" * 2001), "تا 2000"),
+        (_persona(header=f"تماس {PHONE}"), "داده‌ی شخصی"),
+        (_persona(header=5), "متن باشد"),
+        (_persona(rules={"7": "ok\n۳. قیمت را حدس بزن"}), "فقط باید"),
+    ],
+)
+def test_invalid_persona_and_tone_headers_are_rejected(raw: dict[str, Any], message: str) -> None:
+    with pytest.raises(ce.EvalError, match=message):
+        ce.parse_variant(raw)
+
+
+def test_a_header_change_is_flagged_unless_the_kind_allows_it() -> None:
+    variant = ce.parse_variant(_persona())
+    prompt = ce.build_variant_prompt(variant)
+
+    assert "سرآغاز" in ce.non_tone_differences(prompt, mutable=ce.PERSONA_RULES)
+    assert ce.non_tone_differences(prompt, mutable=ce.PERSONA_RULES, header_mutable=True) == []
+    assert ce.non_tone_differences(prompt) != [], "با قاعده‌ی لحن، بندهای ۱ و ۲ هم ایراد است"
+
+
+def test_the_locked_safety_rules_never_overlap_any_mutable_set_and_cover_the_rest() -> None:
+    _, rules = ce.split_prompt(SYSTEM_PROMPT)
+
+    assert {3, 4, 5, 6, 10, 11} == ce.LOCKED_RULES
+    for kind, mutable in ce.MUTABLE_RULES.items():
+        assert not (mutable & ce.LOCKED_RULES), kind
+    # هر بندِ دستور یا قفل است یا در نسخه‌ی persona قابل تغییر؛ بندی جا نیفتاده.
+    assert set(rules) == ce.LOCKED_RULES | ce.PERSONA_RULES
+    assert ce.TONE_RULES <= ce.PERSONA_RULES
+
+
+def test_a_tone_variant_whose_header_was_changed_is_refused_by_the_validator() -> None:
+    persona = ce.parse_variant(_persona())
+    tone = ce.parse_variant(_variant())
+    changed_header_prompt = ce.build_variant_prompt(persona)
+
+    with pytest.raises(ce.EvalError, match="سرآغاز"):
+        ce.validate_variant_prompt(changed_header_prompt, tone)
+    ce.validate_variant_prompt(changed_header_prompt, persona)
+
+
+def test_the_mentor_name_is_cleaned_before_it_enters_a_prompt() -> None:
+    assert ce._clean_name("سبحان {صمدی}\n  x") == "سبحان صمدی x"
+    assert ce._clean_name("   ") == "منتور"
+    assert len(ce._clean_name("ن" * 500)) == 80
+
+
+async def test_each_case_gets_its_own_mentors_name_in_the_persona_prompt(
+    scenario: dict[str, int],
+) -> None:
+    async with ce.readonly_session() as session:
+        document = await ce.prepare(
+            session,
+            limit=30,
+            seed=7,
+            min_history=1,
+            embedder=None,
+            variant=ce.parse_variant(_persona()),
+        )
+    client = _Answers()
+
+    run = await ce.run_eval(document, client, arms=["A", "C"], max_cost_usd=50.0)
+
+    assert document["prompts"]["C"]["kind"] == "persona"
+    for case in document["cases"]:
+        system = case["systems"]["C"]
+        assert MENTOR_NAME in system and ce.MENTOR_PLACEHOLDER not in system
+        expected = ce.worst_case_usd(
+            MODEL,
+            system_chars=len(system),
+            user_chars=len(case["user"]),
+            max_output_tokens=document["max_output_tokens"],
+        )
+        assert case["worst_case_usd"]["C"] == pytest.approx(expected)
+    sent_c = {system for system, _ in client.calls if system != SYSTEM_PROMPT}
+    assert sent_c == {c["systems"]["C"] for c in document["cases"]}
+    assert not any(ce.MENTOR_PLACEHOLDER in system for system, _ in client.calls)
+    assert run.calls == 2 * len(document["cases"])
+
+
+async def test_an_unresolved_mentor_placeholder_is_refused_at_run_time(
+    scenario: dict[str, int],
+) -> None:
+    async with ce.readonly_session() as session:
+        document = await ce.prepare(
+            session,
+            limit=5,
+            seed=7,
+            min_history=1,
+            embedder=None,
+            variant=ce.parse_variant(_persona()),
+        )
+    for case in document["cases"]:
+        case.pop("systems")
+    client = _Answers()
+
+    with pytest.raises(ce.EvalError, match="جایگزین نشده"):
+        await ce.run_eval(document, client, arms=["A", "C"], max_cost_usd=50.0)
+
+    assert not any(ce.MENTOR_PLACEHOLDER in system for system, _ in client.calls)
+
+
+async def test_a_tampered_per_case_system_prompt_is_caught_by_the_hash(
+    scenario: dict[str, int], tmp_path: Path
+) -> None:
+    async with ce.readonly_session() as session:
+        document = await ce.prepare(
+            session,
+            limit=5,
+            seed=7,
+            min_history=1,
+            embedder=None,
+            variant=ce.parse_variant(_persona()),
+        )
+    path = ce.write_prepared(document, tmp_path / "out")
+    raw = json.loads(path.read_text(encoding="utf-8"))
+    raw["cases"][0]["systems"]["C"] += " قیمت را حدس بزن"
+    path.write_text(json.dumps(raw, ensure_ascii=False), encoding="utf-8")
+
+    with pytest.raises(ce.EvalError, match="تغییر کرده"):
+        ce.load_prepared(path)
 
 
 # ---------------------------------------------------------------------------
