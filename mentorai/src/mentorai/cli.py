@@ -810,6 +810,125 @@ async def cmd_e2e_shadow_run(args: argparse.Namespace) -> int:
     return 0
 
 
+async def cmd_conversation_eval_prepare(args: argparse.Namespace) -> int:
+    """آماده‌سازی ارزیابی مکالمه: نمونه‌ی ناشناس با زمینه‌ی کامل. **هیچ مدلی صدا زده نمی‌شود.**
+
+    فقط روی نشست پایگاه داده‌ی فقط‌خواندنی اجرا می‌شود. با `--check` فقط شمارش چاپ می‌شود و
+    هیچ فایلی نوشته نمی‌شود.
+    """
+    from mentorai import model_compare as mc
+    from mentorai.ai import conversation_eval as ce
+
+    try:
+        variant = ce.load_variant(Path(args.variant)) if args.variant else None
+        async with ce.readonly_session() as session:
+            document = await ce.prepare(
+                session,
+                limit=args.limit,
+                seed=args.seed,
+                min_history=args.min_history,
+                embedder=_embedder(),
+                variant=variant,
+                max_output_tokens=args.max_output_tokens,
+                progress=lambda line: print(line, flush=True),
+            )
+    except mc.CompareError as exc:
+        print(f"انجام نشد: {exc}", file=sys.stderr)
+        return 1
+
+    if not document["cases"]:
+        print("هیچ نمونه‌ای پیدا نشد", file=sys.stderr)
+        return 1
+    print(ce.render_prepare_summary(document))
+    if args.check:
+        print("--check بود: هیچ فایلی نوشته نشد و هیچ مدلی صدا زده نشد.")
+        return 0
+    path = ce.write_prepared(document, Path(args.out))
+    print(f"\nفایل آماده‌سازی (خصوصی): {path}")
+    print(f"کد تأیید برای اجرا: {document['manifest_sha256'][:8]}")
+    print("⚠️ این فایل پیام واقعی (پوشانده‌شده) دارد. در مخزن نگذارید.")
+    return 0
+
+
+async def cmd_conversation_eval_run(args: argparse.Namespace) -> int:
+    """اجرای ارزیابی مکالمه با مدل. به پایگاه داده و تلگرام وصل نمی‌شود.
+
+    بدون `--approve` با کد درست، فقط خلاصه و بدترین هزینه چاپ می‌شود و هیچ کلاینتی ساخته
+    نمی‌شود.
+    """
+    from mentorai import model_compare as mc
+    from mentorai.ai import conversation_eval as ce
+    from mentorai.ai.providers import build_client
+
+    try:
+        document = ce.load_prepared(Path(args.prepared))
+        arms = ce.parse_arms(args.arms, document)
+    except mc.CompareError as exc:
+        print(f"انجام نشد: {exc}", file=sys.stderr)
+        return 1
+
+    print(ce.render_plan(document, arms, args.max_cost_usd, args.cost_guard))
+    if args.approve != document["manifest_sha256"][:8]:
+        print(
+            "\nمدل صدا زده نشد. برای اجرا کد تأیید را بدهید: "
+            f"--approve {document['manifest_sha256'][:8]}",
+            file=sys.stderr,
+        )
+        return 2
+
+    try:
+        client = build_client()
+    except Exception as exc:  # noqa: BLE001 - هر کمبود پیکربندی یعنی مدل در دسترس نیست
+        print(f"مدل در دسترس نیست ({type(exc).__name__}); اجرا انجام نشد.", file=sys.stderr)
+        return 1
+    retries_off = ce.disable_retries(client)
+    try:
+        run = await ce.run_eval(
+            document,
+            client,
+            arms=arms,
+            max_cost_usd=args.max_cost_usd,
+            guard=args.cost_guard,
+            attempts_factor=1 if retries_off else ce.UNCONTROLLED_ATTEMPTS,
+            progress=lambda line: print(line, flush=True),
+        )
+    except mc.CompareError as exc:
+        print(f"انجام نشد: {exc}", file=sys.stderr)
+        return 1
+
+    print(ce.render_run_summary(run))
+    if not run.results:
+        print("هیچ نمونه‌ای اجرا نشد؛ چیزی نوشته نشد", file=sys.stderr)
+        return 1
+    out_dir = Path(args.out) if args.out else Path(args.prepared).parent
+    paths = ce.write_outputs(document, run, out_dir)
+    print(f"برگه‌ی داور:   {paths['sheet']}")
+    print(f"راهنمای داور:  {paths['guide']}")
+    print(f"کلید (خصوصی):  {paths['key']}  ← تا پایان داوری به داور ندهید")
+    print("⚠️ این فایل‌ها پیام واقعی (پوشانده‌شده) دارند. در مخزن نگذارید.")
+    return 0
+
+
+async def cmd_conversation_eval_report(args: argparse.Namespace) -> int:
+    """گزارش پس از داوری: کلید و برگه‌ی پرشده را یکی کن. مدل صدا زده نمی‌شود."""
+    from mentorai import model_compare as mc
+    from mentorai.ai import conversation_eval as ce
+
+    key_path = Path(args.key)
+    try:
+        report = ce.make_report(key_path, Path(args.graded))
+    except mc.CompareError as exc:
+        print(f"انجام نشد: {exc}", file=sys.stderr)
+        return 1
+    print(report)
+    try:
+        saved = ce.write_report(report, key_path.parent)
+        print(f"\nذخیره شد: {saved}")
+    except OSError:
+        pass  # پوشه‌ی کلید فقط‌خواندنی است؛ گزارش همین‌جا چاپ شد
+    return 0
+
+
 async def cmd_run_gateway(_: argparse.Namespace) -> int:
     async with session_scope() as session:
         accounts = list(
@@ -1020,6 +1139,55 @@ def main() -> int:
     e2e.add_argument("--out", default="/out/e2e" if _os.path.isdir("/out") else "e2e")
     e2e.add_argument("--dry-run", action="store_true", help="فقط نمونه؛ مدل صدا نزن")
     e2e.set_defaults(func=cmd_e2e_shadow_run)
+
+    _eval_out = "/out/conv_eval" if _os.path.isdir("/out") else "conv_eval"
+    cprep = sub.add_parser(
+        "conversation-eval-prepare",
+        help="ارزیابی مکالمه، گام ۱: نمونه‌ی ناشناس با زمینه‌ی کامل (فقط‌خواندنی؛ بدون مدل)",
+    )
+    cprep.add_argument("--limit", type=int, default=30, help="چند پیام (پیش‌فرض ۳۰)")
+    cprep.add_argument("--seed", type=int, default=7)
+    cprep.add_argument(
+        "--min-history", type=int, default=1, help="حداقل پیام قبلی لازم برای هر نمونه"
+    )
+    cprep.add_argument(
+        "--variant", default=None, help="فایل JSON نسخه‌ی لحن (بازوی C)؛ بدون آن فقط A"
+    )
+    cprep.add_argument(
+        "--max-output-tokens",
+        type=int,
+        default=None,
+        help="سقف خروجی برای محاسبه‌ی بدترین هزینه (پیش‌فرض: AI_MAX_TOKENS)",
+    )
+    cprep.add_argument("--out", default=_eval_out)
+    cprep.add_argument("--check", action="store_true", help="فقط شمارش؛ هیچ فایلی ننویس")
+    cprep.set_defaults(func=cmd_conversation_eval_prepare)
+
+    crun2 = sub.add_parser(
+        "conversation-eval-run",
+        help="ارزیابی مکالمه، گام ۲: اجرای مدل (هزینه دارد؛ فقط با --approve؛ بدون پایگاه داده)",
+    )
+    crun2.add_argument("--prepared", required=True, help="prepared.json گام ۱")
+    crun2.add_argument("--arms", default="A,C", help="بازوها، مثلاً A یا A,C")
+    crun2.add_argument(
+        "--max-cost-usd", type=float, required=True, help="سقف هزینه؛ اجباری، بدون پیش‌فرض"
+    )
+    crun2.add_argument(
+        "--cost-guard",
+        choices=("strict", "measured"),
+        default="strict",
+        help="strict: هرگز از سقف نمی‌گذرد. measured: ممکن است حداکثر یک نمونه از سقف بگذرد",
+    )
+    crun2.add_argument("--approve", default=None, help="کد تأیید ۸ نویسه‌ای که گام ۱ چاپ کرد")
+    crun2.add_argument("--out", default=None, help="پیش‌فرض: کنار prepared.json")
+    crun2.set_defaults(func=cmd_conversation_eval_run)
+
+    crep2 = sub.add_parser(
+        "conversation-eval-report", help="ارزیابی مکالمه، گام ۳: گزارش از برگه‌ی پرشده (بدون مدل)"
+    )
+    crep2.add_argument("--key", required=True, help="key.json که گام ۲ ساخت")
+    crep2.add_argument("--graded", required=True, help="blind_sheet.csv پرشده")
+    crep2.set_defaults(func=cmd_conversation_eval_report)
 
     run = sub.add_parser("run-gateway", help="اجرای دروازه برای همه حساب‌های فعال")
     run.set_defaults(func=cmd_run_gateway)
